@@ -254,14 +254,15 @@ bool ChatHandler::HandleLearnCommand(const char* args, WorldSession *m_session)
 	}
 
 	uint32 spell = atol((char*)args);
-	sGMLog.writefromsession(m_session, "taught %s spell %u", plr->GetName(), spell);
 
 	SpellEntry * sp = dbcSpell.LookupEntry(spell);
 	if(!plr->GetSession()->HasGMPermissions() && (sp->Effect[0]==SPELL_EFFECT_INSTANT_KILL||sp->Effect[1]==SPELL_EFFECT_INSTANT_KILL||sp->Effect[2]==SPELL_EFFECT_INSTANT_KILL))
 	{
 		SystemMessage(m_session, "don't be an idiot and teach players instakill spells. this action has been logged.");
+		sGMLog.writefromsession(m_session, "taught %s an instakill spell - %u", plr->GetName(), spell);
 		return true;
 	}
+	sGMLog.writefromsession(m_session, "taught %s spell %u", plr->GetName(), spell);
 
 	if (plr->HasSpell(spell)) // check to see if char already knows
 	{
