@@ -23,6 +23,7 @@
 
 #ifdef VOICE_CHAT
 
+
 class VoiceChatClientSocket : public Socket
 {
 	uint16 op;
@@ -38,4 +39,5 @@ public:
 
 #endif		// VOICE_CHAT
 #endif		// _VOICECHATCLIENTSOCKET_H
+
 
