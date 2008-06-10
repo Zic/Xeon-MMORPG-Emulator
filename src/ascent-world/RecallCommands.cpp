@@ -21,48 +21,28 @@
 
 bool ChatHandler::HandleRecallGoCommand(const char* args, WorldSession *m_session)
 {
-	if( args == NULL )
-		return false;
+	if( args == NULL ) return false;
 
-	if( !*args )
-		return false;
+	if( !*args ) return false;
 
-	if( m_session == NULL )
-		return false;
+	if( m_session == NULL ) return false;
 
-	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall ORDER BY name" );
+	if( m_session->GetPlayer() == NULL ) return false;
 
-	if( result == NULL)
-		return false;
+	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%%%s%%' ORDER BY name LIMIT 1", args );
 
-	do
-	{
-		Field* fields = result->Fetch();
-		const char* locname = fields[1].GetString();
-		uint32 locmap = fields[2].GetUInt32();
-		float x = fields[3].GetFloat();
-		float y = fields[4].GetFloat();
-		float z = fields[5].GetFloat();
+	if( result == NULL ) return false;
 
-		if( strnicmp( const_cast< char* >( args ), locname, strlen( args ) ) == 0 )
-		{
-			if( m_session->GetPlayer() != NULL )
-			{
-				m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z));
-				delete result;
-				return true;
-			}
-			else
-			{
-				delete result;
-				return false;
-			}
-		}
+	Field* fields = result->Fetch();
+	const char* locname = fields[1].GetString();
+	uint32 locmap = fields[2].GetUInt32();
+	float x = fields[3].GetFloat();
+	float y = fields[4].GetFloat();
+	float z = fields[5].GetFloat();
 
-	}while (result->NextRow());
-
+	m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z));
 	delete result;
-	return false;
+	return true;
 }
 
 bool ChatHandler::HandleRecallAddCommand(const char* args, WorldSession *m_session)
@@ -181,31 +161,21 @@ bool ChatHandler::HandleRecallPortPlayerCommand(const char* args, WorldSession *
 	Player * plr = objmgr.GetPlayer(player, false);
 	if(!plr) return false;
 
-	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall ORDER BY name" );
+	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%%%s%%' ORDER BY name LIMIT 1", location );
 	if(!result)
 		return false;
 
-	do
-	{
-		Field *fields = result->Fetch();
-		const char * locname = fields[1].GetString();
-		uint32 locmap = fields[2].GetUInt32();
-		float x = fields[3].GetFloat();
-		float y = fields[4].GetFloat();
-		float z = fields[5].GetFloat();
+	Field *fields = result->Fetch();
+	const char * locname = fields[1].GetString();
+	uint32 locmap = fields[2].GetUInt32();
+	float x = fields[3].GetFloat();
+	float y = fields[4].GetFloat();
+	float z = fields[5].GetFloat();
 
-		if (strnicmp((char*)location,locname,strlen(args))==0)
-		{
-			if(plr->GetInstanceID() != m_session->GetPlayer()->GetInstanceID())
-				sEventMgr.AddEvent(plr, &Player::EventSafeTeleport, locmap, uint32(0), LocationVector(x, y, z), EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-			else
-				plr->SafeTeleport(locmap, 0, LocationVector(x, y, z));
-			delete result;
-			return true;
-		}
-
-	}while (result->NextRow());
-
+	if(plr->GetInstanceID() != m_session->GetPlayer()->GetInstanceID())
+		sEventMgr.AddEvent(plr, &Player::EventSafeTeleport, locmap, uint32(0), LocationVector(x, y, z), EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	else
+		plr->SafeTeleport(locmap, 0, LocationVector(x, y, z));
 	delete result;
-	return false;
+	return true;
 }
