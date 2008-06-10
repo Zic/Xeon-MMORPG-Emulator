@@ -5787,11 +5787,6 @@ void Unit::CombatStatusHandler_ResetPvPTimeout()
 			}
 		}
 	}
-	// TESTING GROUND TESTING
-	//this->SendChatMessage( CHAT_MSG_MONSTER_SAY , LANG_UNIVERSAL , "Eye of C'thun AI Initialised" );
-	//this->SendChatMessage(
-	//	this->Emote( EMOTE_ONESHOT_SPELLCAST ); 
-	// yay for recursive mutexes
 	sEventMgr.AddEvent(this, &Unit::CombatStatusHandler_UpdatePvPTimeout, EVENT_ATTACK_TIMEOUT, 5000, 1, 0);
 	m_lock.Release();
 }

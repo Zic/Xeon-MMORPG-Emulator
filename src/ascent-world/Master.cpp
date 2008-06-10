@@ -19,7 +19,7 @@
 
 #include "StdAfx.h"
 
-#define BANNER "Ascent %s r%u/%s-%s-%s :: World Server"
+#define BANNER "Ascent AspireCore %s r%u/%s-%s-%s :: World Server"
 
 #ifndef WIN32
 #include <sched.h>

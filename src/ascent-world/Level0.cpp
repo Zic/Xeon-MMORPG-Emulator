@@ -274,7 +274,7 @@ bool ChatHandler::HandleInfoCommand(const char* args, WorldSession *m_session)
 		}			
 	}
 	objmgr._playerslock.ReleaseReadLock();
-	GreenSystemMessage(m_session, "Server Revision: |r%sAscent r%u/%s-%s-%s %s(www.ascentemu.com)", MSG_COLOR_WHITE,
+	GreenSystemMessage(m_session, "Server Revision: |r%sAscent AspireCore r%u/%s-%s-%s %s(www.ascentemu.com)", MSG_COLOR_WHITE,
 		BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
 	GreenSystemMessage(m_session, "Server Uptime: |r%s", sWorld.GetUptimeString().c_str());
 	GreenSystemMessage(m_session, "Current Players: |r%d (%d GMs, %d queued)", clientsNum, gm,  0);
