@@ -175,6 +175,15 @@ void AuthSocket::HandleChallenge()
 			break;
 	}
 
+	if(m_challenge.I_len > 49)
+	{
+		// Overflow protection
+		// credits to tobz
+		Disconnect();
+		return;
+	}
+
+
 	// Null-terminate the account string
 	if(m_challenge.I_len >= 0x50) { Disconnect(); return; }
 	m_challenge.I[m_challenge.I_len] = 0;
