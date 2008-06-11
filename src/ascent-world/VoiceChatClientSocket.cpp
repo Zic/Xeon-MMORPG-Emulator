@@ -39,25 +39,25 @@ void VoiceChatClientSocket::OnRead()
 {
 	WorldPacket *data;
 
-	// uint16 op
-	// uint16 size
-	// <data>
+	//uint16 op;
+	//uint16 size;
+	//<data>
 
 	for(;;)
 	{
 		// no more data
-		if( GetReadBufferSize() < 4 )
+		if( GetReadBuffer().GetSize() < 4 )
 			break;
 
-		Read(2, (uint8*)&op);
-		Read(2, (uint8*)&remaining);
+		GetReadBuffer().Read((uint8*)&op, 2);
+		GetReadBuffer().Read((uint8*)&remaining, 2);
 
-		if( GetReadBufferSize() < remaining )
+		if( GetReadBuffer().GetSize() < remaining )
 			break;
 
 		data = new WorldPacket(op, remaining);
 		data->resize(remaining);
-		Read(remaining, (uint8*)data->contents());
+		GetReadBuffer().Read((uint8*)data->contents(), remaining);
 
 		// handle the packet
 		sVoiceChatHandler.OnRead(data);
@@ -69,7 +69,7 @@ void VoiceChatClientSocket::OnRead()
 
 void VoiceChatClientSocket::SendPacket(WorldPacket* data)
 {
-	if( m_writeByteCount + 4 + data->size() > m_writeBufferSize )
+	if( GetWriteBuffer().GetSpace() < (data->size()+4) )
 	{
 		printf("!!! VOICE CHAT CLIENT SOCKET OVERLOAD !!!\n");
 		return;
@@ -87,7 +87,7 @@ void VoiceChatClientSocket::SendPacket(WorldPacket* data)
 		rv = BurstSend((const uint8*)data->contents(), data->size());
 	}
 
-	printf("sent packet of %u bytes with op %u, buffer len is now %u\n", data->size(), data->GetOpcode(), m_writeByteCount);
+	printf("sent packet of %u bytes with op %u, buffer len is now %u\n", data->size(), data->GetOpcode(), writeBuffer.GetSize());
 	if( rv )
 		BurstPush();
 
