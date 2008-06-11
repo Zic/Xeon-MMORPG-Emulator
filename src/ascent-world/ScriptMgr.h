@@ -148,6 +148,7 @@ public:
 	void register_creature_script(uint32 entry, exp_create_creature_ai callback);
 	void register_gameobject_script(uint32 entry, exp_create_gameobject_ai callback);
 	void register_gossip_script(uint32 entry, GossipScript * gs);
+	void register_go_gossip_script(uint32 entry, GossipScript * gs);
 	void register_dummy_aura(uint32 entry, exp_handle_dummy_aura callback);
 	void register_dummy_spell(uint32 entry, exp_handle_dummy_spell callback);
 	void register_hook(ServerHookEvents event, void * function_pointer);

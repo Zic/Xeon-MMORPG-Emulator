@@ -4,6 +4,19 @@
 /************************************************************************/
 /* SCRIPT FUNCTIONS DECLARATIONS                                        */
 /************************************************************************/
+// Item Gossip Stuff
+int luaItem_GossipCreateMenu(lua_State * L, Item * ptr);
+int luaItem_GossipMenuAddItem(lua_State * L, Item * ptr);
+int luaItem_GossipSendMenu(lua_State * L, Item * ptr);
+int luaItem_GossipComplete(lua_State * L, Item * ptr);
+int luaItem_GossipSendPOI(lua_State * L, Item * ptr);
+// Unit Gossip Stuff
+int luaUnit_GossipCreateMenu(lua_State * L, Unit * ptr);
+int luaUnit_GossipMenuAddItem(lua_State * L, Unit * ptr);
+int luaUnit_GossipSendMenu(lua_State * L, Unit * ptr);
+int luaUnit_GossipComplete(lua_State * L, Unit * ptr);
+int luaUnit_GossipSendPOI(lua_State * L, Unit * ptr);
+
 int luaUnit_GetName(lua_State * L, Unit * ptr);
 int luaUnit_SendChatMessage(lua_State * L, Unit * ptr);
 int luaUnit_MoveTo(lua_State * L, Unit * ptr);
@@ -83,9 +96,18 @@ int luaUnit_SetFieldFlags(lua_State * L, Unit * ptr);
 
 int luaGameObject_GetName(lua_State * L, GameObject * ptr);
 int luaGameObject_Teleport(lua_State * L, GameObject * ptr);
+// GO Gossip Stuff
+int luaGameObject_GossipCreateMenu(lua_State * L, GameObject * ptr);
+int luaGameObject_GossipMenuAddItem(lua_State * L, GameObject * ptr);
+int luaGameObject_GossipSendMenu(lua_State * L, GameObject * ptr);
+int luaGameObject_GossipComplete(lua_State * L, GameObject * ptr);
+int luaGameObject_GossipSendPOI(lua_State * L, GameObject * ptr);
+
 int luaGameObject_SpawnCreature(lua_State * L, GameObject * ptr);
 int luaGameObject_PlayCustomAnim(lua_State * L, GameObject * ptr);
 int luaGameObject_PlaySoundToSet(lua_State * L, GameObject * ptr);
 
 #endif
+
+
 

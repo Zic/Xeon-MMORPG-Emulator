@@ -353,6 +353,15 @@ void ScriptMgr::register_gossip_script(uint32 entry, GossipScript * gs)
 	_customgossipscripts.insert(gs);
 }
 
+void ScriptMgr::register_go_gossip_script(uint32 entry, GossipScript * gs)
+{
+	GameObjectInfo * gi = GameObjectNameStorage.LookupEntry(entry);
+	if(gi)
+		gi->gossip_script = gs;
+
+	_customgossipscripts.insert(gs);
+}
+
 void ScriptMgr::register_quest_script(uint32 entry, QuestScript * qs)
 {
 	Quest * q = QuestStorage.LookupEntry( entry );
