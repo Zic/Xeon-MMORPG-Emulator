@@ -186,7 +186,7 @@ AddItemResult ItemInterface::m_AddItem(Item *item, int8 ContainerSlot, int8 slot
 {
 	ASSERT( slot < MAX_INVENTORY_SLOT );
 	ASSERT( ContainerSlot < MAX_INVENTORY_SLOT );
-	if( item == NULL || !item->GetProto() )
+	if( item == NULL || !item->GetProto() || slot < 0 )
 		return ADD_ITEM_RESULT_ERROR;
 
 	item->m_isDirty = true;
