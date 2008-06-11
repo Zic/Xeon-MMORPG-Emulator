@@ -958,7 +958,7 @@ bool ChatHandler::CmdSetValueField(WorldSession *m_session, uint32 field, uint32
 		mv = 0;
 	}
 
-	if (av <= 0 && mv > 0)
+	if (av <= 0)
 	{  
 		RedSystemMessage(m_session, "Values are invalid. Value must be < max (if max exists), and both must be > 0.");
 		return true;   
