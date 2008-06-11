@@ -65,6 +65,11 @@ RegType<Item> ItemMethods[] = {
 };
 
 RegType<Unit> UnitMethods[] = {
+	{ "GetX", &luaUnit_GetX },
+	{ "GetY", &luaUnit_GetY },
+	{ "GetZ", &luaUnit_GetZ },
+	{ "GetO", &luaUnit_GetO },
+	{ "PlaySoundToSet", &luaUnit_PlaySoundToSet },
     { "GossipCreateMenu", &luaUnit_GossipCreateMenu }, 
     { "GossipMenuAddItem", &luaUnit_GossipMenuAddItem },
     { "GossipSendMenu", &luaUnit_GossipSendMenu },
@@ -80,10 +85,6 @@ RegType<Unit> UnitMethods[] = {
 	{ "FullCastSpellOnTarget", &luaUnit_FullCastSpellOnTarget },
 	{ "SpawnCreature", &luaUnit_SpawnCreature },
 	{ "SpawnGameObject", &luaUnit_SpawnGameObject },
-	{ "GetX", &luaUnit_GetX },
-	{ "GetY", &luaUnit_GetY },
-	{ "GetZ", &luaUnit_GetZ },
-	{ "GetO", &luaUnit_GetO },
 	{ "IsPlayer", &luaUnit_IsPlayer },
 	{ "IsCreature", &luaUnit_IsCreature },
 	{ "RegisterEvent", &luaUnit_RegisterEvent },
@@ -110,7 +111,6 @@ RegType<Unit> UnitMethods[] = {
 	{ "GetManaPct", &luaUnit_GetManaPct },
 	{ "Despawn", &luaUnit_Despawn },
 	{ "GetUnitBySqlId", &luaUnit_GetUnitBySqlId },
-	{ "PlaySoundToSet", &luaUnit_PlaySoundToSet },
 	{ "RemoveAura", &luaUnit_RemoveAura },
 	{ "StopMovement", &luaUnit_StopMovement },
 	{ "Emote", &luaUnit_Emote },
@@ -134,7 +134,7 @@ RegType<Unit> UnitMethods[] = {
 	{ "SetScale", &luaUnit_SetScale },
 	{ "SetFaction", &luaUnit_SetFaction },
 	{ "SetStandState",&luaUnit_SetStandState },
-	{ "Teleport" , &luaUnit_TeleportUnit },
+	{ "Teleport" , &luaUnit_Teleport },
 	{ "GetPlayerClass", &luaUnit_GetPlayerClass },
 	{ "ClearThreatList", &luaUnit_ClearHateList },
 	{ "WipeThreatList", &luaUnit_WipeHateList },
@@ -149,8 +149,12 @@ RegType<Unit> UnitMethods[] = {
 };
 
 RegType<GameObject> GOMethods[] = {
+	{ "GetX", &luaGameObject_GetX },
+	{ "GetY", &luaGameObject_GetY },
+	{ "GetZ", &luaGameObject_GetZ },
+	{ "GetO", &luaGameObject_GetO },
+	{ "PlaySoundToSet", &luaGameObject_PlaySoundToSet },
 	{ "GetName", &luaGameObject_GetName },
-	{ "Teleport" , &luaGameObject_Teleport },
     // GameObject gossip functions
     { "GossipCreateMenu", &luaGameObject_GossipCreateMenu },
 	{ "GossipMenuAddItem", &luaGameObject_GossipMenuAddItem }, 
@@ -1547,6 +1551,34 @@ int luaUnit_GetO(lua_State * L, Unit * ptr)
 	return 1;
 }
 
+int luaGameObject_GetX(lua_State * L, GameObject * ptr)
+{
+	if(ptr==NULL) return 0;
+	lua_pushnumber(L, (double)ptr->GetPositionX());
+	return 1;
+}
+
+int luaGameObject_GetY(lua_State * L, GameObject * ptr)
+{
+	if(ptr==NULL) return 0;
+	lua_pushnumber(L, (double)ptr->GetPositionY());
+	return 1;
+}
+
+int luaGameObject_GetZ(lua_State * L, GameObject * ptr)
+{
+	if(ptr==NULL) return 0;
+	lua_pushnumber(L, (double)ptr->GetPositionZ());
+	return 1;
+}
+
+int luaGameObject_GetO(lua_State * L, GameObject * ptr)
+{
+	if(ptr==NULL) return 0;
+	lua_pushnumber(L, (double)ptr->GetOrientation());
+	return 1;
+}
+
 int luaUnit_CastSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
@@ -2261,6 +2293,14 @@ int luaUnit_PlaySoundToSet(lua_State * L, Unit * ptr)
 	return 0;
 }
 
+int luaGameObject_PlaySoundToSet(lua_State * L, GameObject * ptr)
+{
+	if(!ptr) return 0;
+	int soundid = luaL_checkint(L,1);
+	ptr->PlaySoundToSet(soundid);
+	return 0;
+}
+
 int luaUnit_GetUnitBySqlId(lua_State * L, Unit * ptr)
 {
 	if(!ptr) return 0;
@@ -2461,7 +2501,7 @@ int luaUnit_SendBroadcastMessage(lua_State * L, Unit * ptr)
 	return 0;
 }
 
-int luaUnit_TeleportUnit(lua_State * L, Unit * ptr)
+int luaUnit_Teleport(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int mapId = luaL_checkint(L, 1);
@@ -2473,23 +2513,6 @@ int luaUnit_TeleportUnit(lua_State * L, Unit * ptr)
 
 	LocationVector vec(posX, posY, posZ);
 	((Player*)ptr)->SafeTeleport((uint32)mapId, 0, vec);
-	return 0;
-}
-// Player Teleport (GO)
-int luaGameObject_Teleport(lua_State * L, GameObject * ptr)
-{
-	//CHECK_TYPEID(TYPEID_PLAYER);
-	CHECK_TYPEID(TYPEID_GAMEOBJECT);
-	Player* target = Lunar<Player>::check(L, 1);
-	int mapId = luaL_checkint(L, 2);
-	double posX = luaL_checknumber(L, 3);
-	double posY = luaL_checknumber(L, 4);
-	double posZ = luaL_checknumber(L, 5);
-	//if(!mapId || !posX || !posY || !posZ)
-	//	return 0;
-
-	LocationVector vec((float)posX, (float)posY, (float)posZ);
-	((Player*)target)->SafeTeleport((uint32)mapId, 0, vec);
 	return 0;
 }
 
