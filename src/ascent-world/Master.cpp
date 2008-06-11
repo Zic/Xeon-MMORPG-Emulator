@@ -100,7 +100,7 @@ struct Addr
 #endif
 
 
-const char h0rs[] = ""
+/*const char h0rs[] = ""
 "                                  (OQ\n"
 "                              @@SSQ@@\n"
 "     h0rs                    @@SSSSSGK6\n"
@@ -120,7 +120,7 @@ const char h0rs[] = ""
 "   @SSQ       Qe/    /QC      SS2\n"
 "    /Ss       SQe    SS       SSQ(\n"
 "     QQ        CQ(   6S%       eQs^\n"
-"";
+"";*/
 
 bool bServerShutdown = false;
 bool StartConsoleListener();
@@ -196,7 +196,7 @@ bool Master::Run(int argc, char ** argv)
 #ifdef REPACK
 	printf("\nRepack: %s | Author: %s | %s\n", REPACK, REPACK_AUTHOR, REPACK_WEBSITE);
 #endif
-	puts(h0rs);
+	//puts(h0rs);
 	printf("\nCopyright (C) 2005-2008 Ascent Team. http://www.ascentemu.com/\n");
 	printf("This program comes with ABSOLUTELY NO WARRANTY, and is FREE SOFTWARE.\n");
 	printf("You are welcome to redistribute it under the terms of the GNU Affero\n");
