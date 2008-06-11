@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 
-char * ASCENT_BRANCH = "4.3-TRUNK";
+char * ASCENT_BRANCH = "-TRUNK";
 int g_revision = 0;
 int g_oldRevision = -1;
 
