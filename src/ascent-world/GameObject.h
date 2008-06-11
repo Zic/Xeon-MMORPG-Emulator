@@ -104,6 +104,7 @@ struct GameObjectInfo
 	// Quests
 	GameObjectGOMap goMap;
 	GameObjectItemMap itemMap;
+	GossipScript * gossip_script;
 };
 #pragma pack(pop)
 
