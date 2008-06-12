@@ -1794,7 +1794,7 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 		else
 		{
 			if( pVictim->IsCreature() && this->IsPlayer() )
-				sHookInterface->OnKillCreature(static_cast< Player* >( this ), static_cast< Creature* >( pVictim ));
+				sHookInterface.OnKillCreature(static_cast< Player* >( this ), static_cast< Creature* >( pVictim ));
 
 			pVictim->setDeathState( JUST_DIED );
 			pVictim->GetAIInterface()->HandleEvent( EVENT_LEAVECOMBAT, static_cast< Unit* >( this ), 0);

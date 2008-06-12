@@ -8992,7 +8992,7 @@ void Player::_AdvanceSkillLine(uint32 SkillLine, uint32 Count /* = 1 */)
 	{
 		/* Add it */
 		_AddSkillLine(SkillLine, Count, getLevel() * 5);
-		sHookInterface->OnSkillGain(this, SkillLine, Count);
+		sHookInterface.OnSkillGain(this, SkillLine, Count);
 	}
 	else
 	{
@@ -9004,7 +9004,7 @@ void Player::_AdvanceSkillLine(uint32 SkillLine, uint32 Count /* = 1 */)
 		if(itr->second.CurrentValue >= itr->second.MaximumValue)
 			itr->second.CurrentValue = itr->second.MaximumValue;
 
-		sHookInterface->OnSkillGain(this, SkillLine, itr->second.CurrentValue);
+		sHookInterface.OnSkillGain(this, SkillLine, itr->second.CurrentValue);
 	}
 
 	_UpdateSkillFields();
