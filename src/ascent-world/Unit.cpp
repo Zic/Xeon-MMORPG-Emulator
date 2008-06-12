@@ -3281,6 +3281,7 @@ void Unit::smsg_AttackStart(Unit* pVictim)
 
 void Unit::AddAura(Aura *aur)
 {
+#ifdef FLY_MOUNTS_OL_ONLY
 	if( m_mapId != 530 )
 	{
 		for( uint32 i = 0; i < 3; ++i )
@@ -3293,6 +3294,7 @@ void Unit::AddAura(Aura *aur)
 			}
 		}
 	}
+#endif
 
 	if( aur->GetSpellProto()->School && SchoolImmunityList[aur->GetSpellProto()->School] )
 	{

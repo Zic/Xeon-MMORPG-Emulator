@@ -7324,7 +7324,11 @@ void Aura::SpellAuraEnableFlight(bool apply)
 			static_cast< Player* >( m_target )->flying_aura = m_spellProto->Id;
 		}
 	}
+#ifdef FLY_MOUNTS_OL_ONLY
 	else
+#else
+	if (!apply)
+#endif
 	{
 		m_target->DisableFlight();
 		m_target->m_flyspeedModifier -= mod->m_amount;

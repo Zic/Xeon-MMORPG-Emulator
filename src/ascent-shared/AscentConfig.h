@@ -95,5 +95,17 @@
  */
 #define OPTIMIZE_SERVER_FOR_MYSQL 1
 
+/** Enable/disable Flying mounts usable only in Outland
+ * Comment this out if you want to use flying mounts anywhere
+ * Requires mounts to be made as a trinket with the mount spell on equip.
+ * Default: Enabled
+ */
+#ifdef FLY_MOUNTS_OL_ONLY
+# define FLY_MOUNTS_OL_ONLY 1
+#endif
+#define FLY_MOUNTS_OL_ONLY 1
+
+
+
 #endif		// __ASCENTCONFIG_H
 
