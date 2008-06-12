@@ -956,7 +956,12 @@ public:
 	void SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, const char * msg);
 	void RegisterPeriodicChatMessage(uint32 delay, uint32 msgid, std::string message, bool sendnotify);
 
-	ASCENT_INLINE int GetHealthPct() { return (int)(GetUInt32Value(UNIT_FIELD_HEALTH) * 100 / GetUInt32Value(UNIT_FIELD_MAXHEALTH)); };
+	ASCENT_INLINE int GetHealthPct() 
+	{ 
+		if(GetUInt32Value(UNIT_FIELD_HEALTH) == 0 || GetUInt32Value(UNIT_FIELD_MAXHEALTH) == 0)
+			return 0;
+		return (int)(GetUInt32Value(UNIT_FIELD_HEALTH) * 100 / GetUInt32Value(UNIT_FIELD_MAXHEALTH)); 
+	};
     ASCENT_INLINE void SetHealthPct(uint32 val) { if (val>0) SetUInt32Value(UNIT_FIELD_HEALTH,float2int32(val*0.01f*GetUInt32Value(UNIT_FIELD_MAXHEALTH))); };
 	ASCENT_INLINE int GetManaPct() { return (int)(GetUInt32Value(UNIT_FIELD_POWER1) * 100 / GetUInt32Value(UNIT_FIELD_MAXPOWER1)); };
 		
