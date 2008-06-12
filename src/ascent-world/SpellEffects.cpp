@@ -1260,7 +1260,15 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				return;
 
 			u_caster->DealDamage(unitTarget, this->forced_basepoints[0], 0, 0, 25236, true);
-		}
+		}break;
+
+	case 11958: // Mage - cold snap
+		{
+			if( !p_caster || !p_caster->isAlive() )
+				return;
+
+			p_caster->ClearCooldownsOnLine(6, (uint32)p_caster->GetGUID());
+		}break;
 	}										 
 }
 
