@@ -1063,6 +1063,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 	recv_data >> slot;
 	recv_data >> amount;
 
+	if(amount < 1)
+		amount = 1;
+
 	if( _player->isCasting() )
 		_player->InterruptSpell();
 
