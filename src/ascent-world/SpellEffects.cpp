@@ -1253,6 +1253,14 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				}
 			}
 		}break;
+
+	case 25236: // warrior - execute
+		{
+			if( !u_caster || !u_caster->isAlive() || !unitTarget || !unitTarget->isAlive() )
+				return;
+
+			u_caster->DealDamage(unitTarget, this->forced_basepoints[0], 0, 0, 25236, true);
+		}
 	}										 
 }
 
