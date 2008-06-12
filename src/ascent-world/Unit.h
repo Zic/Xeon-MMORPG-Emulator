@@ -596,6 +596,7 @@ class CombatStatusHandler
 	typedef set<uint64> AttackerMap;
 	typedef set<uint32> HealedSet;		// Must Be Players!
 	AttackerMap m_attackers;
+	Mutex AttackersLock;
 	HealedSet m_healers;
 	HealedSet m_healed;
 	Unit* m_Unit;

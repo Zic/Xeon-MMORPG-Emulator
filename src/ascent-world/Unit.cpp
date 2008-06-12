@@ -5539,16 +5539,20 @@ void CombatStatusHandler::RemoveAttackTarget(Unit * pTarget)
 
 void CombatStatusHandler::RemoveAttacker(Unit * pAttacker, const uint64& guid)
 {
+	AttackersLock.Acquire();
 	AttackerMap::iterator itr = m_attackers.find(guid);
 	if(itr == m_attackers.end())
+	{
+		AttackersLock.Release();
 		return;
-
+	}
 	if( (!pAttacker) || (!pAttacker->CombatStatus.IsAttacking(m_Unit)) )
 	{
 		//printf("Removing attacker "I64FMT" from "I64FMT"\n", guid, m_Unit->GetGUID());
 		m_attackers.erase(itr);
 		UpdateFlag();
 	}
+	AttackersLock.Release();
 	/*else
 	{
 		printf("Cannot remove attacker "I64FMT" from "I64FMT"\n", guid, m_Unit->GetGUID());
@@ -5565,13 +5569,14 @@ void CombatStatusHandler::OnDamageDealt(Unit * pTarget)
 	if(!pTarget->isAlive())
 		return;
 
+	AttackersLock.Acquire();
 	AttackerMap::iterator itr = m_attackTargets.find(pTarget->GetGUID());
 	if(itr == m_attackTargets.end())
 		AddAttackTarget(pTarget->GetGUID());
-
 	itr = pTarget->CombatStatus.m_attackers.find(m_Unit->GetGUID());
 	if(itr == pTarget->CombatStatus.m_attackers.end())
 		pTarget->CombatStatus.AddAttacker(m_Unit->GetGUID());
+	AttackersLock.Release();
 
 	// update the timeout
 	m_Unit->CombatStatusHandler_ResetPvPTimeout();
@@ -5579,13 +5584,16 @@ void CombatStatusHandler::OnDamageDealt(Unit * pTarget)
 
 void CombatStatusHandler::AddAttacker(const uint64& guid)
 {
+	AttackersLock.Acquire();
 	m_attackers.insert(guid);
+	AttackersLock.Release();
 	UpdateFlag();
 }
 
 void CombatStatusHandler::ClearAttackers()
 {
 	// this is a FORCED function, only use when the reference will be destroyed.
+	AttackersLock.Acquire();
 	AttackerMap::iterator itr = m_attackTargets.begin();
 	Unit * pt;
 	for(; itr != m_attackTargets.end(); ++itr)
@@ -5609,6 +5617,7 @@ void CombatStatusHandler::ClearAttackers()
 	}
 
 	m_attackers.clear();
+	AttackersLock.Release();
 	m_attackTargets.clear();
 	m_primaryAttackTarget = 0;
 	UpdateFlag();
