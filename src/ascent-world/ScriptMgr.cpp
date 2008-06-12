@@ -873,3 +873,38 @@ void HookInterface::OnQuestFinished(Player * pPlayer, Quest * pQuest)
 		(call)(pPlayer, pQuest);
 	OUTER_LOOP_END
 }
+
+void HookInterface::OnHonorableKill(Player * pPlayer, Player * pKilled)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_HONORABLE_KILL, tOnHonorableKill)
+		(call)(pPlayer, pKilled);
+	OUTER_LOOP_END
+}
+
+void HookInterface::OnArenaFinish(Player * pPlayer, ArenaTeam* pTeam, bool victory, bool rated)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_ARENA_FINISH, tOnArenaFinish)
+		(call)(pPlayer, pTeam, victory, rated);
+	OUTER_LOOP_END
+}
+
+void HookInterface::OnPostLevelUp(Player * pPlayer)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_POST_LEVELUP, tOnPostLevelUp)
+		(call)(pPlayer);
+	OUTER_LOOP_END
+}
+
+void HookInterface::OnAreaTrigger(Player * pPlayer, uint32 areaTrigger)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_AREATRIGGER, tOnAreaTrigger)
+		(call)(pPlayer, areaTrigger);
+	OUTER_LOOP_END
+}
+
+void HookInterface::OnPlayerSaveToDB(Player * pPlayer)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB, tOnPlayerSaveToDB)
+		(call)(pPlayer);
+	OUTER_LOOP_END
+}

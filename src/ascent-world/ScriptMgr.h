@@ -50,6 +50,11 @@ enum ServerHookEvents
 	SERVER_HOOK_EVENT_ON_CHARACTER_CREATE	= 20,
 	SERVER_HOOK_EVENT_ON_QUEST_CANCELLED	= 21,
 	SERVER_HOOK_EVENT_ON_QUEST_FINISHED		= 22,
+	SERVER_HOOK_EVENT_ON_HONORABLE_KILL		= 23,
+	SERVER_HOOK_EVENT_ON_ARENA_FINISH		= 24,
+	SERVER_HOOK_EVENT_ON_POST_LEVELUP		= 25,
+	SERVER_HOOK_EVENT_ON_AREATRIGGER		= 26,
+	SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB	= 27,
 
 	NUM_SERVER_HOOKS,
 };
@@ -87,6 +92,12 @@ typedef void(*tOnLoot)(Player * pPlayer, Unit * pTarget, uint32 Money, uint32 It
 typedef bool(*ItemScript)(Item * pItem, Player * pPlayer);
 typedef void(*tOnQuestCancel)(Player * pPlayer, Quest * pQuest);
 typedef void(*tOnQuestFinished)(Player * pPlayer, Quest * pQuest);
+typedef void(*tOnHonorableKill)(Player * pPlayer, Player * pKilled);
+typedef void(*tOnArenaFinish)(Player * pPlayer, ArenaTeam * pTeam, bool victory, bool rated);
+typedef void(*tOnPostLevelUp)(Player * pPlayer);
+typedef void(*tOnAreaTrigger)(Player * pPlayer, uint32 areaTrigger);
+typedef void(*tOnPlayerSaveToDB)(Player* pPlayer);
+
 
 class Spell;
 class Aura;
@@ -278,6 +289,11 @@ public:
 	void OnCharacterCreate(Player * pPlayer);
 	void OnQuestCancelled(Player * pPlayer, Quest * pQuest);
 	void OnQuestFinished(Player * pPlayer, Quest * pQuest);
+	void OnHonorableKill(Player * pPlayer, Player * pKilled);
+	void OnArenaFinish(Player * pPlayer, ArenaTeam* pTeam, bool victory, bool rated);
+	void OnPostLevelUp(Player * pPlayer);
+	void OnAreaTrigger(Player * pPlayer, uint32 areaTrigger);
+	void OnPlayerSaveToDB(Player * pPlayer);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()
