@@ -505,6 +505,14 @@
 			Name="Network"
 			>
 			<File
+				RelativePath="..\..\src\ascent-shared\Network\CircularBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascent-shared\Network\CircularBuffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascent-shared\Network\ListenSocketWin32.h"
 				>
 			</File>

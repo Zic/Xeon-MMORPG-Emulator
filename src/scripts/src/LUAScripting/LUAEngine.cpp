@@ -2381,7 +2381,7 @@ int luaUnit_GetTauntedBy(lua_State * L, Unit * ptr)
 int luaUnit_SetTauntedBy(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
-		Unit * target = Lunar<Unit>::check(L, 2);
+		Unit * target = Lunar<Unit>::check(L, 1);
 
 	if (!target || ptr->GetAIInterface()->GetIsTaunted() || target==ptr)
 		return 0;
@@ -2403,18 +2403,18 @@ int luaUnit_GetSoulLinkedWith(lua_State * L, Unit * ptr)
 int luaUnit_SetSoulLinkedWith(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
-		Unit * target = Lunar<Unit>::check(L, 2);
+		Unit * target = Lunar<Unit>::check(L, 1);
 
 	if (!target || ptr->GetAIInterface()->GetIsSoulLinked() || target==ptr)
 		return 0;
 	else
-		ptr->GetAIInterface()->SetSoulLinkedWith(ptr);
+		ptr->GetAIInterface()->SetSoulLinkedWith(target);
 	return 1;
 }
 int luaUnit_ChangeTarget(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
-		Unit * target = Lunar<Unit>::check(L, 2);
+		Unit * target = Lunar<Unit>::check(L, 1);
 
 	if (!target || !isHostile(ptr,target) || ptr==target)
 		return 0;
