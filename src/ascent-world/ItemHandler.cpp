@@ -1406,7 +1406,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendInventoryList(Creature* unit)
 {
-	if(unit->HasItems())
+	if(!unit->HasItems())
 	{
 		sChatHandler.BlueSystemMessageToPlr(_player, "No sell template found. Report this to devs: %d (%s)", unit->GetEntry(), unit->GetCreatureName()->Name);
 		return;
