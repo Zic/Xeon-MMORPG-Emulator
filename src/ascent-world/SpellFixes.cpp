@@ -14247,6 +14247,10 @@ void ApplyNormalFixes()
 		//////////////////////////////////////////
 
 		// Insert warrior spell fixes here
+			
+			// Overpower - can't be dodged/parried/blocked
+			if( sp->NameHash == SPELL_HASH_OVERPOWER )
+				sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
 
 		//////////////////////////////////////////
 		// PALADIN								//

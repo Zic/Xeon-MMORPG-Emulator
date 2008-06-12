@@ -347,10 +347,12 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 {
 	uint64 guid;
 	uint32 spellid;
-	uint8 flags;
+	uint32 unknown;
+	uint32 flags;
 	recvPacket >> guid >> spellid >> flags;
 	
 	SpellEntry * sp = dbcSpell.LookupEntry(spellid);
+	if(!sp) return;
 	// Summoned Elemental's Freeze
     if (spellid == 33395)
     {
@@ -368,26 +370,22 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 
 	if(flags == 0)
 		targets.m_unitTarget = guid;
-	else if(flags & 0x02)
+	else if(flags & TARGET_FLAG_UNIT)
 	{
 		WoWGuid guid;
-		recvPacket >> flags;		// skip one byte
 		recvPacket >> guid;
 		targets.m_unitTarget = guid.GetOldGuid();
 	}
-	else if(flags & 0x20)
+	else if(flags & TARGET_FLAG_SOURCE_LOCATION)
 	{
-		recvPacket >> flags;		// skip one byte
 		recvPacket >> targets.m_srcX >> targets.m_srcY >> targets.m_srcZ;
 	}
-	else if(flags & 0x40)
+	else if(flags & TARGET_FLAG_DEST_LOCATION)
 	{
-		recvPacket >> flags;		// skip one byte
 		recvPacket >> targets.m_destX >> targets.m_destY >> targets.m_destZ;
 	}
-	else if (flags & 0x2000)
+	else if (flags & TARGET_FLAG_STRING)
 	{
-		recvPacket >> flags;		// skip one byte
 		recvPacket >> targets.m_strTarget;
 	}
 	if(spellid == 33395)	// Summoned Water Elemental's freeze

@@ -2612,7 +2612,9 @@ uint8 Spell::CanCast(bool tolerate)
 		// if theres any spells that should be cast while dead let me know
 		if( !p_caster->isAlive() )
 		{
-			return SPELL_FAILED_CASTER_DEAD;
+			//Spirit of Redemption can cast heals while dead
+			if(!p_caster->HasAura(27827) || !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING))
+				return SPELL_FAILED_CASTER_DEAD;
 		}
 #ifdef COLLISION
 		if (m_spellInfo->MechanicsType == MECHANIC_MOUNTED)
