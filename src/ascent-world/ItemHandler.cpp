@@ -32,7 +32,8 @@ void WorldSession::HandleSplitOpcode(WorldPacket& recv_data)
 	if(!GetPlayer())
 		return;
 
-	if(count >= 127 || (SrcInvSlot <= 0 && SrcSlot < INVENTORY_SLOT_ITEM_START) || (DstInvSlot <= 0 && DstSlot < INVENTORY_SLOT_ITEM_START))
+	//from openascent - author zack
+	if( count==0 || count >= 127 || (SrcInvSlot <= 0 && SrcSlot < INVENTORY_SLOT_ITEM_START) || (DstInvSlot <= 0 && DstSlot < INVENTORY_SLOT_ITEM_START))
 	{
 		/* exploit fix */
 		return;
@@ -1391,6 +1392,11 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 	if (unit == NULL)
 		return;
 
+	//from openascent author - zack
+	//this is a blizzlike check
+	if( _player->GetDistanceSq( unit ) > 10 )
+		return; //avoid talking to anyone by guid hacking. Like sell farmed items anytime ? Low chance hack
+
 	if(unit->GetAIInterface())
 		unit->GetAIInterface()->StopMovement(180000);
 
@@ -1400,7 +1406,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendInventoryList(Creature* unit)
 {
-	if(!unit->HasItems())
+	if(unit->HasItems())
 	{
 		sChatHandler.BlueSystemMessageToPlr(_player, "No sell template found. Report this to devs: %d (%s)", unit->GetEntry(), unit->GetCreatureName()->Name);
 		return;
@@ -1652,7 +1658,11 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 
 	if( !pCreature->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ) )
 		return;
-
+	//from openascent auth - zack
+	//this is a blizzlike check
+	if( _player->GetDistanceSq( pCreature ) > 10 )
+		return; //avoid talking to anyone by guid hacking. Like repair items anytime in raid ? Low chance hack
+	
 	if( !itemguid ) 
 	{
 		for( i = 0; i < MAX_INVENTORY_SLOT; i++ )
