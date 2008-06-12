@@ -625,17 +625,17 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 14185:
 		{
 			if(!p_caster) return;
-			if(p_caster->HasSpell(5277)) p_caster->ClearCooldownForSpell(5277);
-			if(p_caster->HasSpell(26699)) p_caster->ClearCooldownForSpell(26699);
-			if(p_caster->HasSpell(2983)) p_caster->ClearCooldownForSpell(2983);
-			if(p_caster->HasSpell(8696)) p_caster->ClearCooldownForSpell(8696);
-			if(p_caster->HasSpell(11305)) p_caster->ClearCooldownForSpell(11305);
-			if(p_caster->HasSpell(1856)) p_caster->ClearCooldownForSpell(1856);
-			if(p_caster->HasSpell(1857)) p_caster->ClearCooldownForSpell(1857);
-			if(p_caster->HasSpell(26889)) p_caster->ClearCooldownForSpell(26889);
-			if(p_caster->HasSpell(14177)) p_caster->ClearCooldownForSpell(14177);
-			if(p_caster->HasSpell(13750)) p_caster->ClearCooldownForSpell(13750);
-			if(p_caster->HasSpell(14183)) p_caster->ClearCooldownForSpell(14183);			
+			if(p_caster->HasSpell(5277)) p_caster->ClearCooldownForSpell(5277);		// Evasion 1
+			if(p_caster->HasSpell(26699)) p_caster->ClearCooldownForSpell(26699);	// Evasion 2
+			if(p_caster->HasSpell(2983)) p_caster->ClearCooldownForSpell(2983);		// Sprint 1
+			if(p_caster->HasSpell(8696)) p_caster->ClearCooldownForSpell(8696);		// Sprint 2
+			if(p_caster->HasSpell(11305)) p_caster->ClearCooldownForSpell(11305);	// Sprint 3
+			if(p_caster->HasSpell(1856)) p_caster->ClearCooldownForSpell(1856);		// Vanish 1
+			if(p_caster->HasSpell(1857)) p_caster->ClearCooldownForSpell(1857);		// Vanish 2
+			if(p_caster->HasSpell(26889)) p_caster->ClearCooldownForSpell(26889);	// Vanish 3
+			if(p_caster->HasSpell(14177)) p_caster->ClearCooldownForSpell(14177);	// Cold Blood
+			if(p_caster->HasSpell(36554)) p_caster->ClearCooldownForSpell(36554);	// Shadowstep
+			if(p_caster->HasSpell(14183)) p_caster->ClearCooldownForSpell(14183);	// Premeditation
 		}break;
 	case 974:
 	case 32593:
