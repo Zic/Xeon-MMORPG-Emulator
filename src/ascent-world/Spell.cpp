@@ -3158,6 +3158,15 @@ uint8 Spell::CanCast(bool tolerate)
 						return SPELL_FAILED_BAD_TARGETS;
 				}
 
+				case 41291: //Soul Cannon
+				{
+					// this spell can be cast only on Reth'hedron the Subduer.
+					if(target->IsPlayer() || !target->IsUnit())
+						return SPELL_FAILED_BAD_TARGETS;
+					if(target->GetEntry()!=22357)
+						return SPELL_FAILED_BAD_TARGETS;
+				}
+
 				case 982: //Revive Pet
 				{
 					Pet *pPet = p_caster->GetSummon();
