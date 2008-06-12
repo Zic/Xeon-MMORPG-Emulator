@@ -3181,11 +3181,13 @@ void Player::OnPushToWorld()
 		m_taxiMapChangeNode = 0;
 	}
 
+#ifdef FLY_MOUNTS_OL_ONLY
 	 if(flying_aura && m_mapId != 530)
 	{
 		RemoveAura(flying_aura);
 		flying_aura = 0;
 	}
+#endif
 
 	ResetHeartbeatCoords();
 	_heartbeatDisable = 0;
@@ -7458,11 +7460,13 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, const LocationVector 
 	if (m_UnderwaterState & UNDERWATERSTATE_UNDERWATER)
 		m_UnderwaterState &= ~UNDERWATERSTATE_UNDERWATER;
 
+#ifdef FLY_MOUNTS_OL_ONLY
 	if(flying_aura && MapID != 530)
 	{
 		RemoveAura(flying_aura);
 		flying_aura = 0;
 	}
+#endif
 
 	// Lookup map info
 	if(mi && mi->flags & WMI_INSTANCE_XPACK_01 && !m_session->HasFlag(ACCOUNT_FLAG_XPACK_01))
@@ -7480,10 +7484,12 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, const LocationVector 
 
 void Player::SafeTeleport(MapMgr * mgr, const LocationVector & vec)
 {
+#ifdef FLY_MOUNTS_OL_ONLY
 	if(flying_aura && mgr->GetMapId()!=530) {
 		RemoveAura(flying_aura);
 		flying_aura=0;
 	}
+#endif
 
 	if(IsInWorld())
 		RemoveFromWorld();
