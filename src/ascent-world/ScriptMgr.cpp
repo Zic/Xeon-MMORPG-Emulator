@@ -908,3 +908,17 @@ void HookInterface::OnPlayerSaveToDB(Player * pPlayer)
 		(call)(pPlayer);
 	OUTER_LOOP_END
 }
+
+void HookInterface::OnSkillGain(Player * pPlayer, uint32 SkillLine, uint32 Value)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_SKILL_GAIN, tOnSkillGain)
+		(call)(pPlayer, SkillLine, Value);
+	OUTER_LOOP_END
+}
+
+void HookInterface::OnKillCreature(Player * pPlayer, Creature * pCreature)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_KILL_CREATURE, tOnKillCreature)
+		(call)(pPlayer, pCreature);
+	OUTER_LOOP_END
+}

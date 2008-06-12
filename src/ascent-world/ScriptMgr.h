@@ -55,6 +55,8 @@ enum ServerHookEvents
 	SERVER_HOOK_EVENT_ON_POST_LEVELUP		= 25,
 	SERVER_HOOK_EVENT_ON_AREATRIGGER		= 26,
 	SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB	= 27,
+	SERVER_HOOK_EVENT_ON_SKILL_GAIN			= 28,
+	SERVER_HOOK_EVENT_ON_KILL_CREATURE		= 29,
 
 	NUM_SERVER_HOOKS,
 };
@@ -97,6 +99,8 @@ typedef void(*tOnArenaFinish)(Player * pPlayer, ArenaTeam * pTeam, bool victory,
 typedef void(*tOnPostLevelUp)(Player * pPlayer);
 typedef void(*tOnAreaTrigger)(Player * pPlayer, uint32 areaTrigger);
 typedef void(*tOnPlayerSaveToDB)(Player* pPlayer);
+typedef void(*tOnSkillGain)(Player * pPlayer, uint32 SkillLine, uint32 Value);
+typedef void(*tOnKillCreature)(Player * pPlayer, Creature * pCreature);
 
 
 class Spell;
@@ -294,6 +298,8 @@ public:
 	void OnPostLevelUp(Player * pPlayer);
 	void OnAreaTrigger(Player * pPlayer, uint32 areaTrigger);
 	void OnPlayerSaveToDB(Player * pPlayer);
+	void OnSkillGain(Player * pPlayer, uint32 SkillLine, uint32 Value);
+	void OnKillCreature(Player * pPlayer, Creature * pCreature);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()
