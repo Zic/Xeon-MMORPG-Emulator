@@ -323,7 +323,9 @@ void CBattlegroundManager::EventQueueUpdate()
 					if(CanCreateInstance(i,j))
 					{
 						bg = CreateInstance(i,j);
-						ASSERT(bg);
+						//Hackfix against WPE users. We should check where the real problem is.
+						if(!bg)
+							continue;
 						
 						// push as many as possible in
 						for(k = 0; k < 2; ++k)
