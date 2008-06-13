@@ -622,7 +622,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			playerTarget->SetUInt32Value(UNIT_FIELD_POWER1,playerTarget->GetUInt32Value(UNIT_FIELD_POWER1)+damage);
 			SendHealManaSpellOnPlayer(p_caster, playerTarget, damage, 0);
 		}break;
-	case 14185:
+	case 14185: // Rogue Preparation
 		{
 			if(!p_caster) return;
 			if(p_caster->HasSpell(5277)) p_caster->ClearCooldownForSpell(5277);		// Evasion 1
@@ -1254,20 +1254,13 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			}
 		}break;
 
-	case 25236: // warrior - execute
-		{
-			if( !u_caster || !u_caster->isAlive() || !unitTarget || !unitTarget->isAlive() )
-				return;
-
-			u_caster->DealDamage(unitTarget, this->forced_basepoints[0], 0, 0, 25236, true);
-		}break;
-
 	case 11958: // Mage - cold snap
 		{
 			if( !p_caster || !p_caster->isAlive() )
 				return;
 
 			p_caster->ClearCooldownsOnLine(6, (uint32)p_caster->GetGUID());
+			p_caster->Cooldown_AddStart(dbcSpell.LookupEntry(11958));
 		}break;
 	}										 
 }
