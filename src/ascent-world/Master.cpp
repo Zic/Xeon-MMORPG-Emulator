@@ -238,13 +238,6 @@ bool Master::Run(int argc, char ** argv)
 		return false;
 	}
 
-	string die;
-	if( Config.MainConfig.GetString( "die", "msg", &die) || Config.MainConfig.GetString( "die2", "msg", &die ) )
-	{
-		Log.Warning( "Config", "Die directive received: %s", die.c_str() );
-		return false;
-	}	
-
 	if(Config.RealmConfig.SetSource(realm_config_file))
 		Log.Success( "Config", ">> ascent-realms.conf" );
 	else
