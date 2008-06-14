@@ -856,7 +856,7 @@ bool ChatHandler::HandleAccountMuteCommand(const char * args, WorldSession * m_s
 	GreenSystemMessage(m_session, "Account '%s' has been muted until %s. The change will be effective immediately.", pAccount, 
 		tsstr.c_str());
 
-	sGMLog.writefromsession(m_session, "mutex account %s until %s", pAccount, ConvertTimeStampToDataTime(timeperiod+(uint32)UNIXTIME).c_str());
+	sGMLog.writefromsession(m_session, "muted account %s until %s", pAccount, ConvertTimeStampToDataTime(timeperiod+(uint32)UNIXTIME).c_str());
 
 	WorldSession * pSession = sWorld.FindSessionByName(pAccount);
 	if( pSession != NULL )
