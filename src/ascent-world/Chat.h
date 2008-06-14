@@ -216,6 +216,7 @@ protected:
 	bool HandleAppearCommand(const char* args, WorldSession *m_session);
 	bool HandleAnnounceCommand(const char* args, WorldSession *m_session);
 	bool HandleWAnnounceCommand(const char* args, WorldSession *m_session);
+	bool HandleGMAnnounceCommand(const char* args, WorldSession *m_session);
 	bool HandleGMOnCommand(const char* args, WorldSession *m_session);
 	bool HandleGMOffCommand(const char* args, WorldSession *m_session);
 	bool HandleGPSCommand(const char* args, WorldSession *m_session);

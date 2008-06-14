@@ -382,6 +382,9 @@ public:
 	void SendZoneMessage(WorldPacket *packet, uint32 zoneid, WorldSession *self = 0);
 	void SendInstanceMessage(WorldPacket *packet, uint32 instanceid, WorldSession *self = 0);
 	void SendFactionMessage(WorldPacket *packet, uint8 teamId);
+	void SendGamemasterMessage(WorldPacket *packet, WorldSession *self = 0);
+	void SendGMWorldText(const char* text, WorldSession *self = 0);
+
 
 	ASCENT_INLINE void SetStartTime(uint32 val) { m_StartTime = val; }
 	ASCENT_INLINE uint32 GetUptime(void) { return (uint32)UNIXTIME - m_StartTime; }
