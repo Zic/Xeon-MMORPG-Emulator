@@ -25,14 +25,14 @@
 
 bool ChatHandler::HandleAnnounceCommand(const char* args, WorldSession *m_session)
 {
-	if( !*args || strlen(args) < 4 || strchr(args, '%'))
+	if( !*args || strlen(args) < 3 || strchr(args, '%'))
 	{
-		m_session->SystemMessage("Announces cannot contain the %% character and must be at least 4 characters.");
+		m_session->SystemMessage("Announces cannot contain the %% character and must be at least 3 characters.");
 		return true;
 	}
 
 	char msg[1024];
-	snprintf(msg, 1024, "[Server Notice]"MSG_COLOR_GREEN" %s: %s", m_session->GetPlayer()->GetName(), args);
+	snprintf(msg, 1024, "[Server Notice]%s [|Hplayer:%s|h%s|h]: %s|r",MSG_COLOR_GREEN, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->GetName(), args);
 	sWorld.SendWorldText(msg); // send message
 	sGMLog.writefromsession(m_session, "used announce command, [%s]", args);
 	return true;
@@ -40,8 +40,11 @@ bool ChatHandler::HandleAnnounceCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleGMAnnounceCommand(const char* args, WorldSession *m_session)
 {
-	if(!*args)
-		return false;
+	if( !*args || strlen(args) < 3 || strchr(args, '%'))
+	{
+		m_session->SystemMessage("Announces cannot contain the %% character and must be at least 3 characters.");
+		return true;
+	}
  
 	char GMAnnounce[1024];
 	snprintf (GMAnnounce, 1024, "%s[STAFF]<%s>|r%s[|Hplayer:%s|h%s|h]:|r %s", MSG_COLOR_LIGHTRED, m_session->CanUseCommand('z') ? "Admin" : "GM", MSG_COLOR_GREEN, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->GetName(), args);
@@ -52,20 +55,15 @@ bool ChatHandler::HandleGMAnnounceCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleWAnnounceCommand(const char* args, WorldSession *m_session)
 {
-	if(!*args)
-		return false;
+	if( !*args || strlen(args) < 3 || strchr(args, '%'))
+	{
+		m_session->SystemMessage("Announces cannot contain the %% character and must be at least 3 characters.");
+		return true;
+	}
 
 	char pAnnounce[1024];
-	string input2;
 
-	input2 = "|cffff6060<";
-	if(m_session->CanUseCommand('z')) input2+="Admin";
-	else if(m_session->GetPermissionCount()) input2+="GM";
-	input2+=">|r|c1f40af20";
-	input2+=m_session->GetPlayer()->GetName();
-	input2+=":|r ";
-	snprintf((char*)pAnnounce, 1024, "%s%s", input2.c_str(), args);
-
+	snprintf (pAnnounce, 1024, "%s<%s>|r%s[|Hplayer:%s|h%s|h]:|r %s", MSG_COLOR_LIGHTRED, m_session->CanUseCommand('z') ? "Admin" : "GM", MSG_COLOR_GREEN, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->GetName(), args);
 	sWorld.SendWorldWideScreenText(pAnnounce); // send message
 	sGMLog.writefromsession(m_session, "used wannounce command [%s]", args);
 	//sWorld.SendForcedIRCMessage(pAnnounce);
