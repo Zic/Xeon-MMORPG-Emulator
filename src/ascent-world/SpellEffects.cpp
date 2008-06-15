@@ -1317,6 +1317,18 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( p_caster->HasSpell(13032) ) p_caster->ClearCooldownForSpell(13032); // Ice Barrier
 			if( p_caster->HasSpell(13033) ) p_caster->ClearCooldownForSpell(13033); // Ice Barrier
 		}break;
+
+	case 100:
+	case 6178:
+	case 11578:
+		{
+			if( !p_caster || !p_caster->IsPlayer() || !p_caster->GetPowerType() == POWER_TYPE_RAGE)
+				return;
+
+			p_caster->ModUnsigned32Value(UNIT_FIELD_POWER2, m_spellInfo->EffectMiscValue[1]);
+			if( p_caster->GetUInt32Value(UNIT_FIELD_POWER2) > 1000 )
+				p_caster->SetUInt32Value(UNIT_FIELD_POWER2, 1000);
+		}break;
 	}										 
 }
 

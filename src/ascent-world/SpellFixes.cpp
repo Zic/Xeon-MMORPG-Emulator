@@ -14247,11 +14247,6 @@ void ApplyNormalFixes()
 		//////////////////////////////////////////
 
 		// Insert warrior spell fixes here
-			
-			// Overpower - can't be dodged/parried/blocked
-			if( sp->Id == 7384 || sp->Id == 7887 || sp->Id == 11584 || sp->Id == 11585 )
-				sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
-
 
 		//////////////////////////////////////////
 		// PALADIN								//
@@ -20755,6 +20750,43 @@ void ApplyNormalFixes()
 	//////////////////////////////////////////
 
 	// Insert warrior spell fixes here
+		// Overpower - Cannot be blocked / dodged / parried
+		sp = dbcSpell.LookupEntryForced( 7384 );
+		if( sp != NULL )
+			sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
+
+		sp = dbcSpell.LookupEntryForced( 7887 );
+		if( sp != NULL )
+			sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
+
+		sp = dbcSpell.LookupEntryForced( 11584 );
+		if( sp != NULL )
+			sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
+
+		sp = dbcSpell.LookupEntryForced( 11585 );
+		if( sp != NULL )
+			sp->Attributes |= ATTRIBUTES_CANT_BE_DPB;
+
+		// Charge - Changing to dummy for the power regen
+		sp = dbcSpell.LookupEntryForced(100);
+		if(sp != NULL)
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;
+			sp->EffectMiscValue[1] = 90;
+		}
+		sp = dbcSpell.LookupEntryForced(6178);
+		if(sp != NULL)
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;
+			sp->EffectMiscValue[1] = 120;
+		}
+		sp = dbcSpell.LookupEntryForced(11578);
+		if(sp != NULL)
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;      
+			sp->EffectMiscValue[1] = 150;
+		}
+			
 
 	//////////////////////////////////////////
 	// PALADIN								//
