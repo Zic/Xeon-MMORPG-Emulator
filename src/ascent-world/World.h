@@ -568,6 +568,7 @@ public:
 	uint32 m_genLevelCap;
 	bool m_limitedNames;
 	bool m_useAccountData;
+	bool m_forceGMTag;
 
 	char * m_banTable;
 

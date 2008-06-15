@@ -97,16 +97,23 @@ bool ChatHandler::HandleGMOffCommand(const char* args, WorldSession *m_session)
 	//m_session->GetPlayer( )->SetUInt32Value( PLAYER_BYTES_2, newbytes);
 
 	//GreenSystemMessage(m_session, "GM Flag Unset.");
-	GreenSystemMessage(m_session, "Unsetting GM Flag on yourself...");
-	if(!m_session->GetPlayer()->bGMTagOn)
-		RedSystemMessage(m_session, "GM Flag not set. Use !gmon to enable it.");
+	if(sWorld.m_forceGMTag && !m_session->CanUseCommand('z'))
+	{
+		GreenSystemMessage(m_session, "You are forced to use the GM tag!");
+		return true;
+	}
 	else
 	{
-		m_session->GetPlayer()->bGMTagOn = false;
-		m_session->GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAG_GM);	// <GM>
-		BlueSystemMessage(m_session, "GM Flag Removed. <GM> Will no longer show in chat messages or above your name.");
+		GreenSystemMessage(m_session, "Unsetting GM Flag on yourself...");
+		if(!m_session->GetPlayer()->bGMTagOn)
+			RedSystemMessage(m_session, "GM Flag not set. Use !gmon to enable it.");
+		else
+		{
+			m_session->GetPlayer()->bGMTagOn = false;
+			m_session->GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAG_GM);	// <GM>
+			BlueSystemMessage(m_session, "GM Flag Removed. <GM> Will no longer show in chat messages or above your name.");
+		}
 	}
-
 	return true;
 }
 

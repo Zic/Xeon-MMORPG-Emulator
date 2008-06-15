@@ -59,6 +59,8 @@ World::World()
 	m_limitedNames=false;
 	m_banTable = NULL;
 	m_lfgForNonLfg = false;
+	m_forceGMTag = false;
+
 }
 
 void CleanupRandomNumberGenerators();
@@ -1273,6 +1275,8 @@ void World::Rehash(bool load)
 	m_genLevelCap = Config.MainConfig.GetIntDefault("Server", "GenLevelCap", 70);
 	m_limitedNames = Config.MainConfig.GetBoolDefault("Server", "LimitedNames", true);
 	m_useAccountData = Config.MainConfig.GetBoolDefault("Server", "UseAccountData", false);
+	m_forceGMTag = Config.MainConfig.GetBoolDefault("Server", "ForceGMTag", false);
+
 
 	// ======================================
 	m_movementCompressInterval = Config.MainConfig.GetIntDefault("Movement", "FlushInterval", 1000);

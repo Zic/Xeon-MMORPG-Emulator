@@ -3160,6 +3160,13 @@ void Player::OnPushToWorld()
 
 	sHookInterface.OnEnterWorld(this);
 
+	if(sWorld.m_forceGMTag && m_session->HasGMPermissions() && !m_session->CanUseCommand('z'))
+	{
+		m_session->GetPlayer()->bGMTagOn = true;
+		m_session->GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAG_GM);
+	}
+
+
 	if(m_TeleportState == 1)		// First world enter
 		CompleteLoading();
 
