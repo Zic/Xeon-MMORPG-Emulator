@@ -451,7 +451,7 @@ void CommandTableStorage::Init()
 		{ "help",		'0', &ChatHandler::HandleHelpCommand,			"Shows help for command",		 NULL, 0, 0, 0},
 		{ "announce",	'u', &ChatHandler::HandleAnnounceCommand,	  "Sends Msg To All",			   NULL, 0, 0, 0},
 		{ "wannounce",   'u', &ChatHandler::HandleWAnnounceCommand,	 "Sends Widescreen Msg To All",	NULL, 0, 0, 0},
-		{ "gmannounce", 'u', &ChatHandler::HandleGMAnnounceCommand, "Sends Msg to all online GMs", NULL, 0, 0, 0},
+		{ "sannounce", 'u', &ChatHandler::HandleGMAnnounceCommand, "Sends Msg to all online GMs", NULL, 0, 0, 0},
 		{ "appear",	  'v', &ChatHandler::HandleAppearCommand,		"Teleports to x's position.",	 NULL, 0, 0, 0},
 		{ "summon",	  'v', &ChatHandler::HandleSummonCommand,		"Summons x to your position",	 NULL, 0, 0, 0},
 		{ "banchar",	 'b', &ChatHandler::HandleBanCharacterCommand,  "Bans character x with or without reason",			  NULL, 0, 0, 0},

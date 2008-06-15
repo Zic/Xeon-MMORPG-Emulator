@@ -44,7 +44,7 @@ bool ChatHandler::HandleGMAnnounceCommand(const char* args, WorldSession *m_sess
 		return false;
  
 	char GMAnnounce[1024];
-	snprintf (GMAnnounce, 1024, "%s[TEAM]<%s>|r%s%s:|r%s", MSG_COLOR_LIGHTRED, m_session->CanUseCommand('z') ? "Admin" : "GM", MSG_COLOR_GREEN, m_session->GetPlayer()->GetName(), args);
+	snprintf (GMAnnounce, 1024, "%s[STAFF]<%s>|r%s[|Hplayer:%s|h%s|h]:|r %s", MSG_COLOR_LIGHTRED, m_session->CanUseCommand('z') ? "Admin" : "GM", MSG_COLOR_GREEN, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->GetName(), args);
 	sWorld.SendGMWorldText(GMAnnounce);
 	sGMLog.writefromsession(m_session, "used team announce command, [%s]", args);
 	return true;
