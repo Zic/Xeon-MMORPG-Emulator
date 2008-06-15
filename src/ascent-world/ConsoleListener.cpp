@@ -337,17 +337,17 @@ void HandleConsoleInput(BaseConsole * pConsole, const char * szInput)
 	static ConsoleCommand Commands[] = {
 		{ &HandleInfoCommand, "info", "none", "Gives server runtime information." },
 		{ &HandleGMsCommand, "gms", "none", "Shows online GMs." },
-		{ &HandleAnnounceCommand, "announce", "<announce string>", "Shows the message in all client chat boxes." },
-		{ &HandleWAnnounceCommand, "wannounce", "<wannounce string>", "Shows the message in all client title areas." },
+		{ &HandleAnnounceCommand, "announce", "<announce string>", "Show message in all client chat boxes." },
+		{ &HandleWAnnounceCommand, "wannounce", "<wannounce string>", "Show message in all client title areas." },
 		{ &HandleKickCommand, "kick", "<plrname> <reason>", "Kicks player x for reason y." },
-		{ &HandleQuitCommand, "shutdown", "[delay]", "Shuts down server with optional delay in seconds." },
+		{ &HandleQuitCommand, "shutdown", "[delay]", "Shutdown with optional delay in secs." },
 		{ &HandleCancelCommand, "cancel", "none", "Cancels a pending shutdown." },
 		{ &HandleUptimeCommand, "uptime", "none", "Shows server uptime." },
-		{ &HandleBanAccountCommand, "banaccount", "<account> <timeperiod>", "Bans account x for time y." },
-		{ &HandleUnbanAccountCommand, "unbanaccount", "<account>", "Unbans account x." },
+		{ &HandleBanAccountCommand, "banacc", "<account> <time>", "Bans account x for time y." },
+		{ &HandleUnbanAccountCommand, "unbanacc", "<account>", "Unbans account x." },
 		{ &HandleMOTDCommand, "motd", "<new motd>", "Sets MOTD" },
-		{ &HandlePlayerInfoCommand, "playerinfo", "<plrname>", "Shows information about a player." },
-		{ &HandleCreateAccountCommand, "createaccount", "<name> <pass> <email> <flags>", "Creates an account." },
+		{ &HandlePlayerInfoCommand, "plrinfo", "<plrname>", "Shows information about a player." },
+		{ &HandleCreateAccountCommand, "createacc", "<name> <pass> <email> <flags>", "Make acc." },
 		{ &HandleRehashCommand, "rehash", "none", "Reloads the config file" },
 		{ NULL, NULL, NULL, NULL },
 	};
@@ -377,13 +377,13 @@ void HandleConsoleInput(BaseConsole * pConsole, const char * szInput)
 
 	if( !stricmp(tokens[0], "help") || tokens[0][0] == '?' )
 	{
-		pConsole->Write("=========================================================================================\r\n");
-		pConsole->Write("| %10s | %20s | %49s |\r\n", "Name", "Arguments", "Description");
+		pConsole->Write("=============================================================================\r\n");
+		pConsole->Write("| %9s | %20s | %39s |\r\n", "Name", "Arguments", "Description");
 		for(i = 0; Commands[i].Name != NULL; ++i)
 		{
-			pConsole->Write("| %10s | %20s | %49s |\r\n", Commands[i].Name, Commands[i].ArgumentFormat, Commands[i].Description);
+			pConsole->Write("| %9s | %20s | %39s |\r\n", Commands[i].Name, Commands[i].ArgumentFormat, Commands[i].Description);
 		}
-		pConsole->Write("=========================================================================================\r\n");		
+		pConsole->Write("=============================================================================\r\n");		
 	}
 	else
 	{
