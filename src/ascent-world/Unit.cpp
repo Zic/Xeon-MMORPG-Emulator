@@ -5449,7 +5449,10 @@ bool CombatStatusHandler::InternalIsInCombat()
 	if(m_attackTargets.size() > 0)
 		return true;
 
-	if(m_attackers.size() > 0)
+	//if(m_attackers.size() > 0)
+	//if(m_attackerz.size() > 0)
+	//if(AttackerVect(&m_attackerz, 0, false, true) != NULL)
+	if(m_attackerz.empty() == false)
 		return true;
 
 	return false;
@@ -5539,20 +5542,19 @@ void CombatStatusHandler::RemoveAttackTarget(Unit * pTarget)
 
 void CombatStatusHandler::RemoveAttacker(Unit * pAttacker, const uint64& guid)
 {
-	AttackersLock.Acquire();
-	AttackerMap::iterator itr = m_attackers.find(guid);
+	/*AttackerMap::iterator itr = m_attackers.find(guid);
 	if(itr == m_attackers.end())
-	{
-		AttackersLock.Release();
+		return;*/
+	if(AttackerVect(&m_attackerz, guid) == NULL)
 		return;
-	}
+
 	if( (!pAttacker) || (!pAttacker->CombatStatus.IsAttacking(m_Unit)) )
 	{
 		//printf("Removing attacker "I64FMT" from "I64FMT"\n", guid, m_Unit->GetGUID());
-		m_attackers.erase(itr);
+		//m_attackers.erase(itr);
+		AttackerVect(&m_attackerz, guid, true);
 		UpdateFlag();
 	}
-	AttackersLock.Release();
 	/*else
 	{
 		printf("Cannot remove attacker "I64FMT" from "I64FMT"\n", guid, m_Unit->GetGUID());
@@ -5569,55 +5571,55 @@ void CombatStatusHandler::OnDamageDealt(Unit * pTarget)
 	if(!pTarget->isAlive())
 		return;
 
-	AttackersLock.Acquire();
 	AttackerMap::iterator itr = m_attackTargets.find(pTarget->GetGUID());
 	if(itr == m_attackTargets.end())
 		AddAttackTarget(pTarget->GetGUID());
-	itr = pTarget->CombatStatus.m_attackers.find(m_Unit->GetGUID());
+/*	itr = pTarget->CombatStatus.m_attackers.find(m_Unit->GetGUID());
 	if(itr == pTarget->CombatStatus.m_attackers.end())
+		pTarget->CombatStatus.AddAttacker(m_Unit->GetGUID());*/
+	AttackerVector Vect = pTarget->CombatStatus.m_attackerz;
+	if(pTarget->CombatStatus.AttackerVect(&Vect, m_Unit->GetGUID()) == NULL)
 		pTarget->CombatStatus.AddAttacker(m_Unit->GetGUID());
-	AttackersLock.Release();
-
 	// update the timeout
 	m_Unit->CombatStatusHandler_ResetPvPTimeout();
 }
 
 void CombatStatusHandler::AddAttacker(const uint64& guid)
 {
-	AttackersLock.Acquire();
-	m_attackers.insert(guid);
-	AttackersLock.Release();
+	//m_attackers.insert(guid);
+	m_attackerz.push_back(guid);
 	UpdateFlag();
 }
 
 void CombatStatusHandler::ClearAttackers()
 {
 	// this is a FORCED function, only use when the reference will be destroyed.
-	AttackersLock.Acquire();
 	AttackerMap::iterator itr = m_attackTargets.begin();
+	AttackerVector::iterator Itr;
 	Unit * pt;
 	for(; itr != m_attackTargets.end(); ++itr)
 	{
 		pt = m_Unit->GetMapMgr()->GetUnit(*itr);
 		if(pt)
 		{
-			pt->CombatStatus.m_attackers.erase(m_Unit->GetGUID());
+			//pt->CombatStatus.m_attackers.erase(m_Unit->GetGUID());
+			AttackerVect(&pt->CombatStatus.m_attackerz, m_Unit->GetGUID(), true);
 			pt->CombatStatus.UpdateFlag();
 		}
 	}
 
-	for(itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
+	for(Itr = m_attackerz.begin(); Itr != m_attackerz.end(); ++Itr)
 	{
-		pt = m_Unit->GetMapMgr()->GetUnit(*itr);
+		pt = m_Unit->GetMapMgr()->GetUnit(*Itr);
 		if(pt)
 		{
-			pt->CombatStatus.m_attackTargets.erase(m_Unit->GetGUID());
+			//pt->CombatStatus.m_attackTargets.erase(m_Unit->GetGUID());
+			AttackerVect(&pt->CombatStatus.m_attackerz, m_Unit->GetGUID(), true);
 			pt->CombatStatus.UpdateFlag();
 		}
 	}
 
-	m_attackers.clear();
-	AttackersLock.Release();
+	m_attackerz.clear();
 	m_attackTargets.clear();
 	m_primaryAttackTarget = 0;
 	UpdateFlag();
@@ -5657,6 +5659,43 @@ void CombatStatusHandler::OnRemoveFromWorld()
 	ClearAttackers();
 	ClearHealers();
 }
+
+uint64 CombatStatusHandler::AttackerVect(AttackerVector *Vect, const uint64 &Guid, bool Remove)
+{
+	AttackerVector::iterator Itr;
+	int Cycle = 0;
+
+	for(Itr = Vect->begin();Itr != Vect->end();Itr++)
+	{
+		if((*Itr) == Guid)
+		{
+			if(Remove == true)
+				Vect->erase(Vect->begin()+Cycle);
+			else
+				return (*Itr);
+			break;
+		}
+		Cycle++;
+	}
+
+	return NULL;
+}
+
+/*void CombatStatusHandler::RemoveTargetVect(AttackerVector &Vect, uint32 Guid)
+{
+	AttackerVector::iterator Itr;
+	int Cycle = 0;
+
+	for(Itr = Vect.begin();Itr != Vect.end();Itr++)
+	{
+		if((*Itr) == Guid)
+		{
+			Vect.erase(Vect.begin()+Cycle);
+		}
+		Cycle++;
+	}
+SPECTRE DELETE
+}*/
 
 void Unit::CombatStatusHandler_ResetPvPTimeout()
 {

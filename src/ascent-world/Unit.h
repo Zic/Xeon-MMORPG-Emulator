@@ -594,14 +594,16 @@ class Unit;
 class CombatStatusHandler
 {
 	typedef set<uint64> AttackerMap;
+	typedef vector<uint64> AttackerVector;
 	typedef set<uint32> HealedSet;		// Must Be Players!
-	AttackerMap m_attackers;
-	Mutex AttackersLock;
+	//AttackerMap m_attackers;
+	AttackerVector m_attackerz;
 	HealedSet m_healers;
 	HealedSet m_healed;
 	Unit* m_Unit;
 	bool m_lastStatus;
 	AttackerMap m_attackTargets;
+	//AttackerVector m_attackTargetz;
 	uint64 m_primaryAttackTarget;
 
 public:
@@ -641,6 +643,7 @@ protected:
 	void ClearHealers();											// this is called on instance change.
 	void ClearAttackers();											// means we vanished, or died.
 	void ClearMyHealers();
+	uint64 AttackerVect(AttackerVector *Vect, const uint64 &Guid, bool Remove = false);
 };
 
 //====================================================================
