@@ -804,11 +804,14 @@ void WorldSession::HandleCharterOffer( WorldPacket & recv_data )
 	Charter * pCharter;
 	recv_data >> shit >> item_guid >> target_guid;
 	
-	if(!_player->IsInWorld() || !pCharter) 
+	if(!_player->IsInWorld()) 
 		return;
 
 	Player * pTarget = _player->GetMapMgr()->GetPlayer((uint32)target_guid);
 	pCharter = objmgr.GetCharterByItemGuid(item_guid);
+
+	if(pCharter == NULL)
+		return;
 
 	if(pTarget == 0 || pTarget->GetTeam() != _player->GetTeam() || pTarget == _player)
 	{
