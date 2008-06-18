@@ -27,7 +27,7 @@ bool ChatHandler::HandleRecallGoCommand(const char* args, WorldSession *m_sessio
 
 	if( m_session == NULL ) return false;
 
-	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%%%s%%' LIMIT 1", args );
+	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%s%%' LIMIT 1", args );
 
 	if( result == NULL) return false;
 
@@ -161,7 +161,7 @@ bool ChatHandler::HandleRecallPortPlayerCommand(const char* args, WorldSession *
 	Player * plr = objmgr.GetPlayer(player, false);
 	if(!plr) return false;
 
-	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%%%s%%' LIMIT 1", location );
+	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall WHERE name LIKE '%s%%' LIMIT 1", location );
 	if(!result) return false;
 
 	Field *fields = result->Fetch();
