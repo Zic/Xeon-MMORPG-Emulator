@@ -1861,15 +1861,22 @@ void Unit::RegeneratePower(bool isinterrupted)
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					m_P_regenTimer = 3000;
-					static_cast< Player* >( this )->LooseRage(30);
+					if (static_cast< Player* >( this )->HasAura(29131)) //Fix for bloodrage, no decay
+					{	m_P_regenTimer = 3000;
+						static_cast< Player* >( this )->LoseRage(0);
+					}
+					else
+					{
+						m_P_regenTimer = 3000;
+						static_cast< Player* >( this )->LoseRage(30);
+					}
 				}
 				else
 				{
 					if (static_cast< Player* >( this )->HasAura(12296))
 					{
 						m_P_regenTimer = 3000;
-						static_cast< Player* >( this )->LooseRage(-10);
+						static_cast< Player* >( this )->LoseRage(-10);
 					}
 				}
 
