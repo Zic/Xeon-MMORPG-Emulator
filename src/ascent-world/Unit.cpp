@@ -1861,22 +1861,15 @@ void Unit::RegeneratePower(bool isinterrupted)
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					if (static_cast< Player* >( this )->HasAura(29131)) //Fix for bloodrage, no decay
-					{	m_P_regenTimer = 3000;
-						static_cast< Player* >( this )->LoseRage(0);
-					}
-					else
-					{
-						m_P_regenTimer = 3000;
-						static_cast< Player* >( this )->LoseRage(30);
-					}
+					m_P_regenTimer = 3000;
+					static_cast< Player* >( this )->LooseRage(30);
 				}
 				else
 				{
 					if (static_cast< Player* >( this )->HasAura(12296))
 					{
 						m_P_regenTimer = 3000;
-						static_cast< Player* >( this )->LoseRage(-10);
+						static_cast< Player* >( this )->LooseRage(-10);
 					}
 				}
 
@@ -5602,7 +5595,7 @@ void CombatStatusHandler::ClearAttackers()
 {
 	// this is a FORCED function, only use when the reference will be destroyed.
 	AttackerMap::iterator itr = m_attackTargets.begin();
-	AttackerVector::iterator Itr;
+
 	Unit * pt;
 	for(; itr != m_attackTargets.end(); ++itr)
 	{
@@ -5615,13 +5608,14 @@ void CombatStatusHandler::ClearAttackers()
 		}
 	}
 
+	AttackerVector::iterator Itr;
 	for(Itr = m_attackerz.begin(); Itr != m_attackerz.end(); ++Itr)
 	{
 		pt = m_Unit->GetMapMgr()->GetUnit(*Itr);
 		if(pt)
 		{
-			//pt->CombatStatus.m_attackTargets.erase(m_Unit->GetGUID());
-			AttackerVect(&pt->CombatStatus.m_attackerz, m_Unit->GetGUID(), true);
+			pt->CombatStatus.m_attackTargets.erase(m_Unit->GetGUID());
+			//AttackerVect(&pt->CombatStatus.m_attackerz, m_Unit->GetGUID(), true);
 			pt->CombatStatus.UpdateFlag();
 		}
 	}
@@ -5684,25 +5678,10 @@ uint64 CombatStatusHandler::AttackerVect(AttackerVector *Vect, const uint64 &Gui
 		}
 		Cycle++;
 	}
-
+	
 	return NULL;
 }
 
-/*void CombatStatusHandler::RemoveTargetVect(AttackerVector &Vect, uint32 Guid)
-{
-	AttackerVector::iterator Itr;
-	int Cycle = 0;
-
-	for(Itr = Vect.begin();Itr != Vect.end();Itr++)
-	{
-		if((*Itr) == Guid)
-		{
-			Vect.erase(Vect.begin()+Cycle);
-		}
-		Cycle++;
-	}
-SPECTRE DELETE
-}*/
 
 void Unit::CombatStatusHandler_ResetPvPTimeout()
 {
