@@ -12787,6 +12787,11 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(38617);
 	if(sp != NULL)
 		sp->procChance = 10;
+
+	// Spell 36041 Proc Chance (Heartrazor)
+	sp = dbcSpell.LookupEntryForced(36041);
+	if(sp != NULL)
+		sp->procChance = 5;
 }
 
 void ApplyNormalFixes()
