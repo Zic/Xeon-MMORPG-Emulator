@@ -4909,6 +4909,8 @@ bool Player::CanSee(Object* obj) // * Invisibility & Stealth Detection - Partha 
 
 		case TYPEID_UNIT:
 			{	
+				if(bGMTagOn) return true;
+
 				Unit *uObj = static_cast<Unit *>(obj);
 					
 				if(uObj->IsSpiritHealer()) // can't see spirit-healers when alive
@@ -4916,7 +4918,26 @@ bool Player::CanSee(Object* obj) // * Invisibility & Stealth Detection - Partha 
 
 				if(uObj->m_invisible // Invisibility - Detection of Units
 						&& m_invisDetect[uObj->m_invisFlag] < 1) // can't see invisible without proper detection
-					return bGMTagOn; // GM can see invisible units
+					return false;
+
+				if(uObj->m_stealth) // Stealthed mobs
+				{
+					if(isInFront(uObj))
+					{
+						detectRange = 5.0f + getLevel() + 0.2f * (float)(GetStealthDetectBonus() - uObj->GetStealthLevel());
+						if(detectRange < 1.0f)
+							detectRange = 1.0f;
+						detectRange += GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS) + uObj->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
+						if(GetDistanceSq(uObj) > detectRange * detectRange)
+							return false;
+					}
+					else
+					{
+						if(GetStealthDetectBonus() > 1000)
+							return true; // Immune to stealth
+						return false;
+					}
+				}
 
 				return true;
 			}
