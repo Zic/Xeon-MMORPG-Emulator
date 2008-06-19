@@ -6348,12 +6348,13 @@ void Aura::SpellAuraModRangedHaste(bool apply)
 	if (m_target->GetTypeId() == TYPEID_PLAYER)
 	{
 		int32 amount = mod->m_amount;
-//		if(GetSpellProto()->Id == 6150)// Quick Shots
-//		{
-//			Unit * pCaster = GetUnitCaster();
-//			if(pCaster)
-//				SM_FIValue(pCaster->SM_FSPELL_VALUE,&amount,0x100000);
-//		}
+
+		if(GetSpellProto()->Id == 6150)// Quick Shots
+		{
+			Unit * pCaster = GetUnitCaster();
+			if(pCaster)
+				SM_FIValue(pCaster->SM_FSPELL_VALUE,&amount,0x100000);
+		}
 
 		if( apply )
 			static_cast< Player* >( m_target )->m_rangedattackspeedmod += amount;
