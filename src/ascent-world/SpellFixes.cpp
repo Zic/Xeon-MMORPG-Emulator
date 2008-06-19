@@ -11948,20 +11948,6 @@ void Apply112SpellFixes()
 	if(sp != NULL)
 		sp->procChance = 12;
 
-	// Spell 19239 Group Relation (Clever Traps Rank 1)
-	sp = dbcSpell.LookupEntryForced(19239);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 24;
-		sp->EffectSpellGroupRelation[1] = 4;
-	}
-
-	// Spell 19245 Group Relation (Clever Traps Rank 2)
-	sp = dbcSpell.LookupEntryForced(19245);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 24;
-		sp->EffectSpellGroupRelation[1] = 4;
-	}
-
 	// Spell 19387 Proc Chance (Entrapment Rank 2)
 	sp = dbcSpell.LookupEntryForced(19387);
 	if(sp != NULL)
@@ -11974,32 +11960,42 @@ void Apply112SpellFixes()
 
 	// Spell 19416 Group Relation (Efficiency Rank 1)
 	sp = dbcSpell.LookupEntryForced(19416);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 522752;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128;
 	}
 
 	// Spell 19417 Group Relation (Efficiency Rank 2)
 	sp = dbcSpell.LookupEntryForced(19417);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 522752;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128;
 	}
 
 	// Spell 19418 Group Relation (Efficiency Rank 3)
 	sp = dbcSpell.LookupEntryForced(19418);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 522752;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128;
 	}
 
 	// Spell 19419 Group Relation (Efficiency Rank 4)
 	sp = dbcSpell.LookupEntryForced(19419);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 522752;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128;
 	}
 
 	// Spell 19420 Group Relation (Efficiency Rank 5)
 	sp = dbcSpell.LookupEntryForced(19420);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 522752;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128;
 	}
 
 	// Spell 19421 Group Relation (Improved Hunter's Mark Rank 1)
@@ -12046,84 +12042,6 @@ void Apply112SpellFixes()
 		sp->EffectSpellGroupRelation[1] = 8192;
 	}
 
-	// Spell 19464 Group Relation (Improved Stings Rank 1)
-	sp = dbcSpell.LookupEntryForced(19464);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 16384;
-	}
-
-	// Spell 19465 Group Relation (Improved Stings Rank 2)
-	sp = dbcSpell.LookupEntryForced(19465);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 16384;
-	}
-
-	// Spell 19466 Group Relation (Improved Stings Rank 3)
-	sp = dbcSpell.LookupEntryForced(19466);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 16384;
-	}
-
-	// Spell 19467 Group Relation (Improved Stings Rank 4)
-	sp = dbcSpell.LookupEntryForced(19467);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 16384;
-	}
-
-	// Spell 19468 Group Relation (Improved Stings Rank 5)
-	sp = dbcSpell.LookupEntryForced(19468);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 16384;
-	}
-
-	// Spell 19485 Group Relation (Mortal Shots Rank 1)
-	sp = dbcSpell.LookupEntryForced(19485);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 408065;
-	}
-
-	// Spell 19487 Group Relation (Mortal Shots Rank 2)
-	sp = dbcSpell.LookupEntryForced(19487);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 408065;
-	}
-
-	// Spell 19488 Group Relation (Mortal Shots Rank 3)
-	sp = dbcSpell.LookupEntryForced(19488);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 408065;
-	}
-
-	// Spell 19489 Group Relation (Mortal Shots Rank 4)
-	sp = dbcSpell.LookupEntryForced(19489);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 408065;
-	}
-
-	// Spell 19490 Group Relation (Mortal Shots Rank 5)
-	sp = dbcSpell.LookupEntryForced(19490);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 408065;
-	}
-
-	// Spell 19498 Group Relation (Hawk Eye Rank 1)
-	sp = dbcSpell.LookupEntryForced(19498);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 522753;
-	}
-
-	// Spell 19499 Group Relation (Hawk Eye Rank 2)
-	sp = dbcSpell.LookupEntryForced(19499);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 522753;
-	}
-
-	// Spell 19500 Group Relation (Hawk Eye Rank 3)
-	sp = dbcSpell.LookupEntryForced(19500);
-	if(sp != NULL) {
-		sp->EffectSpellGroupRelation[0] = 522753;
-	}
-
 	// Spell 19549 Group Relation (Improved Aspect of the Monkey Rank 1)
 	sp = dbcSpell.LookupEntryForced(19549);
 	if(sp != NULL) {
@@ -12144,32 +12062,42 @@ void Apply112SpellFixes()
 
 	// Spell 19552 Group Relation (Improved Aspect of the Hawk Rank 1)
 	sp = dbcSpell.LookupEntryForced(19552);
-	if(sp != NULL) {
+	if(sp != NULL) 
+	{
 		sp->EffectSpellGroupRelation[0] = 1048576;
+		sp->EffectSpellGroupRelation_high[1] = 512;
 	}
 
 	// Spell 19553 Group Relation (Improved Aspect of the Hawk Rank 2)
 	sp = dbcSpell.LookupEntryForced(19553);
-	if(sp != NULL) {
+	if(sp != NULL) 
+	{
 		sp->EffectSpellGroupRelation[0] = 1048576;
+		sp->EffectSpellGroupRelation_high[1] = 512;
 	}
 
 	// Spell 19554 Group Relation (Improved Aspect of the Hawk Rank 3)
 	sp = dbcSpell.LookupEntryForced(19554);
-	if(sp != NULL) {
+	if(sp != NULL) 
+	{
 		sp->EffectSpellGroupRelation[0] = 1048576;
+		sp->EffectSpellGroupRelation_high[1] = 512;
 	}
 
 	// Spell 19555 Group Relation (Improved Aspect of the Hawk Rank 4)
 	sp = dbcSpell.LookupEntryForced(19555);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 1048576;
+		sp->EffectSpellGroupRelation_high[1] = 512;
 	}
 
 	// Spell 19556 Group Relation (Improved Aspect of the Hawk Rank 5)
 	sp = dbcSpell.LookupEntryForced(19556);
-	if(sp != NULL) {
+	if(sp != NULL)
+	{
 		sp->EffectSpellGroupRelation[0] = 1048576;
+		sp->EffectSpellGroupRelation_high[1] = 512;
 	}
 
 	// Spell 19559 Group Relation (Pathfinding Rank 1)
@@ -16653,15 +16581,26 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
 
 	// Hunter - Hawk Eye
-	sp = dbcSpell.LookupEntryForced( 19498 );
+	sp = dbcSpell.LookupEntryForced( 19498 ); //Rank 1
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 1 | 4;
-	sp = dbcSpell.LookupEntryForced( 19499 );
+	{	
+		sp->EffectSpellGroupRelation[0] = 1 | 512 | 2048 | 4096 | 16384 | 262144 | 32768 | 65536 | 131072 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128 | 4096 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19499 ); // Rank 2
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 1 | 4;
-	sp = dbcSpell.LookupEntryForced( 19500 );
+	{	
+		sp->EffectSpellGroupRelation[0] = 1 | 512 | 2048 | 4096 | 16384 | 262144 | 32768 | 65536 | 131072 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128 | 4096 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19500 ); // Rank 3
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 1 | 4;
+	{	
+		sp->EffectSpellGroupRelation[0] = 1 | 512 | 2048 | 4096 | 16384 | 262144 | 32768 | 65536 | 131072 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 | 128 | 4096 ;
+	}
 
 	//Hunter - Frenzy
 	sp = dbcSpell.LookupEntryForced( 19621 );
@@ -16802,37 +16741,51 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19464 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16384 | 65536;
-		sp->EffectSpellGroupRelation[1] = 65536;
-		sp->EffectSpellGroupRelation[2] = 16384 | 65536 | 32768;
+		sp->EffectSpellGroupRelation[0] = 16384;
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation_high[1] = 128;
+		sp->EffectSpellGroupRelation[2] = 16384 | 32768;
+		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
+
 	sp = dbcSpell.LookupEntryForced( 19465 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16384 | 65536;
-		sp->EffectSpellGroupRelation[1] = 65536;
-		sp->EffectSpellGroupRelation[2] = 16384 | 65536 | 32768;
+		sp->EffectSpellGroupRelation[0] = 16384;
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation_high[1] = 128;
+		sp->EffectSpellGroupRelation[2] = 16384 | 32768;
+		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
+
 	sp = dbcSpell.LookupEntryForced( 19466 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16384 | 65536;
-		sp->EffectSpellGroupRelation[1] = 65536;
-		sp->EffectSpellGroupRelation[2] = 16384 | 65536 | 32768;
+		sp->EffectSpellGroupRelation[0] = 16384;
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation_high[1] = 128;
+		sp->EffectSpellGroupRelation[2] = 16384 | 32768;
+		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
+
 	sp = dbcSpell.LookupEntryForced( 19467 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16384 | 65536;
-		sp->EffectSpellGroupRelation[1] = 65536;
-		sp->EffectSpellGroupRelation[2] = 16384 | 65536 | 32768;
+		sp->EffectSpellGroupRelation[0] = 16384;
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation_high[1] = 128;
+		sp->EffectSpellGroupRelation[2] = 16384 | 32768;
+		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
+
 	sp = dbcSpell.LookupEntryForced( 19468 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16384 | 65536;
-		sp->EffectSpellGroupRelation[1] = 65536;
-		sp->EffectSpellGroupRelation[2] = 16384 | 65536 | 32768;
+		sp->EffectSpellGroupRelation[0] = 16384;
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation_high[1] = 128;
+		sp->EffectSpellGroupRelation[2] = 16384 | 32768;
+		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
 
 	//we need to adress this somehow : shot
@@ -16843,19 +16796,35 @@ void ApplyNormalFixes()
 	//Hunter : Mortal Shots
 	sp = dbcSpell.LookupEntryForced( 19485 );
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 4 ; //simple shot
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+	
 	sp = dbcSpell.LookupEntryForced( 19487 );
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 4 ; //simple shot
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
 	sp = dbcSpell.LookupEntryForced( 19488 );
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 4 ; //simple shot
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
 	sp = dbcSpell.LookupEntryForced( 19489 );
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 4 ; //simple shot
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
 	sp = dbcSpell.LookupEntryForced( 19490 );
 	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 4 ; //simple shot
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
 
 	//Hunter : Improved Barrage
 	sp = dbcSpell.LookupEntryForced( 35104 );
@@ -16881,16 +16850,18 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19239 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16 | 8;
-		sp->EffectSpellGroupRelation[0] = 4;
-		sp->EffectSpellGroupRelation[0] = 128;
+		sp->EffectSpellGroupRelation[0] = 8 | 16;
+		sp->EffectSpellGroupRelation[1] = 4;
+		sp->EffectSpellGroupRelation_high[1] = 8192;
+		//sp->EffectSpellGroupRelation[0] = 128;
 	}
 	sp = dbcSpell.LookupEntryForced( 19245 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 16 | 8;
-		sp->EffectSpellGroupRelation[0] = 4;
-		sp->EffectSpellGroupRelation[0] = 128;
+		sp->EffectSpellGroupRelation[0] = 8 | 16;
+		sp->EffectSpellGroupRelation[1] = 4;
+		sp->EffectSpellGroupRelation_high[1] = 8192;
+		//sp->EffectSpellGroupRelation[0] = 128;
 	}
 
 	//Hunter : Resourcefulness
@@ -16898,18 +16869,21 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
+		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 	sp = dbcSpell.LookupEntryForced( 34492 );
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
+		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 	sp = dbcSpell.LookupEntryForced( 34493 );
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
+		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 
@@ -20715,15 +20689,12 @@ void ApplyNormalFixes()
 	/* aspect of the pack - change to AA */
 	sp = dbcSpell.LookupEntryForced( 13159 );
 	if( sp != NULL )
-		sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
-	sp = dbcSpell.LookupEntryForced( 13159 );
-	if( sp != NULL )
-		sp->Effect[1] = SPELL_EFFECT_APPLY_AREA_AURA;
+		sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
 
 	/* aspect of the cheetah - add proc flags */
 	sp = dbcSpell.LookupEntryForced( 5118 );
 	if( sp != NULL )
-		sp->procFlags = 139944;
+		sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
 	
 	/* thrown - add a 1.6 second cooldown */
 	const static uint32 thrown_spells[] = {SPELL_RANGED_GENERAL,SPELL_RANGED_THROW,SPELL_RANGED_WAND, 26679, 29436, 37074, 41182, 41346, 0};
@@ -20755,6 +20726,7 @@ void ApplyNormalFixes()
 	//////////////////////////////////////////
 
 	// Insert warrior spell fixes here
+
 		// Overpower - Cannot be blocked / dodged / parried
 		sp = dbcSpell.LookupEntryForced( 7384 );
 		if( sp != NULL )
@@ -20810,6 +20782,21 @@ void ApplyNormalFixes()
 	//////////////////////////////////////////
 
 	// Insert hunter spell fixes here
+
+		//Hunter - Go for the Throat
+		sp = dbcSpell.LookupEntryForced( 34950 );
+		if( sp != NULL )
+			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+		sp = dbcSpell.LookupEntryForced( 34954 );
+		if( sp != NULL )
+			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+		sp = dbcSpell.LookupEntryForced( 34952 );
+		if( sp != NULL )
+			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+		sp = dbcSpell.LookupEntryForced( 34953 );
+		if( sp != NULL )
+			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+
 
 	//////////////////////////////////////////
 	// ROGUE								//

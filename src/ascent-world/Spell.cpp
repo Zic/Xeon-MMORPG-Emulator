@@ -3655,7 +3655,16 @@ exit:
 		value = basePoints + rand() % randomPoints;
 
 	//scripted shit
-	if( m_spellInfo->Id == 34120)
+	if( m_spellInfo->Id == 34074 && i==0 && u_caster)
+	{	//Aspect of the Viper
+		//The hunter takes on the aspects of a viper,
+		//regenerating mana equal to up to 55% of <his/her> Intellect 
+		//plus 35% of <his/her> level every 5 sec.
+			float formula = ((u_caster->GetUInt32Value(UNIT_FIELD_STAT3) * 55 / 100) + (u_caster->getLevel() * 35 / 100));
+			value = float2int32(formula);
+	}
+
+	else if( m_spellInfo->Id == 34120)
 	{	//A steady shot that causes ${$RAP*0.3+$m1} damage. 
 		//	Actual Equation (http://www.wowwiki.com/Steady_Shot)
 		//		* The tooltip is proven to be wrong and the following is the best player worked out formula so far with data taken from [1]
@@ -3667,15 +3676,22 @@ exit:
 				Item *it;
 				if(p_caster->GetItemInterface())
 				{
-					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 					if(it)
-						value += float2int32(150 + float(it->GetProto()->Damage[0].Min)/float(it->GetProto()->Delay)*2.8f);
+					{
+						float weapondmg = RandomFloat(1)*(it->GetProto()->Damage[0].Max - it->GetProto()->Damage[0].Min) + it->GetProto()->Damage[0].Min;
+						value += float2int32(150 + weapondmg/float(it->GetProto()->Delay/1000.0f)*2.8f);
+					}
 				}
 			}
-			if(target && target->HasNegativeAura(CREATURE_SPELL_TO_DAZE))
+			if(target && target->IsDazed() )
 				value += 175;
 			value += (uint32)(u_caster->GetRAP()*0.2);
 		}
+	}
+	else if( m_spellInfo->Id == 19574 && i == 0 && u_caster && u_caster->HasAura(34692) )
+	{
+		u_caster->CastSpell(u_caster,34471,true);
 	}
     // HACK FIX
     else if( m_spellInfo->NameHash == SPELL_HASH_VICTORY_RUSH )

@@ -153,3 +153,9 @@ Broken talent groups
 
 //// - just taking this home 
 BLESSING OF LIGHT la paladin: dai heal exagerat de mare (12k+ fara iteme la lvl 70) cu blessul pe target. COMBUSTION la mage: odata activat la fiecare fire spell se stackeaza pana ajunge la 10x si ai crit chance 100%. VICTORY RUSH la warrior : Dupa ce omori mob/player care iti da honor/xp ramane activat mereu si nu 20 de secunde cat ar trebui. Cum abilitatea nu cere rage devine deja exploit. SACRIFICE la warlock: Dupa ce sacrifici o data voidu` si iti da shieldu` de 3k absorb poti da shieldul mereu fara a mai avea nevoie de pet pt a folosi abilitatea. In PVP poti iesi din combat doar cu un simplu esc. E aproape imposibil sa bati un rogue care te tine numai in stealth/ cheap shot / kidney shot si iar stealth. Cand folosesti unstuck te da sub harta. 
+
+==========================================================================
+Exploits
+
+-stop wpe on vendors fully, they change the packet info to get a different item
+wpe tells you the packet id of any item. You then buy a free item and lock the packet into wpe then change it to the other id and it fools the vendor into thinking you have the currency or badge required of that item
