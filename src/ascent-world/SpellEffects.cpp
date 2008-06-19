@@ -356,17 +356,17 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 				if(u_caster)
 					dmg += float2int32(float(u_caster->GetRAP())*0.15f);
 				if(u_caster->HasAurasWithNameHash(SPELL_HASH_RAPID_KILLING)) //Arcane shot deals Y% extra damage with rapid killing buff
-					dmg += (dmg * (m_spellInfo->RankNumber / 100));
+					dmg += (dmg * (m_spellInfo->RankNumber / 10));
 			}break;
 		case SPELL_HASH_AIMED_SHOT: // hunter - aimed shot
 			{
 				if(u_caster && u_caster->HasAurasWithNameHash(SPELL_HASH_RAPID_KILLING)) //Aimed shot deals Y% extra damage with rapid killing buff
-					dmg += (dmg * (m_spellInfo->RankNumber / 100));
+					dmg += (dmg * (m_spellInfo->RankNumber / 10));
 			}break;
 		case SPELL_HASH_AUTO_SHOT: // hunter - auto shot
 			{
 				if(u_caster && u_caster->HasAurasWithNameHash(SPELL_HASH_RAPID_KILLING)) //Auto shot deals Y% extra damage with rapid killing buff
-					dmg += (dmg * (m_spellInfo->RankNumber / 100));
+					dmg += (dmg * (m_spellInfo->RankNumber / 10));
 			}break;				
 		case 0xCBC738B8:	// Bloodthirst
 			{
