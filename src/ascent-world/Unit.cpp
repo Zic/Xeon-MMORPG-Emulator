@@ -1861,8 +1861,16 @@ void Unit::RegeneratePower(bool isinterrupted)
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					m_P_regenTimer = 3000;
-					static_cast< Player* >( this )->LoseRage(30);
+					if (static_cast< Player* >( this )->HasAura(29131))
+					{
+						m_P_regenTimer = 3000;
+						static_cast< Player* >( this )->LoseRage(0);
+					}
+					else
+					{
+						m_P_regenTimer = 3000;
+						static_cast< Player* >( this )->LoseRage(30);
+					}
 				}
 				else
 				{
