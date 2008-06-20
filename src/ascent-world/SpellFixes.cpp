@@ -20796,6 +20796,32 @@ void ApplyNormalFixes()
 		sp = dbcSpell.LookupEntryForced( 34953 );
 		if( sp != NULL )
 			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+	//Mend Pet Fix - The spell used to be channeled pre-2.1. While Blizzard changed the spell cast to insta-cast, they never took out the interrupt flag
+		sp = dbcSpell.LookupEntryForced( 136 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 3111 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 3661 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 3662 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 13542 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 13543 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 13544 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+		sp = dbcSpell.LookupEntryForced( 27046 );
+		if( sp != NULL )
+			sp->ChannelInterruptFlags = 0;
+	//End Mend Pet Fixes
 
 
 	//////////////////////////////////////////
