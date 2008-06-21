@@ -1449,7 +1449,7 @@ void Pet::ApplyPetLevelAbilities()
 
 	// Calculate damage.
 	SetUInt32Value(UNIT_FIELD_ATTACK_POWER, FL2UINT(pet_attack_power));
-	ModDamageDonePct = pet_mod_dps;
+	ModDamageDonePct[0] = pet_mod_dps;
 	CalcDamage();
 
 	// These are just for visuals, no other actual purpose.
