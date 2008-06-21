@@ -336,7 +336,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}
 
 			// Check that the player isn't a gm with his status on
-			if(!_player->GetSession()->GetPermissionCount() && player->bGMTagOn && player->gmTargets.count(_player) == 0)
+			if(!_player->GetSession()->HasGMPermissions() && player->bGMTagOn && player->gmTargets.count(_player) == 0)
 			{
 				// Build automated reply
 				string Reply = "This Game Master does not currently have an open ticket from you and did not receive your whisper. Please submit a new GM Ticket request if you need to speak to a GM. This is an automatic message.";

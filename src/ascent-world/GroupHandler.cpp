@@ -69,7 +69,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 		return;
 	}
 	
-	if(player->GetTeam()!=_player->GetTeam() && _player->GetSession()->GetPermissionCount() == 0)
+	if(player->GetTeam()!=_player->GetTeam() && !_player->GetSession()->HasGMPermissions())
 	{
 		SendPartyCommandResult(_player, 0, membername, ERR_PARTY_WRONG_FACTION);
 		return;

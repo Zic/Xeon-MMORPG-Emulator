@@ -89,7 +89,7 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 		Guild::SendGuildCommandResult(this, GUILD_INVITE_S,"",GUILD_PERMISSIONS);
 		return;
 	}
-	else if(plyr->GetTeam()!=_player->GetTeam() && _player->GetSession()->GetPermissionCount() == 0)
+	else if(plyr->GetTeam()!=_player->GetTeam() && !_player->GetSession()->HasGMPermissions())
 	{
 		Guild::SendGuildCommandResult(this, GUILD_INVITE_S,"",GUILD_NOT_ALLIED);
 		return;
