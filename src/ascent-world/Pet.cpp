@@ -1406,35 +1406,46 @@ void Pet::ApplyPetLevelAbilities()
 	double pet_sta_bonus = 0.3 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_STAT2);
 	double pet_arm_bonus = 0.35 * (double)m_Owner->GetResistance(DAMAGE_TYPE_PHYSICAL);
 	double pet_ap_bonus = 0.22 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+	double pet_res_arcane = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_ARCANE);
+	double pet_res_fire = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_FIRE);
+	double pet_res_frost = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_FROST);
+	double pet_res_holy = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_HOLY);
+	double pet_res_nature = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_NATURE);
+	double pet_res_shadow = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_SHADOW);
 
 	//Base attributes from http://petopia.brashendeavors.net/html/art...ttributes.shtml
-	static double R_pet_base_armor[70] = { 20, 21, 46, 82, 126, 180, 245, 322, 412, 518, 545, 580, 615,650, 685, 721, 756, 791, 826, 861, 897, 932, 967, 1002, 1037, 1072, 1108, 1142, 1177, 1212, 1247, 1283, 1317, 1353, 1387, 1494, 1607, 1724, 1849, 1980, 2117, 2262, 2414, 2574, 2742, 2798, 2853,2907, 2963, 3018, 3072, 3128, 3183, 3237, 3292, 3348, 3402, 3457, 3512, 3814, 4113, 4410, 4708, 5006, 5303, 5601, 5900, 6197, 6495, 6790 };
-	static double R_pet_base_hp[70] = { 42, 55, 71, 86, 102, 120, 137, 156, 176, 198, 222, 247, 273, 300, 328, 356, 386, 417, 449, 484, 521, 562, 605, 651, 699, 750, 800, 853, 905, 955, 1006, 1057, 1110, 1163, 1220, 1277, 1336, 1395, 1459, 1524, 1585, 1651, 1716, 1782, 1848, 1919, 1990, 2062, 2138, 2215, 2292, 2371, 2453, 2533, 2614, 2699, 2784, 2871, 2961, 3052, 3144, 3237, 3331, 3425, 3524, 3624, 3728, 3834, 3941, 4049 };
+	//Updated by Spidey, Jun 21th 08 - http://petopia.brashendeavors.net/html/articles/stats_attributes.php
+	static double R_pet_base_armor[70] = { 15, 16, 41, 76, 120, 174, 239, 316, 406, 512, 538, 573, 608, 642, 677, 713, 748, 782, 817, 852, 888, 922, 957, 992, 1026, 1061, 1097, 1130, 1165, 1200, 1234, 1270, 1304, 1340, 1373, 1480, 1593, 1709, 1834, 1964, 2101, 2246, 2397, 2557, 2725, 2780, 2835, 2888, 2944, 2999, 3052, 3108, 3163, 3216, 3271, 3327, 3380, 3435, 3489, 3791, 4091, 4391, 4691, 4991, 5291, 5591, 5892, 6192, 6492, 6792 };
+	static double R_pet_base_hp[70] = { 42, 55, 71, 86, 102, 120, 137, 156, 176, 198, 222, 247, 273, 300, 328, 356, 386, 417, 449, 484, 521, 562, 605, 651, 699, 750, 800, 853, 905, 955, 1006, 1057, 1110, 1163, 1220, 1277, 1336, 1395, 1459, 1524, 1585, 1651, 1716, 1783, 1848, 1919, 1990, 2062, 2138, 2215, 2292, 2371, 2453, 2533, 2614, 2699, 2784, 2871, 2961, 3052, 3144, 3237, 3331, 3425, 3524, 3624, 3728, 3834, 3941, 4050 };
+	static double R_pet_base_ap[70] = { 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 54, 56, 60, 64, 68, 70, 74, 78, 80, 84, 86, 90, 92, 96, 100, 102, 106, 108, 112, 114, 118, 120, 124, 128, 132, 136, 142, 152, 162, 174, 184, 188, 192, 196, 200, 206, 210, 214, 218, 224, 228, 234, 238, 242, 248, 252, 258, 262, 268, 272, 278, 282, 288, 292, 298, 6792 };
+	static double R_pet_base_stamina[70] = { 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 34, 38, 42, 46, 51, 55, 59, 63, 67, 72, 76, 80, 84, 88, 94, 98, 102, 106, 110, 115, 120, 124, 128, 132, 138, 142, 146, 151, 155, 160, 165, 169, 174, 178, 184, 188, 193, 197, 202, 207, 212, 216, 221, 226, 231, 236, 241, 245, 250, 256, 261, 266, 270, 275, 281, 286, 291, 296, 301, 307 };
 
 	// Calculate HP
 	//patch from darken
-	double pet_hp;
-	double pet_armor;
-	if(level-1<70)
-	{
-		pet_hp= ( ( ( R_pet_base_hp[level-1]) + ( pet_sta_bonus * 10 ) ) * pet_mod_sta);
-		pet_armor= ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus );
-	}
-	else
-	{
-		pet_hp	= ( ( ( 0.6 * dlevel * dlevel + 10.6 * dlevel + 33 ) + ( pet_sta_bonus * 10 ) ) * pet_mod_sta);
-		pet_armor = ( ( -75 + 50 * dlevel ) * pet_mod_arm + pet_arm_bonus );
-	}
-//	double pet_attack_power = ( ( ( 20 * dlevel) - 60 ) + pet_ap_bonus ) * pet_mod_dps;
-	double pet_attack_power = ( ( 7.9 * ( ( dlevel * dlevel ) / ( dlevel * 3 ) ) ) + ( pet_ap_bonus ) ) * pet_mod_dps;
+	double pet_hp = ( ( ( R_pet_base_stamina[level-1] + pet_sta_bonus) * pet_mod_sta)* 10);
+	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus );
+
+	double pet_attack_power = ( R_pet_base_ap[level-1] + ( pet_ap_bonus ) ) * pet_mod_dps;
 
 	if(pet_attack_power <= 0.0f) pet_attack_power = 1;
 	if(pet_armor <= 0.0f) pet_armor = 1;
 
 	// Set base values.
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, FL2UINT(pet_hp));
-	BaseResistance[0] = FL2UINT(pet_armor);
-	CalcResistance(0);
+	BaseResistance[DAMAGE_TYPE_PHYSICAL] = FL2UINT(pet_armor);
+	BaseResistance[DAMAGE_TYPE_ARCANE] = FL2UINT(pet_res_arcane);
+	BaseResistance[DAMAGE_TYPE_FIRE] = FL2UINT(pet_res_fire);
+	BaseResistance[DAMAGE_TYPE_FROST] = FL2UINT(pet_res_frost);
+	BaseResistance[DAMAGE_TYPE_HOLY] = FL2UINT(pet_res_holy);
+	BaseResistance[DAMAGE_TYPE_NATURE] = FL2UINT(pet_res_nature);
+	BaseResistance[DAMAGE_TYPE_SHADOW] = FL2UINT(pet_res_shadow);
+	CalcResistance(DAMAGE_TYPE_PHYSICAL);
+	CalcResistance(DAMAGE_TYPE_ARCANE);
+	CalcResistance(DAMAGE_TYPE_FIRE);
+	CalcResistance(DAMAGE_TYPE_FROST);
+	CalcResistance(DAMAGE_TYPE_HOLY);
+	CalcResistance(DAMAGE_TYPE_NATURE);
+	CalcResistance(DAMAGE_TYPE_SHADOW);
 
 	// Calculate damage.
 	SetUInt32Value(UNIT_FIELD_ATTACK_POWER, FL2UINT(pet_attack_power));
