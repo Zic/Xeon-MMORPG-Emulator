@@ -2464,7 +2464,7 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 			}
 		}
 	}
-	if( school == SHADOW_DAMAGE ) 
+	if( school == DAMAGE_TYPE_SHADOW ) 
 	{
 		//VampiricEmbrace
 		if( pVictim->VampEmbCaster.find( this->GetGUID() ) != pVictim->VampEmbCaster.end() && IsUnit() )

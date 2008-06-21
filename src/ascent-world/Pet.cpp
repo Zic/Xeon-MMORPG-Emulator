@@ -1404,7 +1404,7 @@ void Pet::ApplyPetLevelAbilities()
 //	double pet_sta_bonus = 0.3 * (double)m_Owner->BaseStats[STAT_STAMINA];
 	//patch from darken
 	double pet_sta_bonus = 0.3 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_STAT2);
-	double pet_arm_bonus = 0.35 * (double)m_Owner->BaseResistance[0];	   // Armor
+	double pet_arm_bonus = 0.35 * (double)m_Owner->GetResistance(DAMAGE_TYPE_PHYSICAL);
 	double pet_ap_bonus = 0.22 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
 
 	//Base attributes from http://petopia.brashendeavors.net/html/art...ttributes.shtml

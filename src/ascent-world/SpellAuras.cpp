@@ -1220,7 +1220,7 @@ void Aura::EventPeriodicDamage(uint32 amount)
 		
 		SendPeriodicAuraLog(m_casterGuid, m_target, GetSpellProto()->Id, school, float2int32(res), abs_dmg, dmg.resisted_damage, FLAG_PERIODIC_DAMAGE);
 
-		if(school == SHADOW_DAMAGE)
+		if(school == DAMAGE_TYPE_SHADOW)
 		{
 			if(m_target->VampEmbCaster.find(m_casterGuid) != m_target->VampEmbCaster.end())
 			{

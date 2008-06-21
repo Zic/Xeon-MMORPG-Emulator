@@ -3437,7 +3437,7 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 		}
 
-		if( u_caster->m_silenced && m_spellInfo->School != NORMAL_DAMAGE )// can only silence non-physical
+		if( u_caster->m_silenced && m_spellInfo->School != DAMAGE_TYPE_PHYSICAL )// can only silence non-physical
 			return SPELL_FAILED_SILENCED;
 
 		if(target) /* -Supalosa- Shouldn't this be handled on Spell Apply? */
@@ -3462,7 +3462,7 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 		}
 
-		if( u_caster->IsPacified() && m_spellInfo->School == NORMAL_DAMAGE ) // only affects physical damage
+		if( u_caster->IsPacified() && m_spellInfo->School == DAMAGE_TYPE_PHYSICAL ) // only affects physical damage
 		{
 			// HACK FIX
 			switch( m_spellInfo->NameHash )
