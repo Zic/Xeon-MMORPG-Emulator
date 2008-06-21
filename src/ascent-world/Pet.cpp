@@ -1425,7 +1425,7 @@ void Pet::ApplyPetLevelAbilities()
 	double pet_hp = ( ( ( R_pet_base_stamina[level-1] + pet_sta_bonus) * pet_mod_sta)* 10);
 	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus );
 
-	double pet_attack_power = ( R_pet_base_ap[level-1] + ( pet_ap_bonus ) ) * pet_mod_dps;
+	double pet_attack_power = ( R_pet_base_ap[level-1] + ( pet_ap_bonus ) );
 
 	if(pet_attack_power <= 0.0f) pet_attack_power = 1;
 	if(pet_armor <= 0.0f) pet_armor = 1;
@@ -1449,6 +1449,7 @@ void Pet::ApplyPetLevelAbilities()
 
 	// Calculate damage.
 	SetUInt32Value(UNIT_FIELD_ATTACK_POWER, FL2UINT(pet_attack_power));
+	ModDamageDonePct = pet_mod_dps;
 	CalcDamage();
 
 	// These are just for visuals, no other actual purpose.
