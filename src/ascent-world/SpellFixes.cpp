@@ -16797,32 +16797,32 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19485 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
 	
 	sp = dbcSpell.LookupEntryForced( 19487 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
 	sp = dbcSpell.LookupEntryForced( 19488 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
 	sp = dbcSpell.LookupEntryForced( 19489 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
 	sp = dbcSpell.LookupEntryForced( 19490 );
 	if( sp != NULL )
 	{
-		sp->EffectSpellGroupRelation[0] = 1 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
 
@@ -20823,6 +20823,43 @@ void ApplyNormalFixes()
 			sp->ChannelInterruptFlags = 0;
 	//End Mend Pet Fixes
 
+	//Ranged Weapon Specialization --- Commented out untill tested
+/*
+	sp = dbcSpell.LookupEntryForced( 19507 );
+	if( sp != NULL )
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19508 );
+	if( sp != NULL )
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19509 );
+	if( sp != NULL )
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19510 );
+	if( sp != NULL )
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 19511 );
+	if( sp != NULL )
+	{
+		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+		sp->EffectSpellGroupRelation_high[0] = 1 ;
+	}
+*/
 
 	//////////////////////////////////////////
 	// ROGUE								//
