@@ -4922,6 +4922,9 @@ void Aura::SpellAuraMounted(bool apply)
 
 		if( p_target->GetShapeShift() && !(p_target->GetShapeShift() & FORM_BATTLESTANCE | FORM_DEFENSIVESTANCE | FORM_BERSERKERSTANCE ) && p_target->m_ShapeShifted != m_spellProto->Id )
 			p_target->RemoveAura( p_target->m_ShapeShifted );
+
+		if( p_target->GetSummon() && !p_target->m_bg )
+			p_target->GetSummon()->Dismiss(false);
 	}
 	else
 	{
@@ -4929,6 +4932,10 @@ void Aura::SpellAuraMounted(bool apply)
 		p_target->flying_aura = 0;
 		m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
+		if( !p_target->GetSummon() )
+			uint32 petno = p_target->GetUnstabledPetNumber();
+			if( petno )
+				p_target->SpawnPet(petno);
 	}
 }
 
