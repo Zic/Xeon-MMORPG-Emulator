@@ -4933,10 +4933,11 @@ void Aura::SpellAuraMounted(bool apply)
 		m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
 		if( !p_target->GetSummon() )
-			uint32 petno;
-			petno = p_target->GetUnstabledPetNumber();
+		{
+			uint32 petno = p_target->GetUnstabledPetNumber();
 			if( petno )
 				p_target->SpawnPet(petno);
+		}
 	}
 }
 
