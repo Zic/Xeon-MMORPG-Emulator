@@ -645,6 +645,7 @@ void Pet::Remove(bool bSafeDelete, bool bUpdate, bool bSetOffline)
 		// remove association with player
 		m_Owner->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
 
+		m_Owner->EventDismissPet();
 		if(bUpdate) 
 		{
 			if(!bExpires) 

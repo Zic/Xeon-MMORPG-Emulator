@@ -16869,36 +16869,65 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
-		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
+		sp->EffectSpellGroupRelation_high[0] = 524288;
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 	sp = dbcSpell.LookupEntryForced( 34492 );
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
-		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
+		sp->EffectSpellGroupRelation_high[0] = 524288;
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 	sp = dbcSpell.LookupEntryForced( 34493 );
 	if( sp != NULL )
 	{
 		sp->EffectSpellGroupRelation[0] = 128 | 2 | 64; 
-		sp->EffectSpellGroupRelation_high[0] = 524288; //was missing Counterattack =P
+		sp->EffectSpellGroupRelation_high[0] = 524288;
 		sp->EffectSpellGroupRelation[1] = 128;
 	}
 
-	/*
 	//Hunter : Entrapment
 	sp = dbcSpell.LookupEntryForced( 19184 );
 	if( sp != NULL )
-		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+
 	sp = dbcSpell.LookupEntryForced( 19387 );
 	if( sp != NULL )
-		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+
 	sp = dbcSpell.LookupEntryForced( 19388 );
 	if( sp != NULL )
-		sp->procFlags = PROC_ON_CAST_SPELL;
-	*/
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+
+	//Hunter : Explosive Trap
+	sp = dbcSpell.LookupEntryForced( 13813 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+		sp->EffectTriggerSpell[1] = 13812;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 14316 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+		sp->EffectTriggerSpell[1] = 14314;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 14317 );
+	if( sp != NULL )
+	{	
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+		sp->EffectTriggerSpell[1] = 14315;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 27025 );
+	if( sp != NULL )
+	{	
+		sp->procFlags = PROC_ON_TRAP_TRIGGER;
+		sp->EffectTriggerSpell[1] = 27026;
+	}
 	
 	// Mage - Invisibility 
 	sp = dbcSpell.LookupEntryForced( 66 );
@@ -20823,8 +20852,8 @@ void ApplyNormalFixes()
 			sp->ChannelInterruptFlags = 0;
 	//End Mend Pet Fixes
 
-	//Ranged Weapon Specialization --- Commented out untill tested
-/*
+	//Ranged Weapon Specialization
+
 	sp = dbcSpell.LookupEntryForced( 19507 );
 	if( sp != NULL )
 	{
@@ -20859,7 +20888,6 @@ void ApplyNormalFixes()
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
-*/
 
 	//////////////////////////////////////////
 	// ROGUE								//

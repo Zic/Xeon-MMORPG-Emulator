@@ -3655,6 +3655,7 @@ exit:
 		value = basePoints + rand() % randomPoints;
 
 	//scripted shit
+
 	if( m_spellInfo->Id == 34074 && i==0 && u_caster)
 	{	//Aspect of the Viper
 		//The hunter takes on the aspects of a viper,
@@ -3677,7 +3678,7 @@ exit:
 				if(p_caster->GetItemInterface())
 				{
 					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
-					if(it)
+					if(it != NULL && it->GetDurability() != 0)
 					{
 						float weapondmg = RandomFloat(1)*(it->GetProto()->Damage[0].Max - it->GetProto()->Damage[0].Min) + it->GetProto()->Damage[0].Min;
 						value += float2int32(150 + weapondmg/float(it->GetProto()->Delay/1000.0f)*2.8f);
