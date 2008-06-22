@@ -1448,7 +1448,7 @@ void Pet::ApplyPetLevelAbilities()
 	double pet_hp = ( ( ( R_pet_base_stamina[level-1] + pet_sta_bonus) * pet_mod_sta) * pet_endu * 10);
 	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus ) * pet_hide;
 
-	double pet_attack_power = ( R_pet_base_ap[level-1] + ( pet_ap_bonus ) * pet_mod_dps );
+	double pet_attack_power = ( R_pet_base_ap[level-1] * pet_mod_dps + pet_ap_bonus );
 
 	if(pet_attack_power <= 0.0f) pet_attack_power = 1;
 	if(pet_armor <= 0.0f) pet_armor = 1;
