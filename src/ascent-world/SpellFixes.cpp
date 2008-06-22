@@ -20712,7 +20712,7 @@ void ApplyNormalFixes()
 
 	sp = dbcSpell.LookupEntryForced( 40475 );		// Black temple melee trinket
 	if( sp != NULL )
-		sp->procChance = 50;
+		sp->procChance = 3;
 
 
 	//////////////////////////////////////////////////////
