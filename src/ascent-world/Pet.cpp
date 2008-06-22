@@ -1404,7 +1404,7 @@ void Pet::ApplyPetLevelAbilities()
 //	double pet_sta_bonus = 0.3 * (double)m_Owner->BaseStats[STAT_STAMINA];
 	//patch from darken
 	double pet_sta_bonus = 0.3 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_STAT2);
-	double pet_arm_bonus = 0.35 * (double)m_Owner->GetResistance(DAMAGE_TYPE_PHYSICAL);
+	double pet_arm_bonus = 0.35 * (double)m_Owner->BaseResistance[DAMAGE_TYPE_PHYSICAL];
 	double pet_ap_bonus = 0.22 * (double)m_Owner->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
 	double pet_res_arcane = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_ARCANE);
 	double pet_res_fire = 0.4 * (double)m_Owner->GetResistance(DAMAGE_TYPE_FIRE);
@@ -1420,10 +1420,32 @@ void Pet::ApplyPetLevelAbilities()
 	static double R_pet_base_ap[70] = { 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 54, 56, 60, 64, 68, 70, 74, 78, 80, 84, 86, 90, 92, 96, 100, 102, 106, 108, 112, 114, 118, 120, 124, 128, 132, 136, 142, 152, 162, 174, 184, 188, 192, 196, 200, 206, 210, 214, 218, 224, 228, 234, 238, 242, 248, 252, 258, 262, 268, 272, 278, 282, 288, 292, 298, 6792 };
 	static double R_pet_base_stamina[70] = { 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 34, 38, 42, 46, 51, 55, 59, 63, 67, 72, 76, 80, 84, 88, 94, 98, 102, 106, 110, 115, 120, 124, 128, 132, 138, 142, 146, 151, 155, 160, 165, 169, 174, 178, 184, 188, 193, 197, 202, 207, 212, 216, 221, 226, 231, 236, 241, 245, 250, 256, 261, 266, 270, 275, 281, 286, 291, 296, 301, 307 };
 
+	//Raw hide bonus armor
+	double pet_hide = 1;
+	if(m_Owner->HasSpell(19612))
+		pet_hide = 1.20;
+	else if(m_Owner->HasSpell(19610))
+		pet_hide = 1.14;
+	else if(m_Owner->HasSpell(19609))
+		pet_hide = 1.07;
+
+	//Endurance training bonus stamina
+	double pet_endu = 1;
+	if(m_Owner->HasSpell(19587))
+		pet_endu = 1.10;
+	else if(m_Owner->HasSpell(19586))
+		pet_endu = 1.08;
+	else if(m_Owner->HasSpell(19585))
+		pet_endu = 1.06;
+	else if(m_Owner->HasSpell(19584))
+		pet_endu = 1.04;
+	else if(m_Owner->HasSpell(19583))
+		pet_endu = 1.02;
+
 	// Calculate HP
 	//patch from darken
-	double pet_hp = ( ( ( R_pet_base_stamina[level-1] + pet_sta_bonus) * pet_mod_sta)* 10);
-	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus );
+	double pet_hp = ( ( ( R_pet_base_stamina[level-1] + pet_sta_bonus) * pet_mod_sta) * pet_endu * 10);
+	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus ) * pet_hide;
 
 	double pet_attack_power = ( R_pet_base_ap[level-1] + ( pet_ap_bonus ) * pet_mod_dps );
 
