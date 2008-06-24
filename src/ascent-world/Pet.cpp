@@ -262,6 +262,7 @@ void Pet::Update(uint32 time)
 
 	if(bHasLoyalty && !bExpires)
 	{
+		ApplyStatsForLevel();
 		//Happiness
 		if(m_HappinessTimer == 0)
 		{	
@@ -1448,7 +1449,7 @@ void Pet::ApplyPetLevelAbilities()
 	double pet_hp = ( ( ( R_pet_base_hp[level-1]/10 + pet_sta_bonus) * pet_mod_sta) * pet_endu * 10);
 	double pet_armor = ( (R_pet_base_armor[level-1] ) * pet_mod_arm + pet_arm_bonus ) * pet_hide;
 
-	double pet_attack_power = ( R_pet_base_ap[level-1] * pet_mod_dps + pet_ap_bonus );
+	double pet_attack_power = ( R_pet_base_ap[level-1] + pet_ap_bonus );
 
 	if(pet_attack_power <= 0.0f) pet_attack_power = 1;
 	if(pet_armor <= 0.0f) pet_armor = 1;
@@ -1472,8 +1473,7 @@ void Pet::ApplyPetLevelAbilities()
 
 	// Calculate damage.
 	SetUInt32Value(UNIT_FIELD_ATTACK_POWER, FL2UINT(pet_attack_power));
-	//This SHOULD be correct, but sets the damage way too high :/
-	//ModDamageDonePct[0] = pet_mod_dps;
+	ModDamageDonePct[0] = (float)pet_mod_dps;
 	CalcDamage();
 
 	// These are just for visuals, no other actual purpose.

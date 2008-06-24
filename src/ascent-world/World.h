@@ -59,6 +59,7 @@ enum Rates
 	RATE_ARENAPOINTMULTIPLIER2X,
 	RATE_ARENAPOINTMULTIPLIER3X,
 	RATE_ARENAPOINTMULTIPLIER5X,
+	RATE_TALENTS,
 	MAX_RATES
 };		
 
@@ -471,6 +472,11 @@ public:
 	uint32 mAcceptedConnections;
 	uint32 SocketSendBufSize;
 	uint32 SocketRecvBufSize;
+
+	uint32 StartingLevel;
+	uint32 StartingTalents;
+	uint32 MaxProfs;
+	bool StartWithSpells;
 
 	uint32 HordePlayers;
 	uint32 AlliancePlayers;

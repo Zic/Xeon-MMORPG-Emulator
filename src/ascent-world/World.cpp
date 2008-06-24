@@ -1289,6 +1289,12 @@ void World::Rehash(bool load)
 	m_movementCompressThreshold *= m_movementCompressThreshold;		// square it to avoid sqrt() on checks
 	// ======================================
 
+	setRate(RATE_TALENTS, Config.MainConfig.GetFloatDefault("Funserver", "TalentPerLevel", 1));
+	StartingLevel = Config.MainConfig.GetIntDefault("Funserver", "StartingLevel", 1);
+	StartingTalents = Config.MainConfig.GetIntDefault("Funserver", "StartingTalents", 0);
+	StartWithSpells = Config.MainConfig.GetBoolDefault("Funserver", "StartWithAllSpells", false);
+	MaxProfs = Config.MainConfig.GetIntDefault("Funserver", "MaxProfs", 2);
+
 	if( m_banTable != NULL )
 		free( m_banTable );
 
