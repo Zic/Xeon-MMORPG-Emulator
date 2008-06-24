@@ -381,6 +381,11 @@ void HandleConsoleInput(BaseConsole * pConsole, const char * szInput)
 		pConsole->Write("| %9s | %20s | %39s |\r\n", "Name", "Arguments", "Description");
 		for(i = 0; Commands[i].Name != NULL; ++i)
 		{
+			if( Commands[i].Name == "createacc" )
+			{
+				pConsole->Write("| %9s | %20s | %30s |\r\n", Commands[i].Name, Commands[i].ArgumentFormat, Commands[i].Description);
+				continue;
+			}
 			pConsole->Write("| %9s | %20s | %39s |\r\n", Commands[i].Name, Commands[i].ArgumentFormat, Commands[i].Description);
 		}
 		pConsole->Write("=============================================================================\r\n");		
