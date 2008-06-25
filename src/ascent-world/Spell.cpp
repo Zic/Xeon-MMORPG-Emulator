@@ -3661,8 +3661,7 @@ exit:
 		//The hunter takes on the aspects of a viper,
 		//regenerating mana equal to up to 55% of <his/her> Intellect 
 		//plus 35% of <his/her> level every 5 sec.
-			float formula = ((u_caster->GetUInt32Value(UNIT_FIELD_STAT3) * 55 / 100) + (u_caster->getLevel() * 35 / 100));
-			value = float2int32(formula);
+			value = ((u_caster->GetUInt32Value(UNIT_FIELD_STAT3) * 55 / 100) + (u_caster->getLevel() * 35 / 100));
 	}
 
 	else if( m_spellInfo->Id == 34120)
