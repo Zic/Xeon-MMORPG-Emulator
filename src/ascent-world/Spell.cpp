@@ -2613,7 +2613,8 @@ uint8 Spell::CanCast(bool tolerate)
 		if( !p_caster->isAlive() )
 		{
 			//Spirit of Redemption can cast heals while dead
-			if(!p_caster->HasAura(27827) || !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING))
+			//Self Ressurection can cast while dead
+			if(!p_caster->HasAura(27827) || !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING) || !p_caster->HasAura(18976))
 				return SPELL_FAILED_CASTER_DEAD;
 		}
 #ifdef COLLISION
@@ -3758,6 +3759,12 @@ exit:
 		// ${$AP*0.06+$m1} damage.
 		if( u_caster != NULL )
 			value+=float2int32(u_caster->GetAP()*0.06f);
+	}
+
+	else if ( m_spellInfo->Id == 34501 && ( i == 0 || i == 1 ) ) //Hunter: Expose Weakness
+	{
+		if( u_caster != NULL )
+			value = u_caster->GetUInt32Value( UNIT_FIELD_STAT1 ) >> 2;
 	}
 	
 	if( p_caster != NULL )

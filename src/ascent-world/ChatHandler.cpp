@@ -496,6 +496,22 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 			name = static_cast< Player* >( pUnit )->GetName();
 			namelen = (uint32)strlen(name) + 1;
 		}
+
+		else if (pUnit->IsPet())
+		{
+			Pet * pe = static_cast<Pet*>(pUnit);
+			if(pe->GetName().c_str())
+			{
+			name = pe->GetName().c_str();
+			namelen = (uint32)strlen(name) + 1;
+			}
+			else
+			{
+				name = 0;
+				namelen = 0;
+			}
+		}
+
 		else if(pUnit->GetTypeId() == TYPEID_UNIT)
 		{
 			Creature * p = static_cast<Creature*>(pUnit);

@@ -16382,32 +16382,38 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 34455 );
 	if( sp != NULL )
 	{
-		sp->c_is_flags |= SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET;
+		sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET | SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET | PROC_TARGET_SELF;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
 		sp->EffectTriggerSpell[0] = 34456;
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT | PROC_TARGET_SELF; //maybe target master ?
 		sp->Effect[1] = 0; //remove this
+		sp->procFlags = PROC_ON_CRIT_ATTACK;
+		sp->EffectSpellGroupRelation_high[1] = 64;
 	}
 	sp = dbcSpell.LookupEntryForced( 34459 );
 	if( sp != NULL )
 	{
-		sp->c_is_flags |= SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET;
+		sp->c_is_flags |= sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET | SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET | PROC_TARGET_SELF;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
 		sp->EffectTriggerSpell[0] = 34456;
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT | PROC_TARGET_SELF; 
 		sp->Effect[1] = 0; //remove this
+		sp->procFlags = PROC_ON_CRIT_ATTACK;
+		sp->EffectSpellGroupRelation_high[1] = 64;
 	}
 	sp = dbcSpell.LookupEntryForced( 34460 );
 	if( sp != NULL )
 	{
-		sp->c_is_flags |= SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET;
+		sp->c_is_flags |= sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET | SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET | PROC_TARGET_SELF;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
 		sp->EffectTriggerSpell[0] = 34456;
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT | PROC_TARGET_SELF;
 		sp->Effect[1] = 0; //remove this
+		sp->procFlags = PROC_ON_CRIT_ATTACK;
+		sp->EffectSpellGroupRelation_high[1] = 64;
 	}
 
 	// Hunter - Focused Fire
@@ -20812,7 +20818,24 @@ void ApplyNormalFixes()
 
 	// Insert hunter spell fixes here
 
-		//Hunter - Go for the Throat
+	// Hunter - Improved Wing Clip
+		sp = dbcSpell.LookupEntryForced( 19228 );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
+		}
+		sp = dbcSpell.LookupEntryForced( 19232 );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
+		}
+		sp = dbcSpell.LookupEntryForced( 19233 );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
+		}
+
+	//Hunter - Go for the Throat
 		sp = dbcSpell.LookupEntryForced( 34950 );
 		if( sp != NULL )
 			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
@@ -20825,6 +20848,7 @@ void ApplyNormalFixes()
 		sp = dbcSpell.LookupEntryForced( 34953 );
 		if( sp != NULL )
 			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+
 	//Mend Pet Fix - The spell used to be channeled pre-2.1. While Blizzard changed the spell cast to insta-cast, they never took out the interrupt flag
 		sp = dbcSpell.LookupEntryForced( 136 );
 		if( sp != NULL )
@@ -20853,51 +20877,59 @@ void ApplyNormalFixes()
 	//End Mend Pet Fixes
 
 	//Ranged Weapon Specialization
+		sp = dbcSpell.LookupEntryForced( 19507 );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			sp->EffectMiscValue[0] = 1;
+			sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+			sp->EffectSpellGroupRelation_high[0] = 1 ;
+		}
 
-	sp = dbcSpell.LookupEntryForced( 19507 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
-		sp->EffectMiscValue[0] = 1;
-		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
-		sp->EffectSpellGroupRelation_high[0] = 1 ;
-	}
+		sp = dbcSpell.LookupEntryForced( 19508 );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			sp->EffectMiscValue[0] = 1;
+			sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+			sp->EffectSpellGroupRelation_high[0] = 1 ;
+		}
 
-	sp = dbcSpell.LookupEntryForced( 19508 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
-		sp->EffectMiscValue[0] = 1;
-		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
-		sp->EffectSpellGroupRelation_high[0] = 1 ;
-	}
+		sp = dbcSpell.LookupEntryForced( 19509 );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			sp->EffectMiscValue[0] = 1;
+			sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+			sp->EffectSpellGroupRelation_high[0] = 1 ;
+		}
 
-	sp = dbcSpell.LookupEntryForced( 19509 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
-		sp->EffectMiscValue[0] = 1;
-		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
-		sp->EffectSpellGroupRelation_high[0] = 1 ;
-	}
+		sp = dbcSpell.LookupEntryForced( 19510 );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			sp->EffectMiscValue[0] = 1;
+			sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+			sp->EffectSpellGroupRelation_high[0] = 1 ;
+		}
 
-	sp = dbcSpell.LookupEntryForced( 19510 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
-		sp->EffectMiscValue[0] = 1;
-		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
-		sp->EffectSpellGroupRelation_high[0] = 1 ;
-	}
+		sp = dbcSpell.LookupEntryForced( 19511 );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+			sp->EffectMiscValue[0] = 1;
+			sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
+			sp->EffectSpellGroupRelation_high[0] = 1 ;
+		}
 
-	sp = dbcSpell.LookupEntryForced( 19511 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
-		sp->EffectMiscValue[0] = 1;
-		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
-		sp->EffectSpellGroupRelation_high[0] = 1 ;
-	}
+	//Frost Trap
+		sp = dbcSpell.LookupEntryForced( 13809 );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[0] = 13810;
+		}
 
 	//////////////////////////////////////////
 	// ROGUE								//
