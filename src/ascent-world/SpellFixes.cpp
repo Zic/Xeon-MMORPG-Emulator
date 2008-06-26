@@ -20857,6 +20857,8 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19507 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+		sp->EffectMiscValue[0] = 1;
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
@@ -20864,6 +20866,8 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19508 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+		sp->EffectMiscValue[0] = 1;
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
@@ -20871,6 +20875,8 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19509 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+		sp->EffectMiscValue[0] = 1;
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
@@ -20878,6 +20884,8 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19510 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+		sp->EffectMiscValue[0] = 1;
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
@@ -20885,6 +20893,8 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 19511 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+		sp->EffectMiscValue[0] = 1;
 		sp->EffectSpellGroupRelation[0] = 1 | 4 | 2048 | 4096 | 131072 | 262144 ;
 		sp->EffectSpellGroupRelation_high[0] = 1 ;
 	}
