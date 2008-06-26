@@ -98,42 +98,36 @@ void ScriptMgr::LoadScripts()
 				if(vcall == 0 || rcall == 0 || scall == 0)
 				{
 					printf("version functions not found!\n");
-					FreeLibrary(mod);
+					sLog.outError("Warning: The script's version does not match the core's version. Script will still get loaded but bugs or crashes may occur.");
+				}
+
+				uint32 version = vcall();
+				uint32 stype = scall();
+				if(!(SCRIPTLIB_LOPART(version) == SCRIPTLIB_VERSION_MINOR && SCRIPTLIB_HIPART(version) == SCRIPTLIB_VERSION_MAJOR))
+				{
+					printf("version mismatch!\n");
+					sLog.outError("Warning: The script's version does not match the core's version. Script will still get loaded but bugs or crashes may occur.");
+				}
+				if( stype & SCRIPT_TYPE_SCRIPT_ENGINE )
+				{
+					printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
+					printf("delayed load.\n");
+
+					ScriptingEngine se;
+					se.Handle = mod;
+					se.InitializeCall = rcall;
+					se.Type = stype;
+
+					ScriptEngines.push_back( se );
 				}
 				else
 				{
-					uint32 version = vcall();
-					uint32 stype = scall();
-					if(SCRIPTLIB_LOPART(version) == SCRIPTLIB_VERSION_MINOR && SCRIPTLIB_HIPART(version) == SCRIPTLIB_VERSION_MAJOR)
-					{
-						if( stype & SCRIPT_TYPE_SCRIPT_ENGINE )
-						{
-							printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
-							printf("delayed load.\n");
-
-							ScriptingEngine se;
-							se.Handle = mod;
-							se.InitializeCall = rcall;
-							se.Type = stype;
-
-							ScriptEngines.push_back( se );
-						}
-						else
-						{
-							_handles.push_back(((SCRIPT_MODULE)mod));
-							printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
-							rcall(this);
-							printf("loaded.\n");						
-						}
-
-						++count;
-					}
-					else
-					{
-						FreeLibrary(mod);
-						printf("version mismatch!\n");						
-					}
+					_handles.push_back(((SCRIPT_MODULE)mod));
+					printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
+					rcall(this);
+					printf("loaded.\n");						
 				}
+				++count;
 			}
 		}
 		while(FindNextFile(find_handle, &data));
