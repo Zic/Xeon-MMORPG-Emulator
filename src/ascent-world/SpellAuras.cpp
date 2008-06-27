@@ -4982,9 +4982,7 @@ Don't know why there is any weapon modifiers.
 			}
 		}
 		// WEAPON MODIFIER PART DISABLED BY SUPALOSA: compile errors, WeaponModifier implementation changed.
-		/*else
-		
-		//if(mod->m_miscValue&1 || mod->m_miscValue == 126)
+		else if(mod->m_miscValue&1 || mod->m_miscValue == 126)
 		{
 			if(apply)
 			{
@@ -5012,7 +5010,7 @@ Don't know why there is any weapon modifiers.
 				static_cast< Player* >( m_target )->damagedone.erase(GetSpellId());
 			}
 		}
-		*/
+		
 	}
 	else 
 	{
@@ -5026,7 +5024,7 @@ Don't know why there is any weapon modifiers.
 	}
 	m_target->CalcDamage();
 
-
+/*
 	uint32 school_selector=1;
 	for (uint32 x=0;x<7;x++)
 	{
@@ -5034,7 +5032,7 @@ Don't know why there is any weapon modifiers.
 			m_target->DamageDoneModPCT[x] += val;
 		school_selector = school_selector << 1;
 	}
-
+*/
 }
 
 void Aura::SpellAuraModPercStat(bool apply)	
