@@ -760,217 +760,217 @@ enum SpellEffects
 
 enum SPELL_ENTRY
 {
-    SPELL_ENTRY_Id,
-    SPELL_ENTRY_School,
-    SPELL_ENTRY_Category,
-    SPELL_ENTRY_field4,
-    SPELL_ENTRY_DispelType,
-    SPELL_ENTRY_MechanicsType,
-    SPELL_ENTRY_Attributes,
-    SPELL_ENTRY_AttributesEx,
-    SPELL_ENTRY_Flags3,
-    SPELL_ENTRY_Flags4,
-    SPELL_ENTRY_Flags5,
-    SPELL_ENTRY_unk201_1,
-    SPELL_ENTRY_RequiredShapeShift,
-    SPELL_ENTRY_UNK14,
-    SPELL_ENTRY_Targets,
-    SPELL_ENTRY_TargetCreatureType,
-    SPELL_ENTRY_RequiresSpellFocus,
-    SPELL_ENTRY_CasterAuraState,
-    SPELL_ENTRY_TargetAuraState,
-    SPELL_ENTRY_unk201_2,
-    SPELL_ENTRY_unk201_3,
-    SPELL_ENTRY_CastingTimeIndex,
-    SPELL_ENTRY_RecoveryTime,
-    SPELL_ENTRY_CategoryRecoveryTime,
-    SPELL_ENTRY_InterruptFlags,
-    SPELL_ENTRY_AuraInterruptFlags,
-    SPELL_ENTRY_ChannelInterruptFlags,
-    SPELL_ENTRY_procFlags,
-    SPELL_ENTRY_procChance,
-    SPELL_ENTRY_procCharges,
-    SPELL_ENTRY_maxLevel,
-    SPELL_ENTRY_baseLevel,
-    SPELL_ENTRY_spellLevel,
-    SPELL_ENTRY_DurationIndex,
-    SPELL_ENTRY_powerType,
-    SPELL_ENTRY_manaCost,
-    SPELL_ENTRY_manaCostPerlevel,
-    SPELL_ENTRY_manaPerSecond,
-    SPELL_ENTRY_manaPerSecondPerLevel,
-    SPELL_ENTRY_rangeIndex,
-    SPELL_ENTRY_speed,
-    SPELL_ENTRY_modalNextSpell,
-    SPELL_ENTRY_maxstack,
-    SPELL_ENTRY_Totem_1,
-    SPELL_ENTRY_Totem_2,
-    SPELL_ENTRY_Reagent_1,
-    SPELL_ENTRY_Reagent_2,
-    SPELL_ENTRY_Reagent_3,
-    SPELL_ENTRY_Reagent_4,
-    SPELL_ENTRY_Reagent_5,
-    SPELL_ENTRY_Reagent_6,
-    SPELL_ENTRY_Reagent_7,
-    SPELL_ENTRY_Reagent_8,
-    SPELL_ENTRY_ReagentCount_1,
-    SPELL_ENTRY_ReagentCount_2,
-    SPELL_ENTRY_ReagentCount_3,
-    SPELL_ENTRY_ReagentCount_4,
-    SPELL_ENTRY_ReagentCount_5,
-    SPELL_ENTRY_ReagentCount_6,
-    SPELL_ENTRY_ReagentCount_7,
-    SPELL_ENTRY_ReagentCount_8,
-    SPELL_ENTRY_EquippedItemClass,
-    SPELL_ENTRY_EquippedItemSubClass,
-    SPELL_ENTRY_RequiredItemFlags,
-    SPELL_ENTRY_Effect_1,
-    SPELL_ENTRY_Effect_2,
-    SPELL_ENTRY_Effect_3,
-    SPELL_ENTRY_EffectDieSides_1,
-    SPELL_ENTRY_EffectDieSides_2,
-    SPELL_ENTRY_EffectDieSides_3,
-    SPELL_ENTRY_EffectBaseDice_1,
-    SPELL_ENTRY_EffectBaseDice_2,
-    SPELL_ENTRY_EffectBaseDice_3,
-    SPELL_ENTRY_EffectDicePerLevel_1,
-    SPELL_ENTRY_EffectDicePerLevel_2,
-    SPELL_ENTRY_EffectDicePerLevel_3,
-    SPELL_ENTRY_EffectRealPointsPerLevel_1,
-    SPELL_ENTRY_EffectRealPointsPerLevel_2,
-    SPELL_ENTRY_EffectRealPointsPerLevel_3,
-    SPELL_ENTRY_EffectBasePoints_1,
-    SPELL_ENTRY_EffectBasePoints_2,
-    SPELL_ENTRY_EffectBasePoints_3,
-    SPELL_ENTRY_EffectMechanic_1,
-    SPELL_ENTRY_EffectMechanic_2,
-    SPELL_ENTRY_EffectMechanic_3,
-    SPELL_ENTRY_EffectImplicitTargetA_1,
-    SPELL_ENTRY_EffectImplicitTargetA_2,
-    SPELL_ENTRY_EffectImplicitTargetA_3,
-    SPELL_ENTRY_EffectImplicitTargetB_1,
-    SPELL_ENTRY_EffectImplicitTargetB_2,
-    SPELL_ENTRY_EffectImplicitTargetB_3,
-    SPELL_ENTRY_EffectRadiusIndex_1,
-    SPELL_ENTRY_EffectRadiusIndex_2, 
-    SPELL_ENTRY_EffectRadiusIndex_3, 
-    SPELL_ENTRY_EffectApplyAuraName_1,
-    SPELL_ENTRY_EffectApplyAuraName_2,
-    SPELL_ENTRY_EffectApplyAuraName_3,
-    SPELL_ENTRY_EffectAmplitude_1,
-    SPELL_ENTRY_EffectAmplitude_2,
-    SPELL_ENTRY_EffectAmplitude_3,
-    SPELL_ENTRY_Effectunknown_1,
-    SPELL_ENTRY_Effectunknown_2,
-    SPELL_ENTRY_Effectunknown_3,
-    SPELL_ENTRY_EffectChainTarget_1,
-    SPELL_ENTRY_EffectChainTarget_2,
-    SPELL_ENTRY_EffectChainTarget_3,
-    SPELL_ENTRY_EffectSpellGroupRelation_1,
-    SPELL_ENTRY_EffectSpellGroupRelation_2,
-    SPELL_ENTRY_EffectSpellGroupRelation_3,
-    SPELL_ENTRY_EffectMiscValue_1,
-    SPELL_ENTRY_EffectMiscValue_2,
-    SPELL_ENTRY_EffectMiscValue_3,
-    SPELL_ENTRY_EffectTriggerSpell_1,
-    SPELL_ENTRY_EffectTriggerSpell_2,
-    SPELL_ENTRY_EffectTriggerSpell_3,
-    SPELL_ENTRY_EffectPointsPerComboPoint_1,
-    SPELL_ENTRY_EffectPointsPerComboPoint_2,
-    SPELL_ENTRY_EffectPointsPerComboPoint_3,
-    SPELL_ENTRY_SpellVisual,
-    SPELL_ENTRY_field114,
-    SPELL_ENTRY_dummy,
-    SPELL_ENTRY_CoSpell,
-    SPELL_ENTRY_spellPriority,
-    SPELL_ENTRY_Name,
-    SPELL_ENTRY_NameAlt1,
-    SPELL_ENTRY_NameAlt2,
-    SPELL_ENTRY_NameAlt3,
-    SPELL_ENTRY_NameAlt4,
-    SPELL_ENTRY_NameAlt5,
-    SPELL_ENTRY_NameAlt6,
-    SPELL_ENTRY_NameAlt7,
-    SPELL_ENTRY_NameAlt8,
-    SPELL_ENTRY_NameAlt9,
-    SPELL_ENTRY_NameAlt10,
-    SPELL_ENTRY_NameAlt11,
-    SPELL_ENTRY_NameAlt12,
-    SPELL_ENTRY_NameAlt13,
-    SPELL_ENTRY_NameAlt14,
-    SPELL_ENTRY_NameAlt15,
-    SPELL_ENTRY_NameFlags,
-    SPELL_ENTRY_Rank,
-    SPELL_ENTRY_RankAlt1,
-    SPELL_ENTRY_RankAlt2,
-    SPELL_ENTRY_RankAlt3,
-    SPELL_ENTRY_RankAlt4,
-    SPELL_ENTRY_RankAlt5,
-    SPELL_ENTRY_RankAlt6,
-    SPELL_ENTRY_RankAlt7,
-    SPELL_ENTRY_RankAlt8,
-    SPELL_ENTRY_RankAlt9,
-    SPELL_ENTRY_RankAlt10,
-    SPELL_ENTRY_RankAlt11,
-    SPELL_ENTRY_RankAlt12,
-    SPELL_ENTRY_RankAlt13,
-    SPELL_ENTRY_RankAlt14,
-    SPELL_ENTRY_RankAlt15,
-    SPELL_ENTRY_RankFlags,
-    SPELL_ENTRY_Description,
-    SPELL_ENTRY_DescriptionAlt1,
-    SPELL_ENTRY_DescriptionAlt2,
-    SPELL_ENTRY_DescriptionAlt3,
-    SPELL_ENTRY_DescriptionAlt4,
-    SPELL_ENTRY_DescriptionAlt5,
-    SPELL_ENTRY_DescriptionAlt6,
-    SPELL_ENTRY_DescriptionAlt7,
-    SPELL_ENTRY_DescriptionAlt8,
-    SPELL_ENTRY_DescriptionAlt9,
-    SPELL_ENTRY_DescriptionAlt10,
-    SPELL_ENTRY_DescriptionAlt11,
-    SPELL_ENTRY_DescriptionAlt12,
-    SPELL_ENTRY_DescriptionAlt13,
-    SPELL_ENTRY_DescriptionAlt14,
-    SPELL_ENTRY_DescriptionAlt15,
-    SPELL_ENTRY_DescriptionFlags,
-    SPELL_ENTRY_BuffDescription,
-    SPELL_ENTRY_BuffDescriptionAlt1,
-    SPELL_ENTRY_BuffDescriptionAlt2,
-    SPELL_ENTRY_BuffDescriptionAlt3,
-    SPELL_ENTRY_BuffDescriptionAlt4,
-    SPELL_ENTRY_BuffDescriptionAlt5,
-    SPELL_ENTRY_BuffDescriptionAlt6,
-    SPELL_ENTRY_BuffDescriptionAlt7,
-    SPELL_ENTRY_BuffDescriptionAlt8,
-    SPELL_ENTRY_BuffDescriptionAlt9,
-    SPELL_ENTRY_BuffDescriptionAlt10,
-    SPELL_ENTRY_BuffDescriptionAlt11,
-    SPELL_ENTRY_BuffDescriptionAlt12,
-    SPELL_ENTRY_BuffDescriptionAlt13,
-    SPELL_ENTRY_BuffDescriptionAlt14,
-    SPELL_ENTRY_BuffDescriptionAlt15,
-    SPELL_ENTRY_buffdescflags,
-    SPELL_ENTRY_ManaCostPercentage,
-    SPELL_ENTRY_unkflags,
-    SPELL_ENTRY_StartRecoveryTime,
-    SPELL_ENTRY_StartRecoveryCategory,
-    SPELL_ENTRY_SpellFamilyName,
-    SPELL_ENTRY_SpellGroupType,
-    SPELL_ENTRY_unkne,
-    SPELL_ENTRY_MaxTargets,
-    SPELL_ENTRY_Spell_Dmg_Type,
-    SPELL_ENTRY_FG,
-    SPELL_ENTRY_FH,
-    SPELL_ENTRY_dmg_multiplier_1,
-    SPELL_ENTRY_dmg_multiplier_2,
-    SPELL_ENTRY_dmg_multiplier_3,
-    SPELL_ENTRY_FL,
-    SPELL_ENTRY_FM,
-    SPELL_ENTRY_FN,
-	SPELL_ENTRY_TotemCategory1,
-	SPELL_ENTRY_TotemCategory2,
-	SPELL_ENTRY_RequiredAreaID
+    SPELL_ENTRY_Id,							//	0
+    SPELL_ENTRY_School,						// 	1
+    SPELL_ENTRY_Category,					//	2
+    SPELL_ENTRY_field4,						//	3
+    SPELL_ENTRY_DispelType,					//	4
+    SPELL_ENTRY_MechanicsType,				//	5
+    SPELL_ENTRY_Attributes,					//	6
+    SPELL_ENTRY_AttributesEx,				//	7
+    SPELL_ENTRY_Flags3,						//	8
+    SPELL_ENTRY_Flags4,						//	9
+    SPELL_ENTRY_Flags5,						//	10
+    SPELL_ENTRY_unk201_1,					//	11
+    SPELL_ENTRY_RequiredShapeShift,			//	12
+    SPELL_ENTRY_UNK14,						//	13
+    SPELL_ENTRY_Targets,					//	14
+    SPELL_ENTRY_TargetCreatureType,			//	15
+    SPELL_ENTRY_RequiresSpellFocus,			//	16
+    SPELL_ENTRY_CasterAuraState,			//	17
+    SPELL_ENTRY_TargetAuraState,			//	18
+    SPELL_ENTRY_unk201_2,					//	19
+    SPELL_ENTRY_unk201_3,					//	20
+    SPELL_ENTRY_CastingTimeIndex,			//	21
+    SPELL_ENTRY_RecoveryTime,				//	22
+    SPELL_ENTRY_CategoryRecoveryTime,		//	23
+    SPELL_ENTRY_InterruptFlags,				//	24
+    SPELL_ENTRY_AuraInterruptFlags,			//	25
+    SPELL_ENTRY_ChannelInterruptFlags,		//	26
+    SPELL_ENTRY_procFlags,					//	27
+    SPELL_ENTRY_procChance,					//	28
+    SPELL_ENTRY_procCharges,				//	29
+    SPELL_ENTRY_maxLevel,					//	30
+    SPELL_ENTRY_baseLevel,					//	31
+    SPELL_ENTRY_spellLevel,					//	32
+    SPELL_ENTRY_DurationIndex,				//	33
+    SPELL_ENTRY_powerType,					//	34
+    SPELL_ENTRY_manaCost,					//	35
+    SPELL_ENTRY_manaCostPerlevel,			//	36
+    SPELL_ENTRY_manaPerSecond,				//	37
+    SPELL_ENTRY_manaPerSecondPerLevel,		//	38
+    SPELL_ENTRY_rangeIndex,					//	39
+    SPELL_ENTRY_speed,						//	40
+    SPELL_ENTRY_modalNextSpell,				//	41
+    SPELL_ENTRY_maxstack,					//	42
+    SPELL_ENTRY_Totem_1,					//	43
+    SPELL_ENTRY_Totem_2,					//	44
+    SPELL_ENTRY_Reagent_1,					//	45
+    SPELL_ENTRY_Reagent_2,					//	46
+    SPELL_ENTRY_Reagent_3,					//	47
+    SPELL_ENTRY_Reagent_4,					//	48
+    SPELL_ENTRY_Reagent_5,					//	49
+    SPELL_ENTRY_Reagent_6,					//	50
+    SPELL_ENTRY_Reagent_7,					//	51
+    SPELL_ENTRY_Reagent_8,					//	52
+    SPELL_ENTRY_ReagentCount_1,				//	53
+    SPELL_ENTRY_ReagentCount_2,				//	54
+    SPELL_ENTRY_ReagentCount_3,				//	55
+    SPELL_ENTRY_ReagentCount_4,				//	56
+    SPELL_ENTRY_ReagentCount_5,				//	57
+    SPELL_ENTRY_ReagentCount_6,				//	58
+    SPELL_ENTRY_ReagentCount_7,				//	59
+    SPELL_ENTRY_ReagentCount_8,				//	60
+    SPELL_ENTRY_EquippedItemClass,			//	61
+    SPELL_ENTRY_EquippedItemSubClass,		//	62
+    SPELL_ENTRY_RequiredItemFlags,			//	63
+    SPELL_ENTRY_Effect_1,					//	64
+    SPELL_ENTRY_Effect_2,					//	65
+    SPELL_ENTRY_Effect_3,					//	66
+    SPELL_ENTRY_EffectDieSides_1,			//	67
+    SPELL_ENTRY_EffectDieSides_2,			//	68
+    SPELL_ENTRY_EffectDieSides_3,			//	69
+    SPELL_ENTRY_EffectBaseDice_1,			//	70
+    SPELL_ENTRY_EffectBaseDice_2,			//	71
+    SPELL_ENTRY_EffectBaseDice_3,			//	72
+    SPELL_ENTRY_EffectDicePerLevel_1,		//	73
+    SPELL_ENTRY_EffectDicePerLevel_2,		//	74
+    SPELL_ENTRY_EffectDicePerLevel_3,		//	75
+    SPELL_ENTRY_EffectRealPointsPerLevel_1,	//	76
+    SPELL_ENTRY_EffectRealPointsPerLevel_2,	//	77
+    SPELL_ENTRY_EffectRealPointsPerLevel_3,	//	78
+    SPELL_ENTRY_EffectBasePoints_1,			//	79
+    SPELL_ENTRY_EffectBasePoints_2,			//	80
+    SPELL_ENTRY_EffectBasePoints_3,			//	81
+    SPELL_ENTRY_EffectMechanic_1,			//	82
+    SPELL_ENTRY_EffectMechanic_2,			//	83
+    SPELL_ENTRY_EffectMechanic_3,			//	84
+    SPELL_ENTRY_EffectImplicitTargetA_1,	//	85
+    SPELL_ENTRY_EffectImplicitTargetA_2,	//	86
+    SPELL_ENTRY_EffectImplicitTargetA_3,	//	87
+    SPELL_ENTRY_EffectImplicitTargetB_1,	//	88
+    SPELL_ENTRY_EffectImplicitTargetB_2,	//	89
+    SPELL_ENTRY_EffectImplicitTargetB_3,	//	90
+    SPELL_ENTRY_EffectRadiusIndex_1,		//	91
+    SPELL_ENTRY_EffectRadiusIndex_2, 		//	92
+    SPELL_ENTRY_EffectRadiusIndex_3, 		//	93
+    SPELL_ENTRY_EffectApplyAuraName_1,		//	94
+    SPELL_ENTRY_EffectApplyAuraName_2,		//	95
+    SPELL_ENTRY_EffectApplyAuraName_3,		//	96
+    SPELL_ENTRY_EffectAmplitude_1,			//	97
+    SPELL_ENTRY_EffectAmplitude_2,			//	98
+    SPELL_ENTRY_EffectAmplitude_3,			//	99
+    SPELL_ENTRY_Effectunknown_1,			//	100
+    SPELL_ENTRY_Effectunknown_2,			//	101
+    SPELL_ENTRY_Effectunknown_3,			//	102
+    SPELL_ENTRY_EffectChainTarget_1,		//	103
+    SPELL_ENTRY_EffectChainTarget_2,		//	104
+    SPELL_ENTRY_EffectChainTarget_3,		//	105
+    SPELL_ENTRY_EffectSpellGroupRelation_1,	//	106
+    SPELL_ENTRY_EffectSpellGroupRelation_2,	//	107
+    SPELL_ENTRY_EffectSpellGroupRelation_3,	//	108
+    SPELL_ENTRY_EffectMiscValue_1,			//	109
+    SPELL_ENTRY_EffectMiscValue_2,			//	110
+    SPELL_ENTRY_EffectMiscValue_3,			//	111
+    SPELL_ENTRY_EffectTriggerSpell_1,		//	112
+    SPELL_ENTRY_EffectTriggerSpell_2,		//	113
+    SPELL_ENTRY_EffectTriggerSpell_3,		//	114
+    SPELL_ENTRY_EffectPointsPerComboPoint_1,//	115
+    SPELL_ENTRY_EffectPointsPerComboPoint_2,//	116
+    SPELL_ENTRY_EffectPointsPerComboPoint_3,//	117
+    SPELL_ENTRY_SpellVisual,				//	118
+    SPELL_ENTRY_field114,					//	119
+    SPELL_ENTRY_dummy,						//	120
+    SPELL_ENTRY_CoSpell,					//	121
+    SPELL_ENTRY_spellPriority,				//	122
+    SPELL_ENTRY_Name,						//	123
+    SPELL_ENTRY_NameAlt1,					//	124
+    SPELL_ENTRY_NameAlt2,					//	125
+    SPELL_ENTRY_NameAlt3,					//	126
+    SPELL_ENTRY_NameAlt4,					//	127
+    SPELL_ENTRY_NameAlt5,					//	128
+    SPELL_ENTRY_NameAlt6,					//	129
+    SPELL_ENTRY_NameAlt7,					//	130
+    SPELL_ENTRY_NameAlt8,					//	131
+    SPELL_ENTRY_NameAlt9,					//	132
+    SPELL_ENTRY_NameAlt10,					//	133
+    SPELL_ENTRY_NameAlt11,					//	134
+    SPELL_ENTRY_NameAlt12,					//	135
+    SPELL_ENTRY_NameAlt13,					//	136
+    SPELL_ENTRY_NameAlt14,					//	137
+    SPELL_ENTRY_NameAlt15,					//	138
+    SPELL_ENTRY_NameFlags,					//	139
+    SPELL_ENTRY_Rank,						//	140
+    SPELL_ENTRY_RankAlt1,					//	141
+    SPELL_ENTRY_RankAlt2,					//	142
+    SPELL_ENTRY_RankAlt3,					//	143
+    SPELL_ENTRY_RankAlt4,					//	144
+    SPELL_ENTRY_RankAlt5,					//	145
+    SPELL_ENTRY_RankAlt6,					//	146
+    SPELL_ENTRY_RankAlt7,					//	147
+    SPELL_ENTRY_RankAlt8,					//	148
+    SPELL_ENTRY_RankAlt9,					//	149
+    SPELL_ENTRY_RankAlt10,					//	150
+    SPELL_ENTRY_RankAlt11,					//	151
+    SPELL_ENTRY_RankAlt12,					//	152
+    SPELL_ENTRY_RankAlt13,					//	153
+    SPELL_ENTRY_RankAlt14,					//	154
+    SPELL_ENTRY_RankAlt15,					//	155
+    SPELL_ENTRY_RankFlags,					//	156
+    SPELL_ENTRY_Description,				//	157
+    SPELL_ENTRY_DescriptionAlt1,			//	158
+    SPELL_ENTRY_DescriptionAlt2,			//	159
+    SPELL_ENTRY_DescriptionAlt3,			//	160
+    SPELL_ENTRY_DescriptionAlt4,			//	161
+    SPELL_ENTRY_DescriptionAlt5,			//	162
+    SPELL_ENTRY_DescriptionAlt6,			//	163
+    SPELL_ENTRY_DescriptionAlt7,			//	164
+    SPELL_ENTRY_DescriptionAlt8,			//	165
+    SPELL_ENTRY_DescriptionAlt9,			//	166
+    SPELL_ENTRY_DescriptionAlt10,			//	167
+    SPELL_ENTRY_DescriptionAlt11,			//	168
+    SPELL_ENTRY_DescriptionAlt12,			//	169
+    SPELL_ENTRY_DescriptionAlt13,			//	170
+    SPELL_ENTRY_DescriptionAlt14,			//	171
+    SPELL_ENTRY_DescriptionAlt15,			//	172
+    SPELL_ENTRY_DescriptionFlags,			//	173
+    SPELL_ENTRY_BuffDescription,			//	174
+    SPELL_ENTRY_BuffDescriptionAlt1,		//	175
+    SPELL_ENTRY_BuffDescriptionAlt2,		//	176
+    SPELL_ENTRY_BuffDescriptionAlt3,		//	177
+    SPELL_ENTRY_BuffDescriptionAlt4,		//	178
+    SPELL_ENTRY_BuffDescriptionAlt5,		//	179
+    SPELL_ENTRY_BuffDescriptionAlt6,		//	180
+    SPELL_ENTRY_BuffDescriptionAlt7,		//	181
+    SPELL_ENTRY_BuffDescriptionAlt8,		//	182
+    SPELL_ENTRY_BuffDescriptionAlt9,		//	183
+    SPELL_ENTRY_BuffDescriptionAlt10,		//	184
+    SPELL_ENTRY_BuffDescriptionAlt11,		//	185
+    SPELL_ENTRY_BuffDescriptionAlt12,		//	186
+    SPELL_ENTRY_BuffDescriptionAlt13,		//	187
+    SPELL_ENTRY_BuffDescriptionAlt14,		//	188
+    SPELL_ENTRY_BuffDescriptionAlt15,		//	189
+    SPELL_ENTRY_buffdescflags,				//	190
+    SPELL_ENTRY_ManaCostPercentage,			//	191
+    SPELL_ENTRY_unkflags,					//	192
+    SPELL_ENTRY_StartRecoveryTime,			//	193
+    SPELL_ENTRY_StartRecoveryCategory,		//	194
+    SPELL_ENTRY_SpellFamilyName,			//	195
+    SPELL_ENTRY_SpellGroupType,				//	196
+    SPELL_ENTRY_unkne,						//	197
+    SPELL_ENTRY_MaxTargets,					//	198
+    SPELL_ENTRY_Spell_Dmg_Type,				//	199
+    SPELL_ENTRY_FG,							//	200
+    SPELL_ENTRY_FH,							//	201
+    SPELL_ENTRY_dmg_multiplier_1,			//	202
+    SPELL_ENTRY_dmg_multiplier_2,			//	203
+    SPELL_ENTRY_dmg_multiplier_3,			//	204
+    SPELL_ENTRY_FL,							//	205
+    SPELL_ENTRY_FM,							//	206
+    SPELL_ENTRY_FN,							//	207
+	SPELL_ENTRY_TotemCategory1,				//	208
+	SPELL_ENTRY_TotemCategory2,				//	209
+	SPELL_ENTRY_RequiredAreaID				//	210
 };
 
 // target type flags
