@@ -55,7 +55,6 @@ void WDoctor::GossipSelectOption(Object * pObject, Player* Plr, uint32 Id, uint3
 	if(pCreature==NULL)
 		return;
 
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		//Feeling Low

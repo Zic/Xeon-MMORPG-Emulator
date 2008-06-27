@@ -40,7 +40,6 @@ void Morpher::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 //Defining Cases
 void Morpher::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 0:

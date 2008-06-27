@@ -40,7 +40,6 @@ void TomeOfExp::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 
 void TomeOfExp::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 0:
@@ -63,7 +62,7 @@ void TomeOfExp::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint
 
 				case 1:
 				{
-					Plr->GiveXP(FORMULA, Plr->GetGUID(), true);
+					Plr->GiveXP((uint32)(FORMULA), Plr->GetGUID(), true);
 				}break;
 
 				case 2:

@@ -5,10 +5,13 @@
 
 class SCRIPT_DECL sexchange : public GossipScript
 {
-public:	
-	void GossipHello(Object * pObject, Player* Plr, bool AutoSend);	void GossipSelectOption(Object * pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code);
+public:
+	
+	void GossipHello(Object * pObject, Player* Plr, bool AutoSend);
+	void GossipSelectOption(Object * pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code);
 	void GossipEnd(Object * pObject, Player* Plr);
-	void Destroy()	
+	void Destroy()
+	
 	{
 		delete this;
 	}
@@ -26,7 +29,6 @@ void sexchange::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 
 void sexchange::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 0:

@@ -46,7 +46,7 @@ void EventChat(Player * pPlayer, uint32 Type, uint32 Lang, const char * Message,
    }
 }
 
-void SetupEvent(ScriptMgr * mgr)
+void SetupEventChat(ScriptMgr * mgr)
 {
    mgr->register_hook(SERVER_HOOK_EVENT_ON_CHAT, &EventChat);
 }

@@ -12,7 +12,7 @@ extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)
 {
     SetupEventChat(mgr);
     SetupFreeMoneyNPC(mgr);
-    SetupFriendGrab(mgr);
+    SetupFriendPorter(mgr);
 	SetupSurgeon(mgr);
     Setuppvpanner(mgr);
     Setupsexchange(mgr);

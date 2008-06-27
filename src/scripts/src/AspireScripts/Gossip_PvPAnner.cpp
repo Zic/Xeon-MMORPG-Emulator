@@ -43,7 +43,6 @@ void pvpanner::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 //Defining Cases
 void pvpanner::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 0:
@@ -58,7 +57,7 @@ void pvpanner::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint3
 				Plr->Gossip_Complete();
 				return;
 			}
-			Plr->EventTeleport(ARENAMAPID, ARENAX, ARENAY, ARENAZ);
+			Plr->EventTeleport((uint32)ARENAMAPID, (float)ARENAX, (float)ARENAY, (float)ARENAZ);
 			Plr->Gossip_Complete();
 		}break;
 				

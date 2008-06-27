@@ -53,7 +53,7 @@ void Surgeon::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 	if(pf == 1 && pr != RACE_TROLL && pc != WARLOCK && pc != PALADIN && pc != DRUID)
 		Menu->AddItem(0, "Troll", 8);
 	if(pf == 1 && pr != RACE_UNDEAD && pc != SHAMAN && pc != PALADIN && pc != HUNTER && pc != DRUID)
-		Menu->AddItem(0, "Undead", 5)
+		Menu->AddItem(0, "Undead", 5);
 	Menu->AddItem(1, "I've changed my mind", 100);
 	if(AutoSend)
 		Menu->SendTo(Plr);
@@ -61,7 +61,6 @@ void Surgeon::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 
 void Surgeon::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 0:

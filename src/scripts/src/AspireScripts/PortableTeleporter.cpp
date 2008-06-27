@@ -55,55 +55,54 @@ void Pwarper::GossipHello(Object* pObject, Player * Plr, bool AutoSend)
 //Defining Cases
 void Pwarper::GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	GossipMenu * Menu;
 	switch(IntId)
 	{
 		case 50:
 		{   //Stormwind
 			if(Plr->GetTeam() == 0)
-				Plr->SafeTeleport(0, 0, -8831.61, 622.666, 93.7787, 0);
+				Plr->SafeTeleport(0, 0, -8831.61f, 622.666f, 93.7787f, 0);
 		}break;
 
 		case 51:
 		{   //Ironforge
 			if(Plr->GetTeam() == 0)
-				Plr->SafeTeleport(0, 0, -4804.45, -1101.14, 498.807, 0);
+				Plr->SafeTeleport(0, 0, -4804.45f, -1101.14f, 498.807f, 0);
 		}break;
 
 		case 52:
 		{   //Exodar
 			if(Plr->GetTeam() == 0)
-				Plr->SafeTeleport(530, 0, -3796.24, -11710.9, -105.45, 0);
+				Plr->SafeTeleport(530, 0, -3796.24f, -11710.9f, -105.45f, 0);
 		}break;
 
 		case 53:
 		{   //Darnassus
 			if(Plr->GetTeam() == 0)
-				Plr->SafeTeleport(1, 0, 9952.07, 2278.46, 1341.39, 0);
+				Plr->SafeTeleport(1, 0, 9952.07f, 2278.46f, 1341.39f, 0);
 		}break;
 
 		case 54:
 		{   //Orgrimmar
 			if(Plr->GetTeam() == 1)
-				Plr->SafeTeleport(1, 0, 1499.55, -4406.91, 23.1642, 0);
+				Plr->SafeTeleport(1, 0, 1499.55f, -4406.91f, 23.1642f, 0);
 		}break;
 
 		case 55:
 		{   //Thunder Bluff
 			if(Plr->GetTeam() == 1)
-				Plr->SafeTeleport(1, 0, -1195.88, -56.5582, 160.034, 0);
+				Plr->SafeTeleport(1, 0, -1195.88f, -56.5582f, 160.034f, 0);
 		}break;
 
 		case 56:
 		{   //Silvermoon City
 			if(Plr->GetTeam() == 1)
-				Plr->SafeTeleport(530, 0, 9492.45, -7279.12, 14.3036, 0);
+				Plr->SafeTeleport(530, 0, 9492.45f, -7279.12f, 14.3036f, 0);
 		}break;
 					
 		case 57:
 		{   //Undercity
 			if(Plr->GetTeam() == 1)
-				Plr->SafeTeleport(0, 0, 1615.1, 239.786, -62.0774, 0);
+				Plr->SafeTeleport(0, 0, 1615.1f, 239.786f, -62.0774f, 0);
 		}break;
 					
 		case 58:
