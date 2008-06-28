@@ -20927,8 +20927,10 @@ void ApplyNormalFixes()
 		if( sp != NULL )
 		{
 			sp->procFlags = PROC_ON_CAST_SPELL;
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->EffectTriggerSpell[0] = 13810;
+			//sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			//sp->EffectTriggerSpell[0] = 13810;
+			sp->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+			sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
 		}
 
 	//////////////////////////////////////////

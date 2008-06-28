@@ -457,6 +457,24 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 	switch(spellId)
 	{
+	case 13809: //Frost Trap
+		{
+			Player * plr;
+			if(!p_caster)
+				return;
+
+			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
+			{
+				if((*i)->GetTypeId() == TYPEID_PLAYER)
+				{
+					plr=static_cast<Player *>((*i));
+					if(p_caster->GetDistance2dSq((*i)) < 266)
+					{
+						plr->CastSpell(plr, 13810, true);
+					}
+				}
+			}
+		}
 
 	case 30427: // Extract Gas
 		{
