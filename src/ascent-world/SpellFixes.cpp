@@ -12720,6 +12720,36 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(36041);
 	if(sp != NULL)
 		sp->procChance = 5;
+
+	// Spell 20375 Proc Chance (Seal of Command Rank 1)
+	sp = dbcSpell.LookupEntryForced(20375);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
+
+	// Spell 20915 Proc Chance (Seal of Command Rank 2)
+	sp = dbcSpell.LookupEntryForced(20915);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
+
+	// Spell 20918 Proc Chance (Seal of Command Rank 3)
+	sp = dbcSpell.LookupEntryForced(20918);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
+
+	// Spell 20919 Proc Chance (Seal of Command Rank 4)
+	sp = dbcSpell.LookupEntryForced(20919);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
+
+	// Spell 20920 Proc Chance (Seal of Command Rank 5)
+	sp = dbcSpell.LookupEntryForced(20920);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
+
+	// Spell 27170 Proc Chance (Seal of Command Rank 6)
+	sp = dbcSpell.LookupEntryForced(27170);
+	if(sp != NULL)
+		sp->procChance = 11; //Wowwiki
 }
 
 void ApplyNormalFixes()
