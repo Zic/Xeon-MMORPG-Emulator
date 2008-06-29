@@ -1340,6 +1340,9 @@ void Pet::ApplySummonLevelAbilities()
 
 void Pet::ApplyPetLevelAbilities()
 {
+	if(m_Owner == NULL)
+		return;
+
 	uint32 level = m_uint32Values[UNIT_FIELD_LEVEL];
 	double dlevel = (double)level;
 
