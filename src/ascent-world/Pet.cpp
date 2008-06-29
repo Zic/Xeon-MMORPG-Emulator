@@ -522,6 +522,12 @@ void Pet::InitializeMe(bool first)
 
 	if(GetEntry() == 416)
 		m_aiInterface->disable_melee = true;
+	else if(GetEntry() == 17252) //Giving felguard his axe
+	{
+		SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, 23904);
+		SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, 33489154);
+		SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, 273);
+	}
 
 	// Load our spells
 	if(Summon)
