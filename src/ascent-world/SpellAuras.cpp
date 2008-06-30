@@ -1301,6 +1301,33 @@ void Aura::SpellAuraDummy(bool apply)
 
 	switch(GetSpellId())
 	{
+	case 13809: //Frost Traps
+	{
+	Unit *caster = static_cast< Unit* >( GetUnitCaster() );
+	Unit *target = static_cast< Unit* >( GetUnitCaster() );	
+
+	SpellEntry *spellentry = dbcSpell.LookupEntry( 13810 );
+	if(!spellentry)
+	{
+		return;
+	}
+	if (!m_spellProto->Effect[0])
+	{
+		return;
+	}
+	
+	Spell *sp = new Spell(caster, spellentry, false, NULL);
+	if(!sp)
+	{
+		delete sp;
+		return;
+	}
+
+	SpellCastTargets targets;
+	targets.m_unitTarget = target->GetGUID();
+	sp->prepare(&targets);
+
+	}break;
 	case 66:
 		{
 			// mage - invisibility
