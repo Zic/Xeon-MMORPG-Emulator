@@ -20841,6 +20841,26 @@ void ApplyNormalFixes()
 		if( sp != NULL )
 			sp->is_melee_spell = true;
 
+		// Holy Shock - Adding the effects
+		sp = dbcSpell.LookupEntryForced( 20473 ); //Holy Shock Rank 1
+		if( sp != NULL )
+			sp->EffectBasePoints[0] = 288;
+
+		sp = dbcSpell.LookupEntryForced( 20929 ); //Holy Shock Rank 2
+		if( sp != NULL )
+			sp->EffectBasePoints[0] = 394;
+
+		sp = dbcSpell.LookupEntryForced( 20930 ); //Holy Shock Rank 3
+		if( sp != NULL )
+			sp->EffectBasePoints[0] = 516;
+
+		sp = dbcSpell.LookupEntryForced( 27174 ); //Holy Shock Rank 4
+		if( sp != NULL )
+			sp->EffectBasePoints[0] = 639;
+
+		sp = dbcSpell.LookupEntryForced( 33072 ); //Holy Shock Rank 5
+		if( sp != NULL )
+			sp->EffectBasePoints[0] = 750;
 
 	//////////////////////////////////////////
 	// HUNTER								//
