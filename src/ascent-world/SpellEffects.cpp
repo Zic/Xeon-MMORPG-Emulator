@@ -457,24 +457,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 	switch(spellId)
 	{
-	case 13809: //Frost Trap
-		{
-			Player * plr;
-			if(!p_caster)
-				return;
-
-			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
-			{
-				if((*i)->GetTypeId() == TYPEID_PLAYER)
-				{
-					plr=static_cast<Player *>((*i));
-					if(p_caster->GetDistance2dSq((*i)) < 266)
-					{
-						plr->CastSpell(plr, 13810, true);
-					}
-				}
-			}
-		}
 
 	case 30427: // Extract Gas
 		{
@@ -2997,43 +2979,28 @@ void Spell::SpellEffectSummonGuardian(uint32 i) // Summon Guardian
 	//these are not pets. Just some creatures that will fight on your side. 
 	//They follow you and attack your target but you cannot command them
 	//number of creatures is actualy dmg (the usual formula), sometimes =3 sometimes =1
-	uint32 cr_entry = m_spellInfo->EffectMiscValue[i];
+	
 
-	CreatureProto* proto = CreatureProtoStorage.LookupEntry( cr_entry );
-	CreatureInfo* info = CreatureNameStorage.LookupEntry( cr_entry );
-
-	if( proto == NULL || info == NULL )
-	{
-		sLog.outDetail( "Warning : Missing summon creature template %u used by spell %u!", cr_entry, m_spellInfo->Id );
+	if ( !(u_caster || g_caster) )
 		return;
-	}
+
+
+	uint32 cr_entry = m_spellInfo->EffectMiscValue[i];
+	uint32 level = 0;
 
 	float angle_for_each_spawn = -float(M_PI) * 2 / damage;
-
 	for( int i = 0; i < damage; i++ )
 	{
 		float m_fallowAngle = angle_for_each_spawn * i;
-		float x = u_caster->GetPositionX() + ( 3 * ( cosf( m_fallowAngle + u_caster->GetOrientation() ) ) );
-		float y = u_caster->GetPositionY() + ( 3 * ( sinf( m_fallowAngle + u_caster->GetOrientation() ) ) );
-		float z = u_caster->GetPositionZ();
-
-		Creature* p = u_caster->GetMapMgr()->CreateCreature(proto->Id);
-
-		p->SetInstanceID( u_caster->GetMapMgr()->GetInstanceID() );
-		p->Load( proto, x, y, z );
-		p->SetUInt64Value( UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID() );
-        p->SetUInt64Value( UNIT_FIELD_CREATEDBY, m_caster->GetGUID() );
-        p->SetZoneId( m_caster->GetZoneId() );
-		p->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, u_caster->GetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE ) );
-		p->_setFaction();
-		p->GetAIInterface()->Init( p,AITYPE_PET,MOVEMENTTYPE_NONE, u_caster );
-		p->GetAIInterface()->SetUnitToFollow( u_caster );
-		p->GetAIInterface()->SetUnitToFollowAngle( m_fallowAngle );
-		p->GetAIInterface()->SetFollowDistance( 3.0f );
-		p->PushToWorld( u_caster->GetMapMgr() );
-
-		//make sure they will be desumonized (roxor)
-		sEventMgr.AddEvent( p, &Creature::SummonExpire, EVENT_SUMMON_EXPIRE, GetDuration(), 1, 0 );
+		if ( g_caster ) 
+		{
+			u_caster = g_caster->m_summoner;
+			g_caster->create_guardian(cr_entry,GetDuration(),m_fallowAngle, u_caster);
+		}
+		else
+		{
+			u_caster->create_guardian(cr_entry,GetDuration(),m_fallowAngle);
+		}
 	}
 }
 

@@ -634,6 +634,44 @@ void GameObject::_LoadQuests()
 /////////////////
 // Summoned Go's
 
+//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
+Unit* GameObject::create_guardian(uint32 guardian_entry,uint32 duration,float angle, Unit * u_caster)
+{
+	CreatureProto * proto = CreatureProtoStorage.LookupEntry(guardian_entry);
+	CreatureInfo * info = CreatureNameStorage.LookupEntry(guardian_entry);
+	float m_fallowAngle = angle;
+	float x = GetPositionX()+(3*(cosf(m_fallowAngle+GetOrientation())));
+	float y = GetPositionY()+(3*(sinf(m_fallowAngle+GetOrientation())));
+	float z = GetPositionZ();
+	
+	if(!proto || !info)
+	{
+		sLog.outDetail("Warning : Missing summon creature template %u !",guardian_entry);
+		return NULL;
+	}
+	
+	Creature* p = GetMapMgr()->CreateCreature(guardian_entry);
+	p->SetInstanceID(GetMapMgr()->GetInstanceID());
+	p->Load(proto, x, y, z);	
+	p->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, GetGUID());
+    p->SetUInt64Value(UNIT_FIELD_CREATEDBY, GetGUID());
+    p->SetZoneId(GetZoneId());
+	p->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,u_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+	p->_setFaction();
+
+	p->GetAIInterface()->Init(p,AITYPE_PET,MOVEMENTTYPE_NONE,u_caster);
+	p->GetAIInterface()->SetUnitToFollow(u_caster);
+	p->GetAIInterface()->SetUnitToFollowAngle(m_fallowAngle);
+	p->GetAIInterface()->SetFollowDistance(3.0f);
+
+	p->PushToWorld(GetMapMgr());
+
+	sEventMgr.AddEvent(p, &Creature::SummonExpire, EVENT_SUMMON_EXPIRE, duration, 1,0);
+
+	return p;
+
+}
+
 void GameObject::_Expire()
 {
 	sEventMgr.RemoveEvents(this);

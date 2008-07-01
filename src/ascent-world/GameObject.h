@@ -258,6 +258,7 @@ public:
 		if(force || !mines_remaining)
 			mines_remaining = GetInfo()->sound4 + RandomUInt(GetInfo()->sound5 - GetInfo()->sound4) - 1;
 	}
+	Unit* create_guardian(uint32 guardian_entry,uint32 duration,float angle, Unit * u_caster);
 	bool HasLoot();
 	uint32 GetGOReqSkill();
 	MapCell * m_respawnCell;
