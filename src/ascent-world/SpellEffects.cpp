@@ -390,6 +390,10 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 		case 0xf79e1873:		// fire armor, is static damage
 			static_damage=true;
 			break;
+
+		case SPELL_HASH_LACERATE:
+			if( p_caster )
+				dmg += (uint32)(p_caster->GetAP()/20);
 		}
 	}
 
