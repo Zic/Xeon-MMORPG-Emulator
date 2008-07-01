@@ -239,7 +239,7 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 	Player * pTarget = _player->GetMapMgr()->GetPlayer( _player->mTradeTarget );
 
 	Item * pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
-	if( pTarget == NULL || pItem == 0 || TradeSlot > 6 || ( TradeSlot < 6 && pItem->IsSoulbound() ) )
+	if( pTarget == NULL || pItem == 0 || TradeSlot > 6)
 		return;
 
 	if(TradeSlot < 6 && pItem->IsSoulbound())
