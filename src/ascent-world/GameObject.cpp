@@ -150,6 +150,71 @@ void GameObject::TrapSearchTarget()
 	Update(100);
 }
 
+void GameObject::CastSpell(Unit* Target, SpellEntry* Sp, bool triggered)
+{
+	if( Sp == NULL )
+		return;
+
+	Spell *newSpell = new Spell(this, Sp, triggered, 0);
+	SpellCastTargets targets(0);
+	if(Target)
+	{
+		targets.m_unitTarget |= TARGET_FLAG_UNIT;
+		targets.m_unitTarget = Target->GetGUID();
+	}
+	else
+	{
+		newSpell->GenerateTargets(&targets);
+	}
+	newSpell->prepare(&targets);
+}
+
+void GameObject::CastSpell(Unit* Target, uint32 SpellID, bool triggered)
+{
+	SpellEntry * ent = dbcSpell.LookupEntry(SpellID);
+	if(ent == 0) return;
+
+	CastSpell(Target, ent, triggered);
+}
+
+void GameObject::CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered)
+{
+	if( Sp == NULL )
+		return;
+
+	SpellCastTargets targets(targetGuid);
+	Spell *newSpell = new Spell(this, Sp, triggered, 0);
+	newSpell->prepare(&targets);
+}
+
+void GameObject::CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered)
+{
+	SpellEntry * ent = dbcSpell.LookupEntry(SpellID);
+	if(ent == 0) return;
+
+	CastSpell(targetGuid, ent, triggered);
+}
+void GameObject::CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered)
+{
+	if( Sp == NULL )
+		return;
+
+	SpellCastTargets targets;
+	targets.m_destX = x;
+	targets.m_destY = y;
+	targets.m_destZ = z;
+	targets.m_targetMask=TARGET_FLAG_DEST_LOCATION;
+	Spell *newSpell = new Spell(this, Sp, triggered, 0);
+	newSpell->prepare(&targets);
+}
+
+void GameObject::EventCastSpell(Unit * Target, SpellEntry * Sp)
+{
+	Spell * pSpell = new Spell(Target, Sp, true, NULL);
+	SpellCastTargets targets(Target->GetGUID());
+	pSpell->prepare(&targets);
+}
+
 void GameObject::Update(uint32 p_time)
 {
 	if(m_event_Instanceid != m_instanceId)

@@ -265,6 +265,15 @@ public:
 	MapCell * m_respawnCell;
 	DynamicObject * dynObj;
 
+	//Spells
+
+	void CastSpell(Unit* Target, uint32 SpellID, bool triggered);
+	void CastSpell(Unit* Target, SpellEntry* Sp, bool triggered);
+	void CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered);
+	void CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered);
+	void CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered);
+	void EventCastSpell(Unit * Target, SpellEntry * Sp);
+
 protected:
 
 	bool m_summonedGo;
