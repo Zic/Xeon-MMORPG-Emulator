@@ -596,14 +596,12 @@ class CombatStatusHandler
 	typedef set<uint64> AttackerMap;
 	typedef vector<uint64> AttackerVector;
 	typedef set<uint32> HealedSet;		// Must Be Players!
-	//AttackerMap m_attackers;
-	AttackerVector m_attackerz;
+	AttackerVector m_attackers;
 	HealedSet m_healers;
 	HealedSet m_healed;
 	Unit* m_Unit;
 	bool m_lastStatus;
 	AttackerMap m_attackTargets;
-	//AttackerVector m_attackTargetz;
 	uint64 m_primaryAttackTarget;
 
 public:
