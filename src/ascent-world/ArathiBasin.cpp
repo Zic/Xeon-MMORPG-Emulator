@@ -832,7 +832,9 @@ bool ArathiBasin::HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * p
 	// burlex todo: find a cleaner way to do this that doesnt waste memory.
 	if(pGo->bannerslot >= 0 && pGo->bannerslot < AB_NUM_CONTROL_POINTS)
 	{
-		// TODO: anticheat here
+		//Stealthed / invisible players can't cap
+		if(pPlayer->GetStealthLevel() > 0 || pPlayer->HasAurasWithNameHash(SPELL_HASH_PROWL) || pPlayer->HasAurasWithNameHash(SPELL_HASH_SHADOWMELD))
+			return false;
 		AssaultControlPoint(pPlayer,pGo->bannerslot);
 		return true;
 	}
