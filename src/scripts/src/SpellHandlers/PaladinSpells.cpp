@@ -126,66 +126,6 @@ bool SealOfRighteousness(uint32 i, Aura* pAura, bool apply)
 	return true;
 }
 
-// -----------------------------------------------------------------------------
-
-bool HolyShock(uint32 i, Spell *pSpell)
-{
-	Unit *target = pSpell->GetUnitTarget();
-	if(!pSpell->p_caster || !target) return true;
-
-	uint32 newspell = 0;
-
-	if(isAttackable(pSpell->p_caster,target)) // if its an enemy
-	{
-		switch(pSpell->m_spellInfo->Id)
-		{
-		case 20473:
-			newspell = 25912;
-			break;
-		case 20929:
-			newspell = 25911;
-			break;
-		case 20930:
-			newspell = 25902;
-			break;
-		case 27174:
-			newspell = 27176;
-			break;
-		case 33072:
-			newspell = 33073;
-			break;
-		}
-	}
-	else // if its friendly
-	{
-		switch(pSpell->m_spellInfo->Id)
-		{
-		case 20473:
-			newspell = 25914;
-			break;
-		case 20929:
-			newspell = 25913;
-			break;
-		case 20930:
-			newspell = 25903;
-			break;
-		case 27174:
-			newspell = 27175;
-			break;
-		case 33072:
-			newspell = 33074;
-			break;
-		}
-	}
-
-	SpellEntry *spInfo = dbcSpell.LookupEntry(newspell);
-	if(!spInfo) return true;
-
-	pSpell->p_caster->CastSpell(target, spInfo, true);
-	return true;
-}
-
-
 
 // ADD NEW FUNCTIONS ABOVE THIS LINE
 // *****************************************************************************
@@ -202,11 +142,6 @@ void SetupPaladinSpells(ScriptMgr * mgr)
 	mgr->register_dummy_aura( 20292, &SealOfRighteousness); // Seal of Righteousness (Rank 7)
 	mgr->register_dummy_aura( 20293, &SealOfRighteousness); // Seal of Righteousness (Rank 8)
 	mgr->register_dummy_aura( 27155, &SealOfRighteousness); // Seal of Righteousness (Rank 9)
-	mgr->register_dummy_spell(20473, &HolyShock);           // Holy Shock rank 1
-	mgr->register_dummy_spell(20929, &HolyShock);           // Holy Shock rank 2
-	mgr->register_dummy_spell(20930, &HolyShock);           // Holy Shock rank 3
-	mgr->register_dummy_spell(27174, &HolyShock);           // Holy Shock rank 4
-	mgr->register_dummy_spell(33072, &HolyShock);           // Holy Shock rank 5
 
 
 

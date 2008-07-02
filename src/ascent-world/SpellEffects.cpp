@@ -1362,7 +1362,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
 				return;
 
-			if(isHostile(u_caster, unitTarget))
+			if(isAttackable(u_caster,unitTarget))
 			{
 				u_caster->DealDamage(unitTarget, m_spellInfo->EffectBasePoints[i], 0, 0, m_spellInfo->Id, true);
 			}
