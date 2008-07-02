@@ -20989,6 +20989,25 @@ void ApplyNormalFixes()
 
 	// Insert rogue spell fixes here
 
+		//Vanish should dispell all movement impairing effects
+		sp = dbcSpell.LookupEntryForced( 1856 ); //Rank 1
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;
+		}
+
+		sp = dbcSpell.LookupEntryForced( 11329 ); //Rank 2
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;
+		}
+
+		sp = dbcSpell.LookupEntryForced( 26888 ); //Rank 3
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_DUMMY;
+		}
+
 	//////////////////////////////////////////
 	// PRIEST								//
 	//////////////////////////////////////////

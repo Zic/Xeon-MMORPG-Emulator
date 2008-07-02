@@ -1364,6 +1364,17 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				Heal((int32)(m_spellInfo->EffectBasePoints[i]*1.26629680998613037447));
 			}
 		}break;
+	case 1856:
+	case 11329:
+	case 26888:
+		{
+			if( !u_caster || !u_caster->IsInWorld() )
+				return;
+
+			u_caster->RemoveAllAurasByMechanic(MECHANIC_ROOTED, -1, true);
+			u_caster->RemoveAllAurasByMechanic(MECHANIC_ENSNARED, -1, true);
+			u_caster->RemoveAllAurasByMechanic(MECHANIC_STUNNED, -1, true);
+		}break;
 	}
 }
 
@@ -4195,7 +4206,7 @@ void Spell::SpellEffectSanctuary(uint32 i) // Stop all attacks made to you
 		return;
 
 	Object::InRangeSet::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
-	Object::InRangeSet::iterator itr_end = u_caster->GetInRangeOppFactsSetBegin();
+	Object::InRangeSet::iterator itr_end = u_caster->GetInRangeOppFactsSetEnd();
 	Unit * pUnit;
 
 	for( ; itr != itr_end; ++itr ) {
