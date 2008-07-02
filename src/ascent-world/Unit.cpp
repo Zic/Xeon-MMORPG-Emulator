@@ -1929,7 +1929,7 @@ void Unit::CalculateResistanceReduction(Unit *pVictim,dealdamage * dmg, SpellEnt
 	if((*dmg).school_type == 0)//physical
 	{		
 		if(this->IsPlayer())
-			ArmorReduce = PowerCostPctMod[0];
+			ArmorReduce = GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER_01); //Armor penetration
 		else
 			ArmorReduce = 0.0f;
 
