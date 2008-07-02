@@ -23,6 +23,7 @@
 class Player;
 class GameObjectAIScript;
 class GameObjectTemplate;
+class DynamicObject;
 
 struct GOQuestItem
 {
@@ -262,6 +263,7 @@ public:
 	bool HasLoot();
 	uint32 GetGOReqSkill();
 	MapCell * m_respawnCell;
+	DynamicObject * dynObj;
 
 protected:
 

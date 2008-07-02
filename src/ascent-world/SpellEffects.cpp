@@ -2059,16 +2059,15 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	//uncomment it if i'm wrong
 	//We are thinking in general so it might be useful later DK
 	
-	// grep: this is a hack!
-	// our shitty dynobj system doesnt support GO casters, so we gotta
-	// kinda have 2 summoners for traps that apply AA.
 	DynamicObject * dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
 	 
 	if(g_caster && g_caster->m_summoner && !unitTarget)
 	{
-		Unit * caster = g_caster->m_summoner;
-		dynObj->Create(caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
-			g_caster->GetPositionZ(), dur, r);
+		//Unit * caster = g_caster->m_summoner;
+		//dynObj->Create(caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
+		//	g_caster->GetPositionZ(), dur, r);  //This was the old hacky way xD bai bai hax with love from pepsi1x1
+		dynObj->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
+		g_caster->GetPositionZ(), dur, r);
 		m_AreaAura = true;
 		return;
 	}

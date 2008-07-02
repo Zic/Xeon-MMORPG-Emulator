@@ -45,6 +45,7 @@ GameObject::GameObject(uint64 guid)
 	m_ritualtarget = 0;
 	m_ritualmembers = NULL;
 	m_ritualspell = 0;
+	dynObj = 0;
 
 	m_quests = NULL;
 	pInfo = NULL;
@@ -726,11 +727,16 @@ void GameObject::OnRemoveInRangeObject(Object* pObj)
 
 void GameObject::RemoveFromWorld(bool free_guid)
 {
+	
 	WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
 	data << GetGUID();
 	SendMessageToSet(&data,true);
 
 	sEventMgr.RemoveEvents(this, EVENT_GAMEOBJECT_TRAP_SEARCH_TARGET);
+
+	if(dynObj != 0)
+		dynObj->Remove();
+
 	Object::RemoveFromWorld(free_guid);
 }
 

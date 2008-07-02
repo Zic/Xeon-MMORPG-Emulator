@@ -31,6 +31,7 @@ public:
 	DynamicObject( uint32 high, uint32 low );
 	~DynamicObject( );
 
+	void CreateFromGO(GameObject * caster, Spell * pSpell, float x, float y, float z, uint32 duration, float radius);
 	void Create(Unit * caster, Spell * pSpell, float x, float y, float z, uint32 duration, float radius);
 	void UpdateTargets();
 
@@ -41,6 +42,7 @@ public:
 protected:
 	
 	SpellEntry * m_spellProto;
+	GameObject * g_caster;
 	Unit * u_caster;
 	Player * p_caster;
 	Spell* m_parentSpell;
