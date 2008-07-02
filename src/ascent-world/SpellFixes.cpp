@@ -19678,7 +19678,10 @@ void ApplyNormalFixes()
 	// druid - Nature's Grace
 	sp = dbcSpell.LookupEntryForced( 16880 );
 	if( sp != NULL )
+	{
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+		sp->procChance = 100;
+	}
 
 	sp = dbcSpell.LookupEntryForced( 16886 );
 	if( sp != NULL )
