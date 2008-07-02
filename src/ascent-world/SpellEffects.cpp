@@ -391,9 +391,16 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			static_damage=true;
 			break;
 
-		case SPELL_HASH_LACERATE:
+		case SPELL_HASH_LACERATE: //2.4 Lacerate gets 1 more dmg per 20 AP
 			if( p_caster )
 				dmg += (uint32)(p_caster->GetAP()/20);
+			break;
+
+		case SPELL_HASH_SHADOW_BOLT: //First shadowbolt in shadow trance should dispel it
+			if( p_caster && p_caster->HasAura(17941) )
+			{
+				p_caster->RemoveAuraPosByNameHash(SPELL_HASH_SHADOW_TRANCE);
+			}
 		}
 	}
 
