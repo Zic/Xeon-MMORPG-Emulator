@@ -54,10 +54,13 @@ DynamicObject::~DynamicObject()
 		target->RemoveAura(m_spellProto->Id);
 	}
 
-	if(g_caster && g_caster->dynObj == this)
-		g_caster->dynObj = 0;
-	else if(u_caster && u_caster->dynObj == this)
+	if(g_caster->dynObjGO == this || u_caster->dynObj == this)
+	{
+		g_caster->dynObjGO = 0;
+		if (u_caster)
 		u_caster->dynObj = 0;
+	}
+		
 
 }
 
@@ -83,13 +86,13 @@ void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, f
 	g_caster = caster;
 	m_faction = caster->m_faction;
 	m_factionDBC = caster->m_factionDBC;
-	if(caster->dynObj != 0)
+	if(caster->dynObjGO != 0)
 	{
 		// expire next update
-		caster->dynObj->m_aliveDuration = 1;
-		caster->dynObj->UpdateTargets();
+		caster->dynObjGO->m_aliveDuration = 1;
+		caster->dynObjGO->UpdateTargets();
 	}
-	caster->dynObj = this;
+	caster->dynObjGO = this;
 	if(pSpell->g_caster)
 	{
 	   PushToWorld(pSpell->g_caster->GetMapMgr());

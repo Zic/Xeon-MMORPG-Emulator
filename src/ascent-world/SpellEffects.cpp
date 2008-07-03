@@ -2218,19 +2218,22 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	//uncomment it if i'm wrong
 	//We are thinking in general so it might be useful later DK
 	
-	DynamicObject * dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
+	
 	 
 	if(g_caster && g_caster->m_summoner && !unitTarget)
 	{
 		//Unit * caster = g_caster->m_summoner;
 		//dynObj->Create(caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
 		//	g_caster->GetPositionZ(), dur, r);  //This was the old hacky way xD bai bai hax with love from pepsi1x1
-		dynObj->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
+		DynamicObject * dynObjGO = g_caster->GetMapMgr()->CreateDynamicObject();
+		dynObjGO->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
 		g_caster->GetPositionZ(), dur, r);
 		m_AreaAura = true;
 		return;
 	}
-		
+
+	DynamicObject * dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
+
 	switch(m_targets.m_targetMask)
 	{		
 	case TARGET_FLAG_SELF:

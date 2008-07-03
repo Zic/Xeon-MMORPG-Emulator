@@ -45,7 +45,7 @@ GameObject::GameObject(uint64 guid)
 	m_ritualtarget = 0;
 	m_ritualmembers = NULL;
 	m_ritualspell = 0;
-	dynObj = 0;
+	dynObjGO = 0;
 
 	m_quests = NULL;
 	pInfo = NULL;
@@ -799,8 +799,8 @@ void GameObject::RemoveFromWorld(bool free_guid)
 
 	sEventMgr.RemoveEvents(this, EVENT_GAMEOBJECT_TRAP_SEARCH_TARGET);
 
-	if(dynObj != 0)
-		dynObj->Remove();
+	if(dynObjGO != 0)
+		dynObjGO->Remove();
 
 	Object::RemoveFromWorld(free_guid);
 }
