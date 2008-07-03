@@ -163,7 +163,7 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 	if (chr)
 	{
 		char *reason = strtok(NULL, "\n");
-		std::string kickreason = "No reason";
+		std::string kickreason = "No Reason";
 		if(reason)
 			kickreason = reason;
 
@@ -181,7 +181,7 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 		}*/ // we might have to re-work this
 
 		char msg[200];
-		snprintf(msg, 200, "%sGM: %s was kicked from the server by %s. Reason: %s", MSG_COLOR_RED, chr->GetName(), m_session->GetPlayer()->GetName(), kickreason.c_str());
+		snprintf(msg, 200, "%s[SERVER] %s was kicked from the server by %s. Reason: %s",MSG_COLOR_RED, chr->GetName(), m_session->GetPlayer()->GetName(), kickreason.c_str());
 		sWorld.SendWorldText(msg, NULL);
 		//sWorld.SendIRCMessage(msg);
 		SystemMessageToPlr(chr, "You are being kicked from the server by %s. Reason: %s", m_session->GetPlayer()->GetName(), kickreason.c_str());
