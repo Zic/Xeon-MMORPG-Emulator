@@ -1373,7 +1373,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		}break;
 	case 1856:
 	case 11329:
-	case 26888:
+	case 26888: //Vanish - remove immobilize
 		{
 			if( !u_caster || !u_caster->IsInWorld() )
 				return;
@@ -1381,6 +1381,165 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			u_caster->RemoveAllAurasByMechanic(MECHANIC_ROOTED, -1, true);
 			u_caster->RemoveAllAurasByMechanic(MECHANIC_ENSNARED, -1, true);
 			u_caster->RemoveAllAurasByMechanic(MECHANIC_STUNNED, -1, true);
+		}break;
+	case 23989: //Hunter readiness
+		{
+			if( p_caster->HasSpell(19263) ) p_caster->ClearCooldownForSpell(19263); // Deterrence
+			if( p_caster->HasSpell(20910) ) p_caster->ClearCooldownForSpell(20910); // Counterattack
+			if( p_caster->HasSpell(14268) ) p_caster->ClearCooldownForSpell(14268); // Wing Clip
+			if( p_caster->HasSpell(136) ) p_caster->ClearCooldownForSpell(136); // Mend Pet
+			if( p_caster->HasSpell(27044) ) p_caster->ClearCooldownForSpell(27044); // Aspect of the Hawk
+			if( p_caster->HasSpell(27045) ) p_caster->ClearCooldownForSpell(27045); // Aspect of the Wild
+			if( p_caster->HasSpell(14264) ) p_caster->ClearCooldownForSpell(14264); // Raptor Strike
+			if( p_caster->HasSpell(14265) ) p_caster->ClearCooldownForSpell(14265); // Raptor Strike
+			if( p_caster->HasSpell(3043) ) p_caster->ClearCooldownForSpell(3043); // Scorpid Sting
+			if( p_caster->HasSpell(14267) ) p_caster->ClearCooldownForSpell(14267); // Wing Clip
+			if( p_caster->HasSpell(14260) ) p_caster->ClearCooldownForSpell(14260); // Raptor Strike
+			if( p_caster->HasSpell(14261) ) p_caster->ClearCooldownForSpell(14261); // Raptor Strike
+			if( p_caster->HasSpell(14262) ) p_caster->ClearCooldownForSpell(14262); // Raptor Strike
+			if( p_caster->HasSpell(14263) ) p_caster->ClearCooldownForSpell(14263); // Raptor Strike
+			if( p_caster->HasSpell(1543) ) p_caster->ClearCooldownForSpell(1543); // Flare
+			if( p_caster->HasSpell(34600) ) p_caster->ClearCooldownForSpell(34600); // Snake Trap
+			if( p_caster->HasSpell(34120) ) p_caster->ClearCooldownForSpell(34120); // Steady Shot
+			if( p_caster->HasSpell(13163) ) p_caster->ClearCooldownForSpell(13163); // Aspect of the Monkey
+			if( p_caster->HasSpell(13161) ) p_caster->ClearCooldownForSpell(13161); // Aspect of the Beast
+			if( p_caster->HasSpell(13165) ) p_caster->ClearCooldownForSpell(13165); // Aspect of the Hawk
+			if( p_caster->HasSpell(20906) ) p_caster->ClearCooldownForSpell(20906); // Trueshot Aura
+			if( p_caster->HasSpell(14266) ) p_caster->ClearCooldownForSpell(14266); // Raptor Strike
+			if( p_caster->HasSpell(20905) ) p_caster->ClearCooldownForSpell(20905); // Trueshot Aura
+			if( p_caster->HasSpell(5384) ) p_caster->ClearCooldownForSpell(5384); // Feign Death
+			if( p_caster->HasSpell(20903) ) p_caster->ClearCooldownForSpell(20903); // Aimed Shot
+			if( p_caster->HasSpell(20900) ) p_caster->ClearCooldownForSpell(20900); // Aimed Shot
+			if( p_caster->HasSpell(20901) ) p_caster->ClearCooldownForSpell(20901); // Aimed Shot
+			if( p_caster->HasSpell(25295) ) p_caster->ClearCooldownForSpell(25295); // Serpent Sting
+			if( p_caster->HasSpell(25294) ) p_caster->ClearCooldownForSpell(25294); // Multi-Shot
+			if( p_caster->HasSpell(25296) ) p_caster->ClearCooldownForSpell(25296); // Aspect of the Hawk
+			if( p_caster->HasSpell(6991) ) p_caster->ClearCooldownForSpell(6991); // Feed Pet
+			if( p_caster->HasSpell(20909) ) p_caster->ClearCooldownForSpell(20909); // Counterattack
+			if( p_caster->HasSpell(1494) ) p_caster->ClearCooldownForSpell(1494); // Track Beasts
+			if( p_caster->HasSpell(1495) ) p_caster->ClearCooldownForSpell(1495); // Mongoose Bite
+			if( p_caster->HasSpell(1499) ) p_caster->ClearCooldownForSpell(1499); // Freezing Trap
+			if( p_caster->HasSpell(19879) ) p_caster->ClearCooldownForSpell(19879); // Track Dragonkin
+			if( p_caster->HasSpell(20043) ) p_caster->ClearCooldownForSpell(20043); // Aspect of the Wild
+			if( p_caster->HasSpell(3034) ) p_caster->ClearCooldownForSpell(3034); // Viper Sting
+			if( p_caster->HasSpell(13552) ) p_caster->ClearCooldownForSpell(13552); // Serpent Sting
+			if( p_caster->HasSpell(13551) ) p_caster->ClearCooldownForSpell(13551); // Serpent Sting
+			if( p_caster->HasSpell(13550) ) p_caster->ClearCooldownForSpell(13550); // Serpent Sting
+			if( p_caster->HasSpell(13159) ) p_caster->ClearCooldownForSpell(13159); // Aspect of the Pack
+			if( p_caster->HasSpell(13554) ) p_caster->ClearCooldownForSpell(13554); // Serpent Sting
+			if( p_caster->HasSpell(13553) ) p_caster->ClearCooldownForSpell(13553); // Serpent Sting
+			if( p_caster->HasSpell(19306) ) p_caster->ClearCooldownForSpell(19306); // Counterattack
+			if( p_caster->HasSpell(27046) ) p_caster->ClearCooldownForSpell(27046); // Mend Pet
+			if( p_caster->HasSpell(14269) ) p_caster->ClearCooldownForSpell(14269); // Mongoose Bite
+			if( p_caster->HasSpell(15629) ) p_caster->ClearCooldownForSpell(15629); // Distracting Shot
+			if( p_caster->HasSpell(982) ) p_caster->ClearCooldownForSpell(982); // Revive Pet
+			if( p_caster->HasSpell(14325) ) p_caster->ClearCooldownForSpell(14325); // Hunter's Mark
+			if( p_caster->HasSpell(14324) ) p_caster->ClearCooldownForSpell(14324); // Hunter's Mark
+			if( p_caster->HasSpell(19878) ) p_caster->ClearCooldownForSpell(19878); // Track Demons
+			if( p_caster->HasSpell(14326) ) p_caster->ClearCooldownForSpell(14326); // Scare Beast
+			if( p_caster->HasSpell(14321) ) p_caster->ClearCooldownForSpell(14321); // Aspect of the Hawk
+			if( p_caster->HasSpell(14320) ) p_caster->ClearCooldownForSpell(14320); // Aspect of the Hawk
+			if( p_caster->HasSpell(14323) ) p_caster->ClearCooldownForSpell(14323); // Hunter's Mark
+			if( p_caster->HasSpell(13543) ) p_caster->ClearCooldownForSpell(13543); // Mend Pet
+			if( p_caster->HasSpell(13549) ) p_caster->ClearCooldownForSpell(13549); // Serpent Sting
+			if( p_caster->HasSpell(27066) ) p_caster->ClearCooldownForSpell(27066); // Trueshot Aura
+			if( p_caster->HasSpell(27067) ) p_caster->ClearCooldownForSpell(27067); // Counterattack
+			if( p_caster->HasSpell(20190) ) p_caster->ClearCooldownForSpell(20190); // Aspect of the Wild
+			if( p_caster->HasSpell(3045) ) p_caster->ClearCooldownForSpell(3045); // Rapid Fire
+			if( p_caster->HasSpell(3044) ) p_caster->ClearCooldownForSpell(3044); // Arcane Shot
+			if( p_caster->HasSpell(19577) ) p_caster->ClearCooldownForSpell(19577); // Intimidation
+			if( p_caster->HasSpell(14290) ) p_caster->ClearCooldownForSpell(14290); // Multi-Shot
+			if( p_caster->HasSpell(19574) ) p_caster->ClearCooldownForSpell(19574); // Bestial Wrath
+			if( p_caster->HasSpell(14295) ) p_caster->ClearCooldownForSpell(14295); // Volley
+			if( p_caster->HasSpell(14294) ) p_caster->ClearCooldownForSpell(14294); // Volley
+			if( p_caster->HasSpell(2641) ) p_caster->ClearCooldownForSpell(2641); // Dismiss Pet
+			if( p_caster->HasSpell(2643) ) p_caster->ClearCooldownForSpell(2643); // Multi-Shot
+			if( p_caster->HasSpell(3661) ) p_caster->ClearCooldownForSpell(3661); // Mend Pet
+			if( p_caster->HasSpell(3662) ) p_caster->ClearCooldownForSpell(3662); // Mend Pet
+			if( p_caster->HasSpell(15630) ) p_caster->ClearCooldownForSpell(15630); // Distracting Shot
+			if( p_caster->HasSpell(15631) ) p_caster->ClearCooldownForSpell(15631); // Distracting Shot
+			if( p_caster->HasSpell(15632) ) p_caster->ClearCooldownForSpell(15632); // Distracting Shot
+			if( p_caster->HasSpell(1130) ) p_caster->ClearCooldownForSpell(1130); // Hunter's Mark
+			if( p_caster->HasSpell(24133) ) p_caster->ClearCooldownForSpell(24133); // Wyvern Sting
+			if( p_caster->HasSpell(24132) ) p_caster->ClearCooldownForSpell(24132); // Wyvern Sting
+			if( p_caster->HasSpell(13555) ) p_caster->ClearCooldownForSpell(13555); // Serpent Sting
+			if( p_caster->HasSpell(27019) ) p_caster->ClearCooldownForSpell(27019); // Arcane Shot
+			if( p_caster->HasSpell(781) ) p_caster->ClearCooldownForSpell(781); // Disengage
+			if( p_caster->HasSpell(27015) ) p_caster->ClearCooldownForSpell(27015); // Disengage
+			if( p_caster->HasSpell(27014) ) p_caster->ClearCooldownForSpell(27014); // Raptor Strike
+			if( p_caster->HasSpell(27016) ) p_caster->ClearCooldownForSpell(27016); // Serpent Sting
+			if( p_caster->HasSpell(14282) ) p_caster->ClearCooldownForSpell(14282); // Arcane Shot
+			if( p_caster->HasSpell(14283) ) p_caster->ClearCooldownForSpell(14283); // Arcane Shot
+			if( p_caster->HasSpell(14280) ) p_caster->ClearCooldownForSpell(14280); // Viper Sting
+			if( p_caster->HasSpell(14281) ) p_caster->ClearCooldownForSpell(14281); // Arcane Shot
+			if( p_caster->HasSpell(14286) ) p_caster->ClearCooldownForSpell(14286); // Arcane Shot
+			if( p_caster->HasSpell(14287) ) p_caster->ClearCooldownForSpell(14287); // Arcane Shot
+			if( p_caster->HasSpell(14284) ) p_caster->ClearCooldownForSpell(14284); // Arcane Shot
+			if( p_caster->HasSpell(14285) ) p_caster->ClearCooldownForSpell(14285); // Arcane Shot
+			if( p_caster->HasSpell(14288) ) p_caster->ClearCooldownForSpell(14288); // Multi-Shot
+			if( p_caster->HasSpell(14289) ) p_caster->ClearCooldownForSpell(14289); // Multi-Shot
+			if( p_caster->HasSpell(19386) ) p_caster->ClearCooldownForSpell(19386); // Wyvern Sting
+			if( p_caster->HasSpell(19506) ) p_caster->ClearCooldownForSpell(19506); // Trueshot Aura
+			if( p_caster->HasSpell(19503) ) p_caster->ClearCooldownForSpell(19503); // Scatter Shot
+			if( p_caster->HasSpell(20736) ) p_caster->ClearCooldownForSpell(20736); // Distracting Shot
+			if( p_caster->HasSpell(34490) ) p_caster->ClearCooldownForSpell(34490); // Silencing Shot
+			if( p_caster->HasSpell(14303) ) p_caster->ClearCooldownForSpell(14303); // Immolation Trap
+			if( p_caster->HasSpell(14302) ) p_caster->ClearCooldownForSpell(14302); // Immolation Trap
+			if( p_caster->HasSpell(20904) ) p_caster->ClearCooldownForSpell(20904); // Aimed Shot
+			if( p_caster->HasSpell(14305) ) p_caster->ClearCooldownForSpell(14305); // Immolation Trap
+			if( p_caster->HasSpell(14304) ) p_caster->ClearCooldownForSpell(14304); // Immolation Trap
+			if( p_caster->HasSpell(34074) ) p_caster->ClearCooldownForSpell(34074); // Aspect of the Viper
+			if( p_caster->HasSpell(13809) ) p_caster->ClearCooldownForSpell(13809); // Frost Trap
+			if( p_caster->HasSpell(14319) ) p_caster->ClearCooldownForSpell(14319); // Aspect of the Hawk
+			if( p_caster->HasSpell(14316) ) p_caster->ClearCooldownForSpell(14316); // Explosive Trap
+			if( p_caster->HasSpell(14317) ) p_caster->ClearCooldownForSpell(14317); // Explosive Trap
+			if( p_caster->HasSpell(14310) ) p_caster->ClearCooldownForSpell(14310); // Freezing Trap
+			if( p_caster->HasSpell(14311) ) p_caster->ClearCooldownForSpell(14311); // Freezing Trap
+			if( p_caster->HasSpell(27018) ) p_caster->ClearCooldownForSpell(27018); // Viper Sting
+			if( p_caster->HasSpell(13544) ) p_caster->ClearCooldownForSpell(13544); // Mend Pet
+			if( p_caster->HasSpell(14327) ) p_caster->ClearCooldownForSpell(14327); // Scare Beast
+			if( p_caster->HasSpell(6197) ) p_caster->ClearCooldownForSpell(6197); // Eagle Eye
+			if( p_caster->HasSpell(1515) ) p_caster->ClearCooldownForSpell(1515); // Tame Beast
+			if( p_caster->HasSpell(1462) ) p_caster->ClearCooldownForSpell(1462); // Beast Lore
+			if( p_caster->HasSpell(1510) ) p_caster->ClearCooldownForSpell(1510); // Volley
+			if( p_caster->HasSpell(1513) ) p_caster->ClearCooldownForSpell(1513); // Scare Beast
+			if( p_caster->HasSpell(883) ) p_caster->ClearCooldownForSpell(883); // Call Pet
+			if( p_caster->HasSpell(5116) ) p_caster->ClearCooldownForSpell(5116); // Concussive Shot
+			if( p_caster->HasSpell(13795) ) p_caster->ClearCooldownForSpell(13795); // Immolation Trap
+			if( p_caster->HasSpell(13542) ) p_caster->ClearCooldownForSpell(13542); // Mend Pet
+			if( p_caster->HasSpell(14322) ) p_caster->ClearCooldownForSpell(14322); // Aspect of the Hawk
+			if( p_caster->HasSpell(5118) ) p_caster->ClearCooldownForSpell(5118); // Aspect of the Cheetah
+			if( p_caster->HasSpell(27025) ) p_caster->ClearCooldownForSpell(27025); // Explosive Trap
+			if( p_caster->HasSpell(27020) ) p_caster->ClearCooldownForSpell(27020); // Distracting Shot
+			if( p_caster->HasSpell(27021) ) p_caster->ClearCooldownForSpell(27021); // Multi-Shot
+			if( p_caster->HasSpell(27022) ) p_caster->ClearCooldownForSpell(27022); // Volley
+			if( p_caster->HasSpell(27023) ) p_caster->ClearCooldownForSpell(27023); // Immolation Trap
+			if( p_caster->HasSpell(20902) ) p_caster->ClearCooldownForSpell(20902); // Aimed Shot
+			if( p_caster->HasSpell(27068) ) p_caster->ClearCooldownForSpell(27068); // Wyvern Sting
+			if( p_caster->HasSpell(13813) ) p_caster->ClearCooldownForSpell(13813); // Explosive Trap
+			if( p_caster->HasSpell(27065) ) p_caster->ClearCooldownForSpell(27065); // Aimed Shot
+			if( p_caster->HasSpell(36916) ) p_caster->ClearCooldownForSpell(36916); // Mongoose Bite
+			if( p_caster->HasSpell(14271) ) p_caster->ClearCooldownForSpell(14271); // Mongoose Bite
+			if( p_caster->HasSpell(34026) ) p_caster->ClearCooldownForSpell(34026); // Kill Command
+			if( p_caster->HasSpell(19883) ) p_caster->ClearCooldownForSpell(19883); // Track Humanoids
+			if( p_caster->HasSpell(19882) ) p_caster->ClearCooldownForSpell(19882); // Track Giants
+			if( p_caster->HasSpell(19880) ) p_caster->ClearCooldownForSpell(19880); // Track Elementals
+			if( p_caster->HasSpell(19885) ) p_caster->ClearCooldownForSpell(19885); // Track Hidden
+			if( p_caster->HasSpell(19884) ) p_caster->ClearCooldownForSpell(19884); // Track Undead
+			if( p_caster->HasSpell(14273) ) p_caster->ClearCooldownForSpell(14273); // Disengage
+			if( p_caster->HasSpell(14272) ) p_caster->ClearCooldownForSpell(14272); // Disengage
+			if( p_caster->HasSpell(14270) ) p_caster->ClearCooldownForSpell(14270); // Mongoose Bite
+			if( p_caster->HasSpell(14274) ) p_caster->ClearCooldownForSpell(14274); // Distracting Shot
+			if( p_caster->HasSpell(2973) ) p_caster->ClearCooldownForSpell(2973); // Raptor Strike
+			if( p_caster->HasSpell(14279) ) p_caster->ClearCooldownForSpell(14279); // Viper Sting
+			if( p_caster->HasSpell(2974) ) p_caster->ClearCooldownForSpell(2974); // Wing Clip
+			if( p_caster->HasSpell(1978) ) p_caster->ClearCooldownForSpell(1978); // Serpent Sting
+			if( p_caster->HasSpell(3111) ) p_caster->ClearCooldownForSpell(3111); // Mend Pet
+			if( p_caster->HasSpell(1002) ) p_caster->ClearCooldownForSpell(1002); // Eyes of the Beast
+			if( p_caster->HasSpell(19801) ) p_caster->ClearCooldownForSpell(19801); // Tranquilizing Shot
+			if( p_caster->HasSpell(19434) ) p_caster->ClearCooldownForSpell(19434); // Aimed Shot
+			if( p_caster->HasSpell(34477) ) p_caster->ClearCooldownForSpell(34477); // Misdirection
+			if( p_caster->HasSpell(14318) ) p_caster->ClearCooldownForSpell(14318); // Aspect of the Hawk
 		}break;
 	}
 }

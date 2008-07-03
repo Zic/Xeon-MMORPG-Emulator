@@ -20865,6 +20865,17 @@ void ApplyNormalFixes()
 		if( sp != NULL )
 			sp->EffectBasePoints[0] = 750;
 
+		//Holy Shield procfixes
+		sp = dbcSpell.LookupEntryForced( 20925 );
+		if( sp != NULL )
+			sp->procFlags = PROC_ON_BLOCK_VICTIM;
+		for(int i = 20927; i <= 20929; i++)
+		{
+			sp = dbcSpell.LookupEntryForced( i );
+			if( sp != NULL )
+				sp->procFlags = PROC_ON_BLOCK_VICTIM;
+		}
+
 	//////////////////////////////////////////
 	// HUNTER								//
 	//////////////////////////////////////////
