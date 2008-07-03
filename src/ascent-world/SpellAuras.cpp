@@ -2400,6 +2400,30 @@ void Aura::SpellAuraModStun(bool apply)
 	}
 	else
 	{
+		//This is for wyvern sting. Damage caused when aura ends.
+		if(GetCaster() && GetCaster()->IsUnit())
+		{
+			Unit* u_caster = static_cast<Unit*>(GetCaster());
+			switch(pSpellId)
+			{
+			case 19386:
+				{
+					u_caster->CastSpell(p_target, 24131, true);
+				}break;
+			case 24132:
+				{
+					u_caster->CastSpell(p_target, 24134, true);
+				}break;
+			case 24133:
+				{
+					u_caster->CastSpell(p_target, 24135, true);
+				}break;
+			case 27068:
+				{
+					u_caster->CastSpell(p_target, 27069, true);
+				}break;
+			}
+		}
 		m_target->m_rooted--;
 
 		if(m_target->m_rooted == 0)
