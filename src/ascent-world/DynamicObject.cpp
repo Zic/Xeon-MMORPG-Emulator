@@ -38,6 +38,8 @@ DynamicObject::DynamicObject(uint32 high, uint32 low)
 	u_caster = 0;
 	m_spellProto = 0;
 	p_caster = 0;
+	TypeDynGO = 0;
+	TypeDynUnit = 0;
 }
 
 DynamicObject::~DynamicObject()
@@ -54,14 +56,17 @@ DynamicObject::~DynamicObject()
 		target->RemoveAura(m_spellProto->Id);
 	}
 
-	if(g_caster->dynObjGO == this || u_caster->dynObj == this)
+	if(TypeDynGO && g_caster->dynObj == this)
 	{
-		g_caster->dynObjGO = 0;
-		if (u_caster)
-		u_caster->dynObj = 0;
+		g_caster->dynObj = 0;
+		TypeDynGO = 0;
 	}
-		
-
+	if(TypeDynUnit && u_caster->dynObj == this)
+	{
+		u_caster->dynObj = 0;
+		TypeDynUnit = 0;
+	}
+	
 }
 
 void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, float y, float z, uint32 duration, float radius)
@@ -86,13 +91,14 @@ void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, f
 	g_caster = caster;
 	m_faction = caster->m_faction;
 	m_factionDBC = caster->m_factionDBC;
-	if(caster->dynObjGO != 0)
+	TypeDynGO = 1;
+	if(caster->dynObj != 0)
 	{
 		// expire next update
-		caster->dynObjGO->m_aliveDuration = 1;
-		caster->dynObjGO->UpdateTargets();
+		caster->dynObj->m_aliveDuration = 1;
+		caster->dynObj->UpdateTargets();
 	}
-	caster->dynObjGO = this;
+	caster->dynObj = this;
 	if(pSpell->g_caster)
 	{
 	   PushToWorld(pSpell->g_caster->GetMapMgr());
@@ -129,6 +135,7 @@ void DynamicObject::Create(Unit * caster, Spell * pSpell, float x, float y, floa
 	u_caster = caster;
 	m_faction = caster->m_faction;
 	m_factionDBC = caster->m_factionDBC;
+	TypeDynUnit = 1;
 	if(caster->dynObj != 0)
 	{
 		// expire next update

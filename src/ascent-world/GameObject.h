@@ -263,7 +263,7 @@ public:
 	bool HasLoot();
 	uint32 GetGOReqSkill();
 	MapCell * m_respawnCell;
-	DynamicObject * dynObjGO;
+	DynamicObject * dynObj;
 
 	//Spells
 

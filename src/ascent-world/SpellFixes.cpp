@@ -20991,9 +20991,10 @@ void ApplyNormalFixes()
 		if( sp != NULL )
 		{
 			sp->procFlags = PROC_ON_TRAP_TRIGGER;
-			sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
-			sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
-			sp->Effect[1] = 0;  //stop strange effects
+			//sp->EffectTriggerSpell[0] = 13810;
+			sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+			sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+			//sp->Effect[1] = 0;  //stop strange effects
 			sp->Effect[2] = 0;  //stop strange effects
 		}
 

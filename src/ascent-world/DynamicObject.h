@@ -49,6 +49,8 @@ protected:
 	DynamicObjectList targets;
 	FactionRangeList  m_inRangeOppFactions;
 	
+	uint32 TypeDynGO;
+	uint32 TypeDynUnit;
 	uint32 m_aliveDuration;
 	uint32 _fields[DYNAMICOBJECT_END];
 };

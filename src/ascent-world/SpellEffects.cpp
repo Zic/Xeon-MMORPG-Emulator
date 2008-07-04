@@ -2207,7 +2207,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 {
 	if(m_AreaAura == true || !m_caster->IsInWorld())
 		return;
-	//create only 1 dyn object
+
 	uint32 dur = GetDuration();
 	float r = GetRadius(i);
 
@@ -2217,29 +2217,30 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	//it can'be on unit or self or item or object
 	//uncomment it if i'm wrong
 	//We are thinking in general so it might be useful later DK
-	
+	DynamicObject * dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
 	
 	 
-	if(g_caster && g_caster->m_summoner && !unitTarget)
+	if(g_caster && g_caster->IsInWorld() && g_caster->m_summoner && !unitTarget)
 	{
 		//Unit * caster = g_caster->m_summoner;
 		//dynObj->Create(caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
 		//	g_caster->GetPositionZ(), dur, r);  //This was the old hacky way xD bai bai hax with love from pepsi1x1
-		DynamicObject * dynObjGO = g_caster->GetMapMgr()->CreateDynamicObject();
-		dynObjGO->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
+		dynObj->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
 		g_caster->GetPositionZ(), dur, r);
+		//sLog.outColor(TRED, "GO CASTER DYNOBJ");
 		m_AreaAura = true;
 		return;
 	}
 
-	DynamicObject * dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
+	
 
 	switch(m_targets.m_targetMask)
 	{		
 	case TARGET_FLAG_SELF:
 		{
 			dynObj->Create(u_caster, this,	m_caster->GetPositionX(), 
-				m_caster->GetPositionY(), m_caster->GetPositionZ(), dur,r);		 
+				m_caster->GetPositionY(), m_caster->GetPositionZ(), dur,r);
+			//sLog.outColor(TRED, "TARGET_FLAG_SELF");
 		}break;
 	case TARGET_FLAG_UNIT:
 		{
@@ -2247,6 +2248,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 				break;
 			dynObj->Create( u_caster, this, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
+			//sLog.outColor(TRED, "TARGET_FLAG_UNIT");
 		}break;
 	case TARGET_FLAG_OBJECT:
 		{
@@ -2256,18 +2258,21 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 				break;
 			dynObj->Create(u_caster, this, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
+			//sLog.outColor(TRED, "TARGET_FLAG_OBJECT");
 		}break;
 	case TARGET_FLAG_SOURCE_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
 			dynObj->Create(u_caster, this, m_targets.m_srcX,
 				m_targets.m_srcY, m_targets.m_srcZ, dur,r);
+			//sLog.outColor(TRED, "TARGET_FLAG_SOURCE_LOCATION");
 		}break;
 	case TARGET_FLAG_DEST_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
 			dynObj->Create(u_caster?u_caster:g_caster->m_summoner, this,
 				m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ,dur,r);
+			//sLog.outColor(TRED, "TARGET_FLAG_DEST_LOCATION");
 		}break;
 	default:
 		return;
