@@ -4384,7 +4384,6 @@ void Spell::SpellEffectSanctuary(uint32 i) // Stop all attacks made to you
 
 	for( ; itr != itr_end; ++itr ) {
 		pUnit = static_cast<Unit*>(*itr);
-		++itr;
 
 		if( pUnit->GetTypeId() == TYPEID_UNIT )
 			pUnit->GetAIInterface()->RemoveThreatByPtr( u_caster );
