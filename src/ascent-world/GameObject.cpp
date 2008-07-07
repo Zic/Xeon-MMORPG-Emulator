@@ -267,8 +267,10 @@ void GameObject::Update(uint32 p_time)
 				tgt.m_destZ = GetPositionZ();
 				sp->prepare(&tgt);
 				
-				if(pInfo->Type == 6)
+				if(pInfo->Type == GAMEOBJECT_TYPE_TRAP)
 				{
+					if(!pUnit->isAlive()) //Ghosts shouldnt trigger traps xD
+						continue;
 					if(m_summoner != NULL)
 						m_summoner->HandleProc(PROC_ON_TRAP_TRIGGER, pUnit, spell);
 				} 
