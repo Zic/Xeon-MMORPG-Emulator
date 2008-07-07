@@ -1371,17 +1371,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				Heal((int32)(m_spellInfo->EffectBasePoints[i]*1.26629680998613037447));
 			}
 		}break;
-	case 1856:
-	case 11329:
-	case 26888: //Vanish - remove immobilize
-		{
-			if( !u_caster || !u_caster->IsInWorld() )
-				return;
-
-			u_caster->RemoveAllAurasByMechanic(MECHANIC_ROOTED, -1, true);
-			u_caster->RemoveAllAurasByMechanic(MECHANIC_ENSNARED, -1, true);
-			u_caster->RemoveAllAurasByMechanic(MECHANIC_STUNNED, -1, true);
-		}break;
 	case 23989: //Hunter readiness
 		{
 			if( p_caster->HasSpell(19263) ) p_caster->ClearCooldownForSpell(19263); // Deterrence
