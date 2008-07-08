@@ -834,10 +834,10 @@ void WorldSession::HandleCharterSign( WorldPacket & recv_data )
 	recv_data >> item_guid;
 
 	Charter * c = objmgr.GetCharterByItemGuid(item_guid);
-	if(c == 0)
+	if(c == NULL)
 		return;
 
-	for(uint32 i = 0; i < 9; ++i)
+	for(uint32 i = 0; c->SignatureCount; ++i)
 	{
 		if(c->Signatures[i] == _player->GetGUID())
 		{
