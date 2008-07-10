@@ -1303,7 +1303,7 @@ void Aura::SpellAuraDummy(bool apply)
 	{
 	case 13809: //Frost Traps
 	{
-	Unit *caster = static_cast< Unit* >( GetUnitCaster() );
+	Unit *u_caster = static_cast< Unit* >( GetUnitCaster() );
 	Unit *target = static_cast< Unit* >( GetUnitCaster() );	
 
 	SpellEntry *spellentry = dbcSpell.LookupEntry( 13810 );
@@ -1316,16 +1316,16 @@ void Aura::SpellAuraDummy(bool apply)
 		return;
 	}
 	
-	Spell *sp = new Spell(caster, spellentry, false, NULL);
+	Spell *sp = new Spell(u_caster, spellentry, true, NULL);
 	if(!sp)
 	{
 		delete sp;
 		return;
 	}
-
 	SpellCastTargets targets;
 	targets.m_unitTarget = target->GetGUID();
 	sp->prepare(&targets);
+	u_caster->RemoveAura(13810);
 
 	}break;
 	case 66:
@@ -2659,8 +2659,7 @@ void Aura::SpellAuraModStealth(bool apply)
 	}
 	else 
 	{
-		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
-			m_target->SetStealth(0);
+		m_target->SetStealth(0);
 		m_target->m_stealthLevel -= mod->m_amount;
 		if( m_spellProto->NameHash == SPELL_HASH_STEALTH) 
 			m_target->RemoveFlag(UNIT_FIELD_BYTES_2,0x1E000000);

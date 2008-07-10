@@ -27,7 +27,7 @@
 // pooled allocations
 //#define STORAGE_ALLOCATION_POOLS 1
 
-#define STORAGE_ARRAY_MAX 200000
+#define STORAGE_ARRAY_MAX 10000020
 
 #ifdef STORAGE_ALLOCATION_POOLS
 template<class T>

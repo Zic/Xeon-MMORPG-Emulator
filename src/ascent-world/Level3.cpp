@@ -1240,6 +1240,8 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args, WorldSession* m_ses
 	}
 
 	plr->ApplyLevelInfo(Info, Level);
+	plr->Reset_Talents();
+
 	return true;
 }
 

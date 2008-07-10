@@ -73,14 +73,18 @@ void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, f
 {
 	Object::_Create(caster->GetMapId(),x, y, z, 0);
 	m_parentSpell = pSpell;
-	p_caster = pSpell->p_caster;
-
+		
+	p_caster = static_cast<Player*>( caster->m_summoner );
+	u_caster = static_cast<Unit*>( caster->m_summoner );
+	
 	m_spellProto = pSpell->m_spellInfo;
 	SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
 
 	m_uint32Values[OBJECT_FIELD_ENTRY] = m_spellProto->Id;
 	m_uint32Values[DYNAMICOBJECT_BYTES] = 0x01eeeeee;
 	m_uint32Values[DYNAMICOBJECT_SPELLID] = m_spellProto->Id;
+	sLog.outColor(TBLUE, "Spell id: %u\n", m_spellProto->Id);
+	sLog.outColor(TNORMAL, "\n");
 
 	m_floatValues[DYNAMICOBJECT_RADIUS] = radius;
 	m_floatValues[DYNAMICOBJECT_POS_X]  = x;
@@ -216,7 +220,19 @@ void DynamicObject::UpdateTargets()
 
 			if(GetDistanceSq(target) <= radius)
 			{
-				pAura = new Aura(m_spellProto, m_aliveDuration, u_caster, target);
+				if(m_spellProto->Effect[1] == 27 || m_spellProto->Effect[2] == 27 || m_spellProto->Effect[3] == 27 )
+				{
+					sLog.outColor(TBLUE, "New Aura: u-caster, u_caster, %u\n", m_spellProto->Id);
+					sLog.outColor(TNORMAL, "\n");
+					pAura = new Aura(m_spellProto, m_aliveDuration, u_caster, u_caster);
+				}
+				else
+				{
+					sLog.outColor(TBLUE, "New Aura: u-caster, target, %u\n", m_spellProto->Id);
+					sLog.outColor(TNORMAL, "\n");
+					pAura = new Aura(m_spellProto, m_aliveDuration, u_caster, target);
+				}
+		
 				for(uint32 i = 0; i < 3; ++i)
 				{
 					if(m_spellProto->Effect[i] == 27)
@@ -224,8 +240,9 @@ void DynamicObject::UpdateTargets()
 						pAura->AddMod(m_spellProto->EffectApplyAuraName[i],
 							m_spellProto->EffectBasePoints[i]+1, m_spellProto->EffectMiscValue[i], i);
 					}
-				}
+				}				
 				target->AddAura(pAura);
+
 				if(p_caster)
 				{
 					p_caster->HandleProc(PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL,target, m_spellProto);

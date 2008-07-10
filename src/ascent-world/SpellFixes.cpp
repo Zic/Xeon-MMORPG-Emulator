@@ -16824,7 +16824,7 @@ void ApplyNormalFixes()
 		sp->EffectSpellGroupRelation_high[2] = 128 | 4096;
 	}
 
-	//we need to adress this somehow : shot
+	//we need to adress this somehow : shoot
 	sp = dbcSpell.LookupEntryForced( 3018 );
 	if( sp != NULL )
 		sp->SpellGroupType = 4;
@@ -20902,10 +20902,14 @@ void ApplyNormalFixes()
 	//Hunter - Go for the Throat
 		sp = dbcSpell.LookupEntryForced( 34950 );
 		if( sp != NULL )
+		{
 			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+		}
 		sp = dbcSpell.LookupEntryForced( 34954 );
 		if( sp != NULL )
+		{
 			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+		}
 		sp = dbcSpell.LookupEntryForced( 34952 );
 		if( sp != NULL )
 			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
@@ -20992,10 +20996,10 @@ void ApplyNormalFixes()
 		{
 			sp->procFlags = PROC_ON_TRAP_TRIGGER;
 			//sp->EffectTriggerSpell[0] = 13810;
-			sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
-			sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+			//sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+			//sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 			//sp->Effect[1] = 0;  //stop strange effects
-			sp->Effect[2] = 0;  //stop strange effects
+			//sp->Effect[2] = 0;  //stop strange effects
 		}
 
 	//////////////////////////////////////////

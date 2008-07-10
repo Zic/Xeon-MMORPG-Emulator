@@ -47,7 +47,7 @@ protected:
 	void event_ModifyTime(uint32 EventType, uint32 Time);
 	void event_ModifyTimeAndTimeLeft(uint32 EventType, uint32 Time);
 	bool event_HasEvent(uint32 EventType);
-	void event_RemoveByPointer(TimedEvent * ev);
+	//void event_RemoveByPointer(TimedEvent * ev);
 	ASCENT_INLINE int32 event_GetCurrentInstanceId() { return m_event_Instanceid; }
 	bool event_GetTimeLeft(uint32 EventType, uint32 * Time);
 
@@ -59,6 +59,7 @@ public:
 
 	ASCENT_INLINE bool event_HasEvents() { return m_events.size() > 0 ? true : false; }
 	void event_AddEvent(TimedEvent * ptr);
+	void event_RemoveByPointer(TimedEvent * ev);
 	void event_Relocate();
 	
 	// this func needs to be implemented by all eventable classes. use it to retreive the instance
