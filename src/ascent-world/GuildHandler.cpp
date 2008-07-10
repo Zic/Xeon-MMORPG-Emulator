@@ -1576,8 +1576,7 @@ void Guild::SendGuildBank(WorldSession * pClient, GuildBankTab * pTab, int8 upda
 {
 	size_t pos;
 	uint32 count=0;
-	WorldPacket data(SMSG_GUILD_BANK_VIEW_RESPONSE, (pClient->GetClientBuild() >= 8278 ? 8+1+4+1+1 : 1100));
-
+	WorldPacket data(SMSG_GUILD_BANK_VIEW_RESPONSE, 1100);
 	GuildMember * pMember = pClient->GetPlayer()->m_playerInfo->guildMember;
 
 	if(pMember==NULL || !pMember->pRank->CanPerformBankCommand(GR_RIGHT_GUILD_BANK_VIEW_TAB, pTab->iTabId))
@@ -1612,10 +1611,7 @@ void Guild::SendGuildBank(WorldSession * pClient, GuildBankTab * pTab, int8 upda
 			data << pTab->pSlots[j]->GetEntry();
 			data << uint32(0);			// this is an enchant
 			data << pTab->pSlots[j]->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
-			if(pClient->GetClientBuild() >= 8278)   // send the uint8 only to 2.4.2 !!!!
-				data << uint8(0);
-			else
-				data << uint16(0);
+			data << uint16(0);
 		}
 	}
 

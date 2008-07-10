@@ -64,9 +64,9 @@ bool HandleGMsCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	//bool first = true;
 
 	pConsole->Write("There are the following GM's online on this server: \r\n");
-	pConsole->Write("======================================================\r\n");
+	pConsole->Write("=======================================================\r\n");
 	pConsole->Write("| %16s | %20s | Latency  |\r\n" , "Name", "Permissions");
-	pConsole->Write("======================================================\r\n");
+	pConsole->Write("=======================================================\r\n");
 
 	PlayerStorageMap::const_iterator itr;
 	objmgr._playerslock.AcquireReadLock();
@@ -79,7 +79,7 @@ bool HandleGMsCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	}
 	objmgr._playerslock.ReleaseReadLock();
 
-	pConsole->Write("======================================================\r\n\r\n");
+	pConsole->Write("============================================================\r\n\r\n");
 	return true;
 }
 
@@ -241,7 +241,7 @@ bool HandlePlayerInfoCommand(BaseConsole * pConsole, int argc, const char * argv
 	if(argc < 2)
 		return false;
 
-	Player * plr = objmgr.GetPlayer(argv[1], false);
+	Player * plr = objmgr.GetPlayer(argv[1]);
 	if( plr == NULL )
 	{
 		pConsole->Write("Player not found.\r\n");
@@ -254,7 +254,6 @@ bool HandlePlayerInfoCommand(BaseConsole * pConsole, int argc, const char * argv
 	pConsole->Write("IP: %s\r\n", plr->GetSession()->GetSocket() ? plr->GetSession()->GetSocket()->GetRemoteIP().c_str() : "disconnected");
 	pConsole->Write("Level: %u\r\n", plr->getLevel());
 	pConsole->Write("Account: %s\r\n", plr->GetSession()->GetAccountNameS());
-	pConsole->Write("Permissions: %s\r\n", plr->GetSession()->GetPermissions());
 	return true;
 }
 
