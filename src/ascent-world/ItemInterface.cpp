@@ -1971,8 +1971,12 @@ void ItemInterface::BuyItem(ItemPrototype *item, uint32 total_amount, Creature *
 				m_pOwner->GetItemInterface()->RemoveItemAmt( ex->item[i], total_amount * ex->count[i] );
 		}
 
-		m_pOwner->ModUnsigned32Value(PLAYER_FIELD_HONOR_CURRENCY, -(int32)(ex->honor * total_amount) );
-		m_pOwner->ModUnsigned32Value(PLAYER_FIELD_ARENA_CURRENCY, -(int32)(ex->arena * total_amount) );
+		//m_pOwner->ModUnsigned32Value(PLAYER_FIELD_HONOR_CURRENCY, -(int32)(ex->honor * total_amount) );
+		//m_pOwner->ModUnsigned32Value(PLAYER_FIELD_ARENA_CURRENCY, -(int32)(ex->arena * total_amount) );
+		m_pOwner->m_honorPoints -= (int32)(ex->honor * total_amount);
+		m_pOwner->m_arenaPoints -= (int32)(ex->arena * total_amount);
+		m_pOwner->SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, m_pOwner->m_honorPoints);
+		m_pOwner->SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, m_pOwner->m_arenaPoints);
 	}
 }
 
