@@ -467,6 +467,7 @@ public:
 	string MapPath;
 	bool UnloadMapFiles;
 	bool BreathingEnabled;
+	bool ConsoleWhispers;
 	bool SpeedhackProtection;
 	uint32 mInWorldPlayerCount;
 	uint32 mAcceptedConnections;

@@ -34,5 +34,6 @@ bool HandleMOTDCommand(BaseConsole * pConsole, int argc, const char * argv[]);
 bool HandlePlayerInfoCommand(BaseConsole * pConsole, int argc, const char * argv[]);
 bool HandleCreateAccountCommand(BaseConsole * pConsole, int argc, const char * argv[]);
 bool HandleRehashCommand(BaseConsole * pConsole, int argc, const char * argv[]);
+bool HandleWhisperCommand(BaseConsole * pConsole, int argc, const char * argv[]);
 
 #endif

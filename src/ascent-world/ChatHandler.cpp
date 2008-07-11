@@ -326,6 +326,19 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}
 		 
 			Player *player = objmgr.GetPlayer(to.c_str(), false);
+			if(sWorld.ConsoleWhispers)
+			{
+				string csole = strupr(const_cast<char*>(to.c_str()));
+	
+				if( csole == "CONSOLE" )
+				{
+					sLog.outColor(TBLUE, "[Whisper][%s]: %s", _player->GetName() , msg.c_str());
+					sLog.outColor(TNORMAL, "\r\n");
+					_player->BroadcastMessage("|cffdd80e6To [Console]: %s|r", msg.c_str());
+					csole = "";
+					break;
+				}
+			}
 			if(!player)
 			{
 				data = new WorldPacket(SMSG_CHAT_PLAYER_NOT_FOUND, to.length() + 1);

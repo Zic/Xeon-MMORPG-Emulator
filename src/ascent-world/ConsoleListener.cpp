@@ -349,6 +349,7 @@ void HandleConsoleInput(BaseConsole * pConsole, const char * szInput)
 		{ &HandlePlayerInfoCommand, "plrinfo", "<plrname>", "Shows information about a player." },
 		{ &HandleCreateAccountCommand, "createacc", "<name> <pass> <email> <flags>", "Make acc." },
 		{ &HandleRehashCommand, "rehash", "none", "Reloads the config file" },
+		{ &HandleWhisperCommand, "whisper", "<plrname> <msg>", "Sends a whisper to the player." },
 		{ NULL, NULL, NULL, NULL },
 	};
 

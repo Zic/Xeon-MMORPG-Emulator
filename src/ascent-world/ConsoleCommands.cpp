@@ -83,14 +83,41 @@ bool HandleGMsCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	return true;
 }
 
-void ConcatArgs(string & outstr, int argc, const char * argv[])
+void ConcatArgs(string & outstr, int beginarg, int argc, const char * argv[])
 {
-	for(int i = 1; i < argc; ++i)
+	for(int i = beginarg; i < argc; ++i)
 	{
 		outstr += argv[i];
 		if((i+1) != (argc))
 			outstr += " ";
 	}
+}
+
+bool HandleWhisperCommand(BaseConsole * pConsole, int argc, const char * argv[])
+{
+	char msg[256];
+	string outstr;
+	if(argc < 3)
+		return false;
+
+	if(!sWorld.ConsoleWhispers)
+	{
+		pConsole->Write("This function is not enabled, check your config files");
+		return true;
+	}
+ 
+	Player * plr = objmgr.GetPlayer(argv[1], false);
+	if(!plr)
+	{
+		pConsole->Write("Could not find player, %s.\r\n", argv[1]);
+		return true;
+	}
+	
+	ConcatArgs(outstr, 2, argc, argv);
+	snprintf(msg, 1024, "|cffdd80e6[Admin Whisper] [Console]: %s|r", outstr.c_str());
+	plr->BroadcastMessage("%s", msg);
+	pConsole->Write("Message sent.\r\n");
+	return true;
 }
 
 bool HandleAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[])
@@ -100,7 +127,7 @@ bool HandleAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[]
 	if(argc < 2)
 		return false;
 
-	ConcatArgs(outstr, argc, argv);
+	ConcatArgs(outstr, 1, argc, argv);
 	snprintf(pAnnounce, 1024, "%sConsole: |r%s", MSG_COLOR_LIGHTBLUE, outstr.c_str());
 	sWorld.SendWorldText(pAnnounce); // send message
 	pConsole->Write("Message sent.\r\n");
@@ -114,7 +141,7 @@ bool HandleWAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[
 	if(argc < 2)
 		return false;
 
-	ConcatArgs(outstr, argc, argv);
+	ConcatArgs(outstr, 1, argc, argv);
 	snprintf(pAnnounce, 1024, "%sConsole: |r%s", MSG_COLOR_LIGHTBLUE, outstr.c_str());
 	sWorld.SendWorldWideScreenText(pAnnounce); // send message
 	pConsole->Write("Message sent.\r\n");
@@ -136,8 +163,11 @@ bool HandleKickCommand(BaseConsole * pConsole, int argc, const char * argv[])
 		return true;
 	}
 
-	snprintf(pAnnounce, 1024, "%sConsole:|r %s was kicked from the server for: %s.", MSG_COLOR_LIGHTBLUE, pPlayer->GetName(), argv[2]);
-	pPlayer->BroadcastMessage("You were kicked by the console for: %s", argv[2]);
+	string outstr;
+	ConcatArgs(outstr, 1, argc, argv);
+
+	snprintf(pAnnounce, 1024, "%sConsole:|r %s was kicked from the server for: %s.", MSG_COLOR_LIGHTBLUE, pPlayer->GetName(), outstr.c_str());
+	pPlayer->BroadcastMessage("You were kicked by the console for: %s", outstr.c_str());
 	sWorld.SendWorldText(pAnnounce, NULL);
 	pPlayer->Kick(5000);
 	pConsole->Write("Kicked player %s.\r\n", pPlayer->GetName());
