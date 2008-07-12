@@ -410,7 +410,11 @@ void CBattlegroundManager::EventQueueUpdate()
 				if((*itx)->m_loggedInPlayer)
 				{
 					if( ar->HasFreeSlots(0) )
+					{
 						ar->AddPlayer((*itx)->m_loggedInPlayer, 0);
+						(*itx)->m_loggedInPlayer->SetTeam(0);
+					}
+
 				}
 			}
 
@@ -419,7 +423,10 @@ void CBattlegroundManager::EventQueueUpdate()
 				if((*itx)->m_loggedInPlayer)
 				{
 					if( ar->HasFreeSlots(1) )
+					{
 						ar->AddPlayer((*itx)->m_loggedInPlayer, 1);
+						(*itx)->m_loggedInPlayer->SetTeam(1);
+					}
 				}
 			}
 		}
@@ -624,22 +631,26 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 			if(teams[0])
 			{
 				*data << uint32(teams[0]->m_id);
+				*data << uint32(0);
 				*data << teams[0]->m_name;
 			}
 			else
 			{
 				*data << uint32(0x61272A5C);
+				*data << uint32(0);
 				*data << uint8(0);
 			}
 			
 			if(teams[1])
 			{
 				*data << uint32(teams[1]->m_id);
+				*data << uint32(0);
 				*data << teams[1]->m_name;
 			}
 			else
 			{
 				*data << uint32(m_players[0].size() + m_players[1].size());
+				*data << uint32(0);
 				*data << uint8(0);
 			}
 		}
@@ -655,11 +666,21 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 				*data << (*itr)->GetGUID();
 				bs = &(*itr)->m_bgScore;
 				*data << bs->KillingBlows;
-				*data << uint8((*itr)->m_bgTeam);
-				*data << bs->DamageDone;
-				*data << bs->HealingDone;
-				*data << bs->Misc1;	/* rating change */
-				//(*itr)->Root();
+
+				// would this be correct?
+				if( Rated() )
+				{
+					*data << uint8((*itr)->m_bgTeam);
+				}
+				else
+				{
+					*data << uint32(0);		// w
+					*data << uint32(0);		// t
+					*data << uint32(0);		// f
+				}
+
+				*data << uint32(1);			// count of values after this
+				*data << uint32(bs->Misc1);	// rating change
 			}
 		}
 	}
@@ -1003,7 +1024,8 @@ void CBattlegroundManager::SendBattlefieldStatus(Player * plr, uint32 Status, ui
 	{
 		if(Type >= BATTLEGROUND_ARENA_2V2 && Type <= BATTLEGROUND_ARENA_5V5)
 		{
-			data << uint32(plr->m_bgTeam);
+			//data << uint32(plr->m_bgTeam);
+			data << uint32(0);// Queue Slot
 			switch(Type)
 			{
 			case BATTLEGROUND_ARENA_2V2:
@@ -1073,7 +1095,7 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 	if(plr->GetGroup() == m_groups[plr->m_bgTeam])
 		plr->GetGroup()->RemovePlayer( plr->m_playerInfo );
 
-	// reset team
+	/* reset team */
 	plr->ResetTeam();
 
 	/* revive the player if he is dead */
@@ -1082,6 +1104,10 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 		plr->SetUInt32Value(UNIT_FIELD_HEALTH, plr->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 		plr->ResurrectPlayer();
 	}
+
+	/* remove buffs */
+	plr->RemoveAura(32727); // Arena preparation
+	plr->RemoveAura(44521); // BG preparation
 	
 	/* teleport out */
 	if(!logout)

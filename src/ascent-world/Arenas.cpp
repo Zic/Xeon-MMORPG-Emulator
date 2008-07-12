@@ -93,8 +93,11 @@ void Arena::OnAddPlayer(Player * plr)
 
 	UpdatePlayerCounts();
 
+	if (plr->m_bgIsQueued)
+		plr->m_bgIsQueued = false;
+
 	/* Add the green/gold team flag */
-	Aura * aura = new Aura(dbcSpell.LookupEntry(32725-plr->m_bgTeam), -1, plr, plr);
+	Aura * aura = new Aura(dbcSpell.LookupEntry(plr->GetTeam() ? 35775-plr->m_bgTeam : 32725-plr->m_bgTeam), -1, plr, plr);
 	plr->AddAura(aura);
 	
 	/* Set FFA PvP Flag */
@@ -130,15 +133,16 @@ void Arena::OnRemovePlayer(Player * plr)
 	plr->RemoveAura(ARENA_PREPARATION);
 	UpdatePlayerCounts();
 	
-	plr->RemoveAura(32725-plr->m_bgTeam);
+	plr->RemoveAura(plr->GetTeam() ? 35775-plr->m_bgTeam : 32725-plr->m_bgTeam);
 	if(plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_FREE_FOR_ALL_PVP))
 		plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAG_FREE_FOR_ALL_PVP);
+		
+	plr->m_bg = NULL;
 }
 
 void Arena::HookOnPlayerKill(Player * plr, Unit * pVictim)
 {
 	plr->m_bgScore.KillingBlows++;
-	UpdatePlayerCounts();
 }
 
 void Arena::HookOnHK(Player * plr)
@@ -148,7 +152,7 @@ void Arena::HookOnHK(Player * plr)
 
 void Arena::HookOnPlayerDeath(Player * plr)
 {
-	
+	UpdatePlayerCounts();	
 }
 
 void Arena::OnCreate()
@@ -275,7 +279,7 @@ void Arena::UpdatePlayerCounts()
 	for(uint32 i = 0; i < 2; ++i) {
 		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			if((*itr)->isAlive())
-				players[i]++;
+				players[(*itr)->GetTeam()]++;
 		}
 	}
 
@@ -390,6 +394,7 @@ void Arena::Finish()
 			}
 		}
 	}
+
 	for(int i = 0; i < 2; i++)
 	{
 		bool victorious = (i == m_winningteam);
@@ -503,6 +508,8 @@ void Arena::HookOnAreaTrigger(Player * plr, uint32 id)
 
 void Player::FullHPMP()
 {
+	if(isDead())
+		ResurrectPlayer();
     SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     SetUInt32Value(UNIT_FIELD_POWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1));
     SetUInt32Value(UNIT_FIELD_POWER4, GetUInt32Value(UNIT_FIELD_MAXPOWER4));

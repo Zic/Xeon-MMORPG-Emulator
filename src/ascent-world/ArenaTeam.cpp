@@ -209,9 +209,9 @@ void ArenaTeam::Roster(WorldPacket & data)
 {
 	data.Initialize(SMSG_ARENA_TEAM_ROSTER);
 	data.reserve(m_memberCount * 81 + 9);
-	data << uint32(IdToTeamCount[m_type]);
+	data << m_id;
 	data << m_memberCount;
-	data << uint32(0);			// unk
+	data << GetPlayersPerTeam();
 
 	for(uint32 i = 0; i < m_memberCount; ++i)
 	{
@@ -222,14 +222,14 @@ void ArenaTeam::Roster(WorldPacket & data)
 			data << uint64(info->guid);
 			data << uint8( (info->m_loggedInPlayer != NULL) ? 1 : 0 );
 			data << info->name;
-			data << info->lastZone;
+			data << uint32( m_members[i].Info->guid == m_leader ? 0 : 1); // Unk
 			data << uint8( info->lastLevel );
 			data << uint8( info->cl );
 			data << m_members[i].Played_ThisWeek;
 			data << m_members[i].Won_ThisWeek;
 			data << m_members[i].Played_ThisSeason;
 			data << m_members[i].Won_ThisSeason;
-			data << uint32(0);
+			data << m_stat_rating; // (actually personal rating here /shrug)
 		}
 	}
 }
@@ -336,19 +336,16 @@ ArenaTeamMember * ArenaTeam::GetMemberByGuid(uint32 guid)
 void WorldSession::HandleArenaTeamRosterOpcode(WorldPacket & recv_data)
 {
 	uint8 slot;
-	uint32 tcount;
+	uint32 teamId;
 	ArenaTeam * team;
-	recv_data >> tcount;
-	if(tcount <= 5)
+	recv_data >> teamId;
+	team = objmgr.GetArenaTeamById(teamId);
+	if(team)
 	{
-		slot = TeamCountToId[tcount];
-		team = _player->m_arenaTeams[slot];
-		if(team != NULL)
-		{
-			WorldPacket data(1000);
-			team->Roster(data);
-			SendPacket(&data);
-		}
+		slot = TeamCountToId[team->m_type];
+		WorldPacket data(1000);
+		team->Roster(data);
+		SendPacket(&data);
 	}
 }
 
@@ -374,38 +371,29 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 {
 	WorldPacket data(SMSG_ARENA_TEAM_INVITE, 40);
 	string player_name;
-	uint32 tcount;
-	uint8 slot;
-	recv_data >> tcount >> player_name;
-	if( tcount > 5 )
+	uint32 teamId;
+	recv_data >> teamId >> player_name;
+
+	ArenaTeam * pTeam = objmgr.GetArenaTeamById(teamId);
+	if( !pTeam )
 		return;
 
-	slot = TeamCountToId[tcount];
-	if( slot >= NUM_ARENA_TEAM_TYPES )
+	if(!pTeam->HasMember(GetPlayer()->GetLowGUID()))
+	{
+		GetPlayer()->SoftDisconnect();
 		return;
+	}
 
 	Player * plr = objmgr.GetPlayer(player_name.c_str(), false);
 	if(plr == NULL)
 	{
-		SystemMessage("Player `%s` is non-existant or not online.", player_name.c_str());
+		SystemMessage("Player `%s` is non-existent or not online.", player_name.c_str());
 		return;
 	}
 
-	if(!_player->m_arenaTeams[slot])
-	{
-		SystemMessage("You are not in an arena team.");
-		return;
-	}
-
-	if(_player->m_arenaTeams[slot]->m_leader != _player->GetLowGUID())
+	if(pTeam->m_leader != _player->GetLowGUID())
 	{
 		SystemMessage("You are not the captain of this arena team.");
-		return;
-	}
-
-	if(slot > 2)
-	{
-		Disconnect();
 		return;
 	}
 
@@ -415,7 +403,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 		return;
 	}
 
-	if(plr->m_arenaTeams[slot] != NULL)
+	if(plr->m_arenaTeams[pTeam->m_type] != NULL)
 	{
 		SystemMessage("That player is already in an arena team of this type.");
 		return;
@@ -433,9 +421,9 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 		return;
 	}
 
-	plr->m_arenateaminviteguid = _player->m_arenaTeams[slot]->m_id;
+	plr->m_arenateaminviteguid = _player->m_arenaTeams[pTeam->m_type]->m_id;
 	data << _player->GetName();
-	data << _player->m_arenaTeams[slot]->m_name;
+	data << _player->m_arenaTeams[pTeam->m_type]->m_name;
 	plr->GetSession()->SendPacket(&data);
 }
 
@@ -443,17 +431,19 @@ void WorldSession::HandleArenaTeamRemoveMemberOpcode(WorldPacket & recv_data)
 {
 	ArenaTeam * team;
 	uint8 slot;
-	uint32 tcount;
+	uint32 teamId;
 	string name;
 	PlayerInfo * inf;
-	recv_data >> tcount >> name;
+	recv_data >> teamId >> name;
 
-	if( tcount > 5 )
+	team = objmgr.GetArenaTeamById(teamId);
+	if(!team)
+	{
+		GetPlayer()->SoftDisconnect();
 		return;
+	}
 
-	slot = TeamCountToId[tcount];
-	if( slot >= NUM_ARENA_TEAM_TYPES )
-		return;
+	slot = team->m_type;
 
 	if( (team = _player->m_arenaTeams[slot]) == NULL )
 	{
@@ -483,11 +473,11 @@ void WorldSession::HandleArenaTeamRemoveMemberOpcode(WorldPacket & recv_data)
 	{
 		char buffer[1024];
 		WorldPacket * data;
-		snprintf(buffer,1024,"%s was removed from the arena team, '%s'.", inf->name, team->m_name.c_str());
+		snprintf(buffer,1024,"%s was removed from the arena team '%s'.", inf->name, team->m_name.c_str());
 		data = sChatHandler.FillSystemMessageData(buffer);
 		team->SendPacket(data);
 		delete data;
-		SystemMessage("Removed %s from the arena team, '%s'.", inf->name, team->m_name.c_str());
+		SystemMessage("Removed %s from the arena team '%s'.", inf->name, team->m_name.c_str());
 	}
 }
 
@@ -558,26 +548,20 @@ void WorldSession::HandleArenaTeamInviteDenyOpcode(WorldPacket & recv_data)
 void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
 {
 	ArenaTeam * team;
-	uint32 tcount;
-	uint8 slot;
-	recv_data >> tcount;
-	if( tcount > 5 )
-		return;
+	uint32 teamId;
+	recv_data >> teamId;
 
-	slot = TeamCountToId[tcount];
-	if( slot >= NUM_ARENA_TEAM_TYPES )
-		return;
+	team = objmgr.GetArenaTeamById(teamId);
 
-	if( (team = _player->m_arenaTeams[slot]) == NULL )
+	if(!team)
 	{
-		SystemMessage("You are not in an arena team of this type.");
+		GetPlayer()->SoftDisconnect();
 		return;
 	}
 
-	if(team->m_memberCount == 1)
+	if( (team = _player->m_arenaTeams[team->m_type]) == NULL )
 	{
-		/* disbanding*/
-		team->Destroy();
+		SystemMessage("You are not in an arena team of this type.");
 		return;
 	}
 
@@ -602,18 +586,17 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
 void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
 {
 	ArenaTeam * team;
-	uint8 slot;
-	uint32 tcount;
-	recv_data >> tcount;
+	uint32 teamId;
+	recv_data >> teamId;
 
-	if( tcount > 5 )
+	team = objmgr.GetArenaTeamById(teamId);
+	if(!team)
+	{
+		GetPlayer()->SoftDisconnect();
 		return;
+	}
 
-	slot = TeamCountToId[tcount];
-	if( slot >= NUM_ARENA_TEAM_TYPES )
-		return;
-
-	if( (team = _player->m_arenaTeams[slot]) == NULL )
+	if( (team = _player->m_arenaTeams[team->m_type]) == NULL )
 	{
 		SystemMessage("You are not in an arena team of this type.");
 		return;
@@ -630,17 +613,21 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleArenaTeamPromoteOpcode(WorldPacket & recv_data) 
 {
-	uint32 tcount;
+	uint32 teamId;
 	uint8 slot;
 	string name;
 	ArenaTeam * team;
 	PlayerInfo * inf;
-	recv_data >> tcount >> name;
+	recv_data >> teamId >> name;
 
-	if( tcount > 5 )
+	team = objmgr.GetArenaTeamById(teamId);
+	if(!team)
+	{
+		GetPlayer()->SoftDisconnect();
 		return;
+	}
 
-	slot = TeamCountToId[tcount];
+	slot = team->m_type;
 
 	if( slot >= NUM_ARENA_TEAM_TYPES )
 		return;
