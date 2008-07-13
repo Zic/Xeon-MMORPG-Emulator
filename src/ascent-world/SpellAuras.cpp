@@ -1301,6 +1301,13 @@ void Aura::SpellAuraDummy(bool apply)
 
 	switch(GetSpellId())
 	{
+	case 34497:
+	case 34498:
+	case 34499:
+	{
+		Unit *u_caster = static_cast< Unit* >( GetUnitCaster() );
+		u_caster->CastSpell(u_caster, 34720, true);
+	}break;
 	case 13809: //Frost Traps
 	{
 	Unit *caster = static_cast< Unit* >( GetUnitCaster() );
