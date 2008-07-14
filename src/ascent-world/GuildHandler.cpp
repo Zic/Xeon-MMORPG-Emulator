@@ -840,7 +840,7 @@ void WorldSession::HandleCharterSign( WorldPacket & recv_data )
 	if(!_player)
 		return;
 
-	for(uint32 i = 0; c->SignatureCount; ++i)
+	for(uint32 i = 0; i <= c->SignatureCount; ++i)
 	{
 		if(c->Signatures[i] == _player->GetGUID())
 		{
