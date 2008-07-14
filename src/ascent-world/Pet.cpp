@@ -262,7 +262,7 @@ void Pet::Update(uint32 time)
 
 	if(bHasLoyalty && !bExpires)
 	{
-		ApplyStatsForLevel();
+		ApplyPetLevelAbilities();
 		//Happiness
 		if(m_HappinessTimer == 0)
 		{	
