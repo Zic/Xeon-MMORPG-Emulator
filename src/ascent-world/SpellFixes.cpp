@@ -21001,6 +21001,13 @@ void ApplyNormalFixes()
 			sp->Effect[2] = 0;  //stop strange effects
 		}
 
+	//Snakes from Snake Trap cast this, shouldn't stack
+		sp = dbcSpell.LookupEntryForced( 25810 );
+		if( sp != NULL )
+		{
+			sp->maxstack = 1;
+		}
+
 	//////////////////////////////////////////
 	// ROGUE								//
 	//////////////////////////////////////////
