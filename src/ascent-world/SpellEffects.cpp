@@ -4429,6 +4429,11 @@ void Spell::SpellEffectDuel(uint32 i) // Duel
 		return;
 	}
 	*/
+	if(p_caster->m_bg)
+	{
+		SendCastResult(SPELL_FAILED_NO_DUELING);
+		return;
+	}
 
 	//Player *pTarget = sObjHolder.GetObject<Player>(player->GetSelection());	   //  hacky.. and will screw up if plr is deselected..
 	if (!playerTarget)
