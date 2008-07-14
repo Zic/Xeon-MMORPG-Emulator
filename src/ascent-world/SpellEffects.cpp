@@ -1353,23 +1353,35 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				p_caster->SetUInt32Value(UNIT_FIELD_POWER2, 1000);
 		}break;
 
-	case 20473: //Holy Shock
-	case 20969:
-	case 20970:
-	case 27174:
-	case 33072:
+	case 20473: //Holy Shock Rank 1
 		{
 			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
 				return;
-
-			if(isAttackable(u_caster,unitTarget))
-			{
-				u_caster->DealDamage(unitTarget, m_spellInfo->EffectBasePoints[i], 0, 0, m_spellInfo->Id, true);
-			}
-			else
-			{
-				Heal((int32)(m_spellInfo->EffectBasePoints[i]*1.26629680998613037447));
-			}
+			u_caster->CastSpell(unitTarget, isAttackable(u_caster, unitTarget) ? 25912 : 25914, false);
+		}break;
+	case 20969: //Holy Shock Rank 2
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
+				return;
+			u_caster->CastSpell(unitTarget, isAttackable(u_caster, unitTarget) ? 25911 : 25913, false);
+		}break;
+	case 20970: //Holy Shock Rank 3
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
+				return;
+			u_caster->CastSpell(unitTarget, isAttackable(u_caster, unitTarget) ? 25902 : 25903, false);
+		}break;
+	case 27174: //Holy Shock Rank 4
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
+				return;
+			u_caster->CastSpell(unitTarget, isAttackable(u_caster, unitTarget) ? 27176 : 27175, false);
+		}break;
+	case 33072: //Holy Shock Rank 5
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() )
+				return;
+			u_caster->CastSpell(unitTarget, isAttackable(u_caster, unitTarget) ? 33073 : 33074, false);
 		}break;
 	case 23989: //Hunter readiness
 		{
