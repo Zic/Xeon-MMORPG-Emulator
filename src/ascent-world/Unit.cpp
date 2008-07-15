@@ -627,7 +627,8 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 			if( this->IsPlayer() && spe != NULL && (
 				spe->NameHash == SPELL_HASH_MAGTHERIDON_MELEE_TRINKET || 
 				spe->NameHash == SPELL_HASH_ROMULO_S_POISON || 
-				spe->NameHash == SPELL_HASH_BLACK_TEMPLE_MELEE_TRINKET || spellId == 16870 ) )
+				spe->NameHash == SPELL_HASH_BLACK_TEMPLE_MELEE_TRINKET || 
+				spe->NameHash == SPELL_HASH_FROSTBRAND_ATTACK || spellId == 16870 ) )
 			{
 				float ppm = 1.0f;
 				switch( spe->NameHash )
@@ -641,6 +642,9 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 					case SPELL_HASH_BLACK_TEMPLE_MELEE_TRINKET:
 						ppm = 1.0f;
 						break; // madness of the betrayer
+					case SPELL_HASH_FROSTBRAND_ATTACK:
+						ppm = 9.0f;
+						break; // Frostbrand Weapon
 				}
 				switch( spellId )
 				{
@@ -1179,7 +1183,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								if( !(CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING)) //healing wave
 									continue;
 							}break;
-						//shaman - windfurry weapon
+						//shaman - windfury weapon
 						case 8232:
 						case 8235:
 						case 10486:
@@ -1188,15 +1192,14 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 							{
 								if(!IsPlayer())
 									continue;
-								//!! The wierd thing is that we need the spell thet trigegred this enchant spell in order to output logs ..we are using oldspell info too 
-								//we have to recalc the value of this spell
-								SpellEntry *spellInfo = dbcSpell.LookupEntry(origId);
-								uint32 AP_owerride=GetAP() + spellInfo->EffectBasePoints[0]+1;
-								uint32 dmg = static_cast< Player* >( this )->GetMainMeleeDamage(AP_owerride);
-								SpellEntry *sp_for_the_logs = dbcSpell.LookupEntry(spellId);
-								Strike( victim, MELEE, sp_for_the_logs, dmg, 0, 0, true, false );
-								Strike( victim, MELEE, sp_for_the_logs, dmg, 0, 0, true, false );
-								//nothing else to be done for this trigger
+								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+								if( mh == NULL)
+									continue;
+								float mhs = float( mh->GetProto()->Delay );
+								// Calculate extra AP bonus damage
+								uint32 extra_dmg=float2int32(mhs * (ospinfo->EffectBasePoints[0]+1) /14000.0f);
+								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
+								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
 								continue;
 							}break;
 						//rogue - Ruthlessness
@@ -1430,6 +1433,69 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								if(	CastingSpell->NameHash != SPELL_HASH_LIGHTNING_BOLT )
 									continue;
 							}break;
+						// Resilient
+						case 46089:
+						case 43839:
+						case 43848:
+						case 43849:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(	(origId==46097 || origId==43860 || origId==43861 || origId==43862)&&
+									(CastingSpell->NameHash == SPELL_HASH_EARTH_SHOCK || 
+									CastingSpell->NameHash == SPELL_HASH_FROST_SHOCK || 
+									CastingSpell->NameHash == SPELL_HASH_FLAME_SHOCK))
+									break;
+								if(	(origId==43859 || origId==43858 || origId==43857 || origId==46096)&&
+									CastingSpell->NameHash == SPELL_HASH_STORMSTRIKE)
+									break;
+							}continue;
+						// Totem of the Third Wind
+						case 42371:
+						case 34132:
+						case 46099:
+						case 43729:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(CastingSpell->NameHash != SPELL_HASH_LESSER_HEALING_WAVE)
+									continue;
+							}break;
+						// Ancestral Fortitude
+						case 16237:
+						case 16177:
+						case 16236:
+						{
+							if( CastingSpell == NULL )
+								continue;
+							if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) )
+								continue;
+						}break;
+						// Flametongue Weapon
+						case 25555:
+						case 16389:
+						case 10523:
+						case 8248:
+						case 8253:
+						case 8026:
+						case 8028:
+						case 8029:
+						case 10445:
+						case 16343:
+						case 16344:
+						case 25488:
+						{
+							spellId = 29469;
+							Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+				
+							if( mh != NULL)
+							{
+								float mhs = float( mh->GetProto()->Delay );
+								dmg_overwrite = FL2UINT( mhs * 0.001f * (spe->EffectBasePoints[0] + 1)/88 );
+							}
+							else
+								continue;
+						}break;
 						//Spell Haste Trinket
 						case 33370:
 							{
@@ -1642,6 +1708,8 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 							}break;*/
 					}
 				}
+				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
+					continue;
 				if(spellId==22858 && isInBack(victim)) //retatliation needs target to be not in front. Can be casted by creatures too
 					continue;
 				SpellEntry *spellInfo = dbcSpell.LookupEntry(spellId );
@@ -6104,6 +6172,7 @@ void Unit::ReplaceAIInterface(AIInterface *new_interface)
 	delete m_aiInterface;	//be carefull when you do this. Might screw unit states !
 	m_aiInterface = new_interface; 
 }
+
 
 
 

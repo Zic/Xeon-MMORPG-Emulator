@@ -10927,11 +10927,6 @@ void Apply112SpellFixes()
 	if(sp != NULL)
 		sp->procChance = 10;
 
-	// Spell 16164 Proc Chance (Elemental Focus )
-	sp = dbcSpell.LookupEntryForced(16164);
-	if(sp != NULL)
-		sp->procChance = 10;
-
 	// Spell 16178 Group Relation (Purification Rank 1)
 	sp = dbcSpell.LookupEntryForced(16178);
 	if(sp != NULL) {
@@ -12419,7 +12414,21 @@ void Apply112SpellFixes()
 	// Spell 21895 Group Relation (Increased Totem Radius )
 	sp = dbcSpell.LookupEntryForced(21895);
 	if(sp != NULL) {
+		sp->EffectSpellGroupRelation_high[0] = 256;
 		sp->EffectSpellGroupRelation[0] = 67362816;
+	}
+
+	// Spell 16189 Group Relation (Totemic Mastery )
+	sp = dbcSpell.LookupEntryForced(16189);
+	if(sp != NULL) {
+		sp->EffectSpellGroupRelation_high[0] = 256;
+		sp->EffectSpellGroupRelation[0] = 67362816;
+	}
+
+	// Spell 44296 Group Relation (Improved Lightning Bolt )
+	sp = dbcSpell.LookupEntryForced(44296);
+	if(sp != NULL) {
+		sp->EffectSpellGroupRelation[0] = 1;
 	}
 
 	// Spell 21919 Proc Chance (Thrash )
@@ -13775,11 +13784,6 @@ void ApplyNormalFixes()
 		else if( strstr( nametext, "Improved Aspect of the Hawk"))
 			sp->EffectSpellGroupRelation[1] = 0x00100000;
 		//more triggered spell ids are wrong. I think blizz is trying to outsmart us :S
-		else if( strstr( nametext, "Nature's Guardian"))
-		{
-			sp->EffectTriggerSpell[0] = 31616;
-			sp->proc_interval = 5000;
-		}
 		//Chain Heal all ranks %50 heal value (49 + 1)
 		else if( strstr( nametext, "Chain Heal"))
 		{
@@ -14268,6 +14272,34 @@ void ApplyNormalFixes()
 			if( sp->NameHash == SPELL_HASH_LIGHTNING_SHIELD ) // not a mistake, the correct proc spell for lightning shield is also called lightning shield
 				sp->spell_can_crit = false;
 
+			// Frostbrand Weapon - 10% spd coefficient
+			if( sp->NameHash == SPELL_HASH_FROSTBRAND_ATTACK )
+				sp->fixed_dddhcoef = 0.1f;
+
+			// Flametongue Weapon - 10% spd coefficient
+			if( sp->NameHash == SPELL_HASH_FLAMETONGUE_ATTACK )
+				sp->fixed_dddhcoef = 0.1f;
+
+			// Fire Nova - 0% spd coefficient
+			if( sp->NameHash == SPELL_HASH_FIRE_NOVA )
+				sp->fixed_dddhcoef = 0.0f;
+
+			// Searing Totem - 8% spd coefficient
+			if( sp->NameHash == SPELL_HASH_ATTACK )
+				sp->fixed_dddhcoef = 0.08f;
+
+			// Mana Spring Totem - 8% healing coefficient
+			if( sp->NameHash == SPELL_HASH_HEALING_STREAM )
+				sp->OTspell_coef_override = 0.08f;
+			
+			// Nature's Guardian
+			if( sp->NameHash == SPELL_HASH_NATURE_S_GUARDIAN ){
+				sp->procFlags = PROC_ON_SPELL_HIT_VICTIM | PROC_ON_MELEE_ATTACK_VICTIM | 
+					PROC_ON_RANGED_ATTACK_VICTIM | PROC_ON_ANY_DAMAGE_VICTIM;
+				sp->proc_interval = 5000;
+				sp->EffectTriggerSpell[0] = 31616;
+			}
+
 		//////////////////////////////////////////
 		// MAGE								//
 		//////////////////////////////////////////
@@ -14375,10 +14407,10 @@ void ApplyNormalFixes()
 	if( sp != NULL && sp->Id == 16164 )
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
 
-	//remove stormstrike effect 0
+	// Stormstrike fix
 	sp = dbcSpell.LookupEntryForced( 17364 );
 	if( sp != NULL && sp->Id == 17364 )
-		sp->Effect[0] = 0;
+		sp->procFlags=PROC_ON_SPELL_HIT_VICTIM ;
 
 	//Warlock: Nether Protection
 	sp = dbcSpell.LookupEntryForced( 30299 );
@@ -15172,6 +15204,65 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0] = 64 | 128 | 256;
 
+	//shaman - Earth's Grasp
+	sp = dbcSpell.LookupEntryForced( 16130 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x8;
+		sp->EffectSpellGroupRelation_high[1] = 0x1;
+	}
+	sp = dbcSpell.LookupEntryForced( 16043 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x8;
+		sp->EffectSpellGroupRelation_high[1] = 0x1;
+	}
+
+	//shaman - Stormstrike Cooldown Reduction (set bonus)
+	sp = dbcSpell.LookupEntryForced( 33018 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation_high[0] = 0x10;
+
+	//shaman - Improved Grounding Totem (set bonus)
+	sp = dbcSpell.LookupEntryForced( 44299 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 0x40000;
+
+	//shaman - Guardian Totems
+	sp = dbcSpell.LookupEntryForced( 16293 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x8000;
+		sp->EffectSpellGroupRelation[1] = 0x40000;
+	}
+	sp = dbcSpell.LookupEntryForced( 16258 );
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x8000;
+		sp->EffectSpellGroupRelation[1] = 0x40000;
+	}
+
+	//shaman - Tidal Mastery
+	sp = dbcSpell.LookupEntryForced( 16221 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 451;
+	sp = dbcSpell.LookupEntryForced( 16220 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 451;
+	sp = dbcSpell.LookupEntryForced( 16219 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 451;
+	sp = dbcSpell.LookupEntryForced( 16218 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 451;
+	sp = dbcSpell.LookupEntryForced( 16217 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 451;
+	
+	//shaman - Improved Chain Heal
+	sp = dbcSpell.LookupEntryForced( 30873 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 256;
+	sp = dbcSpell.LookupEntryForced( 30872 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 256;
+
 	//shaman ( grouping ) Enhancing Totems = Strength of Earth + Grace of Air
 	group_relation_shaman_enhancing_totems = 0x00010000 | 0x00020000;
 
@@ -15196,21 +15287,31 @@ void ApplyNormalFixes()
 	group_relation_shaman_restorative_totems = 0x00004000 | 0x00002000;
 
 	//shaman - Restorative Totems
-	sp = dbcSpell.LookupEntryForced( 16259 ); 
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = group_relation_shaman_restorative_totems;
+	sp = dbcSpell.LookupEntryForced( 16187 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x00002000;
+		sp->EffectSpellGroupRelation[1] = 0x00004000;
+	}
 	sp = dbcSpell.LookupEntryForced( 16205 ); 
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = group_relation_shaman_restorative_totems;
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x00002000;
+		sp->EffectSpellGroupRelation[1] = 0x00004000;
+	}
 	sp = dbcSpell.LookupEntryForced( 16206 ); 
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = group_relation_shaman_restorative_totems;
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x00002000;
+		sp->EffectSpellGroupRelation[1] = 0x00004000;
+	}
 	sp = dbcSpell.LookupEntryForced( 16207 ); 
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = group_relation_shaman_restorative_totems;
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x00002000;
+		sp->EffectSpellGroupRelation[1] = 0x00004000;
+	}
 	sp = dbcSpell.LookupEntryForced( 16208 ); 
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = group_relation_shaman_restorative_totems;
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x00002000;
+		sp->EffectSpellGroupRelation[1] = 0x00004000;
+	}
 	
 #ifndef NEW_PROCFLAGS
 	//shaman - Healing Way
@@ -15245,6 +15346,103 @@ void ApplyNormalFixes()
 		sp->EffectSpellGroupRelation[0] = 64;
 #endif
 
+	// Shaman - Call of Flame
+	sp = dbcSpell.LookupEntryForced( 16038 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 0x40000000;
+	sp = dbcSpell.LookupEntryForced( 16160 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 0x40000000;
+	sp = dbcSpell.LookupEntryForced( 16161 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = 0x40000000;
+
+	// Shaman - Improved Fire Totems
+	sp = dbcSpell.LookupEntryForced( 16544 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x20;
+		sp->EffectSpellGroupRelation[2] = 0x4;
+	}
+	sp = dbcSpell.LookupEntryForced( 16086 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x20;
+		sp->EffectSpellGroupRelation[2] = 0x4;
+	}
+
+	// Shaman 
+	
+	sp = dbcSpell.LookupEntryForced( 25489 ); 
+	if( sp != NULL ){
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+	}
+
+	// Shaman Arena totems fix
+	// Totem of Survival
+	sp = dbcSpell.LookupEntryForced( 46097 ); 
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43860 ); 
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43861 ); 
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43862 ); 
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+
+	// Totem of Indomitability
+	sp = dbcSpell.LookupEntryForced( 43859 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 46096 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43857 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43858 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+
+	// Totem of Third WInd
+	sp = dbcSpell.LookupEntryForced( 46098 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 34138 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 42370 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	sp = dbcSpell.LookupEntryForced( 43728 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+
 	//shaman - Elemental Devastation
 	sp = dbcSpell.LookupEntryForced( 29179 ); 
 	if( sp != NULL )
@@ -15277,6 +15475,40 @@ void ApplyNormalFixes()
     sp = dbcSpell.LookupEntryForced( 16237 );
     if( sp != NULL )
         sp->rangeIndex = 4;
+	
+	//shaman - Elemental Weapons
+	sp = dbcSpell.LookupEntryForced( 29080 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
+		sp->EffectSpellGroupRelation_high[2] = 0x800;
+	}
+	sp = dbcSpell.LookupEntryForced( 29079 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
+		sp->EffectSpellGroupRelation_high[2] = 0x800;
+	}
+	sp = dbcSpell.LookupEntryForced( 16266 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
+		sp->EffectSpellGroupRelation_high[2] = 0x800;
+	}
+
+	// Magma Totem - 0% spd coefficient
+	sp = dbcSpell.LookupEntryForced( 25550 ); 
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.0f;
+	sp = dbcSpell.LookupEntryForced( 10581 ); 
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.0f;
+	sp = dbcSpell.LookupEntryForced( 10580 ); 
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.0f;
+	sp = dbcSpell.LookupEntryForced( 10579 ); 
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.0f;
+	sp = dbcSpell.LookupEntryForced( 8187 ); 
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.0f;
 
 	//shaman ( grouping ) Mental Quickness (missing 18 spells which have no grouping)
 	group_relation_shaman_mental_quickness = 0x00000008 | 0x00000010 | 0x00000200 | 0x00000400 | 0x00080000 | 0x00100000 | 0x00400000 | 0x20000000 | 0x10000000 | 0x80000000;
@@ -17160,9 +17392,6 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 12536 );
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0] = 0xFFFFFFFF; //all possible spells we can affect
-	sp = dbcSpell.LookupEntryForced( 16246 );
-	if( sp != NULL )
-		sp->EffectSpellGroupRelation[0] = 0xFFFFFFFF; //all possible spells we can affect
 	sp = dbcSpell.LookupEntryForced( 16870 );
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0] = 0xFFFFFFFF; //all possible spells we can affect
@@ -18760,6 +18989,19 @@ void ApplyNormalFixes()
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
+		//Temporary partial fix to get dmg aura instead of heal for shaman himself
+		uint32 tmp = sp->EffectApplyAuraName[0];
+		sp->EffectApplyAuraName[0] = sp->EffectApplyAuraName[1];
+		sp->EffectApplyAuraName[1]=tmp;
+	}
+	// Totem of Wrath
+	sp = dbcSpell.LookupEntryForced( 30708 );
+	if( sp != NULL )
+	{
+	// Temporary partial fix to get crit aura instead of hit for shaman himself
+		uint32 tmp = sp->EffectApplyAuraName[0];
+		sp->EffectApplyAuraName[0] = sp->EffectApplyAuraName[1];
+		sp->EffectApplyAuraName[1]=tmp;
 	}
 
 	//-----BLEED effects----- (setting mech to BLEED)
@@ -20638,9 +20880,86 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CAST_SPELL;
 
-	//windfury weapon changes. Start to hate these day by day
+	
 	EnchantEntry* Enchantment;
-		
+
+	// Flametongue weapon
+	Enchantment = dbcEnchant.LookupEntryForced( 2634 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 25488;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 1666 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 16344;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 1665 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 16343;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 523 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 10445;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 3 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 8029;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 4 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 8028;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 5 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 8026;
+	}
+
+	// Flametongue totem
+	Enchantment = dbcEnchant.LookupEntryForced( 124 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 8253;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 285 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 8248;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 543 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 10523;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 1683 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 16389;
+	}
+	Enchantment = dbcEnchant.LookupEntryForced( 2637 );
+	if( Enchantment != NULL )
+	{
+		Enchantment->type[0] = 1;
+		Enchantment->spell[0] = 25555;
+	}
+
+	//windfury weapon changes. Start to hate these day by day
 	Enchantment = dbcEnchant.LookupEntryForced( 283 );
 	if( Enchantment != NULL )
 	{

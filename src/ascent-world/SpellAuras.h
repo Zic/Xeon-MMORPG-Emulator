@@ -569,6 +569,8 @@ public:
 	void SpellAuraFinishingMovesCannotBeDodged(bool apply);
 	void SpellAuraAxeSkillModifier(bool apply);
 	void SpellAuraDrinkNew(bool apply);
+	void SpellAuraModSpellDamageFromAP(bool apply);
+	void SpellAuraModSpellHealingFromAP(bool apply);
 	void EventPeriodicDrink(uint32 amount);
 
 	void SendModifierLog(int32 ** m,int32 v,uint64 mask,uint8 type,bool pct = false);
