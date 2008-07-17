@@ -7724,8 +7724,10 @@ void Aura::SpellAuraModSpellDamageFromAP(bool apply)
 	if(!m_target->IsPlayer())
 		return;
 	if(apply)
+	{
 		SetPositive();
-	mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+		mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+	}
 	for(uint32 x =0; x<7;x++){
 		if (mod->m_miscValue & (((uint32)1)<<x) ){
 			if(apply)
@@ -7742,8 +7744,10 @@ void Aura::SpellAuraModSpellHealingFromAP(bool apply)
 	if(!m_target->IsPlayer())
 		return;
 	if(apply)
+	{
 		SetPositive();
-	mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+		mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+	}
 	for(uint32 x=0;x<7;x++)
 	{
 		if (mod->m_miscValue  & (((uint32)1)<<x) )
