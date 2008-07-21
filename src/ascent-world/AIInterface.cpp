@@ -3051,7 +3051,7 @@ void AIInterface::addSpellToList(AI_Spell *sp)
 		sp2->procCounter=0;
 		sp2->cooldowntime=0;
 		sp2->custom_pointer = true;
-		m_spells.push_back(sp);
+		m_spells.push_back(sp2);
 	}
 	else
 		m_spells.push_back(sp);

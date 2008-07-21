@@ -30,6 +30,8 @@
 
 #define _GAME
 
+#include <cstring>
+#include <cstdlib>
 #include <list>
 #include <vector>
 #include <map>
@@ -76,6 +78,7 @@
 #endif
 
 #include "Packets.h"
+#include "PacketEncrypt.h"
 
 #include "../ascent-shared/CallBack.h"
 #include "WordFilter.h"

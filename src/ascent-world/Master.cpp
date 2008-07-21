@@ -248,6 +248,7 @@ bool Master::Run(int argc, char ** argv)
 
 	if( !_StartDB() )
 	{
+		Database::CleanupLibs();
 		return false;
 	}
 
@@ -534,6 +535,10 @@ bool Master::Run(int argc, char ** argv)
 
 	sScriptMgr.UnloadScripts();
 	delete ScriptMgr::getSingletonPtr();
+
+	Log.Notice( "ChatHandler", "~ChatHandler()" );
+	delete ChatHandler::getSingletonPtr();
+
 
 	Log.Notice( "EventMgr", "~EventMgr()" );
 	delete EventMgr::getSingletonPtr();

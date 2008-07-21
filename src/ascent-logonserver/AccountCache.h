@@ -211,6 +211,8 @@ public:
 		usepings  = !Config.MainConfig.GetBoolDefault("LogonServer", "DisablePings", false);
 	}
 
+	~InformationCore();
+
 	// Packets
 	void		  SendRealms(AuthSocket * Socket);
 	

@@ -119,6 +119,8 @@ ascent_world_SOURCES = \
     ObjectMgr.h \
     Opcodes.cpp \
     Opcodes.h \
+    PacketEncrypt.cpp \
+    PacketEncrypt.h \
     Pet.cpp \
     Pet.h \
     PetHandler.cpp \

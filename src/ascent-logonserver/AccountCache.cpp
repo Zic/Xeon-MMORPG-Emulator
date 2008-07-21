@@ -407,6 +407,14 @@ void IPBanner::Remove(set<IPBan*>::iterator ban)
 	sLog.outDebug("[IPBanner] Removed expired IPBan for ip '%s'", strIp);
 }
 
+InformationCore::~InformationCore()
+{
+	for( map<uint32, Realm*>::iterator itr = m_realms.begin(); itr != m_realms.end(); ++itr )
+		delete itr->second;
+
+	m_realms.clear();
+}
+
 Realm * InformationCore::AddRealm(uint32 realm_id, Realm * rlm)
 {
 	realmLock.Acquire();

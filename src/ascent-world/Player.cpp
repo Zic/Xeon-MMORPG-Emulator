@@ -7399,6 +7399,10 @@ float Player::CalcRating( uint32 index )
 	if( level > 100 )
 		level = 100;
 
+	if(level < 34 && (index == PLAYER_RATING_MODIFIER_BLOCK || index == PLAYER_RATING_MODIFIER_PARRY || index == PLAYER_RATING_MODIFIER_DEFENCE))
+		level = 34;
+
+
 	CombatRatingDBC * pDBCEntry = dbcCombatRating.LookupEntryForced( relative_index * 100 + level - 1 );
 	if( pDBCEntry == NULL )
 		return rating;

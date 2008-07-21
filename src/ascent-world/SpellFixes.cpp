@@ -36,7 +36,7 @@ void CreateDummySpell(uint32 id)
 	sp->EffectImplicitTargetA[0]=25;
 	sp->NameHash=crc32((const unsigned char*)name, (unsigned int)strlen(name));
 	sp->dmg_multiplier[0]=1.0f;
-	sp->FH=-1;
+	sp->StanceBarOrder=-1;
 	dbcSpell.SetRow(id,sp);
 	sWorld.dummyspells.push_back(sp);
 }
@@ -12813,9 +12813,9 @@ void ApplyNormalFixes()
 		// SpellID
 		uint32 spellid = dbc.getRecord(x).getUInt(0);
 		// Description field
-		char* desc = (char*)dbc.getRecord(x).getString(158); 
-		const char* ranktext = dbc.getRecord(x).getString(141);
-		const char* nametext = dbc.getRecord(x).getString(124);
+		char* desc = (char*)dbc.getRecord(x).getString(161); 
+		const char* ranktext = dbc.getRecord(x).getString(144);
+		const char* nametext = dbc.getRecord(x).getString(127);
 
 		uint32 rank = 0;
 		uint32 type = 0;
@@ -13059,6 +13059,7 @@ void ApplyNormalFixes()
 					temp = sp->EffectChainTarget[col1_swap];	sp->EffectChainTarget[col1_swap] = sp->EffectChainTarget[col2_swap] ;	sp->EffectChainTarget[col2_swap] = temp;
 					temp = sp->EffectSpellGroupRelation[col1_swap];	sp->EffectSpellGroupRelation[col1_swap] = sp->EffectSpellGroupRelation[col2_swap] ;	sp->EffectSpellGroupRelation[col2_swap] = temp;
 					temp = sp->EffectMiscValue[col1_swap];		sp->EffectMiscValue[col1_swap] = sp->EffectMiscValue[col2_swap] ;	sp->EffectMiscValue[col2_swap] = temp;
+					temp = sp->EffectMiscValueB[col1_swap];		sp->EffectMiscValueB[col1_swap] = sp->EffectMiscValueB[col2_swap] ;	sp->EffectMiscValueB[col2_swap] = temp;
 					temp = sp->EffectTriggerSpell[col1_swap];	sp->EffectTriggerSpell[col1_swap] = sp->EffectTriggerSpell[col2_swap] ;	sp->EffectTriggerSpell[col2_swap] = temp;
 					ftemp = sp->EffectPointsPerComboPoint[col1_swap];	sp->EffectPointsPerComboPoint[col1_swap] = sp->EffectPointsPerComboPoint[col2_swap] ;	sp->EffectPointsPerComboPoint[col2_swap] = ftemp;
 				}
@@ -13351,7 +13352,7 @@ void ApplyNormalFixes()
 		for(uint32 y=0;y < 3; y++)
 		{
 			// get the effect number from the spell
-			effect = dbc.getRecord(x).getUInt(64 + y); // spelleffect[0] = 64 // 2.0.1
+			effect = dbc.getRecord(x).getUInt(65 + y); // spelleffect[0] = 64 // 2.0.1
 
 			//spell group
 			/*if(effect==SPELL_EFFECT_SUMMON_TOTEM_SLOT1||effect==SPELL_EFFECT_SUMMON_TOTEM_SLOT2||
@@ -13424,7 +13425,7 @@ void ApplyNormalFixes()
 			else*/
 			if(effect==SPELL_EFFECT_APPLY_AURA)
 			{
-				uint32 aura = dbc.getRecord(x).getUInt(94+y); // 58+30+3 = 91
+				uint32 aura = dbc.getRecord(x).getUInt(95+y); // 58+30+3 = 91
 				if( aura == SPELL_AURA_PROC_TRIGGER_SPELL ||
 					aura == SPELL_AURA_PROC_TRIGGER_DAMAGE
 					)//search for spellid in description

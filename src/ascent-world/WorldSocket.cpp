@@ -292,10 +292,19 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	
 	BigNumber BNK;
 	BNK.SetBinary(K, 40);
+
+	uint8 *key = new uint8[20];
+	PacketKeyGenerator PKG;
+	memcpy(key, PKG.GenerateKey(K), 20);
 	
 	// Initialize crypto.
-	_crypt.SetKey(K, 40);
+	_crypt.SetKey(key, 20);
 	_crypt.Init();
+	delete key;
+
+//	// Initialize crypto.
+//	_crypt.SetKey(K, 40);
+//	_crypt.Init();
 
 	//checking if player is already connected
     //disconnect corrent player and login this one(blizzlike)

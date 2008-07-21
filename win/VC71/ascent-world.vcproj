@@ -557,6 +557,12 @@
 			RelativePath="..\..\src\ascent-world\Opcodes.h">
 		</File>
 		<File
+			RelativePath="..\..\src\ascent-world\PacketEncrypt.cpp">
+		</File>
+		<File
+			RelativePath="..\..\src\ascent-world\PacketEncrypt.h">
+		</File>
+		<File
 			RelativePath="..\..\src\ascent-world\Pet.cpp">
 		</File>
 		<File
@@ -635,13 +641,13 @@
 			RelativePath="..\..\src\ascent-world\SpellFailure.h">
 		</File>
 		<File
+			RelativePath="..\..\src\ascent-world\SpellFixes.cpp">
+		</File>
+		<File
 			RelativePath="..\..\src\ascent-world\SpellHandler.cpp">
 		</File>
 		<File
 			RelativePath="..\..\src\ascent-world\SpellNameHashes.h">
-		</File>
-		<File
-			RelativePath="..\..\src\ascent-world\SpellFixes.cpp">
 		</File>
 		<File
 			RelativePath="..\..\src\ascent-world\SpellTarget.cpp">

@@ -20,6 +20,7 @@
 #ifndef DBCFILE_H
 #define DBCFILE_H
 #include <cassert>
+#include <cstring>
 #include <string>
 
 class DBCFile

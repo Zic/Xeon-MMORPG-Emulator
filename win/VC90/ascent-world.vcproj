@@ -926,6 +926,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\ascent-world\PacketEncrypt.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\ascent-world\PacketEncrypt.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\ascent-world\Packets.h"
 			>
 		</File>

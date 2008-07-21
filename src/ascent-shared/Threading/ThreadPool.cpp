@@ -281,8 +281,9 @@ static unsigned long WINAPI thread_proc(void* param)
 	}
 
 	// at this point the t pointer has already been freed, so we can just cleanly exit.
-	ExitThread(0);
+	//ExitThread(0);
 
+	//let this be reached, so the stack can unwind properly
 	// not reached
 	return 0;
 }
@@ -332,7 +333,10 @@ static void * thread_proc(void * param)
 		}
 	}
 
-	pthread_exit(0);
+	//pthread_exit(0);
+
+	//return to let stack unwind properly
+	return NULL;
 }
 
 Thread * CThreadPool::StartThread(ThreadBase * ExecutionTarget)

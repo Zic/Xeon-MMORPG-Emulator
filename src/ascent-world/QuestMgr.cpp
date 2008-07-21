@@ -1513,6 +1513,7 @@ QuestMgr::~QuestMgr()
 		itr2->second->clear();
 		delete itr2->second;
 	}
+	m_obj_quests.clear();
 
 	for(itr2 = m_npc_quests.begin(); itr2 != m_npc_quests.end(); ++itr2)
 	{
@@ -1527,6 +1528,7 @@ QuestMgr::~QuestMgr()
 		itr2->second->clear();
 		delete itr2->second;
 	}
+	m_npc_quests.clear();
 
 	for(itr2 = m_itm_quests.begin(); itr2 != m_itm_quests.end(); ++itr2)
 	{
@@ -1541,7 +1543,7 @@ QuestMgr::~QuestMgr()
 		itr2->second->clear();
 		delete itr2->second;
 	}
-
+	m_itm_quests.clear();
 }
 
 
