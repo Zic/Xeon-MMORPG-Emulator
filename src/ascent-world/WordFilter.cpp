@@ -144,7 +144,6 @@ void WordFilter::Load(const char * szTableName)
 			pMatch->pCompiledIgnoreExpressionOptions=NULL;
 		}
 
-		pMatch->iType = pResult->Fetch()[2].GetUInt32();
 		lItems.push_back(pMatch);
 	} while (pResult->NextRow());
 	delete pResult;

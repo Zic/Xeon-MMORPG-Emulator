@@ -28,7 +28,6 @@ struct WordFilterMatch
 	void* pCompiledIgnoreExpression;
 	void* pCompiledExpressionOptions;
 	void* pCompiledIgnoreExpressionOptions;
-	int iType;
 };
 
 class WordFilter
