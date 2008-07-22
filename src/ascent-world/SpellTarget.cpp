@@ -350,6 +350,22 @@ void Spell::SpellTargetSingleTargetEnemy(uint32 i, uint32 j)
 			return;
 		}
 
+		int x;
+		for( x = 0; x < 3; ++x )
+			if( m_spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MOD_POSSESS ||
+				m_spellInfo->is_melee_spell )
+				break;		
+
+		if( pTarget && x == 3 && pTarget->m_magnetcaster != 0)
+		{	
+			Unit *MagnetTarget = pTarget->GetMapMgr()->GetUnit(pTarget->m_magnetcaster);
+			if ( MagnetTarget && m_spellInfo->School )
+			{
+				m_magnetTarget = pTarget->m_magnetcaster;	
+				pTarget = MagnetTarget; // Redirected
+			}
+		}
+
 #ifdef COLLISION
 		// this distance check may have to be removed in the future.
 		//Shady: wtf is that? it causes a bug when caster and target too close to each other.
@@ -378,7 +394,8 @@ void Spell::SpellTargetSingleTargetEnemy(uint32 i, uint32 j)
 		{
 			if((*itr)->GetGUID()==m_targets.m_unitTarget)
 				continue;
-			if( !((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive())
+			if( !((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive() || 
+				((*itr)->IsCreature() && ((Creature*)(*itr))->IsTotem()))
 				continue;
 
 			if(IsInrange(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),(*itr),range))

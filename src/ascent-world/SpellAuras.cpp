@@ -252,9 +252,9 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//229 Apply Aura:Reduces the damage your pet takes from area of effect attacks http://www.thottbot.com/s35694
 		&Aura::SpellAuraIncreaseMaxHealth,//230 Increase Max Health (commanding shout);
         &Aura::SpellAuraNULL,//231 curse a target http://www.thottbot.com/s40303
-        &Aura::SpellAuraNULL,//232 // Reduces duration of Magic effects by $s2%.
+        &Aura::SpellAuraReduceEffectDuration,//232 // Reduces duration of Magic effects by $s2%.
         &Aura::SpellAuraNULL,//233 // Beer Goggles
-        &Aura::SpellAuraNULL,//234 Apply Aura: Reduces Silence or Interrupt effects, Item spell magic http://www.thottbot.com/s42184
+        &Aura::SpellAuraReduceEffectDuration,//234 Apply Aura: Reduces Silence or Interrupt effects, Item spell magic http://www.thottbot.com/s42184
 		&Aura::SpellAuraNULL,//235 33206 Instantly reduces a friendly target's threat by $44416s1%, reduces all damage taken by $s1% and increases resistance to Dispel mechanics by $s2% for $d.
 		&Aura::SpellAuraNULL,//236
 		&Aura::SpellAuraModSpellDamageFromAP,//237 Mod Spell Damage from Attack Power
@@ -345,6 +345,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, Object* caster, Unit* target )
 	else
 		p_target = NULL;
 
+	DurationPctMod(proto->MechanicsType);
 	/*if( caster->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER )
 	{
 		if( ( ( Player* )caster )->DuelingWith == ( ( Player* )target ) )
@@ -772,11 +773,26 @@ void Aura::EventUpdateAA(float r)
 	{
 		if(!plr->HasActiveAura(m_spellProto->Id))
 		{
-			Aura * aura = new Aura(m_spellProto, -1, u_caster, plr);
-			aura->m_areaAura = true;
-			aura->AddMod(mod->m_type, mod->m_amount, mod->m_miscValue, mod->i);
-			plr->AddAura(aura);
-			NewTargets.push_back(plr->GetLowGUID());
+			Aura * aura = NULL;
+			for(i = 0; i < m_modcount; ++i)
+			{
+				/* is this an area aura modifier? */
+				if(m_spellProto->Effect[m_modList[i].i] == SPELL_EFFECT_APPLY_AREA_AURA)
+				{
+					if(!aura)
+					{
+						aura = new Aura(m_spellProto, -1, u_caster, plr);
+						aura->m_areaAura = true;
+					}
+					aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount,
+						m_modList[i].m_miscValue, m_modList[i].i);
+				}
+			}
+			if(aura)
+			{
+				plr->AddAura(aura);
+				NewTargets.push_back(plr->GetLowGUID());
+			}
 		}
 	}
 
@@ -4925,6 +4941,7 @@ void Aura::SpellAuraMechanicImmunity(bool apply)
 							case SPELL_AURA_MOD_CONFUSE:
 							case SPELL_AURA_MOD_ROOT:
 							case SPELL_AURA_MOD_FEAR:
+							case SPELL_AURA_MOD_DECREASE_SPEED:
 								m_target->m_auras[x]->Remove();
 								goto out;
 								break;
@@ -5440,38 +5457,17 @@ void Aura::SpellAuraGhost(bool apply)
 }
 
 void Aura::SpellAuraMagnet(bool apply)
-{
-	/*shaman got a totem called grounding totem
-	if you cast it
-	1 negative spell casted on you will be casted on that totem instead of you
-	for example a damage spell
-	so you wont get damage of that 1 spell
-	next spell will deal damage on you of course*/
-	/*
-	//started by zack. If this text is not removed it means it never got to testing fase so feel free to delete or rewrite it
-	//check if there is something to be removed from target
-	if(m_target)
-	{
-		Aura *target_aura=NULL;
-		for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
-			if(	m_target->m_auras[x] 
-//				&& !m_target->m_auras[x]->IsPositive() //this check was already made when we added to negative auras ;)
-				)
-			{
-				target_aura = m_target->m_auras[x];
-				break;
-			}
-		if(target_aura)
-		{
-			//add to self
-			Spell*sp=new Spell(GetCaster(),target_aura->GetSpellProto(),true,NULL); //make or do not make triggers on this action ?
-			SpellCastTargets tgt(GetCaster()->GetGUID());
-			sp->prepare(&tgt);
-			//remove it from target
-			m_target->RemoveAllAuras(target_aura->GetSpellProto()->Id,target_aura->GetCasterGUID());
-		}
+{	
+	if(apply){
+		Unit *caster = GetUnitCaster();
+		if (!caster)
+			return;
+		SetPositive();
+		m_target->m_magnetcaster = caster->GetGUID();
 	}
-	*/
+	else{
+		m_target->m_magnetcaster = NULL;
+	}
 }
 
 void Aura::SpellAuraManaShield(bool apply)
@@ -7098,8 +7094,12 @@ void Aura::SpellAuraModPenetration(bool apply) // armor penetration & spell pene
 				m_target->PowerCostPctMod[x] -= mod->m_amount;
 		}
 
-		if(mod->m_miscValue & 124 && m_target->IsPlayer())
-			m_target->ModUnsigned32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, mod->m_amount);
+		if(m_target->IsPlayer()){
+			if(mod->m_miscValue & 124)
+				m_target->ModSignedInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, mod->m_amount);
+			if(mod->m_miscValue & 1)
+				m_target->ModSignedInt32Value(PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE, mod->m_amount);
+		}
 	}
 	else
 	{
@@ -7108,8 +7108,12 @@ void Aura::SpellAuraModPenetration(bool apply) // armor penetration & spell pene
 			if (mod->m_miscValue & (((uint32)1)<<x))
 				m_target->PowerCostPctMod[x] += mod->m_amount;
 		}
-		if(mod->m_miscValue & 124 && m_target->IsPlayer())
-			m_target->ModUnsigned32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -mod->m_amount);
+		if(m_target->IsPlayer()){
+			if(mod->m_miscValue & 124)
+				m_target->ModSignedInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -mod->m_amount);
+			if(mod->m_miscValue & 1)
+				m_target->ModSignedInt32Value(PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE, -mod->m_amount);
+		}
 	}
 }
 
@@ -7763,4 +7767,30 @@ void Aura::SpellAuraModSpellHealingFromAP(bool apply)
 	else
 		m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, -mod->realamount );
 	
+}
+
+void Aura::SpellAuraReduceEffectDuration(bool apply){
+	if(!m_target->IsPlayer())
+		return;
+	int32 val;
+	if(apply){
+		SetPositive();
+		val = mod->m_amount; // TODO Only maximum effect should be used for Silence or Interrupt effects reduction
+	}
+	else{
+		val = -mod->m_amount;
+	}
+	if(mod->m_miscValue > 0 && mod->m_miscValue < 28){
+		static_cast< Player* >( m_target )->MechanicDurationPctMod[mod->m_miscValue] += val;
+	}
+}
+
+// Modifies current aura duration based on mechanic specified
+void Aura::DurationPctMod(int32 mechanic){
+	if(m_target->IsPlayer()){
+		int32 DurationModifier = static_cast< Player* >( m_target )->MechanicDurationPctMod[mechanic];
+		if(DurationModifier < - 100)
+			DurationModifier = -100; // Can't reduce by more than 100%
+		SetDuration((GetDuration()*(100+DurationModifier))/100);
+	}
 }

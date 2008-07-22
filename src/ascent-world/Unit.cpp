@@ -115,6 +115,7 @@ Unit::Unit()
 	m_canMove = 0;
 	m_noInterrupt = 0;
 	m_modlanguage = -1;
+	m_magnetcaster = 0;
 	
 	critterPet = NULL;
 	summonPet = NULL;
@@ -1183,6 +1184,18 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								if( !(CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING)) //healing wave
 									continue;
 							}break;
+						//shaman - Elemental Focus - Clearcasting
+						case 16246:
+							{
+								if(origId == 39805)
+									continue; // Lightning Overload Proc is already free
+								if(CastingSpell->NameHash != SPELL_HASH_LIGHTNING_BOLT &&
+									CastingSpell->NameHash != SPELL_HASH_CHAIN_LIGHTNING &&
+									CastingSpell->NameHash != SPELL_HASH_EARTH_SHOCK &&
+									CastingSpell->NameHash != SPELL_HASH_FLAME_SHOCK &&
+									CastingSpell->NameHash != SPELL_HASH_FROST_SHOCK)
+									continue;
+							}break;
 						//shaman - windfury weapon
 						case 8232:
 						case 8235:
@@ -1200,7 +1213,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								uint32 extra_dmg=float2int32(mhs * (ospinfo->EffectBasePoints[0]+1) /14000.0f);
 								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
 								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
-								continue;
+								spellId = 33010; // WF animation
 							}break;
 						//rogue - Ruthlessness
 						case 14157:
@@ -1471,12 +1484,13 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 							if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) )
 								continue;
 						}break;
-						// Flametongue Weapon
+						// Flametongue Totem
 						case 25555:
 						case 16389:
 						case 10523:
 						case 8248:
 						case 8253:
+						// Flametongue Weapon
 						case 8026:
 						case 8028:
 						case 8029:
@@ -1485,7 +1499,14 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 						case 16344:
 						case 25488:
 						{
-							spellId = 29469;
+							if(spellId == 25555 ||
+								spellId == 16389 ||
+								spellId == 10523 ||
+								spellId == 8248 ||
+								spellId == 8253)
+									spellId = 16368;	// Flametongue Totem proc
+							else
+								spellId = 29469;	// Flametongue Weapon proc
 							Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
 				
 							if( mh != NULL)
@@ -1513,6 +1534,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								if(	CastingSpell->NameHash == SPELL_HASH_LIGHTNING_BOLT || CastingSpell->NameHash == SPELL_HASH_CHAIN_LIGHTNING )
 								{
 									spellId = CastingSpell->Id;
+									origId = 39805;
 									dmg_overwrite = (CastingSpell->EffectBasePoints[0] + 1) / 2; //only half dmg
 								}
 								else continue;
@@ -1997,7 +2019,7 @@ void Unit::CalculateResistanceReduction(Unit *pVictim,dealdamage * dmg, SpellEnt
 	if((*dmg).school_type == 0)//physical
 	{		
 		if(this->IsPlayer())
-			ArmorReduce = GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER_01); //Armor penetration
+			ArmorReduce = PowerCostPctMod[0];//GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER_01); //Armor penetration
 		else
 			ArmorReduce = 0.0f;
 
@@ -2679,6 +2701,8 @@ else
 					dmg.full_damage = CalculateDamage( this, pVictim, weapon_damage_type, 0, ability );
 			}
 
+			dmg.full_damage += add_damage;
+
 			if(ability && ability->SpellGroupType)
 			{	
 				SM_FIValue(((Unit*)this)->SM_FDamageBonus,&dmg.full_damage,ability->SpellGroupType);
@@ -2705,8 +2729,6 @@ else
 
 			if( pct_dmg_mod > 0 )
 				dmg.full_damage = float2int32( dmg.full_damage *  ( float( pct_dmg_mod) / 100.0f ) );
-
-			dmg.full_damage += add_damage;
 
 			//a bit dirty fix
 			/*if( ability != NULL && ability->NameHash == SPELL_HASH_SHRED )
@@ -2781,7 +2803,7 @@ else
 							float block_multiplier = ( 100.0f + float( static_cast< Player* >( pVictim )->m_modblockabsorbvalue ) ) / 100.0f;
 							if( block_multiplier < 1.0f )block_multiplier = 1.0f;
 
-							blocked_damage = float2int32( float( shield->GetProto()->Block ) + ( float( static_cast< Player* >( pVictim )->m_modblockvaluefromspells + pVictim->GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) ) * block_multiplier ) + ( ( float( pVictim->GetUInt32Value( UNIT_FIELD_STAT0 ) ) / 20.0f ) - 1.0f ) );
+							blocked_damage = float2int32( (float( shield->GetProto()->Block ) + ( float( static_cast< Player* >( pVictim )->m_modblockvaluefromspells + pVictim->GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) )) + ( ( float( pVictim->GetUInt32Value( UNIT_FIELD_STAT0 ) ) / 20.0f ) - 1.0f ) ) * block_multiplier);
 						}
 						else
 						{
@@ -3430,7 +3452,7 @@ void Unit::AddAura(Aura *aur)
 					}
 					else if( m_auras[x]->GetSpellId() == aur->GetSpellId() ) // not the best formula to test this I know, but it works until we find a solution
 					{
-						if( !aur->IsPositive() && m_auras[x]->m_casterGuid != aur->m_casterGuid )
+						if( !aur->IsPositive() && m_auras[x]->m_casterGuid != aur->m_casterGuid && maxStack == 0)
 							continue;
 						f++;
 						//if(maxStack > 1)
@@ -4014,7 +4036,7 @@ int32 Unit::GetSpellDmgBonus(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg
 		SM_FIValue(caster->SM_FDamageBonus, &bonus_damage, spellInfo->SpellGroupType);
 		int dmg_bonus_pct=0;
 		SM_FIValue(caster->SM_PDamageBonus,&dmg_bonus_pct,spellInfo->SpellGroupType);
-		bonus_damage += base_dmg*dmg_bonus_pct/100;
+		bonus_damage += (base_dmg+bonus_damage)*dmg_bonus_pct/100;
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		spell_flat_modifers=0;
 		spell_pct_modifers=0;

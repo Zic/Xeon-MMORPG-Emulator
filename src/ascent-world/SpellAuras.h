@@ -571,6 +571,7 @@ public:
 	void SpellAuraDrinkNew(bool apply);
 	void SpellAuraModSpellDamageFromAP(bool apply);
 	void SpellAuraModSpellHealingFromAP(bool apply);
+	void SpellAuraReduceEffectDuration(bool apply);
 	void EventPeriodicDrink(uint32 amount);
 
 	void SendModifierLog(int32 ** m,int32 v,uint64 mask,uint8 type,bool pct = false);
@@ -592,6 +593,7 @@ public:
 	void EventPeriodicRegenManaStatPct(uint32 perc,uint32 stat);
 	void RelocateEvents();
 	int32 event_GetInstanceID();
+	void DurationPctMod(int32 mechanic);
 
 	ASCENT_INLINE void SendPeriodicHealAuraLog(uint32 amt)
 	{
