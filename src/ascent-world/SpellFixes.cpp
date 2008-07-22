@@ -16246,6 +16246,22 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->procChance = procchance;
 
+        //Paladin: Purifying Power Rank 1
+        sp = dbcSpell.LookupEntryForced( 31825 );
+	if( sp != NULL )
+	{
+	    sp->EffectSpellGroupRelation[0] = 0x1020;
+	    sp->EffectSpellGroupRelation_high[1] = 2;
+	}
+	
+	//Paladin: Purifying Power Rank 2
+	sp = dbcSpell.LookupEntryForced( 31826 );
+	if( sp != NULL )
+	{
+	    sp->EffectSpellGroupRelation[0] = 0x1020;
+	    sp->EffectSpellGroupRelation_high[1] = 2;
+	}
+
 	//Druid: Natural Perfection
 	sp = dbcSpell.LookupEntryForced( 33881 );
 	if ( sp != NULL )
