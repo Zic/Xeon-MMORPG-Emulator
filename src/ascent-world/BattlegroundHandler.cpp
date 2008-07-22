@@ -74,7 +74,7 @@ void WorldSession::SendBattlegroundList(Creature* pCreature, uint32 mapid)
 		return;
 
 	/* we should have a bg id selection here. */
-	uint32 t = BATTLEGROUND_WARSUNG_GULCH;
+	uint32 t = BATTLEGROUND_WARSONG_GULCH;
 	if(pCreature->GetCreatureName())
 	{
 		if(strstr(pCreature->GetCreatureName()->SubName, "Arena") != NULL)
@@ -82,7 +82,12 @@ void WorldSession::SendBattlegroundList(Creature* pCreature, uint32 mapid)
 		else if(strstr(pCreature->GetCreatureName()->SubName, "Arathi") != NULL)
 			t = BATTLEGROUND_ARATHI_BASIN;
 		else if(strstr(pCreature->GetCreatureName()->SubName, "Warsong") != NULL)
-			t = BATTLEGROUND_WARSUNG_GULCH;
+			t = BATTLEGROUND_WARSONG_GULCH;
+		else if(strstr(pCreature->GetCreatureName()->SubName, "Alterac") != NULL)
+			t = BATTLEGROUND_ALTERAC_VALLEY;
+		else if(strstr(pCreature->GetCreatureName()->SubName, "Eye") != NULL)
+			t = BATTLEGROUND_EYE_OF_THE_STORM;
+
 	}
 
     BattlegroundManager.HandleBattlegroundListPacket(this, t);
