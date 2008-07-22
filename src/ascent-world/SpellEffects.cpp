@@ -2293,6 +2293,23 @@ void Spell::SpellEffectSummon(uint32 i) // Summon
 	if(!p_caster || !p_caster->IsInWorld())
 		return;
 
+	switch(m_spellInfo->EffectMiscValueB[i])
+	{
+		case 63:
+		case 81:
+		case 82:
+		case 83:
+			{
+				SpellEffectSummonTotem(i);
+				return;
+			}
+		case 41:
+			{
+				SpellEffectSummonCritter(i);
+				return;
+			}
+	}
+
 	if(p_caster->m_tempSummon)
 	{
 		p_caster->m_tempSummon->RemoveFromWorld(false,true);
@@ -4521,23 +4538,25 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 
 	float x = p_caster->GetPositionX();
 	float y = p_caster->GetPositionY();
-	uint32 slot = m_spellInfo->Effect[i] - SPELL_EFFECT_SUMMON_TOTEM_SLOT1;
+	uint32 slot = m_spellInfo->EffectImplicitTargetA[i] - EFF_TARGET_TOTEM_EARTH;
+	if(slot < 0 || slot > 3)
+		return; // Just 4 totems
 
-	switch(m_spellInfo->Effect[i])
+	switch(m_spellInfo->EffectMiscValueB[i])
 	{
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: 
+	case 63: 
 		x -= 1.5f;
 		y -= 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: 
+	case 81: 
 		x -= 1.5f;
 		y += 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:  
+	case 82:
 		x += 1.5f;
 		y -= 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: 
+	case 83:
 		x += 1.5f;
 		y += 1.5f;
 		break;

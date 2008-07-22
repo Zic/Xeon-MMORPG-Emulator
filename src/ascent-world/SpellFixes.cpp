@@ -14674,10 +14674,32 @@ void ApplyNormalFixes()
 		sp->EffectImplicitTargetB[2] = 0;
 	}
 
-	sp = dbcSpell.LookupEntryForced( 34774 );
-	if( sp != NULL ) //dragonspine trophy proc
-	{
+	// Dragonspine Trophy
+ 	sp = dbcSpell.LookupEntryForced( 34774 );
+	if( sp != NULL ){
 		sp->procChance = 6;
+		sp->procFlags  = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+		sp->proc_interval = 30000;
+	}
+
+	//paladin - Vindication
+	sp = dbcSpell.LookupEntryForced( 26021 );
+	if( sp != NULL )
+	{
+		sp->procChance = 30;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+	}
+	sp = dbcSpell.LookupEntryForced( 26016 );
+	if( sp != NULL )
+	{
+		sp->procChance = 30;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+	}
+	sp = dbcSpell.LookupEntryForced( 9452 );
+	if( sp != NULL )
+	{
+		sp->procChance = 30;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
 	}
 
 	//paladin - Blessing of Light. Changed to scripted because it needs to mod target and should not influence holy nova
@@ -20324,6 +20346,38 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->EffectTriggerSpell[0] = 37445;
 		sp->maxstack = 1;
+	}
+
+	// Band of the Eternal Champion
+	sp = dbcSpell.LookupEntryForced( 35080 );
+	if( sp != NULL ){
+		sp->procFlags  = PROC_ON_MELEE_ATTACK;
+		sp->proc_interval = 60000;
+	}
+	// Band of the Eternal Sage
+	sp = dbcSpell.LookupEntryForced( 35083 );
+	if( sp != NULL ){
+		sp->procFlags  = PROC_ON_CAST_SPELL;
+		sp->proc_interval = 60000;
+	}
+	// Band of the Eternal Restorer
+	sp = dbcSpell.LookupEntryForced( 35086 );
+	if( sp != NULL ){
+		sp->procFlags  = PROC_ON_CAST_SPELL;
+		sp->proc_interval = 60000;
+	}
+	// Band of the Eternal Defender
+	sp = dbcSpell.LookupEntryForced( 35077 );
+	if( sp != NULL ){
+		sp->procFlags  = PROC_ON_MELEE_ATTACK_VICTIM | PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM;
+		sp->proc_interval = 60000;
+	}	
+
+	// Swift Flying Broom
+	sp = dbcSpell.LookupEntryForced( 42668 );
+	SpellEntry *sp2 = dbcSpell.LookupEntryForced( 32239 );  // Ebon Gryphon Mount
+	if( sp != NULL && sp2 != NULL){
+		sp->CastingTimeIndex = sp2->CastingTimeIndex; // Set cast time 3 sec
 	}
 
 	//Item: Assassination Armor

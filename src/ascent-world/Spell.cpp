@@ -3429,7 +3429,8 @@ uint8 Spell::CanCast(bool tolerate)
 
 					// {Insignia|Medallion} of the {Horde|Alliance}
 					case 0xC7C45478: //Immune Movement Impairment and Loss of Control
-					case 0x048c32f9:	// insignia of the alliance/horde
+					case 0xDD06F1BF: // insignia of the alliance/horde 2.4.3
+					case 0x048c32f9: // insignia of the alliance/horde prior to 2.4.3
 						break;
 
 						{
@@ -3512,7 +3513,10 @@ uint8 Spell::CanCast(bool tolerate)
 				case 0x3DFA70E5: /* Will of the Forsaken (Undead Racial) */
 					break;
 
-				case 0x048c32f9:	// insignia of the alliance/horde
+				case 0x048c32f9:	// insignia of the alliance/horde prior to 2.4.3
+					break;
+
+				case 0xDD06F1BF:	// insignia of the alliance/horde 2.4.3
 					break;
 
 				default:
