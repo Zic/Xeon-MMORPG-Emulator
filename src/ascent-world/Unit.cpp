@@ -553,7 +553,7 @@ void Unit::GiveGroupXP(Unit *pVictim, Player *PlayerInGroup)
 	}*/
 }
 
-void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint32 dmg, uint32 abs )
+void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint32 dmg, uint32 abs , uint32 weapon_damage_type)
 {
 	++m_procCounter;
 	bool can_delete = !bProcInUse; //if this is a nested proc then we should have this set to TRUE by the father proc
@@ -588,6 +588,10 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 		//this requires some specific spell check,not yet implemented
 		if( itr2->procFlags & flag )
 		{
+			if(itr2->weapon_damage_type > 0 && itr2->weapon_damage_type < 3 && 
+				itr2->weapon_damage_type != weapon_damage_type)
+					continue; // This spell should proc only from other hand attacks
+
 			uint32 spellId = itr2->spellId;
 			if( itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL )
 			{
@@ -654,7 +658,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 						break; //druid: clearcasting
 				}
 
-				Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+				/*Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
 				Item * of = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
 				
 				if( mh != NULL && of != NULL )
@@ -669,7 +673,17 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 					proc_Chance = float2int32( mhs * 0.001f * ppm / 0.6f );
 				}
 				else
-					proc_Chance = 0;
+					proc_Chance = 0;*/
+				Item * weapon;
+				if(weapon_damage_type == 1)
+					weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+				else if(weapon_damage_type == 2)
+					weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
+				if(weapon)
+				{
+					float speed = float( weapon->GetProto()->Delay );
+					proc_Chance = float2int32( speed * 0.001f * ppm / 0.6f );
+				}
 
 				if( static_cast< Player* >( this )->IsInFeralForm() )
 				{
@@ -1203,9 +1217,9 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 						case 16362:
 						case 25505:
 							{
-								if(!IsPlayer())
+								if(!IsPlayer() || weapon_damage_type < 1 || weapon_damage_type > 2)
 									continue;
-								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type -1);
 								if( mh == NULL)
 									continue;
 								float mhs = float( mh->GetProto()->Delay );
@@ -1507,7 +1521,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 									spellId = 16368;	// Flametongue Totem proc
 							else
 								spellId = 29469;	// Flametongue Weapon proc
-							Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+							Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 				
 							if( mh != NULL)
 							{
@@ -2966,12 +2980,12 @@ else
 //--------------------------dirty fixes-----------------------------------------------------
 	//vstate=1-wound,2-dodge,3-parry,4-interrupt,5-block,6-evade,7-immune,8-deflect	
 	// the above code was remade it for reasons : damage shield needs moslty same flags as handleproc + dual wield should proc too ?
-	if( !disable_proc && weapon_damage_type != OFFHAND )
+	if( !disable_proc)// && weapon_damage_type != OFFHAND )
     {
-		this->HandleProc(aproc,pVictim, ability,realdamage,abs); //maybe using dmg.resisted_damage is better sometimes but then if using godmode dmg is resisted instead of absorbed....bad
+		this->HandleProc(aproc,pVictim, ability,realdamage,abs,weapon_damage_type + 1); //maybe using dmg.resisted_damage is better sometimes but then if using godmode dmg is resisted instead of absorbed....bad
 		m_procCounter = 0;
 
-		pVictim->HandleProc(vproc,this, ability,realdamage,abs);
+		pVictim->HandleProc(vproc,this, ability,realdamage,abs,weapon_damage_type + 1);
 		pVictim->m_procCounter = 0;
 
 		if(realdamage > 0)

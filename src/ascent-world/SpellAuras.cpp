@@ -598,6 +598,7 @@ void Aura::ApplyModifiers( bool apply )
 			pts.procChance = GetSpellProto()->procChance;
 			pts.procFlags = GetSpellProto()->procFlags;
 			pts.procCharges = GetSpellProto()->procCharges;
+			pts.weapon_damage_type = 0;
 			pts.LastTrigger = 0;
 			pts.deleted = false;
 			m_target->m_procSpells.push_front(pts);
@@ -1443,6 +1444,7 @@ void Aura::SpellAuraDummy(bool apply)
 			pts.procCharges = GetSpellProto()->procCharges;
 			pts.LastTrigger = 0;
 			pts.deleted = false;
+			pts.weapon_damage_type = 0;
 			m_target->m_procSpells.push_front(pts);
 			}
 			else
@@ -3851,6 +3853,12 @@ void Aura::SpellAuraProcTriggerSpell(bool apply)
 		pts.procChance = GetSpellProto()->procChance;
 		pts.procFlags = GetSpellProto()->procFlags;
 		pts.procCharges = GetSpellProto()->procCharges;
+		if(mod->m_miscValue == 15)
+			pts.weapon_damage_type = 1; // Proc only on main hand attacks
+		else if(mod->m_miscValue == 16)
+			pts.weapon_damage_type = 2; // Proc only on off hand attacks
+		else
+			pts.weapon_damage_type = 0; // Doesn't depend on weapon
 		pts.LastTrigger = 0;
 		pts.deleted = false;
 

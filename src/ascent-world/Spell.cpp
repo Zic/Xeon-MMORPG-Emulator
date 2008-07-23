@@ -2626,7 +2626,7 @@ uint8 Spell::CanCast(bool tolerate)
 		{
 			//Spirit of Redemption can cast heals while dead
 			//Self Ressurection can cast while dead
-			if(!p_caster->HasAura(27827) || !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING) || !p_caster->HasAura(18976))
+			if(!(p_caster->HasAura(27827) && (m_spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING)) && !p_caster->HasAura(18976))
 				return SPELL_FAILED_CASTER_DEAD;
 		}
 #ifdef COLLISION

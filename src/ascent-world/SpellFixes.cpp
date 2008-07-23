@@ -15549,6 +15549,8 @@ void ApplyNormalFixes()
 	//shaman - Elemental Weapons
 	sp = dbcSpell.LookupEntryForced( 29080 ); 
 	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x400000; // Rockbiter
+		sp->EffectMiscValue[0] = SMT_DAMAGE_DONE;
 		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
 		sp->EffectSpellGroupRelation_high[2] = 0x800;
 		sp->EffectMiscValue[1] = SMT_DAMAGE_DONE;
@@ -15556,6 +15558,8 @@ void ApplyNormalFixes()
 	}
 	sp = dbcSpell.LookupEntryForced( 29079 ); 
 	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x400000; // Rockbiter
+		sp->EffectMiscValue[0] = SMT_DAMAGE_DONE;
 		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
 		sp->EffectSpellGroupRelation_high[2] = 0x800;
 		sp->EffectMiscValue[1] = SMT_DAMAGE_DONE;
@@ -15563,6 +15567,8 @@ void ApplyNormalFixes()
 	}
 	sp = dbcSpell.LookupEntryForced( 16266 ); 
 	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x400000; // Rockbiter
+		sp->EffectMiscValue[0] = SMT_DAMAGE_DONE;
 		sp->EffectSpellGroupRelation[1] = 0x200000 | 0x1000000;
 		sp->EffectSpellGroupRelation_high[2] = 0x800;
 		sp->EffectMiscValue[1] = SMT_DAMAGE_DONE;
@@ -21155,6 +21161,7 @@ void ApplyNormalFixes()
 			sp->maxstack = 1;
 		}
 	}
+	
 
 	//for test only
 	//sp = dbcSpell.LookupEntryForced( 32796 );

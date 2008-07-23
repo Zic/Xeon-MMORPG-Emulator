@@ -1246,6 +1246,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			ILotP.deleted = false;
 			ILotP.caster = u_caster->GetGUID();
 			ILotP.LastTrigger = 0;
+			ILotP.weapon_damage_type = 0;
 			u_caster->m_procSpells.push_back(ILotP);
 		}
 /*	case 19028:	//warlock - soul link
@@ -1671,8 +1672,14 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	else
 	{
 		 pAura=itr->second;
-	} 
-	pAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,m_spellInfo->EffectMiscValue[i],i);
+	}
+	int32 miscValue;
+	if(i_caster && m_caster->IsPlayer() && m_spellInfo->EffectApplyAuraName[i]==SPELL_AURA_PROC_TRIGGER_SPELL){
+		miscValue = p_caster->GetItemInterface()->GetInventorySlotByGuid( i_caster->GetGUID() ); // Need to know on which hands attacks spell should proc
+	}else{
+		miscValue = m_spellInfo->EffectMiscValue[i];
+	}
+	pAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,miscValue,i);
 }
 
 void Spell::SpellEffectPowerDrain(uint32 i)  // Power Drain

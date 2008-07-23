@@ -680,6 +680,12 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 						TS.caster = m_owner->GetGUID();
 						TS.origId = 0;
 						TS.procFlags = PROC_ON_MELEE_ATTACK;
+						if(ItemSlot == 240)
+							TS.weapon_damage_type = 1; // Proc only on main hand attacks
+						else if(ItemSlot == 256)
+							TS.weapon_damage_type = 2; // Proc only on off hand attacks
+						else
+							TS.weapon_damage_type = 0; // Doesn't depend on weapon
 						TS.procCharges = 0;
 						/* This needs to be modified based on the attack speed of the weapon.
 						 * Secondly, need to assign some static chance for instant attacks (ss,
@@ -785,27 +791,36 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 					m_owner->UpdateStats();
 				}break;
 
-			case 6:	 // Rockbiter weapon (increase damage per second... how the hell do you calc that)
+			case 6:	 // Rockbiter weapon (increase damage per second)
 				{
+					float *BaseDamage;
+					if( ItemSlot == 256 )
+						BaseDamage = m_owner->BaseOffhandDamage; // Main hand
+					else if(ItemSlot == 240)
+						BaseDamage = m_owner->BaseDamage; // Off hand
+					else
+						break; // What is this?
+
 					if( Apply )
 					{
-						//m_owner->ModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, Entry->min[c]);
 						//if i'm not wrong then we should apply DMPS formula for this. This will have somewhat a larger value 28->34
 						int32 val = Entry->min[c];
 						if( RandomSuffixAmount )
 							val = RANDOM_SUFFIX_MAGIC_CALCULATION( RandomSuffixAmount, GetItemRandomSuffixFactor() );
 
 						int32 value = GetProto()->Delay * val / 1000;
-						m_owner->ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS, value );
+						SM_PIValue(m_owner->SM_PDamageBonus,&value, 0x400000); // Apply talents (Elemental Weapons)
+						BaseDamage[0] += value;
+						BaseDamage[1] += value;
+
 					}
 					else
 					{
-						int32 val = Entry->min[c];
-						if( RandomSuffixAmount )
-							val = RANDOM_SUFFIX_MAGIC_CALCULATION( RandomSuffixAmount, GetItemRandomSuffixFactor() );
-
-						int32 value =- (int32)(GetProto()->Delay * val / 1000 );
-						m_owner->ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS, value );
+						// Just revert damage to original weapon damage;
+						if(GetProto()->Damage[0].Min){
+							BaseDamage[0] = GetProto()->Damage[0].Min;
+							BaseDamage[1] = GetProto()->Damage[0].Max;
+						}
 					}
 					m_owner->CalcDamage();
 				}break;
