@@ -19,6 +19,17 @@
 
 #include "StdAfx.h"
 
+#ifndef WIN32
+char * strupr(char *s)
+{
+    char *tmp = s;
+    while (*s)
+        *s = toupper(*s++);
+    return tmp;
+}
+#endif
+
+
 extern std::string LogFileName;
 extern bool bLogChat;
 
@@ -599,3 +610,4 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recvPacket)
 		return;
 
 }
+
