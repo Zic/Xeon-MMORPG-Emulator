@@ -3338,8 +3338,8 @@ void Unit::smsg_AttackStop(Unit* pVictim)
 	data << uint32(0);
 	SendMessageToSet(&data, true );
 
-	pVictim->CombatStatus.RemoveAttacker(this, GetGUID());
-	CombatStatus.RemoveAttackTarget(pVictim);
+	//pVictim->CombatStatus.RemoveAttacker(this, GetGUID()); // Shouldn't get out of combat that easily
+	//CombatStatus.RemoveAttackTarget(pVictim);
 }
 
 void Unit::smsg_AttackStop(uint64 victimGuid)
