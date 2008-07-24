@@ -14313,6 +14313,12 @@ void ApplyNormalFixes()
 				sp->EffectTriggerSpell[0] = 31616;
 			}
 
+			if(sp->NameHash == SPELL_HASH_WINDFURY_WEAPON ||
+				sp->NameHash == SPELL_HASH_FLAMETONGUE_WEAPON ||
+				sp->NameHash == SPELL_HASH_ROCKBITER_WEAPON ||
+				sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON)
+				sp->Flags3 |= FLAGS3_ENCHANT_OWN_ONLY;
+
 		//////////////////////////////////////////
 		// MAGE								//
 		//////////////////////////////////////////
@@ -21095,6 +21101,7 @@ void ApplyNormalFixes()
 			sp->procChance = 20;
 			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
 			sp->maxstack = 1;
+			sp->always_apply = true; // so that we can apply 2 wf auras while dual-wielding
 		}
 	}
 
@@ -21111,6 +21118,7 @@ void ApplyNormalFixes()
 			sp->procChance = 20;
 			sp->proc_interval = 3000; //http://www.wowwiki.com/Windfury_Weapon
 			sp->maxstack = 1;
+			sp->always_apply = true;
 		}
 	}
 
@@ -21127,6 +21135,7 @@ void ApplyNormalFixes()
 			sp->procChance = 20;
 			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
 			sp->maxstack = 1;
+			sp->always_apply = true;
 		}
 	}
 
@@ -21143,6 +21152,7 @@ void ApplyNormalFixes()
 			sp->procChance = 20;
 			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
 			sp->maxstack = 1;
+			sp->always_apply = true;
 		}
 	}
 
@@ -21159,6 +21169,7 @@ void ApplyNormalFixes()
 			sp->procChance = 20;
 			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
 			sp->maxstack = 1;
+			sp->always_apply = true;
 		}
 	}
 	

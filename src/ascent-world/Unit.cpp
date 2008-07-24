@@ -1225,8 +1225,8 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								float mhs = float( mh->GetProto()->Delay );
 								// Calculate extra AP bonus damage
 								uint32 extra_dmg=float2int32(mhs * (ospinfo->EffectBasePoints[0]+1) /14000.0f);
-								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
-								Strike( victim, MELEE, spe, extra_dmg, 0, 0, true, false );
+								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
+								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
 								spellId = 33010; // WF animation
 							}break;
 						//rogue - Ruthlessness
@@ -1371,7 +1371,7 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 									continue;
 								//this needs offhand weapon
 								Item* it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-								if( it == NULL || it->GetProto()->InventoryType != INVTYPE_WEAPON )
+								if( it == NULL || it->GetProto()->InventoryType != INVTYPE_WEAPON || weapon_damage_type != 2)
 									continue;
 							}break;
 						//paladin - Seal of Blood
