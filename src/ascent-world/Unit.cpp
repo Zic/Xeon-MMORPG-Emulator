@@ -674,12 +674,15 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 				}
 				else
 					proc_Chance = 0;*/
-				Item * weapon;
-				if(weapon_damage_type == 1)
-					weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-				else if(weapon_damage_type == 2)
-					weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-				if(weapon)
+				Item *weapon = NULL;
+				if(static_cast< Player* >( this )->GetItemInterface())
+				{
+					if(weapon_damage_type == 1)
+						weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+					else if(weapon_damage_type == 2)
+						weapon = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
+				}
+				if(weapon && weapon->GetProto())
 				{
 					float speed = float( weapon->GetProto()->Delay );
 					proc_Chance = float2int32( speed * 0.001f * ppm / 0.6f );
