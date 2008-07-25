@@ -52,6 +52,7 @@ protected:
 	uint32 TypeDynGO;
 	uint32 TypeDynUnit;
 	uint32 m_aliveDuration;
+	float m_radius;
 	uint32 _fields[DYNAMICOBJECT_END];
 };
 

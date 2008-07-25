@@ -64,17 +64,17 @@ void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, f
 
 	m_spellProto = pSpell->m_spellInfo;
 	SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
-
 	m_uint32Values[OBJECT_FIELD_ENTRY] = m_spellProto->Id;
 	m_uint32Values[DYNAMICOBJECT_BYTES] = 0x01eeeeee;
 	m_uint32Values[DYNAMICOBJECT_SPELLID] = m_spellProto->Id;
-
 	m_floatValues[DYNAMICOBJECT_RADIUS] = radius;
 	m_floatValues[DYNAMICOBJECT_POS_X]  = x;
 	m_floatValues[DYNAMICOBJECT_POS_Y]  = y;
 	m_floatValues[DYNAMICOBJECT_POS_Z]  = z;
+	m_uint32Values[DYNAMICOBJECT_CASTTIME] = (uint32)UNIXTIME;
 
 	m_aliveDuration = duration;
+	m_radius = radius;
 	g_caster = caster;
 	if(p_caster)
 	{
@@ -117,17 +117,17 @@ void DynamicObject::Create(Unit * caster, Spell * pSpell, float x, float y, floa
 
 	m_spellProto = pSpell->m_spellInfo;
 	SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
-
 	m_uint32Values[OBJECT_FIELD_ENTRY] = m_spellProto->Id;
 	m_uint32Values[DYNAMICOBJECT_BYTES] = 0x01eeeeee;
 	m_uint32Values[DYNAMICOBJECT_SPELLID] = m_spellProto->Id;
-
 	m_floatValues[DYNAMICOBJECT_RADIUS] = radius;
 	m_floatValues[DYNAMICOBJECT_POS_X]  = x;
 	m_floatValues[DYNAMICOBJECT_POS_Y]  = y;
 	m_floatValues[DYNAMICOBJECT_POS_Z]  = z;
+	m_uint32Values[DYNAMICOBJECT_CASTTIME] = (uint32)UNIXTIME;
 
 	m_aliveDuration = duration;
+	m_radius = radius;
 	u_caster = caster;
 	m_faction = caster->m_faction;
 	m_factionDBC = caster->m_factionDBC;
