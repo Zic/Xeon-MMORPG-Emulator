@@ -2770,6 +2770,7 @@ uint8 Spell::CanCast(bool tolerate)
 				case 1856:
 				case 1857:
 				case 26889:
+				case 20580: // Shadowmeld
 				{
 					return SPELL_FAILED_SPELL_UNAVAILABLE;
 					break;

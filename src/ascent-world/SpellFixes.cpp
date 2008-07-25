@@ -15940,8 +15940,9 @@ void ApplyNormalFixes()
 	{
 		sp->EffectSpellGroupRelation[1] = group_relation_rogue_shadow_step;
 		sp->EffectSpellGroupRelation_high[1] = 256 | 128 ;
-		sp->EffectMiscValue[1] = SMT_SPELL_VALUE;
 		sp->procFlags = 0;
+		sp->AuraInterruptFlags = AURA_INTERRUPT_ON_CAST_SPELL;
+		sp->Effect[2] = 0; // Otherwise damage would be increased 2 times for a total of 40%
 	}
 
 	sp = dbcSpell.LookupEntryForced( 44373 );

@@ -803,9 +803,11 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 						{
 							//warrior/rogue mace specialization can trigger only when using maces
 							Item* it;
+							if(weapon_damage_type < 1 || weapon_damage_type > 2)
+									continue;
 							if( static_cast< Player* >( this )->GetItemInterface() )
 							{
-								it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+								it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 								if( it != NULL && it->GetProto() )
 								{
 									uint32 reqskill = GetSkillByProto( it->GetProto()->Class, it->GetProto()->SubClass );
@@ -824,12 +826,14 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 							if( !Rand( chance ) )
 								continue;
 						}break;
-						case 4350:
+						case 16459:
 						{
 							//sword specialization
 							if( static_cast< Player* >( this )->GetItemInterface())
 							{
-								Item* it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
+								if(weapon_damage_type < 1 || weapon_damage_type > 2)
+									continue;
+								Item* it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 								if( it != NULL && it->GetProto() )
 								{
 									uint32 reqskill=GetSkillByProto( it->GetProto()->Class, it->GetProto()->SubClass );
@@ -4995,6 +4999,11 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 								spi->NameHash != SPELL_HASH_SUMMON_FELHUNTER &&
 								spi->NameHash != SPELL_HASH_SUMMON_FELGUARD )
 								continue;
+						}break;
+					case 36563: //Shadowstep
+						{
+							if(skip == 36554)
+								continue;  // We just got triggered, not removing yet
 						}break;
 				}
 			}

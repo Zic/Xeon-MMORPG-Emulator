@@ -347,7 +347,6 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 {
 	uint64 guid;
 	uint32 spellid;
-	uint32 unknown;
 	uint32 flags;
 	recvPacket >> guid >> spellid >> flags;
 	
