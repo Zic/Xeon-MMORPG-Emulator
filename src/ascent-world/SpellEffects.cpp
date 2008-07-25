@@ -1353,6 +1353,23 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( p_caster->GetUInt32Value(UNIT_FIELD_POWER2) > 1000 )
 				p_caster->SetUInt32Value(UNIT_FIELD_POWER2, 1000);
 		}break;
+	case 5308:
+	case 20658:
+	case 20660:
+	case 20661:
+	case 20662:
+	case 25234:
+	case 25236: // Execute
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || unitTarget->GetHealthPct() >= 20 || !m_spellInfo)
+				return;
+			int32 value = m_spellInfo->EffectBasePoints[i]+1;
+			int32 currentRage = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
+			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]);
+			u_caster->SetUInt32Value(UNIT_FIELD_POWER2,0); // We use all available rage
+			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647 );
+			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
+		}break;
 
 	case 20473: //Holy Shock Rank 1
 		{
