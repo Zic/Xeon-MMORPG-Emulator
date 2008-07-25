@@ -44,18 +44,6 @@ DynamicObject::DynamicObject(uint32 high, uint32 low)
 
 DynamicObject::~DynamicObject()
 {
-	// remove aura from all targets
-	DynamicObjectList::iterator jtr  = targets.begin();
-	DynamicObjectList::iterator jend = targets.end();
-	Unit * target;
-
-	while(jtr != jend)
-	{
-		target = *jtr;
-		++jtr;
-		target->RemoveAura(m_spellProto->Id);
-	}
-
 	if(TypeDynGO && g_caster->dynObj == this)
 	{
 		g_caster->dynObj = 0;
@@ -66,7 +54,6 @@ DynamicObject::~DynamicObject()
 		u_caster->dynObj = 0;
 		TypeDynUnit = 0;
 	}
-	
 }
 
 void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, float y, float z, uint32 duration, float radius)
@@ -89,8 +76,17 @@ void DynamicObject::CreateFromGO(GameObject * caster, Spell * pSpell, float x, f
 
 	m_aliveDuration = duration;
 	g_caster = caster;
-	m_faction = caster->m_faction;
-	m_factionDBC = caster->m_factionDBC;
+	if(p_caster)
+	{
+		m_faction = p_caster->m_faction;
+		m_factionDBC = p_caster->m_factionDBC;
+	}
+	else
+	{
+		m_faction = caster->m_faction;
+		m_factionDBC = caster->m_factionDBC;
+	}
+
 	TypeDynGO = 1;
 	if(caster->dynObj != 0)
 	{
@@ -250,8 +246,8 @@ void DynamicObject::UpdateTargets()
 
 			if(GetDistanceSq(target) > radius)
 			{
-				targets.erase(jtr2);
 				target->RemoveAura(m_spellProto->Id);
+				targets.erase(jtr2);
 			}
 		}
 
@@ -263,24 +259,23 @@ void DynamicObject::UpdateTargets()
 	}
 
 	if(m_aliveDuration == 0)
-	{
-		DynamicObjectList::iterator jtr  = targets.begin();
-		DynamicObjectList::iterator jend = targets.end();
-		Unit * target;
-
-		while(jtr != jend)
-		{
-			target = *jtr;
-			++jtr;
-			target->RemoveAura(m_spellProto->Id);
-		}
-
 		Remove();
-	}
 }
 
 void DynamicObject::Remove()
 {
+	// remove aura from all targets
+	DynamicObjectList::iterator jtr  = targets.begin();
+	DynamicObjectList::iterator jend = targets.end();
+	Unit * target;
+
+	while(jtr != jend)
+	{
+		target = *jtr;
+		++jtr;
+		target->RemoveAura(m_spellProto->Id);
+	}
+
 	if(IsInWorld())
 		RemoveFromWorld(true);
 	delete this;
