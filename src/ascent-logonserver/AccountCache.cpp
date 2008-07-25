@@ -130,18 +130,28 @@ void AccountMgr::AddAccount(Field* field)
 	
 	if( EncryptedPassword.size() > 0 )
 	{
-		// prefer encrypted passwords over nonencrypted
-		BigNumber bn;
-		bn.SetHexStr( EncryptedPassword.c_str() );
-		if( bn.GetNumBytes() != 20 )
-		{
-			printf("Account `%s` has incorrect number of bytes (%u) in encrypted password! Disabling.\n", Username.c_str(), bn.GetNumBytes());
-			memset(acct->SrpHash, 0, 20);
+		if ( EncryptedPassword.size() == 40 )
+		{			
+			BigNumber bn;
+			bn.SetHexStr( EncryptedPassword.c_str() );
+			if( bn.GetNumBytes() < 20 )
+			{
+				// Hacky fix
+				memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
+				for (int n=bn.GetNumBytes(); n<=19; n++)
+					acct->SrpHash[n] = (uint8)0;
+				reverse_array(acct->SrpHash, 20);
+			}
+			else
+			{
+				memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+				reverse_array(acct->SrpHash, 20);
+			}
 		}
 		else
 		{
-			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
-			reverse_array(acct->SrpHash, 20);
+			printf("Account `%s` has incorrect number of bytes in encrypted password! Disabling.\n", Username.c_str());
+			memset(acct->SrpHash, 0, 20);
 		}
 	}
 	else
@@ -194,18 +204,28 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 
 	if( EncryptedPassword.size() > 0 )
 	{
-		// prefer encrypted passwords over nonencrypted
-		BigNumber bn;
-		bn.SetHexStr( EncryptedPassword.c_str() );
-		if( bn.GetNumBytes() != 20 )
-		{
-			printf("Account `%s` has incorrect number of bytes in encrypted password! Disabling.\n", Username.c_str());
-			memset(acct->SrpHash, 0, 20);
+		if ( EncryptedPassword.size() == 40 )
+		{			
+			BigNumber bn;
+			bn.SetHexStr( EncryptedPassword.c_str() );
+			if( bn.GetNumBytes() < 20 )
+			{
+				// Hacky fix
+				memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
+				for (int n=bn.GetNumBytes(); n<=19; n++)
+					acct->SrpHash[n] = (uint8)0;
+				reverse_array(acct->SrpHash, 20);
+			}
+			else
+			{
+				memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+				reverse_array(acct->SrpHash, 20);
+			}
 		}
 		else
 		{
-			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
-			reverse_array(acct->SrpHash, 20);
+			printf("Account `%s` has incorrect number of bytes in encrypted password! Disabling.\n", Username.c_str());
+			memset(acct->SrpHash, 0, 20);
 		}
 	}
 	else
