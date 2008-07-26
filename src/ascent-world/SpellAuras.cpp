@@ -2398,7 +2398,13 @@ void Aura::SpellAuraModStun(bool apply)
 	if(m_spellProto->Id == 38554) return; // Absorb Eye of Grillok
 
 	if(apply)
-	{ 
+	{
+		float res = m_target->MechanicsResistancesPCT[MECHANIC_STUNNED];
+		if(Rand(res))
+		{
+			//resisted. Add a combatlog result here.
+			return;
+		}
 		SetNegative();
 
 		m_target->m_rooted++;
