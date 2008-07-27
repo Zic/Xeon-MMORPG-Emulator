@@ -322,6 +322,16 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 		}
 		delete result;
 	}
+
+	//For Stabatha, uncomment this to disable these races
+	/*
+	if(race == RACE_BLOODELF || race == RACE_DRAENEI)
+	{
+		OutPacket(SMSG_CHAR_CREATE, 1, "\x33");
+	}
+	*/
+
+
 	// loading characters
 	
 	//checking number of chars is useless since client will not allow to create more than 10 chars
@@ -392,7 +402,23 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 	sLogonCommHandler.UpdateAccountCount(GetAccountId(), 1);
 }
 
-/* FOR 1.10.1
+/* Last Checked at patch 2.4.3 Specfic SMSG_CHAR_CREATE Error Codes:
+
+0x2E CHAR_CREATE_IN_PROGRESS = 46,			//Creating character
+0x2F CHAR_CREATE_SUCCESS = 47,				//Character Created
+0x30 CHAR_CREATE_ERROR = 48,				//Error creating character
+0x31 CHAR_CREATE_FAILED = 49,				//Character creation failed
+0x32 CHAR_CREATE_NAME_IN_USE = 50,			//That name is unavailable
+0x33 CHAR_CREATE_DISABLED = 51,				//Creation of that race/class is disabled
+0x34 CHAR_CREATE_PVP_TEAMS_VIOLATION = 52,	//All characters on a PVP realm must be on the same team
+0x35 CHAR_CREATE_SERVER_LIMIT = 53,			//You already have maximum number of characters
+0x36 CHAR_CREATE_ACCOUNT_LIMIT = 54,		//You already have maximum number of characters
+0x37 CHAR_CREATE_SERVER_QUEUE = 55,			//The server is currently queued
+0x38 CHAR_CREATE_ONLY_EXISTING = 56,		//Only players who have characters on this realm..
+0x39 CHAR_CREATE_EXPANSION = 57,			//Creation of that race requires an account that has been upgraded to the approciate expansion
+
+
+FOR 1.10.1
 SMSG_CHAR_CREATE Error Codes:
 0x00 Success
 0x01 Failure
