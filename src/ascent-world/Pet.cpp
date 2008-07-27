@@ -1705,8 +1705,14 @@ AI_Spell * Pet::HandleAutoCastEvent()
 		for(; itr != m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end(), j < c; ++j, ++itr);
 		if(itr == m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end())
 		{
-			if( (*m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin())->autocast_type == AUTOCAST_EVENT_ATTACK )
-				return *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+			AI_Spell * sp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+			if( sp->autocast_type == AUTOCAST_EVENT_ATTACK )
+			{
+				if( sp->cooldown && getMSTime() >= sp->cooldowntime )
+					return *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+				else
+					return NULL;
+			}
 			else
 			{
 				// bad pointers somehow end up here :S
@@ -1716,8 +1722,14 @@ AI_Spell * Pet::HandleAutoCastEvent()
 		}
 		else
 		{
-			if( (*itr)->autocast_type == AUTOCAST_EVENT_ATTACK )
-				return *itr;
+			AI_Spell * sp = *itr;
+			if( sp->autocast_type == AUTOCAST_EVENT_ATTACK )
+			{
+				if( sp->cooldown && getMSTime() >= sp->cooldowntime )
+					return *itr;
+				else
+					return NULL;
+			}
 			else
 			{
 				m_autoCastSpells[AUTOCAST_EVENT_ATTACK].erase(itr);

@@ -328,15 +328,19 @@ void ObjectMgr::LoadExtraItemStuff()
 		case 23734:
 		case 23735:
 		case 23755:
+		case 25900:
+		case 23711:
+		case 23730:
+		case 23731:
+			// Felguard
+			pItemPrototype->ForcedPetId = 17252;
+			break;
+
 		case 16381:
 		case 16382:
 		case 16383:
 		case 22188:
 		case 22189:
-		case 25900:
-		case 23711:
-		case 23730:
-		case 23731:
 		case 16390:
 		case 16388:
 		case 16389:
@@ -345,8 +349,8 @@ void ObjectMgr::LoadExtraItemStuff()
 		case 16386:
 		case 16387:
 		case 22190:
-			// Felguard
-			pItemPrototype->ForcedPetId = 17252;
+			// Felhunter
+			pItemPrototype->ForcedPetId = 417;
 			break;
 
 		case 16321:

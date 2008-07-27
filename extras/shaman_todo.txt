@@ -7,11 +7,11 @@ Healing Grace - healing spells threat reduction doesn't work
 Earth Shield - should be active only on 1 target at a time
 
 Enhancement:
-Elemental Weapons - need to add Rockbiter Weapon dps bonus
+Should be fully working
 
 Spells:
 
-Rockbiter Weapon - Doesn't work
+Rockbiter Weapon - For it to work you need to learn a different spell (e.g. 36502 instead of 25485)
 Stoneclaw Totem - Doesn't work
 Far Sight - Doesn't work
 Sentry Totem - Doesn't work

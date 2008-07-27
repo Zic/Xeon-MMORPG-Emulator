@@ -4796,8 +4796,8 @@ void Spell::SpellEffectSelfResurrect(uint32 i)
 		}break;
 	case 21169: //Reincarnation. Ressurect with 20% health and mana
 		{
-			health = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.20);
-			mana = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*0.20);
+			health = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*damage/100);
+			mana = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*damage/100);
 		}
 		break;
 	default:

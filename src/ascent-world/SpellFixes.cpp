@@ -15098,6 +15098,18 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0]=1|2;
 
+	// shaman - Improved Reincarnation
+	sp = dbcSpell.LookupEntryForced( 16209 );
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x200;
+		sp->EffectSpellGroupRelation[1] = 0x200;
+	}
+	sp = dbcSpell.LookupEntryForced( 16184 );
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 0x200;
+		sp->EffectSpellGroupRelation[1] = 0x200;
+	}
+
 	//shaman - Lightning Overload 
 	sp = dbcSpell.LookupEntryForced( 30675 ); 
 	if( sp != NULL )
