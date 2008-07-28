@@ -14421,6 +14421,7 @@ void ApplyNormalFixes()
 	if( parentsp != NULL && triggersp != NULL )
 		triggersp->EffectBasePoints[0] = parentsp->EffectBasePoints[0];
 
+	SpellEntry *sp2;
 	/// Elemental Focus
 	SpellEntry* sp = dbcSpell.LookupEntryForced( 16164 );
 	if( sp != NULL && sp->Id == 16164 )
@@ -18903,36 +18904,52 @@ void ApplyNormalFixes()
 		sp->Effect[2] = 0 ; //remove this effect
 	}
 
+	sp2 = dbcSpell.LookupEntryForced( 27218 ); // Curse of Agony
 	//warlock - Shadow Embrace
 	sp = dbcSpell.LookupEntryForced( 32385 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->Effect[1] = 0 ; //remove this effect ? Maybe remove the other one :P xD
+		SpellEntry *sp3 = dbcSpell.LookupEntryForced( sp->EffectTriggerSpell[0] );
+		if(sp3 && sp2)
+			sp3->DurationIndex = sp2->DurationIndex; // Make it last 24 sec
 	}
 	sp = dbcSpell.LookupEntryForced( 32387 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->Effect[1] = 0 ; //remove this effect ? Maybe remove the other one :P xD
+		SpellEntry *sp3 = dbcSpell.LookupEntryForced( sp->EffectTriggerSpell[0] );
+		if(sp3 && sp2)
+			sp3->DurationIndex = sp2->DurationIndex; // Make it last 24 sec
 	}
 	sp = dbcSpell.LookupEntryForced( 32392 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->Effect[1] = 0 ; //remove this effect ? Maybe remove the other one :P xD
+		SpellEntry *sp3 = dbcSpell.LookupEntryForced( sp->EffectTriggerSpell[0] );
+		if(sp3 && sp2)
+			sp3->DurationIndex = sp2->DurationIndex; // Make it last 24 sec
 	}
 	sp = dbcSpell.LookupEntryForced( 32393 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->Effect[1] = 0 ; //remove this effect ? Maybe remove the other one :P xD
+		SpellEntry *sp3 = dbcSpell.LookupEntryForced( sp->EffectTriggerSpell[0] );
+		if(sp3 && sp2)
+			sp3->DurationIndex = sp2->DurationIndex; // Make it last 24 sec
 	}
 	sp = dbcSpell.LookupEntryForced( 32394 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->Effect[1] = 0 ; //remove this effect ? Maybe remove the other one :P xD
+		SpellEntry *sp3 = dbcSpell.LookupEntryForced( sp->EffectTriggerSpell[0] );
+		if(sp3 && sp2)
+			sp3->DurationIndex = sp2->DurationIndex; // Make it last 24 sec
 	}
 
 	//warlock - Bane
@@ -19517,13 +19534,22 @@ void ApplyNormalFixes()
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[0] = 30069;
 	}
 	sp = dbcSpell.LookupEntryForced( 29859 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[0] = 30070;
 	}
+	sp2 = dbcSpell.LookupEntryForced( 25208 ); // Rend
+	sp = dbcSpell.LookupEntryForced( 30069 );
+	if( sp != NULL && sp2 != NULL)
+		sp->DurationIndex = sp2->DurationIndex; // Make it last the same time as Rend
+	sp = dbcSpell.LookupEntryForced( 30070 );
+	if( sp != NULL && sp2 != NULL)
+		sp->DurationIndex = sp2->DurationIndex; // Make it last the same time as Rend
 #else
 	//warrior - Blood Frenzy
 	sp = dbcSpell.LookupEntryForced( 29836 );
@@ -20405,7 +20431,7 @@ void ApplyNormalFixes()
 
 	// Swift Flying Broom
 	sp = dbcSpell.LookupEntryForced( 42668 );
-	SpellEntry *sp2 = dbcSpell.LookupEntryForced( 32239 );  // Ebon Gryphon Mount
+	sp2 = dbcSpell.LookupEntryForced( 32239 );  // Ebon Gryphon Mount
 	if( sp != NULL && sp2 != NULL){
 		sp->CastingTimeIndex = sp2->CastingTimeIndex; // Set cast time 3 sec
 	}
