@@ -2768,7 +2768,7 @@ else
 			if( pVictim->DamageTakenPctMod[dmg.school_type] != 1.0f )
 				dmg.full_damage += float2int32( ( inital_dmg * pVictim->DamageTakenPctMod[ dmg.school_type ] ) - inital_dmg );
 
-			if( dd_mod > 1.0f )
+			if( dd_mod > 0.0f )
 				dmg.full_damage += float2int32( ( inital_dmg * dd_mod) - inital_dmg );
 
 			if( ability != NULL && ability->NameHash == SPELL_HASH_SHRED )

@@ -14899,6 +14899,11 @@ void ApplyNormalFixes()
         sp->EffectTriggerSpell[0] = 31803;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 	}
+	sp = dbcSpell.LookupEntryForced( 31803 );
+	if( sp != NULL )
+	{	// Temporary hackfix so that total spelldamage bonus with stack of 5 will be correct.
+		sp->fixed_hotdotcoef = sp->fixed_hotdotcoef / 5;
+	}
 
 	//paladin - Reckoning
 	sp = dbcSpell.LookupEntryForced( 20177 );

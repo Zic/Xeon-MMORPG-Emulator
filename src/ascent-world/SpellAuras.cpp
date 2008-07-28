@@ -1921,7 +1921,30 @@ void Aura::SpellAuraDummy(bool apply)
 				pTarget->m_outStealthDamageBonusPeriod = 6;			// 6 seconds
 				pTarget->m_outStealthDamageBonusTimer = 0;			// reset it
 			}
-		}break;	
+		}break;
+	case 21082:
+	case 20162:
+	case 20305:
+	case 20306:
+	case 20307:
+	case 20308:
+	case 27158: // Seal of the Crusader
+		{
+			if( !m_target->IsPlayer() )
+				return;
+			float val;
+			if( apply )
+			{
+				SetNegative();
+				val = -0.4F;
+			}
+			else
+			{
+				val = 0.40F;
+			}
+			_ptarget->ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,val);
+			_ptarget->CalcDamage();
+		}break;
 	}
 }
 

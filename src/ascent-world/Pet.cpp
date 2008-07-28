@@ -1781,6 +1781,9 @@ void Pet::HandleAutoCastEvent(uint32 Type)
 				for(; itr != m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end(), j < c; ++j, ++itr);
 				if(itr == m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end())
 				{
+					sp =*m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+					if(sp->cooldown && ms < sp->cooldowntime)
+						return;
 					m_aiInterface->SetNextSpell(*m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin());
 					break;
 				}
