@@ -356,7 +356,7 @@ void Arena::Finish()
 			for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				Player * plr = *itr;
-				if(plr->m_arenaTeams[m_arenateamtype] != NULL)
+				if(plr && plr->m_arenaTeams[m_arenateamtype] != NULL)
 				{
 					ArenaTeam * t = plr->m_arenaTeams[m_arenateamtype];
 					ArenaTeamMember * tp = t->GetMember(plr->m_playerInfo);

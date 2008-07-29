@@ -1857,7 +1857,7 @@ Creature * MapMgr::CreateCreature(uint32 entry)
 
 GameObject * MapMgr::CreateGameObject(uint32 entry)
 {
-	if(_reusable_guids_gameobject.size() > 2048)
+	if(_reusable_guids_gameobject.size())
 	{
 		uint32 guid = _reusable_guids_gameobject.front();
 		_reusable_guids_gameobject.pop_front();
