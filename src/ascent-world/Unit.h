@@ -1018,6 +1018,7 @@ public:
 	int32 m_extraattacks;   
 	int32 m_extrastriketargets;
 	int32 m_fearmodifiers;
+	float m_spellcastspeedmod;
 	int64 m_magnetcaster; // Unit who acts as a magnet for this unit
 	//std::set<SpellEntry*> m_onStrikeSpells;
 

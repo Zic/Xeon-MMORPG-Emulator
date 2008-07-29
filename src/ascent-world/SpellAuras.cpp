@@ -2336,13 +2336,13 @@ void Aura::SpellAuraModAttackSpeed(bool apply)
 		if(apply)
 		{
 
-			static_cast< Player* >( m_target )->m_meleeattackspeedmod += mod->m_amount;
-			static_cast< Player* >( m_target )->m_rangedattackspeedmod *= (float)(mod->m_amount/100.0 +1.0);
+			static_cast< Player* >( m_target )->m_meleeattackspeedmod *= (mod->m_amount/100.0f + 1);
+			static_cast< Player* >( m_target )->m_rangedattackspeedmod *= (mod->m_amount/100.0f + 1);
 		}
 		else
 		{
-			static_cast< Player* >( m_target )->m_meleeattackspeedmod -= mod->m_amount;
-			static_cast< Player* >( m_target )->m_rangedattackspeedmod /= (float)(mod->m_amount/100.0 +1.0);
+			static_cast< Player* >( m_target )->m_meleeattackspeedmod /= (mod->m_amount/100.0f + 1);
+			static_cast< Player* >( m_target )->m_rangedattackspeedmod /= (mod->m_amount/100.0f + 1);
 		}
 		static_cast< Player* >( m_target )->UpdateStats();
 	}
@@ -4624,12 +4624,15 @@ void Aura::EventPeriodicManaLeech(uint32 amount)
 
 void Aura::SpellAuraModCastingSpeed(bool apply)
 {
-	float current = m_target->GetFloatValue(UNIT_MOD_CAST_SPEED);
+	float newvalue = m_target->m_spellcastspeedmod;
 	if(apply)
-		current -= float(mod->m_amount / 100.0f);
+		newvalue *= mod->m_amount / 100.0f + 1;
 	else
-		current += float(mod->m_amount / 100.0f);
-	m_target->SetFloatValue(UNIT_MOD_CAST_SPEED, current);
+		newvalue /= mod->m_amount / 100.0f + 1;
+	m_target->m_spellcastspeedmod = newvalue;
+	if(m_target->IsPlayer())
+		newvalue *=  static_cast< Player* >( m_target )->SpellHasteRatingBonus;
+	m_target->SetFloatValue(UNIT_MOD_CAST_SPEED, 1/newvalue);
 }
 
 void Aura::SpellAuraFeignDeath(bool apply)
@@ -6385,11 +6388,11 @@ void Aura::SpellAuraModHaste( bool apply )
 	{
 		if( apply )	
 		{
-			static_cast< Player* >( m_target )->m_meleeattackspeedmod += mod->m_amount;
+			static_cast< Player* >( m_target )->m_meleeattackspeedmod *= (mod->m_amount/100.0f + 1);
 		}
 		else
 		{
-			static_cast< Player* >( m_target )->m_meleeattackspeedmod -= mod->m_amount;
+			static_cast< Player* >( m_target )->m_meleeattackspeedmod /= (mod->m_amount/100.0f + 1);
 		}
 		static_cast< Player* >(m_target)->UpdateAttackSpeed();
 	}
@@ -6457,9 +6460,9 @@ void Aura::SpellAuraModRangedHaste(bool apply)
 		int32 amount = mod->m_amount;
 
 		if( apply )
-			static_cast< Player* >( m_target )->m_rangedattackspeedmod *= (float)(amount/100.0 +1.0);
+			static_cast< Player* >( m_target )->m_rangedattackspeedmod *= (amount/100.0f + 1);
 		else
-			static_cast< Player* >( m_target )->m_rangedattackspeedmod /= (float)(amount/100.0 +1.0);
+			static_cast< Player* >( m_target )->m_rangedattackspeedmod /= (amount/100.0f + 1);
 		static_cast< Player* >( m_target )->UpdateAttackSpeed();
 	}
 	else
@@ -6483,11 +6486,11 @@ void Aura::SpellAuraModRangedAmmoHaste(bool apply)
 
 	if( apply )
 	{
-		p->m_rangedattackspeedmodammo*=(float)(mod->m_amount/100 +1);
+		p->m_rangedattackspeedmodammo*=(mod->m_amount/100.0f + 1);
 	}
 	else
 	{
-		p->m_rangedattackspeedmodammo/=(float)(mod->m_amount/100 +1);
+		p->m_rangedattackspeedmodammo/=(mod->m_amount/100.0f + 1);
 	}
 
 	p->UpdateAttackSpeed();
@@ -7249,9 +7252,18 @@ void Aura::SpellAuraLimitSpeed( bool apply )
 }
 void Aura::SpellAuraIncreaseTimeBetweenAttacksPCT(bool apply)
 {
-	int32 val =  (apply) ? mod->m_amount : -mod->m_amount;
+	/*int32 val =  (apply) ? mod->m_amount : -mod->m_amount;
 	float pct_value = -val/100.0f;
-	m_target->ModFloatValue(UNIT_MOD_CAST_SPEED,pct_value);
+	m_target->ModFloatValue(UNIT_MOD_CAST_SPEED,pct_value);*/
+	float newvalue = m_target->m_spellcastspeedmod;
+	if(apply)
+		newvalue *= mod->m_amount / 100.0f + 1;
+	else
+		newvalue /= mod->m_amount / 100.0f + 1;
+	m_target->m_spellcastspeedmod = newvalue;
+	if(m_target->IsPlayer())
+		newvalue *=  static_cast< Player* >( m_target )->SpellHasteRatingBonus;
+	m_target->SetFloatValue(UNIT_MOD_CAST_SPEED, 1/newvalue);
 }
 
 /*

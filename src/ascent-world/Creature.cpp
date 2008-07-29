@@ -101,6 +101,7 @@ Creature::Creature(uint64 guid)
 	m_transportGuid = 0;
 	m_transportPosition = NULL;
 	BaseAttackType = SCHOOL_NORMAL;
+	m_spellcastspeedmod = 1.0f;
 }
 
 
@@ -982,6 +983,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
 	BaseAttackType=proto->AttackType;
 
+	m_spellcastspeedmod = 1.0f;
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 	SetUInt32Value(UNIT_FIELD_BYTES_0, spawn->bytes);
 	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
@@ -1178,7 +1180,7 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z)
 	BaseRangedDamage[0]=GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
 	BaseAttackType=proto->AttackType;
-
+	m_spellcastspeedmod = 1.0f;
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 
 	////////////AI

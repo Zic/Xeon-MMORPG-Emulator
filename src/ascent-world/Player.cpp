@@ -80,7 +80,7 @@ Player::Player( uint32 guid ) : m_mailBox(guid)
 	m_parryfromspell		= 0;
 	m_hitfromspell		  = 0; 
 	m_hitfrommeleespell	 = 0;
-	m_meleeattackspeedmod   = 0;
+	m_meleeattackspeedmod   = 1.0f;
 	m_rangedattackspeedmod  = 1.0f;
 	m_rangedattackspeedmodammo = 1.0f;
 
@@ -698,6 +698,7 @@ bool Player::Create(WorldPacket& data )
 	SetUInt32Value(PLAYER_BYTES_3, ((gender) | (0x00 << 8) | (0x00 << 16) | (GetPVPRank() << 24)));
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
 	SetUInt32Value(PLAYER_FIELD_BYTES, 0x08 );
+	m_spellcastspeedmod = 1.0f;
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.m_levelCap);
   
@@ -2610,7 +2611,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 		SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId - getGender() );
 		SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId - getGender() );
 	}
-
+	m_spellcastspeedmod = 1.0f;
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.m_levelCap);
 	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, info->factiontemplate);
@@ -4528,14 +4529,14 @@ void Player::UpdateAttackSpeed()
 			speed = weap->GetProto()->Delay;
 	}
 	SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, 
-				    ( uint32 )( ( speed * (( 100.0f - ( float )m_meleeattackspeedmod ) / 100.0f ) ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ) );
+				    ( uint32 )( speed / ( m_meleeattackspeedmod * (( 100.0f + CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ) ) );
 	
 	weap = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
 	if( weap != NULL && weap->GetProto()->Class == 2 )// 2 is a weapon
 	{
 		speed = weap->GetProto()->Delay;
 		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME_01, 
-					    ( uint32 )( ( speed * ( ( 100.0f - ( float )m_meleeattackspeedmod ) / 100.0f ) ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ) );
+					    ( uint32 )( speed / ( m_meleeattackspeedmod * (( 100.0f + CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ) ) );
 	}
 	  
 	weap = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_RANGED );
@@ -4547,12 +4548,12 @@ void Player::UpdateAttackSpeed()
 			if(weap->GetProto()->Spells[i].Id == 44972) //The spell that disables ammo
 			{
 				SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME,
-					(uint32)(speed * (m_rangedattackspeedmod-1.0) * ( ( 100.0f - CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f )));
+					(uint32)(speed / (m_rangedattackspeedmod * ( ( 100.0f + CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f ))));
 				return;
 			}
 		}
 		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME,
-			(uint32)(speed * (m_rangedattackspeedmodammo-1.0) * (m_rangedattackspeedmod-1.0) * ( ( 100.0f - CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f )));
+			(uint32)(speed / (m_rangedattackspeedmodammo * m_rangedattackspeedmod * ( ( 100.0f + CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f ))));
 	}
 }
 
@@ -4696,12 +4697,8 @@ void Player::UpdateStats()
 	}
 
 	/////////////////////RATINGS STUFF/////////////////
-	float cast_speed = CalcRating( PLAYER_RATING_MODIFIER_SPELL_HASTE );
-	if( cast_speed != SpellHasteRatingBonus )
-	{
-		ModFloatValue( UNIT_MOD_CAST_SPEED, ( SpellHasteRatingBonus - cast_speed ) / 100.0f);
-		SpellHasteRatingBonus = cast_speed;
-	}
+	SpellHasteRatingBonus = CalcRating( PLAYER_RATING_MODIFIER_SPELL_HASTE )/100 + 1;
+	SetFloatValue(UNIT_MOD_CAST_SPEED, 1/(m_spellcastspeedmod * SpellHasteRatingBonus));
 	////////////////////RATINGS STUFF//////////////////////
 
 	// Shield Block

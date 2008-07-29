@@ -14591,9 +14591,10 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 2825 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ATTACKSPEED;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
-		sp->EffectImplicitTargetA[2] = 0;
+		sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
@@ -15192,11 +15193,7 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 43338 );
 	if( sp != NULL )
 	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 		sp->procFlags = PROC_ON_CRIT_ATTACK;
-		sp->EffectTriggerSpell[0] = 43339;
-		sp->procChance = 100;
-		sp->maxstack = 1;
 	}
 
 	//Shaman focused
@@ -15204,8 +15201,6 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
-		sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectMiscValue[0] = SMT_COST;
 		sp->EffectSpellGroupRelation[0] = 1048576UL | 268435456UL | 2147483648UL;
 	}
 
