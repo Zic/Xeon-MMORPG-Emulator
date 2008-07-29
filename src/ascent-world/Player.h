@@ -1243,7 +1243,8 @@ public:
 	void EventReduceDrunk(bool full);
 	bool m_AllowAreaTriggerPort;
 	void EventAllowTiggerPort(bool enable);
-	int32 m_rangedattackspeedmod;
+	float m_rangedattackspeedmod;
+	float m_rangedattackspeedmodammo;
 	int32 m_meleeattackspeedmod;
 	uint32 m_modblockabsorbvalue;
 	uint32 m_modblockvaluefromspells;

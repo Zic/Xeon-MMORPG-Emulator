@@ -81,7 +81,8 @@ Player::Player( uint32 guid ) : m_mailBox(guid)
 	m_hitfromspell		  = 0; 
 	m_hitfrommeleespell	 = 0;
 	m_meleeattackspeedmod   = 0;
-	m_rangedattackspeedmod  = 0;
+	m_rangedattackspeedmod  = 1.0f;
+	m_rangedattackspeedmodammo = 1.0f;
 
 	m_healthfromspell	   = 0;
 	m_manafromspell		 = 0;
@@ -4541,8 +4542,17 @@ void Player::UpdateAttackSpeed()
 	if( weap != NULL )
 	{
 		speed = weap->GetProto()->Delay;
+		for(int i=0; i<=5; i++)
+		{
+			if(weap->GetProto()->Spells[i].Id == 44972) //The spell that disables ammo
+			{
+				SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME,
+					(uint32)(speed * (m_rangedattackspeedmod-1.0) * ( ( 100.0f - CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f )));
+				return;
+			}
+		}
 		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME,
-					    ( uint32 )( ( speed * ( ( 100.0f - (float)m_rangedattackspeedmod ) / 100.0f ) ) * ( ( 100.0f - CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f ) ) );
+			(uint32)(speed * (m_rangedattackspeedmodammo-1.0) * (m_rangedattackspeedmod-1.0) * ( ( 100.0f - CalcRating(PLAYER_RATING_MODIFIER_RANGED_HASTE)) / 100.0f )));
 	}
 }
 
