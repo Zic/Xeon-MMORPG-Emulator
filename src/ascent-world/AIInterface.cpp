@@ -3495,10 +3495,14 @@ void AIInterface::ResetProcCounts()
 //we only cast once a spell and we will set his health and resistances. Note that this can be made with db too !
 void AIInterface::Event_Summon_EE_totem(uint32 summon_duration)
 {
-	Unit *ourslave=m_Unit->create_guardian(329,summon_duration,float(-M_PI*2));
+	Unit *ourslave=m_Unit->create_guardian(15352,summon_duration,float(-M_PI*2));
 	if(ourslave)
 	{
 		static_cast<Creature*>(ourslave)->ResistanceModPct[DAMAGE_TYPE_NATURE]=100;//we should be imune to nature dmg. This can be also set in db
+		ourslave->SetUInt32Value(UNIT_FIELD_LEVEL, m_Unit->GetUInt32Value(UNIT_FIELD_LEVEL));
+		ourslave->BaseDamage[0]=250;
+		ourslave->BaseDamage[1]=450;
+		ourslave->CalcDamage();
 		/*
 		- Earth Stun (37982)
 		- taunt
@@ -3512,10 +3516,14 @@ void AIInterface::Event_Summon_FE_totem(uint32 summon_duration)
 	//timer should not reach this value thus not cast this spell again
 	m_totemspelltimer = 0xEFFFFFFF;
 	//creatures do not support PETs and the spell uses that effect so we force a summon guardian thing
-	Unit *ourslave=m_Unit->create_guardian(575,summon_duration,float(-M_PI*2));
+	Unit *ourslave=m_Unit->create_guardian(15438,summon_duration,float(-M_PI*2));
 	if(ourslave)
 	{
 		static_cast<Creature*>(ourslave)->ResistanceModPct[DAMAGE_TYPE_FIRE]=100;//we should be imune to fire dmg. This can be also set in db
+		ourslave->SetUInt32Value(UNIT_FIELD_LEVEL, m_Unit->GetUInt32Value(UNIT_FIELD_LEVEL));
+		ourslave->BaseDamage[0]=250; // todo: damage should be fire instead of physical and scale with player spell damage
+		ourslave->BaseDamage[1]=450;
+		ourslave->CalcDamage();
 		/*
 		- also : select * from dbc_spell where name like "%fire blast%"
 		- also : select * from dbc_spell where name like "%fire nova"

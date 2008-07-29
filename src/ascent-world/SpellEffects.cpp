@@ -4562,30 +4562,32 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 
 	float x = p_caster->GetPositionX();
 	float y = p_caster->GetPositionY();
-	uint32 slot = m_spellInfo->EffectImplicitTargetA[i] - EFF_TARGET_TOTEM_EARTH;
-	if(slot < 0 || slot > 3)
-		return; // Just 4 totems
+	uint32 slot = 0;
 
 	switch(m_spellInfo->EffectMiscValueB[i])
 	{
 	case 63: 
 		x -= 1.5f;
 		y -= 1.5f;
+		slot = 3;
 		break;
 	case 81: 
 		x -= 1.5f;
 		y += 1.5f;
+		slot = 0;
 		break;
 	case 82:
 		x += 1.5f;
 		y -= 1.5f;
+		slot = 1;
 		break;
 	case 83:
 		x += 1.5f;
 		y += 1.5f;
+		slot = 2;
 		break;
 	default:
-		break;
+		return;
 	}
 
 	if(p_caster->m_TotemSlots[slot] != 0)
@@ -4763,10 +4765,14 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 	}
 
 	//in case these are our elemental totems then we should set them up
-	if(m_spellInfo->Id==2062)
+	if(m_spellInfo->Id==2062){
 		pTotem->GetAIInterface()->Event_Summon_EE_totem(GetDuration());
-	else if(m_spellInfo->Id==2894)
+		pTotem->DisableAI();
+	}
+	else if(m_spellInfo->Id==2894){
 		pTotem->GetAIInterface()->Event_Summon_FE_totem(GetDuration());
+		pTotem->DisableAI();
+	}
 
 	// Set up the deletion event. The totem needs to expire after a certain time, or upon its death.
 	sEventMgr.AddEvent(pTotem, &Creature::TotemExpire, EVENT_TOTEM_EXPIRE, GetDuration(), 1,0);

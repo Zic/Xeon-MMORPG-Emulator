@@ -14604,9 +14604,10 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 32182 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ATTACKSPEED;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
-		sp->EffectImplicitTargetA[2] = 0;
+		sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
@@ -15441,6 +15442,57 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 16161 ); 
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0] = 0x40000000;
+
+	// Fire Nova Totem visual fix
+	sp = dbcSpell.LookupEntryForced( 25537 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 25535 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 11307 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 11306 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 8503 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 8502 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+	sp = dbcSpell.LookupEntryForced( 8349 ); 
+	if(sp != NULL){
+		sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[1] = 19823;
+	}
+
+	// Fire Elemental Totem
+	sp = dbcSpell.LookupEntryForced( 2894 ); 
+	if(sp != NULL){
+		sp->EffectImplicitTargetA[0] = sp->EffectImplicitTargetB[0];
+		sp->EffectImplicitTargetB[0] = 0; // Prevents totem from summoning several elementals
+	}
+
+	// Earth Elemental Totem
+	sp = dbcSpell.LookupEntryForced( 2062 ); 
+	if(sp != NULL){
+		sp->EffectImplicitTargetA[0] = sp->EffectImplicitTargetB[0];
+		sp->EffectImplicitTargetB[0] = 0; // Prevents totem from summoning several elementals
+	}
 
 	// Shaman - Improved Fire Totems
 	sp = dbcSpell.LookupEntryForced( 16544 ); 
