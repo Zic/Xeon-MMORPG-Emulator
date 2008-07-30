@@ -13911,36 +13911,37 @@ void ApplyNormalFixes()
 /*		//if there is a proc spell and has 0 as charges then it's probably going to triger infinite times. Better not save these
 		if(sp->procCharges==0)
 			sp->procCharges=-1;*/
+		if(!sp->MechanicsType){ // Use this only if mechanics isn't specified in DBC
+			//Set Silencing spells mech.
+			if( sp->EffectApplyAuraName[0] == 27 || 
+				sp->EffectApplyAuraName[1] == 27 ||
+				sp->EffectApplyAuraName[2] == 27 )
+				sp->MechanicsType = MECHANIC_SILENCED;
 
-		//Set Silencing spells mech.
-		if( sp->EffectApplyAuraName[0] == 27 || 
-			sp->EffectApplyAuraName[1] == 27 ||
-			sp->EffectApplyAuraName[2] == 27 )
-			sp->MechanicsType = MECHANIC_SILENCED;
+			//Set Stunning spells mech.
+			if( sp->EffectApplyAuraName[0] == 12 || 
+				sp->EffectApplyAuraName[1] == 12 ||
+				sp->EffectApplyAuraName[2] == 12 )
+				sp->MechanicsType = MECHANIC_STUNNED;
 
-		//Set Stunning spells mech.
-		if( sp->EffectApplyAuraName[0] == 12 || 
-			sp->EffectApplyAuraName[1] == 12 ||
-			sp->EffectApplyAuraName[2] == 12 )
-			sp->MechanicsType = MECHANIC_STUNNED;
+			//Set Fearing spells mech
+			if( sp->EffectApplyAuraName[0] == 7 || 
+				sp->EffectApplyAuraName[1] == 7 ||
+				sp->EffectApplyAuraName[2] == 7 )
+				sp->MechanicsType = MECHANIC_FLEEING;
 
-		//Set Fearing spells mech
-		if( sp->EffectApplyAuraName[0] == 7 || 
-			sp->EffectApplyAuraName[1] == 7 ||
-			sp->EffectApplyAuraName[2] == 7 )
-			sp->MechanicsType = MECHANIC_FLEEING;
+			//Set Snare spells mech
+			if( sp->EffectApplyAuraName[0] == SPELL_AURA_MOD_DECREASE_SPEED || 
+				sp->EffectApplyAuraName[1] == SPELL_AURA_MOD_DECREASE_SPEED ||
+				sp->EffectApplyAuraName[2] == SPELL_AURA_MOD_DECREASE_SPEED )
+				sp->MechanicsType = MECHANIC_ENSNARED;
 
-		//Set Snare spells mech
-		if( sp->EffectApplyAuraName[0] == SPELL_AURA_MOD_DECREASE_SPEED || 
-			sp->EffectApplyAuraName[1] == SPELL_AURA_MOD_DECREASE_SPEED ||
-			sp->EffectApplyAuraName[2] == SPELL_AURA_MOD_DECREASE_SPEED )
-			sp->MechanicsType = MECHANIC_ENSNARED;
-
-		//Set Interrupted spells mech
-		if( sp->Effect[0] == SPELL_EFFECT_INTERRUPT_CAST || 
-			sp->Effect[1] == SPELL_EFFECT_INTERRUPT_CAST ||
-			sp->Effect[2] == SPELL_EFFECT_INTERRUPT_CAST )
-			sp->MechanicsType = MECHANIC_INTERRUPTED;
+			//Set Interrupted spells mech
+			if( sp->Effect[0] == SPELL_EFFECT_INTERRUPT_CAST || 
+				sp->Effect[1] == SPELL_EFFECT_INTERRUPT_CAST ||
+				sp->Effect[2] == SPELL_EFFECT_INTERRUPT_CAST )
+				sp->MechanicsType = MECHANIC_INTERRUPTED;
+		}
 
 		if( sp->proc_interval != 0 )
 			sp->procFlags |= PROC_REMOVEONUSE;
@@ -21428,6 +21429,14 @@ void ApplyNormalFixes()
 	//////////////////////////////////////////
 
 	// Insert hunter spell fixes here
+
+	// Hunter - Steady Shot cast time fix
+		sp2 = dbcSpell.LookupEntryForced( 133 ); // Fireball Rank 1
+		sp = dbcSpell.LookupEntryForced( 34120 );
+		if( sp != NULL && sp2 != NULL )
+		{
+			sp->CastingTimeIndex = sp2->CastingTimeIndex; // Set 1.5 sec cast time
+		}
 
 	// Hunter - Improved Wing Clip
 		sp = dbcSpell.LookupEntryForced( 19228 );

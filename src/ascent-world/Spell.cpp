@@ -578,7 +578,16 @@ uint8 Spell::DidHit(uint32 effindex,Unit* target)
 	/************************************************************************/
 	/* Check if the target has a % resistance to this mechanic              */
 	/************************************************************************/
-		/* Never mind, it's already done below. Lucky I didn't go through with this, or players would get double resistance. */
+	if( m_spellInfo->MechanicsType<27)
+	{
+		float res;
+		if(p_victim)
+			res = p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+		else 
+			res = u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+		if(Rand(res))
+			return SPELL_DID_HIT_RESIST;
+	}
 
 	/************************************************************************/
 	/* Check if the spell is a melee attack and if it was missed/parried    */
@@ -631,15 +640,6 @@ uint8 Spell::DidHit(uint32 effindex,Unit* target)
 			else
 				resistchance = baseresist[2] + (((float)lvldiff-2.0f)*11.0f);
 		}
-	}
-	//check mechanical resistance
-	//i have no idea what is the best pace for this code
-	if( m_spellInfo->MechanicsType<27)
-	{
-		if(p_victim)
-			resistchance += p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
-		else 
-			resistchance += u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
 	}
 	//rating bonus
 	if( p_caster != NULL )
