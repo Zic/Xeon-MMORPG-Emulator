@@ -14320,6 +14320,10 @@ void ApplyNormalFixes()
 				sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON)
 				sp->Flags3 |= FLAGS3_ENCHANT_OWN_ONLY;
 
+			// Stoneclaw Totem
+			if(sp->NameHash == SPELL_HASH_STONECLAW_TOTEM_PASSIVE)
+				sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
+
 		//////////////////////////////////////////
 		// MAGE								//
 		//////////////////////////////////////////

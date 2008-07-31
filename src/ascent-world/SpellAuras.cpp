@@ -2896,7 +2896,7 @@ void Aura::SpellAuraPeriodicTriggerSpell(bool apply)
 	if(m_spellProto->EffectTriggerSpell[mod->i] == 0)
 		return;
 
-	if(IsPassive() && m_spellProto->dummy != 2010  && m_spellProto->dummy != 2020 && m_spellProto->dummy != 2255) //this spells are passive and are not done on the attack...
+	if(IsPassive() && !(m_target->IsCreature() && static_cast <Creature*> (m_target)->IsTotem()) && m_spellProto->dummy != 2010  && m_spellProto->dummy != 2020 && m_spellProto->dummy != 2255) //this spells are passive and are not done on the attack...
 	{
 		Unit * target = (m_target != 0) ? m_target : GetUnitCaster();
 		if(target == 0 || !target->IsPlayer())

@@ -4759,6 +4759,16 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 		}
 		default:break;
 		}
+		switch(m_spellInfo->NameHash)
+		{
+		case SPELL_HASH_STONECLAW_TOTEM:
+		{
+			totemspelltime = 30000; // Should be casted only once
+			totemspelltimer = 0; // Casted immediately
+			break;
+		}
+		default:break;
+		}
 
 		pTotem->GetAIInterface()->m_totemspelltimer = totemspelltimer;
 		pTotem->GetAIInterface()->m_totemspelltime = totemspelltime;
