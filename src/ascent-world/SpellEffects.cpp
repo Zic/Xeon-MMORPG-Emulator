@@ -4775,11 +4775,13 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 	}
 
 	//in case these are our elemental totems then we should set them up
-	if(m_spellInfo->Id==2062){
+	if(m_spellInfo->Id==2062)
+	{
 		pTotem->GetAIInterface()->Event_Summon_EE_totem(GetDuration());
 		pTotem->DisableAI();
 	}
-	else if(m_spellInfo->Id==2894){
+	else if(m_spellInfo->Id==2894)
+	{
 		pTotem->GetAIInterface()->Event_Summon_FE_totem(GetDuration());
 		pTotem->DisableAI();
 	}
