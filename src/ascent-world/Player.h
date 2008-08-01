@@ -80,38 +80,50 @@ enum PlayerStatus
 	NONE			 = 0,
 	TRANSFER_PENDING = 1,
 };
-
-enum RankTitles
+enum PlayerTitles
 {
-	PVPTITLE_NONE                   = 0x0,
-	PVPTITLE_PRIVATE                = 0x02,
-	PVPTITLE_CORPORAL               = 0x04,
-	PVPTITLE_SERGEANT               = 0x08,
-	PVPTITLE_MASTER_SERGEANT        = 0x10,
-	PVPTITLE_SERGEANT_MAJOR         = 0x20,
-	PVPTITLE_KNIGHT                 = 0x40,
-	PVPTITLE_KNIGHT_LIEUTENANT      = 0x80,
-	PVPTITLE_KNIGHT_CAPTAIN         = 0x100,
-	PVPTITLE_KNIGHT_CHAMPION        = 0x200,
-	PVPTITLE_LIEUTENANT_COMMANDER   = 0x400,
-	PVPTITLE_COMMANDER              = 0x800,
-	PVPTITLE_MARSHAL                = 0x1000,
-	PVPTITLE_FIELD_MARSHAL          = 0x2000,
-	PVPTITLE_GRAND_MARSHAL          = 0x4000,
-	PVPTITLE_SCOUT                  = 0x8000,
-	PVPTITLE_GRUNT                  = 0x10000,
-	PVPTITLE_HSERGEANT              = 0x20000,
-	PVPTITLE_SENIOR_SERGEANT        = 0x40000,
-	PVPTITLE_FIRST_SERGEANT         = 0x80000,
-	PVPTITLE_STONE_GUARD            = 0x100000,
-	PVPTITLE_BLOOD_GUARD            = 0x200000,
-	PVPTITLE_LEGIONNAIRE            = 0x400000,
-	PVPTITLE_CENTURION              = 0x800000,
-	PVPTITLE_CHAMPION               = 0x1000000,
-	PVPTITLE_LIEUTENANT_GENERAL     = 0x2000000,
-	PVPTITLE_GENERAL                = 0x4000000,
-	PVPTITLE_WARLORD                = 0x8000000,
-	PVPTITLE_HIGH_WARLORD           = 0x10000000,
+TITLE_NONE                    = 0,
+TITLE_PRIVATE                 = 1,
+TITLE_CORPORAL                = 2,
+TITLE_SERGEANT                = 3,
+TITLE_MASTER_SERGEANT         = 4,
+TITLE_SERGEANT_MAJOR          = 5,
+TITLE_KNIGHT                  = 6,
+TITLE_KNIGHT_LIEUTENANT       = 7,
+TITLE_KNIGHT_CAPTAIN          = 8,
+TITLE_KNIGHT_CHAMPION         = 9,
+TITLE_LIEUTENANT_COMMANDER    = 10,
+TITLE_COMMANDER               = 11,
+TITLE_MARSHAL                 = 12,
+TITLE_FIELD_MARSHAL           = 13,
+TITLE_GRAND_MARSHAL           = 14,
+TITLE_SCOUT                   = 15,
+TITLE_GRUNT                   = 16,
+TITLE_HSERGEANT               = 17,
+TITLE_SENIOR_SERGEANT         = 18,
+TITLE_FIRST_SERGEANT          = 19,
+TITLE_STONE_GUARD             = 20,
+TITLE_BLOOD_GUARD             = 21,
+TITLE_LEGIONNAIRE             = 22,
+TITLE_CENTURION               = 23,
+TITLE_CHAMPION                = 24,
+TITLE_LIEUTENANT_GENERAL      = 25,
+TITLE_GENERAL                 = 26,
+TITLE_WARLORD                 = 27,
+TITLE_HIGH_WARLORD            = 28,
+TITLE_GLADIATOR	              = 29,
+TITLE_DUELIST	              = 30,
+TITLE_RIVAL		              = 31,
+TITLE_CHALLENGER              = 32,
+TITLE_SCARAB_LORD             = 33,
+TITLE_CONQUEROR               = 34,
+TITLE_JUSTICAR                = 35,
+TITLE_CHAMPION_OF_THE_NAARU   = 36,
+TITLE_MERCILESS_GLADIATOR     = 37,
+TITLE_SHATTERED_SUN		      = 38,
+TITLE_HAND_OF_ADAL			  = 39,
+TITLE_VENGEFUL_GLADIATOR	  = 40,
+TITLE_END				      = 40,
 };
 
 enum PvPAreaStatus
@@ -1447,6 +1459,8 @@ public:
 	void BroadcastMessage(const char* Format, ...);
 	map<uint32, set<uint32> > SummonSpells;
 	map<uint32, PetSpellMap*> PetSpells;
+	void AddKnownTitle(int32 TitleNumber);
+	void RemoveKnownTitle(int32 TitleNumber);
 	void AddSummonSpell(uint32 Entry, uint32 SpellID);
 	void RemoveSummonSpell(uint32 Entry, uint32 SpellID);
 	set<uint32>* GetSummonSpells(uint32 Entry);

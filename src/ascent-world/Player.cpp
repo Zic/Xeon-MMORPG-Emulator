@@ -1347,7 +1347,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 	//blizz send 20 slots for some reason(or no reason :P)
 
 	 *p_data << (uint32)0;
-	 *p_data << (uint8)0;
+	 *p_data << (uint8)1;
 }
 
 ///  This function sends the message displaying the purple XP gain for the char
@@ -1646,6 +1646,22 @@ void Player::_SavePetSpells(QueryBuffer * buf)
 	}
 }
 
+void Player::AddKnownTitle(int32 TitleNumber){
+	if(TitleNumber < 1 || TitleNumber > TITLE_END)
+		return;  // Title doesn't exist
+	uint64 TitleFlag = ((uint64)1) << TitleNumber;
+	SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) | TitleFlag);
+}
+
+void Player::RemoveKnownTitle(int32 TitleNumber){
+	if(TitleNumber < 1 || TitleNumber > TITLE_END)
+		return;  // Title doesn't exist
+	if(TitleNumber == GetUInt32Value(PLAYER_CHOSEN_TITLE)) // if it's the chosen title, remove it
+		SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+	uint64 TitleFlag = ((uint64)1) << TitleNumber;
+	SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) & ~TitleFlag);
+}
+
 void Player::AddSummonSpell(uint32 Entry, uint32 SpellID)
 {
 	SpellEntry * sp = dbcSpell.LookupEntry(SpellID);
@@ -1915,13 +1931,7 @@ void Player::InitVisibleUpdateBits()
 		Player::m_visibleUpdateMask.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0+1 + (i*16))); // visual items for other players
 	}
 
-	/* fuck i hate const - burlex */
-	/*if(target && target->GetGroup() == const_cast<Player*>(this)->GetGroup() && const_cast<Player*>(this)->GetSubGroup() == target->GetSubGroup())
-	{
-	// quest fields are the same for party members
-	for(uint32 i = PLAYER_QUEST_LOG_1_01; i < PLAYER_QUEST_LOG_25_2; ++i)
-	Player::m_visibleUpdateMask.SetBit(i);
-	}*/
+	Player::m_visibleUpdateMask.SetBit(PLAYER_CHOSEN_TITLE);
 }
 
 
@@ -2023,7 +2033,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << "', "
 	<< m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX] << ","
 	<< m_uint32Values[PLAYER_CHOSEN_TITLE] << ","
-	<< m_uint32Values[PLAYER__FIELD_KNOWN_TITLES] << ","
+	<< GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) << ","
 	<< m_uint32Values[PLAYER_FIELD_COINAGE] << ","
 	<< m_uint32Values[PLAYER_AMMO_ID] << ","
 	<< m_uint32Values[PLAYER_CHARACTER_POINTS2] << ","
@@ -2543,10 +2553,10 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	}
 
 	// set the rest of the shit
-	uint32 PvPRanks[] = { PVPTITLE_NONE, PVPTITLE_PRIVATE, PVPTITLE_CORPORAL, PVPTITLE_SERGEANT, PVPTITLE_MASTER_SERGEANT, PVPTITLE_SERGEANT_MAJOR, PVPTITLE_KNIGHT, PVPTITLE_KNIGHT_LIEUTENANT, PVPTITLE_KNIGHT_CAPTAIN, PVPTITLE_KNIGHT_CHAMPION, PVPTITLE_LIEUTENANT_COMMANDER, PVPTITLE_COMMANDER, PVPTITLE_MARSHAL, PVPTITLE_FIELD_MARSHAL, PVPTITLE_GRAND_MARSHAL, PVPTITLE_SCOUT, PVPTITLE_GRUNT, PVPTITLE_HSERGEANT, PVPTITLE_SENIOR_SERGEANT, PVPTITLE_FIRST_SERGEANT, PVPTITLE_STONE_GUARD, PVPTITLE_BLOOD_GUARD, PVPTITLE_LEGIONNAIRE, PVPTITLE_CENTURION, PVPTITLE_CHAMPION, PVPTITLE_LIEUTENANT_GENERAL, PVPTITLE_GENERAL, PVPTITLE_WARLORD, PVPTITLE_HIGH_WARLORD };
+	//uint32 PvPRanks[] = { PVPTITLE_NONE, PVPTITLE_PRIVATE, PVPTITLE_CORPORAL, PVPTITLE_SERGEANT, PVPTITLE_MASTER_SERGEANT, PVPTITLE_SERGEANT_MAJOR, PVPTITLE_KNIGHT, PVPTITLE_KNIGHT_LIEUTENANT, PVPTITLE_KNIGHT_CAPTAIN, PVPTITLE_KNIGHT_CHAMPION, PVPTITLE_LIEUTENANT_COMMANDER, PVPTITLE_COMMANDER, PVPTITLE_MARSHAL, PVPTITLE_FIELD_MARSHAL, PVPTITLE_GRAND_MARSHAL, PVPTITLE_SCOUT, PVPTITLE_GRUNT, PVPTITLE_HSERGEANT, PVPTITLE_SENIOR_SERGEANT, PVPTITLE_FIRST_SERGEANT, PVPTITLE_STONE_GUARD, PVPTITLE_BLOOD_GUARD, PVPTITLE_LEGIONNAIRE, PVPTITLE_CENTURION, PVPTITLE_CHAMPION, PVPTITLE_LIEUTENANT_GENERAL, PVPTITLE_GENERAL, PVPTITLE_WARLORD, PVPTITLE_HIGH_WARLORD };
 	m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX]  = get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_CHOSEN_TITLE]				 = get_next_field.GetUInt32();
-	field_index++;
+	SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, get_next_field.GetUInt64());
 	m_uint32Values[PLAYER_FIELD_COINAGE]				= get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_AMMO_ID]					  = get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_CHARACTER_POINTS2]			= get_next_field.GetUInt32();
@@ -2558,7 +2568,6 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	SetUInt32Value(PLAYER_BYTES, get_next_field.GetUInt32());
 	SetUInt32Value(PLAYER_BYTES_2, get_next_field.GetUInt32());
 	SetUInt32Value(PLAYER_BYTES_3, getGender() | (pvprank << 24));
-	SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES, PvPRanks[GetPVPRank()]);
 	SetUInt32Value(PLAYER_FLAGS, get_next_field.GetUInt32());
 	SetUInt32Value(PLAYER_FIELD_BYTES, get_next_field.GetUInt32());
 	//m_uint32Values[0x22]=(m_uint32Values[0x22]>0x46)?0x46:m_uint32Values[0x22];
