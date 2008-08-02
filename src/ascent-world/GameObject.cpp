@@ -555,6 +555,8 @@ void GameObject::DeleteFromDB()
 void GameObject::EventCloseDoor()
 {
 	SetUInt32Value(GAMEOBJECT_STATE, 1);
+	if(m_spawn)
+		SetUInt32Value(GAMEOBJECT_FLAGS, m_spawn->flags);
 }
 
 void GameObject::UseFishingNode(Player *player)

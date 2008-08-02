@@ -1,0 +1,1 @@
+ALTER TABLE characters MODIFY available_pvp_titles bigint(40) not null;
