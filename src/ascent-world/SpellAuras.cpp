@@ -7438,6 +7438,8 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		{
 			static_cast< Player* >( m_target )->flying_aura = m_spellProto->Id;
 		}
+		mod->realamount = m_target->MechanicsDispels[MECHANIC_POLYMORPHED]; // Players flying on flying mounts are immune to polymorph.
+		m_target->MechanicsDispels[MECHANIC_POLYMORPHED] = 1;
 	}
 	else
 	{
@@ -7448,6 +7450,7 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		{
 			static_cast< Player* >( m_target )->flying_aura = 0;
 		}
+		m_target->MechanicsDispels[MECHANIC_POLYMORPHED] = mod->realamount;
 	}
 }
 

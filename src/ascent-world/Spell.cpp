@@ -4080,7 +4080,7 @@ void Spell::Heal(int32 amount)
 
 		//Spells affected by Bonus Healing
 		if(m_spellInfo->NameHash == SPELL_HASH_EARTH_SHIELD) //Earth Shield
-			healdoneaffectperc = 0.3f;
+			healdoneaffectperc = 0.286f;
 
 		//Basic bonus
 		bonus += u_caster->HealDoneMod[m_spellInfo->School];
