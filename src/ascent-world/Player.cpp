@@ -661,7 +661,7 @@ bool Player::Create(WorldPacket& data )
 	SetUInt32Value(UNIT_FIELD_BASE_MANA, info->mana );
 	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, info->factiontemplate );
 	SetUInt32Value(UNIT_FIELD_LEVEL, sWorld.StartingLevel );
-	SetUInt32Value(PLAYER_CHARACTER_POINTS1, sWorld.StartingTalents );
+	SetUInt32Value(PLAYER_CHARACTER_POINTS1, 0 ); // It gets overwritten later
 	SetUInt32Value(PLAYER_CHARACTER_POINTS2, sWorld.MaxProfs );
 	
 	SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
@@ -757,9 +757,7 @@ bool Player::Create(WorldPacket& data )
 			}
 		}
 	}
-
 	sHookInterface.OnCharacterCreate(this);
-
 	load_health = m_uint32Values[UNIT_FIELD_HEALTH];
 	load_mana = m_uint32Values[UNIT_FIELD_POWER1];
 	return true;
@@ -1414,7 +1412,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid, bool allowbonus)
 		levelup = true;
 
 		if(level > 9)
-			ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, 1);
+			ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, float2int32(sWorld.getRate(RATE_TALENTS)));
 
 		if(level >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
 			break;
@@ -3169,6 +3167,10 @@ void Player::OnPushToWorld()
    
 	if(m_FirstLogin)
 	{
+		LevelInfo * Info = objmgr.GetLevelInfo(getRace(), getClass(), sWorld.StartingLevel);
+		if(Info)
+			ApplyLevelInfo(Info,sWorld.StartingLevel);
+
 		sHookInterface.OnFirstEnterWorld(this);
 		m_FirstLogin = false;
 	}
@@ -5872,7 +5874,7 @@ void Player::Reset_Talents()
 	uint32 l=getLevel();
 	if(l>9)
 	{
-		SetUInt32Value(PLAYER_CHARACTER_POINTS1, l - 9); 
+		SetUInt32Value(PLAYER_CHARACTER_POINTS1, float2int32((l - 9) * sWorld.getRate(RATE_TALENTS) + sWorld.ExtraTalents)); 
 	}
 	else
 	{
@@ -7347,7 +7349,7 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 	if(Level >= 10)
 		TalentPoints = Level - 9;
 
-	SetUInt32Value(PLAYER_CHARACTER_POINTS1, float2int32(TalentPoints * sWorld.getRate(RATE_TALENTS)));
+	SetUInt32Value(PLAYER_CHARACTER_POINTS1, float2int32(TalentPoints * sWorld.getRate(RATE_TALENTS) + sWorld.ExtraTalents));
 
 	// Set base fields
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, Info->HP);

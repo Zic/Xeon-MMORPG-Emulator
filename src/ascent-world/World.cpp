@@ -1292,7 +1292,7 @@ void World::Rehash(bool load)
 
 	setRate(RATE_TALENTS, Config.MainConfig.GetFloatDefault("Funserver", "TalentPerLevel", 1));
 	StartingLevel = Config.MainConfig.GetIntDefault("Funserver", "StartingLevel", 1);
-	StartingTalents = Config.MainConfig.GetIntDefault("Funserver", "StartingTalents", 0);
+	ExtraTalents = Config.MainConfig.GetIntDefault("Funserver", "ExtraTalents", 0);
 	StartWithSpells = Config.MainConfig.GetBoolDefault("Funserver", "StartWithAllSpells", false);
 	MaxProfs = Config.MainConfig.GetIntDefault("Funserver", "MaxProfs", 2);
 

@@ -475,7 +475,7 @@ public:
 	uint32 SocketRecvBufSize;
 
 	uint32 StartingLevel;
-	uint32 StartingTalents;
+	uint32 ExtraTalents;
 	uint32 MaxProfs;
 	bool StartWithSpells;
 
