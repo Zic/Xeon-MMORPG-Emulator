@@ -586,7 +586,7 @@ void GossipScript::GossipHello(Object* pObject, Player* Plr, bool AutoSend)
 		Menu->AddItem(0, "I want to create a guild crest.", 9);
 
 	if(flags & UNIT_NPC_FLAG_BATTLEFIELDPERSON)
-		Menu->AddItem(0, "I would like to go to the battleground.", 10);
+		Menu->AddItem(1, "I would like to go to the battleground.", 10);
 
 	if( pTrainer &&
 		pTrainer->RequiredClass &&					  // class trainer
