@@ -9913,6 +9913,26 @@ void ApplyExtraDataFixes()
 	sp = dbcSpell.LookupEntryForced(26988);
 	if( sp != NULL )
 		sp->in_front_status = 1;
+
+	// Spell 27180 (Hammer of Wrath Rank 4) is infront from spell extra.
+   sp = dbcSpell.LookupEntryForced(27180);
+   if( sp != NULL )
+      sp->in_front_status = 1;
+
+   // Spell 24239 (Hammer of Wrath Rank 3) is infront from spell extra.
+   sp = dbcSpell.LookupEntryForced(24239);
+   if( sp != NULL )
+      sp->in_front_status = 1;
+
+   // Spell 24274 (Hammer of Wrath Rank 2) is infront from spell extra.
+   sp = dbcSpell.LookupEntryForced(24274);
+   if( sp != NULL )
+      sp->in_front_status = 1;
+
+   // Spell 24275 (Hammer of Wrath Rank 1) is infront from spell extra.
+   sp = dbcSpell.LookupEntryForced(24275);
+   if( sp != NULL )
+      sp->in_front_status = 1;
 }
 
 void Apply112SpellFixes()

@@ -26,7 +26,7 @@ void WorldSession::HandleSetVisibleRankOpcode(WorldPacket& recv_data)
 	recv_data >> ChosenRank; 
 	if(ChosenRank == 0xFFFFFFFF)
 		_player->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
-	else
+	else if(_player->HasKnownTitle(ChosenRank)) // Check for cheating
 		_player->SetUInt32Value(PLAYER_CHOSEN_TITLE, ChosenRank);
 }
 

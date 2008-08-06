@@ -1461,6 +1461,7 @@ public:
 	map<uint32, PetSpellMap*> PetSpells;
 	void AddKnownTitle(int32 TitleNumber);
 	void RemoveKnownTitle(int32 TitleNumber);
+	bool HasKnownTitle(int32 TitleNumber);
 	void AddSummonSpell(uint32 Entry, uint32 SpellID);
 	void RemoveSummonSpell(uint32 Entry, uint32 SpellID);
 	set<uint32>* GetSummonSpells(uint32 Entry);
