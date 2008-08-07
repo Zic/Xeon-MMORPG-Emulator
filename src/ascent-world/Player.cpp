@@ -5859,6 +5859,9 @@ void Player::Reset_Talents()
 				spellInfo = dbcSpell.LookupEntry( tmpTalent->RankID[j] );
 				if(spellInfo)
 				{
+					if (spellInfo->NameHash == SPELL_HASH_DUAL_WIELD && getClass() != SHAMAN)
+						continue; //Dual wield only removed on shammies
+					
 					for(int k=0;k<3;k++)
 						if(spellInfo->Effect[k] == SPELL_EFFECT_LEARN_SPELL)
 						{

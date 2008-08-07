@@ -2102,6 +2102,14 @@ void WorldSession::HandleDungeonDifficultyOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket & recv_data)
 {
+	//How long was this bugged for? Client now sends packet on cancel too
+	uint32 sguid; //Summoner's GUID
+	uint32 unk;
+	uint8 choice;
+	recv_data >> sguid >> unk >> choice;
+	if(choice == 0)
+		return;
+
 	if(!_player->m_summoner)
 	{
 		SendNotification(NOTIFICATION_MESSAGE_NO_PERMISSION);

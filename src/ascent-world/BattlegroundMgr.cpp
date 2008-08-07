@@ -135,8 +135,12 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 	uint32 instance;
 
 	pck >> guid >> bgtype >> instance;
-	if(bgtype >= BATTLEGROUND_NUM_TYPES)
+	
+	if(bgtype >= BATTLEGROUND_NUM_TYPES || !bgtype)
+	{
+		m_session->Disconnect();
 		return;		// cheater!
+	}
 
 	/* Check the instance id */
 	if(instance)
@@ -791,7 +795,7 @@ void CBattleground::PortPlayer(Player * plr, bool skip_teleport /* = false*/)
 	plr->SetTeam(plr->m_bgTeam);
 	WorldPacket data(SMSG_BATTLEGROUND_PLAYER_JOINED, 8);
 	data << plr->GetGUID();
-	DistributePacketToAll(&data);
+	DistributePacketToTeam(&data, plr->m_bgTeam);
 
 	m_players[plr->m_bgTeam].insert(plr);
 
