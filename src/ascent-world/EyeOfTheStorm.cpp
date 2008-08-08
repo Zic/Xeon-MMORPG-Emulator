@@ -250,16 +250,16 @@ void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
 	uint32 i;
 	uint32 towers = 0;
 	if( team == 0 )
-		val = 100;
+		val = EOTS_BANNER_ALLIANCE;
 	else
-		val = 0;
+		val = EOTS_BANNER_HORDE;
 
-	if( m_CPStatus[tid] != val )
+	if( m_CPBanner[i]->GetEntry() != val )
 		return;			// not captured by our team
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPStatus[i] == val)
+		if(m_CPBanner[i]->GetEntry() == val)
 			towers++;
 	}
 
@@ -656,9 +656,9 @@ void EyeOfTheStorm::UpdateCPs()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if( m_CPStatus[i] == 100 )
+		if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE )
 			towers[0]++;
-		else if( m_CPStatus[i] == 0 )
+		else if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE )
 			towers[1]++;
 	}
 
@@ -685,9 +685,9 @@ void EyeOfTheStorm::GeneratePoints()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPStatus[i] == 100)
+		if(m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE)
 			towers[0]++;
-		else if(m_CPStatus[i] == 0)
+		else if(m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE)
 			towers[1]++;
 	}
 

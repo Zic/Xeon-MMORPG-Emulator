@@ -630,6 +630,7 @@ bool ChatHandler::HandleGODelete(const char *args, WorldSession *m_session)
 		return true;
 	}
 	
+	GObj->DeleteFromDB();
 	if(GObj->m_spawn != 0 && GObj->m_spawn->entry == GObj->GetEntry())
 	{
 		uint32 cellx=float2int32(((_maxX-GObj->m_spawn->x)/_cellSize));
@@ -648,7 +649,7 @@ bool ChatHandler::HandleGODelete(const char *args, WorldSession *m_session)
 			delete GObj->m_spawn;
 		}
 	}
-	GObj->DeleteFromDB();
+	
 	GObj->Despawn(0);
 	
 	delete GObj;
