@@ -164,8 +164,8 @@ bool EyeOfTheStorm::HookHandleRepop(Player * plr)
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE && t == 0 ||
-			m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE && t == 1)
+		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE && t == 0 ||
+			m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE && t == 1)
 		{
 			distcur = plr->GetPositionNC().Distance2DSq( EOTSGraveyardLocations[i][0], EOTSGraveyardLocations[i][1] );
 			if( distcur < dist )
@@ -254,12 +254,12 @@ void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
 	else
 		val = EOTS_BANNER_HORDE;
 
-	if( m_CPBanner[i]->GetEntry() != val )
+	if(!m_CPBanner[i] || m_CPBanner[i]->GetEntry() != val )
 		return;			// not captured by our team
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPBanner[i]->GetEntry() == val)
+		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == val)
 			towers++;
 	}
 
@@ -574,7 +574,7 @@ void EyeOfTheStorm::UpdateCPs()
 			// change the flag depending on cp status
 			if( m_CPStatus[i] == 0 )
 			{
-				if( m_CPBanner[i]->GetEntry() != EOTS_BANNER_HORDE )
+				if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_HORDE )
 				{
 					RespawnCPFlag(i, EOTS_BANNER_HORDE);
 					if( m_spiritGuides[i] != NULL )
@@ -595,7 +595,7 @@ void EyeOfTheStorm::UpdateCPs()
 			}
 			else if( m_CPStatus[i] == 100 )
 			{
-				if( m_CPBanner[i]->GetEntry() != EOTS_BANNER_ALLIANCE )
+				if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_ALLIANCE )
 				{
 					RespawnCPFlag(i, EOTS_BANNER_ALLIANCE);
 					if( m_spiritGuides[i] != NULL )
@@ -616,8 +616,8 @@ void EyeOfTheStorm::UpdateCPs()
 			}
 			else
 			{
-				if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE && m_CPStatus[i] <= 50 ||
-					m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE && m_CPStatus[i] >= 50)
+				if(  m_CPBanner[i] && (m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE && m_CPStatus[i] <= 50 ||
+					m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE && m_CPStatus[i] >= 50))
 				{
 					RespawnCPFlag(i, EOTS_BANNER_NEUTRAL);
 					if( m_spiritGuides[i] != NULL )
@@ -656,9 +656,9 @@ void EyeOfTheStorm::UpdateCPs()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE )
+		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE )
 			towers[0]++;
-		else if( m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE )
+		else if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE )
 			towers[1]++;
 	}
 
@@ -685,9 +685,9 @@ void EyeOfTheStorm::GeneratePoints()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE)
+		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE)
 			towers[0]++;
-		else if(m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE)
+		else if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE)
 			towers[1]++;
 	}
 
