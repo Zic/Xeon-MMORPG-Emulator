@@ -254,7 +254,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
 	else
 		val = EOTS_BANNER_HORDE;
 
-	if(!m_CPBanner[i] || m_CPBanner[i]->GetEntry() != val )
+	if(!m_CPBanner[tid] || m_CPBanner[tid]->GetEntry() != val )
 		return;			// not captured by our team
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
