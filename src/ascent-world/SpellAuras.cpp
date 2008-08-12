@@ -1506,25 +1506,6 @@ void Aura::SpellAuraDummy(bool apply)
 	case 2096://MindVision
 		{
 		}break;
-	case 6196://FarSight
-		{
-			if(apply)
-			{
-			}
-			else
-			{
-				// disabled this due to unstableness :S
-#if 0
-				Creature *summon = m_target->GetMapMgr()->GetCreature(m_target->GetUInt32Value(PLAYER_FARSIGHT));
-				if(summon)
-				{
-					summon->RemoveFromWorld(false,true);
-					delete summon;
-				}
-				m_target->SetUInt64Value(PLAYER_FARSIGHT,0);
-#endif
-			}
-		}break;
 	case 15286://Vampiric Embrace
 		{
 			if(apply)
@@ -1728,25 +1709,23 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 570:   // far sight
 	case 1345:
+	case 6196:
 	case 6197:
 	case 6198:  // eagle eye
 	case 24125:
 	case 21171:
 		{
-			/*if(!apply && m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsInWorld())
+			if(!apply && p_target && p_target->IsInWorld())
 			{
-				// reset players vision
-				Player * plr = static_cast< Player* >( m_target );
-				plr->GetMapMgr()->ChangeFarsightLocation(plr, NULL);
 
-				Creature * farsight = plr->GetMapMgr()->GetCreature(plr->GetUInt32Value(PLAYER_FARSIGHT));
-				plr->SetUInt64Value(PLAYER_FARSIGHT, 0);
+				Creature * farsight = p_target->GetMapMgr()->GetCreature(p_target->GetUInt32Value(PLAYER_FARSIGHT));
+				p_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
 				if(farsight)
 				{
 					farsight->RemoveFromWorld(false,true);
 					delete farsight;
 				}
-			}*/
+			}
 		}break;
 
 	case 23701://Darkmoon Card: Twisting Nether give 10% chance to self resurrect ->cast 23700

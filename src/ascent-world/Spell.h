@@ -25,7 +25,7 @@
 
 class WorldSession;
 class Unit;
-class DynamicObj;
+//class DynamicObj; Not used anywhere
 class Player;
 class Item;
 class Group;

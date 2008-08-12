@@ -12922,7 +12922,7 @@ void ApplyNormalFixes()
 		else if(sp->School & 64)
 			SET_SCHOOL(SCHOOL_ARCANE);
 		else
-			printf("UNKNOWN SCHOOL %u\n", sp->School);
+			sLog.outDebug("Unknown School %u on spell %u\n", sp->School, sp->Id);
 #undef SET_SCHOOL
 
 		/*
