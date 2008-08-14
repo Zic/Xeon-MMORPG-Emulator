@@ -14716,6 +14716,14 @@ void ApplyNormalFixes()
 		sp->proc_interval = 30000;
 	}
 
+	// The Twin Blades of Azzinoth
+	sp = dbcSpell.LookupEntryForced( 41434 );
+	if( sp != NULL ){
+		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_TARGET_SELF;
+		sp->procChance = 2;
+		sp->proc_interval = 45000;
+	}
+
 	//paladin - Vindication
 	sp = dbcSpell.LookupEntryForced( 26021 );
 	if( sp != NULL )
