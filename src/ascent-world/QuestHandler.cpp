@@ -624,8 +624,6 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 		SendPacket(&data);
 		sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 	}
-	
-	sHookInterface.OnQuestFinished(_player, qst);
 }
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
@@ -714,6 +712,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 
 	
 	sQuestMgr.OnQuestFinished(GetPlayer(), qst, qst_giver, reward_slot);
+	sHookInterface.OnQuestFinished(GetPlayer(), qst);
 	//if(qst_giver->GetTypeId() == TYPEID_UNIT) qst->LUA_SendEvent(static_cast< Creature* >( qst_giver ),GetPlayer(),ON_QUEST_COMPLETEQUEST);
 
 	if(qst->next_quest_id)

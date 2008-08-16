@@ -61,6 +61,10 @@ uint32 QuestMgr::PlayerMeetsReqs(Player* plr, Quest* qst, bool skiplevelcheck)
 		if(!(qst->required_class & plr->getClassMask()))
 			return QMGR_QUEST_NOT_AVAILABLE;
 
+	if(qst->required_races)
+		if(!(qst->required_races & plr->getRaceMask()))
+			return QMGR_QUEST_NOT_AVAILABLE;
+
 	if(qst->required_tradeskill)
 	{
 		if(!plr->_HasSkillLine(qst->required_tradeskill))
@@ -919,6 +923,7 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
     //details: hmm as i can remember, repeatable quests give faction rep still after first completation
     if(IsQuestRepeatable(qst))
     {
+		plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, qst->reward_money);
 		// Reputation reward
 		GiveQuestRewardReputation(plr, qst, qst_giver);
         // Static Item reward
