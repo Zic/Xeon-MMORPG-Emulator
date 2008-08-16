@@ -2612,6 +2612,19 @@ else
 		crush = 0.0f;
 		crit = 100.0f;
 	}
+
+	if(backAttack)
+	{
+		//From the gametips:
+		//|cffffd100Tip:|r Players cannot dodge, parry, or block attacks that come from behind them.
+		if(pVictim->IsPlayer())
+		{
+			//However mobs can dodge attacks from behind
+			dodge = 0.0f;
+		}
+		parry = 0.0f;
+		block = 0.0f;
+	}
 //==========================================================================================
 //==============================One Roll Processing=========================================
 //==========================================================================================
