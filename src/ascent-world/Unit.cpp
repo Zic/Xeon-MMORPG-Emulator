@@ -3273,26 +3273,6 @@ else
 			ModUnsigned32Value( UNIT_FIELD_POWER2, 1000 - GetUInt32Value( UNIT_FIELD_POWER2 ) );
 
 	}
-
-	// I am receiving damage!
-	if( dmg.full_damage && pVictim->IsPlayer() && pVictim->GetPowerType() == POWER_TYPE_RAGE && pVictim->CombatStatus.IsInCombat() )
-	{
-		float val;
-		float level = (float)getLevel();
-
-		// Conversion Value
-		float c = 0.0091107836f * level * level + 3.225598133f * level + 4.2652911f;
-
-		val = 2.5f * dmg.full_damage / c;
-		val *= 10;
-
-		//sLog.outDebug( "Rd(%i) d(%i) c(%f) rage = %f", realdamage, dmg.full_damage, c, val );
-
-		pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, (int32)val );
-		if( pVictim->GetUInt32Value( UNIT_FIELD_POWER2) > 1000 )
-			pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, 1000 - pVictim->GetUInt32Value( UNIT_FIELD_POWER2 ) );
-
-	}
 		
 	RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_START_ATTACK);
 //--------------------------extra strikes processing----------------------------------------
