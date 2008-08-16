@@ -15792,6 +15792,11 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->EffectSpellGroupRelation[0] = group_relation_shaman_shock;
 
+	// Shaman Shock Crit Bonus (set bonus)
+	sp = dbcSpell.LookupEntryForced( 22804 ); 
+	if( sp != NULL )
+		sp->EffectSpellGroupRelation[0] = group_relation_shaman_shock;
+
 	//rogue ( grouping ) Elusiveness = blind + vanish
 	group_relation_rogue_elusiveness = 0x00000800 | 0x01000000;
 
