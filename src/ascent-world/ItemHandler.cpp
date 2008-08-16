@@ -1266,7 +1266,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 		return;
 
 	if(amount < 1)
-		amount = 1;
+		return;
 
 	CreatureItem item;
 	unit->GetSellItemByItemId(itemid, item);
