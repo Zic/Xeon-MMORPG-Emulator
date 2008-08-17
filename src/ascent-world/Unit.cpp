@@ -2248,12 +2248,6 @@ uint32 Unit::GetSpellDidHitResult( Unit* pVictim, uint32 weapon_damage_type, Spe
 		{
 			hitmodifier -= 19.0f;
 		}
-		else
-		{
-			it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-			if( it != NULL && it->GetProto()->InventoryType == INVTYPE_2HWEAPON )//2 handed weapon to-hit penalty
-				hitmodifier -= 4.0f;
-		}
 	}
 
 	//--------------------------------by skill difference---------------------------------------
@@ -2283,6 +2277,12 @@ uint32 Unit::GetSpellDidHitResult( Unit* pVictim, uint32 weapon_damage_type, Spe
 		if(spell_flat_modifers!=0 )
 			printf("!!!!!spell resist mod flat %f,  spell resist bonus %f, spell group %u\n",spell_flat_modifers,hitchance,ability->SpellGroupType);
 #endif
+	}
+	if( ability != NULL && ability->Attributes & ATTRIBUTES_CANT_BE_DPB )
+	{
+		dodge = 0.0f;
+		parry = 0.0f;
+		block = 0.0f;
 	}
 	//==========================================================================================
 	//==============================One Roll Processing=========================================
@@ -2554,7 +2554,7 @@ else
 	if(crit<0) crit=0.0f;
 	if (this->IsPlayer())
 	{
-		hitmodifier += (weapon_damage_type == RANGED) ? static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_RANGED_HIT ) : static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_HIT );
+		hitchance += (weapon_damage_type == RANGED) ? static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_RANGED_HIT ) : static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_HIT );
 		dodge -=static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
 		if(dodge<0) dodge=0.0f;
 		parry -=static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
@@ -2574,13 +2574,7 @@ else
 		{
 			it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
 			if( it != NULL && it->GetProto()->InventoryType == INVTYPE_WEAPON && !ability )//dualwield to-hit penalty
-				hitmodifier -= 19.0f;
-			else
-			{
-				it = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-				if( it != NULL && it->GetProto()->InventoryType == INVTYPE_2HWEAPON )//2 handed weapon to-hit penalty
-					hitmodifier -= 4.0f;
-			}
+				hitchance -= 19.0f;
 		}
 
 	//Hackfix for Surprise Attacks
@@ -2746,6 +2740,9 @@ else
 					dmg.full_damage = CalculateDamage( this, pVictim, weapon_damage_type, 0, ability );
 			}
 
+			if( pct_dmg_mod > 0 )
+				dmg.full_damage = float2int32( dmg.full_damage *  ( float( pct_dmg_mod) / 100.0f ) );
+
 			dmg.full_damage += add_damage;
 
 			if(ability && ability->SpellGroupType)
@@ -2771,9 +2768,6 @@ else
 				disable_dR = true; 
 			
 			//float summaryPCTmod = (pVictim->DamageTakenPctMod[dmg.school_type] / 100.0f) + (GetDamageDonePctMod( dmg.school_type ) / 100.0f) + 1;
-
-			if( pct_dmg_mod > 0 )
-				dmg.full_damage = float2int32( dmg.full_damage *  ( float( pct_dmg_mod) / 100.0f ) );
 
 			//a bit dirty fix
 			/*if( ability != NULL && ability->NameHash == SPELL_HASH_SHRED )

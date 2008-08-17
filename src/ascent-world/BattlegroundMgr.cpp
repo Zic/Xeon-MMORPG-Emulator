@@ -682,17 +682,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 				bs = &(*itr)->m_bgScore;
 				*data << bs->KillingBlows;
 
-				// would this be correct?
-				if( Rated() )
-				{
-					*data << uint8((*itr)->m_bgTeam);
-				}
-				else
-				{
-					*data << uint32(0);		// w
-					*data << uint32(0);		// t
-					*data << uint32(0);		// f
-				}
+				*data << uint8((*itr)->m_bgTeam);
 
 				*data << uint32(1);			// count of values after this
 				*data << uint32(bs->Misc1);	// rating change
@@ -862,7 +852,6 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 		/* arenas follow a different procedure. */
 		static const uint32 arena_map_ids[3] = { 559, 562, 572 };
 		uint32 mapid = arena_map_ids[RandomUInt(2)];
-		mapid=562;
 		uint32 players_per_side;
 		mgr = sInstanceMgr.CreateBattlegroundInstance(mapid);
 		if(mgr == NULL)
