@@ -685,9 +685,9 @@ void EyeOfTheStorm::GeneratePoints()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE)
+		if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE)
 			towers[0]++;
-		else if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE)
+		else if(m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_HORDE)
 			towers[1]++;
 	}
 
@@ -768,6 +768,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				}
 			}
 		}
+		m_winningteam = m_winningteam ? 0 : 1;
 		m_mainLock.Release();
 		SetWorldState( EOTS_WORLDSTATE_ALLIANCE_VICTORYPOINTS + team, m_points[team] );
 		UpdatePvPData();

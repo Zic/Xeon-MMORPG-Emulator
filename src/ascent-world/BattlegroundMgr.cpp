@@ -22,7 +22,7 @@
 #define ENABLE_AB
 #define ENABLE_WSG
 //#define ENABLE_AV
-//#define ENABLE_EOTS
+#define ENABLE_EOTS
 //#define ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
 
 
