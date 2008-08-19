@@ -1644,14 +1644,16 @@ void Player::_SavePetSpells(QueryBuffer * buf)
 	}
 }
 
-void Player::AddKnownTitle(int32 TitleNumber){
+void Player::AddKnownTitle(int32 TitleNumber)
+{
 	if(TitleNumber < 1 || TitleNumber > TITLE_END)
 		return;  // Title doesn't exist
 	uint64 TitleFlag = ((uint64)1) << TitleNumber;
 	SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) | TitleFlag);
 }
 
-void Player::RemoveKnownTitle(int32 TitleNumber){
+void Player::RemoveKnownTitle(int32 TitleNumber)
+{
 	if(TitleNumber < 1 || TitleNumber > TITLE_END)
 		return;  // Title doesn't exist
 	if(TitleNumber == GetUInt32Value(PLAYER_CHOSEN_TITLE)) // if it's the chosen title, remove it
@@ -1660,7 +1662,8 @@ void Player::RemoveKnownTitle(int32 TitleNumber){
 	SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) & ~TitleFlag);
 }
 
-bool Player::HasKnownTitle(int32 TitleNumber){
+bool Player::HasKnownTitle(int32 TitleNumber)
+{
 	if(TitleNumber < 1 || TitleNumber > TITLE_END)
 		return false;  // Title doesn't exist
 	return ((GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) & (((uint64)1) << TitleNumber)) != (uint64) 0);

@@ -1924,6 +1924,7 @@ void Aura::SpellAuraDummy(bool apply)
 			_ptarget->ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,val);
 			_ptarget->CalcDamage();
 		}break;
+
 	}
 }
 
@@ -5652,14 +5653,19 @@ void Aura::SpellAuraFeatherFall( bool apply )
 	//FIXME:Find true flag
 	if( m_target->GetTypeId() == TYPEID_PLAYER )
 	{
+		WorldPacket data(12);
 		if( apply )
 		{
+			data.SetOpcode(SMSG_MOVE_FEATHER_FALL);
 			static_cast< Player* >( m_target )->m_noFallDamage = true;
 		}
 		else
 		{
+			data.SetOpcode(SMSG_MOVE_NORMAL_FALL);
 			static_cast< Player* >( m_target )->m_noFallDamage = false;
 		}
+		data << m_target->GetNewGUID() << (uint32)0;
+		m_target->SendMessageToSet(&data, true);
 	}
 }
 
