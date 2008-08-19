@@ -303,9 +303,16 @@ void CBattlegroundManager::EventQueueUpdate()
 
 			if(IS_ARENA(i))
 			{
-				// enough players to start a round?
+#ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG //this will break rated matches
+				if(tempPlayerVec[0].size() < 1)
+					continue;
+#else
 				if(tempPlayerVec[0].size() < BGMinimumPlayers[i])
 					continue;
+#endif
+				// enough players to start a round?
+				//if(tempPlayerVec[0].size() < BGMinimumPlayers[i])
+				//	continue;
 
 				if(CanCreateInstance(i,j))
 				{

@@ -20,8 +20,12 @@
 #include "StdAfx.h"
 
 #define ARENA_PREPARATION 32727
-#define ARENA_WORLD_STATE_A_PLAYER_COUNT 2544
-#define ARENA_WORLD_STATE_H_PLAYER_COUNT 2545
+#define ARENA_WORLD_STATE_LORD_A_PLAYER_COUNT 3000
+#define ARENA_WORLD_STATE_LORD_H_PLAYER_COUNT 3001
+#define ARENA_WORLD_STATE_BLADES_A_PLAYER_COUNT 2544
+#define ARENA_WORLD_STATE_BLADES_H_PLAYER_COUNT 2545
+#define ARENA_WORLD_STATE_NAGRAND_A_PLAYER_COUNT 2575
+#define ARENA_WORLD_STATE_NAGRAND_H_PLAYER_COUNT 2576
 #define GREEN_TEAM 0
 #define GOLD_TEAM 1
 
@@ -245,7 +249,23 @@ void Arena::OnCreate()
 	SetWorldState(0x09F1	,0x0000);
 	SetWorldState(0x09F0	,0x0000);
 	SetWorldState(0x0C0D	,0x017B);
-	SetWorldState(0x09F3	,0x0001);
+	switch(m_mapMgr->GetMapId())
+	{
+		/* loraedeon */
+	case 572:
+		SetWorldState(0x0BBA, 0x0001);
+		break;
+
+		/* blades edge arena */
+	case 562:
+		SetWorldState(0x09F3, 0x0001);
+		break;
+
+		/* nagrand arena */
+	case 559:
+		SetWorldState(0x0A11, 0x0001);
+		break;
+	}
 }
 
 void Arena::OnStart()
@@ -283,8 +303,27 @@ void Arena::UpdatePlayerCounts()
 		}
 	}
 
-	SetWorldState(ARENA_WORLD_STATE_A_PLAYER_COUNT, players[0]);
-	SetWorldState(ARENA_WORLD_STATE_H_PLAYER_COUNT, players[1]);
+	switch(m_mapMgr->GetMapId())
+	{
+		/* loraedeon */
+	case 572:
+		SetWorldState(ARENA_WORLD_STATE_LORD_A_PLAYER_COUNT, players[0]);
+		SetWorldState(ARENA_WORLD_STATE_LORD_H_PLAYER_COUNT, players[1]);
+		break;
+
+		/* blades edge arena */
+	case 562:
+		SetWorldState(ARENA_WORLD_STATE_BLADES_A_PLAYER_COUNT, players[0]);
+		SetWorldState(ARENA_WORLD_STATE_BLADES_H_PLAYER_COUNT, players[1]);
+		break;
+
+		/* nagrand arena */
+	case 559:
+		SetWorldState(ARENA_WORLD_STATE_NAGRAND_A_PLAYER_COUNT, players[0]);
+		SetWorldState(ARENA_WORLD_STATE_NAGRAND_H_PLAYER_COUNT, players[1]);
+		break;
+	}
+
 
 	if(!m_started)
 		return;
@@ -503,7 +542,6 @@ bool Arena::HookHandleRepop(Player * plr)
 
 void Arena::HookOnAreaTrigger(Player * plr, uint32 id)
 {
-
 }
 
 void Player::FullHPMP()
