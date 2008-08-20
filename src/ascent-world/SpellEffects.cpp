@@ -143,7 +143,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_TELEPORT_GRAVEYARD - 120//Not used
 		&Spell::SpellEffectDummyMelee,//SPELL_EFFECT_DUMMYMELEE	- 121
 		&Spell::SpellEffectNULL,//unknown - 122 //not used
-		&Spell::SpellEffectNULL,//SPELL_EFFECT_FILMING - 123 // http://www.thottbot.com/?sp=27998: flightpath 
+		&Spell::SpellEffectFlightPath,//SPELL_EFFECT_FILMING - 123 // http://www.thottbot.com/?sp=27998: flightpath 
 		&Spell::SpellEffectPlayerPull, // SPELL_EFFECT_PLAYER_PULL - 124 - http://thottbot.com/e2312
 		&Spell::SpellEffectNULL,//unknown - 125 // Reduce Threat by % //http://www.thottbot.com/?sp=32835
 		&Spell::SpellEffectSpellSteal,//SPELL_EFFECT_SPELL_STEAL - 126 // Steal Beneficial Buff (Magic) //http://www.thottbot.com/?sp=30449
@@ -5799,4 +5799,47 @@ void Spell::SpellEffectApplyAura128(uint32 i)
 {
 	if(m_spellInfo->EffectApplyAuraName[i] != 0)
 		SpellEffectApplyAura(i);
+}
+
+void Spell::SpellEffectFlightPath(uint32 i)
+{
+	if (!playerTarget || !playerTarget->isAlive() || !u_caster)
+		return;
+
+	if(playerTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOCK_PLAYER))
+		return;
+
+	TaxiPath* taxipath = sTaxiMgr.GetTaxiPath(m_spellInfo->EffectMiscValue[i]);
+
+	TaxiNode* taxinode = sTaxiMgr.GetTaxiNode( taxipath->GetSource() );
+
+	if( !taxinode || !taxipath )
+		return;
+
+	uint32 modelid =0;
+
+	if( playerTarget->GetTeam() )
+	{
+		CreatureInfo* ci = CreatureNameStorage.LookupEntry( taxinode->horde_mount );
+		if(!ci) return;
+		modelid = ci->Male_DisplayID;
+		if(!modelid) return;
+	}
+	else
+	{
+		CreatureInfo* ci = CreatureNameStorage.LookupEntry( taxinode->alliance_mount );
+		if(!ci) return;
+		modelid = ci->Male_DisplayID;
+		if(!modelid) return;
+	}
+
+	if(playerTarget->GetSummon() != NULL)
+	{
+		if(playerTarget->GetSummon()->GetUInt32Value(UNIT_CREATED_BY_SPELL) > 0)
+			playerTarget->GetSummon()->Dismiss(false);						   // warlock summon -> dismiss
+		else
+			playerTarget->GetSummon()->Remove(false, true, true);					  // hunter pet -> just remove for later re-call
+	}
+
+	playerTarget->TaxiStart(taxipath, modelid, 0);
 }

@@ -1725,6 +1725,7 @@ public:
     void SpellEffectAddHonor(uint32 i);
     void SpellEffectSpawn(uint32 i);
     void SpellEffectApplyAura128(uint32 i);
+	void SpellEffectFlightPath(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);
