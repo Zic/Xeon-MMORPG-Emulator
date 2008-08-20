@@ -56,6 +56,8 @@ ChatCommand * CommandTableStorage::GetSubCommandTable(const char * name)
 		return _honorCommandTable;
 	else if(!strcmp(name, "guild"))
 		return _GuildCommandTable;
+	else if(!strcmp(name, "title"))
+		return _TitleCommandTable;
 	else if(!strcmp(name, "quest"))
 		return _questCommandTable;
 	return 0;
@@ -181,6 +183,7 @@ void CommandTableStorage::Dealloc()
 	free( _recallCommandTable );
 	free( _honorCommandTable );
 	free( _GuildCommandTable);
+	free( _TitleCommandTable);
 	free( _questCommandTable );
 	free( _commandTable );
 }
@@ -300,6 +303,16 @@ void CommandTableStorage::Init()
 	};
 	dupe_command_table(GuildCommandTable, _GuildCommandTable);
 
+	static ChatCommand TitleCommandTable[] =
+	{
+		{ "add",		 'm', &ChatHandler::HandleAddTitleCommand,  "<TitleNumber> - Adds known title to the selected player",			   NULL, 0, 0, 0},
+		{ "remove",	   'm', &ChatHandler::HandleRemoveTitleCommand, "<TitleNumber> - Removes known title from the selected player",		 NULL, 0, 0, 0},
+		{ "known",	   'm', &ChatHandler::HandleGetKnownTitlesCommand, "Shows all titles known by the player",	  NULL, 0, 0, 0},
+		{ "setchosen",	   'm', &ChatHandler::HandleSetChosenTitleCommand, "<TitleNumber> - Sets chosen title for the selected player",		 NULL, 0, 0, 0},
+		{ NULL,			0, NULL,									   "",							 NULL, 0, 0  }
+	};
+	dupe_command_table(TitleCommandTable, _TitleCommandTable);
+
 	static ChatCommand GameObjectCommandTable[] =
 	{
 		{ "select",	  'o', &ChatHandler::HandleGOSelect,   "Selects the nearest GameObject to you",	NULL, 0, 0, 0},
@@ -313,6 +326,8 @@ void CommandTableStorage::Init()
 		{ "export",	  'o', &ChatHandler::HandleGOExport,   "Exports the current GO selected",		  NULL, 0, 0, 0 },
 		{ "move", 'g', &ChatHandler::HandleGOMove, "Moves gameobject to player xyz", NULL, 0, 0, 0 },
 		{ "rotate", 'g', &ChatHandler::HandleGORotate, "Rotates gameobject x degrees", NULL, 0, 0, 0 },
+		{ "flag", 'o', &ChatHandler::HandleGOFlag, "Sets flag of selected GO", NULL, 0, 0, 0 },
+		{ "state", 'o', &ChatHandler::HandleGOState, "Sets state of selected GO", NULL, 0, 0, 0 },
 		{ NULL,			0, NULL,						   "",										 NULL, 0, 0  }
 	};
 	dupe_command_table(GameObjectCommandTable, _GameObjectCommandTable);
@@ -351,6 +366,7 @@ void CommandTableStorage::Init()
 		{ "possess", 'n', &ChatHandler::HandleNpcPossessCommand, ".npc possess - Possess an npc (mind control)", NULL, 0, 0, 0 },
 		{ "unpossess", 'n', &ChatHandler::HandleNpcUnPossessCommand, ".npc unpossess - Unposses any currently possessed npc.", NULL, 0, 0, 0 },
 		{ "select", 'n', &ChatHandler::HandleNpcSelectCommand, ".npc select - selects npc closest", NULL, 0, 0, 0 },
+		{ "cast", 'd', &ChatHandler::HandleMonsterCastCommand, ".npc cast <spellId> - Makes selected mob cast the specified spell on you.", NULL, 0, 0, 0 },
 		{ NULL,		  2, NULL,						   "",										   NULL, 0, 0  }
 	};
 	dupe_command_table(NPCCommandTable, _NPCCommandTable);
@@ -505,6 +521,7 @@ void CommandTableStorage::Init()
 		{ "pet",		   'm', NULL,									 "",					petCommandTable, 0, 0, 0},
 		{ "recall",		'q', NULL,									 "",				 recallCommandTable, 0, 0, 0},
 		{ "guild",		'm', NULL,									 "",				 GuildCommandTable, 0, 0, 0},
+		{ "title",		'm', NULL,									 "",				 TitleCommandTable, 0, 0, 0},
 		{ "getpos"	  ,  'd', &ChatHandler::HandleGetPosCommand,		"",							   NULL, 0, 0, 0},
 		{ "clearcooldowns", 'm', &ChatHandler::HandleClearCooldownsCommand, "Clears all cooldowns for your class.", NULL, 0, 0, 0 },
 		{ "removeauras",   'm', &ChatHandler::HandleRemoveAurasCommand,   "Removes all auras from target",  NULL, 0, 0, 0},

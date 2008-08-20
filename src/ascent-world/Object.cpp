@@ -1883,7 +1883,11 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 			if( !self_res_spell && static_cast< Player* >( pVictim )->bReincarnation )
 			{
 				SpellEntry* m_reincarnSpellInfo = dbcSpell.LookupEntry( 20608 );
-				if( static_cast< Player* >( pVictim )->Cooldown_CanCast( m_reincarnSpellInfo ) )
+				int bg_type = 0;
+				if(static_cast< Player* >( pVictim )->m_bg)
+					bg_type = static_cast< Player* >( pVictim )->m_bg->GetType();
+				if( static_cast< Player* >( pVictim )->Cooldown_CanCast( m_reincarnSpellInfo ) &&
+					!(bg_type >= BATTLEGROUND_ARENA_2V2 && bg_type <= BATTLEGROUND_ARENA_5V5))
 				{
 					uint32 ankh_count = static_cast< Player* >( pVictim )->GetItemInterface()->GetItemCount( 17030 );
 					if( ankh_count )
