@@ -539,7 +539,7 @@ private:
 	SessionMap m_sessions;
 	RWLock m_sessionlock;
 
-	typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger*> AreaTriggerMap;
+	typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerExtra*> AreaTriggerMap;
 	AreaTriggerMap m_AreaTrigger;
 
 protected:

@@ -25,7 +25,7 @@ const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
 const char * gCreatureNameFormat						= "ussuuuuuuuffcc";
 const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gCreatureProtoFormat						= "uuuuufuuffuffuuuuuuuuuuuuuuuuuuffsuuff";
-const char * gAreaTriggerFormat							= "uuuusffffuu";
+const char * gAreaTriggerExtraFormat					= "ucusuu";
 const char * gItemPageFormat							= "usu";
 const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
 const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
@@ -41,13 +41,13 @@ const char * gWorldMapInfoFormat						= "uuuuufffusuuuuu";
 SQLStorage<ItemPrototype, ArrayStorageContainer<ItemPrototype> >				ItemPrototypeStorage;
 SQLStorage<CreatureInfo, HashMapStorageContainer<CreatureInfo> >				CreatureNameStorage;
 SQLStorage<GameObjectInfo, HashMapStorageContainer<GameObjectInfo> >			GameObjectNameStorage;
-//SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >				CreatureProtoStorage;
-//SQLStorage<AreaTrigger, HashMapStorageContainer<AreaTrigger> >					AreaTriggerStorage;
+//SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >			CreatureProtoStorage;
+//SQLStorage<AreaTriggerExtra, HashMapStorageContainer<AreaTriggerExtra> >		AreaTriggerExtraStorage;
 SQLStorage<ItemPage, HashMapStorageContainer<ItemPage> >						ItemPageStorage;
 SQLStorage<Quest, HashMapStorageContainer<Quest> >								QuestStorage;
 SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					NpcTextStorage;
 //SQLStorage<SpellExtraInfo, HashMapStorageContainer<SpellExtraInfo> >			SpellExtraStorage;
-//SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >		GraveyardStorage;
+//SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >	GraveyardStorage;
 //SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >			TeleportCoordStorage;
 //SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >		FishingZoneStorage;
 SQLStorage<MapInfo, HashMapStorageContainer<MapInfo> >							WorldMapInfoStorage;
@@ -68,7 +68,7 @@ void Storage_Cleanup()
 	CreatureNameStorage.Cleanup();
 	GameObjectNameStorage.Cleanup();
 	//CreatureProtoStorage.Cleanup();
-	//AreaTriggerStorage.Cleanup();
+	//AreaTriggerExtraStorage.Cleanup();
 	ItemPageStorage.Cleanup();
 	QuestStorage.Cleanup();
 	//SpellExtraStorage.Cleanup();
@@ -90,7 +90,7 @@ bool Storage_ReloadTable(const char * TableName)
 		CreatureNameStorage.Reload();
 	else if(!stricmp(TableName, "gameobject_names"))	// GO Names
 		GameObjectNameStorage.Reload();
-/*	else if(!stricmp(TableName, "areatriggers"))		// Areatriggers
+/*	else if(!stricmp(TableName, "areatrigger_extra"))	// Areatriggers
 		AreaTriggerStorage.Reload();*/
 	else if(!stricmp(TableName, "itempages"))			// Item Pages
 		ItemPageStorage.Reload();

@@ -26,6 +26,20 @@
 
 #pragma pack(push,1)
 
+struct AreaTriggerEntry
+{
+	uint32 AreaTriggerID;	// 1
+	uint32 Mapid;			// 2
+	float x;				// 3
+	float y;				// 4
+	float z;				// 5
+	float o;				// 6
+	float edge_x;			// 7
+	float edge_y;			// 8
+	float edge_z;			// 9
+	float edge_o;			// 10
+};
+
 struct BankSlotPrice
 {
 	uint32 Id;
@@ -34,16 +48,16 @@ struct BankSlotPrice
 
 struct ItemSetEntry
 {
-    uint32 id;                  //1
-    char* name;                //2
-    //uint32 unused_shit[15];      //3 - 9
-    uint32 flag;                //10 constant
-    uint32 itemid[8];           //11 - 18
-    //uint32 more_unused_shit[9]; //19 - 27
-    uint32 SpellID[8];          //28 - 35
-    uint32 itemscount[8];       //36 - 43
-    uint32 RequiredSkillID;     //44
-    uint32 RequiredSkillAmt;    //45
+    uint32 id;						//1
+    char* name;						//2
+    //uint32 unused_shit[15];		//3 - 9
+    uint32 flag;					//10 constant
+    uint32 itemid[8];				//11 - 18
+    //uint32 more_unused_shit[9];	//19 - 27
+    uint32 SpellID[8];				//28 - 35
+    uint32 itemscount[8];			//36 - 43
+    uint32 RequiredSkillID;			//44
+    uint32 RequiredSkillAmt;		//45
 };
 
 struct Lock
@@ -1166,6 +1180,7 @@ public:
 #endif
 };
 
+extern SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
 extern SERVER_DECL DBCStorage<GemPropertyEntry> dbcGemProperty;
 extern SERVER_DECL DBCStorage<ItemSetEntry> dbcItemSet;
 extern SERVER_DECL DBCStorage<Lock> dbcLock;

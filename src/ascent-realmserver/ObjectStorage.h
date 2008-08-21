@@ -24,14 +24,14 @@ extern SQLStorage<ItemPrototype, ArrayStorageContainer<ItemPrototype> >				ItemP
 extern SQLStorage<CreatureInfo, HashMapStorageContainer<CreatureInfo> >				CreatureNameStorage;
 extern SQLStorage<GameObjectInfo, HashMapStorageContainer<GameObjectInfo> >			GameObjectNameStorage;
 //extern SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >			CreatureProtoStorage;
-//extern SQLStorage<AreaTrigger, HashMapStorageContainer<AreaTrigger> >				AreaTriggerStorage;
+//extern SQLStorage<AreaTriggerExtra, HashMapStorageContainer<AreaTriggerExtra> >	AreaTriggerExtraStorage;
 extern SQLStorage<ItemPage, HashMapStorageContainer<ItemPage> >						ItemPageStorage;
 extern SQLStorage<Quest, HashMapStorageContainer<Quest> >							QuestStorage;
 extern SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					NpcTextStorage;
-//extern SQLStorage<SpellExtraInfo, HashMapStorageContainer<SpellExtraInfo> >			SpellExtraStorage;
+//extern SQLStorage<SpellExtraInfo, HashMapStorageContainer<SpellExtraInfo> >		SpellExtraStorage;
 //extern SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >	GraveyardStorage;
-//extern SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >			TeleportCoordStorage;
-//extern SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >		FishingZoneStorage;
+//extern SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >		TeleportCoordStorage;
+//extern SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >	FishingZoneStorage;
 extern SQLStorage<MapInfo, HashMapStorageContainer<MapInfo> >						WorldMapInfoStorage;
 
 /*void Storage_FillTaskList(TaskList & tl);*/

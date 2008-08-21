@@ -57,7 +57,7 @@ const char * AreaTriggerFailureMessages[] = {
 	"You must be level 70 to enter heroic mode.",
 };
 
-uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, Player * pPlayer, MapInfo * pMapInfo)
+uint32 CheckTriggerPrerequsites(AreaTriggerExtra * pAreaTrigger, WorldSession * pSession, Player * pPlayer, MapInfo * pMapInfo)
 {
 	if(pAreaTrigger->required_level && pPlayer->getLevel() < pAreaTrigger->required_level)
 		return AREA_TRIGGER_FAILURE_LEVEL;
@@ -110,18 +110,19 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
     // Search quest log, find any exploration quests
 	sQuestMgr.OnPlayerExploreArea(GetPlayer(),id);
 
-	AreaTrigger* pAreaTrigger = AreaTriggerStorage.LookupEntry( id );
+	AreaTriggerEntry* dbcTrigger = dbcAreaTrigger.LookupEntry(id);
+	AreaTriggerExtra* pAreaTrigger = AreaTriggerExtraStorage.LookupEntry( id );
 
-	if( pAreaTrigger == NULL )
+	if( dbcTrigger == NULL ) //outdated dbcs!
 	{
-		sLog.outDebug("Missing AreaTrigger: %u", id);
+		sLog.outDebug("Missing AreaTrigger: %u, probably outdated DBCs", id);
 		return;
 	}
 
 	sHookInterface.OnAreaTrigger(GetPlayer(), id);
 
 	if( _player->GetSession()->CanUseCommand('z') )
-		sChatHandler.BlueSystemMessage( this, "[%sSystem%s] |rEntered areatrigger: %s%u (%s).", MSG_COLOR_WHITE, MSG_COLOR_LIGHTBLUE, MSG_COLOR_SUBWHITE, id, pAreaTrigger->Name );
+		sChatHandler.BlueSystemMessage( this, "[%sSystem%s] |rEntered areatrigger: %s%u (%s).", MSG_COLOR_WHITE, MSG_COLOR_LIGHTBLUE, MSG_COLOR_SUBWHITE, id, pAreaTrigger ? pAreaTrigger->Name : "Unknown");
 
 	// if in BG handle is triggers
 	if( _player->m_bg )
@@ -133,13 +134,19 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 	// Hook for Scripted Areatriggers
 	_player->GetMapMgr()->HookOnAreaTrigger(_player, id);
 
+	if( pAreaTrigger == NULL )
+	{
+		sLog.outDebug("Missing information from areatrigger_extra, for AreaTrigger ID : %u", id);
+		return;
+	}
+
 	switch(pAreaTrigger->Type)
 	{
 	case ATTYPE_INSTANCE:
 		{
 			if(GetPlayer()->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
-				uint32 reason = CheckTriggerPrerequsites(pAreaTrigger, this, _player, WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid));
+				uint32 reason = CheckTriggerPrerequsites(pAreaTrigger, this, _player, WorldMapInfoStorage.LookupEntry(dbcTrigger->Mapid));
 				if(reason != AREA_TRIGGER_FAILURE_OK)
 				{
 					const char * pReason = AreaTriggerFailureMessages[reason];
@@ -155,7 +162,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 						break;
 					case AREA_TRIGGER_FAILURE_NO_ATTUNE_I:
 						{
-							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(dbcTrigger->Mapid);
 							ItemPrototype * pItem = ItemPrototypeStorage.LookupEntry(pMi->required_item);
 							if(pItem)
 								snprintf(msg,200,"You must have the item, `%s` to pass through here.",pItem->Name1);
@@ -166,7 +173,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 						}break;
 					case AREA_TRIGGER_FAILURE_NO_ATTUNE_Q:
 						{
-							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(dbcTrigger->Mapid);
 							Quest * pQuest = QuestStorage.LookupEntry(pMi->required_quest);
 							if(pQuest)
 								snprintf(msg,200,"You must have finished the quest, `%s` to pass through here.",pQuest->title);
@@ -185,8 +192,8 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 					return;
 				}
 
-				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
-				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
+				GetPlayer()->SaveEntryPoint(dbcTrigger->Mapid);
+				GetPlayer()->SafeTeleport(dbcTrigger->Mapid, 0, LocationVector(dbcTrigger->x, dbcTrigger->y, dbcTrigger->z, dbcTrigger->o));
 			}
 		}break;
 	case ATTYPE_QUESTTRIGGER:
@@ -202,8 +209,8 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 		{
 			if(GetPlayer()->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
-				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
-				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
+				GetPlayer()->SaveEntryPoint(dbcTrigger->Mapid);
+				GetPlayer()->SafeTeleport(dbcTrigger->Mapid, 0, LocationVector(dbcTrigger->x, dbcTrigger->y, dbcTrigger->z, dbcTrigger->o));
 			}
 		}break;
 	default:break;

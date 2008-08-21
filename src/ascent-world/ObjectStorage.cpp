@@ -25,7 +25,7 @@ const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
 const char * gCreatureNameFormat						= "usssuuuuuuuuuuffcc";
 const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gCreatureProtoFormat						= "uuuuuuufuuuffuffuuuuuuuuuuuuuuuuuuffsuuuufffu";
-const char * gAreaTriggerFormat							= "ucuusffffuu";
+const char * gAreaTriggerExtraFormat					= "ucusuu";
 const char * gItemPageFormat							= "usu";
 const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
 const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
@@ -43,7 +43,7 @@ SERVER_DECL SQLStorage<ItemPrototype, ArrayStorageContainer<ItemPrototype> >				
 SERVER_DECL SQLStorage<CreatureInfo, HashMapStorageContainer<CreatureInfo> >				CreatureNameStorage;
 SERVER_DECL SQLStorage<GameObjectInfo, HashMapStorageContainer<GameObjectInfo> >			GameObjectNameStorage;
 SERVER_DECL SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >				CreatureProtoStorage;
-SERVER_DECL SQLStorage<AreaTrigger, HashMapStorageContainer<AreaTrigger> >					AreaTriggerStorage;
+SERVER_DECL SQLStorage<AreaTriggerExtra, HashMapStorageContainer<AreaTriggerExtra> >		AreaTriggerExtraStorage;
 SERVER_DECL SQLStorage<ItemPage, HashMapStorageContainer<ItemPage> >						ItemPageStorage;
 SERVER_DECL SQLStorage<Quest, HashMapStorageContainer<Quest> >								QuestStorage;
 SERVER_DECL SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					NpcTextStorage;
@@ -477,7 +477,7 @@ void Storage_FillTaskList(TaskList & tl)
 	make_task(CreatureNameStorage, CreatureInfo, HashMapStorageContainer, "creature_names", gCreatureNameFormat);
 	make_task(GameObjectNameStorage, GameObjectInfo, HashMapStorageContainer, "gameobject_names", gGameObjectNameFormat);
 	make_task(CreatureProtoStorage, CreatureProto, HashMapStorageContainer, "creature_proto", gCreatureProtoFormat);
-	make_task(AreaTriggerStorage, AreaTrigger, HashMapStorageContainer, "areatriggers", gAreaTriggerFormat);
+	make_task(AreaTriggerExtraStorage, AreaTriggerExtra, HashMapStorageContainer, "areatrigger_extra", gAreaTriggerExtraFormat);
 	make_task(ItemPageStorage, ItemPage, HashMapStorageContainer, "itempages", gItemPageFormat);
 	make_task(QuestStorage, Quest, HashMapStorageContainer, "quests", gQuestFormat);
 	make_task(GraveyardStorage, GraveyardTeleport, HashMapStorageContainer, "graveyards", gGraveyardFormat);
@@ -509,7 +509,7 @@ void Storage_Cleanup()
 	CreatureNameStorage.Cleanup();
 	GameObjectNameStorage.Cleanup();
 	CreatureProtoStorage.Cleanup();
-	AreaTriggerStorage.Cleanup();
+	AreaTriggerExtraStorage.Cleanup();
 	ItemPageStorage.Cleanup();
 	QuestStorage.Cleanup();
 	GraveyardStorage.Cleanup();
@@ -542,8 +542,8 @@ bool LoadAdditionalTable(const char * TableName, const char * SecondName)
 		CreatureNameStorage.LoadAdditionalData(SecondName, gCreatureNameFormat);
 	else if(!stricmp(TableName, "gameobject_names"))	// GO Names
 		GameObjectNameStorage.LoadAdditionalData(SecondName, gGameObjectNameFormat);
-	else if(!stricmp(TableName, "areatriggers"))		// Areatriggers
-		AreaTriggerStorage.LoadAdditionalData(SecondName, gAreaTriggerFormat);
+	else if(!stricmp(TableName, "areatrigger_extra"))		// Areatriggers
+		AreaTriggerExtraStorage.LoadAdditionalData(SecondName, gAreaTriggerExtraFormat);
 	else if(!stricmp(TableName, "itempages"))			// Item Pages
 		ItemPrototypeStorage.LoadAdditionalData(SecondName, gItemPageFormat);
 	else if(!stricmp(TableName, "quests"))				// Quests
@@ -577,8 +577,8 @@ bool Storage_ReloadTable(const char * TableName)
 		CreatureNameStorage.Reload();
 	else if(!stricmp(TableName, "gameobject_names"))	// GO Names
 		GameObjectNameStorage.Reload();
-	else if(!stricmp(TableName, "areatriggers"))		// Areatriggers
-		AreaTriggerStorage.Reload();
+	else if(!stricmp(TableName, "areatrigger_extra"))		// Areatriggers
+		AreaTriggerExtraStorage.Reload();
 	else if(!stricmp(TableName, "itempages"))			// Item Pages
 		ItemPageStorage.Reload();
 	else if(!stricmp(TableName, "quests"))				// Quests
