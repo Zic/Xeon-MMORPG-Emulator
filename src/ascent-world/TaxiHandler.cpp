@@ -193,20 +193,10 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 	// hippogryph: 479
 
 	uint32 modelid =0;
-	if( _player->GetTeam() )
-	{
-		if( taxinode->horde_mount == 2224 )
-			modelid =295; // In case it's a wyvern
-		else
-			modelid =1566; // In case it's a bat or a bad id
-	}
-	else
-	{
-		if( taxinode->alliance_mount == 3837 )
-			modelid =479; // In case it's an hippogryph
-		else
-			modelid =1147; // In case it's a gryphon or a bad id
-	}
+	CreatureInfo* ci = CreatureNameStorage.LookupEntry( _player->GetTeam() ? taxinode->horde_mount : taxinode->alliance_mount );
+	if(!ci) return;
+	modelid = ci->Male_DisplayID;
+	if(!modelid) return;
 
 	//GetPlayer( )->setDismountCost( newmoney );
 
@@ -331,20 +321,10 @@ void WorldSession::HandleMultipleActivateTaxiOpcode(WorldPacket & recvPacket)
 	// hippogryph: 479
 
 	uint32 modelid =0;
-	if( _player->GetTeam() )
-	{
-		if( taxinode->horde_mount == 2224 )
-			modelid =295; // In case it's a wyvern
-		else
-			modelid =1566; // In case it's a bat or a bad id
-	}
-	else
-	{
-		if( taxinode->alliance_mount == 3837 )
-			modelid =479; // In case it's an hippogryph
-		else
-			modelid =1147; // In case it's a gryphon or a bad id
-	}
+	CreatureInfo* ci = CreatureNameStorage.LookupEntry( _player->GetTeam() ? taxinode->horde_mount : taxinode->alliance_mount );
+	if(!ci) return;
+	modelid = ci->Male_DisplayID;
+	if(!modelid) return;
 
 	//GetPlayer( )->setDismountCost( newmoney );
 
