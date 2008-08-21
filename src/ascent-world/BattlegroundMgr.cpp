@@ -1110,7 +1110,7 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 	plr->ResetTeam();
 
 	/* revive the player if he is dead */
-	if(!plr->isAlive())
+	if(!plr->isAlive() && !logout)
 	{
 		plr->SetUInt32Value(UNIT_FIELD_HEALTH, plr->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 		plr->ResurrectPlayer();
