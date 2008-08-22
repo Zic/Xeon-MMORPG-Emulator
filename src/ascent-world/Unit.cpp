@@ -2555,9 +2555,15 @@ else
 	if (this->IsPlayer())
 	{
 		hitchance += (weapon_damage_type == RANGED) ? static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_RANGED_HIT ) : static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_HIT );
-		dodge -=static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		float expertise_bonus = static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		if(weapon_damage_type == MELEE)
+			expertise_bonus += static_cast< Player* >(this)->GetUInt32Value(PLAYER_EXPERTISE);
+		else if(weapon_damage_type == OFFHAND)
+			expertise_bonus += static_cast< Player* >(this)->GetUInt32Value(PLAYER_OFFHAND_EXPERTISE);
+		expertise_bonus *= 0.25f;
+		dodge -= expertise_bonus;
 		if(dodge<0) dodge=0.0f;
-		parry -=static_cast< Player* >(this)->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		parry -= expertise_bonus;
 		if(parry<0) parry=0.0f;
 	}
 	

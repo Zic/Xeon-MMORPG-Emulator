@@ -24,6 +24,7 @@
 //#define ENABLE_AV
 #define ENABLE_EOTS
 //#define ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
+#define ALLOWED_DISTANCE_AT_START 1600 // 40 yards
 
 
 initialiseSingleton(CBattlegroundManager);
@@ -1211,6 +1212,17 @@ void CBattleground::EventCountdown()
 
 void CBattleground::Start()
 {
+#ifdef ANTI_CHEAT
+	for(uint32 i = 0; i < 2; ++i) {
+		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+			if((*itr) && GetStartingCoords((*itr)->GetTeam()). Distance2DSq((*itr)->GetPosition()) > ALLOWED_DISTANCE_AT_START){
+				(*itr)->Kick(5000);
+				(*itr)->BroadcastMessage("You went too far from the starting place.");
+				Anticheat_Log->writefromsession((*itr)->GetSession(), "%s was too far from the starting place at start. BG ID: %u.", (*itr)->GetName(), this->m_id);
+			}
+		}
+	}
+#endif
 	OnStart();
 }
 

@@ -568,7 +568,7 @@ public:
 	//void SpellAuraModRangedDamageTakenPCT(bool apply);
 	void SpellAuraModBlockValue(bool apply);
 	void SpellAuraFinishingMovesCannotBeDodged(bool apply);
-	void SpellAuraAxeSkillModifier(bool apply);
+	void SpellAuraExpertise(bool apply);
 	void SpellAuraDrinkNew(bool apply);
 	void SpellAuraModSpellDamageFromAP(bool apply);
 	void SpellAuraModSpellHealingFromAP(bool apply);

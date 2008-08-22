@@ -8224,7 +8224,6 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 		case EXPERTISE_RATING_2:
 			{
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_EXPERTISE, val );
-				ModUnsigned32Value( PLAYER_EXPERTISE, val );
 			}break;
 		case RESILIENCE_RATING:
 			{
@@ -8344,7 +8343,7 @@ void Player::SetShapeShift(uint8 ss)
 			uint32 reqss = m_auras[x]->GetSpellProto()->RequiredShapeShift;
 			if( reqss != 0 && m_auras[x]->IsPositive() )
 			{
-				if( old_ss > 0 )
+				if( old_ss > 0 && old_ss != 28) // not if we are cancelling Shadowform
 				{
 					if(  ( ((uint32)1 << (old_ss-1)) & reqss ) &&		// we were in the form that required it
 						!( ((uint32)1 << (ss-1) & reqss) ) )			// new form doesnt have the right form

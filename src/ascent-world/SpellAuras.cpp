@@ -260,7 +260,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraModSpellDamageFromAP,//237 Mod Spell Damage from Attack Power
 		&Aura::SpellAuraModSpellHealingFromAP,//238 Mod Healing from Attack Power
 		&Aura::SpellAuraNULL,//239
-		&Aura::SpellAuraAxeSkillModifier,//240 Increase Axe Skill http://www.wowhead.com/?spell=20574
+		&Aura::SpellAuraExpertise,//240 Expertise http://www.wowhead.com/?spell=20574
 };
 /*
 ASCENT_INLINE void ApplyFloatSM(float ** m,float v,uint32 mask, float def)
@@ -7737,21 +7737,23 @@ void Aura::SendChannelUpdate(uint32 time, Object * m_caster)
 	m_caster->SendMessageToSet(&data, true);	
 }
 
-void Aura::SpellAuraAxeSkillModifier(bool apply)
+void Aura::SpellAuraExpertise(bool apply)
 {
 	if( p_target != NULL )
 	{
-		SetPositive();
+		int32 amt = 0;
 		if( apply )
 		{
-			p_target->_ModifySkillBonus( SKILL_AXES, mod->m_amount );
-			p_target->_ModifySkillBonus( SKILL_2H_AXES, mod->m_amount );
+			SetPositive();
+			amt = mod->m_amount;
 		}
 		else
 		{
-			p_target->_ModifySkillBonus( SKILL_AXES, -mod->m_amount );
-			p_target->_ModifySkillBonus( SKILL_2H_AXES, -mod->m_amount );
+			amt = - mod->m_amount;
 		}
+		// TODO: different weapon types expertise
+		p_target->ModUnsigned32Value( PLAYER_EXPERTISE, amt );
+		p_target->ModUnsigned32Value( PLAYER_OFFHAND_EXPERTISE, amt );
 		p_target->UpdateStats();
 	}
 }
