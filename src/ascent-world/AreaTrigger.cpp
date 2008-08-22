@@ -192,8 +192,8 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 					return;
 				}
 
-				GetPlayer()->SaveEntryPoint(dbcTrigger->Mapid);
-				GetPlayer()->SafeTeleport(dbcTrigger->Mapid, 0, LocationVector(dbcTrigger->x, dbcTrigger->y, dbcTrigger->z, dbcTrigger->o));
+				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
+				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
 			}
 		}break;
 	case ATTYPE_QUESTTRIGGER:
@@ -209,8 +209,8 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 		{
 			if(GetPlayer()->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
-				GetPlayer()->SaveEntryPoint(dbcTrigger->Mapid);
-				GetPlayer()->SafeTeleport(dbcTrigger->Mapid, 0, LocationVector(dbcTrigger->x, dbcTrigger->y, dbcTrigger->z, dbcTrigger->o));
+				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
+				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
 			}
 		}break;
 	default:break;

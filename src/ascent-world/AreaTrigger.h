@@ -37,8 +37,13 @@ typedef struct AreaTriggerExtra
 {
 	uint32 AreaTriggerID;
 	uint8 Type;
+	uint32 Mapid;
 	uint32 PendingScreen;
 	char * Name;
+	float x;
+	float y;
+	float z;
+	float o;
 	uint32 required_honor_rank;
 	uint32 required_level;
 }AreaTriggerExtra;
