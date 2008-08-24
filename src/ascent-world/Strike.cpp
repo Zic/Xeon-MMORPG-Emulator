@@ -226,7 +226,7 @@ void Striker::Deal(){
 //==============================One Roll Processing=========================================
 //==========================================================================================
 //--------------------------------cummulative chances generation----------------------------
-	//float chances[7];
+	float chances[7];
 	chances[0]=std::max(0.0f,100.0f-hitchance);
 	chances[1]=chances[0]+dodge;
 	chances[2]=chances[1]+parry;
