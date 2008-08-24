@@ -677,6 +677,12 @@
 			RelativePath="..\..\src\ascent-world\StdAfx.h">
 		</File>
 		<File
+			RelativePath="..\..\src\ascent-world\Strike.cpp">
+		</File>
+		<File
+			RelativePath="..\..\src\ascent-world\Strike.h">
+		</File>
+		<File
 			RelativePath="..\..\src\ascent-world\TaxiHandler.cpp">
 		</File>
 		<File

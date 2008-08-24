@@ -670,6 +670,7 @@ public:
 
 	friend class AIInterface;
 	friend class Aura;
+	friend class Striker;
 
 	virtual void Update( uint32 time );
 	virtual void RemoveFromWorld(bool free_guid);

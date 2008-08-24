@@ -1434,22 +1434,17 @@ bool Object::isInFront(Object* target)
 
 bool Object::isInBack(Object* target)
 {
+	if(CalcDistance(target) < 0.5f)
+		return false; 
+
 	// check if we are behind something ( is the object within a 180 degree slice of our negative y axis )
 
-    double x = m_position.x - target->GetPositionX();
-    double y = m_position.y - target->GetPositionY();
+    double x = target->GetPositionX() - m_position.x;
+    double y = target->GetPositionY() - m_position.y;
 
     double angle = atan2( y, x );
     angle = ( angle >= 0.0 ) ? angle : 2.0 * M_PI + angle;
-
-	// if we are a unit and have a UNIT_FIELD_TARGET then we are always facing them
-	if( m_objectTypeId == TYPEID_UNIT && m_uint32Values[UNIT_FIELD_TARGET] != 0 && static_cast< Unit* >( this )->GetAIInterface()->GetNextTarget() )
-	{
-		Unit* pTarget = static_cast< Unit* >( this )->GetAIInterface()->GetNextTarget();
-		angle -= double( Object::calcRadAngle( target->m_position.x, target->m_position.y, pTarget->m_position.x, pTarget->m_position.y ) );
-	}
-	else
-		angle -= target->GetOrientation();
+	angle -= target->GetOrientation();
 
     while( angle > M_PI)
         angle -= 2.0 * M_PI;
@@ -1462,7 +1457,7 @@ bool Object::isInBack(Object* target)
     double left = -1.0 * ( M_H_PI / 2.0 );
     double right = ( M_H_PI / 2.0 );
 
-    return( ( angle <= left ) && ( angle >= right ) );
+    return( ( angle >= left ) && ( angle <= right ) );
 }
 
 bool Object::isInRange(Object* target, float range)
