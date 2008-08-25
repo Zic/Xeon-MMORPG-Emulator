@@ -275,6 +275,9 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 		atA = dbcArea.LookupEntry( static_cast< Pet* >( objA )->GetPetOwner()->GetAreaID() );
 	else if( objA->IsPlayer() )
 		atA = dbcArea.LookupEntry( static_cast< Player* >( objA )->GetAreaID() );
+	else if( objA->IsCreature() && static_cast< Creature* >( objA )->IsTotem() &&
+			static_cast< Creature* >( objA )->GetTotemOwner())
+		atA = dbcArea.LookupEntry( static_cast< Creature* >( objA )->GetTotemOwner()->GetAreaID() );
 	else
 		atA = NULL;
 
@@ -282,6 +285,9 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 		atB = dbcArea.LookupEntry( static_cast< Pet* >( objB )->GetPetOwner()->GetAreaID() );
 	else if( objB->IsPlayer() )
 		atB = dbcArea.LookupEntry( static_cast< Player* >( objB )->GetAreaID() );
+	else if( objB->IsCreature() && static_cast< Creature* >( objB )->IsTotem() &&
+			static_cast< Creature* >( objB )->GetTotemOwner())
+		atB = dbcArea.LookupEntry( static_cast< Creature* >( objB )->GetTotemOwner()->GetAreaID() );
 	else
 		atB = NULL;
 

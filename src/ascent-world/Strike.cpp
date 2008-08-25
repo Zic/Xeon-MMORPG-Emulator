@@ -73,6 +73,11 @@ void Striker::Deal(){
 //==========================================================================================
 	if(!pVictim->isAlive() || !pAttacker->isAlive()  || pAttacker->IsStunned() || pAttacker->IsPacified() || pAttacker->IsFeared())
 		return;
+	if(!isAttackable(pAttacker,pVictim,false)){
+		if(pAttacker->IsPlayer())
+			static_cast< Player* >( pAttacker )->GetSession()->OutPacket(SMSG_ATTACKSWING_CANT_ATTACK);
+		return;
+	}
 	if(!pAttacker->isInFront(pVictim))
 		if(pAttacker->IsPlayer())
 		{
