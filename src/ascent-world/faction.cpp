@@ -278,6 +278,8 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 	else if( objA->IsCreature() && static_cast< Creature* >( objA )->IsTotem() &&
 			static_cast< Creature* >( objA )->GetTotemOwner())
 		atA = dbcArea.LookupEntry( static_cast< Creature* >( objA )->GetTotemOwner()->GetAreaID() );
+	else if( objA->IsUnit() && objA->GetUInt32Value(UNIT_FIELD_CREATEDBY) && objA->GetMapMgr())
+		atA = dbcArea.LookupEntry( objA->GetMapMgr()->GetAreaID(objA->GetPositionX(),objA->GetPositionY()) );
 	else
 		atA = NULL;
 
@@ -288,6 +290,8 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 	else if( objB->IsCreature() && static_cast< Creature* >( objB )->IsTotem() &&
 			static_cast< Creature* >( objB )->GetTotemOwner())
 		atB = dbcArea.LookupEntry( static_cast< Creature* >( objB )->GetTotemOwner()->GetAreaID() );
+	else if( objB->IsUnit() && objB->GetUInt32Value(UNIT_FIELD_CREATEDBY) && objB->GetMapMgr())
+		atB = dbcArea.LookupEntry( objB->GetMapMgr()->GetAreaID(objB->GetPositionX(),objB->GetPositionY()) );
 	else
 		atB = NULL;
 
