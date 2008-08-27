@@ -8300,6 +8300,8 @@ void Player::SaveAuras(stringstream &ss)
 				skip = true;
 				break;
 			}
+			if( aur->m_spellProto->AuraInterruptFlags & AURA_INTERRUPT_ON_STAND_UP) // To prevent food/drink bug
+				skip = true;
 
 			//disabled proc spells until proper loading is fixed. Some spells tend to block or not remove when restored
 			if(aur->GetSpellProto()->procFlags)

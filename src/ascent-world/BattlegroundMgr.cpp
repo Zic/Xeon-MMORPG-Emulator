@@ -596,7 +596,7 @@ CBattleground::~CBattleground()
 
 void CBattleground::UpdatePvPData()
 {
-	if(m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5)
+	if(isArena())
 	{
 		if(!m_ended)
 		{
@@ -622,7 +622,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 	data->reserve(10*(m_players[0].size()+m_players[1].size())+50);
 
 	BGScore * bs;
-	if(m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5)
+	if(isArena())
 	{
 		if(!m_ended)
 		{
@@ -855,7 +855,7 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 	CBattleground * bg;
 	uint32 iid;
 
-	if(Type == BATTLEGROUND_ARENA_2V2 || Type == BATTLEGROUND_ARENA_3V3 || Type == BATTLEGROUND_ARENA_5V5)
+	if(IS_ARENA(Type))
 	{
 		/* arenas follow a different procedure. */
 		static const uint32 arena_map_ids[3] = { 559, 562, 572 };
@@ -1034,7 +1034,7 @@ void CBattlegroundManager::SendBattlefieldStatus(Player * plr, uint32 Status, ui
 		data << uint64(0) << uint32(0);
 	else
 	{
-		if(Type >= BATTLEGROUND_ARENA_2V2 && Type <= BATTLEGROUND_ARENA_5V5)
+		if(IS_ARENA(Type))
 		{
 			//data << uint32(plr->m_bgTeam);
 			data << uint32(0);// Queue Slot
@@ -1079,7 +1079,7 @@ void CBattlegroundManager::SendBattlefieldStatus(Player * plr, uint32 Status, ui
 			data << MapId << Time;
 			break;
 		case 3:
-			if(Type >= BATTLEGROUND_ARENA_2V2 && Type <= BATTLEGROUND_ARENA_5V5)
+			if(IS_ARENA(Type))
 				data << MapId << uint32(0) << Time << uint8(0);
 			else
 				data << MapId << uint32(0) << Time << uint8(1);

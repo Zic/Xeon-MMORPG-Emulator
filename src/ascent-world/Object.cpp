@@ -1872,21 +1872,21 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 		pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 		if(pVictim->IsPlayer())
 		{
-			uint32 self_res_spell = static_cast< Player* >( pVictim )->SoulStone;
-			static_cast< Player* >( pVictim )->SoulStone = static_cast< Player* >( pVictim )->SoulStoneReceiver = 0;
-
-			if( !self_res_spell && static_cast< Player* >( pVictim )->bReincarnation )
+			uint32 self_res_spell = 0;
+			if(!(static_cast< Player* >( pVictim )->m_bg && static_cast< Player* >( pVictim )->m_bg->isArena())) // Can't self res in Arena
 			{
-				SpellEntry* m_reincarnSpellInfo = dbcSpell.LookupEntry( 20608 );
-				int bg_type = 0;
-				if(static_cast< Player* >( pVictim )->m_bg)
-					bg_type = static_cast< Player* >( pVictim )->m_bg->GetType();
-				if( static_cast< Player* >( pVictim )->Cooldown_CanCast( m_reincarnSpellInfo ) &&
-					!(bg_type >= BATTLEGROUND_ARENA_2V2 && bg_type <= BATTLEGROUND_ARENA_5V5))
+				self_res_spell = static_cast< Player* >( pVictim )->SoulStone;
+				static_cast< Player* >( pVictim )->SoulStone = static_cast< Player* >( pVictim )->SoulStoneReceiver = 0;
+
+				if( !self_res_spell && static_cast< Player* >( pVictim )->bReincarnation )
 				{
-					uint32 ankh_count = static_cast< Player* >( pVictim )->GetItemInterface()->GetItemCount( 17030 );
-					if( ankh_count )
-						self_res_spell = 21169;
+					SpellEntry* m_reincarnSpellInfo = dbcSpell.LookupEntry( 20608 );
+					if( static_cast< Player* >( pVictim )->Cooldown_CanCast( m_reincarnSpellInfo ))
+					{
+						uint32 ankh_count = static_cast< Player* >( pVictim )->GetItemInterface()->GetItemCount( 17030 );
+						if( ankh_count )
+							self_res_spell = 21169;
+					}
 				}
 			}
 			pVictim->SetUInt32Value( PLAYER_SELF_RES_SPELL, self_res_spell );

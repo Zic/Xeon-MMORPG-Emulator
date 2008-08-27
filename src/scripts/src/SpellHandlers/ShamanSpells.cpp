@@ -56,12 +56,12 @@ bool RockbiterWeapon(uint32 i, Spell* pSpell)
         break;
     }
 
-    if(!enchantment_entry || !pSpell->p_caster)
+    if(!enchantment_entry || !pSpell->p_caster || !pSpell->p_caster->GetItemInterface())
         return true;
 	Item * item = NULL;
 	if(rand()%2 == 0) // Don't know which weapon to enchant, so use random
 		item = pSpell->p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_OFFHAND);
-	if(!item)
+	if(!item || (item->GetProto() && item->GetProto()->InventoryType != INVTYPE_WEAPON && item->GetProto()->InventoryType != INVTYPE_WEAPONOFFHAND))
 		item = pSpell->p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 
     EnchantEntry * enchant = dbcEnchant.LookupEntry(enchantment_entry);
