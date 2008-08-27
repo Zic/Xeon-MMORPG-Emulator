@@ -266,7 +266,7 @@ void CBattlegroundManager::EventQueueUpdate()
 			// try to join existing instances
 			for(iitr = m_instances[i].begin(); iitr != m_instances[i].end(); ++iitr)
 			{
-				if( iitr->second->HasEnded() )
+				if(!iitr->second || iitr->second->HasEnded() || iitr->second->GetLevelGroup() != j)
 					continue;
 
 				if(IS_ARENA(i))
@@ -318,6 +318,8 @@ void CBattlegroundManager::EventQueueUpdate()
 				if(CanCreateInstance(i,j))
 				{
 					arena = ((Arena*)CreateInstance(i, j));
+					if(!arena)
+						continue;
 					team = arena->GetFreeTeam();
 					while(!arena->IsFull() && tempPlayerVec[0].size() && team >= 0)
 					{
@@ -425,6 +427,8 @@ void CBattlegroundManager::EventQueueUpdate()
 			}
 
 			Arena * ar = ((Arena*)CreateInstance(i,LEVEL_GROUP_70));
+			if(!ar)
+				continue;
 			GroupMembersSet::iterator itx;
 			ar->rated_match=true;
 
@@ -888,6 +892,8 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 
 		iid = ++m_maxBattlegroundId;
         bg = new Arena(mgr, iid, LevelGroup, Type, players_per_side);
+		if(!bg)
+			return NULL;
 		mgr->m_battleground = bg;
 		Log.Success("BattlegroundManager", "Created arena battleground type %u for level group %u on map %u.", Type, LevelGroup, mapid);
 		sEventMgr.AddEvent(bg, &CBattleground::EventCreate, EVENT_BATTLEGROUND_QUEUE_UPDATE, 1, 1,0);
