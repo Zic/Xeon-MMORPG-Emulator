@@ -314,6 +314,12 @@ public:
 		return (uint32)s;
 	}
 
+	// Returns true iff this BG is Arena
+	bool isArena()
+	{
+		return (m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5);
+	}
+
 	GameObject * SpawnGameObject(uint32 entry,uint32 MapId , float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
 	void UpdatePvPData();
 
