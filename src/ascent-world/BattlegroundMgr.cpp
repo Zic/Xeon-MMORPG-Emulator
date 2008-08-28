@@ -771,7 +771,7 @@ void CBattleground::OnPlayerPushed(Player * plr)
 
 	plr->ProcessPendingUpdates();
 	
-	if( plr->GetGroup() == NULL )
+	if( plr->GetGroup() == NULL && !plr->bGMTagOn)
 		m_groups[plr->m_bgTeam]->AddMember( plr->m_playerInfo );
 }
 
@@ -795,11 +795,14 @@ void CBattleground::PortPlayer(Player * plr, bool skip_teleport /* = false*/)
 	}
 
 	plr->SetTeam(plr->m_bgTeam);
-	WorldPacket data(SMSG_BATTLEGROUND_PLAYER_JOINED, 8);
-	data << plr->GetGUID();
-	DistributePacketToTeam(&data, plr->m_bgTeam);
+	if(!plr->bGMTagOn) // Don't announce GM joining
+	{
+		WorldPacket data(SMSG_BATTLEGROUND_PLAYER_JOINED, 8);
+		data << plr->GetGUID();
+		DistributePacketToTeam(&data, plr->m_bgTeam);
 
-	m_players[plr->m_bgTeam].insert(plr);
+		m_players[plr->m_bgTeam].insert(plr);
+	}
 
 	/* remove from any auto queue remove events */
 	sEventMgr.RemoveEvents(plr, EVENT_BATTLEGROUND_QUEUE_UPDATE);
@@ -826,7 +829,7 @@ void CBattleground::PortPlayer(Player * plr, bool skip_teleport /* = false*/)
 	UpdatePvPData();
 
 	/* add the player to the group */
-	if(plr->GetGroup() && !Rated())
+	if(plr->GetGroup() && !Rated() && !plr->bGMTagOn)
 	{
 		// remove them from their group
 		plr->GetGroup()->RemovePlayer( plr->m_playerInfo );
@@ -1102,8 +1105,11 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 	data << plr->GetGUID();
 
 	m_mainLock.Acquire();
-	m_players[plr->m_bgTeam].erase(plr);
-	DistributePacketToAll(&data);
+	if(!plr->bGMTagOn)
+	{
+		m_players[plr->m_bgTeam].erase(plr);
+		DistributePacketToAll(&data);
+	}
 
 	memset(&plr->m_bgScore, 0, sizeof(BGScore));
 	OnRemovePlayer(plr);
@@ -1565,5 +1571,5 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 bool CBattleground::CanPlayerJoin(Player * plr)
 {
-	return HasFreeSlots(plr->m_bgTeam);
+	return (plr->bGMTagOn || HasFreeSlots(plr->m_bgTeam));
 }

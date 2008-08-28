@@ -2305,7 +2305,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			for(std::vector<Unit*>::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
-				((Unit*)(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat);
+				((Unit*)(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
 			}
 		}
 
@@ -2375,7 +2375,7 @@ void Aura::SpellAuraModThreatGenerated(bool apply)
 		{
 			if(m_target->GetGeneratedThreatModifyer() < mod->m_amount)
 			{
-				m_target->ModGeneratedThreatModifyer(0);
+				m_target->ModGeneratedThreatModifyer(-m_target->GetGeneratedThreatModifyer());
 				m_target->ModGeneratedThreatModifyer(mod->m_amount);
 			}
 		}
@@ -5623,7 +5623,7 @@ void Aura::SpellAuraModTotalThreat( bool apply )
 
 		if( m_target->GetThreatModifyer() > mod->m_amount ) // replace old mod
 		{
-			m_target->ModThreatModifyer( 0 );
+			m_target->ModThreatModifyer( -m_target->GetThreatModifyer() );
 			m_target->ModThreatModifyer( mod->m_amount );
 		}
 	}
@@ -5784,13 +5784,15 @@ void Aura::SpellAuraAddPctMod( bool apply )
 	//TODO:
 	/*	
 	case SMT_BLOCK:
-	case SMT_THREAT_REDUCED:
 
 	case SMT_TRIGGER:
 	case SMT_TIME:
 		break;
 	*/
-	//unknown Modifier type
+	case SMT_THREAT_REDUCED:
+		SendModifierLog(&m_target->SM_PThreatReduced, val, AffectedGroups,mod->m_miscValue, true);
+		break;
+
 	case SMT_RESIST_DISPEL:
 		SendModifierLog( &m_target->SM_PRezist_dispell, val, AffectedGroups, mod->m_miscValue, true );
 		break;

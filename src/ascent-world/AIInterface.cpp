@@ -1245,13 +1245,18 @@ void AIInterface::AttackReaction(Unit* pUnit, uint32 damage_dealt, uint32 spellI
 	HandleEvent(EVENT_DAMAGETAKEN, pUnit, _CalcThreat(damage_dealt, spellId ? dbcSpell.LookupEntryForced(spellId) : NULL, pUnit));
 }
 
-bool AIInterface::HealReaction(Unit* caster, Unit* victim, uint32 amount)
+bool AIInterface::HealReaction(Unit* caster, Unit* victim, uint32 amount, SpellEntry * sp)
 {
 	if(!caster || !victim)
 	{
 		printf("!!!BAD POINTER IN AIInterface::HealReaction!!!\n");
 		return false;
 	}
+
+	// apply spell modifiers
+	if(sp && sp->SpellGroupType)
+		SM_PIValue(caster->SM_PThreatReduced,(int32*)&amount,sp->SpellGroupType);
+	amount += (amount * caster->GetGeneratedThreatModifyer() / 100);
 
 	int casterInList = 0, victimInList = 0;
 
@@ -3467,6 +3472,9 @@ uint32 AIInterface::_CalcThreat(uint32 damage, SpellEntry * sp, Unit* Attacker)
 	{
 		mod = damage;
 	}
+
+	if(sp && sp->SpellGroupType)
+		SM_PIValue(Attacker->SM_PThreatReduced,&mod,sp->SpellGroupType);
 
 	// modify mod by Affects
 	mod += (mod * Attacker->GetGeneratedThreatModifyer() / 100);

@@ -15297,6 +15297,19 @@ void ApplyNormalFixes()
 	//shaman - Healing Grace
 	sp = dbcSpell.LookupEntryForced( 29191 ); 
 	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 64 | 128 | 256;
+		sp->EffectSpellGroupRelation[1] = 0xFFFFFFFF; // all spells
+		sp->EffectSpellGroupRelation_high[1] = 0xFFFFFFFF; // all spells
+	}
+	sp = dbcSpell.LookupEntryForced( 29189 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 64 | 128 | 256;
+		sp->EffectSpellGroupRelation[1] = 0xFFFFFFFF; // all spells
+		sp->EffectSpellGroupRelation_high[1] = 0xFFFFFFFF; // all spells
+	}
+	sp = dbcSpell.LookupEntryForced( 29187 ); 
+	if( sp != NULL ){
+		sp->EffectSpellGroupRelation[0] = 64 | 128 | 256;
 		sp->EffectSpellGroupRelation[1] = 0xFFFFFFFF; // all spells
 		sp->EffectSpellGroupRelation_high[1] = 0xFFFFFFFF; // all spells
 	}

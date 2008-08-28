@@ -4134,6 +4134,20 @@ void Spell::Heal(int32 amount)
 		amount += amount*u_caster->HealDonePctMod[m_spellInfo->School]/100;
 		amount += float2int32( float( amount ) * unitTarget->HealTakenPctMod[m_spellInfo->School] );
 
+		// Healing Way fix
+		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)
+		{
+			uint32 healing_way_count=0;
+			for(uint32 x = 0; x < MAX_POSITIVE_AURAS; ++x)
+			{
+				if(unitTarget->m_auras[x] && unitTarget->m_auras[x]->GetSpellProto()->Id == 29203)
+				{
+					healing_way_count++;
+				}
+			}
+			amount += amount * 6 * healing_way_count / 100;
+		}
+
 		if (m_spellInfo->SpellGroupType)
 			SM_PIValue(u_caster->SM_PDamageBonus,&amount,m_spellInfo->SpellGroupType);
 
@@ -4190,7 +4204,7 @@ void Spell::Heal(int32 amount)
 	if (p_caster)
 	{
 		p_caster->m_casted_amount[m_spellInfo->School]=amount;
-		p_caster->HandleProc( PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL, unitTarget, m_spellInfo );
+		//p_caster->HandleProc( PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL, unitTarget, m_spellInfo );
 	}
 
 	int doneTarget = 0;
@@ -4230,7 +4244,7 @@ void Spell::Heal(int32 amount)
 			for(std::vector<Unit*>::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
-				static_cast< Unit* >( *itr )->GetAIInterface()->HealReaction( u_caster, unitTarget, threat );
+				static_cast< Unit* >( *itr )->GetAIInterface()->HealReaction( u_caster, unitTarget, threat, m_spellInfo);
 
 				if( (*itr)->GetGUID() == u_caster->CombatStatus.GetPrimaryAttackTarget() )
 					doneTarget = 1;

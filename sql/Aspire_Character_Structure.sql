@@ -96,7 +96,7 @@ CREATE TABLE `characters` (
   `skills` longtext COLLATE utf8_unicode_ci NOT NULL,
   `watched_faction_index` int(10) unsigned NOT NULL DEFAULT '0',
   `selected_pvp_title` int(10) unsigned NOT NULL DEFAULT '0',
-  `available_pvp_titles` int(10) unsigned NOT NULL DEFAULT '0',
+  `available_pvp_titles` bigint(40) unsigned NOT NULL DEFAULT '0',
   `gold` int(10) unsigned NOT NULL DEFAULT '0',
   `ammo_id` int(10) unsigned NOT NULL DEFAULT '0',
   `available_prof_points` tinyint(3) unsigned NOT NULL DEFAULT '0',
