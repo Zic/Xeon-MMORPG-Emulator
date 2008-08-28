@@ -270,23 +270,20 @@ void Striker::Deal(){
 		vstate = DODGE;
 		vproc |= PROC_ON_DODGE_VICTIM;
 		pVictim->Emote(EMOTE_ONESHOT_PARRYUNARMED);			// Animation
-		if( pVictim->IsPlayer() )
+		//allmighty warrior overpower
+		if( pAttacker->IsPlayer() && static_cast< Player* >( pAttacker )->getClass() == WARRIOR )
 		{
-			//allmighty warrior overpower
-			if( pAttacker->IsPlayer() && static_cast< Player* >( pAttacker )->getClass() == WARRIOR )
-			{
-				static_cast< Player* >( pAttacker )->AddComboPoints( pVictim->GetGUID(), 1 );
-				static_cast< Player* >( pAttacker )->UpdateComboPoints();
-				if( !sEventMgr.HasEvent( static_cast< Player* >( pAttacker ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET ) )
-					sEventMgr.AddEvent( static_cast< Player* >( pAttacker ), &Player::NullComboPoints, (uint32)EVENT_COMBO_POINT_CLEAR_FOR_TARGET, (uint32)5000, (uint32)1, (uint32)0 );
-				else
-					sEventMgr.ModifyEventTimeLeft( static_cast< Player* >( pAttacker ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET, 5000 ,0 );
-			}
-			pVictim->SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_DODGE_BLOCK);	//SB@L: Enables spells requiring dodge
-			if(!sEventMgr.HasEvent(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE))
-				sEventMgr.AddEvent(pVictim,&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_DODGE_BLOCK,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,1,0);
-			else sEventMgr.ModifyEventTimeLeft(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,0);
+			static_cast< Player* >( pAttacker )->AddComboPoints( pVictim->GetGUID(), 1 );
+			static_cast< Player* >( pAttacker )->UpdateComboPoints();
+			if( !sEventMgr.HasEvent( static_cast< Player* >( pAttacker ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET ) )
+				sEventMgr.AddEvent( static_cast< Player* >( pAttacker ), &Player::NullComboPoints, (uint32)EVENT_COMBO_POINT_CLEAR_FOR_TARGET, (uint32)5000, (uint32)1, (uint32)0 );
+			else
+				sEventMgr.ModifyEventTimeLeft( static_cast< Player* >( pAttacker ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET, 5000 ,0 );
 		}
+		pVictim->SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_DODGE_BLOCK);	//SB@L: Enables spells requiring dodge
+		if(!sEventMgr.HasEvent(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE))
+			sEventMgr.AddEvent(pVictim,&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_DODGE_BLOCK,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,1,0);
+		else sEventMgr.ModifyEventTimeLeft(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,0);
 		break;
 //--------------------------------parry-----------------------------------------------------
 	case 2:

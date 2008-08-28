@@ -1075,6 +1075,17 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 			u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, m_spellInfo->CasterAuraState );
 	}
 
+	if( p_caster && p_caster->IsStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) )
+	{
+		/* talents procing - don't remove stealth either */
+		if (!(m_spellInfo->Attributes & ATTRIBUTES_PASSIVE) && 
+			!( pSpellId && dbcSpell.LookupEntry(pSpellId)->Attributes & ATTRIBUTES_PASSIVE ) )
+		{
+			p_caster->RemoveAura(p_caster->m_stealth);
+			p_caster->m_stealth = 0;
+		}
+	}
+
 	//instant cast(or triggered) and not channeling
 	if( u_caster != NULL && ( m_castTime > 0 || m_spellInfo->ChannelInterruptFlags ) && !m_triggeredSpell )	
 	{
@@ -1262,16 +1273,6 @@ void Spell::cast(bool check)
 				/* slam - reset attack timer */
 				p_caster->setAttackTimer( 0, true );
 				p_caster->setAttackTimer( 0, false );
-			}
-			if( p_caster->IsStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) )
-			{
-				/* talents procing - don't remove stealth either */
-				if (!(m_spellInfo->Attributes & ATTRIBUTES_PASSIVE) && 
-					!( pSpellId && dbcSpell.LookupEntry(pSpellId)->Attributes & ATTRIBUTES_PASSIVE ) )
-				{
-					p_caster->RemoveAura(p_caster->m_stealth);
-					p_caster->m_stealth = 0;
-				}
 			}
 		}
 
