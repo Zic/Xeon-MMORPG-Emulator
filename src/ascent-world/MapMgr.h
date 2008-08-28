@@ -184,7 +184,8 @@ public:
 	void PushStaticObject(Object * obj);
 	void RemoveObject(Object *obj, bool free_guid);
 	void ChangeObjectLocation(Object *obj); // update inrange lists
-	void ChangeFarsightLocation(Player *plr, Creature *farsight);
+	void ChangeFarsightLocation(Player *plr, Unit *farsight, bool apply);
+	void ChangeFarsightLocation(Player* plr, float X, float Y, bool apply);
 
 	//! Mark object as updated
 	void ObjectUpdated(Object *obj);

@@ -140,7 +140,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraModMechanicResistance,//SPELL_AURA_MOD_MECHANIC_RESISTANCE = 117,
 		&Aura::SpellAuraModHealingPCT,//SPELL_AURA_MOD_HEALING_PCT = 118,
 		&Aura::SpellAuraNULL,//SPELL_AURA_SHARE_PET_TRACKING = 119,//obselete
-		&Aura::SpellAuraNULL,//SPELL_AURA_UNTRACKABLE = 120,
+		&Aura::SpellAuraUntrackable,//SPELL_AURA_UNTRACKABLE = 120,
 		&Aura::SpellAuraEmphaty,//SPELL_AURA_EMPATHY = 121,
 		&Aura::SpellAuraModOffhandDamagePCT,//SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT = 122,
 		&Aura::SpellAuraModPenetration,//SPELL_AURA_MOD_POWER_COST_PCT = 123, --> armor penetration & spell penetration, NOT POWER COST!
@@ -148,7 +148,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraModMeleeDamageTaken,//SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,
 		&Aura::SpellAuraModMeleeDamageTakenPct,//SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,
 		&Aura::SpellAuraRAPAttackerBonus,//SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
-		&Aura::SpellAuraNULL,//SPELL_AURA_MOD_POSSESS_PET = 128,
+		&Aura::SpellAuraModPossessPet,//SPELL_AURA_MOD_POSSESS_PET = 128,
 		&Aura::SpellAuraModIncreaseSpeedAlways,//SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,
 		&Aura::SpellAuraModIncreaseMountedSpeed,//SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS = 130,
 		&Aura::SpellAuraModCreatureRangedAttackPower,//SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER = 131,
@@ -248,7 +248,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//225 // Prayer of Mending "Places a spell on the target that heals them for $s1 the next time they take damage.  When the heal occurs, Prayer of Mending jumps to a raid member within $a1 yards.  Jumps up to $n times and lasts $d after each jump.  This spell can only be placed on one target at a time."
 		&Aura::SpellAuraDrinkNew,//226 // used in brewfest spells, headless hoerseman
 		&Aura::SpellAuraNULL,//227 Inflicts [SPELL DAMAGE] damage to enemies in a cone in front of the caster. (based on combat range) http://www.thottbot.com/s40938
-		&Aura::SpellAuraNULL,//228 Stealth Detection. http://www.thottbot.com/s34709
+		&Aura::SpellAuraAuraModInvisibilityDetection,//228 Stealth Detection. http://www.thottbot.com/s34709
 		&Aura::SpellAuraNULL,//229 Apply Aura:Reduces the damage your pet takes from area of effect attacks http://www.thottbot.com/s35694
 		&Aura::SpellAuraIncreaseMaxHealth,//230 Increase Max Health (commanding shout);
         &Aura::SpellAuraNULL,//231 curse a target http://www.thottbot.com/s40303
@@ -1690,6 +1690,7 @@ void Aura::SpellAuraDummy(bool apply)
 				pCaster->SetUInt64Value(UNIT_FIELD_CHARM, m_target->GetGUID());
 				m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY, pCaster->GetGUID());
 				pCaster->SetUInt64Value(PLAYER_FARSIGHT, m_target->GetGUID());
+				pCaster->GetMapMgr()->ChangeFarsightLocation(pCaster, m_target, true);
 				pCaster->m_CurrentCharm = ((Creature*)m_target);
 				m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED_CREATURE);
 				pCaster->m_noInterrupt = 1;
@@ -1707,6 +1708,7 @@ void Aura::SpellAuraDummy(bool apply)
 				pCaster->SetUInt64Value(UNIT_FIELD_CHARM, 0);
 				m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY, 0);
 				pCaster->SetUInt64Value(PLAYER_FARSIGHT, 0);
+				pCaster->GetMapMgr()->ChangeFarsightLocation(pCaster, m_target, false);
 				pCaster->m_CurrentCharm = 0;
 				m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED_CREATURE);
 				pCaster->m_noInterrupt = 0;
@@ -1727,9 +1729,9 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 			if(!apply && p_target && p_target->IsInWorld())
 			{
-
 				Creature * farsight = p_target->GetMapMgr()->GetCreature(p_target->GetUInt32Value(PLAYER_FARSIGHT));
 				p_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
+				p_target->GetMapMgr()->ChangeFarsightLocation(p_target, NULL, NULL, false);
 				if(farsight)
 				{
 					farsight->RemoveFromWorld(false,true);
@@ -4896,18 +4898,24 @@ void Aura::SpellAuraModLanguage(bool apply)
 
 void Aura::SpellAuraAddFarSight(bool apply)
 {
+    Player* caster = static_cast<Player*>(GetUnitCaster());
+	SpellCastTargets m_targets;
+    if(!caster)
+		return;
+	if(!caster->IsPlayer())
+        return;
+
 	if(apply)
 	{
-		if(m_target->GetTypeId() != TYPEID_PLAYER)
-			return;
-		
-		//FIXME:grep aka Nublex will fix this
-		//Make update circle bigger here
+		float sightX = caster->GetPositionX() + 100.0f;
+		float sightY = caster->GetPositionY() + 100.0f;
+		caster->SetUInt64Value(PLAYER_FARSIGHT, mod->m_miscValue);
+		caster->GetMapMgr()->ChangeFarsightLocation(caster, sightX, sightY, true);
 	}
 	else
 	{
-		//Destroy new updated objects here if they are still out of update range
-		//w/e
+		caster->SetUInt64Value(PLAYER_FARSIGHT, 0);
+		caster->GetMapMgr()->ChangeFarsightLocation(caster, NULL, NULL, false);
 	}
 }
 
@@ -6223,6 +6231,29 @@ void Aura::SpellAuraRAPAttackerBonus(bool apply)
 		m_target->RAPvModifier -= mod->m_amount;
 }
 
+void Aura::SpellAuraModPossessPet(bool apply)
+{
+    Unit* caster = GetUnitCaster();
+    if(!caster)
+		return;
+	if(caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+	if(static_cast<Player*>(caster)->GetSummon() != m_target)
+        return;
+
+    if(apply)
+    {
+        caster->SetUInt64Value(PLAYER_FARSIGHT, m_target->GetGUID());
+        m_target->SetFlag(UNIT_FIELD_FLAGS, 0x01000000);
+    }
+    else
+    {
+        caster->SetUInt64Value(PLAYER_FARSIGHT, 0);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x01000000);
+    }
+}
+
 void Aura::SpellAuraModIncreaseSpeedAlways(bool apply)
 {
 	if(apply)
@@ -7094,6 +7125,14 @@ void Aura::SpellAuraEmphaty(bool apply)
 	m_target->BuildFieldUpdatePacket(static_cast< Player* >(caster), UNIT_DYNAMIC_FLAGS, dynflags);
 }
 
+void Aura::SpellAuraUntrackable(bool apply)
+{
+    if(apply)
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x04000000);
+    else
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x04000000);
+}
+
 void Aura::SpellAuraModOffhandDamagePCT(bool apply)
 {
 	//Used only by talents of rogue and warrior;passive,positive
@@ -7591,6 +7630,14 @@ void Aura::SpellAuraFinishingMovesCannotBeDodged(bool apply)
 
 		static_cast< Player* >( m_target )->m_finishingmovesdodge = false;
 	}
+}
+
+void Aura::SpellAuraAuraModInvisibilityDetection(bool apply)
+{
+	if( apply )
+		m_target->m_stealthDetectBonus += mod->m_amount;
+	else
+		m_target->m_stealthDetectBonus -= mod->m_amount;
 }
 
 void Aura::SpellAuraIncreaseMaxHealth(bool apply)

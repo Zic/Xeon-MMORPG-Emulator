@@ -8811,6 +8811,7 @@ void Player::Possess(Unit * pTarget)
 	m_noInterrupt++;
 	SetUInt64Value(UNIT_FIELD_CHARM, pTarget->GetGUID());
 	SetUInt64Value(PLAYER_FARSIGHT, pTarget->GetGUID());
+	pTarget->GetMapMgr()->ChangeFarsightLocation(this, pTarget, true);
 	ResetHeartbeatCoords();
 
 	pTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY, GetGUID());
@@ -8889,6 +8890,7 @@ void Player::UnPossess()
 
 	m_noInterrupt--;
 	SetUInt64Value(PLAYER_FARSIGHT, 0);
+	pTarget->GetMapMgr()->ChangeFarsightLocation(this, pTarget, false);
 	SetUInt64Value(UNIT_FIELD_CHARM, 0);
 	pTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY, 0);
 

@@ -3862,7 +3862,7 @@ void Spell::SpellEffectAddFarsight(uint32 i) // Add Farsight
 	dyn->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
 	dyn->AddToWorld(p_caster->GetMapMgr());
 	p_caster->SetUInt64Value(PLAYER_FARSIGHT, dyn->GetGUID());
-	
+	p_caster->GetMapMgr()->ChangeFarsightLocation(p_caster, m_targets.m_destX, m_targets.m_destY, true);	
 }
 
 void Spell::SpellEffectSummonPossessed(uint32 i) // eye of kilrog

@@ -342,6 +342,11 @@ public:
 		return m_position.Distance2DSq( obj->m_position );
 	}
 
+	ASCENT_INLINE float GetDistance2dSq(float x, float y)
+	{
+		return m_position.Distance2DSq( x, y );
+	}
+
 	// In-range object management, not sure if we need it
 	ASCENT_INLINE bool IsInRangeSet( Object* pObj )
 	{
