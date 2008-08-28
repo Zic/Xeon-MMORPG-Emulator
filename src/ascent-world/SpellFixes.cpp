@@ -13931,37 +13931,27 @@ void ApplyNormalFixes()
 /*		//if there is a proc spell and has 0 as charges then it's probably going to triger infinite times. Better not save these
 		if(sp->procCharges==0)
 			sp->procCharges=-1;*/
-		if(!sp->MechanicsType){ // Use this only if mechanics isn't specified in DBC
-			//Set Silencing spells mech.
-			if( sp->EffectApplyAuraName[0] == 27 || 
-				sp->EffectApplyAuraName[1] == 27 ||
-				sp->EffectApplyAuraName[2] == 27 )
-				sp->MechanicsType = MECHANIC_SILENCED;
 
-			//Set Stunning spells mech.
-			if( sp->EffectApplyAuraName[0] == 12 || 
-				sp->EffectApplyAuraName[1] == 12 ||
-				sp->EffectApplyAuraName[2] == 12 )
-				sp->MechanicsType = MECHANIC_STUNNED;
-
-			//Set Fearing spells mech
-			if( sp->EffectApplyAuraName[0] == 7 || 
-				sp->EffectApplyAuraName[1] == 7 ||
-				sp->EffectApplyAuraName[2] == 7 )
-				sp->MechanicsType = MECHANIC_FLEEING;
-
-			//Set Snare spells mech
-			if( sp->EffectApplyAuraName[0] == SPELL_AURA_MOD_DECREASE_SPEED || 
-				sp->EffectApplyAuraName[1] == SPELL_AURA_MOD_DECREASE_SPEED ||
-				sp->EffectApplyAuraName[2] == SPELL_AURA_MOD_DECREASE_SPEED )
-				sp->MechanicsType = MECHANIC_ENSNARED;
-
-			//Set Interrupted spells mech
-			if( sp->Effect[0] == SPELL_EFFECT_INTERRUPT_CAST || 
-				sp->Effect[1] == SPELL_EFFECT_INTERRUPT_CAST ||
-				sp->Effect[2] == SPELL_EFFECT_INTERRUPT_CAST )
-				sp->MechanicsType = MECHANIC_INTERRUPTED;
-		}
+		// Setting mechanics for effects where it wasn't set in DBC
+		// Not sure whether we need it any more
+		for(uint32 i = 0; i < 3; ++i)
+		{
+			if(!sp->EffectMechanic[i])
+			{
+				if(sp->EffectApplyAuraName[i] == SPELL_AURA_MOD_SILENCE)
+					sp->EffectMechanic[i] = MECHANIC_SILENCED;
+				if(sp->EffectApplyAuraName[i] == SPELL_AURA_MOD_STUN)
+					sp->EffectMechanic[i] = MECHANIC_STUNNED;
+				if(sp->EffectApplyAuraName[i] == SPELL_AURA_MOD_FEAR)
+					sp->EffectMechanic[i] = MECHANIC_FLEEING;
+				if(sp->EffectApplyAuraName[i] == SPELL_AURA_MOD_DECREASE_SPEED)
+					sp->EffectMechanic[i] = MECHANIC_ENSNARED;
+				if(sp->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT)
+					sp->EffectMechanic[i] = MECHANIC_ROOTED;
+				if(sp->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST)
+					sp->EffectMechanic[i] = MECHANIC_INTERRUPTED;
+			}
+		}		
 
 		if( sp->proc_interval != 0 )
 			sp->procFlags |= PROC_REMOVEONUSE;

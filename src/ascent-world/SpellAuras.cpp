@@ -355,7 +355,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, Object* caster, Unit* target )
 	else
 		p_target = NULL;
 
-	DurationPctMod(proto->MechanicsType);
+	DurationPctMod(GetMechanic());
 	/*if( caster->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER )
 	{
 		if( ( ( Player* )caster )->DuelingWith == ( ( Player* )target ) )
@@ -3714,7 +3714,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			{
 				if( m_target->m_auras[x] != NULL )
 				{
-					if( m_target->m_auras[x]->GetSpellProto()->MechanicsType == 7 || m_target->m_auras[x]->GetSpellProto()->MechanicsType == 11 ) // Remove roots and slow spells
+					if( m_target->m_auras[x]->HasMechanic(7) || m_target->m_auras[x]->HasMechanic(11) ) // Remove roots and slow spells
 					{
 						m_target->m_auras[x]->Remove();
 					}

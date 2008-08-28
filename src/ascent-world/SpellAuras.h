@@ -676,6 +676,26 @@ public:
 		return false;
 	}
 
+	bool HasMechanic(uint32 MechanicsType)
+	{
+		return m_spellProto->MechanicsType == MechanicsType ||
+			m_spellProto->EffectMechanic[0] == MechanicsType ||
+			m_spellProto->EffectMechanic[1] == MechanicsType ||
+			m_spellProto->EffectMechanic[2] == MechanicsType;
+	}
+	uint32 GetMechanic()
+	{
+		if(m_spellProto->MechanicsType)
+			return m_spellProto->MechanicsType;
+		if(m_spellProto->EffectMechanic[0])
+			return m_spellProto->EffectMechanic[0];
+		if(m_spellProto->EffectMechanic[1])
+			return m_spellProto->EffectMechanic[1];
+		if(m_spellProto->EffectMechanic[2])
+			return m_spellProto->EffectMechanic[2];
+		return 0;
+	}
+
 	bool m_castInDuel;
 
 private:

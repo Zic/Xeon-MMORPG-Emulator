@@ -5236,10 +5236,7 @@ bool Unit::IsDazed()
 	{
 		if(m_auras[x])
 		{
-			if(m_auras[x]->GetSpellProto()->MechanicsType == MECHANIC_ENSNARED)
-			return true;
-			for(uint32 y=0;y<3;y++)
-			if(m_auras[x]->GetSpellProto()->EffectMechanic[y]==MECHANIC_ENSNARED)
+			if(m_auras[x]->HasMechanic(MECHANIC_ENSNARED))
 				return true;
 		}
 	}
@@ -6177,7 +6174,7 @@ bool Unit::RemoveAllAurasByMechanic( uint32 MechanicType , uint32 MaxDispel = -1
 
 			if( m_auras[x] )
 			{
-					if( m_auras[x]->GetSpellProto()->MechanicsType == MechanicType ) // Remove all mechanics of type MechanicType (my english goen boom)
+					if( m_auras[x]->HasMechanic( MechanicType )) // Remove all mechanics of type MechanicType (my english goen boom)
 					{
 						//sLog.outString( "Removed aura. [AuraSlot %u, SpellId %u]" , x , m_auras[x]->GetSpellId() );
 						// TODO: Stop moving if fear was removed.

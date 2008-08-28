@@ -554,26 +554,11 @@ uint8 Spell::DidHit(uint32 effindex,Unit* target)
 	/*************************************************************************/
 	/* Check if the target is immune to this mechanic                        */
 	/*************************************************************************/
-	if(u_victim->MechanicsDispels[m_spellInfo->MechanicsType])
+	if( m_spellInfo->MechanicsType<27 && u_victim->MechanicsDispels[m_spellInfo->MechanicsType])
 	{
-		return SPELL_DID_HIT_IMMUNE; // Moved here from Spell::CanCast
+		return SPELL_DID_HIT_IMMUNE;
 	}
 	
-	/**** HACK FIX: AoE Snare/Root spells (i.e. Frost Nova) ****/
-	/* If you find any other AoE effects that also apply something that SHOULD be a mechanic, add it here. */
-	if( u_victim->MechanicsDispels[MECHANIC_ROOTED] ||
-		u_victim->MechanicsDispels[MECHANIC_ENSNARED]
-		)
-	{
-	for( int i = 1 ; i <= 3 ; i ++ )
-		{
-			if( u_victim->MechanicsDispels[MECHANIC_ROOTED] && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT )
-				return SPELL_DID_HIT_IMMUNE;
-			if( u_victim->MechanicsDispels[MECHANIC_ENSNARED] && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_DECREASE_SPEED )
-				return SPELL_DID_HIT_IMMUNE;
-		}
-
-	}
 
 	/************************************************************************/
 	/* Check if the target has a % resistance to this mechanic              */
@@ -2436,7 +2421,15 @@ void Spell::HandleEffects(uint64 guid, uint32 i)
 				break;
 			}
 		}
-	}	
+	}
+
+	// Check if the target has Mechanic Immunity or a % resistance to this mechanic
+	if( unitTarget && m_spellInfo->EffectMechanic[i] < 27 )
+	{
+		float res = unitTarget->MechanicsResistancesPCT[m_spellInfo->EffectMechanic[i]];
+		if(Rand(res) || unitTarget->MechanicsDispels[m_spellInfo->EffectMechanic[i]])
+			return;
+	}
 
 	damage = CalculateEffect(i,unitTarget);  
 	sLog.outDebug( "WORLD: Spell effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
