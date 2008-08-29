@@ -21404,20 +21404,36 @@ void ApplyNormalFixes()
 		sp = dbcSpell.LookupEntryForced(100);
 		if(sp != NULL)
 		{
-			sp->Effect[1] = SPELL_EFFECT_DUMMY;
-			sp->EffectMiscValue[1] = 90;
+			sp->Effect[1] = SPELL_EFFECT_ENERGIZE;
+			sp->EffectMiscValue[1] = 1;
 		}
 		sp = dbcSpell.LookupEntryForced(6178);
 		if(sp != NULL)
 		{
-			sp->Effect[1] = SPELL_EFFECT_DUMMY;
-			sp->EffectMiscValue[1] = 120;
+			sp->Effect[1] = SPELL_EFFECT_ENERGIZE;
+			sp->EffectMiscValue[1] = 1;
 		}
 		sp = dbcSpell.LookupEntryForced(11578);
 		if(sp != NULL)
 		{
-			sp->Effect[1] = SPELL_EFFECT_DUMMY;      
-			sp->EffectMiscValue[1] = 150;
+			sp->Effect[1] = SPELL_EFFECT_ENERGIZE;      
+			sp->EffectMiscValue[1] = 1;
+		}
+		// Improved charge
+		sp = dbcSpell.LookupEntryForced(12285);
+		if(sp != NULL)
+		{
+			sp->EffectSpellGroupRelation[0] = 0x1; 
+		}
+		sp = dbcSpell.LookupEntryForced(12697);
+		if(sp != NULL)
+		{
+			sp->EffectSpellGroupRelation[0] = 0x1; 
+		}
+		sp = dbcSpell.LookupEntryForced(12285);
+		if(sp != NULL)
+		{
+			sp->EffectSpellGroupRelation[0] = 0x1; 
 		}
 			
 

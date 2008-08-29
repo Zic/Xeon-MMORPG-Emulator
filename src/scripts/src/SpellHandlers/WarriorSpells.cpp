@@ -22,7 +22,7 @@
 /* Spell Defs                                                           */
 /************************************************************************/
 
-bool Charge(uint32 i, Spell* pSpell)
+/*bool Charge(uint32 i, Spell* pSpell)
 {
     uint32 rage_to_gen;
     switch(pSpell->m_spellInfo->Id)
@@ -84,7 +84,7 @@ bool Charge(uint32 i, Spell* pSpell)
     pSpell->u_caster->SetUInt32Value(UNIT_FIELD_POWER2, val);
   //  script_debuglog("WarriorSpells.cpp :: Charge generate %u rage on "I64FMT, rage_to_gen, pSpell->u_caster->GetGUID());
     return true;
-}
+}*/
 
 bool Execute(uint32 i, Spell* pSpell)
 {
@@ -132,9 +132,9 @@ bool Bloodrage(uint32 i, Spell* pSpell)
 void SetupWarriorSpells(ScriptMgr * mgr)
 {
     /**** Charge ****/
-    mgr->register_dummy_spell(100, &Charge);      // Rank 1
+    /*mgr->register_dummy_spell(100, &Charge);      // Rank 1
     mgr->register_dummy_spell(6178, &Charge);     // Rank 2
-    mgr->register_dummy_spell(11578, &Charge);    // Rank 3
+    mgr->register_dummy_spell(11578, &Charge);    // Rank 3*/
 
     /**** Execute ****/
     /* log isn't working */
