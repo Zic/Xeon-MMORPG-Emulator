@@ -24,7 +24,7 @@ uint8 *PacketKeyGenerator::GenerateKey(uint8 *sessionKey)
 	shafirst.Finalize();
 			
 	uint8 *tempDigest = shafirst.GetDigest();
-	delete firstBuffer;
+	delete[] firstBuffer;
 			
 	Sha1Hash shasecond;
 			
@@ -33,7 +33,7 @@ uint8 *PacketKeyGenerator::GenerateKey(uint8 *sessionKey)
 	shasecond.Finalize();
 			
 	uint8 *finalKey = shasecond.GetDigest();
-	delete secondBuffer;
+	delete[] secondBuffer;
 			
 	return finalKey;
 }
