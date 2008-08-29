@@ -4527,6 +4527,7 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 
 	case SPELL_HASH_MIND_CONTROL:			// Mind Control
 		grp = 12;
+		pve = true;
 		break;
 
 	//case SPELL_HASH_FROST_SHOCK:			// Frost Shock
@@ -4581,6 +4582,12 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 		break;
 	case SPELL_HASH_RIPOSTE:
 		grp = 24;
+		break;
+	case SPELL_HASH_MIND_NUMBING_POISON:
+	case SPELL_HASH_MIND_NUMBING_POISON_II:
+	case SPELL_HASH_MIND_NUMBING_POISON_III:
+	case SPELL_HASH_CURSE_OF_TONGUES:
+		grp = 25;
 		break;
 	}
 	uint32 ret;

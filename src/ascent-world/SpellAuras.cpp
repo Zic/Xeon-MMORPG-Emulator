@@ -1000,6 +1000,10 @@ void Aura::SpellAuraBindSight(bool apply)
 
 void Aura::SpellAuraModPossess(bool apply)
 {
+	if(apply)
+		mod->realamount = m_target->getLevel();
+	if( mod->realamount > mod->m_amount) //Check if target is too high level
+		return;
 	Unit *caster = GetUnitCaster();
 
 	if(apply)

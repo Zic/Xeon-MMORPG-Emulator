@@ -21435,6 +21435,17 @@ void ApplyNormalFixes()
 		{
 			sp->EffectSpellGroupRelation[0] = 0x1; 
 		}
+		// Improved Bloodrage
+		sp = dbcSpell.LookupEntryForced(12818);
+		if(sp != NULL)
+		{
+			sp->EffectSpellGroupRelation[0] = 0x100; 
+		}
+		sp = dbcSpell.LookupEntryForced(12301);
+		if(sp != NULL)
+		{
+			sp->EffectSpellGroupRelation[0] = 0x100; 
+		}
 			
 
 	//////////////////////////////////////////

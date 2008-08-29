@@ -86,14 +86,13 @@
     return true;
 }*/
 
-bool Execute(uint32 i, Spell* pSpell)
+/*bool Execute(uint32 i, Spell* pSpell)
 {
     //uint32 uSpellId = pSpell->m_spellInfo->Id;
     uint32 base_dmg = pSpell->damage;
-    /*
-    Attempt to finish off a wounded foe, causing 125 damage and converting each extra point
-    of rage into 3 additional damage.  Only usable on enemies that have less than 20% health.
-    */
+    
+    //Attempt to finish off a wounded foe, causing 125 damage and converting each extra point
+    //of rage into 3 additional damage.  Only usable on enemies that have less than 20% health.
 
     Unit * target = pSpell->GetUnitTarget();
     if(!target || !pSpell->u_caster) return true;
@@ -118,15 +117,15 @@ bool Execute(uint32 i, Spell* pSpell)
 	// zero rage
     pSpell->u_caster->SetUInt32Value(UNIT_FIELD_POWER2, 0);
     return true;
-}
+}*/
 
-bool Bloodrage(uint32 i, Spell* pSpell)
+/*bool Bloodrage(uint32 i, Spell* pSpell)
 {
   // Put the player in Combat (gotta find when to put him ooc)
 
 
   return true;
-}
+}*/
 
 /* Module info */
 void SetupWarriorSpells(ScriptMgr * mgr)
@@ -146,13 +145,13 @@ void SetupWarriorSpells(ScriptMgr * mgr)
       WORLD: Sent SMSG_ATTACKSTART
       Player::Update:  No valid current selection to attack, stopping attack
     */
-    mgr->register_dummy_spell(5308, &Execute);     // Rank 1
+    /*mgr->register_dummy_spell(5308, &Execute);     // Rank 1
     mgr->register_dummy_spell(20658, &Execute);    // Rank 2
     mgr->register_dummy_spell(20660, &Execute);    // Rank 3
     mgr->register_dummy_spell(20661, &Execute);    // Rank 4
     mgr->register_dummy_spell(20662, &Execute);    // Rank 5
     mgr->register_dummy_spell(25234, &Execute);    // Rank 6
-    mgr->register_dummy_spell(25236, &Execute);    // Rank 7
+    mgr->register_dummy_spell(25236, &Execute);    // Rank 7*/
 
     /**** Bloodrage ****/
     /* server debug when blood rages is cast */
@@ -171,6 +170,6 @@ void SetupWarriorSpells(ScriptMgr * mgr)
     WORLD: target = 2 , Spell Aura id = 94, SpellId  = 29131, i = 1, apply = false
     
     */
-    mgr->register_dummy_spell(2687, &Bloodrage);    // Bloodrage
-    mgr->register_dummy_spell(29131, &Bloodrage);   // Bloodrage this is also called
+    /*mgr->register_dummy_spell(2687, &Bloodrage);    // Bloodrage
+    mgr->register_dummy_spell(29131, &Bloodrage);   // Bloodrage this is also called*/
 }

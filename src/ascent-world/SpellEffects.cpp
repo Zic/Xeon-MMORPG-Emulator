@@ -1342,17 +1342,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( p_caster->HasSpell(13033) ) p_caster->ClearCooldownForSpell(13033); // Ice Barrier
 		}break;
 
-	case 100:
-	case 6178:
-	case 11578: //Charge - all ranks
-		{
-			if( !p_caster || !p_caster->IsPlayer() || !p_caster->GetPowerType() == POWER_TYPE_RAGE)
-				return;
-
-			p_caster->ModUnsigned32Value(UNIT_FIELD_POWER2, m_spellInfo->EffectMiscValue[1]);
-			if( p_caster->GetUInt32Value(UNIT_FIELD_POWER2) > 1000 )
-				p_caster->SetUInt32Value(UNIT_FIELD_POWER2, 1000);
-		}break;
 	case 5308:
 	case 20658:
 	case 20660:
@@ -1640,6 +1629,7 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 		{
 			switch(m_spellInfo->EffectApplyAuraName[i])
 			{
+			case 2: // possess
 			case 5:  // confuse
 			case 6:  // charm
 			case 7:  // fear
@@ -1691,9 +1681,11 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 		 pAura=itr->second;
 	}
 	int32 miscValue;
-	if(i_caster && m_caster->IsPlayer() && m_spellInfo->EffectApplyAuraName[i]==SPELL_AURA_PROC_TRIGGER_SPELL){
-		miscValue = p_caster->GetItemInterface()->GetInventorySlotByGuid( i_caster->GetGUID() ); // Need to know on which hands attacks spell should proc
-	}else{
+	if(i_caster && m_caster->IsPlayer() && m_spellInfo->EffectApplyAuraName[i]==SPELL_AURA_PROC_TRIGGER_SPELL)
+	{ // Need to know on which hands attacks spell should proc
+		miscValue = p_caster->GetItemInterface()->GetInventorySlotByGuid( i_caster->GetGUID() );
+	}else
+	{
 		miscValue = m_spellInfo->EffectMiscValue[i];
 	}
 	pAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,miscValue,i);
@@ -2521,23 +2513,6 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 			else if(ProcedOnSpell->Effect[2]==SPELL_EFFECT_HEAL || ProcedOnSpell->Effect[2]==SPELL_EFFECT_SCRIPT_EFFECT)
 				healamt=ProcedOnSpell->EffectBasePoints[2]+1;
 			modEnergy = (motherspell->EffectBasePoints[0]+1)*(healamt)/100;
-		}
-	}
-	else if (m_spellInfo->Id==2687){
-		modEnergy = damage;
-		if( p_caster != NULL )
-		{
-			/*for(set<uint32>::iterator itr = p_caster->mSpells.begin(); itr != p_caster->mSpells.end(); ++itr)
-			{
-				if(*itr == 12818)
-					modEnergy += 60;
-				else if(*itr == 12301)
-					modEnergy += 30;
-			}*/
-			if(p_caster->mSpells.find(12818) != p_caster->mSpells.end())
-				modEnergy += 60;
-			if(p_caster->mSpells.find(12301) != p_caster->mSpells.end())
-				modEnergy += 30;
 		}
 	}
 	else  
