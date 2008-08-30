@@ -34,6 +34,7 @@ bool SERVER_DECL Rand(float);
 #define SPELL_GROUPS	64//This is actually on 64 bits !
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
+#define DIMINISHING_GROUPS 12
 
 class Aura;
 class Spell;
@@ -1121,10 +1122,10 @@ public:
 
 	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, Object *caster=NULL);
 	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, Aura* aur, Object *caster=NULL);
-
-	uint16 m_diminishCount[23];
-	uint8  m_diminishAuraCount[23];
-	uint16 m_diminishTimer[23];
+	
+	uint16 m_diminishCount[DIMINISHING_GROUPS];
+	uint8  m_diminishAuraCount[DIMINISHING_GROUPS];
+	uint16 m_diminishTimer[DIMINISHING_GROUPS];
 	bool   m_diminishActive;
 
 	void SetDiminishTimer(uint32 index)

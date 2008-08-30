@@ -4458,111 +4458,75 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 
 	switch(NameHash)
 	{
-	case SPELL_HASH_SAP:					// Sap
-	case SPELL_HASH_GOUGE:					// Gouge
+	case SPELL_HASH_CYCLONE:
+	case SPELL_HASH_BLIND:
 		grp = 0;
+		pve = true;
 		break;
-
-	case SPELL_HASH_CHEAP_SHOT:				// Cheap Shot
-		{
-			grp = 1;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_KIDNEY_SHOT:			// Kidney Shot
-		{
-			grp = 2;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_BASH:					// Bash
-		grp = 3;
+	case SPELL_HASH_MIND_CONTROL:
+		grp = 1;
 		break;
-
-	case SPELL_HASH_ENTANGLING_ROOTS:		// Entangling Roots
-		grp = 4;
+	case SPELL_HASH_FEAR:
+	case SPELL_HASH_PSYCHIC_SCREAM:
+	case SPELL_HASH_HOWL_OF_TERROR:
+	case SPELL_HASH_SEDUCTION:
+		grp = 2;
 		break;
-
-	case SPELL_HASH_HAMMER_OF_JUSTICE:		// Hammer of Justice
-		{
-			grp = 5;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_STUN:					// Stuns (all of them)
-		grp = 6;
-		break;
-
-	case SPELL_HASH_CHARGE:					// Charge
-	case SPELL_HASH_INTERCEPT :				// Intercept
-	case SPELL_HASH_CONCUSSION_BLOW:		// Concussion Blow
-		{
-			grp = 7;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_FEAR:					// Fear
-	case SPELL_HASH_SEDUCTION:				// Seduction
-	case SPELL_HASH_HOWL_OF_TERROR:			// Howl of Terror
-		grp = 8;
-		break;
-
-	case SPELL_HASH_FROST_NOVA:				// Frost Nova
-		grp = 9;
-		break;
-
+	case SPELL_HASH_SAP:
+	case SPELL_HASH_GOUGE:
 	case SPELL_HASH_POLYMORPH:				// Polymorph
 	case SPELL_HASH_POLYMORPH__CHICKEN:		// Chicken
 	case SPELL_HASH_POLYMORPH__PIG:			// Pig
 	case SPELL_HASH_POLYMORPH__TURTLE:		// Turtle
 	case SPELL_HASH_POLYMORPH__SHEEP:		// Good ol' sheep
-		{
-			grp = 10;
-			pve = true;   
-		}break;
-
-	case SPELL_HASH_PSYCHIC_SCREAM:			// Psychic Scream
-		grp = 11;
+		grp = 3;
 		break;
-
-	case SPELL_HASH_MIND_CONTROL:			// Mind Control
-		grp = 12;
+	case SPELL_HASH_DEATH_COIL:
+		grp = 4;
+		break;
+	case SPELL_HASH_KIDNEY_SHOT:
+		grp = 5;
+		pve = true;
+		break;
+	case SPELL_HASH_ENTRAPMENT:
+		grp = 6;
+		break;
+	case SPELL_HASH_ENTANGLING_ROOTS:
+	case SPELL_HASH_FROST_NOVA:
+		grp = 7;
+		break;
+	case SPELL_HASH_FROSTBITE:
+		grp = 8;
+		break;
+	case SPELL_HASH_HIBERNATE:
+	case SPELL_HASH_WYVERN_STING:
+	case SPELL_HASH_SLEEP:
+	case SPELL_HASH_FROST_TRAP_AURA:
+	case SPELL_HASH_FREEZING_TRAP_EFFECT:
+		grp = 9;
+		break;
+	case SPELL_HASH_BASH:
+	case SPELL_HASH_IMPACT:
+	case SPELL_HASH_HAMMER_OF_JUSTICE:
+	case SPELL_HASH_CHEAP_SHOT:
+	case SPELL_HASH_SHADOWFURY:
+	case SPELL_HASH_CHARGE_STUN:
+	case SPELL_HASH_INTERCEPT_STUN:
+	case SPELL_HASH_CONCUSSION_BLOW:
+		grp = 10;
+		pve = true;
+		break;
+	case SPELL_HASH_STARFIRE_STUN:
+	case SPELL_HASH_STONECLAW_STUN:
+	case SPELL_HASH_STUN:
+	case SPELL_HASH_BLACKOUT:
+	case SPELL_HASH_MACE_STUN_EFFECT:
+		grp = 11;
 		pve = true;
 		break;
 
-	//case SPELL_HASH_FROST_SHOCK:			// Frost Shock
-		//grp = 13;
-		//break;
 
-	case SPELL_HASH_HIBERNATE:				// Hibernate
-		grp = 14;
-		break;
-
-	case SPELL_HASH_CYCLONE:				// Cyclone
-		{
-			grp = 15;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_CELESTIAL_FOCUS:		// Celestial Focus
-		{
-			grp = 16;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_IMPACT:					// Impact
-		{
-			grp = 17;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_BLACKOUT:				// Blackout
-		{
-			grp = 18;
-			pve = true;
-		}break;
-
-	case SPELL_HASH_BANISH:					// Banish
+	/*case SPELL_HASH_BANISH:					// Banish
 		grp = 19;
 		break;
 
@@ -4582,13 +4546,7 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 		break;
 	case SPELL_HASH_RIPOSTE:
 		grp = 24;
-		break;
-	case SPELL_HASH_MIND_NUMBING_POISON:
-	case SPELL_HASH_MIND_NUMBING_POISON_II:
-	case SPELL_HASH_MIND_NUMBING_POISON_III:
-	case SPELL_HASH_CURSE_OF_TONGUES:
-		grp = 25;
-		break;
+		break;*/
 	}
 	uint32 ret;
 	if( pve )

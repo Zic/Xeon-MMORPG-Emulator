@@ -1852,6 +1852,15 @@ public:
 						printf("!!!!!spell duration mod flat %d , spell duration mod pct %d , spell duration %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,Dur,m_spellInfo->SpellGroupType);
 #endif
                 }
+				// Limit duration in PvP but not applying diminishing returns
+				if(unitTarget && unitTarget->IsPlayer() && this->Dur > 10000)
+				{
+					switch(m_spellInfo->NameHash)
+					{
+						case SPELL_HASH_CURSE_OF_TONGUES:
+							this->Dur = 10000;
+					}
+				}
             }
             else
             {
