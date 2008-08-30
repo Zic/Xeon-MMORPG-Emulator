@@ -41,7 +41,6 @@ public:
 	void UpdatePlayerCounts();
 	LocationVector GetStartingCoords(uint32 Team);
 	virtual const char * GetName() { return "Arena"; }
-	void AntiCheat();
 	void OnStart();
 	bool CanPlayerJoin(Player * plr)
 	{

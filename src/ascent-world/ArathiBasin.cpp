@@ -318,6 +318,7 @@ void ArathiBasin::OnCreate()
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_01,-0.0602880f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_02,0.3449600f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_03,0.9365900f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
@@ -327,6 +328,7 @@ void ArathiBasin::OnCreate()
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_01,0.0151270f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_02,0.9292169f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_03,-0.3657840f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 

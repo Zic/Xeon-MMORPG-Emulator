@@ -611,7 +611,7 @@ void Arena::SpawnShadowSight()
 	{
 		/* ruins of lordaeron */
 	case 572:
-		m_shadowsight[0] = SpawnGameObject(184663, 572, 1328.72, 1632.72f, 36.73f, 2.6f, 32, 1375, 1.0f);
+		m_shadowsight[0] = SpawnGameObject(184663, 572, 1328.72f, 1632.72f, 36.73f, 2.6f, 32, 1375, 1.0f);
 		m_shadowsight[0]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
 		m_shadowsight[0]->PushToWorld(m_mapMgr);
 
@@ -643,6 +643,7 @@ void Arena::SpawnShadowSight()
 		break;
 	}
 	m_shadowsightspawned = true;
+	SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "Shadow Sight powerups have been spawned!" );
 }
 
 void Player::FullHPMP()

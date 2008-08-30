@@ -444,14 +444,17 @@ void WarsongGulch::OnCreate()
 
 	// Alliance Gates
 	GameObject *gate = SpawnGameObject(179921, 489, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	gate = SpawnGameObject(179919, 489, 1492.477783f, 1457.912354f, 342.968933f, 0, 33, 114, 2.68149f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	gate = SpawnGameObject(179918, 489, 1503.335327f, 1493.465820f, 352.188843f, 0, 33, 114, 2.26f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
@@ -461,6 +464,7 @@ void WarsongGulch::OnCreate()
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_01,-0.004956f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_02,-0.283972f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_03,0.9586736f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
@@ -469,6 +473,7 @@ void WarsongGulch::OnCreate()
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_01,0.1575096f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_02,-0.8239487f);
 	gate->SetFloatValue(GAMEOBJECT_ROTATION_03,0.5073640f);
+	gate->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
