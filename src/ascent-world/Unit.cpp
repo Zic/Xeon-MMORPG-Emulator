@@ -52,7 +52,7 @@ Unit::Unit()
 	{
 		PctPowerRegenModifier[x] = 1;
 	}
-	m_speedModifier = 0;
+	m_speedModifier = 1.0f;
 	m_slowdown = 0;
 	m_mountedspeedModifier=0;
 	m_maxSpeed = 0;
@@ -1767,7 +1767,16 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 				//Spell *spell = new Spell(this,spellInfo,false,0,true,false);
 				if(spellId==974||spellId==32593||spellId==32594) // Earth Shield handler
 				{
-					spell->pSpellId=itr2->spellId;
+					spell->pSpellId = itr2->spellId;
+					Player * Caster = NULL;
+					if(GET_TYPE_FROM_GUID(itr2->caster) == HIGHGUID_TYPE_PLAYER)
+						Caster = GetMapMgr()->GetPlayer( GUID_LOPART(itr2->caster) );
+					if(Caster)
+					{
+						spell->p_caster = Caster;
+						spell->u_caster = static_cast< Unit* >( Caster );
+					}
+					spell->SetUnitTarget( this );
 					spell->SpellEffectDummy(0);
 					delete spell;
 					continue;
@@ -3523,7 +3532,7 @@ void Unit::AddAura(Aura *aur)
 		SM_FIValue(SM_FSpeedMod,&speedmod,aur->GetSpellProto()->SpellGroupType);
 		if(speedmod)
 		{
-			m_speedModifier += speedmod;
+			m_speedModifier *= (speedmod / 100.0f + 1);
 			UpdateSpeed();
 		}
 	}
@@ -4622,23 +4631,13 @@ void Unit::UpdateSpeed()
 {
 	if(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID) == 0)
 	{
-		if(IsPlayer())
-			m_runSpeed = m_base_runSpeed*(1.0f + ((float)m_speedModifier)/100.0f);
-		else
-			m_runSpeed = m_base_runSpeed*(1.0f + ((float)m_speedModifier)/100.0f);
+		m_runSpeed = m_base_runSpeed * m_speedModifier;
 	}
 	else
 	{
-		if(IsPlayer())
-		{
-			m_runSpeed = m_base_runSpeed*(1.0f + ((float)m_mountedspeedModifier)/100.0f);
-			m_runSpeed += (m_speedModifier<0) ? (m_base_runSpeed*((float)m_speedModifier)/100.0f) : 0;
-		}
-		else
-		{
-			m_runSpeed = m_base_runSpeed*(1.0f + ((float)m_mountedspeedModifier)/100.0f);
-			m_runSpeed += (m_speedModifier<0) ? (m_base_runSpeed*((float)m_speedModifier)/100.0f) : 0;
-		}
+		m_runSpeed = m_base_runSpeed*(1.0f + ((float)m_mountedspeedModifier)/100.0f);
+		if(m_speedModifier < 1.0f)
+			m_runSpeed *= m_speedModifier;
 	}
 
 	
@@ -5404,20 +5403,22 @@ int32 Unit::GetRAP()
 
 bool Unit::GetSpeedDecrease()
 {
-	int32 before=m_speedModifier;
-	m_speedModifier -= m_slowdown;
+	int32 before = m_slowdown;
 	m_slowdown = 0;
 	map< uint32, int32 >::iterator itr = speedReductionMap.begin();
 	for(; itr != speedReductionMap.end(); ++itr)
 		m_slowdown = (int32)min( m_slowdown, itr->second );
 
-	if(m_slowdown<-100)
-		m_slowdown = 100; //do not walk backwards !
+	if(m_slowdown<=-100)
+		m_slowdown = -99; //do not walk backwards and prevent division by zero
 
-	m_speedModifier += m_slowdown;
 	//save bandwidth :P
-	if(m_speedModifier!=before)
+	if(m_slowdown != before)
+	{
+		m_speedModifier /= before / 100.0f + 1;
+		m_speedModifier *= m_slowdown / 100.0f + 1;
 		return true;
+	}
 	return false;
 }
 

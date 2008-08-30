@@ -480,7 +480,7 @@ void Aura::Remove()
 		SM_FIValue( m_target->SM_FSpeedMod, &speedmod, m_spellProto->SpellGroupType );
 		if( speedmod )
 		{
-			m_target->m_speedModifier -= speedmod;
+			m_target->m_speedModifier /= (speedmod / 100.0f + 1);
 			m_target->UpdateSpeed();
 		}
 	}
@@ -3296,10 +3296,15 @@ void Aura::SpellAuraModSkill(bool apply)
 
 void Aura::SpellAuraModIncreaseSpeed(bool apply)
 {
+	float newvalue = m_target->m_speedModifier;
 	if(apply)
-		m_target->m_speedModifier += mod->m_amount;
+	{
+		SetPositive();
+		newvalue *= mod->m_amount / 100.0f + 1;
+	}
 	else
-		m_target->m_speedModifier -= mod->m_amount;
+		newvalue /= mod->m_amount / 100.0f + 1;
+	m_target->m_speedModifier = newvalue;
 
 	m_target->UpdateSpeed();
 }
@@ -6260,13 +6265,15 @@ void Aura::SpellAuraModPossessPet(bool apply)
 
 void Aura::SpellAuraModIncreaseSpeedAlways(bool apply)
 {
+	float newvalue = m_target->m_speedModifier;
 	if(apply)
-	{  
+	{
 		SetPositive();
-		m_target->m_speedModifier += mod->m_amount;
+		newvalue *= mod->m_amount / 100.0f + 1;
 	}
 	else
-		m_target->m_speedModifier -= mod->m_amount;
+		newvalue /= mod->m_amount / 100.0f + 1;
+	m_target->m_speedModifier = newvalue;
 
 	m_target->UpdateSpeed();
 }
@@ -6852,14 +6859,12 @@ void Aura::SpellAuraIncreasePartySpeed(bool apply)
 {
 	if(m_target->GetTypeId() == TYPEID_PLAYER && m_target->isAlive() && m_target->GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID) == 0)
 	{
+		float newvalue = m_target->m_speedModifier;
 		if(apply)
-		{
-			m_target->m_speedModifier += mod->m_amount;
-		}
+			newvalue *= mod->m_amount / 100.0f + 1;
 		else
-		{
-			m_target->m_speedModifier -= mod->m_amount;
-		}
+			newvalue /= mod->m_amount / 100.0f + 1;
+		m_target->m_speedModifier = newvalue;
 		m_target->UpdateSpeed();
 	}
 }

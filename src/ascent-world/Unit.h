@@ -1031,7 +1031,7 @@ public:
 	uint64 m_detectRangeGUID[5];
 	int32  m_detectRangeMOD[5];
 	// Affect Speed
-	int32 m_speedModifier;
+	float m_speedModifier;
 	int32 m_slowdown;
 	float m_maxSpeed;
 	map< uint32, int32 > speedReductionMap;

@@ -668,7 +668,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(pSpellId);
 			if(!spellInfo) return;
 			uint32 heal32 = CalculateEffect(i,u_caster);
-			unitTarget=u_caster; // Should heal caster :p
 			if(heal32)
 				Heal(heal32);
 		}break;
