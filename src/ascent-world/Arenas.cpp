@@ -32,6 +32,7 @@
 Arena::Arena(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side) : CBattleground(mgr, id, lgroup, t)
 {
 	m_started = false;
+	m_shadowsightspawned = false;
 	m_playerCountPerTeam = players_per_side;
 	switch(t)
 	{
@@ -170,12 +171,14 @@ void Arena::OnCreate()
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.746058f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.665881f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
 		obj = SpawnGameObject(185918, 572, 1293.560791f, 1601.937988f, 31.605574f, -1.457349f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, -0.665881f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.746058f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
 			  }break;
@@ -186,24 +189,28 @@ void Arena::OnCreate()
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.90445f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, -0.426569f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		obj->PushToWorld(m_mapMgr);
 
 		obj = SpawnGameObject(183973, 562, 6189.546387f, 241.709854f, 3.101481f, 0.881392f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.426569f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.904455f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
 		obj = SpawnGameObject(183970, 562, 6299.115723f, 296.549438f, 3.308032f, 0.881392f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.426569f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.904455f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		obj->PushToWorld(m_mapMgr);
 
 		obj = SpawnGameObject(183971, 562, 6287.276855f, 282.187714f, 3.810925f, -2.260201f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.904455f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, -0.426569f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 			  }break;
 
@@ -213,24 +220,28 @@ void Arena::OnCreate()
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.243916f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.969796f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		obj->PushToWorld(m_mapMgr);
 
 		obj = SpawnGameObject(183980, 559, 4081.178955f, 2874.970459f, 12.391714f, 0.492805f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.243916f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, 0.969796f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
 		obj = SpawnGameObject(183977, 559, 4023.709473f, 2981.776611f, 10.701169f, -2.648788f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.969796f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, -0.243916f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		obj->PushToWorld(m_mapMgr);
 
 		obj = SpawnGameObject(183978, 559, 4031.854248f, 2966.833496f, 12.646200f, -2.648788f, 32, 1375, 1.0f);
 		obj->SetUInt32Value(GAMEOBJECT_STATE, 1);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_02, 0.969796f);
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, -0.243916f);
+		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
 			  }break;
@@ -288,6 +299,12 @@ void Arena::OnStart()
 
 	/* Incase all players left */
 	UpdatePlayerCounts();
+
+	/* Play Sound */
+	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
+
+	sEventMgr.RemoveEvents(this, EVENT_SHADOW_SIGHT);
+	sEventMgr.AddEvent(this, &Arena::SpawnShadowSight, EVENT_SHADOW_SIGHT, 90000, 1,0);
 }
 
 void Arena::UpdatePlayerCounts()
@@ -542,6 +559,90 @@ bool Arena::HookHandleRepop(Player * plr)
 
 void Arena::HookOnAreaTrigger(Player * plr, uint32 id)
 {
+	uint32 spellid=0;
+	int8 buffslot = -1;
+
+	if(!m_started || !m_shadowsightspawned)
+		return;
+
+	switch(id) 
+	{
+		case 4536: //Nagrand
+		case 4538: //Blades Edge
+		case 4696: //Lordaeron
+			buffslot = 0;
+			break;
+
+		case 4537: //Nagrand
+		case 4539: //Blades Edge
+		case 4697: //Lordaeron
+			buffslot = 1;
+			break;
+
+		default:
+			{
+				Log.Error("Arena", "Encountered unhandled areatrigger id %u", id);
+				return;
+			}break;
+	}
+
+	if(m_shadowsight[buffslot] != NULL && m_shadowsight[buffslot]->IsInWorld())
+	{
+		/* apply the spell */
+		spellid = m_shadowsight[buffslot]->GetInfo()->sound3;
+
+		/*Despawn and Respawn in 90000ms */
+		m_shadowsight[buffslot]->Despawn(90000);
+			
+		/* cast the spell on the player */
+		SpellEntry * sp = dbcSpell.LookupEntryForced(spellid);
+		if(sp)
+		{
+			Spell * pSpell = new Spell(plr, sp, true, NULL);
+			SpellCastTargets targets(plr->GetGUID());
+			pSpell->prepare(&targets);
+		}
+	}
+}
+
+void Arena::SpawnShadowSight()
+{
+	switch(m_mapMgr->GetMapId())
+	{
+		/* ruins of lordaeron */
+	case 572:
+		m_shadowsight[0] = SpawnGameObject(184663, 572, 1328.72, 1632.72f, 36.73f, 2.6f, 32, 1375, 1.0f);
+		m_shadowsight[0]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[0]->PushToWorld(m_mapMgr);
+
+		m_shadowsight[1] = SpawnGameObject(184664, 572, 1243.306759f, 1699.334354f, 34.87f, 5.7f, 32, 1375, 1.0f);
+		m_shadowsight[1]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[1]->PushToWorld(m_mapMgr);
+		break;
+
+		/* blades edge arena */
+	case 562:
+		m_shadowsight[0] = SpawnGameObject(184663, 562, 6248.73f, 274.70f, 11.22f, -2.2f, 32, 1375, 1.0f);
+		m_shadowsight[0]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[0]->PushToWorld(m_mapMgr);
+
+		m_shadowsight[1] = SpawnGameObject(184664, 562, 6228.21f, 249.56f, 11.22f, 0.8f, 32, 1375, 1.0f);
+		m_shadowsight[1]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[1]->PushToWorld(m_mapMgr);
+		break;
+
+		/* nagrand arena */
+	case 559:
+		m_shadowsight[0] = SpawnGameObject(184663, 559, 4009.19f, 2895.25f, 13.05f, 0.4f, 32, 1375, 1.0f);
+		m_shadowsight[0]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[0]->PushToWorld(m_mapMgr);
+
+		m_shadowsight[1] = SpawnGameObject(184664, 559, 4103.33f, 2946.35f, 13.05f, 3.6f, 32, 1375, 1.0f);
+		m_shadowsight[1]->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
+		m_shadowsight[1]->PushToWorld(m_mapMgr);
+		break;
+	}
+	m_shadowsightspawned = true;
 }
 
 void Player::FullHPMP()

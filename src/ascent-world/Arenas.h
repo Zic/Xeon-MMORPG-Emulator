@@ -25,6 +25,7 @@ class Arena : public CBattleground
 	set<ArenaTeam*> doneteams;
 	bool m_started;
 	uint32 m_arenateamtype;
+	GameObject * m_shadowsight[2];
 public:
 	bool rated_match;
 	Arena(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side);
@@ -40,6 +41,7 @@ public:
 	void UpdatePlayerCounts();
 	LocationVector GetStartingCoords(uint32 Team);
 	virtual const char * GetName() { return "Arena"; }
+	void AntiCheat();
 	void OnStart();
 	bool CanPlayerJoin(Player * plr)
 	{
@@ -50,6 +52,9 @@ public:
 	}
 
 	bool CreateCorpse(Player * plr) { return false; }
+	
+	void SpawnShadowSight();
+	bool m_shadowsightspawned;
 
 	/* dummy stuff */
 	void HookOnMount(Player * plr) {}
