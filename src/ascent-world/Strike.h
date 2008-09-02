@@ -17,9 +17,13 @@
  *
  */
 
-class Striker
+#ifndef __STRIKE_H
+#define __STRIKE_H
+
+class Striker : public ObjectPool< Striker >
 {
 public:
+	Striker(){}
 	Striker(Unit* pAttacker, Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
 	void Deal();
 	uint32 GetSpellDidHitResult();
@@ -49,3 +53,5 @@ private:
 
 	bool backAttack;
 };
+
+#endif

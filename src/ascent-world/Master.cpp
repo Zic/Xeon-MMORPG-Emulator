@@ -380,7 +380,7 @@ bool Master::Run(int argc, char ** argv)
 	new VoiceChatHandler();
 	sVoiceChatHandler.Startup();
 #endif
-
+	Striker::init();
 	// Create listener
 	ListenSocket<WorldSocket> * ls = new ListenSocket<WorldSocket>(host.c_str(), wsport);
     bool listnersockcreate = ls->IsOpen();
@@ -563,6 +563,8 @@ bool Master::Run(int argc, char ** argv)
 	delete GMCommand_Log;
 	delete Anticheat_Log;
 	delete Player_Log;
+
+	Striker::destroy();
 
 	// remove pid
 	remove( "ascent.pid" );

@@ -544,6 +544,9 @@
 		<File
 			RelativePath="..\..\src\ascent-world\ObjectMgr.h">
 		</File>
+ 		<File
+			RelativePath="..\..\src\ascent-world\ObjectPool.h">
+		</File>
 		<File
 			RelativePath="..\..\src\ascent-world\ObjectStorage.cpp">
 		</File>

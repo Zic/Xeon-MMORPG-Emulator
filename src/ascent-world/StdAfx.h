@@ -140,6 +140,8 @@
 #include "ItemInterface.h"
 #include "Stats.h"
 #include "WorldCreator.h"
+#include "ObjectPool.h"
+#include "Strike.h"
 
 
 #include "ObjectMgr.h"
