@@ -26,6 +26,11 @@ bool ChatHandler::HandleSetBGScoreCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleStartBGCommand(const char *args, WorldSession *m_session)
 {
+	if(m_session->GetPlayer()->m_bg && sEventMgr.HasEvent(m_session->GetPlayer()->m_bg, EVENT_BATTLEGROUND_COUNTDOWN))
+	{
+		sEventMgr.RemoveEvents(m_session->GetPlayer()->m_bg, EVENT_BATTLEGROUND_COUNTDOWN);
+		m_session->GetPlayer()->m_bg->Start();
+	}
 	return true;
 }
 

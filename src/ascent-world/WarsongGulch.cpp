@@ -266,6 +266,10 @@ void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
 	SpellCastTargets targets(plr->GetGUID());
 	sp->prepare(&targets);
 	SetWorldState(plr->GetTeam() ? WSG_ALLIANCE_FLAG_CAPTURED : WSG_HORDE_FLAG_CAPTURED, 2);
+	if( plr->GetTeam() == 1 )
+		SendChatMessage( CHAT_MSG_BG_EVENT_HORDE, plr->GetGUID(), "The Alliance flag was picked up by %s!", plr->GetName() );
+	else
+		SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE, plr->GetGUID(), "The Horde flag was picked up by %s!", plr->GetName() );
 }
 
 void WarsongGulch::ReturnFlag(uint32 team)

@@ -1074,7 +1074,7 @@ void CBattlegroundManager::SendBattlefieldStatus(Player * plr, uint32 Status, ui
 			data << Type;
 			data << uint16(0x1F90);
 			data << InstanceID;
-			data << uint8(plr->m_bgTeam);
+			data << uint8(0);
 		}
 		
 		data << Status;
@@ -1205,14 +1205,12 @@ void CBattleground::EventCountdown()
 	{
 		m_countdownStage = 3;
 		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "Thirty seconds until the battle for %s begins!", GetName() );
+		sEventMgr.ModifyEventTime(this, EVENT_BATTLEGROUND_COUNTDOWN, 15000);
 	}
 	else if(m_countdownStage == 3)
-	if(m_countdownStage==1)
 	{
 		m_countdownStage = 4;
 		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "Fifteen seconds until the battle for %s begins!", GetName() );
-		sEventMgr.ModifyEventTime(this, EVENT_BATTLEGROUND_COUNTDOWN, 15000);
-		sEventMgr.ModifyEventTimeLeft(this, EVENT_BATTLEGROUND_COUNTDOWN, 15000);
 	}
 	else
 	{
