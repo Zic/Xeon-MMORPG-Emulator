@@ -57,8 +57,8 @@ public:
 
 	static void destroy()
 	{
-		std::vector<T* >::iterator first = T::get_list().begin();
-		std::vector<T* >::iterator last = T::get_list().end();
+		typename vector<T* >::iterator first = T::get_list().begin();
+		typename vector<T* >::iterator last = T::get_list().end();
 		while (first != last)
 		{
 			T* p = *first; ++first;

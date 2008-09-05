@@ -678,10 +678,10 @@ public:
 
 	bool HasMechanic(uint32 MechanicsType)
 	{
-		return m_spellProto->MechanicsType == MechanicsType ||
-			m_spellProto->EffectMechanic[0] == MechanicsType ||
-			m_spellProto->EffectMechanic[1] == MechanicsType ||
-			m_spellProto->EffectMechanic[2] == MechanicsType;
+		return (uint32)m_spellProto->MechanicsType == MechanicsType ||
+			(uint32)m_spellProto->EffectMechanic[0] == MechanicsType ||
+			(uint32)m_spellProto->EffectMechanic[1] == MechanicsType ||
+			(uint32)m_spellProto->EffectMechanic[2] == MechanicsType;
 	}
 	uint32 GetMechanic()
 	{

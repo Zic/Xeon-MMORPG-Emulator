@@ -154,6 +154,8 @@ ascent_world_SOURCES = \
     Stats.cpp \
     StdAfx.cpp \
     StdAfx.h \
+    Strike.cpp \
+    Strike.h \
     TaxiHandler.cpp \
     TaxiMgr.cpp \
     TaxiMgr.h \
