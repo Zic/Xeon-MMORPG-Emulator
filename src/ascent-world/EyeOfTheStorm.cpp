@@ -525,7 +525,7 @@ void EyeOfTheStorm::UpdateCPs()
 	set<Player*>::iterator itr, itrend;
 	Player * plr;
 	GameObject * go;
-	int32 delta;
+	int32 delta = 0;
 	uint32 playercounts[2];
 	uint32 towers[2] = {0,0};
 	EOTSCaptureDisplayList::iterator eitr, eitr2, eitrend;
@@ -732,6 +732,9 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				
 				if ( (*itr)==NULL )
 					continue;
+				
+				/* Add Bonus Honor to all players */
+				HonorHandler::AddHonorPointsToPlayer((*itr), ((m_points[i] / 12) + (*itr)->m_bgScore.BonusHonor));
 
 				if(i == m_winningteam)
 				{
