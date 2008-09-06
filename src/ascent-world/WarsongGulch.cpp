@@ -114,6 +114,26 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 
 	if(((id == 3646 && plr->GetTeam() == 0) || (id == 3647 && plr->GetTeam() == 1)) && (plr->m_bgHasFlag && m_flagHolders[plr->GetTeam()] == plr->GetLowGUID()))
 	{
+		if (plr->GetTeam() == 0)
+		{
+			if (plr->CalcDistance(1540.29f, 1481.34f, 352.64f) > 50.0f)
+			{
+				//50 yards from the spawn, gtfo hacker.
+				sCheatLog.writefromsession(plr->GetSession(),"Tried to capture the flag in WSG while being more then 50 yards away. (%f yards)",plr->CalcDistance(1540.29f, 1481.34f, 352.64f));
+				plr->GetSession()->Disconnect();
+				return;
+			}
+		}
+		else
+		{
+			if (plr->CalcDistance(915.367f, 1433.78f, 346.089f) > 50.0f)
+			{
+				//50 yards from the spawn, gtfo hacker.
+				sCheatLog.writefromsession(plr->GetSession(),"Tried to capture the flag in WSG while being more then 50 yards away. (%f yards)",plr->CalcDistance(915.367f, 1433.78f, 346.089f));
+				plr->GetSession()->Disconnect();
+				return;
+			}
+		}
 		if(m_flagHolders[plr->GetTeam() ? 0 : 1] != 0 || m_dropFlags[plr->GetTeam() ? 0 : 1]->IsInWorld())
 		{
 			/* can't cap while flag dropped */
