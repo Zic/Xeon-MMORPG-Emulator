@@ -2513,7 +2513,7 @@ bool ObjectMgr::HandleInstanceReputationModifiers(Player * pPlayer, Unit * pVict
 		else
 		{
 			value = i->mob_rep_reward;
-			replimit = i->mob_rep_reward;
+			replimit = i->mob_rep_limit;
 		}
 
 		if(!value || (replimit && pPlayer->GetStanding(i->faction[team]) >= replimit))
