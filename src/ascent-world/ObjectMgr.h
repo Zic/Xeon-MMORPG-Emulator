@@ -124,8 +124,10 @@ struct InstanceReputationMod
 {
 	uint32 mapid;
 	uint32 mob_rep_reward;
+	uint32 mob_rep_reward_heroic;
 	uint32 mob_rep_limit;
 	uint32 boss_rep_reward;
+	uint32 boss_rep_reward_heroic;
 	uint32 boss_rep_limit;
 	uint32 faction[2];
 };

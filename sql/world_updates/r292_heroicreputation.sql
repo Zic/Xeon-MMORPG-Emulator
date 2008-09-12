@@ -1,0 +1,2 @@
+ALTER TABLE `reputation_instance_onkill` ADD COLUMN `mob_rep_reward_heroic` int(30) NOT NULL AFTER `mob_rep_reward`;
+ALTER TABLE `reputation_instance_onkill` ADD COLUMN `boss_rep_reward_heroic` int(30) NOT NULL AFTER `boss_rep_reward`;
