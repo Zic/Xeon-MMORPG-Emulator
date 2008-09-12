@@ -915,7 +915,7 @@ void Player::Update( uint32 p_time )
 	if( mstime >= m_speedhackCheckTimer )
 	{
 		_SpeedhackCheck( mstime );
-		m_speedhackCheckTimer = mstime + 1000;
+		m_speedhackCheckTimer = mstime + 2000;
 	}
 }
 
@@ -10150,9 +10150,6 @@ void Player::_SpeedhackCheck(uint32 mstime)
 		{
 			if( _lastHeartbeatV == speed )
 			{
-				// latency compensation a little
-				speed += 0.25f;
-
 				float distance = m_position.Distance2D( _lastHeartbeatPosition );
 				uint32 time_diff = mstime - _lastHeartbeatT;
 				uint32 move_time = float2int32( ( distance / ( speed * 0.001f ) ) );
