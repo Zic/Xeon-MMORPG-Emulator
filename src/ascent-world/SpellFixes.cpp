@@ -15553,6 +15553,13 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_MELEE_ATTACK;
 	}
 
+	// Fathom-Brooch of the Tidewalker
+	sp = dbcSpell.LookupEntryForced( 37247 ); 
+	if( sp != NULL ){
+		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->proc_interval = 45000;
+	}
+
 	// Shaman Arena totems fix
 	// Totem of Survival
 	sp = dbcSpell.LookupEntryForced( 46097 ); 

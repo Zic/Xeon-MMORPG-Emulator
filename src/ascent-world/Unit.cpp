@@ -1551,6 +1551,14 @@ void Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) )
 									continue;
 							}break;
+						// Fathom-Brooch of the Tidewalker proc
+						case 37243:
+							{
+								if( !CastingSpell )
+									continue;
+								if( CastingSpell->School != SCHOOL_NATURE )
+									continue;
+							}break;
 						//shaman - Lightning Overload
 						case 39805:
 							{
