@@ -12672,11 +12672,6 @@ void Apply112SpellFixes()
 	if(sp != NULL)
 		sp->procChance = 10;
 
-	// Spell 27521 Proc Chance (Mana Restore )
-	sp = dbcSpell.LookupEntryForced(27521);
-	if(sp != NULL)
-		sp->procChance = 2;
-
 	// Spell 27789 Group Relation (Holy Reach Rank 1)
 	sp = dbcSpell.LookupEntryForced(27789);
 	if(sp != NULL) {
@@ -13934,7 +13929,7 @@ void ApplyNormalFixes()
 
 		// Setting mechanics for effects where it wasn't set in DBC
 		// Not sure whether we need it any more
-		for(uint32 i = 0; i < 3; ++i)
+		/*for(uint32 i = 0; i < 3; ++i)
 		{
 			if(!sp->EffectMechanic[i])
 			{
@@ -13951,7 +13946,7 @@ void ApplyNormalFixes()
 				if(sp->Effect[i] == SPELL_EFFECT_INTERRUPT_CAST)
 					sp->EffectMechanic[i] = MECHANIC_INTERRUPTED;
 			}
-		}		
+		}*/
 
 		if( sp->proc_interval != 0 )
 			sp->procFlags |= PROC_REMOVEONUSE;
@@ -14696,6 +14691,13 @@ void ApplyNormalFixes()
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
+	}
+
+	// Lesser Heroism (Tenacious Earthstorm Diamond)
+	sp = dbcSpell.LookupEntryForced( 32844 );
+	if( sp != NULL ){
+		sp->procChance = 5;
+		sp->procFlags  = PROC_ON_MELEE_ATTACK;
 	}
 
 	// Dragonspine Trophy
@@ -15558,6 +15560,19 @@ void ApplyNormalFixes()
 	if( sp != NULL ){
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->proc_interval = 45000;
+	}
+
+	// Lightning Capacitor
+	sp = dbcSpell.LookupEntryForced( 37657 ); 
+	if( sp != NULL ){
+		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+		sp->proc_interval = 2500;
+		sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		sp->EffectTriggerSpell[0] = 37658;
+		sp->EffectBasePoints[0] = 99;
+		sp->EffectDieSides[0] = 1;
+		sp->EffectBaseDice[0] = 1;
 	}
 
 	// Shaman Arena totems fix

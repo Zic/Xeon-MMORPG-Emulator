@@ -4131,15 +4131,7 @@ void Spell::Heal(int32 amount)
 		// Healing Way fix
 		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)
 		{
-			uint32 healing_way_count=0;
-			for(uint32 x = 0; x < MAX_POSITIVE_AURAS; ++x)
-			{
-				if(unitTarget->m_auras[x] && unitTarget->m_auras[x]->GetSpellProto()->Id == 29203)
-				{
-					healing_way_count++;
-				}
-			}
-			amount += amount * 6 * healing_way_count / 100;
+			amount += amount * 6 * unitTarget->GetAuraCount(29203) / 100;
 		}
 
 		if (m_spellInfo->SpellGroupType)

@@ -1744,6 +1744,20 @@ void Aura::SpellAuraDummy(bool apply)
 			}
 		}break;
 
+	case 37658:
+		{
+			Unit * Caster = GetUnitCaster();
+			if(!apply || !Caster)
+				return;
+			if(Caster->GetAuraCount(37658) >= 2) // Reached 3 charges
+			{
+				//Caster->CastSpell(Target,37661,true); // Need to figure how to get the correct target
+				Caster->RemoveAllAuras(37658, 0);
+				sEventMgr.AddEvent(this, &Aura::Remove, EVENT_AURA_REMOVE, 100, 1,
+			EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_DELETES_OBJECT);
+			}	
+		}break;
+
 	case 23701://Darkmoon Card: Twisting Nether give 10% chance to self resurrect ->cast 23700
 		{
 			//if(!apply)
@@ -2444,7 +2458,7 @@ void Aura::SpellAuraModStun(bool apply)
 		}
 
 		//warrior talent - second wind triggers on stun and immobilize. This is not used as proc to be triggered always !
-		if(p_target)
+		if(p_target && HasMechanic(MECHANIC_STUNNED))
 			p_target->EventStunOrImmobilize(NULL);
 	}
 	else
@@ -3134,6 +3148,9 @@ void Aura::SpellAuraModRoot(bool apply)
 		if(m_target->m_rooted == 1)
 			m_target->Root();
 
+		//warrior talent - second wind triggers on stun and immobilize
+		if(p_target && HasMechanic(MECHANIC_ROOTED))
+			p_target->EventStunOrImmobilize(NULL);
 		/* -Supalosa- TODO: Mobs will attack nearest enemy in range on aggro list when rooted. */
 	}
 	else

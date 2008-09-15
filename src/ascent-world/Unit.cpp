@@ -2742,6 +2742,19 @@ Aura* Unit::FindAura(uint32 spellId, uint64 guid)
 	return NULL;
 }
 
+uint32 Unit::GetAuraCount(uint32 spellId)
+{
+	uint32 count = 0;
+	for(uint32 x = 0; x < MAX_AURAS; ++x)
+	{
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->Id == spellId)
+		{
+			++count;
+		}
+	}
+	return count;
+}
+
 void Unit::_UpdateSpells( uint32 time )
 {
 	/* to avoid deleting the current spell */
