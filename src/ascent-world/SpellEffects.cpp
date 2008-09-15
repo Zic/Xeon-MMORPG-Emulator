@@ -472,8 +472,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 30427: // Extract Gas
 		{
 			bool check = false;
-			uint32 cloudtype;
-			Creature *creature;
+			uint32 cloudtype = 0;
+			Creature *creature = NULL;
 
 			if(!p_caster)
 				return;
@@ -498,7 +498,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			
 			if(check)
 			{
-				uint32 item,count = 3+(rand()%3);
+				uint32 item = 0;
+				uint32 count = 3+(rand()%3);
 			
 				if (cloudtype==24222) item=22572;//-air
 				if (cloudtype==17408) item=22576;//-mana
@@ -2243,7 +2244,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 		//	g_caster->GetPositionZ(), dur, r);  //This was the old hacky way xD bai bai hax with love from pepsi1x1
 		dynObj->CreateFromGO(g_caster, this, g_caster->GetPositionX(), g_caster->GetPositionY(), 
 		g_caster->GetPositionZ(), dur, r);
-		//sLog.outColor(TRED, "GO CASTER DYNOBJ");
+		//sLog.outColor(TRED, "GO CASTER DYNOBJ\n");
 		m_AreaAura = true;
 		return;
 	}
@@ -2256,7 +2257,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 		{
 			dynObj->Create(u_caster, this,	m_caster->GetPositionX(), 
 				m_caster->GetPositionY(), m_caster->GetPositionZ(), dur,r);
-			//sLog.outColor(TRED, "TARGET_FLAG_SELF");
+			//sLog.outColor(TRED, "TARGET_FLAG_SELF\n");
 		}break;
 	case TARGET_FLAG_UNIT:
 		{
@@ -2264,7 +2265,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 				break;
 			dynObj->Create( u_caster, this, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
-			//sLog.outColor(TRED, "TARGET_FLAG_UNIT");
+			//sLog.outColor(TRED, "TARGET_FLAG_UNIT\n");
 		}break;
 	case TARGET_FLAG_OBJECT:
 		{
@@ -2274,21 +2275,21 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 				break;
 			dynObj->Create(u_caster, this, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
-			//sLog.outColor(TRED, "TARGET_FLAG_OBJECT");
+			//sLog.outColor(TRED, "TARGET_FLAG_OBJECT\n");
 		}break;
 	case TARGET_FLAG_SOURCE_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
 			dynObj->Create(u_caster, this, m_targets.m_srcX,
 				m_targets.m_srcY, m_targets.m_srcZ, dur,r);
-			//sLog.outColor(TRED, "TARGET_FLAG_SOURCE_LOCATION");
+			//sLog.outColor(TRED, "TARGET_FLAG_SOURCE_LOCATION\n");
 		}break;
 	case TARGET_FLAG_DEST_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
 			dynObj->Create(u_caster?u_caster:g_caster->m_summoner, this,
 				m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ,dur,r);
-			//sLog.outColor(TRED, "TARGET_FLAG_DEST_LOCATION");
+			//sLog.outColor(TRED, "TARGET_FLAG_DEST_LOCATION\n");
 		}break;
 	default:
 		return;
@@ -2305,11 +2306,13 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 
 void Spell::SpellEffectSummon(uint32 i) // Summon
 {
-	if(!p_caster || !p_caster->IsInWorld())
-		return;
-
 	switch(m_spellInfo->EffectMiscValueB[i])
 	{
+		case 61:
+			{
+				SpellEffectSummonGuardian(i);
+				return;
+			}
 		case 63:
 		case 81:
 		case 82:
@@ -2324,6 +2327,9 @@ void Spell::SpellEffectSummon(uint32 i) // Summon
 				return;
 			}
 	}
+
+	if(!p_caster || !p_caster->IsInWorld())
+		return;
 
 	if(p_caster->m_tempSummon)
 	{
@@ -2486,7 +2492,7 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 
 	uint32 curEnergy = (uint32)unitTarget->GetUInt32Value(POWER_TYPE);
 	uint32 maxEnergy = (uint32)unitTarget->GetUInt32Value(POWER_TYPE+6);
-	uint32 modEnergy;
+	uint32 modEnergy = 0;
 	//yess there is always someone special : shamanistic rage - talent
 	if(m_spellInfo->Id==30824)
 		modEnergy = damage*GetUnitTarget()->GetAP()/100;
