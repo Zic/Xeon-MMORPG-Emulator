@@ -2452,9 +2452,9 @@ void ObjectMgr::LoadInstanceReputationModifiers()
 {
 	QueryResult * result = WorldDatabase.Query("SELECT * FROM reputation_instance_onkill");
 	if(!result) return;
-	if(result->GetFieldCount() < 7)
+	if(result->GetFieldCount() < 9)
 	{
-		Log.Notice("ObjectMgr", "Invalid format in reputation_instance_onkill (7/%u) columns, not enough data to proceed.\n", result->GetFieldCount() );
+		Log.Notice("ObjectMgr", "Invalid format in reputation_instance_onkill (9/%u) columns, not enough data to proceed.\n", result->GetFieldCount() );
 		delete result;
 		return;
 	}
