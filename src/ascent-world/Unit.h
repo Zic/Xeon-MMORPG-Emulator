@@ -731,6 +731,7 @@ public:
 	bool isCasting();
 	bool IsInInstance();
     void CalculateResistanceReduction(Unit *pVictim,dealdamage *dmg,SpellEntry* ability) ;
+	double GetResistanceReducion(Unit *pVictim, uint32 type);
 	void RegenerateHealth();
 	void RegeneratePower(bool isinterrupted);
 	ASCENT_INLINE void setHRegenTimer(uint32 time) {m_H_regenTimer = time; }
