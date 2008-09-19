@@ -4659,6 +4659,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 		if( apply )
 		{
 			pTarget->EventAttackStop();
+			pTarget->m_onAutoShot = false;
 			pTarget->SetFlag( UNIT_FIELD_FLAGS_2, 1 );
 			pTarget->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_FEIGN_DEATH );
 			//pTarget->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DEAD );

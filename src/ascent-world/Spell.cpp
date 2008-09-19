@@ -1075,6 +1075,11 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		}
 	}
 
+	if( p_caster && p_caster->HasFlag(UNIT_FIELD_FLAGS_2, 1) )
+	{
+		p_caster->RemoveAuraByNameHash(SPELL_HASH_FEIGN_DEATH);
+	}
+
 	//instant cast(or triggered) and not channeling
 	if( u_caster != NULL && ( m_castTime > 0 || m_spellInfo->ChannelInterruptFlags ) && !m_triggeredSpell )	
 	{

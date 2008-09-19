@@ -150,14 +150,6 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 
 	if(objB->GetTypeId() == TYPEID_CORPSE)
 		return false;
-	
-	// Players in feign death flags can't be attacked
-	if(objA->IsPlayer())
-		if(objA->HasFlag(UNIT_FIELD_FLAGS_2, 0x00000001))
-			return false;
-	if(objB->IsPlayer())
-		if(objB->HasFlag(UNIT_FIELD_FLAGS_2, 0x00000001))
-			return false;
 
 	// Checks for untouchable, unattackable
 	if(objA->IsUnit() && objA->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_9 | UNIT_FLAG_MOUNTED_TAXI | UNIT_FLAG_NOT_SELECTABLE))
