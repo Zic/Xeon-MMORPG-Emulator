@@ -119,15 +119,41 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 	std::string msg;
 	msg.reserve(256);
 
+	std::string to, channel, reason, tmp;
 	//arghhh STFU. I'm not giving you gold or items NOOB
 	switch(type)
 	{
+	case CHAT_MSG_WHISPER:
+		{
+			to = "";
+			recv_data >> to >> msg;
+			pMsg=msg.c_str();
+			pMisc = to.c_str();
+		}break;
+	case CHAT_MSG_CHANNEL:
+		{
+			channel = "";
+			recv_data >> channel;
+			recv_data >> msg;
+			pMsg = msg.c_str();
+			pMisc = channel.c_str();
+		}break;
+	case CHAT_MSG_AFK:
+		{
+			recv_data >> reason;
+		}break;
 	case CHAT_MSG_EMOTE:
 	case CHAT_MSG_SAY:
 	case CHAT_MSG_YELL:
-	case CHAT_MSG_WHISPER:
-	case CHAT_MSG_CHANNEL:
+	case CHAT_MSG_PARTY:
+	case CHAT_MSG_RAID:
+	case CHAT_MSG_RAID_LEADER:
+	case CHAT_MSG_RAID_WARNING:
+	case CHAT_MSG_GUILD:
+	case CHAT_MSG_OFFICER:
 		{
+			recv_data >> msg;
+			pMsg=msg.c_str();
 			if( m_muted && m_muted >= (uint32)UNIXTIME )
 			{
 				SystemMessage("Your voice is currently muted by a moderator.");
@@ -136,11 +162,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 		}break;
 	}
 
+	if(pMsg)
+		if(!sHookInterface.OnChat(_player, type, lang, pMsg, pMisc))
+			return;
+
 	switch(type)
 	{
 	case CHAT_MSG_EMOTE:
 		{
-			recv_data >> msg;
 
 			if(GetPlayer()->m_modlanguage >=0)
 				data = sChatHandler.FillMessageData( CHAT_MSG_EMOTE, GetPlayer()->m_modlanguage,  msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
@@ -151,13 +180,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			//sLog.outString("[emote] %s: %s", _player->GetName(), msg.c_str());
 			delete data;
 			
-			pMsg=msg.c_str();
 			pMisc=0;
 
 		}break;
 	case CHAT_MSG_SAY:
 		{
-			recv_data >> msg;
 
 			if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
 				break;
@@ -192,7 +219,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			
 			//sLog.outString("[say] %s: %s", _player->GetName(), msg.c_str());
 			delete data;
-			pMsg=msg.c_str();
 			pMisc=0;
 		} break;
 	case CHAT_MSG_PARTY:
@@ -200,7 +226,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 	case CHAT_MSG_RAID_LEADER:
 	case CHAT_MSG_RAID_WARNING:
 		{
-			recv_data >> msg;
 
 			if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
 				break;
@@ -252,12 +277,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}
 			//sLog.outString("[party] %s: %s", _player->GetName(), msg.c_str());
 			delete data;
-			pMsg=msg.c_str();
 			pMisc=0;
 		} break;
 	case CHAT_MSG_GUILD:
 		{
-			recv_data >> msg;
 			if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
 			{
 				break;
@@ -272,13 +295,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			if(_player->m_playerInfo->guild)
 				_player->m_playerInfo->guild->GuildChat(msg.c_str(), this, lang);
 
-			pMsg=msg.c_str();
 			pMisc=0;
 		} break;
 	case CHAT_MSG_OFFICER:
 		{
-			recv_data >> msg;
-
 			if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
 				break;
 
@@ -291,13 +311,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			if(_player->m_playerInfo->guild)
 				_player->m_playerInfo->guild->OfficerChat(msg.c_str(), this, lang);
 
-			pMsg=msg.c_str();
 			pMisc=0;
 		} break;
 	case CHAT_MSG_YELL:
 		{
-			recv_data >> msg;
-
 			if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
 				break;
 
@@ -322,14 +339,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			_player->GetMapMgr()->SendChatMessageToCellPlayers(_player, data, 2, 1, lang, this);
 			delete data;
 			//sLog.outString("[yell] %s: %s", _player->GetName(), msg.c_str());
-			pMsg=msg.c_str();
 			pMisc=0;
 		} break;
 	case CHAT_MSG_WHISPER:
 		{
-			std::string to = "",tmp;
-			recv_data >> to >> msg;
-
 			if(g_chatFilter->Parse(msg) == true)
 			{
 				SystemMessage("Your chat message was blocked by a server-side filter.");
@@ -415,15 +428,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}
 
 			//sLog.outString("[whisper] %s to %s: %s", _player->GetName(), to.c_str(), msg.c_str());
-			pMsg=msg.c_str();
-			pMisc=to.c_str();
 		} break;
 	case CHAT_MSG_CHANNEL:
-		{
-			std::string channel = "";
-			recv_data >> channel;
-			recv_data >> msg;
-		 
+		{	 
 			if(g_chatFilter->Parse(msg) == true)
 			{
 				SystemMessage("Your chat message was blocked by a server-side filter.");
@@ -438,14 +445,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 				chn->Say(GetPlayer(),msg.c_str(), NULL, false);
 
 			//sLog.outString("[%s] %s: %s", channel.c_str(), _player->GetName(), msg.c_str());
-			pMsg=msg.c_str();
-			pMisc=channel.c_str();
 
 		} break;
 	case CHAT_MSG_AFK:
 		{
-			std::string reason;
-			recv_data >> reason;
 			GetPlayer()->SetAFKReason(reason);
 
 			if(g_chatFilter->Parse(msg) == true)
@@ -464,7 +467,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			else
 			{
 				GetPlayer()->SetFlag(PLAYER_FLAGS, 0x02);
-				if(sWorld.GetKickAFKPlayerTime())
+				if(sWorld.GetKickAFKPlayerTime() && !HasGMPermissions())
 					sEventMgr.AddEvent(GetPlayer(),&Player::SoftDisconnect,EVENT_PLAYER_SOFT_DISCONNECT,sWorld.GetKickAFKPlayerTime(),1,0);
 			}			
 		} break;
@@ -488,11 +491,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}		  
 		} break;
 	default:
-		sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
+		sLog.outError("CHAT: unknown msg type %u, lang: %d", type, lang);
 	}
 
-	if(pMsg)
-		sHookInterface.OnChat(_player, type, lang, pMsg, pMisc);
 }
 
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
