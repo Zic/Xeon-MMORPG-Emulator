@@ -25,9 +25,19 @@ void WorldSession::HandleSetVisibleRankOpcode(WorldPacket& recv_data)
 	uint32 ChosenRank;
 	recv_data >> ChosenRank; 
 	if(ChosenRank == 0xFFFFFFFF)
+	{
 		_player->SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
-	else if(_player->HasKnownTitle(ChosenRank)) // Check for cheating
+		_player->SetPVPRank(0);
+	} else if(_player->HasKnownTitle(ChosenRank)) // Check for cheating
+	{
 		_player->SetUInt32Value(PLAYER_CHOSEN_TITLE, ChosenRank);
+		if(ChosenRank <= TITLE_HIGH_WARLORD)
+		{
+			if(ChosenRank > TITLE_GRAND_MARSHAL)
+				ChosenRank -= TITLE_GRAND_MARSHAL;
+			_player->SetPVPRank(ChosenRank);
+		}
+	}
 }
 
 void HonorHandler::AddHonorPointsToPlayer(Player *pPlayer, uint32 uAmount)
@@ -132,6 +142,12 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 
 	if( Points > 0 )
 	{
+		uint32 victimPvPRank = 0;
+		if(pVictim)
+			victimPvPRank = uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+		if(victimPvPRank)
+			victimPvPRank += 4;
+
 		if( pPlayer->m_bg )
 		{
 			// hackfix for battlegrounds (since the gorups there are disabled, we need to do this manually)
@@ -161,8 +177,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 					{
 						// Send PVP credit
 						WorldPacket data(SMSG_PVP_CREDIT, 12);
-						uint32 pvppoints = pts * 10;
-						data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+						data << pts << pVictim->GetGUID() << victimPvPRank;
 						(*vtr)->GetSession()->SendPacket(&data);
 					}
 				}
@@ -198,8 +213,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 		                {
 			                // Send PVP credit
 			                WorldPacket data(SMSG_PVP_CREDIT, 12);
-			                uint32 pvppoints = GroupPoints * 10;
-			                data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+			                data << GroupPoints << pVictim->GetGUID() << victimPvPRank;
 			                gPlayer->GetSession()->SendPacket(&data);
 		                }
 						//patch by emsy
@@ -240,8 +254,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 		    {
 			    // Send PVP credit
 			    WorldPacket data(SMSG_PVP_CREDIT, 12);
-			    uint32 pvppoints = Points * 10;
-			    data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+			    data << Points << pVictim->GetGUID() << victimPvPRank;
 			    pPlayer->GetSession()->SendPacket(&data);
 		    }
 			//patch by emsy

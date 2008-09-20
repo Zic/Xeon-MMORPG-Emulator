@@ -628,17 +628,14 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 	BGScore * bs;
 	if(isArena())
 	{
-		if(!m_ended)
-		{
-			return;
-		}
-
 		*data << uint8(1);
 		if(!Rated())
 		{
 			*data << uint32(0x61272A5C);
+			*data << uint32(0);
 			*data << uint8(0);
-			*data << uint32(m_players[0].size() + m_players[1].size());
+			*data << uint32(0x61272A5C);
+			*data << uint32(0);
 			*data << uint8(0);
 		}
 		else
@@ -682,8 +679,13 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 			}
 		}
 
-		*data << uint8(1);
-		*data << uint8(m_winningteam);
+		if(m_ended)
+		{
+			*data << uint8(1);
+			*data << uint8(m_winningteam);
+		}
+		else
+			*data << uint8(0);		// If the game has ended - this will be 1
 
 		*data << uint32(m_players[0].size() + m_players[1].size());
 		for(uint32 i = 0; i < 2; ++i)
@@ -695,7 +697,10 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 				*data << bs->KillingBlows;
 
 				*data << uint8((*itr)->m_bgTeam);
-
+				
+				*data << bs->DamageDone;
+				*data << bs->HealingDone;
+				
 				*data << uint32(1);			// count of values after this
 				*data << uint32(bs->Misc1);	// rating change
 			}
@@ -829,7 +834,7 @@ void CBattleground::PortPlayer(Player * plr, bool skip_teleport /* = false*/)
 	UpdatePvPData();
 
 	/* add the player to the group */
-	if(plr->GetGroup() && !Rated() && !plr->bGMTagOn)
+	if(plr->GetGroup() && !Rated())
 	{
 		// remove them from their group
 		plr->GetGroup()->RemovePlayer( plr->m_playerInfo );
