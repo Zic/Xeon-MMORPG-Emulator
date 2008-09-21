@@ -1,3 +1,7 @@
+/*
+UPDATED BY NECCTA FOR ASPIRE
+*/
+
 ALTER TABLE `quests` change column `RewardMoneyAtMaxLevel` `RequiredMoney` int(10) unsigned not null default 0;
 ALTER TABLE `creature_proto` DROP column `spell1`;
 ALTER TABLE `creature_proto` DROP column `spell2`;
