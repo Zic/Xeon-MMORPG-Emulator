@@ -3211,6 +3211,7 @@ void Aura::SpellAuraReflectSpells(bool apply)
 		rss->chance = mod->m_amount;
 		rss->spellId = GetSpellId();
 		rss->school = -1;
+		rss->require_aura_hash = 0;
 		m_target->m_reflectSpellSchool.push_back(rss);
 	}
 	else
@@ -3434,9 +3435,6 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 
 	if(m_target->IsPlayer())
 	{
-		//maybe we should not adjust hitpoints too but only maximum health
-		static_cast< Player* >( m_target )->SetHealthFromSpell(static_cast< Player* >( m_target )->GetHealthFromSpell() + amt);
-		static_cast< Player* >( m_target )->UpdateStats();
 		if(apply)
 			m_target->ModUnsigned32Value(UNIT_FIELD_HEALTH,amt);
 		else
@@ -3445,6 +3443,8 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 				m_target->ModUnsigned32Value(UNIT_FIELD_HEALTH,amt);
 			else m_target->SetUInt32Value(UNIT_FIELD_HEALTH,1); //do not kill player but do strip him good
 		}
+		static_cast< Player* >( m_target )->SetHealthFromSpell(static_cast< Player* >( m_target )->GetHealthFromSpell() + amt);
+		static_cast< Player* >( m_target )->UpdateStats();
 	}
 	else
 		m_target->ModUnsigned32Value(UNIT_FIELD_MAXHEALTH, amt);

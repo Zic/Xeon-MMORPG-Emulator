@@ -4341,7 +4341,7 @@ void Spell::SafeAddModeratedTarget(uint64 guid, uint16 type)
 
 bool Spell::Reflect(Unit *refunit)
 {
-	SpellEntry * refspell = NULL;
+	uint32 refspellid = 0;
 
 	if( m_reflectedParent != NULL )
 		return false;
@@ -4354,7 +4354,7 @@ bool Spell::Reflect(Unit *refunit)
     }
 	for(std::list<struct ReflectSpellSchool*>::iterator i = refunit->m_reflectSpellSchool.begin();i != refunit->m_reflectSpellSchool.end();i++)
 	{
-		if((*i)->school == -1 || (*i)->school == (int32)m_spellInfo->School)
+		if(((*i)->school == -1 && m_spellInfo->School) || (*i)->school == (int32)m_spellInfo->School)
 		{
 			if(Rand((float)(*i)->chance))
 			{
@@ -4363,14 +4363,15 @@ bool Spell::Reflect(Unit *refunit)
                 {
 					continue;
                 }
-				refspell = m_spellInfo;
+				refspellid = (*i)->spellId;
 			}
 		}
 	}
 
-	if(!refspell || m_caster == refunit) return false;
+	if(!refspellid || m_caster == refunit) return false;
+	refunit->RemoveAura(refspellid);
 
-	Spell *spell = new Spell(refunit, refspell, true, NULL);
+	Spell *spell = new Spell(m_caster, m_spellInfo, true, NULL);
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
 	spell->prepare(&targets);

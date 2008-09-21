@@ -19583,6 +19583,11 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->procFlags |= PROC_TARGET_SELF;
 
+	// warrior - Spell Reflection
+	sp = dbcSpell.LookupEntryForced( 23920 );
+	if( sp != NULL )
+		sp->procFlags = PROC_NULL; // No need to proc
+
 	//warrior - Improved Disciplines
 	sp = dbcSpell.LookupEntryForced( 29725 );
 	if (sp != NULL )
