@@ -163,11 +163,15 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 		if( !m_homeFlags[plr->GetTeam()]->IsInWorld() )
 			m_homeFlags[plr->GetTeam()]->PushToWorld(m_mapMgr);
 
-		/* give each player on that team a bonus 82 honor - burlex: is this correct amount? */
+		/* give each player on that team bonus honor and reputation*/
+		int32 honorToAdd = 2 * HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 repToAdd = 35; //thinking forward for adding holiday support
+		uint32 fact = plr->GetTeam() ? 889 : 890; /*Warsong Outriders : Sliverwing Sentinels*/
 		for(set<Player*>::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
 		{
-			plr->m_bgScore.BonusHonor += 82;
-			HonorHandler::AddHonorPointsToPlayer(plr, 82);
+			plr->m_bgScore.BonusHonor += honorToAdd;
+			HonorHandler::AddHonorPointsToPlayer(plr, honorToAdd);
+			plr->ModStanding(fact, repToAdd);
 		}
 
 		m_scores[plr->GetTeam()]++;
@@ -175,28 +179,39 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 		{
 			/* victory! */
 			m_ended = true;
-			m_winningteam = plr->GetTeam() ? 0 : 1;
+			m_winningteam = plr->GetTeam();
 			m_nextPvPUpdateTime = 0;
 
 			sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_CLOSE);
 			sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
-
-			m_mainLock.Acquire();
+		
 			/* add the marks of honor to all players */
-			SpellEntry * winner_spell = dbcSpell.LookupEntry(24950);
-			SpellEntry * loser_spell = dbcSpell.LookupEntry(24951);
+			SpellEntry * winner_spell = dbcSpell.LookupEntry(24951);
+			SpellEntry * loser_spell = dbcSpell.LookupEntry(24950);
+			uint32 lostHonorToAdd = 2 * HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+			uint32 winHonorToAdd = lostHonorToAdd + HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+			m_mainLock.Acquire();
 			for(uint32 i = 0; i < 2; ++i)
 			{
 				for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
 					(*itr)->Root();
 					if(i == m_winningteam)
+					{
+						(*itr)->m_bgScore.BonusHonor += winHonorToAdd;
+						HonorHandler::AddHonorPointsToPlayer((*itr), winHonorToAdd);
 						(*itr)->CastSpell((*itr), winner_spell, true);
+					}
 					else
+					{
+						(*itr)->m_bgScore.BonusHonor += lostHonorToAdd;
+						HonorHandler::AddHonorPointsToPlayer((*itr), lostHonorToAdd);
 						(*itr)->CastSpell((*itr), loser_spell, true);
+					}
 				}
 			}
 			m_mainLock.Release();
+			m_winningteam = m_winningteam ? 0 : 1;
 		}
 
 		/* increment the score world state */

@@ -102,6 +102,8 @@ const uint32 m_iconsStates[EOTS_TOWER_COUNT][3] = {
 #define EOTS_WORLDSTATE_ALLIANCE_BASES 2752
 #define EOTS_WORLDSTATE_HORDE_BASES 2753
 #define EOTS_NETHERWING_FLAG_SPELL 34976
+#define POINTS_TO_GAIN_BH 330
+#define POINTS_TO_GAIN_BH_HOLIDAY 200
 
 
 #define EOTS_CAPTURE_RATE 4
@@ -123,6 +125,7 @@ EyeOfTheStorm::EyeOfTheStorm(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t) :
 
 	m_flagHolder = 0;
 	m_points[0] = m_points[1] = 0;
+	m_lastHonorGainPoints[0] = m_lastHonorGainPoints[1] = 0;
 }
 
 EyeOfTheStorm::~EyeOfTheStorm()
@@ -710,6 +713,22 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	//printf("EOTS: Give team %u %u points.\n", team, points);
 
 	m_points[team] += points;
+
+	if((m_points[team] - m_lastHonorGainPoints[team]) >= POINTS_TO_GAIN_BH)
+	{
+		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		m_mainLock.Acquire();
+		for(set<Player*>::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
+		{
+			(*itr)->m_bgScore.BonusHonor += honorToAdd;
+			HonorHandler::AddHonorPointsToPlayer((*itr), honorToAdd);
+		}
+
+		UpdatePvPData();
+		m_mainLock.Release();
+		m_lastHonorGainPoints[team] += POINTS_TO_GAIN_BH;
+	}
+
 	if( m_points[team] >= 2000 )
 	{
 		m_points[team] = 2000;
@@ -722,6 +741,8 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 		sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 		/* add the marks of honor to all players */
+		uint32 lostHonorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 winHonorToAdd = 2 * lostHonorToAdd;
 		m_mainLock.Acquire();
 
 		for(uint32 i = 0; i < 2; ++i)
@@ -733,11 +754,10 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				if ( (*itr)==NULL )
 					continue;
 				
-				/* Add Bonus Honor to all players */
-				HonorHandler::AddHonorPointsToPlayer((*itr), ((m_points[i] / 12) + (*itr)->m_bgScore.BonusHonor));
-
 				if(i == m_winningteam)
 				{
+					(*itr)->m_bgScore.BonusHonor += winHonorToAdd;
+					HonorHandler::AddHonorPointsToPlayer((*itr), winHonorToAdd);
 					Item *item;
 					item = objmgr.CreateItem( 29024 , *itr);
 					item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,3);
@@ -755,6 +775,8 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				}
 				else
 				{
+					(*itr)->m_bgScore.BonusHonor += lostHonorToAdd;
+					HonorHandler::AddHonorPointsToPlayer((*itr), lostHonorToAdd);
 					Item *item;
 					item = objmgr.CreateItem( 29024 , *itr);
 					item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,1);

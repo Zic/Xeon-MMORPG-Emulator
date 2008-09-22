@@ -78,6 +78,7 @@ protected:
 	typedef set<Player*> EOTSCaptureDisplayList;
 	EOTSCaptureDisplayList m_CPDisplay[EOTS_TOWER_COUNT];
 
+	uint32 m_lastHonorGainPoints[2];
 	uint32 m_points[2];
 	Creature * m_spiritGuides[EOTS_TOWER_COUNT];
 };

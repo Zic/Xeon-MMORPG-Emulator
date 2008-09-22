@@ -4369,7 +4369,8 @@ bool Spell::Reflect(Unit *refunit)
 	}
 
 	if(!refspellid || m_caster == refunit) return false;
-	refunit->RemoveAura(refspellid);
+	if(refspellid == 23920)
+		refunit->RemoveAura(refspellid);
 
 	Spell *spell = new Spell(m_caster, m_spellInfo, true, NULL);
 	SpellCastTargets targets;

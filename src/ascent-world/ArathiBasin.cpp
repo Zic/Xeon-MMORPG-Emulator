@@ -21,8 +21,10 @@
 
 #define BASE_RESOURCES_GAIN 10
 #define RESOURCES_WINVAL 2000
-#define RESOURCES_TO_GAIN_BH 200
-#define BASE_BH_GAIN 14
+#define RESOURCES_TO_GAIN_BH 330
+#define RESOURCES_TO_GAIN_BR 200
+#define RESOURCES_TO_GAIN_BH_HOLIDAY 200
+#define RESOURCES_TO_GAIN_BR_HOLIDAY 150
 uint32 buffentrys[3] = {180380,180362,180146};
 // AB define's
 #define AB_CAPTURED_STABLES_ALLIANCE		0x6E7 //1767
@@ -448,6 +450,7 @@ ArathiBasin::ArathiBasin(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t) : CBa
 		m_resources[i] = 0;
 		m_capturedBases[i] = 0;
 		m_lastHonorGainResources[i] = 0;
+		m_lastRepGainResources[i] = 0;
 	}
 }
 
@@ -502,14 +505,31 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 		current_resources = RESOURCES_WINVAL;
 
 	m_resources[Team] = current_resources;
-	if((current_resources - m_lastHonorGainResources[Team]) >= RESOURCES_TO_GAIN_BH)
+	if((current_resources - m_lastRepGainResources[Team]) >= RESOURCES_TO_GAIN_BR)
 	{
 		m_mainLock.Acquire();
 		for(set<Player*>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
-			(*itr)->m_bgScore.BonusHonor += BASE_BH_GAIN;
+		{
+			uint32 fact = (*itr)->GetTeam() ? 510 : 509; //The Defilers : The League of Arathor
+			(*itr)->ModStanding(fact, 10);
+		}
+		m_mainLock.Release();
+		m_lastRepGainResources[Team] += RESOURCES_TO_GAIN_BR;
+	}
+
+	if((current_resources - m_lastHonorGainResources[Team]) >= RESOURCES_TO_GAIN_BH)
+	{
+		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		m_mainLock.Acquire();
+		for(set<Player*>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
+		{
+			(*itr)->m_bgScore.BonusHonor += honorToAdd;
+			HonorHandler::AddHonorPointsToPlayer((*itr), honorToAdd);
+		}
 
 		UpdatePvPData();
 		m_mainLock.Release();
+		m_lastHonorGainResources[Team] += RESOURCES_TO_GAIN_BH;
 	}
 
 	// update the world states
@@ -526,19 +546,28 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 		sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 		/* add the marks of honor to all players */
-		m_mainLock.Acquire();
-
 		SpellEntry * winner_spell = dbcSpell.LookupEntry(24953);
 		SpellEntry * loser_spell = dbcSpell.LookupEntry(24952);
+		uint32 lostHonorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 winHonorToAdd = 2 * lostHonorToAdd;
+		m_mainLock.Acquire();
 		for(uint32 i = 0; i < 2; ++i)
 		{
 			for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				(*itr)->Root();
 				if(i == m_winningteam)
+				{
+					(*itr)->m_bgScore.BonusHonor += winHonorToAdd;
+					HonorHandler::AddHonorPointsToPlayer((*itr), winHonorToAdd);
 					(*itr)->CastSpell((*itr), winner_spell, true);
+				}
 				else
+				{
+					(*itr)->m_bgScore.BonusHonor += lostHonorToAdd;
+					HonorHandler::AddHonorPointsToPlayer((*itr), lostHonorToAdd);
 					(*itr)->CastSpell((*itr), loser_spell, true);
+				}
 			}
 		}
 		m_winningteam = m_winningteam ? 0 : 1;
