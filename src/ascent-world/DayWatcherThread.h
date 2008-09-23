@@ -26,6 +26,7 @@ enum DAYWATCHERSETTINGS
 	DAILY		= 2,
 	MONTHLY		= 3,
 	HOURLY		= 4,
+	WEEKEND		= 5
 };
 
 class DayWatcherThread : public CThread
@@ -56,6 +57,9 @@ public:
 	uint32 get_timeout_from_string(const char * string, uint32 def);
 	bool has_timeout_expired(tm * now_time, tm * last_time, uint32 timeoutval);
 	void update_arena();
+	uint32 week_number;
+	bool m_isholiday;
+	void unset_bg_holiday();
 };
 
 #endif

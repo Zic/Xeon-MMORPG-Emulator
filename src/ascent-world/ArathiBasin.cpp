@@ -21,6 +21,7 @@
 
 #define BASE_RESOURCES_GAIN 10
 #define RESOURCES_WINVAL 2000
+#define RESOURCES_WARNINGVAL 1800
 #define RESOURCES_TO_GAIN_BH 330
 #define RESOURCES_TO_GAIN_BR 200
 #define RESOURCES_TO_GAIN_BH_HOLIDAY 200
@@ -407,6 +408,9 @@ void ArathiBasin::OnCreate()
 	SetWorldState(AB_CAPTURING_STABLES_ALLIANCE, 	   0x00);
 	SetWorldState(AB_CAPTURED_STABLES_HORDE, 		   0x00);
 	SetWorldState(AB_CAPTURED_STABLES_ALLIANCE, 		0x00);
+
+	resources_to_gain_br = m_isholiday ? RESOURCES_TO_GAIN_BR_HOLIDAY : RESOURCES_TO_GAIN_BR;
+	resources_to_gain_bh = m_isholiday ? RESOURCES_TO_GAIN_BH_HOLIDAY : RESOURCES_TO_GAIN_BH;
 }
 
 void ArathiBasin::OnStart()
@@ -451,6 +455,7 @@ ArathiBasin::ArathiBasin(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t) : CBa
 		m_capturedBases[i] = 0;
 		m_lastHonorGainResources[i] = 0;
 		m_lastRepGainResources[i] = 0;
+		m_almostEnded[i] = false;
 	}
 }
 
@@ -505,7 +510,8 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 		current_resources = RESOURCES_WINVAL;
 
 	m_resources[Team] = current_resources;
-	if((current_resources - m_lastRepGainResources[Team]) >= RESOURCES_TO_GAIN_BR)
+
+	if((current_resources - m_lastRepGainResources[Team]) >= resources_to_gain_br)
 	{
 		m_mainLock.Acquire();
 		for(set<Player*>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
@@ -514,10 +520,10 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 			(*itr)->ModStanding(fact, 10);
 		}
 		m_mainLock.Release();
-		m_lastRepGainResources[Team] += RESOURCES_TO_GAIN_BR;
+		m_lastRepGainResources[Team] += resources_to_gain_br;
 	}
 
-	if((current_resources - m_lastHonorGainResources[Team]) >= RESOURCES_TO_GAIN_BH)
+	if((current_resources - m_lastHonorGainResources[Team]) >= resources_to_gain_bh)
 	{
 		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
 		m_mainLock.Acquire();
@@ -529,11 +535,18 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 
 		UpdatePvPData();
 		m_mainLock.Release();
-		m_lastHonorGainResources[Team] += RESOURCES_TO_GAIN_BH;
+		m_lastHonorGainResources[Team] += resources_to_gain_bh;
 	}
 
 	// update the world states
 	SetWorldState(resource_fields[Team], current_resources);
+
+	if(current_resources >= RESOURCES_WARNINGVAL && !m_almostEnded[Team])
+	{
+		m_almostEnded[Team] = true;
+		SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, (uint64)0, "The %s has gathered %u resources and is nearing victory!", Team ? "Horde" : "Alliance", current_resources);
+		PlaySoundToAll(Team ? SOUND_ALLIANCE_BGALMOSTEND : SOUND_HORDE_BGALMOSTEND);
+	}
 
 	// check for winning condition
 	if(current_resources == RESOURCES_WINVAL)
@@ -748,7 +761,7 @@ void ArathiBasin::CaptureControlPoint(uint32 Id, uint32 Team)
 
 	// send the chat message/sounds out
 	PlaySoundToAll(Team ? SOUND_HORDE_CAPTURE : SOUND_ALLIANCE_CAPTURE);
-	SendChatMessage(Team ? 0x54 : 0x53, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
+	SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
 	
 	// update the overhead display on the clients (world states)
 	m_capturedBases[Team]++;
@@ -846,7 +859,7 @@ void ArathiBasin::AssaultControlPoint(Player * pPlayer, uint32 Id)
 	SpawnControlPoint(Id, Team ? AB_SPAWN_TYPE_HORDE_ASSAULT : AB_SPAWN_TYPE_ALLIANCE_ASSAULT);
 
 	// send out the chat message and sound
-	SendChatMessage(Team ? 0x54 : 0x53, pPlayer->GetGUID(), "$N claims the %s! If left unchallenged, the %s will control it in 1 minute!", ControlPointNames[Id],
+	SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, pPlayer->GetGUID(), "$N claims the %s! If left unchallenged, the %s will control it in 1 minute!", ControlPointNames[Id],
 		Team ? "Horde" : "Alliance");
 
 	//NEED THE SOUND ID

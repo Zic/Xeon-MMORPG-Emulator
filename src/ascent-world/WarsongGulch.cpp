@@ -165,7 +165,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 
 		/* give each player on that team bonus honor and reputation*/
 		int32 honorToAdd = 2 * HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
-		uint32 repToAdd = 35; //thinking forward for adding holiday support
+		uint32 repToAdd = m_isholiday ? 45 : 35;
 		uint32 fact = plr->GetTeam() ? 889 : 890; /*Warsong Outriders : Sliverwing Sentinels*/
 		for(set<Player*>::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
 		{
@@ -188,8 +188,10 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 			/* add the marks of honor to all players */
 			SpellEntry * winner_spell = dbcSpell.LookupEntry(24951);
 			SpellEntry * loser_spell = dbcSpell.LookupEntry(24950);
-			uint32 lostHonorToAdd = 2 * HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+			uint32 lostHonorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+			lostHonorToAdd = m_isholiday ? 3 * lostHonorToAdd : lostHonorToAdd;
 			uint32 winHonorToAdd = lostHonorToAdd + HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+			
 			m_mainLock.Acquire();
 			for(uint32 i = 0; i < 2; ++i)
 			{

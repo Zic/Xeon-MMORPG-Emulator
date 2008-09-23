@@ -713,8 +713,8 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	//printf("EOTS: Give team %u %u points.\n", team, points);
 
 	m_points[team] += points;
-
-	if((m_points[team] - m_lastHonorGainPoints[team]) >= POINTS_TO_GAIN_BH)
+	uint32 points_to_gain_bh = m_isholiday ? POINTS_TO_GAIN_BH_HOLIDAY : POINTS_TO_GAIN_BH;
+	if((m_points[team] - m_lastHonorGainPoints[team]) >= points_to_gain_bh)
 	{
 		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
 		m_mainLock.Acquire();
@@ -726,7 +726,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 
 		UpdatePvPData();
 		m_mainLock.Release();
-		m_lastHonorGainPoints[team] += POINTS_TO_GAIN_BH;
+		m_lastHonorGainPoints[team] += points_to_gain_bh;
 	}
 
 	if( m_points[team] >= 2000 )

@@ -33,6 +33,7 @@ DayWatcherThread::DayWatcherThread()
 {
 	m_running = true;
 	m_dirty = false;
+	m_isholiday = true;
 }
 
 DayWatcherThread::~DayWatcherThread()
@@ -114,6 +115,12 @@ bool DayWatcherThread::has_timeout_expired(tm * now_time, tm * last_time, uint32
 
 	case DAILY:
 		return ((now_time->tm_mday != last_time->tm_mday) || (now_time->tm_mday != last_time->tm_mday));
+	
+	case WEEKEND:
+		{
+				week_number = ((now_time->tm_yday / 7) % 4);
+				return ((now_time->tm_wday >= 5 || now_time->tm_wday < 2));
+		}
 	}
 	return false;
 }
@@ -144,6 +151,9 @@ bool DayWatcherThread::run()
 
 		if(has_timeout_expired(&local_currenttime, &local_last_arena_time, arena_period))
 			update_arena();
+
+		if(!has_timeout_expired(&local_currenttime, &local_last_arena_time, WEEKEND) && m_isholiday == true)
+			unset_bg_holiday();
         
 		if(m_dirty)
 			update_settings();
@@ -172,6 +182,11 @@ bool DayWatcherThread::run()
 	pthread_cond_destroy(&abortcond);
 #endif
 	return true;
+}
+
+void DayWatcherThread::unset_bg_holiday()
+{
+	m_isholiday = false;
 }
 
 void DayWatcherThread::update_arena()

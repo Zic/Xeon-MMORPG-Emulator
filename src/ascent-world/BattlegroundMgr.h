@@ -228,6 +228,8 @@ protected:
 	uint32 m_lastResurrect;
 
 public:
+	/* holiday stuff */
+	bool m_isholiday;
 
 	void SendChatMessage(uint32 Type, uint64 Guid, const char * Format, ...);
 
@@ -314,7 +316,7 @@ public:
 		return (uint32)s;
 	}
 
-	// Returns true iff this BG is Arena
+	// Returns true if this BG is Arena
 	bool isArena()
 	{
 		return (m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5);

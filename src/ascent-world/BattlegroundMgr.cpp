@@ -865,8 +865,10 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 	CreateBattlegroundFunc cfunc = BGCFuncs[Type];
 	MapMgr * mgr = 0;
 	CBattleground * bg;
+	DayWatcherThread Day;
 	uint32 iid;
-
+	uint32 week;
+	
 	if(IS_ARENA(Type))
 	{
 		/* arenas follow a different procedure. */
@@ -918,6 +920,22 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 		return NULL;
 	}
 
+	switch (Type)
+	{
+		case BATTLEGROUND_WARSONG_GULCH:
+			week = 0;
+			break;
+		case BATTLEGROUND_ARATHI_BASIN:
+			week = 1;
+			break;
+		case BATTLEGROUND_EYE_OF_THE_STORM:
+			week = 2;
+			break;
+		case BATTLEGROUND_ALTERAC_VALLEY:
+			week = 3;
+			break;
+	}
+
 	/* Create Map Manager */
 	mgr = sInstanceMgr.CreateBattlegroundInstance(BGMapIds[Type]);
 	if(mgr == NULL)
@@ -928,7 +946,9 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 
 	/* Call the create function */
 	iid = ++m_maxBattlegroundId;
-	bg = cfunc(mgr, iid, LevelGroup, Type);	
+	bg = cfunc(mgr, iid, LevelGroup, Type);
+	if(Day.week_number == week)
+		bg->m_isholiday = true;
 	mgr->m_battleground = bg;
 	sEventMgr.AddEvent(bg, &CBattleground::EventCreate, EVENT_BATTLEGROUND_QUEUE_UPDATE, 1, 1,0);
 	Log.Success("BattlegroundManager", "Created battleground type %u for level group %u.", Type, LevelGroup);
