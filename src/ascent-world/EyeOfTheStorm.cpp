@@ -716,7 +716,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	uint32 points_to_gain_bh = m_isholiday ? POINTS_TO_GAIN_BH_HOLIDAY : POINTS_TO_GAIN_BH;
 	if((m_points[team] - m_lastHonorGainPoints[team]) >= points_to_gain_bh)
 	{
-		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 honorToAdd = m_honorPerKill;
 		m_mainLock.Acquire();
 		for(set<Player*>::iterator itr = m_players[team].begin(); itr != m_players[team].end(); ++itr)
 		{
@@ -741,7 +741,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 		sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 		/* add the marks of honor to all players */
-		uint32 lostHonorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 lostHonorToAdd = m_honorPerKill;
 		uint32 winHonorToAdd = 2 * lostHonorToAdd;
 		m_mainLock.Acquire();
 

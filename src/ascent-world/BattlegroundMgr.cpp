@@ -25,7 +25,7 @@
 #define ENABLE_EOTS
 //#define ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
 #define ALLOWED_DISTANCE_AT_START 1600 // 40 yards
-
+extern DayWatcherThread * dw;
 
 initialiseSingleton(CBattlegroundManager);
 typedef CBattleground*(*CreateBattlegroundFunc)(MapMgr* mgr,uint32 iid,uint32 group, uint32 type);
@@ -579,6 +579,7 @@ CBattleground::CBattleground(MapMgr * mgr, uint32 id, uint32 levelgroup, uint32 
 		m_groups[i]->m_disbandOnNoMembers = false;
 		m_groups[i]->ExpandToRaid();
 	}
+	m_honorPerKill = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
 }
 
 CBattleground::~CBattleground()
@@ -865,7 +866,6 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 	CreateBattlegroundFunc cfunc = BGCFuncs[Type];
 	MapMgr * mgr = 0;
 	CBattleground * bg;
-	DayWatcherThread Day;
 	uint32 iid;
 	uint32 week;
 	
@@ -947,8 +947,7 @@ CBattleground * CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGr
 	/* Call the create function */
 	iid = ++m_maxBattlegroundId;
 	bg = cfunc(mgr, iid, LevelGroup, Type);
-	if(Day.week_number == week)
-		bg->m_isholiday = true;
+	bg->m_isholiday = (dw->m_isholiday && dw->week_number == week);
 	mgr->m_battleground = bg;
 	sEventMgr.AddEvent(bg, &CBattleground::EventCreate, EVENT_BATTLEGROUND_QUEUE_UPDATE, 1, 1,0);
 	Log.Success("BattlegroundManager", "Created battleground type %u for level group %u.", Type, LevelGroup);

@@ -525,7 +525,7 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 
 	if((current_resources - m_lastHonorGainResources[Team]) >= resources_to_gain_bh)
 	{
-		uint32 honorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 honorToAdd = m_honorPerKill;
 		m_mainLock.Acquire();
 		for(set<Player*>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
 		{
@@ -561,7 +561,7 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 		/* add the marks of honor to all players */
 		SpellEntry * winner_spell = dbcSpell.LookupEntry(24953);
 		SpellEntry * loser_spell = dbcSpell.LookupEntry(24952);
-		uint32 lostHonorToAdd = HonorHandler::CalculateHonorPointsForKill(m_levelGroup * 10, m_levelGroup * 10);
+		uint32 lostHonorToAdd = m_honorPerKill;
 		uint32 winHonorToAdd = 2 * lostHonorToAdd;
 		m_mainLock.Acquire();
 		for(uint32 i = 0; i < 2; ++i)
