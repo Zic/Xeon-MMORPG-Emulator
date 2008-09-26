@@ -20,7 +20,7 @@ static float ex = 0.0f;
 static float ey = 0.0f;
 static float ez = 0.0f;
 
-void EventChat(Player * pPlayer, uint32 Type, uint32 Lang, const char * Message, const char * Misc)
+bool EventChat(Player * pPlayer, uint32 Type, uint32 Lang, const char * Message, const char * Misc)
 {
    if(Message == evon && pPlayer->GetSession()->HasGMPermissions())
    {
@@ -29,10 +29,12 @@ void EventChat(Player * pPlayer, uint32 Type, uint32 Lang, const char * Message,
 	  ey = pPlayer->GetPositionY();
 	  ez = pPlayer->GetPositionZ();
 	  emapid = pPlayer->GetMapId();
+	  return false;
    }
    else if(Message == evoff && pPlayer->GetSession()->HasGMPermissions())
    {
 	  eon = false;
+	  return false;
    }
    else if(Message == evplr)
    {
@@ -43,7 +45,9 @@ void EventChat(Player * pPlayer, uint32 Type, uint32 Lang, const char * Message,
 			pPlayer->BroadcastMessage("You can't port while in combat.");
 	  else
 		 pPlayer->BroadcastMessage("There's no active event at the moment.");
+	  return false;
    }
+   return true;
 }
 
 void SetupEventChat(ScriptMgr * mgr)
