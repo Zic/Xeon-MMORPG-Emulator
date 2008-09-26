@@ -1871,6 +1871,9 @@ void Aura::SpellAuraDummy(bool apply)
 			if(apply)
 				return;
 
+			if(m_target->GetAuraCount(33763) != 1) // Heal only when removing the last stack
+				return;
+
 			Unit * pCaster = GetUnitCaster();
 			if( pCaster == NULL )
 				pCaster = m_target;
