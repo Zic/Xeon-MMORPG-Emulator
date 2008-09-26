@@ -1,5 +1,5 @@
 /*
-** $Id: lstring.c,v 2.8 2005/12/22 16:19:56 roberto Exp $
+** $Id: lstring.c,v 2.8.1.1 2007/12/27 13:02:25 roberto Exp $
 ** String table (keeps all strings handled by Lua)
 ** See Copyright Notice in lua.h
 */
@@ -108,4 +108,5 @@ Udata *luaS_newudata (lua_State *L, size_t s, Table *e) {
   G(L)->mainthread->next = obj2gco(u);
   return u;
 }
+
 
