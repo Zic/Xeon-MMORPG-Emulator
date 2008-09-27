@@ -1295,6 +1295,7 @@ void World::Rehash(bool load)
 	ExtraTalents = Config.MainConfig.GetIntDefault("Funserver", "ExtraTalents", 0);
 	StartWithSpells = Config.MainConfig.GetBoolDefault("Funserver", "StartWithAllSpells", false);
 	MaxProfs = Config.MainConfig.GetIntDefault("Funserver", "MaxProfs", 2);
+	BGQueueDisplay = Config.MainConfig.GetBoolDefault("Funserver", "BGQueueDisplay", false);
 
 	if( m_banTable != NULL )
 		free( m_banTable );

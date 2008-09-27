@@ -138,6 +138,7 @@ class CBattlegroundManager : public Singleton<CBattlegroundManager>, public Even
 	/* Queue System */
 	// Instance Id -> list<Player guid> [ BattlegroundType ] (instance 0 - first available)
 	list<uint32> m_queuedPlayers[BATTLEGROUND_NUM_TYPES][MAX_LEVEL_GROUP];
+	uint32 m_queuedPlayersCount[BATTLEGROUND_NUM_TYPES][MAX_LEVEL_GROUP][2]; // Alliance/Horde
 
 	// Instance Id -> list<Group id> [BattlegroundType][LevelGroup]
 	list<uint32> m_queuedGroups[BATTLEGROUND_NUM_TYPES];

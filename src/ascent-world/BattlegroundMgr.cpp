@@ -82,6 +82,7 @@ const static uint32 BGMinimumPlayers[BATTLEGROUND_NUM_TYPES] = {
 CBattlegroundManager::CBattlegroundManager() : EventableObject()
 {
 	m_maxBattlegroundId = 0;
+	memset(m_queuedPlayersCount, 0, BATTLEGROUND_NUM_TYPES*MAX_LEVEL_GROUP*2*sizeof(uint32));
 	sEventMgr.AddEvent(this, &CBattlegroundManager::EventQueueUpdate, EVENT_BATTLEGROUND_QUEUE_UPDATE, 15000, 0,0);
 }
 
@@ -162,6 +163,8 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
     
 	/* Queue him! */
 	m_queueLock.Acquire();
+	if(sWorld.BGQueueDisplay)
+		sChatHandler.SystemMessage(m_session, "Players in this queue: Alliance %u, Horde %u", m_queuedPlayersCount[bgtype][lgroup][0], m_queuedPlayersCount[bgtype][lgroup][1]);
 	m_queuedPlayers[bgtype][lgroup].push_back(pguid);
 	Log.Success("BattlegroundManager", "Player %u is now in battleground queue for instance %u", m_session->GetPlayer()->GetLowGUID(), instance );
 
@@ -305,33 +308,29 @@ void CBattlegroundManager::EventQueueUpdate()
 			if(IS_ARENA(i))
 			{
 #ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG //this will break rated matches
-				if(tempPlayerVec[0].size() < 1)
-					continue;
+				if(tempPlayerVec[0].size() >= 1)
 #else
-				if(tempPlayerVec[0].size() < BGMinimumPlayers[i])
-					continue;
+				if(tempPlayerVec[0].size() >= BGMinimumPlayers[i])
 #endif
-				// enough players to start a round?
-				//if(tempPlayerVec[0].size() < BGMinimumPlayers[i])
-				//	continue;
-
-				if(CanCreateInstance(i,j))
 				{
-					arena = ((Arena*)CreateInstance(i, j));
-					if(!arena)
-						continue;
-					team = arena->GetFreeTeam();
-					while(!arena->IsFull() && tempPlayerVec[0].size() && team >= 0)
+					if(CanCreateInstance(i,j))
 					{
-						plr = *tempPlayerVec[0].begin();
-						tempPlayerVec[0].pop_front();
-
-						plr->m_bgTeam=team;
-						arena->AddPlayer(plr, team);
+						arena = ((Arena*)CreateInstance(i, j));
+						if(!arena)
+							continue;
 						team = arena->GetFreeTeam();
+						while(!arena->IsFull() && tempPlayerVec[0].size() && team >= 0)
+						{
+							plr = *tempPlayerVec[0].begin();
+							tempPlayerVec[0].pop_front();
 
-						// remove from the main queue (painful!)
-						ErasePlayerFromList(plr->GetLowGUID(), &m_queuedPlayers[i][j]);
+							plr->m_bgTeam=team;
+							arena->AddPlayer(plr, team);
+							team = arena->GetFreeTeam();
+
+							// remove from the main queue (painful!)
+							ErasePlayerFromList(plr->GetLowGUID(), &m_queuedPlayers[i][j]);
+						}
 					}
 				}
 			}
@@ -367,6 +366,8 @@ void CBattlegroundManager::EventQueueUpdate()
 					}
 				}
 			}
+			m_queuedPlayersCount[i][j][0] = tempPlayerVec[0].size();
+			m_queuedPlayersCount[i][j][1] = tempPlayerVec[1].size();
 		}
 	}
 
@@ -777,7 +778,7 @@ void CBattleground::OnPlayerPushed(Player * plr)
 
 	plr->ProcessPendingUpdates();
 	
-	if( plr->GetGroup() == NULL && !plr->bGMTagOn)
+	if( plr->GetGroup() == NULL && !plr->m_isGmInvisible)
 		m_groups[plr->m_bgTeam]->AddMember( plr->m_playerInfo );
 }
 
@@ -801,7 +802,7 @@ void CBattleground::PortPlayer(Player * plr, bool skip_teleport /* = false*/)
 	}
 
 	plr->SetTeam(plr->m_bgTeam);
-	if(!plr->bGMTagOn) // Don't announce GM joining
+	if(!plr->m_isGmInvisible) // Don't announce GM joining
 	{
 		WorldPacket data(SMSG_BATTLEGROUND_PLAYER_JOINED, 8);
 		data << plr->GetGUID();
@@ -1129,9 +1130,9 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 	data << plr->GetGUID();
 
 	m_mainLock.Acquire();
-	if(!plr->bGMTagOn)
+	m_players[plr->m_bgTeam].erase(plr);
+	if(!plr->m_isGmInvisible)
 	{
-		m_players[plr->m_bgTeam].erase(plr);
 		DistributePacketToAll(&data);
 	}
 
@@ -1572,6 +1573,8 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 	/* Queue him! */
 	m_queueLock.Acquire();
+	if(sWorld.BGQueueDisplay)
+		sChatHandler.SystemMessage(m_session, "Players in this arena queue: %u", m_queuedPlayersCount[BattlegroundType][lgroup][0]);
 	m_queuedPlayers[BattlegroundType][lgroup].push_back(pguid);
 	Log.Success("BattlegroundMgr", "Player %u is now in battleground queue for {Arena %u}", m_session->GetPlayer()->GetLowGUID(), BattlegroundType );
 

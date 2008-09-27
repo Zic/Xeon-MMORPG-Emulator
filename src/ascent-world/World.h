@@ -477,6 +477,7 @@ public:
 	uint32 StartingLevel;
 	uint32 ExtraTalents;
 	uint32 MaxProfs;
+	bool BGQueueDisplay;
 	bool StartWithSpells;
 
 	uint32 HordePlayers;
