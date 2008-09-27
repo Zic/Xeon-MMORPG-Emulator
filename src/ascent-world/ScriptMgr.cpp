@@ -916,3 +916,10 @@ void HookInterface::OnKillCreature(Player * pPlayer, Creature * pCreature)
 		(call)(pPlayer, pCreature);
 	OUTER_LOOP_END
 }
+
+bool HookInterface::OnJoinChannel(const char * Channel, Player * pPlayer)
+{
+	OUTER_LOOP_BEGIN_COND(SERVER_HOOK_EVENT_ON_JOIN_CHANNEL, tOnJoinChannel)
+		(call)(Channel, pPlayer);
+	OUTER_LOOP_END_COND
+}

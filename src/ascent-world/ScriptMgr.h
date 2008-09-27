@@ -57,6 +57,7 @@ enum ServerHookEvents
 	SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB	= 27,
 	SERVER_HOOK_EVENT_ON_SKILL_GAIN			= 28,
 	SERVER_HOOK_EVENT_ON_KILL_CREATURE		= 29,
+	SERVER_HOOK_EVENT_ON_JOIN_CHANNEL		= 30,
 
 	NUM_SERVER_HOOKS,
 };
@@ -101,6 +102,7 @@ typedef void(*tOnAreaTrigger)(Player * pPlayer, uint32 areaTrigger);
 typedef void(*tOnPlayerSaveToDB)(Player* pPlayer);
 typedef void(*tOnSkillGain)(Player * pPlayer, uint32 SkillLine, uint32 Value);
 typedef void(*tOnKillCreature)(Player * pPlayer, Creature * pCreature);
+typedef bool(*tOnJoinChannel)(const char * Channel, Player * pPlayer);
 
 
 class Spell;
@@ -300,6 +302,7 @@ public:
 	void OnPlayerSaveToDB(Player * pPlayer);
 	void OnSkillGain(Player * pPlayer, uint32 SkillLine, uint32 Value);
 	void OnKillCreature(Player * pPlayer, Creature * pCreature);
+	bool OnJoinChannel(const char * Channel, Player * pPlayer);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()

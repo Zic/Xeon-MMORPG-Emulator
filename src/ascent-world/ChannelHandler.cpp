@@ -33,7 +33,8 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 	recvPacket >> dbc_id >> crap;
 	recvPacket >> channelname;
 	recvPacket >> pass;
-
+	if(sHookInterface.OnJoinChannel(channelname.c_str(), _player) == false)
+		return;
 	if(!stricmp(channelname.c_str(), "LookingForGroup") && !sWorld.m_lfgForNonLfg)
 	{
 		// make sure we have lfg dungeons
