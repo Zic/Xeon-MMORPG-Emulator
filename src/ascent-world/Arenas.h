@@ -22,7 +22,8 @@ class ArenaTeam;
 class Arena : public CBattleground
 {
 	set<GameObject*> m_gates;
-	set<ArenaTeam*> doneteams;
+	int32 m_teams[2]; // Ids of teams fighting in rated match
+	set<uint32> m_teammembers[2]; // Guids of players who joined rated match. Are saved even after they leave
 	bool m_started;
 	uint32 m_arenateamtype;
 	GameObject * m_shadowsight[2];

@@ -82,8 +82,8 @@ ArenaTeam::ArenaTeam(Field * f)
 	for(i = 0; i < m_slots; ++i)
 	{
 		data = f[z++].GetString();
-		if(sscanf(data, "%u %u %u %u %u", &guid, &m_members[i].Played_ThisWeek, &m_members[i].Won_ThisWeek,
-			&m_members[i].Played_ThisSeason, &m_members[i].Won_ThisSeason) == 5)
+		if(sscanf(data, "%u %u %u %u %u %u", &guid, &m_members[i].Played_ThisWeek, &m_members[i].Won_ThisWeek,
+			&m_members[i].Played_ThisSeason, &m_members[i].Won_ThisSeason, &m_members[i].PersonalRating) == 6)
 		{
 			m_members[i].Info = objmgr.GetPlayerInfo(guid);
 			if(m_members[i].Info)
@@ -140,6 +140,7 @@ bool ArenaTeam::AddMember(PlayerInfo * info)
 		return false;
 
 	memset(&m_members[m_memberCount], 0, sizeof(ArenaTeamMember));
+	m_members[m_memberCount].PersonalRating = 1500;
 	m_members[m_memberCount++].Info = info;
 	SaveToDB();
 
@@ -229,7 +230,7 @@ void ArenaTeam::Roster(WorldPacket & data)
 			data << m_members[i].Won_ThisWeek;
 			data << m_members[i].Played_ThisSeason;
 			data << m_members[i].Won_ThisSeason;
-			data << m_stat_rating; // (actually personal rating here /shrug)
+			data << m_members[i].PersonalRating;
 		}
 	}
 }
@@ -259,7 +260,7 @@ void ArenaTeam::SaveToDB()
 		{
 			ss << ",'" << m_members[i].Info->guid << " " << m_members[i].Played_ThisWeek << " "
 				<< m_members[i].Won_ThisWeek << " " << m_members[i].Played_ThisSeason << " "
-				<< m_members[i].Won_ThisSeason << "'";
+				<< m_members[i].Won_ThisSeason << " " << m_members[i].PersonalRating << "'";
 		}
 		else
 		{

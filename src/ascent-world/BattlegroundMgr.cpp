@@ -1509,6 +1509,8 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 				break;
 			}
 
+			int32 teamId = -1;
+			uint32 arenaTeamType = BattlegroundType-BATTLEGROUND_ARENA_2V2;
 			pGroup->Lock();
 			for(itx = pGroup->GetSubGroup(0)->GetGroupMembersBegin(); itx != pGroup->GetSubGroup(0)->GetGroupMembersEnd(); ++itx)
 			{
@@ -1534,9 +1536,24 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 						pGroup->Unlock();
 						return;
 					}
+					if(!(*itx)->m_loggedInPlayer->m_arenaTeams[arenaTeamType] || 
+						teamId > 0 && teamId != (*itx)->m_loggedInPlayer->m_arenaTeams[arenaTeamType]->m_id)
+					{
+						m_session->SystemMessage("All party members have to be in the same arena team.");
+						pGroup->Unlock();
+						return;
+					}
+					if(teamId < 0)
+						teamId = (*itx)->m_loggedInPlayer->m_arenaTeams[arenaTeamType]->m_id;
 
 					--maxplayers;
 				}
+			}
+			if(maxplayers != 0)
+			{
+				m_session->SystemMessage("You don't have enough players in your party");
+				pGroup->Unlock();
+				return;
 			}
 			WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
 			data << uint32(6);		// all arenas
