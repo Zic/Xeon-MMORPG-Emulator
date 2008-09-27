@@ -824,7 +824,6 @@ public:
 		return ( s == 1 || s == 5 || s == 8 );
 	}
 	void CalcDamage();
-	uint32 GetMainMeleeDamage(uint32 AP_owerride); //i need this for windfury
 
     const uint64& GetSelection( ) const { return m_curSelection; }
 	const uint64& GetTarget( ) const { return m_curTarget; }

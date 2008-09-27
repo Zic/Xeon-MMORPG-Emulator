@@ -61,6 +61,7 @@ public:
 	void HookFlagDrop(Player * plr, GameObject * obj) {}
 	void HookFlagStand(Player * plr, GameObject * obj) {}
 	void HookOnAreaTrigger(Player * plr, uint32 id);
+	void SetScore(uint32 teamId, uint32 score) {}
 
 	int32 GetFreeTeam()
 	{

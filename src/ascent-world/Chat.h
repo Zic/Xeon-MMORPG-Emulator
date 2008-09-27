@@ -293,6 +293,8 @@ protected:
 	bool HandleKillCommand(const char *args, WorldSession *m_session);
 	bool HandleKillByPlrCommand( const char *args , WorldSession *m_session );
 	bool HandleCreatureSpawnCommand(const char *args, WorldSession *m_session);
+	bool HandleReSpawnAllCommand(const char *args, WorldSession *m_session);
+	bool HandleCreatureRemoveCorpseCommand(const char *args, WorldSession *m_session);
 	bool HandleGOSelect(const char *args, WorldSession *m_session);
 	bool HandleGODelete(const char *args, WorldSession *m_session);
 	bool HandleGOSpawn(const char *args, WorldSession *m_session);

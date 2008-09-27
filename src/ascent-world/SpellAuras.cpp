@@ -1769,13 +1769,13 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 			Unit *caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
-				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize(29841,100);//fixed 100% chance
+				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize((apply) ? 29841:0,100);
 		}break;
 	case 29838:
 		{
 			Unit *caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
-				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize(29842,100);//fixed 100% chance
+				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize((apply) ? 29842:0,100);
 		}break;
 	//mage Frostbite talent
 	case 11071:
@@ -1784,7 +1784,7 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 			Unit *caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
-				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize(12494,mod->m_amount);
+				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize((apply) ? 12494:0,mod->m_amount);
 		}break;
 	//mage Magic Absorption
 	case 29441:

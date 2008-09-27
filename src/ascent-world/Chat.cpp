@@ -334,11 +334,11 @@ void CommandTableStorage::Init()
 
 	static ChatCommand BattlegroundCommandTable[] = 
 	{
-		{ "setbgscore",  'e', &ChatHandler::HandleSetBGScoreCommand,	"<Teamid> <Score> - Sets battleground score. 2 Arguments. ", NULL, 0, 0, 0},
+		{ "setscore",  'e', &ChatHandler::HandleSetBGScoreCommand,	"<Teamid> <Score> - Sets battleground score. 2 Arguments. ", NULL, 0, 0, 0},
 		{ "startbg",	 'e', &ChatHandler::HandleStartBGCommand,	   "Starts current battleground match.",  NULL, 0, 0, 0},
 		{ "pausebg",	 'e', &ChatHandler::HandlePauseBGCommand,	   "Pauses current battleground match.",  NULL, 0, 0, 0},
 		{ "bginfo",	  'e', &ChatHandler::HandleBGInfoCommnad,		"Displays information about current battleground.", NULL, 0, 0, 0},
-		{ "battleground",'e', &ChatHandler::HandleBattlegroundCommand,  "Shows BG Menu",					   NULL, 0, 0, 0 },
+		{ "menu",'e', &ChatHandler::HandleBattlegroundCommand,  "Shows BG Menu",					   NULL, 0, 0, 0 },
 		{ "setworldstate",'e',&ChatHandler::HandleSetWorldStateCommand, "<var> <val> - Var can be in hex. WS Value.", NULL, 0, 0, 0 },
 		{ "playsound",   'e', &ChatHandler::HandlePlaySoundCommand,	 "<val>. Val can be in hex.",		   NULL, 0, 0, 0 },
 		{ "setbfstatus", 'e', &ChatHandler::HandleSetBattlefieldStatusCommand,".setbfstatus - NYI.",		   NULL, 0, 0, 0 },
@@ -362,11 +362,13 @@ void CommandTableStorage::Init()
 		{ "come",		'n', &ChatHandler::HandleNpcComeCommand,	   ".npc come - Makes npc move to your position", NULL, 0, 0, 0 },
 		{ "return",	  'n', &ChatHandler::HandleNpcReturnCommand,	 ".npc return - Returns ncp to spawnpoint.", NULL, 0, 0, 0 },
 		{ "spawn", 'n', &ChatHandler::HandleCreatureSpawnCommand, ".npc spawn - Spawns npc of entry <id>", NULL, 0, 0, 0 },
+		{ "respawnall", 'n', &ChatHandler::HandleReSpawnAllCommand, ".npc respawnall - respawns all npcs on this map", NULL, 0, 0, 0 },
 		{ "spawnlink", 'n', &ChatHandler::HandleNpcSpawnLinkCommand, ".spawnlink sqlentry", NULL, 0, 0, 0 },
 		{ "possess", 'n', &ChatHandler::HandleNpcPossessCommand, ".npc possess - Possess an npc (mind control)", NULL, 0, 0, 0 },
 		{ "unpossess", 'n', &ChatHandler::HandleNpcUnPossessCommand, ".npc unpossess - Unposses any currently possessed npc.", NULL, 0, 0, 0 },
 		{ "select", 'n', &ChatHandler::HandleNpcSelectCommand, ".npc select - selects npc closest", NULL, 0, 0, 0 },
 		{ "cast", 'd', &ChatHandler::HandleMonsterCastCommand, ".npc cast <spellId> - Makes selected mob cast the specified spell on you.", NULL, 0, 0, 0 },
+		{ "removecorpse", 'n', &ChatHandler::HandleCreatureRemoveCorpseCommand, ".npc removecorpse - removes corpse of selected npc", NULL, 0, 0, 0 },
 		{ NULL,		  2, NULL,						   "",										   NULL, 0, 0  }
 	};
 	dupe_command_table(NPCCommandTable, _NPCCommandTable);

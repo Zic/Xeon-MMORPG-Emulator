@@ -569,4 +569,11 @@ void WarsongGulch::OnStart()
 	m_started = true;
 }
 
-
+void WarsongGulch::SetScore(uint32 teamId, uint32 score)
+{
+	if(teamId < 2 && score <= 3 && !m_ended && m_started)
+	{
+		m_scores[teamId] = score;
+		SetWorldState(teamId ? WSG_CURRENT_HORDE_SCORE : WSG_CURRENT_ALLIANCE_SCORE, score);
+	}
+}

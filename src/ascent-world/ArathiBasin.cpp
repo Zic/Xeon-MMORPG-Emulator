@@ -886,3 +886,12 @@ bool ArathiBasin::HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * p
 
 	return false;
 }
+
+void ArathiBasin::SetScore(uint32 teamId, uint32 score)
+{
+	if(teamId < 2 && score <= RESOURCES_WINVAL && !m_ended && m_started)
+	{
+		m_resources[teamId] = score;
+		SetWorldState(teamId ? AB_HORDE_RESOURCES : AB_ALLIANCE_RESOURCES, score);
+	}
+}

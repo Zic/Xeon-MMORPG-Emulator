@@ -342,7 +342,7 @@ void WorldSession::HandleSwapItemOpcode(WorldPacket& recv_data)
 				printf("HandleSwapItem: Error while adding item to dstslot\n");
 				if (!_player->GetItemInterface()->SafeAddItem(SrcItem, SrcInvSlot, SrcSlot))
 					delete SrcItem;
-				if (!_player->GetItemInterface()->SafeAddItem(DstItem, DstInvSlot, DstSlot))
+				if (!_player->GetItemInterface()->SafeAddItem(DstItem, DstInvSlot, DstSlot) && DstItem)
 					delete DstItem;
 				return;
 			}
@@ -354,7 +354,7 @@ void WorldSession::HandleSwapItemOpcode(WorldPacket& recv_data)
 			if(!result)
 			{
 				printf("HandleSwapItem: Error while adding item to srcslot\n");
-				if (!_player->GetItemInterface()->SafeAddItem(SrcItem, SrcInvSlot, SrcSlot))
+				if (!_player->GetItemInterface()->SafeAddItem(SrcItem, SrcInvSlot, SrcSlot) && SrcItem)
 					delete SrcItem;
 				if (!_player->GetItemInterface()->SafeAddItem(DstItem, DstInvSlot, DstSlot))
 					delete DstItem;

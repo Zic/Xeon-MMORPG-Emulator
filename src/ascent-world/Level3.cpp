@@ -2111,6 +2111,24 @@ bool ChatHandler::HandleIPUnBanCommand(const char * args, WorldSession * m_sessi
 	return true;
 }
 
+bool ChatHandler::HandleCreatureRemoveCorpseCommand(const char *args, WorldSession *m_session)
+{
+	Creature * crt = getSelectedCreature(m_session, false);
+	if(!crt)
+	{
+		RedSystemMessage(m_session, "Please select a creature before using this command.");
+		return true;
+	}
+	sEventMgr.ModifyEventTimeLeft(crt, EVENT_CREATURE_REMOVE_CORPSE, 0);
+	return true;
+}
+
+bool ChatHandler::HandleReSpawnAllCommand(const char *args, WorldSession *m_session)
+{
+	sEventMgr.ModifyEventTimeLeft(m_session->GetPlayer()->GetMapMgr(), EVENT_CREATURE_RESPAWN, 0);
+	return true;
+}
+
 bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_session)
 {
 	uint32 entry = atol(args);

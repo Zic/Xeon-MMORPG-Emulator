@@ -62,6 +62,7 @@ public:
 	void DropFlag(Player * plr);
 	void EventResetFlag();
 	void RepopPlayersOfTeam(int32 team, Creature * sh);
+	void SetScore(uint32 teamId, uint32 score);
 
 protected:
 	int32 m_CPStatus[EOTS_TOWER_COUNT];		

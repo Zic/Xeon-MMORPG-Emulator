@@ -53,4 +53,5 @@ public:
 	uint32 GetAllianceFlagHolderGUID() { return m_flagHolders[0]; }
 	uint32 GetHordeFlagHolderGUID() { return m_flagHolders[1]; }
 	void OnStart();
+	void SetScore(uint32 teamId, uint32 score);
 };

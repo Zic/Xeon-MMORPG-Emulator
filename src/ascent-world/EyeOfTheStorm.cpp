@@ -889,3 +889,12 @@ void EyeOfTheStorm::OnStart()
 	m_started = true;
 }
 
+void EyeOfTheStorm::SetScore(uint32 teamId, uint32 score)
+{
+	if(teamId < 2 && score <= 2000 && !m_ended && m_started)
+	{
+		m_points[teamId] = score;
+		SetWorldState( EOTS_WORLDSTATE_ALLIANCE_VICTORYPOINTS + teamId, score );
+	}
+}
+

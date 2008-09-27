@@ -21,6 +21,17 @@
 
 bool ChatHandler::HandleSetBGScoreCommand(const char* args, WorldSession *m_session)
 {
+	CBattleground * bg = m_session->GetPlayer()->m_bg;
+	if(!bg)
+	{
+		RedSystemMessage(m_session, "You need to be inside BG to use this command.");
+		return true;
+	}
+	uint32 teamId = 0;
+	uint32 score = 0;
+	if( sscanf(args, "%u %u", &teamId, &score) != 2 || teamId > 1)
+		return false;
+	bg->SetScore(teamId, score);
 	return true;
 }
 
@@ -70,6 +81,11 @@ bool ChatHandler::HandleSetWorldStateCommand(const char* args, WorldSession *m_s
 
 bool ChatHandler::HandlePlaySoundCommand(const char* args, WorldSession *m_session)
 {
+	uint32 sound = 0;
+	if(sscanf(args,"%u", &sound) != 1)
+		return false;
+	if(m_session->GetPlayer()->m_bg)
+		m_session->GetPlayer()->m_bg->PlaySoundToAll(sound);
 	return true;
 }
 
@@ -82,5 +98,8 @@ bool ChatHandler::HandleSetBattlefieldStatusCommand(const char* args, WorldSessi
 
 bool ChatHandler::HandleBattlegroundExitCommand(const char* args, WorldSession* m_session)
 {
+	Player * plr = m_session->GetPlayer();
+	if(plr->m_bg && plr->IsInWorld())
+		plr->m_bg->RemovePlayer(plr, false);
 	return true;
 }
