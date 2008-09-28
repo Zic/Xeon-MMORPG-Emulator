@@ -2511,29 +2511,30 @@ void Spell::HandleAddAura(uint64 guid)
 	std::map<uint32,Aura*>::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
 	if(itr!=Target->tmpAura.end())
 	{
-		if(itr->second)
+		Aura * aura = itr->second;
+		Target->tmpAura.erase(itr);
+		if(aura)
 		{
-			if(itr->second->GetSpellProto()->procCharges>0)
+			if(aura->GetSpellProto()->procCharges>0)
 			{
 				Aura *aur=NULL;
-				for(int i=0;i<itr->second->GetSpellProto()->procCharges-1;i++)
+				for(int i=0;i<aura->GetSpellProto()->procCharges-1;i++)
 				{
-					aur = new Aura(itr->second->GetSpellProto(),itr->second->GetDuration(),itr->second->GetCaster(),itr->second->GetTarget());
+					aur = new Aura(aura->GetSpellProto(),aura->GetDuration(),aura->GetCaster(),aura->GetTarget());
 					Target->AddAura(aur);
 					aur=NULL;
 				}
-				if(!(itr->second->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
+				if(!(aura->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
 				{
 					SpellCharge charge;
-					charge.count=itr->second->GetSpellProto()->procCharges;
-					charge.spellId=itr->second->GetSpellId();
-					charge.ProcFlag=itr->second->GetSpellProto()->procFlags;
+					charge.count=aura->GetSpellProto()->procCharges;
+					charge.spellId=aura->GetSpellId();
+					charge.ProcFlag=aura->GetSpellProto()->procFlags;
 					charge.lastproc = 0;
-					Target->m_chargeSpells.insert(make_pair(itr->second->GetSpellId(),charge));
+					Target->m_chargeSpells.insert(make_pair(aura->GetSpellId(),charge));
 				}
 			}
-			Target->AddAura(itr->second); // the real spell is added last so the modifier is removed last
-			Target->tmpAura.erase(itr);
+			Target->AddAura(aura); // the real spell is added last so the modifier is removed last
 		}
 	}
 }
