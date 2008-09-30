@@ -3725,6 +3725,22 @@ exit:
 			value += (uint32)(u_caster->GetRAP()*0.2);
 		}
 	}
+	else if( m_spellInfo->NameHash == SPELL_HASH_REND)
+	{	//additional [0.05201 * ((MWB + mwb) / 2 + AP / 14 * MWS)] (e.g. 5% average main hand damage)
+		if( p_caster )
+		{
+			Item *it;
+			if(p_caster->GetItemInterface())
+			{
+				it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+				if(it && it->GetProto() && it->GetDurability() != 0)
+				{
+					float avgWeaponDmg = (it->GetProto()->Damage[0].Max + it->GetProto()->Damage[0].Min) / 2 + p_caster->GetAP() * it->GetProto()->Delay / 14000;
+					value += float2int32(0.05201f * avgWeaponDmg / 7); // Divide by 7 to get bonus for each tick
+				}
+			}
+		}
+	}
 	else if( m_spellInfo->Id == 19574 && i == 0 && u_caster && u_caster->HasAura(34692) )
 	{
 		u_caster->CastSpell(u_caster,34471,true);
