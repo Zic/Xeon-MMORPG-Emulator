@@ -693,7 +693,7 @@ void Spell::SpellTargetScriptedEffects2(uint32 i, uint32 j)
 
 }
 
-/// Spell Target Handling for type 37: all Members of the targets party
+/// Spell Target Handling for type 37: all Members of the targets party inside given range
 void Spell::SpellTargetPartyMember(uint32 i, uint32 j)
 {
 	if(!m_caster->IsInWorld())
@@ -704,7 +704,8 @@ void Spell::SpellTargetPartyMember(uint32 i, uint32 j)
 	Player * Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		return;
-
+	float r = GetRadius(i);
+	r *= r;
 	SubGroup * subgroup = Target->GetGroup() ?
 		Target->GetGroup()->GetSubGroup(Target->GetSubGroup()) : 0;
 
@@ -713,7 +714,8 @@ void Spell::SpellTargetPartyMember(uint32 i, uint32 j)
 		Target->GetGroup()->Lock();
 		for(GroupMembersSet::iterator itr = subgroup->GetGroupMembersBegin(); itr != subgroup->GetGroupMembersEnd(); ++itr)
 		{
-			if((*itr)->m_loggedInPlayer)
+			if((*itr)->m_loggedInPlayer && 
+					IsInrange(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),(*itr)->m_loggedInPlayer,r))
 				SafeAddTarget(tmpMap,(*itr)->m_loggedInPlayer->GetGUID());
 		}
 		Target->GetGroup()->Unlock();
