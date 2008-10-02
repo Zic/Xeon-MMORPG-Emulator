@@ -527,7 +527,7 @@ bool World::SetInitialWorldSettings()
 		InspectTalentTabSize[talent_info->TalentTree] += talent_max_rank;
 	}
 
-	for( uint32 i = 1; i < dbcTalentTab.GetNumRows(); ++i )
+	for( uint32 i = 0; i < dbcTalentTab.GetNumRows(); ++i )
 	{
 		TalentTabEntry const* tab_info = dbcTalentTab.LookupRow( i );
 		if( tab_info == NULL )

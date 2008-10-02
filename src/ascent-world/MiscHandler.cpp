@@ -1491,8 +1491,9 @@ void WorldSession::HandleInspectOpcode( WorldPacket & recv_data )
 	_player->SetSelection( guid );
 
     WorldPacket data( SMSG_INSPECT_TALENTS, 4 + talent_points );
-
+	data << player->GetNewGUID();
     data << uint32( talent_points );
+	uint32 talents_start_pos = data.wpos();
 
 	uint32 talent_tab_pos = 0;
 	uint32 talent_max_rank;
@@ -1552,8 +1553,10 @@ void WorldSession::HandleInspectOpcode( WorldPacket & recv_data )
 			rank_index = ( uint32( ( talent_index + talent_max_rank - 1 ) / 7 ) ) * 8  + ( uint32( ( talent_index + talent_max_rank - 1 ) % 7 ) );
 			rank_slot = rank_index / 8;
 			rank_offset = rank_index % 8;
-			mask = 1 << rank_offset;
-			data.put< uint8 >( 4 + rank_slot, mask & 0xFF );
+
+            mask = data.read<uint8>(talents_start_pos + rank_slot);
+            mask |= (1 << rank_offset);
+			data.put< uint8 >(talents_start_pos + rank_slot, mask & 0xFF );
 
 			sLog.outDebug( "HandleInspectOpcode: talent(%i) talent_max_rank(%i) rank_id(%i) talent_index(%i) talent_tab_pos(%i) rank_index(%i) rank_slot(%i) rank_offset(%i)", talent_info->TalentID, talent_max_rank, talent_info->RankID[talent_max_rank-1], talent_index, talent_tab_pos, rank_index, rank_slot, rank_offset );
 		}

@@ -301,7 +301,7 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
     Player* player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
 	if( player == NULL )
 	{
-		sLog.outError( "HandleInspectHonorStatsOpcode : guid was null" );
+		sLog.outError( "HandleInspectArenaStatsOpcode : guid was null" );
 		return;
 	}
 
@@ -315,16 +315,20 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
             ArenaTeam* team = objmgr.GetArenaTeamById( id );
             if( team != NULL )
 			{
-				WorldPacket data( MSG_INSPECT_ARENA_STATS, 8 + 1 + 4 * 5 );
+				WorldPacket data( MSG_INSPECT_ARENA_STATS, 8 + 1 + 4 * 6 );
 				data << player->GetGUID();
-				data << team->m_type;
+				data << (uint8)team->m_type;
 				data << team->m_id;
 				data << team->m_stat_rating;
 				data << team->m_stat_gamesplayedweek;
 				data << team->m_stat_gameswonweek;
 				data << team->m_stat_gamesplayedseason;
+				uint32 personal_rating = 0;
+				ArenaTeamMember * member = team->GetMemberByGuid(GUID_LOPART(guid));
+				if(member)
+					personal_rating = member->PersonalRating;
+				data << personal_rating;
 				SendPacket( &data );
-
 			}
         }
     }
