@@ -358,7 +358,7 @@ public:
 	void BuildPvPUpdateDataPacket(WorldPacket * data);
 	virtual uint8 Rated() { return 0; }
 	void OnPlayerPushed(Player* plr);
-	virtual void SetScore(uint32 teamId, uint32 score) = 0 {}
+	virtual void SetScore(uint32 teamId, uint32 score) = 0;
 };
 
 #define BattlegroundManager CBattlegroundManager::getSingleton( )
