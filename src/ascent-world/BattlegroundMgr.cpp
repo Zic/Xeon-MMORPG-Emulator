@@ -1472,6 +1472,8 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 			m_session->SystemMessage("You must be the party leader to add a group to an arena.");
 			return;
 		}
+		if(!pGroup->m_disbandOnNoMembers) // Is a BG/Arena created group, shouldn't be able to queue
+			return;
 
 		GroupMembersSet::iterator itx;
 		if(!rated_match)
