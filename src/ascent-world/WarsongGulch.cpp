@@ -368,7 +368,7 @@ void WarsongGulch::HookOnHK(Player * plr)
 
 void WarsongGulch::OnAddPlayer(Player * plr)
 {
-	if(!m_started)
+	if(!m_started && plr->IsInWorld())
 		plr->CastSpell(plr, BG_PREPARATION, true);
 }
 

@@ -617,7 +617,7 @@ void ArathiBasin::HookOnHK(Player * plr)
 
 void ArathiBasin::OnAddPlayer(Player * plr)
 {
-	if(!m_started)
+	if(!m_started && plr->IsInWorld())
 		plr->CastSpell(plr, BG_PREPARATION, true);
 }
 

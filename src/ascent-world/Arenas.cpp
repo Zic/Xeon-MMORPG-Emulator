@@ -63,7 +63,7 @@ Arena::~Arena()
 
 void Arena::OnAddPlayer(Player * plr)
 {
-	if( !m_started )
+	if( !m_started  && plr->IsInWorld())
 	{
 		/* cast arena readyness buff */
 		if(plr->isDead())
@@ -94,7 +94,7 @@ void Arena::OnAddPlayer(Player * plr)
 	plr->GetItemInterface()->RemoveAllConjured();
 	plr->ResetAllCooldowns();
 
-	if( !m_started )
+	if( !m_started  && plr->IsInWorld())
 		plr->CastSpell(plr, ARENA_PREPARATION, true);
 
 	UpdatePlayerCounts();
@@ -184,6 +184,8 @@ void Arena::OnCreate()
 		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
+		SetWorldState(0x0BBA, 0x0001);
+
 			  }break;
 
 		/* blades edge arena */
@@ -215,6 +217,8 @@ void Arena::OnCreate()
 		obj->SetFloatValue(GAMEOBJECT_ROTATION_03, -0.426569f);
 		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
+
+		SetWorldState(0x09F3, 0x0001);
 			  }break;
 
 		/* nagrand arena */
@@ -247,6 +251,8 @@ void Arena::OnCreate()
 		obj->SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, 100);
 		m_gates.insert(obj);
 
+		SetWorldState(0x0A11, 0x0001);
+
 			  }break;
 	}
 
@@ -263,23 +269,6 @@ void Arena::OnCreate()
 	SetWorldState(0x09F1	,0x0000);
 	SetWorldState(0x09F0	,0x0000);
 	SetWorldState(0x0C0D	,0x017B);
-	switch(m_mapMgr->GetMapId())
-	{
-		/* loraedeon */
-	case 572:
-		SetWorldState(0x0BBA, 0x0001);
-		break;
-
-		/* blades edge arena */
-	case 562:
-		SetWorldState(0x09F3, 0x0001);
-		break;
-
-		/* nagrand arena */
-	case 559:
-		SetWorldState(0x0A11, 0x0001);
-		break;
-	}
 }
 
 void Arena::OnStart()
@@ -441,7 +430,8 @@ void Arena::Finish()
 		for(; itr != m_players[i].end(); itr++)
 		{
 			Player * plr = (Player *)(*itr);
-			sHookInterface.OnArenaFinish(plr, plr->m_arenaTeams[m_arenateamtype], victorious, rated_match);
+			if(plr != NULL)
+				sHookInterface.OnArenaFinish(plr, plr->m_arenaTeams[m_arenateamtype], victorious, rated_match);
 		}
 	}
 }

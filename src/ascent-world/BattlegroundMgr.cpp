@@ -138,7 +138,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 
 	pck >> guid >> bgtype >> instance;
 	
-	if(bgtype >= BATTLEGROUND_NUM_TYPES || !bgtype)
+	if(bgtype >= BATTLEGROUND_NUM_TYPES || !bgtype || !guid)
 	{
 		m_session->Disconnect();
 		return;		// cheater!
@@ -307,7 +307,7 @@ void CBattlegroundManager::EventQueueUpdate()
 
 			if(IS_ARENA(i))
 			{
-#ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG //this will break rated matches
+#ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
 				if(tempPlayerVec[0].size() >= 1)
 #else
 				if(tempPlayerVec[0].size() >= BGMinimumPlayers[i])
@@ -349,7 +349,18 @@ void CBattlegroundManager::EventQueueUpdate()
 						bg = CreateInstance(i,j);
 						//Hackfix against WPE users. We should check where the real problem is.
 						if(!bg)
-							continue;
+						{
+							for(k = 0; k < 2; ++k)
+							{
+								while(tempPlayerVec[k].size())
+								{
+									plr = *tempPlayerVec[k].begin();
+									tempPlayerVec[k].pop_front();
+									ErasePlayerFromList(plr->GetLowGUID(), &m_queuedPlayers[i][j]);
+								}
+							}
+						continue;
+						}
 						
 						// push as many as possible in
 						for(k = 0; k < 2; ++k)
@@ -404,6 +415,9 @@ void CBattlegroundManager::EventQueueUpdate()
 
 				group1 = objmgr.GetGroupById(*itz);
 				m_queuedGroups[i].erase(itz);
+				
+				if(group1->GetLeader()->m_loggedInPlayer == NULL || group1->GetSubGroup(0) == NULL)
+					group1 = NULL;
 			}
 
 			while(group2 == NULL)
@@ -422,14 +436,17 @@ void CBattlegroundManager::EventQueueUpdate()
 					m_instanceLock.Release();
 					return;
 				}
-
 				group2 = objmgr.GetGroupById(*itz);
 				m_queuedGroups[i].erase(itz);
+
+				if(group2->GetLeader()->m_loggedInPlayer == NULL || group2->GetSubGroup(0) == NULL)
+					group2 = NULL;
 			}
 
 			Arena * ar = ((Arena*)CreateInstance(i,LEVEL_GROUP_70));
 			if(!ar)
 				continue;
+
 			GroupMembersSet::iterator itx;
 			ar->rated_match=true;
 
@@ -442,7 +459,6 @@ void CBattlegroundManager::EventQueueUpdate()
 						ar->AddPlayer((*itx)->m_loggedInPlayer, 0);
 						(*itx)->m_loggedInPlayer->SetTeam(0);
 					}
-
 				}
 			}
 

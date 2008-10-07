@@ -348,7 +348,7 @@ void EyeOfTheStorm::HookOnMount(Player * plr)
 
 void EyeOfTheStorm::OnAddPlayer(Player * plr)
 {
-	if(!m_started)
+	if(!m_started && plr->IsInWorld())
 		plr->CastSpell(plr, BG_PREPARATION, true);
 }
 
