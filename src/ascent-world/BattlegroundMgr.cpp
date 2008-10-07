@@ -778,7 +778,8 @@ void CBattleground::OnPlayerPushed(Player * plr)
 
 	plr->ProcessPendingUpdates();
 	
-	if( plr->GetGroup() == NULL && !plr->m_isGmInvisible)
+	if( plr->GetGroup() == NULL && !Rated() && !plr->m_isGmInvisible &&
+		plr->m_bgTeam >= 0 && plr->m_bgTeam <= 1)
 		m_groups[plr->m_bgTeam]->AddMember( plr->m_playerInfo );
 }
 
