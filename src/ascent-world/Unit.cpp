@@ -36,6 +36,7 @@ Unit::Unit()
 	m_TotemSlots[1] = NULL;
 	m_TotemSlots[2] = NULL;
 	m_TotemSlots[3] = NULL;
+	m_TotemSlots[4] = NULL;
 	m_ObjectSlots[0] = 0;
 	m_ObjectSlots[1] = 0;
 	m_ObjectSlots[2] = 0;

@@ -2313,6 +2313,7 @@ void Spell::SpellEffectSummon(uint32 i) // Summon
 				SpellEffectSummonGuardian(i);
 				return;
 			}
+		case 121:
 		case 63:
 		case 81:
 		case 82:
@@ -4533,6 +4534,10 @@ void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
 		x += 1.5f;
 		y += 1.5f;
 		slot = 2;
+		break;
+	case 121: // Non shaman totem
+		x += 1.5f;
+		slot = 4;
 		break;
 	default:
 		return;

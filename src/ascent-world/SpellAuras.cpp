@@ -6326,6 +6326,7 @@ void Aura::SpellAuraModIncreaseHealthPerc( bool apply )
 	{
 		mod->fixed_amount[0] = m_target->GetModPUInt32Value( UNIT_FIELD_MAXHEALTH, mod->m_amount );
 		m_target->ModUnsigned32Value( UNIT_FIELD_MAXHEALTH, mod->fixed_amount[0] );
+		m_target->ModUnsigned32Value( UNIT_FIELD_HEALTH, mod->fixed_amount[0] );
 		if( m_target->IsPlayer() )
 			( ( Player* )m_target )->SetHealthFromSpell( ( ( Player* )m_target )->GetHealthFromSpell() + mod->fixed_amount[0] ); 
 	}
@@ -6334,6 +6335,9 @@ void Aura::SpellAuraModIncreaseHealthPerc( bool apply )
 		m_target->ModUnsigned32Value( UNIT_FIELD_MAXHEALTH, -mod->fixed_amount[0] );
 		if( m_target->IsPlayer() )
 			( ( Player* )m_target )->SetHealthFromSpell( ( ( Player* )m_target )->GetHealthFromSpell() - mod->fixed_amount[0] ); 
+		uint32 mh = m_target->GetUInt32Value( UNIT_FIELD_MAXHEALTH );
+		if( m_target->GetUInt32Value( UNIT_FIELD_HEALTH ) > mh )
+			m_target->SetUInt32Value( UNIT_FIELD_HEALTH, mh );
 	}
 }
 

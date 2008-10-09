@@ -35,6 +35,7 @@ bool SERVER_DECL Rand(float);
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 #define DIMINISHING_GROUPS 12
+#define TOTEM_SLOTS 5
 
 class Aura;
 class Spell;
@@ -821,7 +822,7 @@ public:
 	Unit* create_guardian(uint32 guardian_entry,uint32 duration,float angle);//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
 
 	uint32 m_addDmgOnce;
-	Creature *m_TotemSlots[4];
+	Creature *m_TotemSlots[TOTEM_SLOTS];
 	uint32 m_ObjectSlots[4];
 	uint32 m_triggerSpell;
 	uint32 m_triggerDamage;

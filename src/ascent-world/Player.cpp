@@ -3304,7 +3304,7 @@ void Player::RemoveFromWorld()
 	//clear buyback
 	GetItemInterface()->EmptyBuyBack();
 	
-	for(uint32 x=0;x<4;x++)
+	for(uint32 x=0;x<TOTEM_SLOTS;x++)
 	{
 		if(m_TotemSlots[x])
 			m_TotemSlots[x]->TotemExpire();
