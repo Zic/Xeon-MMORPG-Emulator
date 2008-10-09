@@ -8554,7 +8554,7 @@ void Player::CalcDamage()
 				ap_bonus = GetRAP()/14000.0f;
 				bonus = ap_bonus*it->GetProto()->Delay;
 				
-				if(GetUInt32Value(PLAYER_AMMO_ID))
+				if(GetUInt32Value(PLAYER_AMMO_ID) && it->GetProto()->SubClass != 16) // thrown weapons don't use ammo
 				{
 					ItemPrototype * xproto=ItemPrototypeStorage.LookupEntry(GetUInt32Value(PLAYER_AMMO_ID));
 					if(xproto)

@@ -3603,7 +3603,8 @@ void Spell::RemoveItems()
 	} 
 
 	// Ammo Removal
-	if( m_spellInfo->Flags3 == FLAGS3_REQ_RANGED_WEAPON || m_spellInfo->Flags4 & FLAGS4_PLAYER_RANGED_SPELLS)
+	if( (m_spellInfo->Flags3 == FLAGS3_REQ_RANGED_WEAPON || m_spellInfo->Flags4 & FLAGS4_PLAYER_RANGED_SPELLS) &&
+		m_spellInfo->EquippedItemSubClass != 0x10000) // Not for thrown
 	{
 		p_caster->GetItemInterface()->RemoveItemAmt_ProtectPointer(p_caster->GetUInt32Value(PLAYER_AMMO_ID), 1, &i_caster);
 	}
