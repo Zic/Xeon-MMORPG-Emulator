@@ -6056,7 +6056,9 @@ void Player::EventTaxiInterpolate()
 {
 	if(!m_CurrentTaxiPath || m_mapMgr==NULL) return;
 
-	float x,y,z;
+	float x = 0; 
+	float y = 0;
+	float z = 0;
 	uint32 ntime = getMSTime();
 
 	if (ntime > m_taxi_ride_time)
@@ -6073,9 +6075,9 @@ void Player::EventTaxiInterpolate()
 void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 {
 	int32 mapchangeid = -1;
-	float mapchangex;
-	float mapchangey;
-	float mapchangez;
+	float mapchangex = 0;
+	float mapchangey = 0;
+	float mapchangez = 0;
 	uint32 cn = m_taxiMapChangeNode;
 
 	m_taxiMapChangeNode = 0;
@@ -8756,6 +8758,12 @@ void Player::Possess(Unit * pTarget)
 	}
 
 	m_noInterrupt++;
+
+	/* send "switch mover" packet */
+	WorldPacket data1(SMSG_DEATH_NOTIFY_OBSOLETE, 10);		/* burlex: this should be renamed SMSG_SWITCH_ACTIVE_MOVER :P */
+	data1 << pTarget->GetNewGUID() << uint8(1);
+	m_session->SendPacket(&data1);
+
 	SetUInt64Value(UNIT_FIELD_CHARM, pTarget->GetGUID());
 	SetUInt64Value(PLAYER_FARSIGHT, pTarget->GetGUID());
 	pTarget->GetMapMgr()->ChangeFarsightLocation(this, pTarget, true);
@@ -8767,11 +8775,6 @@ void Player::Possess(Unit * pTarget)
 	pTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED_CREATURE);
 
 	SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOCK_PLAYER);
-	
-	/* send "switch mover" packet */
-	WorldPacket data1(SMSG_DEATH_NOTIFY_OBSOLETE, 10);		/* burlex: this should be renamed SMSG_SWITCH_ACTIVE_MOVER :P */
-	data1 << pTarget->GetNewGUID() << uint8(1);
-	m_session->SendPacket(&data1);
 
 	/* update target faction set */
 	pTarget->_setFaction();
@@ -8849,7 +8852,7 @@ void Player::UnPossess()
 
 	/* send "switch mover" packet */
 	WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 10);
-	data << GetNewGUID() << uint8(1);
+	data << pTarget->GetNewGUID() << uint8(0);
 	m_session->SendPacket(&data);
 
 	if(pTarget->m_temp_summon)
