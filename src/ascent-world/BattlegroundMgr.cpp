@@ -416,7 +416,7 @@ void CBattlegroundManager::EventQueueUpdate()
 				group1 = objmgr.GetGroupById(*itz);
 				m_queuedGroups[i].erase(itz);
 				
-				if(group1->GetLeader()->m_loggedInPlayer == NULL || group1->GetSubGroup(0) == NULL)
+				if(group1 == NULL || group1->GetLeader()->m_loggedInPlayer == NULL || group1->GetSubGroup(0) == NULL)
 					group1 = NULL;
 			}
 
@@ -439,7 +439,7 @@ void CBattlegroundManager::EventQueueUpdate()
 				group2 = objmgr.GetGroupById(*itz);
 				m_queuedGroups[i].erase(itz);
 
-				if(group2->GetLeader()->m_loggedInPlayer == NULL || group2->GetSubGroup(0) == NULL)
+				if(group2 == NULL || group2->GetLeader()->m_loggedInPlayer == NULL || group2->GetSubGroup(0) == NULL)
 					group2 = NULL;
 			}
 
