@@ -57,7 +57,7 @@ Unit::Unit()
 	m_slowdown = 0;
 	m_mountedspeedModifier=0;
 	m_maxSpeed = 0;
-	for(uint32 x=0;x<27;x++)
+	for(uint32 x=0;x<NUM_MECHANIC;x++)
 	{
 		MechanicsDispels[x]=0;
 		MechanicsResistancesPCT[x]=0;

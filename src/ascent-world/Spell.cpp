@@ -555,7 +555,7 @@ uint8 Spell::DidHit(uint32 effindex,Unit* target)
 	/*************************************************************************/
 	/* Check if the target is immune to this mechanic                        */
 	/*************************************************************************/
-	if( m_spellInfo->MechanicsType<27 && u_victim->MechanicsDispels[m_spellInfo->MechanicsType])
+	if( m_spellInfo->MechanicsType<NUM_MECHANIC && u_victim->MechanicsDispels[m_spellInfo->MechanicsType])
 	{
 		return SPELL_DID_HIT_IMMUNE;
 	}
@@ -564,7 +564,7 @@ uint8 Spell::DidHit(uint32 effindex,Unit* target)
 	/************************************************************************/
 	/* Check if the target has a % resistance to this mechanic              */
 	/************************************************************************/
-	if( m_spellInfo->MechanicsType<27)
+	if( m_spellInfo->MechanicsType<NUM_MECHANIC)
 	{
 		float res;
 		if(p_victim)
@@ -2433,7 +2433,7 @@ void Spell::HandleEffects(uint64 guid, uint32 i)
 	}
 
 	// Check if the target has Mechanic Immunity or a % resistance to this mechanic
-	if( unitTarget && m_spellInfo->EffectMechanic[i] < 27 )
+	if( unitTarget && m_spellInfo->EffectMechanic[i] < NUM_MECHANIC )
 	{
 		float res = unitTarget->MechanicsResistancesPCT[m_spellInfo->EffectMechanic[i]];
 		if(Rand(res) || unitTarget->MechanicsDispels[m_spellInfo->EffectMechanic[i]])

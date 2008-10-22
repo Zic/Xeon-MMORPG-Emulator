@@ -36,6 +36,7 @@ bool SERVER_DECL Rand(float);
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 #define DIMINISHING_GROUPS 12
 #define TOTEM_SLOTS 5
+#define NUM_MECHANIC 31
 
 class Aura;
 class Spell;
@@ -900,9 +901,9 @@ public:
 	uint64 stalkedby;
 	uint32 dispels[10];
 	bool trackStealth;
-	uint32 MechanicsDispels[27];
-	float MechanicsResistancesPCT[27]; 
-	float ModDamageTakenByMechPCT[27];
+	uint32 MechanicsDispels[NUM_MECHANIC];
+	float MechanicsResistancesPCT[NUM_MECHANIC]; 
+	float ModDamageTakenByMechPCT[NUM_MECHANIC];
 	//int32 RangedDamageTakenPct; 
 
 	//SM
