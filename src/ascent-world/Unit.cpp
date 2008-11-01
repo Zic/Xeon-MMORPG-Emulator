@@ -21,6 +21,7 @@
 
 Unit::Unit()
 {
+	m_chain = NULL;
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
 	m_duelWield = false;
@@ -238,6 +239,8 @@ Unit::~Unit()
 {  
 	RemoveAllAuras();
 
+	if (m_chain)
+		m_chain->RemoveUnit(this);
 	if(SM_CriticalChance != 0) delete [] SM_CriticalChance ;
 	if(SM_FDur != 0) delete [] SM_FDur ;//flat
 	if(SM_PDur != 0) delete [] SM_PDur ;//pct
@@ -5021,6 +5024,19 @@ void Unit::ReplaceAIInterface(AIInterface *new_interface)
 	m_aiInterface = new_interface; 
 }
 
-
+void UnitChain::AddUnit(Unit* u)
+{
+	m_units.insert(u);
+	u->m_chain = this;
+}
+ 
+void UnitChain::RemoveUnit(Unit* u)
+{
+	m_units.erase(u);
+	u->m_chain = NULL;
+ 
+	if (m_units.size() == 0 && !m_persist)
+		delete this;
+}
 
 

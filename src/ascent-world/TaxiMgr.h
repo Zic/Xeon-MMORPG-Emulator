@@ -79,7 +79,7 @@ protected:
 };
 
 
-class TaxiMgr :  public Singleton < TaxiMgr >
+class SERVER_DECL TaxiMgr :  public Singleton < TaxiMgr >
 {
 public:
 	TaxiMgr() 

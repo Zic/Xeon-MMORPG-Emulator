@@ -146,6 +146,26 @@ AIInterface::~AIInterface()
 			delete (*itr);
 }
 
+void AIInterface::HandleChainAggro(Unit* u)
+{
+	if (!m_Unit->IsInWorld() || !m_Unit->isAlive() || m_Unit->m_chain == NULL)
+		return;
+
+	for (std::set<Unit*>::iterator itr=m_Unit->m_chain->m_units.begin(); itr!=m_Unit->m_chain->m_units.end(); ++itr)
+	{
+		if (!(*itr)->IsInWorld() || !(*itr)->isAlive() || (m_Unit->m_chain->m_chainrange != 0 && m_Unit->CalcDistance(*itr) > m_Unit->m_chain->m_chainrange))
+			continue;
+
+		if ((*itr)->GetAIInterface()->GetAITargets()->find(u) == (*itr)->GetAIInterface()->GetAITargets()->end())
+		{
+			if((*itr)->GetAIInterface()->getAIState() == STATE_IDLE || (*itr)->GetAIInterface()->getAIState() == STATE_FOLLOWING)
+				(*itr)->GetAIInterface()->HandleEvent(EVENT_ENTERCOMBAT, u, 0);
+			else
+				(*itr)->GetAIInterface()->GetAITargets()->insert(TargetMap::value_type(u, 1));
+		}
+	}
+}
+
 void AIInterface::Init(Unit *un, AIType at, MovementType mt, Unit *owner)
 {
 	ASSERT(at == AITYPE_PET || at == AITYPE_TOTEM);
@@ -223,6 +243,21 @@ void AIInterface::HandleEvent(uint32 event, Unit* pUnit, uint32 misc1)
 							 m_Unit->GetMapMgr()->AddCombatInProgress(m_Unit->GetGUID());
 						}
 					}
+				}
+
+				HandleChainAggro(pUnit);
+
+				//give 1 threat to this unit if were not on the threat list
+				if (m_aiTargets.find(pUnit)==m_aiTargets.end())
+				{
+					m_aiTargets.insert(TargetMap::value_type(pUnit, 1));
+				}
+ 			}break;
+		case EVENT_DAMAGEDEALT:
+			{
+				if (m_aiTargets.find(pUnit)==m_aiTargets.end())
+				{
+					m_aiTargets.insert(TargetMap::value_type(pUnit, 1));
 				}
 			}break;
 		case EVENT_LEAVECOMBAT:
@@ -325,6 +360,7 @@ void AIInterface::HandleEvent(uint32 event, Unit* pUnit, uint32 misc1)
 			{
 				if( pUnit == NULL ) return;
 
+				HandleChainAggro(pUnit);
 				CALL_SCRIPT_EVENT(m_Unit, OnDamageTaken)(pUnit, float(misc1));
 				if(!modThreatByPtr(pUnit, misc1))
 				{
@@ -681,7 +717,8 @@ void AIInterface::_UpdateTargets()
 	}
 	else if(m_AIState != STATE_IDLE && m_AIState != STATE_SCRIPTIDLE)
 	{
-		FindFriends(16.0f/*4.0f*/);
+		//FindFriends(16.0f/*4.0f*/);
+		FindFriends(100.0f/*10.0f*/);
 	}
 
 	if( m_updateAssist )
@@ -1580,7 +1617,8 @@ bool AIInterface::FindFriends(float dist)
 			continue;
 		}
 
-		if( isCombatSupport( m_Unit, pUnit ) && ( pUnit->GetAIInterface()->getAIState() == STATE_IDLE || pUnit->GetAIInterface()->getAIState() == STATE_SCRIPTIDLE ) )//Not sure
+		//if( isCombatSupport( m_Unit, pUnit ) && ( pUnit->GetAIInterface()->getAIState() == STATE_IDLE || pUnit->GetAIInterface()->getAIState() == STATE_SCRIPTIDLE ) )//Not sure
+		if( isCombatSupport( m_Unit, pUnit ) )//Not sure
 		{
 			if( m_Unit->GetDistanceSq(pUnit) < dist)
 			{

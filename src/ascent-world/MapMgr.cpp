@@ -1224,7 +1224,8 @@ bool MapMgr::_CellActive(uint32 x, uint32 y)
 
 			if (objCell)
 			{
-				if (objCell->HasPlayers())
+				//if (objCell->HasPlayers())
+				if (objCell->HasPlayers() || m_forcedcells.find(objCell) != m_forcedcells.end())
 				{
 					return true;
 				}
@@ -1929,3 +1930,14 @@ DynamicObject * MapMgr::CreateDynamicObject()
 	return new DynamicObject(HIGHGUID_TYPE_DYNAMICOBJECT,(++m_DynamicObjectHighGuid));
 }
 
+void MapMgr::AddForcedCell(MapCell* c)
+{
+	m_forcedcells.insert(c);
+	UpdateCellActivity(c->GetPositionX(), c->GetPositionY(), 1);
+}
+
+void MapMgr::RemoveForcedCell(MapCell* c)
+{
+	m_forcedcells.erase(c);
+	UpdateCellActivity(c->GetPositionX(), c->GetPositionY(), 1);
+}
