@@ -6263,8 +6263,10 @@ void Player::CalcStat(uint32 type)
 	int32 pos = (BaseStats[type] * StatModPctPos[type] ) / 100 + FlatStatModPos[type];
 	int32 neg = (BaseStats[type] * StatModPctNeg[type] ) / 100 + FlatStatModNeg[type];
 	res = pos + BaseStats[type] - neg;
-	pos += ( res * static_cast< Player* >( this )->TotalStatModPctPos[type] ) / 100;
-	neg += ( res * static_cast< Player* >( this )->TotalStatModPctNeg[type] ) / 100;
+	if( res <= 0 )
+		res = 1;
+	pos += ( res * (int32) static_cast< Player* >( this )->TotalStatModPctPos[type] ) / 100;
+	neg += ( res * (int32) static_cast< Player* >( this )->TotalStatModPctNeg[type] ) / 100;
 	res = pos + BaseStats[type] - neg;
 	if( res <= 0 )
 		res = 1;
