@@ -354,10 +354,17 @@ void LootMgr::LoadLootTables(const char * szTableName,LootStore * LootTable)
 	delete result;
 }
 
-void LootMgr::PushLoot(StoreLootList *list,Loot * loot, bool heroic)
+void LootMgr::PushLoot(StoreLootList *list, Loot * loot, bool heroic, bool disenchant)
 {
 	uint32 i;
 	uint32 count;
+	float nrand = 0;
+	float ncount;
+
+	if (disenchant) {
+		nrand = RandomUInt(10000) / 100.0f;
+		ncount = 0;
+	}
 
 	for( uint32 x = 0; x < list->count; x++ )
 	{
@@ -367,7 +374,16 @@ void LootMgr::PushLoot(StoreLootList *list,Loot * loot, bool heroic)
 			if(chance == 0.0f) continue;
 			
 			ItemPrototype *itemproto = list->items[x].item.itemproto;
-			if( Rand( chance * sWorld.getRate( RATE_DROP0 + itemproto->Quality ) ) )//|| itemproto->Class == ITEM_CLASS_QUEST)
+			int lucky;
+
+			if (disenchant) {
+				lucky = nrand >= ncount && nrand <= (ncount+chance);
+				ncount+= chance;
+			} else {
+				lucky = Rand( chance * sWorld.getRate( RATE_DROP0 + itemproto->Quality ) );
+			}
+
+			if( lucky )
 			{
 				if( list->items[x].mincount == list->items[x].maxcount )
 					count = list->items[x].maxcount;
@@ -538,7 +554,7 @@ void LootMgr::FillCreatureLoot(Loot * loot,uint32 loot_id, bool heroic)
 	
 	LootStore::iterator tab =CreatureLoot.find(loot_id);
 	if( CreatureLoot.end()==tab)return;
-	else PushLoot(&tab->second,loot, heroic);
+	else PushLoot(&tab->second,loot, heroic, false);
 }
 
 void LootMgr::FillGOLoot(Loot * loot,uint32 loot_id, bool heroic)
@@ -548,7 +564,7 @@ void LootMgr::FillGOLoot(Loot * loot,uint32 loot_id, bool heroic)
 
 	LootStore::iterator tab =GOLoot.find(loot_id);
 	if( GOLoot.end()==tab)return;
-	else PushLoot(&tab->second,loot, heroic);
+	else PushLoot(&tab->second,loot, heroic, false);
 }
 
 void LootMgr::FillFishingLoot(Loot * loot,uint32 loot_id)
@@ -558,27 +574,27 @@ void LootMgr::FillFishingLoot(Loot * loot,uint32 loot_id)
 
     LootStore::iterator tab = FishingLoot.find(loot_id);
     if( FishingLoot.end() == tab) return;
-    else PushLoot(&tab->second, loot, false);
+    else PushLoot(&tab->second, loot, false, false);
 }
 
 void LootMgr::FillSkinningLoot(Loot * loot,uint32 loot_id)
 {
- loot->items.clear();
- loot->gold = 0;
+	loot->items.clear();
+	loot->gold = 0;
 
- LootStore::iterator tab = SkinningLoot.find(loot_id);
- if( SkinningLoot.end() == tab)return;
- else PushLoot(&tab->second, loot, false);
+	LootStore::iterator tab = SkinningLoot.find(loot_id);
+	if( SkinningLoot.end() == tab)return;
+	else PushLoot(&tab->second, loot, false, false);
 }
 
 void LootMgr::FillPickpocketingLoot(Loot * loot,uint32 loot_id)
 {
- loot->items.clear();
- loot->gold =0;
+	loot->items.clear();
+	loot->gold =0;
 
- LootStore::iterator tab =PickpocketingLoot.find(loot_id);
- if( PickpocketingLoot.end()==tab)return;
- else PushLoot(&tab->second,loot,false);
+	LootStore::iterator tab =PickpocketingLoot.find(loot_id);
+	if( PickpocketingLoot.end()==tab)return;
+	else PushLoot(&tab->second, loot, false, false);
 }
 
 void LootMgr::FillDisenchantingLoot(Loot *loot, uint32 loot_id)
@@ -590,7 +606,7 @@ void LootMgr::FillDisenchantingLoot(Loot *loot, uint32 loot_id)
 	if( DisenchantingLoot.end()==tab)
 		return;
 	else 
-		PushLoot(&tab->second,loot,false);
+		PushLoot(&tab->second, loot, false, true);
 }
 
 void LootMgr::FillProspectingLoot(Loot *loot, uint32 loot_id)
@@ -602,7 +618,7 @@ void LootMgr::FillProspectingLoot(Loot *loot, uint32 loot_id)
 	if( ProspectingLoot.end()==tab)
 		return;
 	else
-		PushLoot(&tab->second,loot,false);
+		PushLoot(&tab->second, loot, false, false);
 }
 
 bool LootMgr::CanGODrop(uint32 LootId,uint32 itemid)
@@ -922,7 +938,7 @@ void LootMgr::FillItemLoot(Loot *loot, uint32 loot_id)
 
 	LootStore::iterator tab =ItemLoot.find(loot_id);
 	if( ItemLoot.end()==tab)return;
-	else PushLoot(&tab->second,loot,false);
+	else PushLoot(&tab->second, loot, false, false);
 }
 
 int32 LootRoll::event_GetInstanceID()

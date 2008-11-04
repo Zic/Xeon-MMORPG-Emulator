@@ -160,7 +160,7 @@ public:
  
 private:
 	void LoadLootTables(const char * szTableName,LootStore * LootTable);
-	void PushLoot(StoreLootList *list,Loot * loot, bool heroic);
+	void PushLoot(StoreLootList *list,Loot * loot, bool heroic, bool disenchant);
 	
 	map<uint32, RandomPropertyVector> _randomprops;
 	map<uint32, RandomSuffixVector> _randomsuffix;
