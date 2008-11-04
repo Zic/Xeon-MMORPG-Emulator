@@ -63,19 +63,6 @@ Arena::~Arena()
 
 void Arena::OnAddPlayer(Player * plr)
 {
-	if( !m_started  && plr->IsInWorld())
-	{
-		/* cast arena readyness buff */
-		if(plr->isDead())
-			plr->ResurrectPlayer();
-
-		plr->SetUInt32Value(UNIT_FIELD_HEALTH, plr->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-		plr->SetUInt32Value(UNIT_FIELD_POWER1, plr->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-		plr->SetUInt32Value(UNIT_FIELD_POWER4, plr->GetUInt32Value(UNIT_FIELD_MAXPOWER4));
-		sEventMgr.AddEvent(plr, &Player::FullHPMP, EVENT_PLAYER_UPDATE, 500, 1, 0);
-		sEventMgr.AddEvent(plr, &Player::ResetAllCooldowns, EVENT_PLAYER_UPDATE, 500, 1, 0);
-	}
-
 	plr->m_deathVision = true;
 
 	// remove all buffs (exclude talents, include flasks)
