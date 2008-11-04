@@ -10509,3 +10509,37 @@ void Player::Social_SendFriendList(uint32 flag)
 	m_session->SendPacket(&data);
 }
 
+uint32 Player::GetMaxPersonalRating()
+{
+	uint32 maxrating = 0;
+	int i;
+
+	ASSERT(m_playerInfo != NULL);
+
+	for (i=0; i<NUM_ARENA_TEAM_TYPES; i++)
+	{
+		if(m_arenaTeams[i] != NULL)
+		{
+			ArenaTeamMember *m = m_arenaTeams[i]->GetMemberByGuid(m_playerInfo->guid);
+			if (m)
+			{
+				if (m->PersonalRating > maxrating) maxrating = m->PersonalRating;
+			}
+			else
+			{
+				sLog.outError("%s: GetMemberByGuid returned NULL for player guid = %u\n", __FUNCTION__, m_playerInfo->guid);
+			}
+		}
+	}
+
+	return maxrating;
+}
+
+void Player::FullHPMP()
+{
+	if(isDead())
+		ResurrectPlayer();
+    SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+    SetUInt32Value(UNIT_FIELD_POWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    SetUInt32Value(UNIT_FIELD_POWER4, GetUInt32Value(UNIT_FIELD_MAXPOWER4));
+}

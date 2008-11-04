@@ -396,6 +396,7 @@ struct ItemExtendedCostEntry
     uint32 arena;
     uint32 item[5];
     uint32 count[5];
+	uint32 personalrating;
 };
 
 struct TalentEntry
