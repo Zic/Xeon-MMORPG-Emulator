@@ -70,7 +70,7 @@ const static CreateBattlegroundFunc BGCFuncs[BATTLEGROUND_NUM_TYPES] = {
 
 const static uint32 BGMinimumPlayers[BATTLEGROUND_NUM_TYPES] = {
 	0,							// 0
-	0,							// AV
+	20,							// AV
 	5,							// WSG
 	5,							// AB
 	4,							// 2v2

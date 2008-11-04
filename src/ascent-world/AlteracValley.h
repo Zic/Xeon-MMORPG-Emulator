@@ -18,3 +18,38 @@
  */
 
 
+class AlteracValley : public CBattleground
+{
+public:
+
+protected:
+	list<GameObject*> m_gates;
+
+	uint32 m_scores[2];
+	
+public:
+	AlteracValley(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t);
+	~AlteracValley();
+
+	void HookOnPlayerDeath(Player * plr);
+	void HookFlagDrop(Player * plr, GameObject * obj);
+	void HookFlagStand(Player * plr, GameObject * obj);
+	void HookOnMount(Player * plr);
+	void HookOnAreaTrigger(Player * plr, uint32 id);
+	bool HookHandleRepop(Player * plr);
+	void OnAddPlayer(Player * plr);
+	void OnRemovePlayer(Player * plr);
+	void OnCreate();
+	void HookOnPlayerKill(Player * plr, Unit * pVictim);
+	void HookOnHK(Player * plr);
+	void SpawnBuff(uint32 x);
+	LocationVector GetStartingCoords(uint32 Team);
+
+	static CBattleground * Create(MapMgr * m, uint32 i, uint32 l, uint32 t) { return new AlteracValley(m, i, l, t); }
+
+	const char * GetName() { return "Alterac Valley"; }
+	void OnStart();
+
+	void DecrementReinforcements(uint32 teamId, uint32 amt);
+	void SetScore(uint32 teamId, uint32 score);
+};
