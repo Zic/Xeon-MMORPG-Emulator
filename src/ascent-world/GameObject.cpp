@@ -30,6 +30,7 @@ GameObject::GameObject(uint64 guid)
 	m_wowGuid.Init(GetGUID());
  
 	SetFloatValue( OBJECT_FIELD_SCALE_X, 1);//info->Size  );
+	SetUInt32Value( GAMEOBJECT_ANIMPROGRESS, 100);
 
 	counter=0;//not needed at all but to prevent errors that var was not inited, can be removed in release
 
