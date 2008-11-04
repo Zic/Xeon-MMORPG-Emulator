@@ -1170,6 +1170,12 @@ public:
 	Player * m_redirectSpellPackets;
 	void UpdateVisibility();
 
+	struct
+	{
+		int32 amt;
+		int32 max;
+	} m_soulSiphon;
+
 	//solo target auras
 	uint32 polySpell;
 	uint32 m_special_state; //flags for special states (stunned,rooted etc)

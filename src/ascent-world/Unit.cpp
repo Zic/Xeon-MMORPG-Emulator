@@ -233,6 +233,9 @@ Unit::Unit()
 	m_chargeSpellsInUse=false;
 	m_spellsbusy=false;
 	m_interruptedRegenTime = 0;
+
+	m_soulSiphon.amt = 0;
+	m_soulSiphon.max = 0;
 }
 
 Unit::~Unit()

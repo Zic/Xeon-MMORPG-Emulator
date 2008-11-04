@@ -39,7 +39,11 @@ public:
 		if(mValue)
 		{
 			uint64 value;
+			#ifdef WIN32
 			sscanf(mValue,I64FMTD,&value);
+			#else
+			sscanf(mValue,I64FMTD,(long long unsigned int*)&value);
+			#endif
 			return value;
 		}
 		else

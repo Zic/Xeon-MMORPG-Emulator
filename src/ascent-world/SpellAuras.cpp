@@ -1957,7 +1957,18 @@ void Aura::SpellAuraDummy(bool apply)
 			_ptarget->ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,val);
 			_ptarget->CalcDamage();
 		}break;
-
+	case 17804: // Warlock: Soul Siphon
+	case 17805:
+		{
+			Unit *caster = GetUnitCaster();
+			if(caster)
+			{
+				if( apply )
+					caster->m_soulSiphon.amt+= mod->m_amount;
+				else
+					caster->m_soulSiphon.amt-= mod->m_amount;
+			}
+		}break;
 	}
 }
 
@@ -4163,8 +4174,89 @@ void Aura::EventPeriodicLeech(uint32 amount)
 		}
 
 		amount += bonus;
-	
+
 		uint32 Amount = (uint32)min( amount, m_target->GetUInt32Value( UNIT_FIELD_HEALTH ) );
+
+		// Apply bonus from [Warlock] Soul Siphon
+		if (m_caster->m_soulSiphon.amt)
+		{
+			// Use hashmap to prevent counting duplicate auras (stacked ones, from the same unit)
+			map_t auras = NULL;
+			uint32 bonus;
+			int32 pct;
+			int32 count=0;
+
+			for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
+			{
+				if(m_target->m_auras[x])
+				{
+					Aura *aura = m_target->m_auras[x];
+					if (aura->GetSpellProto()->SpellFamilyName == 5)
+					{
+						skilllinespell *sk;
+
+						sk = objmgr.GetSpellSkill(aura->GetSpellId());
+						if(sk && sk->skilline == SKILL_AFFLICTION)
+						{
+							map_t ids = NULL;
+							int found = 0;
+
+							if (auras == NULL)
+							{
+								// No skill yet, create the hashmaps
+								auras = hashmap64_new();
+								ids = hashmap_new();
+								hashmap64_put(auras, aura->GetCasterGUID(), (any_t)ids);
+							}
+							else
+							{
+								if (hashmap64_get(auras, aura->GetCasterGUID(), &ids) != MAP_OK)
+								{
+									ids = hashmap_new();
+									hashmap64_put(auras, aura->GetCasterGUID(), (any_t)ids);
+								}
+								else
+								{
+									if (hashmap_get(ids, aura->GetSpellId(), NULL) == MAP_OK)
+									{
+										found = 1;
+									}
+								}
+							}
+
+							if (found == 0)
+							{
+								hashmap_put(ids, aura->GetSpellId(), NULL);
+							}
+						}
+		            }
+				}
+			}
+
+			if (auras)
+			{
+				for (int i=0; i<hashmap64_length(auras); i++)
+				{
+					uint64 guid;
+					map_t ids;
+
+					if (hashmap64_get_index(auras, i, (int64*)&guid, &ids) == MAP_OK)
+					{
+						count+= hashmap_length(ids);
+						hashmap_free(ids);
+					}
+				}
+
+				hashmap64_free(auras);
+			}
+
+			pct = count * m_caster->m_soulSiphon.amt;
+			if (pct > m_caster->m_soulSiphon.max)
+				pct = m_caster->m_soulSiphon.max;
+			bonus = (Amount * pct) / 100;
+			Amount+= bonus;
+		}
+
 		uint32 newHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + Amount ;
 		
 		uint32 mh = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -6113,6 +6205,17 @@ void Aura::SpellAuraOverrideClassScripts(bool apply)
 			{
 				//this shoul actually add a new functionality to the spell and not override it. There is a lot to decode and to be done here
 			}break;*/
+		case 4992: // Warlock: Soul Siphon
+		case 4993:
+		{
+			if(m_target)
+			{
+				if( apply )
+					m_target->m_soulSiphon.max+= mod->m_amount;
+				else
+					m_target->m_soulSiphon.max-= mod->m_amount;
+			}
+		}break;
 	default:
 		sLog.outError("Unknown override report to devs: %u", mod->m_miscValue);
 	};
