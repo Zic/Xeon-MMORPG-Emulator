@@ -482,6 +482,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ascent-shared\hashmap.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascent-shared\hashmap.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascent-shared\Auth\MD5.cpp"
 				>
 			</File>

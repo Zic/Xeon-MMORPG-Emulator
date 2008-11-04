@@ -33,6 +33,8 @@ libshared_a_SOURCES = \
     ascent_getopt.cpp \
     CrashHandler.h \
     CrashHandler.cpp \
+    hashmap.cpp \
+    hashmap.h \
     Auth/BigNumber.cpp \
     Auth/BigNumber.h \
     Auth/MD5.cpp \
