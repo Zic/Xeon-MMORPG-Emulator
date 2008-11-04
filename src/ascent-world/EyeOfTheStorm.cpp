@@ -306,6 +306,13 @@ void EyeOfTheStorm::HookFlagDrop(Player * plr, GameObject * obj)
 	if( !m_dropFlag->IsInWorld() )
 		return;
 
+	// check forcedreaction 1059, meaning do we recently dropped a flag?
+	map<uint32,uint32>::iterator itr = plr->m_forcedReactions.find(1059);
+	if (itr != plr->m_forcedReactions.end())
+	{
+		return;
+	}
+
 	m_dropFlag->RemoveFromWorld(false);
 	plr->CastSpell( plr->GetGUID(), EOTS_NETHERWING_FLAG_SPELL, true );
 
@@ -375,6 +382,8 @@ void EyeOfTheStorm::DropFlag(Player * plr)
 {
 	if( m_flagHolder != plr->GetLowGUID() )
 		return;
+
+	plr->CastSpell(plr, BG_RECENTLY_DROPPED_FLAG, true);
 
 	m_dropFlag->SetPosition( plr->GetPosition() );
 	m_dropFlag->PushToWorld( m_mapMgr );

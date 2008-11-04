@@ -239,6 +239,8 @@ void WarsongGulch::DropFlag(Player * plr)
 	SetWorldState(plr->GetTeam() ? WSG_ALLIANCE_FLAG_CAPTURED : WSG_HORDE_FLAG_CAPTURED, 1);
 	plr->m_bgHasFlag = false;
 
+	plr->CastSpell(plr, BG_RECENTLY_DROPPED_FLAG, true);
+
 	sEventMgr.AddEvent( this, &WarsongGulch::ReturnFlag, plr->GetTeam(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + plr->GetTeam(), 60000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 
 	if( plr->GetTeam() == 1 )
@@ -276,6 +278,13 @@ void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
 			SetWorldState(plr->GetTeam() ? WSG_ALLIANCE_FLAG_CAPTURED : WSG_HORDE_FLAG_CAPTURED, 1);
 			PlaySoundToAll(plr->GetTeam() ? SOUND_HORDE_RETURNED : SOUND_ALLIANCE_RETURNED);
 		}
+		return;
+	}
+
+	// check forcedreaction 1059, meaning do we recently dropped a flag?
+	map<uint32,uint32>::iterator itr = plr->m_forcedReactions.find(1059);
+	if (itr != plr->m_forcedReactions.end())
+	{
 		return;
 	}
 
@@ -327,6 +336,13 @@ void WarsongGulch::HookFlagStand(Player * plr, GameObject * obj)
 	if(m_flagHolders[plr->GetTeam()] || m_homeFlags[plr->GetTeam()] != obj)
 	{
 		// cheater!
+		return;
+	}
+
+	// check forcedreaction 1059, meaning do we recently dropped a flag?
+	map<uint32,uint32>::iterator itr = plr->m_forcedReactions.find(1059);
+	if (itr != plr->m_forcedReactions.end())
+	{
 		return;
 	}
 

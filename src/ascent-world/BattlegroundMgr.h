@@ -68,6 +68,7 @@ struct BGScore
 #define AB_ALLIANCE_CAPTUREBASE			 0x6F3
 #define AB_MAX_SCORE						0x6F4
 
+#define BG_RECENTLY_DROPPED_FLAG       42792
 #define BG_PREPARATION 44521
 #define BG_REVIVE_PREPARATION	44535
 #define RESURRECT_SPELL			21074   // Spirit Healer Res
