@@ -14335,6 +14335,11 @@ void ApplyNormalFixes()
 
 		// Insert mage spell fixes here
 
+		// Hypothermia: undispellable
+		if( sp->NameHash == SPELL_HASH_HYPOTHERMIA )
+			sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
+
+
 		//////////////////////////////////////////
 		// WARLOCK								//
 		//////////////////////////////////////////
@@ -21697,5 +21702,8 @@ void ApplyNormalFixes()
 	// Insert druid spell fixes here
 
 
-
+	// Recently Dropped Flag
+	sp = dbcSpell.LookupEntryForced( 42792 );
+	if (sp != NULL)
+		sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
 }

@@ -371,6 +371,11 @@ Aura::Aura( SpellEntry* proto, int32 duration, Object* caster, Unit* target )
 	m_dynamicValue = 0;
 	m_areaAura = false;
 
+	if( m_spellProto->c_is_flags & SPELL_FLAG_IS_FORCEDDEBUFF )
+		SetNegative( 100 );
+	else if( m_spellProto->c_is_flags & SPELL_FLAG_IS_FORCEDBUFF )
+		SetPositive( 100 );
+
 	if( caster->IsUnit() )
 	{
 		if( m_spellProto->buffIndexType > 0 && caster->IsPlayer() )
