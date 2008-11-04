@@ -2416,6 +2416,19 @@ void Unit::AddAura(Aura *aur)
 			GetAIInterface()->AttackReaction(pCaster, 1, aur->GetSpellId());
 		}*/
 	}
+
+	if (aur->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_ON_INVINCIBLE)
+	{
+		Unit * pCaster = aur->GetUnitCaster();
+		if(pCaster)
+		{
+			pCaster->RemoveStealth();
+			pCaster->RemoveInvisibility();
+			pCaster->RemoveAllAuraByNameHash(SPELL_HASH_ICE_BLOCK);
+			pCaster->RemoveAllAuraByNameHash(SPELL_HASH_DIVINE_SHIELD);
+			pCaster->RemoveAllAuraByNameHash(SPELL_HASH_BLESSING_OF_PROTECTION);
+		}
+	}
 }
 
 bool Unit::RemoveAura(Aura *aur)
@@ -5019,4 +5032,20 @@ void UnitChain::RemoveUnit(Unit* u)
 		delete this;
 }
 
+void Unit::RemoveStealth()
+{
+	if( m_stealth != 0 )
+	{
+		RemoveAura( m_stealth );
+		m_stealth = 0;
+	}
+}
 
+void Unit::RemoveInvisibility()
+{
+	if( m_invisibility != 0 )
+	{
+		RemoveAura( m_invisibility );
+		m_invisibility = 0;
+	}
+}

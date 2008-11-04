@@ -1268,6 +1268,18 @@ void Spell::cast(bool check)
 				p_caster->setAttackTimer( 0, true );
 				p_caster->setAttackTimer( 0, false );
 			}
+
+			// Arathi Basin opening spell, remove stealth, invisibility, etc. 
+			// hacky but haven't found a better way that works
+			// Note: Same stuff but for picking flags is over AddAura
+			if (p_caster->m_bg && m_spellInfo->Id == 21651)
+			{
+				p_caster->RemoveStealth();
+				p_caster->RemoveInvisibility();
+				p_caster->RemoveAllAuraByNameHash(SPELL_HASH_ICE_BLOCK);
+				p_caster->RemoveAllAuraByNameHash(SPELL_HASH_DIVINE_SHIELD);
+				p_caster->RemoveAllAuraByNameHash(SPELL_HASH_BLESSING_OF_PROTECTION);
+			}
 		}
 
 		/*SpellExtraInfo* sp = objmgr.GetSpellExtraData(m_spellInfo->Id);

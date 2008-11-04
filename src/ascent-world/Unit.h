@@ -771,6 +771,9 @@ public:
 	float detectRange;
 
 	// Invisibility
+	ASCENT_INLINE void SetInvisibility(uint32 id) { m_invisibility = id; }
+	ASCENT_INLINE bool IsInvisible() { return (m_invisible!=0 ? true : false); }
+	uint32 m_invisibility;
 	bool m_invisible;
 	uint8 m_invisFlag;
 	int32 m_invisDetect[INVIS_FLAG_TOTAL];
@@ -1079,14 +1082,8 @@ public:
 	void MoveToWaypoint(uint32 wp_id);	
 	void PlaySpellVisual(uint64 target, uint32 spellVisual);
 
-	void RemoveStealth()
-	{
-		if( m_stealth != 0 )
-		{
-			RemoveAura( m_stealth );
-			m_stealth = 0;
-		}
-	}
+	void RemoveStealth();
+	void RemoveInvisibility();
 
 	bool m_isPet;
 	uint32 m_stealth;
