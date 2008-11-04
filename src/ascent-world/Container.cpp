@@ -133,7 +133,7 @@ bool Container::HasItems()
 
 bool Container::AddItem(int8 slot, Item *item)
 {
-	if((uint32)slot > m_itemProto->ContainerSlots)
+	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
 		return false;
 
 	//ASSERT(m_Slot[slot] == NULL);
@@ -232,7 +232,8 @@ void Container::SwapItems(int8 SrcSlot, int8 DstSlot)
 
 Item *Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool destroy)
 {
-	ASSERT((uint32)slot < GetProto()->ContainerSlots);
+	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
+		return false;
 
 	Item *pItem = m_Slot[slot];
 
@@ -261,7 +262,8 @@ Item *Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool destroy)
 
 bool Container::SafeFullRemoveItemFromSlot(int8 slot)
 {
-	ASSERT((uint32)slot < GetProto()->ContainerSlots);
+	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
+		return false;
 
 	Item *pItem = m_Slot[slot];
 
