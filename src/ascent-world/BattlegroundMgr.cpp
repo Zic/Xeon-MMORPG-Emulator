@@ -23,7 +23,6 @@
 #define ENABLE_WSG
 //#define ENABLE_AV
 #define ENABLE_EOTS
-//#define ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
 #define ALLOWED_DISTANCE_AT_START 1600 // 40 yards
 extern DayWatcherThread * dw;
 
@@ -83,7 +82,7 @@ CBattlegroundManager::CBattlegroundManager() : EventableObject()
 {
 	m_maxBattlegroundId = 0;
 	memset(m_queuedPlayersCount, 0, BATTLEGROUND_NUM_TYPES*MAX_LEVEL_GROUP*2*sizeof(uint32));
-	sEventMgr.AddEvent(this, &CBattlegroundManager::EventQueueUpdate, EVENT_BATTLEGROUND_QUEUE_UPDATE, 15000, 0,0);
+	sEventMgr.AddEvent(this, &CBattlegroundManager::EventQueueUpdate, false, EVENT_BATTLEGROUND_QUEUE_UPDATE, 15000, 0,0);
 }
 
 CBattlegroundManager::~CBattlegroundManager()
@@ -200,7 +199,7 @@ void ErasePlayerFromList(uint32 guid, list<uint32>* l)
 	}
 }
 
-void CBattlegroundManager::EventQueueUpdate()
+void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 {
 	deque<Player*> tempPlayerVec[2];
 	uint32 i,j,k;
@@ -307,11 +306,8 @@ void CBattlegroundManager::EventQueueUpdate()
 
 			if(IS_ARENA(i))
 			{
-#ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
-				if(tempPlayerVec[0].size() >= 1)
-#else
-				if(tempPlayerVec[0].size() >= BGMinimumPlayers[i])
-#endif
+				if((forceStart && tempPlayerVec[0].size() >= 1) ||
+				    tempPlayerVec[0].size() >= BGMinimumPlayers[i])
 				{
 					if(CanCreateInstance(i,j))
 					{
@@ -336,13 +332,11 @@ void CBattlegroundManager::EventQueueUpdate()
 			}
 			else
 			{
-#ifdef ONLY_ONE_PERSON_REQUIRED_TO_JOIN_DEBUG
-				if(tempPlayerVec[0].size() >= 1 ||
-					tempPlayerVec[1].size() >= 1)
-#else
-				if(tempPlayerVec[0].size() >= BGMinimumPlayers[i] &&
-					tempPlayerVec[1].size() >= BGMinimumPlayers[i])
-#endif
+				if((forceStart && 
+				   (tempPlayerVec[0].size() >= 1 ||
+					tempPlayerVec[1].size() >= 1)) ||
+					(tempPlayerVec[0].size() >= BGMinimumPlayers[i] &&
+					 tempPlayerVec[1].size() >= BGMinimumPlayers[i]))
 				{
 					if(CanCreateInstance(i,j))
 					{

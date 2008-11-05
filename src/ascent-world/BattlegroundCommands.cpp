@@ -103,3 +103,9 @@ bool ChatHandler::HandleBattlegroundExitCommand(const char* args, WorldSession* 
 		plr->m_bg->RemovePlayer(plr, false);
 	return true;
 }
+
+bool ChatHandler::HandleBattlegroundForcestartCommand(const char* args, WorldSession* m_session)
+{
+	BattlegroundManager.EventQueueUpdate(true);
+	return true;
+}

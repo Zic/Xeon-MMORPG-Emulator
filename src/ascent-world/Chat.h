@@ -382,6 +382,7 @@ protected:
 	bool HandleModifyValueCommand(const char* args, WorldSession* m_session);
 	bool HandleModifyBitCommand(const char* args, WorldSession* m_session);
 	bool HandleBattlegroundExitCommand(const char* args, WorldSession* m_session);
+	bool HandleBattlegroundForcestartCommand(const char* args, WorldSession* m_session);
 	bool HandleExitInstanceCommand(const char* args, WorldSession* m_session);
 	bool HandleCooldownCheatCommand(const char* args, WorldSession* m_session);
 	bool HandleCastTimeCheatCommand(const char* args, WorldSession* m_session);

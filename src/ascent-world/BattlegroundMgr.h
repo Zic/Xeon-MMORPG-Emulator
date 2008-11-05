@@ -158,7 +158,7 @@ public:
 	void OnPlayerLogout(Player * plr);
 
 	/* Handler On Update Event */
-	void EventQueueUpdate();
+	void EventQueueUpdate(bool forceStart);
 
 	/* Handle Battleground Join */
 	void HandleBattlegroundJoin(WorldSession * m_session, WorldPacket & pck);

@@ -334,15 +334,16 @@ void CommandTableStorage::Init()
 
 	static ChatCommand BattlegroundCommandTable[] = 
 	{
-		{ "setscore",  'e', &ChatHandler::HandleSetBGScoreCommand,	"<Teamid> <Score> - Sets battleground score. 2 Arguments. ", NULL, 0, 0, 0},
-		{ "startbg",	 'e', &ChatHandler::HandleStartBGCommand,	   "Starts current battleground match.",  NULL, 0, 0, 0},
-		{ "pausebg",	 'e', &ChatHandler::HandlePauseBGCommand,	   "Pauses current battleground match.",  NULL, 0, 0, 0},
-		{ "bginfo",	  'e', &ChatHandler::HandleBGInfoCommnad,		"Displays information about current battleground.", NULL, 0, 0, 0},
-		{ "menu",'e', &ChatHandler::HandleBattlegroundCommand,  "Shows BG Menu",					   NULL, 0, 0, 0 },
-		{ "setworldstate",'e',&ChatHandler::HandleSetWorldStateCommand, "<var> <val> - Var can be in hex. WS Value.", NULL, 0, 0, 0 },
-		{ "playsound",   'e', &ChatHandler::HandlePlaySoundCommand,	 "<val>. Val can be in hex.",		   NULL, 0, 0, 0 },
-		{ "setbfstatus", 'e', &ChatHandler::HandleSetBattlefieldStatusCommand,".setbfstatus - NYI.",		   NULL, 0, 0, 0 },
-		{ "leave",	   'e', &ChatHandler::HandleBattlegroundExitCommand, "Leaves the current battleground.", NULL, 0, 0, 0 },
+		{ "setscore",      'e', &ChatHandler::HandleSetBGScoreCommand,	"<Teamid> <Score> - Sets battleground score. 2 Arguments. ", NULL, 0, 0, 0},
+		{ "startbg",	   'e', &ChatHandler::HandleStartBGCommand,	   "Starts current battleground match.",  NULL, 0, 0, 0},
+		{ "pausebg",	   'e', &ChatHandler::HandlePauseBGCommand,	   "Pauses current battleground match.",  NULL, 0, 0, 0},
+		{ "bginfo",	       'e', &ChatHandler::HandleBGInfoCommnad,		"Displays information about current battleground.", NULL, 0, 0, 0},
+		{ "menu",          'e', &ChatHandler::HandleBattlegroundCommand,  "Shows BG Menu",					   NULL, 0, 0, 0 },
+		{ "setworldstate", 'e', &ChatHandler::HandleSetWorldStateCommand, "<var> <val> - Var can be in hex. WS Value.", NULL, 0, 0, 0 },
+		{ "playsound",     'e', &ChatHandler::HandlePlaySoundCommand,	 "<val>. Val can be in hex.",		   NULL, 0, 0, 0 },
+		{ "setbfstatus",   'e', &ChatHandler::HandleSetBattlefieldStatusCommand,".setbfstatus - NYI.",		   NULL, 0, 0, 0 },
+		{ "leave",	       'e', &ChatHandler::HandleBattlegroundExitCommand, "Leaves the current battleground.", NULL, 0, 0, 0 },
+		{ "forcestart",    'e', &ChatHandler::HandleBattlegroundForcestartCommand, "Forcestart current battlegrounds.", NULL, 0, 0, 0 },
 		{ NULL,			0, NULL,									 "",									NULL, 0, 0  }
 	};
 	dupe_command_table(BattlegroundCommandTable, _BattlegroundCommandTable);
