@@ -778,6 +778,24 @@ public:
 	uint8 m_invisFlag;
 	int32 m_invisDetect[INVIS_FLAG_TOTAL];
 
+    /************************************************************************/
+    /* Stun Immobilize                                                      */
+    /************************************************************************/
+	uint32 trigger_on_stun;				// second wind warrior talent
+	uint32 trigger_on_stun_chance;
+
+	void SetTriggerStunOrImmobilize(uint32 newtrigger,uint32 new_chance);
+    void EventStunOrImmobilize();
+
+    /************************************************************************/
+    /* Chill                                                                */
+    /************************************************************************/
+	uint32 trigger_on_chill;			//mage "Frostbite" talent chill
+	uint32 trigger_on_chill_chance;
+
+	void SetTriggerChill(uint32 newtrigger, uint32 new_chance);
+    void EventChill(Unit *proc_target);
+
 	bool HasAura(uint32 spellid);
 	bool HasAuraVisual(uint32 visualid);//not spell id!!!
 	bool HasActiveAura(uint32 spelllid);

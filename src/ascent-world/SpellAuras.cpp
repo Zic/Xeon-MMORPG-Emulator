@@ -528,6 +528,7 @@ const char* SpellAuraNames[TOTAL_SPELL_AURAS] = {
 //	"MOD_ENEMY_DODGE",									// 251
 };
 
+
 /*
 ASCENT_INLINE void ApplyFloatSM(float ** m,float v,uint32 mask, float def)
 {
@@ -836,6 +837,7 @@ void Aura::ApplyModifiers( bool apply )
 		{
 			sLog.outDebug( "WORLD: target=%u, Spell Aura id=%u (%s), SpellId=%u, i=%u, apply=%s, duration=%u, miscValue=%d, damage=%d",
 				m_target->GetLowGUID(),mod->m_type, SpellAuraNames[mod->m_type], m_spellProto->Id, mod->i, apply ? "true" : "false",GetDuration(),mod->m_miscValue,mod->m_amount);
+
 			(*this.*SpellAuraHandler[mod->m_type])(apply);
 		}
 		else
@@ -884,6 +886,27 @@ void Aura::ApplyModifiers( bool apply )
 				}
 			}
 		}
+	}
+}
+
+void Aura::UpdateModifiers( )
+{
+	for( uint32 x = 0; x < m_modcount; x++ )
+	{
+		mod = &m_modList[x];
+
+		if(mod->m_type<TOTAL_SPELL_AURAS)
+		{
+			sLog.outDebug( "WORLD: Update Aura mods : target = %u , Spell Aura id = %u (%s), SpellId  = %u, i = %u, duration = %u, damage = %d",
+				m_target->GetLowGUID(),mod->m_type, SpellAuraNames[mod->m_type], m_spellProto->Id, mod->i, GetDuration(),mod->m_amount);
+			switch (mod->m_type)
+			{
+				case 33: UpdateAuraModDecreaseSpeed(); break;
+
+			}
+		}
+		else
+			sLog.outError("Unknown Aura id %d", (uint32)mod->m_type);
 	}
 }
 
@@ -2044,7 +2067,7 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 			Unit *caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
-				static_cast< Player* >(caster)->SetTriggerStunOrImmobilize((apply) ? 12494:0,mod->m_amount);
+				static_cast< Player* >(caster)->SetTriggerChill((apply) ? 12494:0,mod->m_amount);
 		}break;
 	//mage Magic Absorption
 	case 29441:
@@ -2733,7 +2756,7 @@ void Aura::SpellAuraModStun(bool apply)
 
 		//warrior talent - second wind triggers on stun and immobilize. This is not used as proc to be triggered always !
 		if(p_target && HasMechanic(MECHANIC_STUNNED))
-			p_target->EventStunOrImmobilize(NULL);
+			p_target->EventStunOrImmobilize();
 	}
 	else
 	{
@@ -3430,7 +3453,7 @@ void Aura::SpellAuraModRoot(bool apply)
 
 		//warrior talent - second wind triggers on stun and immobilize
 		if(p_target && HasMechanic(MECHANIC_ROOTED))
-			p_target->EventStunOrImmobilize(NULL);
+			p_target->EventStunOrImmobilize();
 		/* -Supalosa- TODO: Mobs will attack nearest enemy in range on aggro list when rooted. */
 	}
 	else
@@ -3666,13 +3689,13 @@ void Aura::SpellAuraModDecreaseSpeed(bool apply)
 				break;
 		}
 
-		//let's check Mage talents if we proc anythig 
+		//let's check Mage talents if we proc anything
 		if(m_spellProto->School==SCHOOL_FROST)
 		{
-			Unit *caster=GetUnitCaster();
 			//yes we are freezing the bastard, so can we proc anything on this ?
-			if(caster && caster->IsPlayer() && m_target)
-				static_cast< Player* >(caster)->EventStunOrImmobilize(m_target);
+			Unit *caster = GetUnitCaster();
+			if( caster && m_target )
+				static_cast<Unit*>(caster)->EventChill( m_target );
 		}
 		m_target->speedReductionMap.insert(make_pair(m_spellProto->Id, mod->m_amount));
 		//m_target->m_slowdown=this;
@@ -3689,6 +3712,26 @@ void Aura::SpellAuraModDecreaseSpeed(bool apply)
 	if(m_target->GetSpeedDecrease())
 		m_target->UpdateSpeed();
 
+}
+
+void Aura::UpdateAuraModDecreaseSpeed()
+{
+	if( m_target )
+	{
+		if( m_target->MechanicsDispels[MECHANIC_ENSNARED] )
+		{
+			return;
+		}
+	}
+
+	//let's check Mage talents if we proc anythig
+	if(m_spellProto->School==SCHOOL_FROST)
+	{
+		//yes we are freezing the bastard, so can we proc anything on this ?
+		Unit *caster = GetUnitCaster();
+		if( caster && m_target )
+			static_cast<Unit*>(caster)->EventChill( m_target );
+	}
 }
 
 void Aura::SpellAuraModIncreaseHealth(bool apply)

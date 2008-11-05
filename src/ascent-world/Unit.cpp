@@ -236,6 +236,11 @@ Unit::Unit()
 
 	m_soulSiphon.amt = 0;
 	m_soulSiphon.max = 0;
+
+	trigger_on_stun = 0;
+	trigger_on_stun_chance = 100;
+	trigger_on_chill = 0;
+	trigger_on_chill_chance = 100;
 }
 
 Unit::~Unit()
@@ -2281,6 +2286,7 @@ void Unit::AddAura(Aura *aur)
 							sEventMgr.ModifyEventTimeLeft(m_auras[x], EVENT_AURA_REMOVE, aur->GetDuration());
 							if(maxStack <= 1)
 							{
+								m_auras[x]->UpdateModifiers();
 								if(this->IsPlayer())
 								{
 									data.Initialize(SMSG_UPDATE_AURA_DURATION);
@@ -5048,4 +5054,43 @@ void Unit::RemoveInvisibility()
 		RemoveAura( m_invisibility );
 		m_invisibility = 0;
 	}
+}
+
+//what is an Immobilize spell ? Have to add it later to spell effect handler
+void Unit::EventStunOrImmobilize()
+{
+	if( trigger_on_stun )
+	{
+		if( trigger_on_stun_chance < 100 && !Rand( trigger_on_stun_chance ) )
+			return;
+
+		CastSpell(this, trigger_on_stun, true);
+	}
+}
+
+// Proc on chill effects (such as frostbolt slow effect)
+void Unit::EventChill(Unit *proc_target)
+{
+	if ( this == proc_target || proc_target == NULL )
+		return; //how and why would we chill ourselfs
+
+	if( trigger_on_chill )
+	{
+		if( trigger_on_chill_chance < 100 && !Rand( trigger_on_chill_chance ) )
+			return;
+
+		CastSpell(proc_target, trigger_on_chill, true);
+	}
+}
+
+void Unit::SetTriggerStunOrImmobilize(uint32 newtrigger,uint32 new_chance)
+{
+	trigger_on_stun = newtrigger;
+	trigger_on_stun_chance = new_chance;
+}
+
+void Unit::SetTriggerChill(uint32 newtrigger,uint32 new_chance)
+{
+	trigger_on_chill = newtrigger;
+	trigger_on_chill_chance = new_chance;
 }

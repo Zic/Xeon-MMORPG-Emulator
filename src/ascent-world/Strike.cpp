@@ -106,7 +106,6 @@ void Striker::Deal(){
 	uint32 vproc			 = 0;
 	   
 	backAttack				 = pAttacker->isInBack( pVictim );
-	uint32 vskill            = 0;
 	bool disable_dR			 = false;
 
 	vsk = 0;
@@ -143,8 +142,6 @@ void Striker::Deal(){
 
 	if( pAttacker->IsPlayer() )
 	{	  
-		Player* pr = static_cast< Player* >( pAttacker );
-		
 		switch( weapon_damage_type )
 		{
 		case MELEE:   // melee main hand weapon
