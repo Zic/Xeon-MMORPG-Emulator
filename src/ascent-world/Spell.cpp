@@ -112,7 +112,7 @@ void SpellCastTargets::write( WorldPacket& data )
 Spell::Spell(Object* Caster, SpellEntry *info, bool triggered, Aura* aur)
 {
 	ASSERT( Caster != NULL && info != NULL );
-  
+	pushLastSpell(info->Id);
 	m_spellInfo = info;
 	m_caster = Caster;
 	duelSpell = false;

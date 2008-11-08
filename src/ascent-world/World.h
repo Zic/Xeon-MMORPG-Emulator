@@ -331,6 +331,9 @@ class WorldSocket;
 typedef std::list<WorldSocket*> QueueSet;
 typedef set<WorldSession*> SessionSet;
 
+void pushLastSpell(uint32 spellid);
+extern CircularQueue<uint32, 30> last_spells;
+
 class SERVER_DECL World : public Singleton<World>, public EventableObject
 {
 public:

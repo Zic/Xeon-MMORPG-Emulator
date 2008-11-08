@@ -650,6 +650,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\ascent-shared\CircularQueue.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\ascent-shared\CrashHandler.cpp"
 				>
 			</File>

@@ -36,6 +36,7 @@
 #include "../ascent-shared/Config/ConfigEnv.h"
 #include "../ascent-shared/crc32.h"
 #include "../ascent-shared/LocationVector.h"
+#include "../ascent-shared/CircularQueue.h"
 
 #include <zlib.h>
 

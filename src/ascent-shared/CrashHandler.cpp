@@ -40,6 +40,7 @@ void OutputCrashLogLine(const char * format, ...)
 #ifdef WIN32
 
 #include "CircularQueue.h"
+extern CircularQueue<uint32, 30> last_spells;
 Mutex m_crashLock;
 
 /* *
@@ -193,6 +194,8 @@ void echo(const char * format, ...)
 
 void PrintCrashInformation(PEXCEPTION_POINTERS except)
 {
+
+	uint32 i,j;
 	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
 	echo("Server has crashed. Reason was:\n");
 	echo("   %s at 0x%08X\n", GetExceptionDescription(except->ExceptionRecord->ExceptionCode),
@@ -200,6 +203,17 @@ void PrintCrashInformation(PEXCEPTION_POINTERS except)
 #ifdef REPACK
 	echo("%s repack by %s has crashed. Visit %s for support.", REPACK, REPACK_AUTHOR, REPACK_WEBSITE);
 #endif
+	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+	echo("Last 30 used spells were: \n");
+	for(i = 0; i < 3; ++i)
+	{
+		echo("   ");
+		for(j = 0; j < 10; ++j)
+		{
+			echo("%u ", last_spells.get()[j*i]);
+		}
+		echo("\n");
+	}
 	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
 	/*echo("Call Stack: \n");
 	CStackWalker sw;
