@@ -1383,7 +1383,7 @@ void Spell::cast(bool check)
 					break;
 			}
 
-			if(GetCanReflect() && m_caster->IsInWorld())
+			if(GetCanReflect() && m_caster->IsInWorld() && m_reflectedParent == NULL)
 			{
 				for(i= UniqueTargets.begin();i != UniqueTargets.end();i++)
 				{
@@ -4403,6 +4403,7 @@ bool Spell::Reflect(Unit *refunit)
 		refunit->RemoveAura(refspellid);
 
 	Spell *spell = new Spell(m_caster, m_spellInfo, true, NULL);
+	spell->m_reflectedParent = this;
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
 	spell->prepare(&targets);
