@@ -22,6 +22,7 @@
 
 #include "CrashHandler.h"
 #include "Log.h"
+//#define CRASHLOGCALLSTACK 1
 
 void OutputCrashLogLine(const char * format, ...)
 {
@@ -215,10 +216,12 @@ void PrintCrashInformation(PEXCEPTION_POINTERS except)
 		echo("\n");
 	}
 	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-	/*echo("Call Stack: \n");
+#ifdef CRASHLOGCALLSTACK
+	echo("Call Stack: \n");
 	CStackWalker sw;
 	sw.ShowCallstack();
-	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");*/
+	echo("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+#endif
 }
 
 void CStackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUserName)
