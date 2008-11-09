@@ -38,12 +38,7 @@ public:
 	}
 	~SkillNameMgr()
 	{
-		for(uint32 i = 0;i<=maxskill;i++)
-		{
-			if(SkillNames[i] != 0)
-				delete SkillNames[i];
-		}
-		delete SkillNames;
+		delete[] SkillNames;
 	}
 };
 #endif
