@@ -469,7 +469,8 @@ void CommandTableStorage::Init()
 	static ChatCommand aspireCommandTable[] =
 	{
 		{ "addkick", '2', &ChatHandler::HandleAddKickMessageCommand, "adds a pre-defined kick message format: Index Message", NULL, 0, 0, 0 },
-		{ "removekick", '2', &ChatHandler::HandleRemoveKickMessageCommand, "removes a pre-defined kick message format: Index", NULL, 0, 0, 0 },
+		{ "removekick", 'z', &ChatHandler::HandleRemoveKickMessageCommand, "removes a pre-defined kick message format: Index", NULL, 0, 0, 0 },
+		{ "listkicks", '2', &ChatHandler::HandleListKickMessagesCommand, "provides a list of all predefined kick messages and their indexes", NULL, 0, 0, 0 },
 		{ NULL,		    0,  NULL,										"",														NULL, 0, 0, 0},
 	};
 	dupe_command_table(aspireCommandTable, _aspireCommandTable);

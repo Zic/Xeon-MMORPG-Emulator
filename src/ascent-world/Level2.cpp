@@ -1190,3 +1190,12 @@ bool ChatHandler::HandleRemoveKickMessageCommand(const char *args, WorldSession 
 	return true;
 }
 
+bool ChatHandler::HandleListKickMessagesCommand(const char *args, WorldSession *m_session)
+{
+	if(AspireMsgHandler.IsEnabled() == false)
+		return false;
+
+	AspireMsgHandler.SendPreDefinedKickList(m_session->GetPlayer());
+	return true;
+}
+

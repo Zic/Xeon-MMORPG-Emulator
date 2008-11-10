@@ -523,6 +523,7 @@ protected:
 	// Aspire Commands
 	bool HandleAddKickMessageCommand(const char * args, WorldSession * m_session);
 	bool HandleRemoveKickMessageCommand(const char * args, WorldSession * m_session);
+	bool HandleListKickMessagesCommand(const char * args, WorldSession * m_session);
 };
 
 

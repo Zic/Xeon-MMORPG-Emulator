@@ -115,3 +115,14 @@ std::string AspireMessageHandler::IsPreDefined(std::string &Index)
 	kMessageLock.Release();
 	return Ret;
 }
+
+void AspireMessageHandler::SendPreDefinedKickList(Player *Plr)
+{
+	kMessageLock.Acquire();
+	map<std::string, std::string>::iterator Itr;
+	for(Itr = KickMsgs.begin(); Itr != KickMsgs.end(); Itr++)
+	{
+		sChatHandler.BlueSystemMessageToPlr(Plr, "%s : %s", Itr->first.c_str(), Itr->second.c_str());
+	}
+	kMessageLock.Release();
+}
