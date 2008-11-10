@@ -116,13 +116,20 @@ std::string AspireMessageHandler::IsPreDefined(std::string &Index)
 	return Ret;
 }
 
-void AspireMessageHandler::SendPreDefinedKickList(Player *Plr)
+uint32 AspireMessageHandler::SendPreDefinedKickList(Player *Plr, const char *Substring)
 {
+	uint32 Results = 0;
 	kMessageLock.Acquire();
 	map<std::string, std::string>::iterator Itr;
 	for(Itr = KickMsgs.begin(); Itr != KickMsgs.end(); Itr++)
 	{
+		if(strlen(Substring) > 2)
+			if(strstr(Itr->second.c_str(), Substring) == NULL)
+				continue;
 		sChatHandler.BlueSystemMessageToPlr(Plr, "%s : %s", Itr->first.c_str(), Itr->second.c_str());
+		Results++;
 	}
 	kMessageLock.Release();
+
+	return Results;
 }

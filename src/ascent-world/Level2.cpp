@@ -1195,7 +1195,14 @@ bool ChatHandler::HandleListKickMessagesCommand(const char *args, WorldSession *
 	if(AspireMsgHandler.IsEnabled() == false)
 		return false;
 
-	AspireMsgHandler.SendPreDefinedKickList(m_session->GetPlayer());
+	uint32 Res = 0;
+	if(strlen(args) > 2)
+		sChatHandler.BlueSystemMessage(m_session, "Searching for instances of substring %s in pre-defined list", args);
+	else
+		sChatHandler.BlueSystemMessage(m_session, "Listing all pre-defined kick messages");
+	
+	Res = AspireMsgHandler.SendPreDefinedKickList(m_session->GetPlayer(), args);
+	sChatHandler.BlueSystemMessage(m_session, "%u results", Res);
 	return true;
 }
 

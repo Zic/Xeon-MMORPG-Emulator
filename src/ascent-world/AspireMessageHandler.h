@@ -40,7 +40,7 @@ class AspireMessageHandler //: public EventableObject // incase i decided to exp
 			return sWorld.EnablePreDefinedKicks;
 		}
 
-		void SendPreDefinedKickList(Player *Plr); // Sending a list of pre-defined kicks to the player
+		uint32 SendPreDefinedKickList(Player *Plr, const char *Substring = ""); // Sending a list of pre-defined kicks to the player
 
 	private:
 		AspireMessageHandler();
