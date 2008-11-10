@@ -473,6 +473,18 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="Aspire"
+			>
+			<File
+				RelativePath="..\..\src\ascent-world\AspireMessageHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascent-world\AspireMessageHandler.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\ascent-world\AddonMgr.cpp"
 			>
@@ -909,7 +921,7 @@
 			RelativePath="..\..\src\ascent-world\ObjectMgr.h"
 			>
 		</File>
- 		<File
+		<File
 			RelativePath="..\..\src\ascent-world\ObjectPool.h"
 			>
 		</File>

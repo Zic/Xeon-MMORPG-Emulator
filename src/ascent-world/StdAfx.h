@@ -143,6 +143,7 @@
 #include "WorldCreator.h"
 #include "ObjectPool.h"
 #include "Strike.h"
+#include "AspireMessageHandler.h"
 
 
 #include "ObjectMgr.h"

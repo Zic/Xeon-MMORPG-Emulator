@@ -155,6 +155,7 @@ class SERVER_DECL CommandTableStorage : public Singleton<CommandTableStorage>
 	ChatCommand * _commandTable;
 	ChatCommand * _GuildCommandTable;
 	ChatCommand * _TitleCommandTable;
+	ChatCommand * _aspireCommandTable;
 
 	ChatCommand * GetSubCommandTable(const char * name);
 public:
@@ -518,6 +519,10 @@ protected:
 
 	bool HandleFixScaleCommand(const char * args, WorldSession * m_session);
 	bool HandleAddTrainerSpellCommand( const char * args, WorldSession * m_session );
+
+	// Aspire Commands
+	bool HandleAddKickMessageCommand(const char * args, WorldSession * m_session);
+	bool HandleRemoveKickMessageCommand(const char * args, WorldSession * m_session);
 };
 
 

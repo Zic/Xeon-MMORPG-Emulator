@@ -482,6 +482,7 @@ public:
 	uint32 MaxProfs;
 	bool BGQueueDisplay;
 	bool StartWithSpells;
+	bool EnablePreDefinedKicks;
 
 	uint32 HordePlayers;
 	uint32 AlliancePlayers;

@@ -1142,3 +1142,51 @@ bool ChatHandler::HandleNpcComeCommand(const char* args, WorldSession* m_session
 	crt->GetAIInterface()->MoveTo(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetOrientation());
 	return true;
 }
+
+bool ChatHandler::HandleAddKickMessageCommand(const char *args, WorldSession *m_session)
+{
+	char I[50], M[400];
+	std::string Index, Message;
+	Player *Plr = m_session->GetPlayer();
+
+	if(AspireMsgHandler.IsEnabled() == false)
+		return false;
+
+	sscanf(args, "%s %[^\n]s", I, M); // better way to get data?
+	if(strlen(M) < 2)
+		return false;
+
+	// Noob code incomming
+	Index = I;
+	Message = M; 
+
+	if(AspireMsgHandler.AddKickMessage(Index, Message) == true)
+		Plr->BroadcastMessage("Inserted %s with Index %s to predefined kick messages", M, I);
+	else
+		Plr->BroadcastMessage("An error occured, most likely cause is the index was already taken");
+
+	return true;
+}
+
+bool ChatHandler::HandleRemoveKickMessageCommand(const char *args, WorldSession *m_session)
+{
+	char I[50];
+	std::string Index;
+	Player *Plr = m_session->GetPlayer();
+
+	if(AspireMsgHandler.IsEnabled() == false)
+		return false;
+
+	sscanf(args, "%s", I); // better way to get data?
+
+	// Noob code incomming
+	Index = I;
+
+	if(AspireMsgHandler.RemoveKickMessage(Index) == true)
+		Plr->BroadcastMessage("Removed Index %s from Pre-Defined kick messages", I);
+	else
+		Plr->BroadcastMessage("An error occured, most likely cause is the index was not found");
+
+	return true;
+}
+

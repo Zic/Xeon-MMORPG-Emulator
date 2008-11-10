@@ -60,6 +60,8 @@ ChatCommand * CommandTableStorage::GetSubCommandTable(const char * name)
 		return _TitleCommandTable;
 	else if(!strcmp(name, "quest"))
 		return _questCommandTable;
+	else if(!strcmp(name,  "aspire"))
+		return _aspireCommandTable;
 	return 0;
 }
 
@@ -185,6 +187,7 @@ void CommandTableStorage::Dealloc()
 	free( _GuildCommandTable);
 	free( _TitleCommandTable);
 	free( _questCommandTable );
+	free( _aspireCommandTable );
 	free( _commandTable );
 }
 
@@ -463,6 +466,15 @@ void CommandTableStorage::Init()
 	};
 	dupe_command_table(questCommandTable, _questCommandTable);
 
+	static ChatCommand aspireCommandTable[] =
+	{
+		{ "addkick", '2', &ChatHandler::HandleAddKickMessageCommand, "adds a pre-defined kick message format: Index Message", NULL, 0, 0, 0 },
+		{ "removekick", '2', &ChatHandler::HandleRemoveKickMessageCommand, "removes a pre-defined kick message format: Index", NULL, 0, 0, 0 },
+		{ NULL,		    0,  NULL,										"",														NULL, 0, 0, 0},
+	};
+	dupe_command_table(aspireCommandTable, _aspireCommandTable);
+
+
 	static ChatCommand commandTable[] = {
 		//{ "renameguild", 'a', &ChatHandler::HandleRenameGuildCommand, "Renames a guild.", NULL, 0, 0, 0 },
 		{ "masssummon", 'z', &ChatHandler::HandleMassSummonCommand, ".masssummon - Summons all players.", NULL, 0, 0, 0},
@@ -574,7 +586,8 @@ void CommandTableStorage::Init()
 		{ "removesickness",   'm', &ChatHandler::HandleRemoveRessurectionSickessAuraCommand,   "Removes ressurrection sickness from the target",  NULL, 0, 0, 0},
 		{ "fixscale", 'm', &ChatHandler::HandleFixScaleCommand, "", NULL, 0, 0, 0 },
 		{ "addtrainerspell", 'm', &ChatHandler::HandleAddTrainerSpellCommand, "", NULL, 0, 0, 0 },
-	
+		{ "aspire"		 ,  'n', NULL,									 "",					aspireCommandTable, 0, 0, 0},
+
 		{ NULL,		  0, NULL,										 "",							   NULL, 0, 0  }
 	};
 	dupe_command_table(commandTable, _commandTable);

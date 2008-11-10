@@ -167,6 +167,10 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 		if(reason)
 			kickreason = reason;
 
+		std::string PreDef = AspireMsgHandler.IsPreDefined(kickreason);
+		if(strlen(PreDef.c_str()) > 2)
+			kickreason = PreDef;
+
 		BlueSystemMessage(m_session, "Attempting to kick %s from the server for \"%s\".", chr->GetName(), kickreason.c_str());
 		sGMLog.writefromsession(m_session, "Kicked player %s from the server for %s", chr->GetName(), kickreason.c_str());
 		if(!m_session->CanUseCommand('z') && chr->GetSession()->CanUseCommand('z'))
@@ -181,7 +185,7 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 		}*/ // we might have to re-work this
 
 		char msg[200];
-		snprintf(msg, 200, "%s[SERVER] %s was kicked from the server by %s. Reason: %s",MSG_COLOR_RED, chr->GetName(), m_session->GetPlayer()->GetName(), kickreason.c_str());
+		snprintf(msg, 200, "%s[SERVER] %s was kicked from the server by %s. Reason: %s",MSG_COLOR_YELLOW, chr->GetName(), m_session->GetPlayer()->GetName(), kickreason.c_str());
 		sWorld.SendWorldText(msg, NULL);
 		//sWorld.SendIRCMessage(msg);
 		SystemMessageToPlr(chr, "You are being kicked from the server by %s. Reason: %s", m_session->GetPlayer()->GetName(), kickreason.c_str());

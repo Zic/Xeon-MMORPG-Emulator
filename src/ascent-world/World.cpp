@@ -1306,6 +1306,10 @@ void World::Rehash(bool load)
 	StartWithSpells = Config.MainConfig.GetBoolDefault("Funserver", "StartWithAllSpells", false);
 	MaxProfs = Config.MainConfig.GetIntDefault("Funserver", "MaxProfs", 2);
 	BGQueueDisplay = Config.MainConfig.GetBoolDefault("Funserver", "BGQueueDisplay", false);
+	EnablePreDefinedKicks = Config.MainConfig.GetBoolDefault("Funserver", "EnablePreDefinedKicks", false);
+
+	if(EnablePreDefinedKicks)
+		AspireMsgHandler.LoadKickMessages();
 
 	if( m_banTable != NULL )
 		free( m_banTable );
