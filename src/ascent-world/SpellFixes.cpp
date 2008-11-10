@@ -14297,19 +14297,23 @@ void ApplyNormalFixes()
 
 			// Frostbrand Weapon - 10% spd coefficient
 			if( sp->NameHash == SPELL_HASH_FROSTBRAND_ATTACK )
-				sp->fixed_dddhcoef = 0.1f;
+				sp->Dspell_coef_override = 0.1f;
 
-			// Fire Nova - 0% spd coefficient
+			// Fire Nova - 21.4% spd coefficient
 			if( sp->NameHash == SPELL_HASH_FIRE_NOVA )
-				sp->fixed_dddhcoef = 0.0f;
+				sp->Dspell_coef_override = 0.214f;
 
-			// Searing Totem - 8% spd coefficient
+			// Magma Totem - 6.67% spd coefficient
+			if( sp->NameHash == SPELL_HASH_MAGMA_TOTEM )
+				sp->Dspell_coef_override = 0.0667f;
+
+			// Searing Totem - 16.67% spd coefficient
 			if( sp->NameHash == SPELL_HASH_ATTACK )
-				sp->fixed_dddhcoef = 0.08f;
+				sp->Dspell_coef_override = 0.1667f;
 
-			// Mana Spring Totem - 8% healing coefficient
+			// Mana Spring Totem - 4.5% healing coefficient
 			if( sp->NameHash == SPELL_HASH_HEALING_STREAM )
-				sp->OTspell_coef_override = 0.08f;
+				sp->OTspell_coef_override = 0.045f;
 			
 			// Nature's Guardian
 			if( sp->NameHash == SPELL_HASH_NATURE_S_GUARDIAN ){
