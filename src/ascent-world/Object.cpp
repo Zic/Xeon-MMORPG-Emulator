@@ -1684,6 +1684,8 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 		val = 2.5f * damage / c;
 		val *= 10.0;
 		uint32 rage = pVictim->GetUInt32Value( UNIT_FIELD_POWER2 );
+		if(pVictim->HasAura(18499)) // Warriors Berserker Rage
+			val += val; // 100% increase ? could not find the correct amount anywhere, one site suggested 100%.
 		if( rage + float2int32( val ) > 1000 )
 		  val = 1000.0f - (float)pVictim->GetUInt32Value( UNIT_FIELD_POWER2 );
 
