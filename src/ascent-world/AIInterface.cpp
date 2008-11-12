@@ -3498,8 +3498,9 @@ void AIInterface::CheckTarget(Unit* target)
 
 uint32 AIInterface::_CalcThreat(uint32 damage, SpellEntry * sp, Unit* Attacker)
 {
-	if (isSameFaction(m_Unit,Attacker))
-		return 0;
+	if(m_Unit->m_faction != NULL && Attacker->m_faction != NULL) // Temp crash fix, needs to be removed when solved
+		if (isSameFaction(m_Unit,Attacker))
+			return 0;
 
 	int32 mod = 0;
 	if( sp != NULL && sp->ThreatForSpell != 0 )

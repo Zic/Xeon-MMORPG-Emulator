@@ -141,8 +141,13 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 	sGMLog.writefromsession(m_session, "used npc delete, sqlid %u, creature %s, pos %f %f %f",
 		unit->GetSQL_id(), unit->GetCreatureName() ? unit->GetCreatureName()->Name : "wtfbbqhax", unit->GetPositionX(), unit->GetPositionY(),
 		unit->GetPositionZ());
-	if(unit->m_spawn == 0)
-		return false;
+	if(unit->m_spawn == NULL)
+	{
+		BlueSystemMessage(m_session, "Removed creature %s from world", unit->GetCreatureName()->Name);
+		unit->RemoveFromWorld(false, true);
+		delete unit;
+		return true;
+	}
 	BlueSystemMessage(m_session, "Deleted creature ID %u", unit->spawnid);
 
 	if(unit->IsInWorld())
@@ -1198,6 +1203,7 @@ bool ChatHandler::HandleListKickMessagesCommand(const char *args, WorldSession *
 	uint32 Res = 0;
 	if(strlen(args) > 2)
 		sChatHandler.BlueSystemMessage(m_session, "Searching for instances of substring %s in pre-defined list", args);
+
 	else
 		sChatHandler.BlueSystemMessage(m_session, "Listing all pre-defined kick messages");
 	
@@ -1205,4 +1211,3 @@ bool ChatHandler::HandleListKickMessagesCommand(const char *args, WorldSession *
 	sChatHandler.BlueSystemMessage(m_session, "%u results", Res);
 	return true;
 }
-
