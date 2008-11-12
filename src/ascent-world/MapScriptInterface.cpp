@@ -96,7 +96,7 @@ GameObject* MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY
 	return pGameObject;
 }
 
-Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2)
+Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld)//, bool tmplate, uint32 Misc1, uint32 Misc2)
 {
 	CreatureProto * proto = CreatureProtoStorage.LookupEntry(Entry);
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(Entry);
@@ -117,8 +117,8 @@ Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, fl
 	sp->emote_state =0;
 	sp->flags = 0;
 	sp->factionid = proto->Faction;
-	sp->bytes=0;
-	sp->bytes2=0;
+	sp->bytes = 0;
+	sp->bytes2 = 0;
 	//sp->respawnNpcLink = 0;
 	sp->stand_state = 0;
 	sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
@@ -129,7 +129,8 @@ Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, fl
 	p->spawnid = 0;
 	p->m_spawn = 0;
 	delete sp;
-	p->PushToWorld(&mapMgr);
+	if(AddToWorld)
+		p->PushToWorld(&mapMgr);
 	return p;
 }
 
