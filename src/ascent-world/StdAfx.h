@@ -68,7 +68,6 @@
 #include "../ascent-shared/Threading/RWLock.h"
 #include "../ascent-shared/Threading/Condition.h"
 #include "../ascent-shared/ascent_getopt.h"
-#include "../ascent-shared/hashmap.h"
 
 #include "UpdateFields.h"
 #include "UpdateMask.h"

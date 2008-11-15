@@ -234,9 +234,6 @@ Unit::Unit()
 	m_spellsbusy=false;
 	m_interruptedRegenTime = 0;
 
-	m_soulSiphon.amt = 0;
-	m_soulSiphon.max = 0;
-
 	trigger_on_stun = 0;
 	trigger_on_stun_chance = 100;
 	trigger_on_chill = 0;
