@@ -25,6 +25,7 @@
 
 #define FactionRef_ALL -1
 #define ZoneRef_ALL -1
+//#define WORLDSTATE_ENABLED // Until this is finished this define controls whether this is enabled or not
 
 class MapMgr;
 
@@ -38,7 +39,7 @@ struct WorldStateData
 class WorldStateHandler
 {
 	public:
-		WorldStateHandler(MapMgr *mgr);
+		WorldStateHandler(MapMgr &mgr);
 		~WorldStateHandler();
 
 		// WorldState Handling
@@ -46,8 +47,11 @@ class WorldStateHandler
 		void UpdateWorldState(uint32 Index, uint32 Val);
 		void SendWorldStates(Player *Plr);
 
+		// Database
+		void Load();
+
 	private:
-		MapMgr *m_Map;
+		MapMgr &m_Map;
 		std::map<uint32, WorldStateData*> worldStates;
 
 	protected:

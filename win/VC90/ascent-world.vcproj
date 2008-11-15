@@ -484,6 +484,14 @@
 				RelativePath="..\..\src\ascent-world\AspireMessageHandler.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\ascent-world\WorldStateHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ascent-world\WorldStateHandler.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\ascent-world\AddonMgr.cpp"

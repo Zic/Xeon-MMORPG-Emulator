@@ -37,7 +37,7 @@ class Transporter;
 class Corpse;
 class CBattleground;
 class Instance;
-
+class WorldStateHandler;
 
 enum MapMgrTimers
 {
@@ -293,6 +293,7 @@ private:
 	uint32 m_instanceID;
 
 	MapScriptInterface * ScriptInterface;
+	WorldStateHandler *wStates;
 
 public:
 #ifdef WIN32
