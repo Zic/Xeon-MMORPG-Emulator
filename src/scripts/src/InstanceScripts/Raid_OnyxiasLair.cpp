@@ -345,7 +345,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[i].x, whelpCoords[i].y,
                     whelpCoords[i].z, whelpCoords[i].o,
-                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
+                    true);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(14.161, -177.874, -85.649, 0.23);
@@ -354,7 +354,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[5-i].x, whelpCoords[5-i].y,
                     whelpCoords[5-i].z, whelpCoords[5-i].o,
-                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
+                    true);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(27.133, -232.030, -84.188, 0.44);
@@ -385,7 +385,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[i].x, whelpCoords[i].y,
                     whelpCoords[i].z, whelpCoords[i].o,
-                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
+                    true);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(14.161, -177.874, -85.649, 0.23);
@@ -394,7 +394,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[5-i].x, whelpCoords[5-i].y,
                     whelpCoords[5-i].z, whelpCoords[5-i].o,
-                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
+                    true);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(27.133, -232.030, -84.188, 0.44);
