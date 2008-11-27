@@ -91,6 +91,9 @@ public:
 	ObjectSet m_objectinsertpool;
 	void AddObject(Object *);
 
+	// WorldStates
+	WorldStateHandler *wStates;
+
 ////////////////////////////////////////////////////////
 // Local (mapmgr) storage/generation of GameObjects
 /////////////////////////////////////////////
@@ -293,7 +296,6 @@ private:
 	uint32 m_instanceID;
 
 	MapScriptInterface * ScriptInterface;
-	WorldStateHandler *wStates;
 
 public:
 #ifdef WIN32
