@@ -22,7 +22,6 @@
 //
 
 #include "StdAfx.h"
-#include "WorldStateHandler.h"
 #define MAP_MGR_UPDATE_PERIOD 100
 #define MAPMGR_INACTIVE_MOVE_TIME 10
 extern bool bServerShutdown;
@@ -64,9 +63,7 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 	thread_kill_only = false;
 	thread_running = false;
 
-	#ifdef WORLDSTATE_ENALBED
 	wStates = new WorldStateHandler(*this);
-	#endif
 }
 
 

@@ -94,13 +94,16 @@ void WorldStateHandler::SendWorldStatePacket(WorldStateData *wState, WorldPacket
 
 void WorldStateHandler::SendWorldStates(Player *Plr)
 {
-	WorldPacket data(SMSG_INIT_WORLD_STATES, (worldStates.size() * 8) + 32);
+	if(!worldStates.size())
+		return;
+
 	map<uint32, WorldStateData*>::iterator Itr;
 	uint8 Team = Plr->GetTeam() == 0 ? 0 : 1;
-
+	WorldPacket data(SMSG_INIT_WORLD_STATES, 10 + (worldStates.size() * 8));
 	data << m_Map.GetMapId();
 	data << Plr->GetZoneId();
 	data << Plr->GetAreaID();
+	data << uint16(worldStates.size());
 
 	for(Itr = worldStates.begin(); Itr != worldStates.end(); Itr++)
 	{
@@ -119,7 +122,7 @@ void WorldStateHandler::SendWorldStates(Player *Plr)
 // Database
 void WorldStateHandler::Load()
 {
-	QueryResult *Result = WorldDatabase.Query("SELECT * FROM `worldstates` WHERE `MapId` = '%u'", m_Map.GetMapId());
+	QueryResult *Result = WorldDatabase.Query("SELECT * FROM `worldstates` WHERE `MapId` = '%u' or `MapId` = '-1'", m_Map.GetMapId());
 	if(Result)
 	{
 		do
@@ -127,8 +130,8 @@ void WorldStateHandler::Load()
 			WorldStateData *Data = new WorldStateData;
 			Field *Fields = Result->Fetch();
 			Data->Value = Fields[2].GetUInt32();
-			Data->Zone = Fields[3].GetUInt32();
-			Data->Faction = Fields[4].GetUInt32();
+			Data->Zone = Fields[3].GetInt32();
+			Data->Faction = Fields[4].GetInt32();
 			worldStates.insert(make_pair(Fields[1].GetUInt32(), Data));
 		}while(Result->NextRow());
 		WorldDatabase.FreeQueryResult(Result);	

@@ -25,7 +25,6 @@
 
 #define FactionRef_ALL -1
 #define ZoneRef_ALL -1
-//#define WORLDSTATE_ENABLED // Until this is finished this define controls whether this is enabled or not
 
 class MapMgr;
 

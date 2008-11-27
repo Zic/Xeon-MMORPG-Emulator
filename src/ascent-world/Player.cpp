@@ -3302,9 +3302,7 @@ void Player::OnPushToWorld()
 	z_axisposition = 0.0f;
 	m_changingMaps = false;
 
-#ifdef WORLDSTATE_ENABLED
 	m_mapMgr->wStates->SendWorldStates(this);
-#endif
 }
 
 void Player::ResetHeartbeatCoords()
