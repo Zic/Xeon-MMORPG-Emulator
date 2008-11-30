@@ -1047,9 +1047,8 @@ void WorldSession::HandleAchievementInspect(WorldPacket &recv_data)
 	Unit * pUnit = GetPlayer()->GetMapMgr()->GetPlayer( GUID_LOPART(rguid) );
 	if( pUnit && pUnit->IsPlayer() )
 	{
-		printf("got player %s.\n", TO_PLAYER(pUnit)->GetName());
 		WorldPacket * data = TO_PLAYER(pUnit)->GetAchievementInterface()->BuildAchievementData();
 		data->SetOpcode(SMSG_RESPOND_INSPECT_ACHIEVEMENTS);
-		SendPacket(data);
+		//SendPacket(data); doesn't work yet anyways :)
 	}
 }

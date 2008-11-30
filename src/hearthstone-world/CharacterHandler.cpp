@@ -590,6 +590,7 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 		CharacterDatabase.Execute("DELETE FROM mailbox WHERE player_guid = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_friends WHERE character_guid = %u OR friend_guid = %u", (uint32)guid, (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_ignores WHERE character_guid = %u OR ignore_guid = %u", (uint32)guid, (uint32)guid);
+		CharacterDatabase.Execute("DELETE FROM achievements WHERE player = %u", (uint32)guid);
 
 		/* remove player info */
 		objmgr.DeletePlayerInfo((uint32)guid);
