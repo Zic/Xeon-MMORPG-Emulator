@@ -941,6 +941,14 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 				if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() )
 					continue;
 			}
+			else if( ace->ID == 6261 ) // Winter Veil: A Frosty Shake 
+			{
+				if( m_player.GetZoneId() != 4395 ) // Not in Dalaran
+					continue;
+
+				if( !pTarget || !pTarget->HasAura(21848) ) // Not a Snowman
+					continue;
+			}
 			else
 				continue;
 		}
