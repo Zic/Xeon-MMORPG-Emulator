@@ -1746,12 +1746,14 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 
 	DEBUG_LOG("PLAYER: Buy bytes bag slot, slot number = %d", slots);
 	BankSlotPrice* bsp = dbcBankSlotPrices.LookupEntry(slots+1);
+	if(!bsp) return;
 	price = (bsp != NULL ) ? bsp->Price : 99999999;
 
 	if ((int32)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) >= price) 
 	{
 	   _player->SetUInt32Value(PLAYER_BYTES_2, (bytes&0xff00ffff) | ((slots+1) << 16) );
 	   _player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -price);
+	   _player->GetAchievementInterface()->HandleAchievementCriteriaBuyBankSlot();
 	}
 }
 
