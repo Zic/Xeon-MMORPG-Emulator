@@ -201,6 +201,7 @@ public:
 	void HandleAchievementCriteriaBuyBankSlot(bool retroactive = false);
 	void HandleAchievementCriteriaFlightPathsTaken();
 	void HandleAchievementCriteriaHighestHealth(uint32 health);
+	void HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags);
 
 	//-----------------------------------------------------------------
 };

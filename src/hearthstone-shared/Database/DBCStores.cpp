@@ -75,6 +75,7 @@ SERVER_DECL DBCStorage<AchievementEntry> dbcAchievement;
 SERVER_DECL DBCStorage<AchievementCriteriaEntry> dbcAchivementCriteria;
 SERVER_DECL DBCStorage<VehicleEntry> dbcVehicle;
 SERVER_DECL DBCStorage<VehicleSeatEntry> dbcVehicleSeat;
+SERVER_DECL DBCStorage<WorldMapOverlayEntry> dbcWorldMapOverlay;
 
 const char* AreaTriggerFormat = "uuffffffff";
 const char* CharTitlesEntryfmt = "uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxu";
@@ -103,6 +104,7 @@ const char* spellrangeFormat =
 	"sxxxxxxxxxxxxxxxx"
 	"sxxxxxxxxxxxxxxxx";
 
+const char* WorldMapOverlayfmt="uxuxxxxxxxxxxxxxx";
 const char* SpellRuneCostfmt="uuuuu";
 const char* spelldurationFormat = "uuuu";
 const char* randompropsFormat = "usuuuxxxxxxxxxxxxxxxxxxx";
@@ -218,5 +220,6 @@ bool LoadDBCs()
 	LOAD_DBC("DBC/gtOCTRegenMP.dbc", gtfloatformat, false, dbcManaRegen, false); //it's not a mistake.
 	LOAD_DBC("DBC/gtRegenHPPerSpt.dbc", gtfloatformat, false, dbcHPRegenBase, false); //it's not a mistake.
 	LOAD_DBC("DBC/gtOCTRegenHP.dbc", gtfloatformat, false, dbcHPRegen, false); //it's not a mistake.
+	LOAD_DBC("DBC/WorldMapOverlay.dbc", WorldMapOverlayfmt, true, dbcWorldMapOverlay, true);
 	return true;
 }

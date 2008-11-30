@@ -905,6 +905,12 @@ struct RandomProps
 
 };
 
+struct WorldMapOverlayEntry
+{
+	uint32 AreaReference;
+	uint32 AreaTableID;
+};
+
 struct AreaTable
 {
     uint32 AreaId;
@@ -1639,6 +1645,7 @@ extern SERVER_DECL DBCStorage<AchievementEntry> dbcAchievement;
 extern SERVER_DECL DBCStorage<AchievementCriteriaEntry> dbcAchivementCriteria;
 extern SERVER_DECL DBCStorage<VehicleEntry> dbcVehicle;
 extern SERVER_DECL DBCStorage<VehicleSeatEntry> dbcVehicleSeat;
+extern SERVER_DECL DBCStorage<WorldMapOverlayEntry> dbcWorldMapOverlay;
 
 bool LoadDBCs();
 

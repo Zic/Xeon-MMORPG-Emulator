@@ -814,3 +814,56 @@ void AchievementInterface::HandleAchievementCriteriaHighestHealth(uint32 health)
 			EventAchievementEarned(ad);
 	}
 }
+
+void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags)
+{
+	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqFlags = ace->explore_area.areaReference;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		WorldMapOverlayEntry * wmoe = dbcWorldMapOverlay.LookupEntryForced( ReqFlags );
+		if(!wmoe) continue;
+
+		AreaTable * at = dbcArea.LookupEntryForced(wmoe->AreaTableID);
+		if(!at || !(ReqFlags & at->explorationFlag) )
+			continue;
+
+		uint32 offset = at->explorationFlag / 32;
+		offset += PLAYER_EXPLORED_ZONES_1;
+
+		uint32 val = (uint32)(1 << (at->explorationFlag % 32));
+		uint32 currFields = m_player.GetUInt32Value(offset);
+
+		// Not explored /sadface
+		if( !(currFields & val) )
+			continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i] = 1;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}

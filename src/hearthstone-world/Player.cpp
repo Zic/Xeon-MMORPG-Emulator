@@ -1298,7 +1298,7 @@ void Player::_EventExploration()
 	}
     sChatHandler.BlueSystemMessageToPlr(this,areaname);*/
 
-	int offset = at->explorationFlag / 32;
+	uint32 offset = at->explorationFlag / 32;
 	offset += PLAYER_EXPLORED_ZONES_1;
 
 	uint32 val = (uint32)(1 << (at->explorationFlag % 32));
@@ -1385,6 +1385,9 @@ void Player::_EventExploration()
 		if(getLevel() < GetUInt32Value(PLAYER_FIELD_MAX_LEVEL) && explore_xp)
 			GiveXP(explore_xp, 0, false);
 	}
+	
+	if( !GetTaxiState() && !m_TransporterGUID )
+		GetAchievementInterface()->HandleAchievementCriteriaExploreArea( at->AreaId, GetUInt32Value(offset) );
 }
 
 void Player::EventDeath()
