@@ -252,22 +252,8 @@ void WorldSession::HandleUnlearnTalents( WorldPacket & recv_data )
 	GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - price );
 	GetPlayer()->Reset_Talents();
 
-/*	// Unlearn all talent spells
-	WorldPacket data;
-	std::list<uint32> *talentproto = GetPlayer()->getTalentproto();
-
-	std::list<uint32>::iterator itr;
-	for (itr = talentproto->begin(); itr != talentproto->end(); ++itr)
-	{
-		GetPlayer()->removeSpell((*itr));
-
-		// Handled in removespell.
-		//data.Initialize(SMSG_REMOVED_SPELL);
-		//data << (*itr); 
-		//SendPacket( &data );
-	}
-	talentproto->clear();
-*/
+	GetPlayer()->GetAchievementInterface()->HandleAchievementCriteriaTalentResetCostTotal( price );
+	GetPlayer()->GetAchievementInterface()->HandleAchievementCriteriaTalentResetCount();
 }
 
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recv_data)

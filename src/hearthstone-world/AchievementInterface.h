@@ -196,6 +196,8 @@ public:
 	void HandleAchievementCriteriaQuestCount(uint32 questCount);
 	void HandleAchievementCriteriaHonorableKillClass(uint32 classId);
 	void HandleAchievementCriteriaHonorableKillRace(uint32 raceId);
+	void HandleAchievementCriteriaTalentResetCount();
+	void HandleAchievementCriteriaTalentResetCostTotal(uint32 cost);
 
 	//-----------------------------------------------------------------
 };
