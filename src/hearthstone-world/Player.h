@@ -1979,7 +1979,7 @@ public:
 
 private:
 	// Stuff for "Talent Inspect"
-	#define TALENT_INSPECT_BYTES 61
+	#define TALENT_INSPECT_BYTES 71
 	uint8 m_talentInspectBuffer[TALENT_INSPECT_BYTES];
 
 public:
