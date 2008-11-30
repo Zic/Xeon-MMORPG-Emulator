@@ -235,7 +235,11 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	data << uint32(unixTimeToTimeBitfields(time(NULL)));
 	data << uint32(0);
 	data << uint32(0); 
-	m_player.GetSession()->SendPacket(&data);
+
+	if( !m_player.IsInWorld() )
+		m_player.CopyAndSendDelayedPacket(&data);
+	else
+		m_player.GetSession()->SendPacket(&data);
 }
 
 void AchievementInterface::HandleAchievementCriteriaConditionDeath()
@@ -697,7 +701,7 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 	}
 }
 
-void AchievementInterface::HandleAchievementCriteriaBuyBankSlot()
+void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive)
 {
 	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_BUY_BANK_SLOT );
@@ -723,7 +727,15 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot()
 			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
 			if( compareCriteria == ace )
 			{
-				ad->counter[i] = ad->counter[i] + 1;
+				if( retroactive )
+				{
+					uint32 bytes = m_player.GetUInt32Value(PLAYER_BYTES_2);
+					uint8 slots =(uint8) (bytes >> 16);
+					ad->counter[i] = slots;
+				}
+				else
+					ad->counter[i] = ad->counter[i] + 1;
+
 				SendCriteriaUpdate(ad, i);
 			}
 		}

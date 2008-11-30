@@ -198,7 +198,7 @@ public:
 	void HandleAchievementCriteriaHonorableKillRace(uint32 raceId);
 	void HandleAchievementCriteriaTalentResetCount();
 	void HandleAchievementCriteriaTalentResetCostTotal(uint32 cost);
-	void HandleAchievementCriteriaBuyBankSlot();
+	void HandleAchievementCriteriaBuyBankSlot(bool retroactive = false);
 	void HandleAchievementCriteriaFlightPathsTaken();
 	void HandleAchievementCriteriaHighestHealth(uint32 health);
 
