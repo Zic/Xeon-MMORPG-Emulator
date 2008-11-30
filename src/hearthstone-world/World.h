@@ -271,7 +271,6 @@ struct CharacterLoaderThread : public ThreadContext
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
 #endif
-	bool running;
 public:
 	CharacterLoaderThread();
 	~CharacterLoaderThread();

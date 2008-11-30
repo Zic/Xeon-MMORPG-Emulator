@@ -45,6 +45,7 @@ SessionLogWriter* GMCommand_Log;
 SessionLogWriter* Anticheat_Log;
 SessionLogWriter* Player_Log;
 extern DayWatcherThread * dw;
+extern CharacterLoaderThread * ctl;
 
 void Master::_OnSignal(int s)
 {
@@ -411,6 +412,10 @@ bool Master::Run(int argc, char ** argv)
 
 	Log.Notice("Rnd", "~Rnd()");
 	CleanupRandomNumberGenerators();
+
+	Log.Notice( "CharacterLoaderThread", "Exiting..." );
+	ctl->Terminate();
+	ctl = NULL;
 
 	Log.Notice( "DayWatcherThread", "Exiting..." );
 	dw->terminate();

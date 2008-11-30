@@ -22,6 +22,7 @@
 initialiseSingleton( World );
 
 DayWatcherThread* dw = NULL;
+CharacterLoaderThread* ctl = NULL;
 
 float World::m_movementCompressThreshold;
 float World::m_movementCompressThresholdCreatures;
@@ -552,7 +553,8 @@ bool World::SetInitialWorldSettings()
 	dw = new DayWatcherThread();
 	ThreadPool.ExecuteTask( dw );
 
-	ThreadPool.ExecuteTask( new CharacterLoaderThread() );
+	ctl = new CharacterLoaderThread();
+	ThreadPool.ExecuteTask( ctl );
 	ThreadPool.ExecuteTask( new NewsAnnouncer() );
 
 #ifdef ENABLE_COMPRESSED_MOVEMENT
@@ -1568,7 +1570,6 @@ bool CharacterLoaderThread::run()
 	pthread_mutex_init(&mutex,NULL);
 	pthread_cond_init(&cond,NULL);
 #endif
-	running=true;
 	for(;;)
 	{
 		// Get a single connection to maintain for the whole process.
@@ -1596,7 +1597,7 @@ bool CharacterLoaderThread::run()
 		pthread_cond_timedwait(&cond, &mutex, &tv);
 		pthread_mutex_unlock(&mutex);
 #endif
-		if(!running)
+		if(!m_threadRunning)
 			break;
 	}
 
