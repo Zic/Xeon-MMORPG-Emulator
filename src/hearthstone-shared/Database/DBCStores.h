@@ -439,6 +439,7 @@ struct AchievementCriteriaEntry
             uint32  additionalRequirement2_value;           // 8 additional requirement 1 value
         } raw;
     };
+	char* name;
     //char*  name[16];                                      // 9-24
     //uint32 name_flags;                                    // 25
     uint32  completionFlag;                                 // 26

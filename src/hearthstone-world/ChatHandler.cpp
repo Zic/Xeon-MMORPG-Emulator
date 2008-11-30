@@ -565,6 +565,8 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 		else				data << (uint8)0x00;
 
 		GetPlayer()->SendMessageToSet(&data, true);
+
+		GetPlayer()->GetAchievementInterface()->HandleAchievementCriteriaDoEmote(em->Id, pUnit);
 	}
 }
 

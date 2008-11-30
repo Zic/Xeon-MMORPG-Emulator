@@ -867,3 +867,97 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 			EventAchievementEarned(ad);
 	}
 }
+
+void AchievementInterface::HandleAchievementCriteriaHonorableKill()
+{
+	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i] = ad->counter[i] + 1;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}
+
+void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget)
+{
+	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqEmote = ace->do_emote.emoteID;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		// Target information is not stored, so we'll have to do this one by one...
+		// --unless the target's name is the description of the criteria! Bahahaha
+		if( pTarget && pTarget->IsCreature() )
+		{
+			Creature * pCreature = TO_CREATURE(pTarget);
+			if( !ace->name || strlen(ace->name) == 0 || !pCreature->GetCreatureName() || stricmp(pCreature->GetCreatureName()->Name, ace->name) != 0 )
+			{
+				continue;
+			}
+			// Otherwise we go on happily and complete this achievement.
+		}
+		else
+		{
+			// Script individual ones here...
+			if( ace->ID == 2379 ) // Make Love, Not Warcraft
+			{
+				if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() )
+					continue;
+			}
+			else
+				continue;
+		}
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i] = ad->counter[i] + 1;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}

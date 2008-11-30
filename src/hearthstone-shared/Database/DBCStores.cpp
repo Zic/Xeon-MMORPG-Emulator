@@ -154,7 +154,7 @@ const char* gtfloatformat = "f";
 const char* spellshapeshiftformformat = "uuuxxxxxxxxxxxxxxuuuuuuuuuuuuuuuuuu";
 
 const char* achievementfmt="niixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiixxxxxxxxxxxxxxxxxxxi";
-const char* achievementCriteriafmt="niiiiiiiixxxxxxxxxxxxxxxxxiixix";
+const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 
 
 template<class T>
