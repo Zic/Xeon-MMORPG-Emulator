@@ -269,12 +269,10 @@ void AchievementInterface::HandleAchievementCriteriaConditionDeath()
 
 void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMonster)
 {
-	objmgr.m_achievementLock.Acquire();
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 	{
-		objmgr.m_achievementLock.Release();
 		return;
 	}
 	
@@ -310,12 +308,10 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
-	objmgr.m_achievementLock.Release();
 }
 
 void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, CBattleground * bg)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_WIN_BG );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -399,7 +395,6 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 
 void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 achievementId)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -438,7 +433,6 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 
 void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -477,7 +471,6 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 
 void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint32 stack)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -517,7 +510,6 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 
 void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -553,7 +545,6 @@ void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount
 
 void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 classId)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -593,7 +584,6 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 cl
 
 void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 raceId)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HK_RACE );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -633,7 +623,6 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 rac
 
 void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 cost)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -668,7 +657,6 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 
 
 void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -703,7 +691,6 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 
 void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_BUY_BANK_SLOT );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -747,7 +734,6 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 
 void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -782,7 +768,6 @@ void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 
 void AchievementInterface::HandleAchievementCriteriaHighestHealth(uint32 health)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -817,7 +802,6 @@ void AchievementInterface::HandleAchievementCriteriaHighestHealth(uint32 health)
 
 void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -870,7 +854,6 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 
 void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
@@ -905,7 +888,6 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 
 void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget)
 {
-	Guard m_guard(objmgr.m_achievementLock); // be threadsafe, wear a mutex! :)
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE );
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
