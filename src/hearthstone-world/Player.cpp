@@ -4706,6 +4706,8 @@ void Player::UpdateStats()
 
 	UpdateChances();
 	CalcDamage();
+
+	GetAchievementInterface()->HandleAchievementCriteriaHighestHealth( GetUInt32Value(UNIT_FIELD_HEALTH) );
 }
 
 void Player::AddRestXP(uint32 amount)

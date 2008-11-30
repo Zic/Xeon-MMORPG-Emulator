@@ -234,6 +234,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
 	_player->taxi_model_id = modelid;
 	GetPlayer()->TaxiStart(taxipath, modelid, 0);
+	GetPlayer()->GetAchievementInterface()->HandleAchievementCriteriaFlightPathsTaken();
 	
 	//sLog.outString("TAXI: Starting taxi trip. Next update in %d msec.", first_node_time);
 }

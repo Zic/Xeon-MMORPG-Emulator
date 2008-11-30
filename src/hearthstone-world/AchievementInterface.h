@@ -199,6 +199,8 @@ public:
 	void HandleAchievementCriteriaTalentResetCount();
 	void HandleAchievementCriteriaTalentResetCostTotal(uint32 cost);
 	void HandleAchievementCriteriaBuyBankSlot();
+	void HandleAchievementCriteriaFlightPathsTaken();
+	void HandleAchievementCriteriaHighestHealth(uint32 health);
 
 	//-----------------------------------------------------------------
 };
