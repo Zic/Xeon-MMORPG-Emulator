@@ -7506,6 +7506,8 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 	if (m_playerInfo)
 		m_playerInfo->lastLevel = Level;
 
+	GetAchievementInterface()->HandleAchievementCriteriaLevelUp( getLevel() );
+
 	DEBUG_LOG("Player %s set parameters to level %u", GetName(), Level);
 }
 
