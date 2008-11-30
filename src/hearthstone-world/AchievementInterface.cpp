@@ -1061,7 +1061,7 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 	{
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
-		uint32 ReqDuels = ace->win_duel.duelCount;
+		//uint32 ReqDuels = ace->win_duel.duelCount;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;
@@ -1074,7 +1074,7 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
 			if( compareCriteria == ace )
 			{
-				ad->counter[i]++;
+				ad->counter[i] = ad->counter[i] + 1;
 				SendCriteriaUpdate(ad, i);
 			}
 		}
@@ -1096,7 +1096,7 @@ void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 	{
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
-		uint32 ReqDuels = ace->win_duel.duelCount;
+		//uint32 ReqDuels = ace->win_duel.duelCount;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;
@@ -1109,7 +1109,7 @@ void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
 			if( compareCriteria == ace )
 			{
-				ad->counter[i]++;
+				ad->counter[i] = ad->counter[i] + 1;
 				SendCriteriaUpdate(ad, i);
 			}
 		}
