@@ -1611,6 +1611,8 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 			pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, NewHP);
 			//End Duel
 			static_cast< Player* >( this )->EndDuel(DUEL_WINNER_KNOCKOUT);
+			TO_PLAYER(this)->GetAchievementInterface()->HandleAchievementCriteriaWinDuel();
+			TO_PLAYER(pVictim)->GetAchievementInterface()->HandleAchievementCriteriaLoseDuel();
 
 			// surrender emote
 			pVictim->Emote(EMOTE_ONESHOT_BEG);			// Animation
