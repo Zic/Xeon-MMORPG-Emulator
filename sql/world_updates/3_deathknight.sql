@@ -1,0 +1,1 @@
+ALTER TABLE playercreateinfo ADD COLUMN BaseRunic int4 unsigned not null DEFAULT 0 AFTER BaseEnergy;
