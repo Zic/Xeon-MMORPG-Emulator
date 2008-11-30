@@ -5043,41 +5043,35 @@ void Player::AddInRangeObject(Object* pObj)
 		if (GetSession() != NULL)
 		{
 			WorldPacket data(SMSG_AURA_UPDATE_ALL, 28 * MAX_AURAS);
-			FastGUIDPack(data, pUnit->GetGUID());
+			data << pUnit->GetNewGUID();
 			for (uint32 i=0; i<MAX_AURAS; ++i)
 			{
 				aur = pUnit->m_auras[i];
 				if (aur != NULL)
 				{
-					uint32 spellid = aur->m_spellProto->Id;
-					if(!spellid || aur->m_visualSlot >= MAX_AURAS)
-						continue;
-
-					data << uint8(aur->m_visualSlot);
-					data << uint32(spellid);
-
+					data << uint8( aur->m_visualSlot );
+					data << uint32( aur->GetSpellId() );
 					uint8 flags = aur->GetAuraFlags();
-					data << (uint8)flags;
+					if( aur->IsPositive() )
+						flags |= AFLAG_POSITIVE;
+					else
+						flags |= AFLAG_NEGATIVE;
+					data << flags;
 					data << aur->GetAuraLevel();
-	
-					data << (uint8)pUnit->m_auraStackCount[aur->m_visualSlot];
-
-					if(!(flags & 0x08))
+					data << pUnit->m_auraStackCount[ aur->m_visualSlot ];
+					if(!(aur->GetAuraFlags() & AFLAG_NOT_GUID))
 					{
 						FastGUIDPack(data, aur->GetCasterGUID());
 					}
 
-					if(flags & 0x20)
+					if( aur->GetAuraFlags() & AFLAG_HAS_DURATION )
 					{
 						data << aur->GetDuration();
-						data << aur->GetMSExpiryTime();
+						data << aur->GetTimeLeft(); //GetMSExpiryTime();
 					}
 				}
 			}
-			/*if( !IsInWorld() )
-				CopyAndSendDelayedPacket(&data);
-			else*/
-				GetSession()->SendPacket(&data);
+			CopyAndSendDelayedPacket(&data);
 		}
 	}
 }

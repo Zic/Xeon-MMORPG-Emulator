@@ -1027,10 +1027,9 @@ void Aura::BuildAuraUpdate()
 		data << GetTimeLeft(); //GetMSExpiryTime();
 	}
 
-	/*if(!m_target->IsInWorld())
-		
+	if(!m_target->IsInWorld())
 		p_target->CopyAndSendDelayedPacket(&data);
-	else*/
+	else
 		m_target->SendMessageToSet(&data, true);
 }
 
