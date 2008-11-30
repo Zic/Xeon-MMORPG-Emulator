@@ -1,0 +1,6 @@
+1) If you are on Windows, you will need to compile the collision dll regardless of whether you're using it or not.
+Simply place the compiled DLL in your bin/Release folder and you'll be set for that. You will have the option to use collision in the hearthstone-world.conf file.
+
+2) Compile away at the main core files win/ for Windows users or run the standard autoreconf, sh make_precompiled_header.sh, and make install if you are on *nix.
+
+3) If you are on windows, you will need to now navigate to src/scripts/ and compile the scripts project.
