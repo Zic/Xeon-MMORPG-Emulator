@@ -1676,7 +1676,17 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 		}
 		/* victim died! */
 		if( pVictim->IsPlayer() )
+		{
 			static_cast< Player* >( pVictim )->KillPlayer();
+			if( IsCreature() )
+			{
+				TO_PLAYER(pVictim)->GetAchievementInterface()->HandleAchievementCriteriaKilledByCreature( TO_CREATURE(this)->GetUInt32Value(OBJECT_FIELD_ENTRY) );
+			}
+			else if(IsPlayer())
+			{
+				TO_PLAYER(pVictim)->GetAchievementInterface()->HandleAchievementCriteriaKilledByPlayer();
+			}
+		}
 		else
 		{
 			pVictim->setDeathState( JUST_DIED );

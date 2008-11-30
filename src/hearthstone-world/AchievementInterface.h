@@ -227,6 +227,8 @@ public:
 	void HandleAchievementCriteriaReachSkillLevel(uint32 skillId, uint32 skillLevel);
 	void HandleAchievementCriteriaWinDuel();
 	void HandleAchievementCriteriaLoseDuel();
+	void HandleAchievementCriteriaKilledByCreature(uint32 creatureEntry);
+	void HandleAchievementCriteriaKilledByPlayer();
 
 	//-----------------------------------------------------------------
 };

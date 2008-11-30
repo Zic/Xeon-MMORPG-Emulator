@@ -1076,7 +1076,7 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 	}
 }
 
-void AchievementInterface::HandleAchievementCriteriaWinDuel()
+void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL );
 	AchievementCriteriaSet * acs = itr->second;
@@ -1089,6 +1089,75 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqDuels = ace->win_duel.duelCount;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i]++;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}
+
+void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 killedMonster)
+{
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqCreature = ace->killed_by_creature.creatureEntry;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i]++;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}
+
+void AchievementInterface::HandleAchievementCriteriaKilledByPlayer()
+{
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;
