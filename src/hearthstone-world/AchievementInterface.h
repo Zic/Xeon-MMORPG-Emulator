@@ -205,6 +205,7 @@ public:
 	void HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags);
 	void HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget);
 	void HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId);
+	void HandleAchievementCriteriaReachSkillLevel(uint32 skillId, uint32 skillLevel);
 
 	//-----------------------------------------------------------------
 };

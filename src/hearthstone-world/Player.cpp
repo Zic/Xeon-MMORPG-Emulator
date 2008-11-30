@@ -9100,6 +9100,8 @@ void Player::_UpdateSkillFields()
 
 		SetUInt32Value(f++, (itr->second.MaximumValue << 16) | itr->second.CurrentValue);
 		SetUInt32Value(f++, itr->second.BonusValue);
+
+		GetAchievementInterface()->HandleAchievementCriteriaReachSkillLevel( itr->second.Skill->id, itr->second.CurrentValue );
 		++itr;
 	}
 
