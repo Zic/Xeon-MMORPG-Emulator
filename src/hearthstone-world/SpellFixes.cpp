@@ -6100,6 +6100,24 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->Effect[0] = SPELL_EFFECT_DUMMY;
 
+	sp = dbcSpell.LookupEntryForced(46915);
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+	}
+
+	sp = dbcSpell.LookupEntryForced(46914);
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+	}
+
+	sp = dbcSpell.LookupEntryForced(46913);
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+	}
+
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();
 #endif

@@ -829,12 +829,18 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 							if( !this->IsPlayer() || static_cast< Player* >( this )->GetShapeShift() != FORM_CAT )
 								continue;
 						}break;
+
                         case 34754: //holy concentration
                         {
 
 							if( CastingSpell->NameHash != SPELL_HASH_FLASH_HEAL &&
 								CastingSpell->NameHash != SPELL_HASH_BINDING_HEAL &&
 								CastingSpell->NameHash != SPELL_HASH_GREATER_HEAL )
+								continue;
+						}break;
+						case 46916:
+						{
+							if( CastingSpell->NameHash != SPELL_HASH_BLOODSURGE )
 								continue;
 						}break;
 						case 5530:
