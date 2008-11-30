@@ -3657,7 +3657,7 @@ void Spell::SpellEffectWeapondamage( uint32 i ) // Weapon damage +
 		return;
 
 	//Hackfix for Mangle
-	if( m_spellInfo->NameHash == SPELL_HASH_MANGLE__CAT_ && u_caster->IsPlayer() )
+	if( m_spellInfo->NameHash == SPELL_HASH_MANGLE___CAT && u_caster->IsPlayer() )
 		static_cast< Player* >( u_caster )->AddComboPoints( unitTarget->GetGUID(), 1 );
 
 	// Hacky fix for druid spells where it would "double attack".
@@ -5890,7 +5890,7 @@ void Spell::SpellEffectEnchantHeldItem( uint32 i )
 	uint32 Duration = 1800; // Needs to be found in dbc.. I guess?
 	switch( m_spellInfo->NameHash )
 	{
-		case SPELL_HASH_WINDFURY_TOTEM_EFFECT: // Windfury Totem Effect
+		case SPELL_HASH_WINDFURY_TOTEM: // Windfury Totem
 		{   
 			Duration = 10;
 		}

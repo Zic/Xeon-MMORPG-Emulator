@@ -424,6 +424,7 @@ public:
 	Guild* GetGuildByLeaderGuid(uint64 leaderGuid);  
 	Guild* GetGuildByGuildName(std::string guildName);
 
+	map<uint32,set<Quest*>*> ZoneToQuestMap;
 	void LoadAchievements();
 
 	//Corpse Stuff

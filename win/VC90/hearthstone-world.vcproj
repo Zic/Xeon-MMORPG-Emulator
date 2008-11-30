@@ -1031,6 +1031,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hearthstone-world\SpellNameHashes.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-world\SpellTarget.cpp"
 				>
 			</File>

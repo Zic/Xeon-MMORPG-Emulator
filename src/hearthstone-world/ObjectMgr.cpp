@@ -226,6 +226,29 @@ void ObjectMgr::LoadAchievements()
 			}
 		}
 	}
+
+	// For Achievements: Complete Quest by Zone Id
+	StorageContainerIterator<Quest> * itr = QuestStorage.MakeIterator();
+	for(; !itr->AtEnd(); itr->Inc() )
+	{
+		Quest * pQuest = itr->Get();
+		if(!pQuest) continue;
+
+		uint32 QuestZone = pQuest->zone_id;
+		map<uint32,set<Quest*>*>::iterator qitr = ZoneToQuestMap.find( QuestZone );
+		if( qitr == ZoneToQuestMap.end() )
+		{
+			// We don't have any entries for this zone yet.
+			set<Quest*>* mySet = new set<Quest*>;
+			mySet->insert( pQuest );
+			ZoneToQuestMap.insert( make_pair( QuestZone, mySet ) );
+		}
+		else
+		{
+			set<Quest*>* thisSet = qitr->second;
+			thisSet->insert( pQuest );
+		}
+	}
 }
 
 //

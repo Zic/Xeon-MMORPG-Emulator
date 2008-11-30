@@ -223,6 +223,7 @@ void CommandTableStorage::Init()
 
 	static ChatCommand debugCommandTable[] =
 	{
+		{ "retroactivequest", 'd', &ChatHandler::HandleDebugRetroactiveQuestAchievements, "",		NULL, 0, 0, 0},
 		{ "setphase",    'd', &ChatHandler::HandleDebugSetPhase, "",								NULL, 0, 0, 0},
 		{ "infront",	 'd', &ChatHandler::HandleDebugInFrontCommand,  "",							   NULL, 0, 0, 0},
 		{ "showreact",   'd', &ChatHandler::HandleShowReactionCommand,  "",							   NULL, 0, 0, 0},
@@ -1162,5 +1163,16 @@ bool ChatHandler::HandleGetPosCommand(const char* args, WorldSession *m_session)
 	SpellEntry *se = dbcSpell.LookupEntry(spell);
 	if(se)
 		BlueSystemMessage(m_session, "SpellIcon for %d is %d", se->Id, se->SpellIconID);
+	return true;
+}
+
+
+bool ChatHandler::HandleDebugRetroactiveQuestAchievements(const char *args, WorldSession *m_session)
+{
+	Player * pTarget = getSelectedChar(m_session, true );
+	if(!pTarget) return true;
+
+	pTarget->RetroactiveCompleteQuests();
+	m_session->GetPlayer()->BroadcastMessage("Done.");
 	return true;
 }

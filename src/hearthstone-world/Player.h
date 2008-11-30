@@ -1305,6 +1305,7 @@ public:
 	void Reset_Spells();
 	void Reset_Talents();
 	void Reset_ToLevel1();
+	void RetroactiveCompleteQuests();
 
 	uint32 GetBGQueueSlotByBGType(uint32 type);
 	uint32 HasBGQueueSlotOfType(uint32 type);

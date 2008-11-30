@@ -943,3 +943,42 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 			EventAchievementEarned(ad);
 	}
 }
+
+void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId)
+{
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_IN_ZONE );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqZone = ace->complete_quests_in_zone.zoneID;
+		uint32 ReqCount = ace->complete_quests_in_zone.questCount;
+
+		if( ReqZone != zoneId )
+			continue;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i] = ad->counter[i] + 1;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
+}

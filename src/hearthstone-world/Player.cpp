@@ -11030,3 +11030,15 @@ uint32 Player::HasBGQueueSlotOfType(uint32 type)
 
 	return 4;
 }
+
+void Player::RetroactiveCompleteQuests()
+{
+	set<uint32>::iterator itr = m_finishedQuests.begin();
+	for(; itr != m_finishedQuests.end(); ++itr)
+	{
+		Quest * pQuest = QuestStorage.LookupEntry( *itr );
+		if(!pQuest) continue;
+
+		GetAchievementInterface()->HandleAchievementCriteriaCompleteQuestsInZone( pQuest->zone_id );
+	}
+}

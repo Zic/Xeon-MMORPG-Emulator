@@ -526,6 +526,8 @@ protected:
 	bool HandlePosRepCommand(const char *args, WorldSession *m_session);
 	bool HandleNegRepCommand(const char *args, WorldSession *m_session);
 	bool HandleGetRepCommand(const char *args, WorldSession *m_session);
+
+	bool HandleDebugRetroactiveQuestAchievements(const char *args, WorldSession *m_session);
 };
 
 

@@ -4555,8 +4555,6 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 
 	case SPELL_HASH_POLYMORPH:				// Polymorph
 	case SPELL_HASH_POLYMORPH__CHICKEN:		// Chicken
-	case SPELL_HASH_POLYMORPH__PIG:			// Pig
-	case SPELL_HASH_POLYMORPH__TURTLE:		// Turtle
 	case SPELL_HASH_POLYMORPH__SHEEP:		// Good ol' sheep
 		{
 			grp = 10;

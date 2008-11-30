@@ -977,9 +977,7 @@ void ApplyNormalFixes()
 
 		case SPELL_HASH_POLYMORPH:			// Polymorph
 		case SPELL_HASH_POLYMORPH__CHICKEN:	// Polymorph: Chicken
-		case SPELL_HASH_POLYMORPH__PIG:		// Polymorph: Pig
 		case SPELL_HASH_POLYMORPH__SHEEP:	// Polymorph: Sheep
-		case SPELL_HASH_POLYMORPH__TURTLE:	// Polymorph: Turtle
 			sp->buffIndexType = SPELL_TYPE_INDEX_POLYMORPH;
 			break;
 
@@ -1013,7 +1011,6 @@ void ApplyNormalFixes()
 			break;
 
 		//case SPELL_HASH_JUDGEMENT_OF_VENGEANCE:
-		case SPELL_HASH_JUDGEMENT_OF_THE_CRUSADER:
 		case SPELL_HASH_JUDGEMENT_OF_LIGHT:
 		case SPELL_HASH_JUDGEMENT_OF_WISDOM:
 		case SPELL_HASH_JUDGEMENT_OF_JUSTICE:

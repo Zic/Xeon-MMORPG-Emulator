@@ -204,6 +204,7 @@ public:
 	void HandleAchievementCriteriaHighestHealth(uint32 health);
 	void HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags);
 	void HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget);
+	void HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId);
 
 	//-----------------------------------------------------------------
 };
