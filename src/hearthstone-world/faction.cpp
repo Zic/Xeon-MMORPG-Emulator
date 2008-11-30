@@ -19,10 +19,6 @@
 
 #include "StdAfx.h"
 
-#ifdef WIN32
-#define HACKY_CRASH_FIXES 1		// SEH stuff
-#endif
-
 bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 {
 	if(!objA || !objB)
@@ -91,25 +87,11 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 		}
 		if( objB->IsPet() )
 		{
-#if defined(WIN32) && defined(HACKY_CRASH_FIXES)
-			__try {
-				// Check PvP Flags.
-				if( static_cast< Pet* >( objB )->GetPetOwner() != NULL && static_cast< Pet* >( objB )->GetPetOwner()->GetMapMgr() == objB->GetMapMgr() && static_cast< Pet* >( objB )->GetPetOwner()->IsPvPFlagged() )
-					return true;
-				else
-					return false;
-			} __except(EXCEPTION_EXECUTE_HANDLER)
-			{
-				static_cast<Pet*>(objB)->ClearPetOwner();
-				static_cast<Pet*>(objB)->SafeDelete();
-			}
-#else
 			// Check PvP Flags.
 			if( static_cast< Pet* >( objB )->GetPetOwner() != NULL && static_cast< Pet* >( objB )->GetPetOwner()->GetMapMgr() == objB->GetMapMgr() && static_cast< Pet* >( objB )->GetPetOwner()->IsPvPFlagged() )
 				return true;
 			else
 				return false;
-#endif
 		}
 	}
 
