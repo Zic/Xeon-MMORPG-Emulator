@@ -134,6 +134,9 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 				{
 					AddHonorPointsToPlayer(*vtr, pts);
 
+					(*vtr)->GetAchievementInterface()->HandleAchievementCriteriaHonorableKillClass( pVictim->getClass() );
+					(*vtr)->GetAchievementInterface()->HandleAchievementCriteriaHonorableKillRace( pVictim->getRace() );
+
 					(*vtr)->m_killsToday++;
 					(*vtr)->m_killsLifetime++;
 					pPlayer->m_bg->HookOnHK(*vtr);
@@ -166,6 +169,8 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
                     
                     if(gPlayer && (gPlayer == pPlayer || gPlayer->isInRange(pPlayer,100.0f))) // visible range
                     {
+						gPlayer->GetAchievementInterface()->HandleAchievementCriteriaHonorableKillClass( pVictim->getClass() );
+						gPlayer->GetAchievementInterface()->HandleAchievementCriteriaHonorableKillRace( pVictim->getRace() );
                         gPlayer->m_killsToday++;
                         gPlayer->m_killsLifetime++;
 						if(gPlayer->m_bg)

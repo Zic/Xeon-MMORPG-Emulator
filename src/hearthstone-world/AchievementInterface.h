@@ -194,6 +194,8 @@ public:
 	void HandleAchievementCriteriaLevelUp(uint32 level);
 	void HandleAchievementCriteriaOwnItem(uint32 itemId, uint32 stack = 1);
 	void HandleAchievementCriteriaQuestCount(uint32 questCount);
+	void HandleAchievementCriteriaHonorableKillClass(uint32 classId);
+	void HandleAchievementCriteriaHonorableKillRace(uint32 raceId);
 
 	//-----------------------------------------------------------------
 };
