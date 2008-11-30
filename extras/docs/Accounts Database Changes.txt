@@ -1,0 +1,9 @@
+The way accounts are loaded has changed in Hearthstone. 
+You'll notice a new `changed` field in the accounts DB.
+
+When the loginserver starts up, it will load ALL accounts.
+From that point on, it will only reload accounts that have CHANGED = 1.
+So, when you insert/modify any data in accounts, set changed = 1 with it. 
+This reduces logonserver overhead, so you can reload the DB more often.
+
+If you wish to delete an account from the DB, set changed = 2.
