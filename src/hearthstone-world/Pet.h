@@ -217,7 +217,7 @@ public:
 	void SetPetSpellState(uint32 spell, uint16 state);
 	void SetAutoCast(AI_Spell * sp, bool on);
 	float GetHappinessDmgMod() { return 0.25f * GetHappinessState() + 0.5f; };
-	const char* GetPetName() { m_name.c_str(); }
+	const char* GetPetName() { return m_name.c_str(); }
 
 protected:
 	bool bHasLoyalty;
