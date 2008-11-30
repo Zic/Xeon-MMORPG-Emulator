@@ -523,6 +523,12 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 			{
 				name = p->GetCreatureName()->Name;
 				namelen = (uint32)strlen(name) + 1;
+
+				if( p->IsPet() )
+				{
+					name = TO_PET(p)->m_name.c_str();
+					namelen = (uint32)strlen(name)+1;
+				}
 			}
 			else
 			{
