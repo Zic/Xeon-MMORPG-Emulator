@@ -7472,6 +7472,7 @@ void Player::EventTeleport(uint32 mapid, float x, float y, float z)
 void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 {
 	// Apply level
+	uint32 PreviousLevel = GetUInt32Value(UNIT_FIELD_LEVEL);
 	SetUInt32Value(UNIT_FIELD_LEVEL, Level);
 
 	// Set next level conditions
@@ -7490,12 +7491,8 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 	SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 	SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1));
 
-	// Calculate talentpoints
-	uint32 TalentPoints = 0;
-	if(Level >= 10)
-		TalentPoints = Level - 9;
-
-	SetUInt32Value(PLAYER_CHARACTER_POINTS1, TalentPoints);
+	if( Level >= 10)
+		ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, Level - PreviousLevel);
 
 	_UpdateMaxSkillCounts();
 	UpdateStats();
