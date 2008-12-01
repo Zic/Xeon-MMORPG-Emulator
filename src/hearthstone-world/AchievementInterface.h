@@ -220,7 +220,6 @@ public:
 	void HandleAchievementCriteriaTalentResetCostTotal(uint32 cost);
 	void HandleAchievementCriteriaBuyBankSlot(bool retroactive = false);
 	void HandleAchievementCriteriaFlightPathsTaken();
-	void HandleAchievementCriteriaHighestHealth(uint32 health);
 	void HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags);
 	void HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget);
 	void HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId);

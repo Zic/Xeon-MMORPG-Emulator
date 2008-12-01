@@ -785,40 +785,6 @@ void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 	}
 }
 
-void AchievementInterface::HandleAchievementCriteriaHighestHealth(uint32 health)
-{
-	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH );
-	AchievementCriteriaSet * acs = itr->second;
-	if( !acs ) // We have no achievements for this criteria :(
-		return;
-
-	AchievementCriteriaSet::iterator citr = acs->begin();
-	for(; citr != acs->end(); ++citr)
-	{
-		AchievementCriteriaEntry * ace = (*citr);
-		uint32 AchievementID = ace->referredAchievement;
-
-		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
-		if(!pAchievementEntry) continue;
-
-		AchievementCriteriaEntry * compareCriteria = NULL;
-		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
-		// Figure out our associative ID.
-		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
-		{
-			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
-			if( compareCriteria == ace && ad->counter[i] < health)
-			{
-				ad->counter[i] = health;
-				SendCriteriaUpdate(ad, i);
-			}
-		}
-
-		if( CanCompleteAchievement(ad) )
-			EventAchievementEarned(ad);
-	}
-}
-
 void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA );
