@@ -6115,6 +6115,248 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
 	}
 
+	//rogue - Killing Spree Stealth fix
+	sp = dbcSpell.LookupEntryForced( 51690 );
+	if( sp != NULL )
+    	sp->AttributesEx |= ATTRIBUTESEX_NOT_BREAK_STEALTH;
+   
+	//Waylay       
+	sp = dbcSpell.LookupEntryForced( 51692 );
+	if( sp != NULL )
+	{
+    	sp->procFlags = PROC_ON_CRIT_HIT_VICTIM;
+    	sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+    	sp->EffectTriggerSpell[1] = 51693;
+    	sp->procChance = 50;
+	}
+
+	sp = dbcSpell.LookupEntryForced( 51696 );
+	if( sp != NULL )   
+	{
+    	sp->procFlags = PROC_ON_CRIT_HIT_VICTIM;
+    	sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+    	sp->EffectTriggerSpell[1] = 51693;
+    	sp->procChance = 100;   
+	}
+
+	// Mind Flay  all rank's
+	             
+	 sp = dbcSpell.LookupEntryForced( 15407 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	             
+	 sp = dbcSpell.LookupEntryForced( 17311 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	 
+	sp = dbcSpell.LookupEntryForced( 17312 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	
+	 sp = dbcSpell.LookupEntryForced( 17313 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	 
+	sp = dbcSpell.LookupEntryForced( 17314 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	 
+	sp = dbcSpell.LookupEntryForced( 18807 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	 
+	sp = dbcSpell.LookupEntryForced( 25387 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+	
+	 sp = dbcSpell.LookupEntryForced( 48155 );  
+	 if( sp != NULL )
+	 {        
+	     sp->EffectApplyAuraName[1] = SPELL_AURA_MOD_DECREASE_SPEED;
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+	 }
+
+	//Warlock Chaos bolt
+	sp = dbcSpell.LookupEntryForced( 50796 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_IGNORE_INVULNERABILITY;
+	    sp->School = SCHOOL_FIRE;
+	}
+	sp = dbcSpell.LookupEntryForced( 59170 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_IGNORE_INVULNERABILITY;
+	    sp->School = SCHOOL_FIRE;    
+	}
+	sp = dbcSpell.LookupEntryForced( 59171 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_IGNORE_INVULNERABILITY;
+	    sp->School = SCHOOL_FIRE;
+	}
+	sp = dbcSpell.LookupEntryForced( 59172 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_IGNORE_INVULNERABILITY;
+	    sp->School = SCHOOL_FIRE;    
+	}
+
+	   
+	//Force debuff's   
+	// Hypothermia
+	sp = dbcSpell.LookupEntryForced( 41425 );  
+	 if( sp != NULL )
+	{
+	     sp->c_is_flags = SPELL_FLAG_IS_FORCEDDEBUFF;
+	}
+	
+	// Forbearance
+	 sp = dbcSpell.LookupEntryForced( 25771 );  
+	 if( sp != NULL )        
+	 {
+	    sp->c_is_flags = SPELL_FLAG_IS_FORCEDDEBUFF;
+	}   
+	// Weakened Soul
+	 sp = dbcSpell.LookupEntryForced( 6788 );  
+	 if( sp != NULL )
+	{
+	    sp->c_is_flags = SPELL_FLAG_IS_FORCEDDEBUFF;   
+	}      
+#  
+	// DK spell fixes here
+	// Mind Freeze
+	sp = dbcSpell.LookupEntryForced( 47528 );
+	 if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_INTERRUPT_CAST;
+	}
+	
+	//Rune Strike
+	sp = dbcSpell.LookupEntryForced( 56815 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;
+	}   
+	
+	//Frost Strike
+	sp = dbcSpell.LookupEntryForced( 49143 );
+	if( sp != NULL )
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;
+
+	sp = dbcSpell.LookupEntryForced( 51416 );
+	if( sp != NULL )
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;   
+
+	sp = dbcSpell.LookupEntryForced( 51417 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;
+	}   
+	sp = dbcSpell.LookupEntryForced( 51418 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;     
+	}
+	sp = dbcSpell.LookupEntryForced( 51419 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;   
+	}   
+	sp = dbcSpell.LookupEntryForced( 55268 );
+	if( sp != NULL )
+	{
+	    sp->Attributes = ATTRIBUTES_CANT_BE_DPB;   
+	}   
+	
+	//Death and Decay
+	sp = dbcSpell.LookupEntryForced( 43265 );  
+	 if( sp != NULL )  
+	{
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;                
+	     sp->Effect[0] = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+	}
+	sp = dbcSpell.LookupEntryForced( 49936 );  
+	 if( sp != NULL )  
+	{
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;                
+	     sp->Effect[0] = SPELL_EFFECT_PERSISTENT_AREA_AURA;
+	}
+	sp = dbcSpell.LookupEntryForced( 49937 );  
+	 if( sp != NULL )  
+	{
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;                
+	     sp->Effect[0] = SPELL_EFFECT_PERSISTENT_AREA_AURA;        
+	}
+	sp = dbcSpell.LookupEntryForced( 49938 );  
+	 if( sp != NULL )
+	{
+	     sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;                
+	     sp->Effect[0] = SPELL_EFFECT_PERSISTENT_AREA_AURA;    
+	}
+	
+	    //DK Auras
+	// Blood Aura
+	sp = dbcSpell.LookupEntryForced( 50365 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}
+	
+	sp = dbcSpell.LookupEntryForced( 50371 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}   
+	
+	
+	// Frost Aura
+	sp = dbcSpell.LookupEntryForced( 50384 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}   
+	
+	sp = dbcSpell.LookupEntryForced( 50385 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}       
+	
+	// UnholyAura
+	sp = dbcSpell.LookupEntryForced( 50391 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}   
+	
+	sp = dbcSpell.LookupEntryForced( 50392 );
+	if( sp != NULL )
+	{
+	     sp->Effect[0] = SPELL_EFFECT_APPLY_AREA_AURA;
+	}    
+
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();
 #endif
