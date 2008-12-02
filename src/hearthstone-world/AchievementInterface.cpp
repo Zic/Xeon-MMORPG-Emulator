@@ -736,8 +736,8 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 				if( retroactive )
 				{
 					uint32 bytes = m_player.GetUInt32Value(PLAYER_BYTES_2);
-					uint8 slots =(uint8) (bytes >> 16);
-					ad->counter[i] = slots;
+					uint32 slots = (uint8)(bytes >> 16);
+					ad->counter[i] = slots > ReqSlots ? ReqSlots : slots;
 				}
 				else
 					ad->counter[i] = ad->counter[i] + 1;
