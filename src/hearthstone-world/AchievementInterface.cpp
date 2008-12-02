@@ -525,6 +525,47 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 		if( CanCompleteAchievement(ad) )
 			EventAchievementEarned(ad);
 	}
+
+	HandleAchievementCriteriaLootItem(itemId, stack);
+}
+
+void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint32 stack)
+{
+	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM );
+	AchievementCriteriaSet * acs = itr->second;
+	if( !acs ) // We have no achievements for this criteria :(
+		return;
+
+	AchievementCriteriaSet::iterator citr = acs->begin();
+	for(; citr != acs->end(); ++citr)
+	{
+		AchievementCriteriaEntry * ace = (*citr);
+		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqItemId = ace->loot_item.itemID;
+		uint32 ReqItemCount = ace->loot_item.itemCount;
+
+		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
+		if(!pAchievementEntry) continue;
+
+		if( itemId != ReqItemId )
+			continue;
+
+		AchievementCriteriaEntry * compareCriteria = NULL;
+		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		// Figure out our associative ID.
+		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
+		{
+			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
+			if( compareCriteria == ace )
+			{
+				ad->counter[i] = ad->counter[i] + stack;
+				SendCriteriaUpdate(ad, i);
+			}
+		}
+
+		if( CanCompleteAchievement(ad) )
+			EventAchievementEarned(ad);
+	}
 }
 
 void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount)
