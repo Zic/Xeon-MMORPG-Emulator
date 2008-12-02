@@ -22,6 +22,7 @@
 
 AIInterface::AIInterface()
 {
+	m_summonedGuard = NULL;
 	m_waypoints=NULL;
 	m_canMove = true;
 	m_destinationX = m_destinationY = m_destinationZ = 0;
@@ -3333,7 +3334,7 @@ void AIInterface::UpdateCivilian()
 		if(!pOpp->isAlive() || !TO_CREATURE(m_Unit)->CanSee( pOpp ) )
 			continue;
 
-		if( !isCombatSupport( m_Unit, pOpp ) )
+		if( !isAttackable( m_Unit, pOpp ) )
 			continue;
 
 		if( pOpp->GetDistance2dSq( m_Unit ) > 900 )
@@ -3355,7 +3356,7 @@ void AIInterface::UpdateCivilian()
 		// Do this so we don't spam "Guards!" every second
 		if( !m_summonedGuard->GetAIInterface()->GetMostHated() && m_guardCallTimer < UNIXTIME )
 		{
-			m_Unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, isAlliance(m_Unit) ? LANG_COMMON : LANG_ORCISH, "Guards!");
+			m_Unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, target->GetTeam() ? LANG_COMMON : LANG_ORCISH, "Guards!");
 			m_summonedGuard->GetAIInterface()->AttackReaction( target, 1 );
 			m_guardCallTimer = uint32(UNIXTIME + 15);
 		}
