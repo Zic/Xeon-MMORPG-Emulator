@@ -3152,16 +3152,16 @@ void Aura::SpellAuraModAttackSpeed(bool apply)
 		if(apply)
 		{
 			mod->fixed_amount[0] = m_target->GetModPUInt32Value(UNIT_FIELD_BASEATTACKTIME,mod->m_amount);
-			mod->fixed_amount[1] = m_target->GetModPUInt32Value(UNIT_FIELD_RANGEDATTACKTIME,mod->m_amount);
+			mod->fixed_amount[1] = m_target->GetModPUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1,mod->m_amount);
 			mod->fixed_amount[2] = m_target->GetModPUInt32Value(UNIT_FIELD_RANGEDATTACKTIME,mod->m_amount);
 			m_target->ModUnsigned32Value(UNIT_FIELD_BASEATTACKTIME, -mod->fixed_amount[0]);
-			m_target->ModUnsigned32Value(UNIT_FIELD_RANGEDATTACKTIME, -mod->fixed_amount[1]);
+			m_target->ModUnsigned32Value(UNIT_FIELD_BASEATTACKTIME + 1, -mod->fixed_amount[1]);
 			m_target->ModUnsigned32Value(UNIT_FIELD_RANGEDATTACKTIME, -mod->fixed_amount[2]);
 		}
 		else
 		{
 			m_target->ModUnsigned32Value(UNIT_FIELD_BASEATTACKTIME, mod->fixed_amount[0]);
-			m_target->ModUnsigned32Value(UNIT_FIELD_RANGEDATTACKTIME, mod->fixed_amount[1]);
+			m_target->ModUnsigned32Value(UNIT_FIELD_BASEATTACKTIME + 1, mod->fixed_amount[1]);
 			m_target->ModUnsigned32Value(UNIT_FIELD_RANGEDATTACKTIME, mod->fixed_amount[2]);
 		}
 	}
@@ -7434,19 +7434,24 @@ void Aura::SpellAuraModHaste( bool apply )
 		{
 			mod->fixed_amount[0] = m_target->GetModPUInt32Value( UNIT_FIELD_BASEATTACKTIME, mod->m_amount );
 			mod->fixed_amount[1] = m_target->GetModPUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, mod->m_amount );
+			mod->fixed_amount[2] = m_target->GetModPUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1, mod->m_amount);
 
 			if( (int32)m_target->GetUInt32Value ( UNIT_FIELD_BASEATTACKTIME ) <= mod->fixed_amount[0] )
 				mod->fixed_amount[0] = m_target->GetUInt32Value ( UNIT_FIELD_BASEATTACKTIME ); //watch it, a negative timer might be bad ;)
 			if( (int32)m_target->GetUInt32Value ( UNIT_FIELD_RANGEDATTACKTIME ) <= mod->fixed_amount[1] )
 				mod->fixed_amount[1] = m_target->GetUInt32Value ( UNIT_FIELD_RANGEDATTACKTIME );//watch it, a negative timer might be bad ;)
+			if( (int32)m_target->GetUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1 ) <= mod->fixed_amount[2] )
+				mod->fixed_amount[2] = m_target->GetUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1 );
 
 			m_target->ModUnsigned32Value( UNIT_FIELD_BASEATTACKTIME, -mod->fixed_amount[0] );
 			m_target->ModUnsigned32Value( UNIT_FIELD_RANGEDATTACKTIME, -mod->fixed_amount[1] );
+			m_target->ModUnsigned32Value( UNIT_FIELD_BASEATTACKTIME + 1, -mod->fixed_amount[2] );
 		}
 		else
 		{
 			m_target->ModUnsigned32Value( UNIT_FIELD_BASEATTACKTIME, mod->fixed_amount[0] );
 			m_target->ModUnsigned32Value( UNIT_FIELD_RANGEDATTACKTIME, mod->fixed_amount[1] );
+			m_target->ModUnsigned32Value( UNIT_FIELD_BASEATTACKTIME + 1, mod->fixed_amount[2] );
 		}
 	}
 }

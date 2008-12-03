@@ -4537,7 +4537,7 @@ void Player::UpdateAttackSpeed()
 	if( weap != NULL && weap->GetProto()->Class == 2 )// 2 is a weapon
 	{
 		speed = weap->GetProto()->Delay;
-		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, uint32(( speed * m_meleeattackspeedmod ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ));
+		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1, uint32(( speed * m_meleeattackspeedmod ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ));
 	}
 	  
 	weap = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_RANGED );
@@ -7962,11 +7962,21 @@ void Player::CalculateBaseStats()
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, lvlinfo->HP);
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->HP);
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, lvlinfo->XPToNextLevel);
+
+	uint32 baseValues70[] = { 0, 0, 2953, 3383, 0, 2620, 0, 3457, 2241, 2871, 0, 2370 };
+
+	uint32 baseValues80[] = { 0, 0, 4394, 5046, 0, 3863, 0, 4396, 3268, 4294, 0, 3796 };
 	
 	if(GetPowerType() == POWER_TYPE_MANA)
 	{
-		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana);
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, lvlinfo->Mana);
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana - (lvlinfo->Stat[0] * 15));
+
+		if( getLevel() == 70 )
+			SetUInt32Value(UNIT_FIELD_BASE_MANA, baseValues70[getClass()]);
+
+		if( getLevel() == 80 )
+			SetUInt32Value(UNIT_FIELD_BASE_MANA, baseValues80[getClass()]);
 	}
 }
 

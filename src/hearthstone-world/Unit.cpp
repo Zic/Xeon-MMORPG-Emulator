@@ -3232,7 +3232,7 @@ else
 		if( weapon == NULL )
 		{
 			if( weapon_damage_type == OFFHAND )
-				s = GetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME ) / 1000.0f;
+				s = GetUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1 ) / 1000.0f;
 			else
 				s = GetUInt32Value( UNIT_FIELD_BASEATTACKTIME ) / 1000.0f;
 		}
@@ -6037,11 +6037,11 @@ bool Unit::RemoveAllAurasByMechanic( uint32 MechanicType , uint32 MaxDispel = -1
 void Unit::setAttackTimer(int32 time, bool offhand)
 {
 	if(!time)
-		time = offhand ? m_uint32Values[UNIT_FIELD_RANGEDATTACKTIME] : m_uint32Values[UNIT_FIELD_BASEATTACKTIME];
+		time = offhand ? m_uint32Values[UNIT_FIELD_BASEATTACKTIME + 1] : m_uint32Values[UNIT_FIELD_BASEATTACKTIME];
 
 	time = std::max(1000,float2int32(float(time)*GetFloatValue(UNIT_MOD_CAST_SPEED)));
 	if(time>300000)		// just in case.. shouldn't happen though
-		time=offhand ? m_uint32Values[UNIT_FIELD_RANGEDATTACKTIME] : m_uint32Values[UNIT_FIELD_BASEATTACKTIME];
+		time=offhand ? m_uint32Values[UNIT_FIELD_BASEATTACKTIME + 1] : m_uint32Values[UNIT_FIELD_BASEATTACKTIME];
 
 	if(offhand)
 		m_attackTimer_1 = getMSTime() + time;
