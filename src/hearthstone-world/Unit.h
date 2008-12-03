@@ -791,6 +791,8 @@ public:
 	uint8 m_invisFlag;
 	int32 m_invisDetect[INVIS_FLAG_TOTAL];
 
+	int32 m_damageOverTimePctIncrease[7];
+
     /************************************************************************/
     /* Stun Immobilize                                                      */
     /************************************************************************/
@@ -881,6 +883,8 @@ public:
 	uint32 m_triggerSpell;
 	uint32 m_triggerDamage;
 	uint32 m_canMove;
+
+	uint32 m_lastHauntInitialDamage;
 	
 	// Spell Effect Variables
 	int32 m_silenced;

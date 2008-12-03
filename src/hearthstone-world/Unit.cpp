@@ -21,6 +21,8 @@
 
 Unit::Unit()
 {
+	m_lastHauntInitialDamage = 0;
+	memset(m_damageOverTimePctIncrease, 0, sizeof(uint32) * 7);
 	memset(m_auracount, 0, sizeof(uint32)*263);
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
@@ -4016,6 +4018,9 @@ int32 Unit::GetSpellDmgBonus(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg
 //==========================================================================================
 //------------------------------by cast duration--------------------------------------------
 	float dmgdoneaffectperc = 1.0f;
+	if(isdot)
+		dmgdoneaffectperc += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
+
 	if( spellInfo->Dspell_coef_override >= 0 && !isdot )
 		plus_damage = float2int32( float( plus_damage ) * spellInfo->Dspell_coef_override );
 	else if( spellInfo->OTspell_coef_override >= 0 && isdot )

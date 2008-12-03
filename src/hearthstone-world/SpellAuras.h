@@ -247,6 +247,7 @@ enum MOD_TYPES
     SPELL_AURA_INCREASE_MAX_HEALTH=230,//Used by Commanding Shout
 	SPELL_AURA_MODIFY_AXE_SKILL=240,
 	SPELL_AURA_FROZEN_TARGET=262,
+	SPELL_AURA_INCREASE_SPELL_DOT_DAMAGE_PCT = 271,
 	SPELL_AURA_IGNORE_ARMOR_PCT=280,
     TOTAL_SPELL_AURAS = 281,
 };
@@ -607,6 +608,7 @@ public:
 	void SpellAuraDrinkNew(bool apply);
 	void SpellAuraFrozenTarget(bool apply);
 	void EventPeriodicDrink(uint32 amount);
+	void SpellAuraModSpellDamageDOTPct(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 

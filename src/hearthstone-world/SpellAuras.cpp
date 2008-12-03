@@ -291,7 +291,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//268
 		&Aura::SpellAuraNULL,//269
 		&Aura::SpellAuraNULL,//270
-		&Aura::SpellAuraNULL,//271
+		&Aura::SpellAuraModSpellDamageDOTPct,//271
 		&Aura::SpellAuraNULL,//272
 		&Aura::SpellAuraNULL,//273
 		&Aura::SpellAuraNULL,//274
@@ -1753,6 +1753,13 @@ void Aura::SpellAuraDummy(bool apply)
 
 	switch(GetSpellId())
 	{
+	case 59164: // Warlock: Haunt Heal Effect
+		{
+			if( !apply && GetUnitCaster() && GetUnitCaster()->m_lastHauntInitialDamage )
+			{
+				GetUnitCaster()->Heal( GetUnitCaster(), 59164, GetUnitCaster()->m_lastHauntInitialDamage );
+			}
+		}break;
 	case 61216:
 	case 61221:
 	case 61222:
@@ -6036,6 +6043,23 @@ void Aura::SpellAuraMounted(bool apply)
 		p_target->flying_aura = 0;
 		m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
+	}
+}
+
+void Aura::SpellAuraModSpellDamageDOTPct(bool apply)
+{
+	if(!m_target->IsUnit())
+		return;
+
+	Unit * u_target = TO_UNIT(m_target);
+	int32 val = (apply) ? mod->m_amount : -mod->m_amount;
+
+	for(uint32 x=0;x<7;x++)
+	{
+		if (mod->m_miscValue & (((uint32)1)<<x) )
+		{
+			m_target->m_damageOverTimePctIncrease[x] += val;
+		}
 	}
 }
 

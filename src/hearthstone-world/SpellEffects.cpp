@@ -338,6 +338,10 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 		dmg = damage;
 		switch(m_spellInfo->NameHash)
 		{
+		case SPELL_HASH_HAUNT:
+			{
+				unitTarget->m_lastHauntInitialDamage = dmg;
+			}break;
 		case SPELL_HASH_INCINERATE:	// Incinerate -> Deals x-x extra damage if the target is affected by immolate
 			{
 				if( unitTarget->HasAurasWithNameHash( SPELL_HASH_IMMOLATE ) )
