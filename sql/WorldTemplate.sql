@@ -203,11 +203,6 @@ CREATE TABLE `creature_proto` (
   `run_speed` float NOT NULL default '8',
   `fly_speed` float NOT NULL default '14',
   `extra_a9_flags` int(30) NOT NULL default '0',
-  `spell1` int(30) NOT NULL default '0',
-  `spell2` int(30) NOT NULL default '0',
-  `spell3` int(30) NOT NULL default '0',
-  `spell4` int(30) NOT NULL default '0',
-  `spell_flags` int(30) NOT NULL default '0',
   PRIMARY KEY  (`entry`),
   UNIQUE KEY `ID` (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Creature System';
@@ -249,7 +244,6 @@ CREATE TABLE `creature_spawns` (
   `faction` int(30) NOT NULL default '14',
   `flags` int(30) NOT NULL default '0',
   `bytes0` int(30) NOT NULL default '0',
-  `bytes1` int(30) NOT NULL default '0',
   `bytes2` int(30) NOT NULL default '0',
   `emote_state` int(30) NOT NULL default '0',
   `npc_respawn_link` int(30) NOT NULL default '0',
