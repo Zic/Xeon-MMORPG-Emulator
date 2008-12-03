@@ -7960,12 +7960,12 @@ void Player::CalculateBaseStats()
 
 	LevelInfo * levelone = objmgr.GetLevelInfo(this->getRace(),this->getClass(),1);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, lvlinfo->HP);
-	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->HP - (lvlinfo->Stat[2]-levelone->Stat[2])*10);
+	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->HP);
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, lvlinfo->XPToNextLevel);
 	
 	if(GetPowerType() == POWER_TYPE_MANA)
 	{
-		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana - (lvlinfo->Stat[3]-levelone->Stat[3])*15);
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana);
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, lvlinfo->Mana);
 	}
 }
