@@ -734,6 +734,7 @@ public:
 	uint32 m_muted;
 	uint32 m_lastEnumTime;
 	uint32 m_lastWhoTime;
+	bool m_asyncQuery;
 
 protected:
 	uint32 m_repeatTime;

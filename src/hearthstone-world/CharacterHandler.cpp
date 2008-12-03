@@ -121,6 +121,8 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 	uint8 num = 0;
 	uint8 race;
 
+	m_asyncQuery = false;
+
 	// should be more than enough.. 200 bytes per char..
 	WorldPacket data(SMSG_CHAR_ENUM, (result ? result->GetRowCount() * 200 : 1));	
 
@@ -253,14 +255,14 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {	
-	if( m_lastEnumTime > 0 && (UNIXTIME - m_lastEnumTime) < 5 )		// should be enough
+	if( m_asyncQuery )		// should be enough
 	{
-		Disconnect();
 		return;
 	}
 
 	AsyncQuery * q = new AsyncQuery( new SQLClassCallbackP1<World, uint32>(World::getSingletonPtr(), &World::CharacterEnumProc, GetAccountId()) );
 	q->AddQuery("SELECT guid, level, race, class, gender, bytes, bytes2, name, positionX, positionY, positionZ, mapId, zoneId, banned, restState, deathstate, forced_rename_pending, player_flags, guild_data.guildid FROM characters LEFT JOIN guild_data ON characters.guid = guild_data.playerid WHERE acct=%u ORDER BY guid", GetAccountId());
+	m_asyncQuery = true;
 	CharacterDatabase.QueueAsyncQuery(q);
 	m_lastEnumTime = (uint32)UNIXTIME;
 }
