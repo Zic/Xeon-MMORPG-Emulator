@@ -229,6 +229,8 @@ public:
 	void HandleAchievementCriteriaLoseDuel();
 	void HandleAchievementCriteriaKilledByCreature(uint32 creatureEntry);
 	void HandleAchievementCriteriaKilledByPlayer();
+	void HandleAchievementCriteriaDeath();
+	void HandleAchievementCriteriaDeathAtMap(uint32 mapId);
 
 	//-----------------------------------------------------------------
 };

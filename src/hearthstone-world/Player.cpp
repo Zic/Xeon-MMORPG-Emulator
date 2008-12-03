@@ -4064,6 +4064,7 @@ void Player::KillPlayer()
 	NullComboPoints();
 
 	GetAchievementInterface()->HandleAchievementCriteriaConditionDeath();
+	GetAchievementInterface()->HandleAchievementCriteriaDeath();
 
 	sHookInterface.OnDeath(this);
 }
