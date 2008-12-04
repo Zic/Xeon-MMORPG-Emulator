@@ -321,6 +321,9 @@ void AchievementInterface::HandleAchievementCriteriaConditionDeath()
 void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMonster)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 	{
@@ -364,6 +367,9 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, CBattleground * bg)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_WIN_BG );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -447,6 +453,9 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 achievementId)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -485,6 +494,9 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -519,7 +531,7 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 					break;
 				}
 			}
-			for(uint32 i = 0; i < 11; ++i)
+			for(uint32 i = 0; i < 12; ++i)
 			{
 				if(strlen(raceNames[i]) > 0 && string(pAchievementEntry->name).find(raceNames[i]) != string::npos )
 				{
@@ -557,6 +569,9 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint32 stack)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -598,6 +613,9 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint32 stack)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -637,6 +655,9 @@ void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint
 void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -672,6 +693,9 @@ void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount
 void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 classId)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HK_CLASS );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -711,6 +735,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 cl
 void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 raceId)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_HK_RACE );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -750,6 +777,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 rac
 void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 cost)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TALENTS );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -784,6 +814,9 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 
 void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_NUMBER_OF_TALENT_RESETS );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -818,6 +851,9 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_BUY_BANK_SLOT );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -861,6 +897,9 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -895,6 +934,9 @@ void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EXPLORE_AREA );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -947,6 +989,9 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_EARN_HONORABLE_KILL );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -981,6 +1026,9 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1047,6 +1095,9 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUESTS_IN_ZONE );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1086,6 +1137,9 @@ void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 
 void AchievementInterface::HandleAchievementCriteriaReachSkillLevel(uint32 skillId, uint32 skillLevel)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_REACH_SKILL_LEVEL );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1125,6 +1179,9 @@ void AchievementInterface::HandleAchievementCriteriaReachSkillLevel(uint32 skill
 void AchievementInterface::HandleAchievementCriteriaWinDuel()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1160,6 +1217,9 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_LOSE_DUEL );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1195,6 +1255,9 @@ void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 killedMonster)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_CREATURE );
+	if( itr == objmgr.m_achievementCriteriaMap.end() )
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1230,6 +1293,9 @@ void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 kill
 void AchievementInterface::HandleAchievementCriteriaKilledByPlayer()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_KILLED_BY_PLAYER );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1264,6 +1330,9 @@ void AchievementInterface::HandleAchievementCriteriaKilledByPlayer()
 void AchievementInterface::HandleAchievementCriteriaDeath()
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DEATH );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
@@ -1300,6 +1369,9 @@ void AchievementInterface::HandleAchievementCriteriaDeath()
 void AchievementInterface::HandleAchievementCriteriaDeathAtMap(uint32 mapId)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP );
+	if(itr == objmgr.m_achievementCriteriaMap.end())
+		return;
+
 	AchievementCriteriaSet * acs = itr->second;
 	if( !acs ) // We have no achievements for this criteria :(
 		return;
