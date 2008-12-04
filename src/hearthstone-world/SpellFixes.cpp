@@ -558,7 +558,7 @@ void DumpClassSpells()
 	f = fopen("ClassSpells.h", "w");
 	if (f == NULL)
 	{
-		sLog.outString("Error while opening spell.sql: %s", strerror(errno));
+		sLog.outString("Error while opening ClassSpells.h: %s", strerror(errno));
 		return;
 	}
 

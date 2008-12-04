@@ -6413,7 +6413,7 @@ void Unit::RemovePvPFlag()
 void Unit::SetPowerType(uint8 type)
 {
 	SetByte(UNIT_FIELD_BYTES_0,3,type);
-	if (type == POWER_TYPE_RUNIC)
+	if (type == POWER_TYPE_RUNIC && IsPlayer())
 	{
 		SetFloatValue(PLAYER_RUNE_REGEN_1, 0.100000f);
 		SetFloatValue(PLAYER_RUNE_REGEN_1_1, 0.100000f);
