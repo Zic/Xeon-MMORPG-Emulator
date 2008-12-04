@@ -153,7 +153,7 @@ const char* barbershopstyleFormat="nusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxuuu";
 const char* gtfloatformat = "f";
 const char* spellshapeshiftformformat = "uuuxxxxxxxxxxxxxxuuuuuuuuuuuuuuuuuu";
 
-const char* achievementfmt="niixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiixxxxxxxxxxxxxxxxxxxi";
+const char* achievementfmt="niixsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiixxxxxxxxxxxxxxxxxxxi";
 const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 
 

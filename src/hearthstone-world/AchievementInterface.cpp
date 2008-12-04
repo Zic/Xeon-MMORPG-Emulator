@@ -470,6 +470,40 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 		if( level < ReqLevel )
 			continue;
 
+		// Realm first to 80 stuff has race and class requirements. Let the hacking begin.
+		if( string(pAchievementEntry->name).find("Realm First!") != string::npos )
+		{
+			static const char* classNames[] = { "", "Warrior", "Paladin", "Hunter", "Rogue", "Priest", "Death Knight", "Shaman", "Mage", "Warlock", "", "Druid" };
+			static const char* raceNames[] = { "", "Human", "Orc", "Dwarf", "Night Elf", "Forsaken", "Tauren", "Gnome", "Troll", "Blood Elf", "Draenei" };
+
+			uint32 ReqClass = 0;
+			uint32 ReqRace = 0;
+			for(uint32 i = 0; i < 12; ++i)
+			{
+				if(strlen(classNames[i]) > 0 && string(pAchievementEntry->name).find(classNames[i]) != string::npos )
+				{
+					// We require this class
+					ReqClass = i;
+					break;
+				}
+			}
+			for(uint32 i = 0; i < 12; ++i)
+			{
+				if(strlen(raceNames[i]) > 0 && string(pAchievementEntry->name).find(raceNames[i]) != string::npos )
+				{
+					// We require this race
+					ReqRace = i;
+					break;
+				}
+			}
+
+			if( ReqClass && m_player.getClass() != ReqClass )
+				continue;
+
+			if( ReqRace && m_player.getRace() != ReqRace )
+				continue;
+		}
+
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
 		// Figure out our associative ID.
