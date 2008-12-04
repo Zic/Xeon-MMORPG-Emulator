@@ -19,6 +19,8 @@
 
 #include "StdAfx.h"
 
+set<uint32> m_completedRealmFirstAchievements;
+
 AchievementInterface::AchievementInterface(Player& plr) : m_player(plr)
 {
 }
@@ -56,6 +58,8 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 		ad->completed = completed;
 		ad->date = fields[4].GetUInt32();
 		
+		if( ad->completed && string(ae->name).find("Realm First!") != string::npos )
+			m_completedRealmFirstAchievements.insert( ae->ID );
 
 		vector<string> Delim = StrSplit( criteriaprogress, "," );
 		for( uint32 i = 0; i < 32; ++i)
@@ -151,9 +155,33 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 	pData->completed = true;
 	pData->date = (uint32)time(NULL);
 
+	AchievementEntry * ae = dbcAchievement.LookupEntry(pData->id);
+
 	m_player.SendMessageToSet( BuildAchievementEarned(pData), true );
 
 	HandleAchievementCriteriaRequiresAchievement(pData->id);
+
+	// Realm First Achievements
+	if( string(ae->name).find("Realm First") != string::npos  ) // flags are wrong lol
+	{
+		m_completedRealmFirstAchievements.insert( ae->ID );
+
+		// Send to my team
+		WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, 60);
+		data << m_player.GetName();
+		data << m_player.GetGUID();
+		data << ae->ID;
+		data << uint32(1);
+		sWorld.SendFactionMessage(&data, m_player.GetTeam());
+
+		// Send to the other team (no clickable link)
+		WorldPacket data2(SMSG_SERVER_FIRST_ACHIEVEMENT, 60);
+		data2 << m_player.GetName();
+		data2 << m_player.GetGUID();
+		data2 << ae->ID;
+		data2 << uint32(0);
+		sWorld.SendFactionMessage(&data2, m_player.GetTeam() ? 0 : 1);
+	}
 }
 
 
@@ -185,6 +213,10 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 	bool hasCompleted = false;
 	AchievementEntry * ach = dbcAchievement.LookupEntry(ad->id);
 	if( ach->is_statistic == 1 ) // We cannot complete statistics
+		return false;
+
+	// realm first achievements
+	if( m_completedRealmFirstAchievements.find(ad->id) != m_completedRealmFirstAchievements.end() )
 		return false;
 
 	bool failedOne = false;
