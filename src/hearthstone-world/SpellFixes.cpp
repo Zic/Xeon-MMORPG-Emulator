@@ -695,7 +695,7 @@ void ApplyNormalFixes()
                 case SUMMON_TYPE_TOTEM_4: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT4; break;
                 case SUMMON_TYPE_CRITTER: sp->Effect[i] = SPELL_EFFECT_SUMMON_CRITTER; break;
                 case SUMMON_TYPE_TOTEM_3: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT3; break;
-                case SUMMON_TYPE_CREATE_TOTEM: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM; break;
+                //case SUMMON_TYPE_CREATE_TOTEM: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM; break;
             }
         }
 

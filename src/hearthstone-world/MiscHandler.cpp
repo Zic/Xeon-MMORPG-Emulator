@@ -2034,3 +2034,10 @@ void WorldSession::HandleSetAutoLootPassOpcode(WorldPacket & recv_data)
 
 	_player->m_passOnLoot = (on!=0) ? true : false;
 }
+
+void WorldSession::HandleRemoveGlyph(WorldPacket & recv_data)
+{
+	uint32 glyphSlot;
+	recv_data >> glyphSlot;
+	_player->RemoveGlyph(glyphSlot);
+}

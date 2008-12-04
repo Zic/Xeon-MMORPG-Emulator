@@ -669,7 +669,7 @@ enum SpellEffects
     SPELL_EFFECT_PICKPOCKET,                //    71
     SPELL_EFFECT_ADD_FARSIGHT,              //    72
     SPELL_EFFECT_SUMMON_POSSESSED,          //    73    
-    SPELL_EFFECT_SUMMON_TOTEM,              //    74    
+    SPELL_EFFECT_USE_GLYPH,                 //    74    
     SPELL_EFFECT_HEAL_MECHANICAL,           //    75
     SPELL_EFFECT_SUMMON_OBJECT_WILD,        //    76
     SPELL_EFFECT_SCRIPT_EFFECT,             //    77    
@@ -1696,7 +1696,7 @@ public:
     void SpellEffectPickpocket(uint32 i);
     void SpellEffectAddFarsight(uint32 i);
     void SpellEffectSummonPossessed(uint32 i);
-    void SpellEffectCreateSummonTotem(uint32 i);
+	void SpellEffectUseGlyph(uint32 i);
     void SpellEffectHealMechanical(uint32 i);
     void SpellEffectSummonObjectWild(uint32 i);
     void SpellEffectScriptEffect(uint32 i);
@@ -1921,6 +1921,7 @@ public:
     uint32 castedItemId;
     bool judgement;
 	uint8 extra_cast_number;
+	uint32 m_glyphIndex;
 	uint32 m_interruptcount;
 
     bool duelSpell;

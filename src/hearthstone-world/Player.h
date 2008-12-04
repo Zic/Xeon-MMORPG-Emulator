@@ -258,6 +258,7 @@ enum PlayerFlags
     PLAYER_FLAG_NOCLOAK				= 0x800,
     PLAYER_FLAG_NEED_REST_3_HOURS	= 0x1000,
     PLAYER_FLAG_NEED_REST_5_HOURS	= 0x2000,
+	PLAYER_FLAG_PVP_TIMER			= 0x40000,
 };
 
 enum CharterTypes
@@ -1643,7 +1644,7 @@ public:
 	//! Do this on /pvp off
 	HEARTHSTONE_INLINE void ResetPvPTimer();
 	//! Stop the timer for pvp off
-	HEARTHSTONE_INLINE void StopPvPTimer() { m_pvpTimer = 0; }
+	HEARTHSTONE_INLINE void StopPvPTimer() { RemoveFlag(PLAYER_FLAGS, PLAYER_FLAG_PVP_TIMER); m_pvpTimer = 0; }
 	
 	//! Called at login to add the honorless buff, etc.
 	void LoginPvPSetup();
@@ -2048,6 +2049,13 @@ public:
 	bool mWeakenedSoul;
 	bool mForbearance;
 	bool mHypothermia;
+
+	// Glyphs
+	void RemoveGlyph(uint32 slot);
+	uint8 SetGlyph(uint32 slot, uint32 glyphId);
+	void InitGlyphSlots();
+	void InitGlyphsForLevel();
+	uint8 m_runes[6];
 
 private:
 	// Stuff for "Talent Inspect"

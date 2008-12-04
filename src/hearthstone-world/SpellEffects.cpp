@@ -94,7 +94,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectPickpocket,//SPELL_EFFECT_PICKPOCKET - 71
 		&Spell::SpellEffectAddFarsight,//SPELL_EFFECT_ADD_FARSIGHT - 72
 		&Spell::SpellEffectSummonPossessed,//SPELL_EFFECT_SUMMON_POSSESSED - 73
-		&Spell::SpellEffectCreateSummonTotem,//SPELL_EFFECT_SUMMON_TOTEM - 74
+		&Spell::SpellEffectUseGlyph,//SPELL_EFFECT_USE_GLYPH - 74
 		&Spell::SpellEffectHealMechanical,//SPELL_EFFECT_HEAL_MECHANICAL - 75
 		&Spell::SpellEffectSummonObjectWild,//SPELL_EFFECT_SUMMON_OBJECT_WILD - 76
 		&Spell::SpellEffectScriptEffect,//SPELL_EFFECT_SCRIPT_EFFECT - 77
@@ -3962,9 +3962,13 @@ void Spell::SpellEffectSummonPossessed(uint32 i) // eye of kilrog
 	}*/
 }
 
-void Spell::SpellEffectCreateSummonTotem(uint32 i)
+void Spell::SpellEffectUseGlyph(uint32 i)
 {
-	//Atalai Skeleton Totem
+	if(!p_caster)
+		return;
+	uint8 result = p_caster->SetGlyph(m_glyphIndex, m_spellInfo->EffectMiscValue[i]);
+	if(result)
+		SendCastResult(result);
 }
 
 void Spell::SpellEffectHealMechanical(uint32 i)

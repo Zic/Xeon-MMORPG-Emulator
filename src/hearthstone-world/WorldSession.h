@@ -675,6 +675,7 @@ protected:
 	// Misc Opcodes
 	void HandleAlterAppearance(WorldPacket & recv_data);
 	void HandleAchievementInspect(WorldPacket & recv_data);
+	void HandleRemoveGlyph(WorldPacket & recv_data);
 
 public:
 

@@ -228,6 +228,7 @@ Spell::Spell(Object* Caster, SpellEntry *info, bool triggered, Aura* aur)
 	ProcedOnSpell = 0;
 	forced_basepoints[0] = forced_basepoints[1] = forced_basepoints[2] = 0;
 	extra_cast_number = 0;
+	m_glyphIndex = 0;
 	m_reflectedParent = NULL;
 	m_isCasting = false;
 	m_hitTargetCount = 0;

@@ -2021,9 +2021,8 @@ void World::BackupDB()
 {
 #ifndef WIN32
 	const char *tables[] =
-	{ "account_data", "account_forced_permissions", "arenateams", "auctions",
-	  "banned_names", "characters", "characters_insert_queue", "charters",
-	  "clientaddons", "command_overrides", "corpses", "gm_tickets",
+	{ "account_data", "account_forced_permissions", "achievements", "arenateams", "auctions",
+	  "banned_names", "characters", "characters_insert_queue", "charters", "corpses", "gm_tickets",
 	  "groups", "guild_bankitems", "guild_banklogs", "guild_banktabs",
 	  "guild_data", "guild_logs", "guild_ranks", "guilds",
 	  "instances", "mailbox", "mailbox_insert_queue", "news_timers",

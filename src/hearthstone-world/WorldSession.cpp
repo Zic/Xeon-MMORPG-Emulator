@@ -897,6 +897,7 @@ void WorldSession::InitPacketHandlerTable()
 
 	WorldPacketHandlers[CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY].handler = &WorldSession::HandleInrangeQuestgiverQuery;
 	WorldPacketHandlers[CMSG_ALTER_APPEARANCE].handler = &WorldSession::HandleAlterAppearance;
+	WorldPacketHandlers[CMSG_REMOVE_GLYPH].handler = &WorldSession::HandleRemoveGlyph;
 
 	WorldPacketHandlers[CMSG_QUERY_INSPECT_ACHIEVEMENTS].handler = &WorldSession::HandleAchievementInspect;
 }

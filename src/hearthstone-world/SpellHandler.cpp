@@ -30,8 +30,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	uint64 item_guid;
 	uint8 cn;
 	uint32 spellId = 0;
+	uint32 glyphIndex;
 
-	recvPacket >> tmp1 >> slot >> tmp3 >> cn >> item_guid >> unk;
+	recvPacket >> tmp1 >> slot >> cn >> spellId >> item_guid >> glyphIndex >> unk;
 	Item* tmpItem = NULL;
 	tmpItem = p_User->GetItemInterface()->GetInventoryItem(tmp1,slot);
 	if (!tmpItem)
@@ -175,6 +176,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 	Spell *spell = new Spell(_player, spellInfo, false, NULL);
 	spell->extra_cast_number=cn;
+	spell->m_glyphIndex = glyphIndex;
 	spell->i_caster = tmpItem;
 	if( spell->prepare(&targets) == SPELL_CANCAST_OK )
 		_player->Cooldown_AddItem( itemProto, x );

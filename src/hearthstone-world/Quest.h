@@ -126,6 +126,8 @@ struct Quest
 	uint32 required_rep_faction;
 	uint32 required_rep_value;
 
+	uint32 suggested_players;
+
 	uint32 time;
 	uint32 special_flags;
 	

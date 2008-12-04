@@ -387,11 +387,11 @@ void LogonCommHandler::LoadRealmConfiguration()
 
 			// process realm type
 			if(!stricmp(rt.c_str(), "pvp"))
-				type = 1;
+				type = 4;
 			else if(!stricmp(rt.c_str(), "rp"))
-				type = 0;
+				type = 6;
 			else if(!stricmp(rt.c_str(), "rppvp"))
-				type = 0;
+				type = 8;
 			else
 				type = 0;
 

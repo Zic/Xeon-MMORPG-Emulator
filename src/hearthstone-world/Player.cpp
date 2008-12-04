@@ -751,6 +751,8 @@ bool Player::Create(WorldPacket& data )
 	else
 		SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
 	
+	InitGlyphSlots();
+	InitGlyphsForLevel();
 	// lookup level information
 	uint32 lvl = GetUInt32Value(UNIT_FIELD_LEVEL);
 	lvlinfo = objmgr.GetLevelInfo(getRace(), getClass(), lvl);
@@ -991,6 +993,12 @@ void Player::Update( uint32 p_time )
 
 	if(m_pvpTimer)
 	{
+		if(!IsPvPFlagged())
+		{
+			StopPvPTimer();
+			RemovePvPFlag();	// Reset Timer Status
+		}
+
 		if(p_time >= m_pvpTimer)
 		{
 			RemovePvPFlag();
@@ -1497,6 +1505,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid, bool allowbonus)
 			GetSummon()->ModUnsigned32Value( UNIT_FIELD_LEVEL, 1 );
 			GetSummon()->ApplyStatsForLevel();
 		}
+		InitGlyphsForLevel();
 
 		GetAchievementInterface()->HandleAchievementCriteriaLevelUp( getLevel() );
 	}
@@ -2043,6 +2052,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 			player_flags &= ~PLAYER_FLAG_PVP_TOGGLE;
 		if(player_flags & PLAYER_FLAG_FREE_FOR_ALL_PVP)
 			player_flags &= ~PLAYER_FLAG_FREE_FOR_ALL_PVP;
+		if(player_flags & PLAYER_FLAG_PVP_TIMER)
+			player_flags &= ~PLAYER_FLAG_PVP_TIMER;
 	}
 
 	ss << "', "
@@ -2206,7 +2217,15 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << m_killsToday << ", " << m_killsYesterday << ", " << m_killsLifetime << ", ";
 	ss << m_honorToday << ", " << m_honorYesterday << ", ";
 	ss << m_honorPoints << ", ";
-   	ss << iInstanceType << ")";
+   	ss << iInstanceType << ", ";
+
+	// dump glyphs
+	ss << "'";
+
+	for(uint32 i = 0; i < 8; ++i)
+		ss << m_uint32Values[PLAYER_FIELD_GLYPHS_1 + i] << ",";
+
+	ss << "')";
 	
 	if(bNewCharacter)
 		CharacterDatabase.WaitExecuteNA(ss.str().c_str());
@@ -2923,12 +2942,41 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	RolloverHonor();
     iInstanceType = get_next_field.GetUInt32();
 
+	start = (char*)get_next_field.GetString();
+	for(uint32 Counter = 0; Counter < 8; Counter++) 
+	{
+		end = strchr(start,',');
+		if(!end)
+			break;
+		*end = 0;
+		SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + Counter, atol(start));
+		start = end + 1;
+	}
+
+	GlyphPropertyEntry *glyph;
+	for(uint32 i=0; i < 8; i++)
+	{
+		uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + i);
+		if(glyphId == 0)
+			continue;
+		// Get info
+		glyph = dbcGlyphProperty.LookupEntry(glyphId);
+		if(!glyph || !glyph->SpellID)
+			continue;
+		LoginAura la;
+		la.id = glyph->SpellID;
+		la.dur = -1;
+		loginauras.push_back(la);
+	}
+
 	HonorHandler::RecalculateHonorFields(this);
 	
 	for(uint32 x=0;x<5;x++)
 		BaseStats[x]=GetUInt32Value(UNIT_FIELD_STAT0+x);
   
 	_setFaction();
+	InitGlyphSlots();
+	InitGlyphsForLevel();
    
 	//class fixes
 	switch(getClass())
@@ -7503,6 +7551,7 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 		m_playerInfo->lastLevel = Level;
 
 	GetAchievementInterface()->HandleAchievementCriteriaLevelUp( getLevel() );
+	InitGlyphsForLevel();
 
 	DEBUG_LOG("Player %s set parameters to level %u", GetName(), Level);
 }
@@ -7951,7 +8000,8 @@ void Player::PvPToggle()
 
 void Player::ResetPvPTimer()
 {
-	 m_pvpTimer = sWorld.getIntRate(INTRATE_PVPTIMER);
+	SetFlag(PLAYER_FLAGS, PLAYER_FLAG_PVP_TIMER);
+	m_pvpTimer = sWorld.getIntRate(INTRATE_PVPTIMER);
 }
 
 void Player::CalculateBaseStats()
@@ -11050,4 +11100,72 @@ void Player::RetroactiveCompleteQuests()
 
 		GetAchievementInterface()->HandleAchievementCriteriaCompleteQuestsInZone( pQuest->zone_id );
 	}
+}
+
+// Update glyphs after level change
+void Player::InitGlyphsForLevel()
+{
+	// Enable number of glyphs depending on level
+	uint32 level = getLevel();
+	uint32 glyph_mask = 0; 
+	if(level == 80)
+		glyph_mask = 6;
+	else if(level >= 70)
+		glyph_mask = 5;
+	else if(level >= 50)
+		glyph_mask = 4;
+	else if(level >= 30)
+		glyph_mask = 3;
+	else if(level >= 15)
+		glyph_mask = 2;
+	SetUInt32Value(PLAYER_GLYPHS_ENABLED, (1 << glyph_mask) -1 );
+}
+
+void Player::InitGlyphSlots()
+{
+	for(uint32 i = 0; i < 6; ++i)
+		SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + i, 21 + i);
+}
+
+void Player::RemoveGlyph(uint32 slot)
+{
+	if(slot > 5)
+		return; // Glyph doesn't exist
+	// Get info
+	uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot);
+	if(glyphId == 0)
+		return;
+	GlyphPropertyEntry *glyph = dbcGlyphProperty.LookupEntry(glyphId);
+	if(!glyph)
+		return;
+	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
+	RemoveAllAuras(glyph->SpellID, 0);
+}
+
+static const uint32 glyphType[6] = {0, 1, 1, 0, 1, 0};
+
+uint8 Player::SetGlyph(uint32 slot, uint32 glyphId)
+{
+	// Get info
+	GlyphPropertyEntry *glyph = dbcGlyphProperty.LookupEntry(glyphId);
+	if(!glyph)
+		return SPELL_FAILED_INVALID_GLYPH;
+
+	uint32 type = glyph->Type;
+	uint32 glyphX = 0;
+	for(uint32 x=0; x<6; ++x)
+	{
+		glyphX = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + x);
+		if(glyphX == glyphId)
+			return SPELL_FAILED_UNIQUE_GLYPH;
+	}
+	
+	if( glyphType[slot] != glyph->Type || // Glyph type doesn't match
+			(GetUInt32Value(PLAYER_GLYPHS_ENABLED) & (1 << slot)) == 0) // slot is not enabled
+		return SPELL_FAILED_INVALID_GLYPH;
+
+	RemoveGlyph(slot);
+	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyphId);
+	CastSpell(this, glyph->SpellID, true);	// Apply the glyph effect
+	return 0;
 }
