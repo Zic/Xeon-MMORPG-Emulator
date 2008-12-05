@@ -521,7 +521,7 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 		if( string(pAchievementEntry->name).find("Realm First!") != string::npos )
 		{
 			static const char* classNames[] = { "", "Warrior", "Paladin", "Hunter", "Rogue", "Priest", "Death Knight", "Shaman", "Mage", "Warlock", "", "Druid" };
-			static const char* raceNames[] = { "", "Human", "Orc", "Dwarf", "Night Elf", "Forsaken", "Tauren", "Gnome", "Troll", "Blood Elf", "Draenei" };
+			static const char* raceNames[] = { "", "Human", "Orc", "Dwarf", "Night Elf", "Forsaken", "Tauren", "Gnome", "Troll", "", "Blood Elf", "Draenei" };
 
 			uint32 ReqClass = 0;
 			uint32 ReqRace = 0;
