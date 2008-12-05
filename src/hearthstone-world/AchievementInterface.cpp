@@ -157,7 +157,10 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 
 	AchievementEntry * ae = dbcAchievement.LookupEntry(pData->id);
 
-	m_player.SendMessageToSet( BuildAchievementEarned(pData), true );
+	if( m_player.IsInWorld() )
+		m_player.GetSession()->SendPacket( BuildAchievementEarned(pData) );
+	else
+		m_player.CopyAndSendDelayedPacket( BuildAchievementEarned(pData) );
 
 	HandleAchievementCriteriaRequiresAchievement(pData->id);
 

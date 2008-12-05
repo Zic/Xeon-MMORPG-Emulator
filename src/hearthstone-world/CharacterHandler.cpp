@@ -993,7 +993,7 @@ void WorldSession::FullLogin(Player * plr)
 
 	// Send achievement data!
 	if( _player->GetAchievementInterface()->HasAchievements() )
-		SendPacket(_player->GetAchievementInterface()->BuildAchievementData());
+		_player->CopyAndSendDelayedPacket(_player->GetAchievementInterface()->BuildAchievementData());
 
 	if(enter_world && !_player->GetMapMgr())
 	{
