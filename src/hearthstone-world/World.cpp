@@ -60,8 +60,8 @@ World::World()
 	SocketSendBufSize = WORLDSOCKET_SENDBUF_SIZE;
 	SocketRecvBufSize = WORLDSOCKET_RECVBUF_SIZE;
 #endif
-	m_levelCap=70;
-	m_genLevelCap=70;
+	m_levelCap=80;
+	m_genLevelCap=80;
 	m_limitedNames=false;
 	m_banTable = NULL;
 	m_lfgForNonLfg = false;
@@ -1336,8 +1336,8 @@ void World::Rehash(bool load)
 	antihack_flight = Config.MainConfig.GetBoolDefault("AntiHack", "Flight", true);
 	no_antihack_on_gm = Config.MainConfig.GetBoolDefault("AntiHack", "DisableOnGM", false);
 	SpeedhackProtection = antihack_speed;
-	m_levelCap = Config.MainConfig.GetIntDefault("Server", "LevelCap", 70);
-	m_genLevelCap = Config.MainConfig.GetIntDefault("Server", "GenLevelCap", 70);
+	m_levelCap = Config.MainConfig.GetIntDefault("Server", "LevelCap", 80);
+	m_genLevelCap = Config.MainConfig.GetIntDefault("Server", "GenLevelCap", 80);
 	m_limitedNames = Config.MainConfig.GetBoolDefault("Server", "LimitedNames", true);
 	m_useAccountData = Config.MainConfig.GetBoolDefault("Server", "UseAccountData", false);
 
