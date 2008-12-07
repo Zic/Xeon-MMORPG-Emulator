@@ -7541,8 +7541,13 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 	SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 	SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1));
 
-	if( Level >= 10)
-		ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, Level - PreviousLevel);
+	int32 Talents = Level - PreviousLevel;
+	if(PreviousLevel < 9)
+		Talents = Level - 9;
+	if(Talents < 0)
+		Reset_Talents();
+	else if(Level >= 10)
+		ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, Talents);
 
 	_UpdateMaxSkillCounts();
 	UpdateStats();
