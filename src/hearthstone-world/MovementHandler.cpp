@@ -529,6 +529,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 			_player->m_TransporterGUID = 0;
 			_player->ResetHeartbeatCoords();
+			_player->DelaySpeedHack(5000);
 		}
 		else if(movement_info.transGuid)
 		{
@@ -548,6 +549,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 				_player->m_TransporterX = movement_info.transX;
 				_player->m_TransporterY = movement_info.transY;
 				_player->m_TransporterZ = movement_info.transZ;
+				_player->DelaySpeedHack(5000);
 			}
 			else
 			{
