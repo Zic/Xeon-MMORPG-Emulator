@@ -180,7 +180,7 @@ void LogonCommServerSocket::HandleRegister(WorldPacket & recvData)
 	recvData >> realm->Address;
 	recvData >> realm->Colour >> realm->Icon >> realm->TimeZone >> realm->Population;
 
-	sLog.outString("Updating realm realm `%s` ID %u.", realm->Name.c_str(), realm->Id);
+	sLog.outString("Updating realm `%s` ID %u.", realm->Name.c_str(), realm->Id);
 
 	// Send back response packet.
 	WorldPacket data(RSMSG_REALM_REGISTERED, 4);

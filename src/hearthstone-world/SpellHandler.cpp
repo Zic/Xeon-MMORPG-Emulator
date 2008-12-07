@@ -25,7 +25,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	
 	Player* p_User = GetPlayer();
 	DEBUG_LOG("WORLD: got use Item packet, data length = %i",recvPacket.size());
-	int8 tmp1,slot,tmp3;
+	int8 tmp1,slot;
 	uint8 unk; // 3.0.2 added unk
 	uint64 item_guid;
 	uint8 cn;
