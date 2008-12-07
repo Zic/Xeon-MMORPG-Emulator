@@ -3524,7 +3524,7 @@ void Unit::AddAura(Aura *aur, Aura *pParentAura)
 	Unit* target = aur->GetTarget();
 
 	aur->SetAuraFlags(AFLAG_VISIBLE | AFLAG_EFF_INDEX_1 | AFLAG_EFF_INDEX_2 | AFLAG_NOT_GUID | (aur->GetDuration() ? AFLAG_HAS_DURATION : AFLAG_NONE) | (aur->IsPositive() ? AFLAG_CANCELLABLE : AFLAG_NONE));
-	aur->SetAuraLevel(aur->GetUnitCaster() ? aur->GetUnitCaster()->getLevel() : sWorld.m_levelCap);	
+	aur->SetAuraLevel(aur->GetUnitCaster() ? aur->GetUnitCaster()->getLevel() : MAXIMUM_ATTAINABLE_LEVEL);	
 
 	if(!aur->IsPassive())
 	{	

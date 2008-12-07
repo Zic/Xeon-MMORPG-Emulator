@@ -359,6 +359,9 @@ class WorldSocket;
 typedef std::list<WorldSocket*> QueueSet;
 typedef set<WorldSession*> SessionSet;
 
+// The maximum level attainable, period, regardless of flags on your account.
+#define MAXIMUM_ATTAINABLE_LEVEL 80
+
 class SERVER_DECL World : public Singleton<World>, public EventableObject
 {
 public:
@@ -611,8 +614,6 @@ public:
 	bool m_reqGmForCommands;
 	bool m_lfgForNonLfg;
 	list<SpellEntry*> dummyspells;
-	uint32 m_levelCap;
-	uint32 m_genLevelCap;
 	bool m_limitedNames;
 	bool m_useAccountData;
 

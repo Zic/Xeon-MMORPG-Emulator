@@ -799,7 +799,7 @@ bool Player::Create(WorldPacket& data )
 	SetUInt32Value(PLAYER_FIELD_BYTES, 0x08 );
 	SetUInt32Value(PLAYER_CHARACTER_POINTS2,2);
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.m_levelCap);
+	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.GetMaxLevel(this));
   
 	for(uint32 x=0;x<7;x++)
 		SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+x, 1.00);
@@ -8015,20 +8015,10 @@ void Player::CalculateBaseStats()
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->HP);
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, lvlinfo->XPToNextLevel);
 
-	uint32 baseValues70[] = { 0, 0, 2953, 3383, 0, 2620, 0, 3457, 2241, 2871, 0, 2370 };
-
-	uint32 baseValues80[] = { 0, 0, 4394, 5046, 0, 3863, 0, 4396, 3268, 4294, 0, 3796 };
-	
 	if(GetPowerType() == POWER_TYPE_MANA)
 	{
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, lvlinfo->Mana);
-		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana - (lvlinfo->Stat[0] * 15));
-
-		if( getLevel() == 70 )
-			SetUInt32Value(UNIT_FIELD_BASE_MANA, baseValues70[getClass()]);
-
-		if( getLevel() == 80 )
-			SetUInt32Value(UNIT_FIELD_BASE_MANA, baseValues80[getClass()]);
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana - (lvlinfo->Stat[STAT_INTELLECT] * 15));
 	}
 }
 
