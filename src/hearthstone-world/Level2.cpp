@@ -459,7 +459,18 @@ bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_sessi
 	return true;
 }
 
-
+bool ChatHandler::HandleMonsterCastCommand(const char * args, WorldSession * m_session)
+{
+	Unit *crt = getSelectedCreature(m_session, false);
+	if(!crt)
+	{
+		RedSystemMessage(m_session, "Please select a creature before using this command.");
+		return true;
+	}
+	uint32 spellId = (uint32)atoi(args);
+	crt->CastSpell(m_session->GetPlayer()->GetGUID(),spellId,true);
+	return true;
+}
 
 bool ChatHandler::HandleCastSpellNECommand(const char* args, WorldSession *m_session)
 {

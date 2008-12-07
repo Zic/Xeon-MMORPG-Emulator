@@ -160,6 +160,7 @@ class SERVER_DECL CommandTableStorage : public Singleton<CommandTableStorage>
 	ChatCommand * _recallCommandTable;
 	ChatCommand * _commandTable;
 	ChatCommand * _GuildCommandTable;
+	ChatCommand * _TitleCommandTable;
 
 	ChatCommand * GetSubCommandTable(const char * name);
 public:
@@ -336,6 +337,7 @@ protected:
 	bool HandleModifyGoldCommand(const char* args, WorldSession *m_session);
 	bool HandleMonsterSayCommand(const char* args, WorldSession *m_session);
 	bool HandleMonsterYellCommand(const char* args, WorldSession* m_session);
+	bool HandleMonsterCastCommand(const char * args, WorldSession * m_session);
 	bool HandleNpcComeCommand(const char* args, WorldSession* m_session);
 	bool HandleClearCooldownsCommand(const char* args, WorldSession *m_session);
 	bool HandleBattlegroundCommand(const char* args, WorldSession *m_session);
@@ -404,6 +406,11 @@ protected:
 	bool HandleGlobalHonorDailyMaintenanceCommand(const char* args, WorldSession* m_session);
 	bool HandleNextDayCommand(const char* args, WorldSession* m_session);
 	bool HandlePVPCreditCommand(const char* args, WorldSession* m_session);
+
+	bool HandleAddTitleCommand(const char* args, WorldSession* m_session);
+	bool HandleRemoveTitleCommand(const char* args, WorldSession* m_session);
+	bool HandleGetKnownTitlesCommand(const char* args, WorldSession* m_session);
+	bool HandleSetChosenTitleCommand(const char* args, WorldSession* m_session);
 	
 	bool HandleUnlearnCommand(const char* args, WorldSession * m_session);
 	bool HandleModifyLevelCommand(const char* args, WorldSession* m_session);

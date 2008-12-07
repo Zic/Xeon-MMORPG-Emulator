@@ -2059,7 +2059,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << "', "
 	<< m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX] << ","
 	<< m_uint32Values[PLAYER_CHOSEN_TITLE] << ","
-	<< m_uint32Values[PLAYER__FIELD_KNOWN_TITLES] << ","
+	<< GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) << ","
+	<< GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES1) << ","
 	<< m_uint32Values[PLAYER_FIELD_COINAGE] << ","
 	<< m_uint32Values[PLAYER_AMMO_ID] << ","
 	<< m_uint32Values[PLAYER_CHARACTER_POINTS2] << ","
@@ -2606,6 +2607,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX]  = get_next_field.GetUInt32();
 	m_uint32Values[ PLAYER_CHOSEN_TITLE ]					= get_next_field.GetUInt32();
 	SetUInt64Value( PLAYER__FIELD_KNOWN_TITLES, get_next_field.GetUInt64() );
+	SetUInt64Value( PLAYER__FIELD_KNOWN_TITLES1, get_next_field.GetUInt64() );
 	m_uint32Values[PLAYER_FIELD_COINAGE]				= get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_AMMO_ID]					  = get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_CHARACTER_POINTS2]			= get_next_field.GetUInt32();
@@ -10976,19 +10978,27 @@ void Player::FullHPMP()
     SetUInt32Value(UNIT_FIELD_POWER4, GetUInt32Value(UNIT_FIELD_MAXPOWER4));
 }
 
-void Player::SetKnownTitle( RankTitles title, bool set )
+void Player::SetKnownTitle( int32 title, bool set )
 {	
-	if( !( HasKnownTitle( title ) ^ set ) )
+	if( !( HasKnownTitle( title ) ^ set ) ||
+			title < 1 || title >= TITLE_END)
 		return;
 
-	uint64 current = GetUInt64Value( PLAYER__FIELD_KNOWN_TITLES );
+	if(title == GetUInt32Value(PLAYER_CHOSEN_TITLE)) // if it's the chosen title, remove it
+		SetUInt32Value(PLAYER_CHOSEN_TITLE, 0);
+
+	uint32 field = PLAYER__FIELD_KNOWN_TITLES;
+	uint32 title2 = title;
+	if(title > 63)
+	{
+		field = PLAYER__FIELD_KNOWN_TITLES1;
+		title2 = title - 64;
+	}
+	uint64 current = GetUInt64Value( field );
 	if( set )
-		SetUInt64Value( PLAYER__FIELD_KNOWN_TITLES, current | uint64(1) << uint8( title ) );
+		SetUInt64Value( field, current | uint64(1) << title2 );
 	else
-		SetUInt64Value( PLAYER__FIELD_KNOWN_TITLES, current & ~uint64(1) << uint8( title ) );
-	
-	if( title >= PVPTITLE_INVISIBLE_NAME ) // to avoid client crash
-		return;
+		SetUInt64Value( field, current & ~uint64(1) << title2 );
 	
 	WorldPacket data( SMSG_TITLE_EARNED, 8 );
 	data << uint32( title ) << uint32( set ? 1 : 0 );

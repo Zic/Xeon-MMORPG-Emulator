@@ -1260,6 +1260,86 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args, WorldSession* m_ses
 	return true;
 }
 
+bool ChatHandler::HandleAddTitleCommand(const char* args, WorldSession* m_session)
+{
+	Player * plr = getSelectedChar(m_session, true);
+	if(!plr){
+		RedSystemMessage(m_session, "This command requires selecting a player.");
+		return true;
+	}
+	uint32 title = args ? atoi(args) : 0;
+	if(title == 0 || title > TITLE_END)
+	{
+		RedSystemMessage(m_session, "A title number (numeric) is required to be specified after this command.");
+		return true;
+	}
+	BlueSystemMessage(m_session, "Adding title number %u to %s.", title, plr->GetName());
+	GreenSystemMessageToPlr(plr, "%s added title number %u to you.", m_session->GetPlayer()->GetName(), title);
+
+	sGMLog.writefromsession(m_session, "added title number %u to %s", title, plr->GetName());
+	plr->SetKnownTitle(title, true);
+	return true;
+}
+bool ChatHandler::HandleRemoveTitleCommand(const char* args, WorldSession* m_session)
+{
+	Player * plr = getSelectedChar(m_session, true);
+	if(!plr){
+		RedSystemMessage(m_session, "This command requires selecting a player.");
+		return true;
+	}
+	uint32 title = args ? atoi(args) : 0;
+	if(title == 0 || title > TITLE_END)
+	{
+		RedSystemMessage(m_session, "A title number (numeric) is required to be specified after this command.");
+		return true;
+	}
+	BlueSystemMessage(m_session, "Removing title number %u from %s.", title, plr->GetName());
+	GreenSystemMessageToPlr(plr, "%s removed title number %u from you.", m_session->GetPlayer()->GetName(), title);
+
+	sGMLog.writefromsession(m_session, "removed title number %u from %s", title, plr->GetName());
+	plr->SetKnownTitle(title, false);
+	return true;
+}
+bool ChatHandler::HandleGetKnownTitlesCommand(const char* args, WorldSession* m_session){
+	Player * plr = getSelectedChar(m_session, true);
+	if(!plr){
+		RedSystemMessage(m_session, "This command requires selecting a player.");
+		return true;
+	}
+	std::stringstream ss;
+	for(uint32 i=1;i<=TITLE_END;i++){
+		if(plr->HasKnownTitle(i)){
+			ss << i << " ";
+		}
+	}
+	BlueSystemMessage(m_session, ss.str().c_str());
+	return true;
+}
+bool ChatHandler::HandleSetChosenTitleCommand(const char* args, WorldSession* m_session)
+{
+	Player * plr = getSelectedChar(m_session, true);
+	if(!plr){
+		RedSystemMessage(m_session, "This command requires selecting a player.");
+		return true;
+	}
+	uint32 title = args ? atoi(args) : 0;
+	if(title == 0 || title > TITLE_END)
+	{
+		RedSystemMessage(m_session, "A title number (numeric) is required to be specified after this command.");
+		return true;
+	}
+	BlueSystemMessage(m_session, "Setting title number %u for %s.", title, plr->GetName());
+	GreenSystemMessageToPlr(plr, "%s set title number %u for you.", m_session->GetPlayer()->GetName(), title);
+
+	sGMLog.writefromsession(m_session, "set title number %u for %s", title, plr->GetName());
+	if(!plr->HasKnownTitle(title)){
+		RedSystemMessage(m_session, "Selected player doesn't know this title.");
+		return true;
+	}
+	plr->SetUInt32Value(PLAYER_CHOSEN_TITLE,title);
+	return true;
+}
+
 bool ChatHandler::HandleCreatePetCommand(const char* args, WorldSession* m_session)
 {
 /*	if(!args || strlen(args) < 2)

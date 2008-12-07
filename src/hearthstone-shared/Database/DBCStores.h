@@ -473,7 +473,8 @@ struct CharTitlesEntry
 {
     uint32  ID;                                             // 0, title ids
     //uint32      unk1;                                     // 1 flags?
-    //char*       name[16];                                 // 2-17, unused
+    char*         name;                                     // 2 title name
+	char*         name2[15];								// 3-17, unused
                                                             // 18 string flag, unused
     //char*       name2[16];                                // 19-34, unused
                                                             // 35 string flag, unused

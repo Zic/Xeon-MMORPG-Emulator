@@ -67,7 +67,7 @@ public:
 	void OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint32 reward_slot);
 
 	void GiveQuestRewardReputation(Player* plr, Quest* qst, Object *qst_giver);
-	void GiveQuestRankReward(Player * plr, Quest* qst);
+	void GiveQuestTitleReward(Player * plr, Quest* qst);
 
 	uint32 GenerateQuestXP(Player *pl, Quest *qst);
 

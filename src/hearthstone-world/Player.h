@@ -129,7 +129,6 @@ enum RankTitles
 	PVPTITLE_OF_THE_SHATTERED_SUN	= 38,
 	PVPTITLE_HAND_OF_ADAL			= 39,
 	PVPTITLE_VENGEFUL_GLADIATOR		= 40,
-	PVPTITLE_INVISIBLE_NAME			= 41,
 	TITLE_BATTLEMASTER				= 41,
 	TITLE_ELDER						= 42,
 	TITLE_FLAME_WARDEN				= 43,
@@ -2038,12 +2037,17 @@ public:
 	// mage invisibility
 	bool m_mageInvisibility;
 
-	HEARTHSTONE_INLINE bool HasKnownTitle( RankTitles title )
+	HEARTHSTONE_INLINE bool HasKnownTitle( int32 title )
 	{
-		return ( GetUInt64Value( PLAYER__FIELD_KNOWN_TITLES ) & uint64(1) << uint8( title ) ) != 0;
+		if(title < 1 || title > TITLE_END)
+			return false;  // Title doesn't exist
+		if(title < 64)
+			return ( GetUInt64Value( PLAYER__FIELD_KNOWN_TITLES ) & uint64(1) << title ) != (uint64) 0;
+		else
+			return ( GetUInt64Value( PLAYER__FIELD_KNOWN_TITLES1 ) & uint64(1) << (title - 64) ) != (uint64) 0;
 	}
 
-	void SetKnownTitle( RankTitles title, bool set );
+	void SetKnownTitle( int32 title, bool set );
 
 	// debuffs
 	bool mWeakenedSoul;
