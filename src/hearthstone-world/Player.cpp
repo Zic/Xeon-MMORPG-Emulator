@@ -5572,8 +5572,10 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, Unit* target, bool autoshot 
 	uint32 rIndex = autoshot ? 114 : spellinfo->rangeIndex;
 	SpellRange* range = dbcSpellRange.LookupEntry( rIndex );
 	float minrange = GetMinRange( range );
-	float dist = CalcDistance( this, target );
-	float maxr = GetMaxRange( range ) + 2.52f;
+	float dist = GetDistance2dSq( target ) - target->GetSize() - GetSize();
+	float maxr = GetMaxRange( range );
+	maxr *= maxr; // square me!
+	minrange *= minrange;
 
 	if( spellinfo->SpellGroupType )
 	{
@@ -7377,9 +7379,9 @@ void Player::DuelBoundaryTest()
 		return;
 	}
 
-	float Dist = CalcDistance((Object*)pGameObject);
+	float Dist = GetDistance2dSq((Object*)pGameObject);
 
-	if(Dist > 75.0f)
+	if(Dist > 5625.0f)
 	{
 		// Out of bounds
 		if(m_duelStatus == DUEL_STATUS_OUTOFBOUNDS)
@@ -7621,8 +7623,6 @@ float Player::CalcRating( uint32 index )
 		return 0.0f;*/
 
 	uint32 level = m_uint32Values[UNIT_FIELD_LEVEL];
-	if( level > 100 )
-		level = 100;
 
 	CombatRatingDBC * pDBCEntry = dbcCombatRating.LookupEntryForced( relative_index * 100 + level - 1 );
 	if( pDBCEntry == NULL )

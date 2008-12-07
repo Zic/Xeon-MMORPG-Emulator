@@ -3219,7 +3219,7 @@ uint8 Spell::CanCast(bool tolerate)
 				else
 				{
 					// Added +2 because there's always someone who forgot to put CombatReach into the DB and latency compensation
-					float targetRange = maxRange + target->GetUInt32Value(UNIT_FIELD_COMBATREACH) + m_caster->GetUInt32Value(UNIT_FIELD_COMBATREACH) + 2;
+					float targetRange = maxRange + target->GetSize() + (u_caster ? u_caster->GetSize() : 0 ) + 2;
 					if( !IsInrange(m_caster, target, targetRange * targetRange ) )
 						return SPELL_FAILED_OUT_OF_RANGE;
 				}
