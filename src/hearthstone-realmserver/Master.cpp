@@ -23,18 +23,42 @@
 Database * Database_Character;
 Database * Database_World;
 
+bool _StartCharacterDatabase()
+{
+	string host = Config.ClusterConfig.GetStringDefault("CharacterDatabase", "Hostname", "localhost");
+	string user = Config.ClusterConfig.GetStringDefault("CharacterDatabase", "Username", "root");
+	string pw = Config.ClusterConfig.GetStringDefault("CharacterDatabase", "Password", "");
+	string database = Config.ClusterConfig.GetStringDefault("CharacterDatabase", "Name", "Character");
+	uint32 port = Config.ClusterConfig.GetIntDefault("CharacterDatabase", "Port", 3306);
+	return Database_Character->Initialize(host.c_str(), port, user.c_str(), pw.c_str(), database.c_str(), 5, 16384);
+}
+
+bool _StartWorldDatabase()
+{
+	string host = Config.ClusterConfig.GetStringDefault("WorldDatabase", "Hostname", "localhost");
+	string user = Config.ClusterConfig.GetStringDefault("WorldDatabase", "Username", "root");
+	string pw = Config.ClusterConfig.GetStringDefault("WorldDatabase", "Password", "");
+	string database = Config.ClusterConfig.GetStringDefault("WorldDatabase", "Name", "World");
+	uint32 port = Config.ClusterConfig.GetIntDefault("WorldDatabase", "Port", 3306);
+	return Database_World->Initialize(host.c_str(), port, user.c_str(), pw.c_str(), database.c_str(), 5, 16384);
+}
+
 int main(int argc, char *argv[])
 {
-	sLog.outString("TexT");
+	//sLog.outString("TexT");
 	/* Initialize global timestamp */
 	UNIXTIME = time(NULL);
 
+	ThreadPool.Startup();
+
     /* Print Banner */
 	Log.Notice("Server", "==============================================================");
-	Log.Notice("Server", "| Codename Ascent Cluster - Realm Server                     |");
-	Log.Notice("Server", "| Version 0.1, Revision %04u                                 |", BUILD_REVISION);
+	Log.Notice("Server", "| Hearthstone - Realm Server                     |");
+	Log.Notice("Server", "| Revision %04u                                 |", BUILD_REVISION);
 	Log.Notice("Server", "==============================================================");
 	Log.Line();
+
+	
 
 	Database_Character = Database::Create();
 	Database_World = Database::Create();
@@ -42,44 +66,47 @@ int main(int argc, char *argv[])
 
 	new ClusterMgr;
 	new ClientMgr;
-	ThreadPool.Startup();
+	
 	Log.Line();
-	Log.Notice("Database", "Connecting to database...");
-	if(Database_Character->Initialize("localhost", 3306, "moocow", "moo", "antrix-character", 1, 1000) &&
-		Database_World->Initialize("localhost", 3306, "moocow", "moo", "antrix-world", 1, 1000))
-	{
-		Log.Success("Database", "Connections established.");
-	}
-	else
+	Config.ClusterConfig.SetSource("./hearthstone-realmserver.conf");
+	Config.RealmConfig.SetSource("./hearthstone-realms.conf");
+	Log.Notice("Database", "Connecting to databases...");
+	if(!_StartCharacterDatabase() ||
+	   !_StartWorldDatabase() )
 	{
 		Log.Error("Database", "One or more errors occured while connecting to databases.");
 		exit(-1);
 	}
+	else
+	{
+		Log.Error("Database", "Connections established successfully.");
+	}
 
+	ThreadPool.ShowStats();
 	Log.Line();
 
 	Log.Success("Storage", "DBC Files Loaded...");
 	Storage_Load();
 
 	Log.Line();
-	//CreateSocketEngine();
-	//sSocketEngine.SpawnThreads();
+
 	new SocketMgr;
 	new SocketGarbageCollector;
 	sSocketMgr.SpawnWorkerThreads();
+
+	/* connect to LS */
+	new LogonCommHandler;
+	sLogonCommHandler.Startup();
 
 	Log.Success("Network", "Network Subsystem Started.");
 
 	Log.Notice("Network", "Opening Client Port...");
 	ListenSocket<WorldSocket> * wsl = new ListenSocket<WorldSocket>("0.0.0.0", 8129);
 	bool lsc = wsl->IsOpen();
-	
+
 	Log.Notice("Network", "Opening Server Port...");
 	ListenSocket<WSSocket> * isl = new ListenSocket<WSSocket>("0.0.0.0", 11010);
 	bool ssc = isl->IsOpen();
-
-	Config.MainConfig.SetSource("ascent.conf");
-	Config.RealmConfig.SetSource("realms.conf");
 
 	if(!lsc || !ssc)
 	{
@@ -87,9 +114,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	/* connect to LS */
-	new LogonCommHandler;
-	sLogonCommHandler.Startup();
+	ThreadPool.ExecuteTask( isl );
+	ThreadPool.ExecuteTask( wsl );
 
 	/* main loop */
 	for(;;)
@@ -99,7 +125,7 @@ int main(int argc, char *argv[])
 		//isl->Update();
 		sClientMgr.Update();
 		sClusterMgr.Update();
-		Sleep(50);
+		Sleep(10);
 	}
 
 }

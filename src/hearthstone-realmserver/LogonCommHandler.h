@@ -43,10 +43,10 @@ typedef struct
 
 enum RealmType
 {
-	REALMTYPE_NORMAL = 0,
-	REALMTYPE_PVP	= 4,
-	REALMTYPE_RP	 = 6,
-	REALMTYPE_RPPVP  = 8,
+	REALMTYPE_NORMAL	= 0,
+	REALMTYPE_PVP		= 1,
+	REALMTYPE_RP		= 6,
+	REALMTYPE_RPPVP		= 8,
 };
 
 class SocketLoadBalancer;
@@ -97,13 +97,13 @@ public:
 	void RemoveUnauthedSocket(uint32 id);
 	HEARTHSTONE_INLINE WorldSocket* GetSocketByRequest(uint32 id)
 	{
-		//pendingLock.Acquire();
+		pendingLock.Acquire();
 
 		WorldSocket * sock;
 		map<uint32, WorldSocket*>::iterator itr = pending_logons.find(id);
 		sock = (itr == pending_logons.end()) ? 0 : itr->second;
 
-		//pendingLock.Release();
+		pendingLock.Release();
 		return sock;
 	}
 	HEARTHSTONE_INLINE Mutex & GetPendingLock() { return pendingLock; }		

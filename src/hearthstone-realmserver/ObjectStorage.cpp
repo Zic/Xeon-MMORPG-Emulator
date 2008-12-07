@@ -21,20 +21,21 @@
 
 /** Table formats converted to strings
  */
-const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuuu";
-const char * gCreatureNameFormat						= "ussuuuuuuuffcc";
+const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gCreatureNameFormat						= "usssuuuuuuuuuuffcc";
 const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
-const char * gCreatureProtoFormat						= "uuuuufuuffuffuuuuuuuuuuuuuuuuuuffsuuff";
-const char * gAreaTriggerFormat							= "uuuusffffuu";
+const char * gCreatureProtoFormat						= "uuuuuuufuuuffuffuuuuuuuuuuuuuuuuuuffsuuuufffu";
+const char * gAreaTriggerFormat							= "ucuusffffuu";
 const char * gItemPageFormat							= "usu";
 const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
-const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gSpellExtraFormat							= "uuuu";
 const char * gGraveyardFormat							= "uffffuuuux";
 const char * gTeleportCoordFormat						= "uxufffx";
 const char * gPvPAreaFormat								= "ush";
 const char * gFishingFormat								= "uuu";
-const char * gWorldMapInfoFormat						= "uuuuufffusuuuuu";
+const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufuu";
+const char * gZoneGuardsFormat							= "uuu";
 
 /** SQLStorage symbols
  */

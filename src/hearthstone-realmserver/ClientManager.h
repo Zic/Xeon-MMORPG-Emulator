@@ -54,6 +54,8 @@ public:
 	/* create a new session, returns null if the player is already logged in */
 	Session * CreateSession(uint32 AccountId);
 
+	void RemoveSession(Session * sess);
+
 	/* updates sessions */
 	void Update();
 };

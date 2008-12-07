@@ -25,7 +25,7 @@ ClientMgr::ClientMgr()
 {
 	Session::InitHandlers();
 	m_maxSessionId = 0;
-	memset(m_sessions, 0, MAX_SESSIONS * sizeof(void*));
+	memset(m_sessions, 0, MAX_SESSIONS * sizeof(Session*));
 	Log.Success("ClientMgr", "Interface Created");
 }
 
@@ -55,33 +55,28 @@ void ClientMgr::SendPackedClientInfo(WServer * server)
 	server->SendPacket(&data);
 }
 
+void ClientMgr::RemoveSession(Session * sess)
+{
+	for(uint32 i = 0; i < MAX_SESSIONS; ++i)
+	{
+		if( m_sessions[i] == sess )
+		{
+			delete sess;
+			m_sessions[i] = NULL;
+		}
+	}
+}
+
 Session * ClientMgr::CreateSession(uint32 AccountId)
 {
 	uint32 i = 0;
-	uint32 j = 1;
-
-	/* make sure nothing with this id exists already */
-	for(; j < MAX_SESSIONS; ++j)
+	for(uint32 p = 0; p < MAX_SESSIONS; ++p)
 	{
-		if(m_sessions[j] == 0)
-		{
-			if(!i)
-				i = j;
-		}
-		else
-		{
-			if(m_sessions[i]->GetAccountId() == AccountId)
-			{
-				Log.Error("ClientMgr", "Could not create session for account %u due to a session already existing from %s", AccountId, 
-					m_sessions[i]->GetSocket()->GetRemoteIP().c_str());
-
-				return 0;
-			}
-		}
+		if(m_sessions[p] && m_sessions[p]->GetAccountId() == AccountId)
+			return m_sessions[p];
+		else if( m_sessions[p] == NULL )
+			i = p;
 	}
-
-	if(i == 0)
-		return 0;
 
 	if(m_maxSessionId < i)
 	{
@@ -96,7 +91,7 @@ Session * ClientMgr::CreateSession(uint32 AccountId)
 
 void ClientMgr::Update()
 {
-	for(uint32 i = 1; i <= m_maxSessionId; ++i)
+	for(uint32 i = 0; i <= m_maxSessionId; ++i)
 		if(m_sessions[i])
 			m_sessions[i]->Update();
 }

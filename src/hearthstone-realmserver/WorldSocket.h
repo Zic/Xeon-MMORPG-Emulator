@@ -64,6 +64,7 @@ private:
 	uint32 mRequestID;
 
 	WorldPacket * pAuthenticationPacket;
+	string * m_fullAccountName;
 	WowCrypt _crypt;
 	uint32 _latency;
 

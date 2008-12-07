@@ -24,8 +24,8 @@ LogonCommHandler::LogonCommHandler()
 {
 	idhigh = 1;
 	next_request = 1;
-	pings = !Config.MainConfig.GetBoolDefault("LogonServer", "DisablePings", false);
-	string logon_pass = Config.MainConfig.GetStringDefault("LogonServer", "RemotePassword", "r3m0t3");
+	pings = !Config.RealmConfig.GetBoolDefault("LogonServer", "DisablePings", false);
+	string logon_pass = Config.RealmConfig.GetStringDefault("LogonServer", "RemotePassword", "r3m0t3");
 	
 	// sha1 hash it
 	Sha1Hash hash;
@@ -233,7 +233,7 @@ void LogonCommHandler::ConnectionDropped(uint32 ID)
 uint32 LogonCommHandler::ClientConnected(string AccountName, WorldSocket * Socket)
 {
 	uint32 request_id = next_request++;
-	DEBUG_LOG ( " >> sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
+	printf( " >> sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
   //  sLog.outColor(TNORMAL, "\n");
 	
 	// Send request packet to server.
@@ -242,15 +242,23 @@ uint32 LogonCommHandler::ClientConnected(string AccountName, WorldSocket * Socke
 	{
 		// No valid logonserver is connected.
 		return (uint32)-1;
+		printf("No valid loginserver is connected.\n");
 	}
 	pendingLock.Acquire();
 
 	WorldPacket data(RCMSG_REQUEST_SESSION, 100);
 	data << request_id;
-	data << AccountName;
+
+	// strip the shitty hash from it
+	uint32 i = 0;
+	for(; AccountName[i] != '#' && AccountName[i] != '\0'; ++i )
+		data.append( &AccountName[i], 1 );
+
+	data.append( "\0", 1 );
 	itr->second->SendPacket(&data);
 
 	pending_logons[request_id] = Socket;
+
 	pendingLock.Release();
 
 	return request_id;
@@ -261,11 +269,13 @@ void LogonCommHandler::UnauthedSocketClose(uint32 id)
 	pendingLock.Acquire();
 	pending_logons.erase(id);
 	pendingLock.Release();
+	//printf("Unauth'd socket closed ID: %u", id);
 }
 
 void LogonCommHandler::RemoveUnauthedSocket(uint32 id)
 {
 	pending_logons.erase(id);
+	//printf("RemoveUnauthedSocket called with ID %u", id);
 }
 
 void LogonCommHandler::LogonDatabaseSQLExecute(const char* str, ...)

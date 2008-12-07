@@ -26,6 +26,7 @@ class Session
 {
 public:
 	friend class WorldSocket;
+	friend class CharacterStorage;
 	Session(uint32 id);
 	~Session();
 
@@ -43,6 +44,7 @@ protected:
 	string m_accountName;
 	uint32 m_build;
 	static SessionPacketHandler Handlers[NUM_MSG_TYPES];
+	bool m_loadedPlayerData;
 
 public:
 	static void InitHandlers();
@@ -65,7 +67,10 @@ public:
 	}
 
 	void HandlePlayerLogin(WorldPacket & pck);
+
 	void HandleCharacterEnum(WorldPacket & pck);
+	void HandleCharacterEnumProc();
+
 	void HandleCharacterCreate(WorldPacket & pck);
 	void HandleCharacterDelete(WorldPacket & pck);
 	void HandleCharacterRename(WorldPacket & pck);
@@ -75,6 +80,8 @@ public:
 	void HandleGameObjectQueryOpcode(WorldPacket & pck);
 	void HandleItemPageQueryOpcode(WorldPacket & pck);
 	void HandleNpcTextQueryOpcode(WorldPacket & pck);
+
+	void HandleRealmSplitQuery(WorldPacket & pck);
 };
 
 #endif

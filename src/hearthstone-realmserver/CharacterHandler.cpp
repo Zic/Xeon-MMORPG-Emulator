@@ -36,7 +36,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 	uint32 start_time = getMSTime();
 
 	// loading characters
-	QueryResult* result = CharacterDatabase.Query("SELECT guid, level, race, class, gender, bytes, bytes2, guildid, name, positionX, positionY, positionZ, mapId, zoneId, banned, restState, deathstate, forced_rename_pending FROM characters WHERE acct=%u ORDER BY guid", GetAccountId());
+	QueryResult* result = CharacterDatabase.Query("SELECT guid, level, race, class, gender, bytes, bytes2, bytes2, name, positionX, positionY, positionZ, mapId, zoneId, banned, restState, deathstate, forced_rename_pending FROM characters WHERE acct=%u ORDER BY guid", GetAccountId());
 	QueryResult * res;
 	CreatureInfo *info = NULL;
 	uint8 num = 0;
@@ -87,6 +87,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 			else
 				data << uint32(1);		// alive
 
+			data << uint32(0);
 			data << fields[15].GetUInt8();		// Rest State
 
 			if(Class==9 || Class==3)
@@ -106,7 +107,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 				data << uint32(0) << uint32(0) << uint32(0);
 
 			res = CharacterDatabase.Query("SELECT slot, entry FROM playeritems WHERE ownerguid=%u and containerslot=-1 and slot < 19 and slot >= 0", guid);
-			
+
 			memset(items, 0, sizeof(player_item) * 20);
 			if(res)
 			{
@@ -124,7 +125,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 			}
 
 			for( i = 0; i < 20; ++i )
-				data << items[i].displayid << items[i].invtype;
+				data << items[i].displayid << items[i].invtype << uint32(0);
 
 			num++;
 		}
@@ -245,3 +246,13 @@ void Session::HandlePlayerLogin(WorldPacket & pck)
 	m_nextServer = dest->Server;
 }
 
+void Session::HandleRealmSplitQuery(WorldPacket & pck)
+{
+	uint32 v;
+	pck >> v;
+
+	WorldPacket data(SMSG_REALM_SPLIT, 16);
+	data << v << uint32(0);
+	data << "01/01/01";
+	SendPacket(&data);
+}

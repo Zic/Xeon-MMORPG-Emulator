@@ -26,6 +26,7 @@ void Session::InitHandlers()
 	Handlers[CMSG_PLAYER_LOGIN] = &Session::HandlePlayerLogin;
 	Handlers[CMSG_CHAR_ENUM] = &Session::HandleCharacterEnum;
 	Handlers[CMSG_ITEM_QUERY_SINGLE] = &Session::HandleItemQuerySingleOpcode;
+	Handlers[CMSG_REALM_SPLIT] = &Session::HandleRealmSplitQuery;
 }
 
 Session::Session(uint32 id) : m_sessionId(id)
@@ -38,6 +39,10 @@ Session::Session(uint32 id) : m_sessionId(id)
 	m_accountFlags = 0;
 	m_build = 0;
 	m_nextServer = 0;
+}
+
+Session::~Session()
+{
 }
 
 void Session::Update()

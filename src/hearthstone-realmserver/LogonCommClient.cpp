@@ -26,6 +26,8 @@ typedef struct
 }logonpacket;
 #pragma pack(pop)
 
+HEARTHSTONE_INLINE static void swap32(uint32* p) { *p = ((*p >> 24 & 0xff)) | ((*p >> 8) & 0xff00) | ((*p << 8) & 0xff0000) | (*p << 24); }
+
 LogonCommClientSocket::LogonCommClientSocket(SOCKET fd) : Socket(fd, 524288, 65536)
 {
 	// do nothing
@@ -43,22 +45,22 @@ void LogonCommClientSocket::OnRead()
 	{
 		if(!remaining)
 		{
-			if(readBuffer.GetSize() < 4)
+			if(readBuffer.GetSize() < 6)
 				return;	 // no header
 
 			// read header
 			readBuffer.Read(&opcode, 2);
 			readBuffer.Read(&remaining, 4);
 
-			// decrypt the first two bytes
 			if(use_crypto)
 			{
-				_recvCrypto.Process((uint8*)&opcode, (uint8*)&opcode, 2);
-				_recvCrypto.Process((uint8*)&remaining, (uint8*)&remaining, 4);
+				// decrypt the packet
+				_recvCrypto.Process((unsigned char*)&opcode, (unsigned char*)&opcode, 2);
+				_recvCrypto.Process((unsigned char*)&remaining, (unsigned char*)&remaining, 4);
 			}
 
-			// convert network byte order
-			remaining = ntohl(remaining);
+			/* reverse byte order */
+			swap32(&remaining);
 		}
 
 		// do we have a full packet?
@@ -73,13 +75,12 @@ void LogonCommClientSocket::OnRead()
 			readBuffer.Read((uint8*)buff.contents(), remaining);
 		}
 
-		// decrypt the rest of the packet
 		if(use_crypto && remaining)
 			_recvCrypto.Process((unsigned char*)buff.contents(), (unsigned char*)buff.contents(), remaining);
 
 		// handle the packet
 		HandlePacket(buff);
-		
+
 		remaining = 0;
 		opcode = 0;
 	}
@@ -102,7 +103,14 @@ void LogonCommClientSocket::HandlePacket(WorldPacket & recvData)
 		&LogonCommClientSocket::HandleRequestAccountMapping,// RSMSG_REQUEST_ACCOUNT_CHARACTER_MAPPING
 		NULL,												// RCMSG_ACCOUNT_CHARACTER_MAPPING_REPLY
 		NULL,												// RCMSG_UPDATE_CHARACTER_MAPPING_COUNT
+		NULL,												// RSMSG_DISCONNECT_ACCOUNT
+		NULL,												// RCMSG_TEST_CONSOLE_LOGIN
+		NULL,												// RSMSG_CONSOLE_LOGIN_RESULT
+		NULL,												// RCMSG_MODIFY_DATABASE
+		&LogonCommClientSocket::HandlePong,					// RCMSG_SERVER_PING
+		&LogonCommClientSocket::HandlePong,					// RSMSG_SERVER_PONG
 	};
+
 
 	if(recvData.GetOpcode() >= RMSG_COUNT || Handlers[recvData.GetOpcode()] == 0)
 	{
@@ -226,9 +234,6 @@ void LogonCommClientSocket::SendChallenge()
 
 	_recvCrypto.Setup(key, 20);
 	_sendCrypto.Setup(key, 20);	
-
-	/* packets are encrypted from now on */
-	use_crypto = true;
 }
 
 void LogonCommClientSocket::HandleAuthResponse(WorldPacket & recvData)
@@ -243,6 +248,7 @@ void LogonCommClientSocket::HandleAuthResponse(WorldPacket & recvData)
 	{
 		authenticated = 1;
 	}
+	use_crypto = true;
 }
 
 void LogonCommClientSocket::UpdateAccountCount(uint32 account_id, uint8 add)
@@ -260,7 +266,7 @@ void LogonCommClientSocket::UpdateAccountCount(uint32 account_id, uint8 add)
 
 void LogonCommClientSocket::HandleRequestAccountMapping(WorldPacket & recvData)
 {
-	/*return;
+	return;
 	uint32 t= getMSTime();
 	uint32 realm_id;
 	uint32 account_id;
@@ -321,7 +327,7 @@ void LogonCommClientSocket::HandleRequestAccountMapping(WorldPacket & recvData)
 
 		uncompressed.clear();
 	}	
-	sLog.outString("Took %u msec to build character mapping list for realm %u", getMSTime() - t, realm_id);*/
+	sLog.outString("Took %u msec to build character mapping list for realm %u", getMSTime() - t, realm_id);
 }
 
 void LogonCommClientSocket::CompressAndSend(ByteBuffer & uncompressed)

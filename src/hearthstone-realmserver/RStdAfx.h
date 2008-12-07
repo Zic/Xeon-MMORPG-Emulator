@@ -69,3 +69,4 @@
 #include "LogonCommHandler.h"
 #include "../hearthstone-shared/Storage.h"
 #include "ObjectStorage.h"
+#include "CharacterStorage.h"

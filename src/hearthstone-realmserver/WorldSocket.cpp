@@ -19,6 +19,7 @@
 
 #include "RStdAfx.h"
 #include "../hearthstone-shared/AuthCodes.h"
+#include "../hearthstone-shared/Auth/AuthPacketKey.h"
 
 #pragma pack(push, 1)
 struct ClientPktHeader
@@ -55,6 +56,11 @@ void WorldSocket::OnDisconnect()
 	{
 		sLogonCommHandler.UnauthedSocketClose(mRequestID);
 		mRequestID = 0;
+	}
+
+	if( m_session )
+	{
+		sClientMgr.RemoveSession(m_session);
 	}
 }
 
@@ -108,10 +114,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket* recvPacket)
 	}
 	catch(ByteBuffer::error &)
 	{
-		DEBUG_LOG("Incomplete copy of AUTH_SESSION Received.");
+		printf("Incomplete copy of AUTH_SESSION Received.");
 		return;
 	}
-
 	// Send out a request for this account.
 	mRequestID = sLogonCommHandler.ClientConnected(account, this);
 
@@ -123,6 +128,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket* recvPacket)
 
 	// Set the authentication packet 
 	pAuthenticationPacket = recvPacket;
+	m_fullAccountName = new string(account);
 }
 
 void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 requestid)
@@ -137,6 +143,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	{
 		// something happened wrong @ the logon server
 		OutPacket(SMSG_AUTH_RESPONSE, 1, "\x0D");
+		printf("Information callback returns failure.\n");
 		return;
 	}
 
@@ -144,10 +151,12 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	string AccountName;
 	uint32 AccountID;
 	string GMFlags;
-	uint32 AccountFlags;
+	uint8 AccountFlags;
+	uint8 SessionKey[40];
 
 	recvData >> AccountID >> AccountName >> GMFlags >> AccountFlags;
-	DEBUG_LOG( " >> got information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
+	//recvData.read(SessionKey,40);
+	printf( " >> got information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
 	//	sLog.outColor(TNORMAL, "\n");
 
 	mRequestID = 0;
@@ -158,15 +167,27 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	BigNumber BNK;
 	BNK.SetBinary(K, 40);
 
+	uint8 *key = new uint8[20];
+	AutheticationPacketKey::GenerateKey(key, K);
+
 	// Initialize crypto.
-	_crypt.SetKey(K, 40);
+	_crypt.SetKey(key, 20);
 	_crypt.Init();
+	delete [] key;
+
+	//checking if player is already connected
+	//disconnect corrent player and login this one(blizzlike)
+
+	string lang = "enUS";
+	if(recvData.rpos() != recvData.wpos())
+		recvData.read((uint8*)lang.data(), 4);
 
 	Session * session = sClientMgr.CreateSession(AccountID);
 	if(session == NULL)
 	{
 		/* we are already logged in. send auth failed. (if anyone has a better error lemme know :P) */
 		OutPacket(SMSG_AUTH_RESPONSE, 1, "\x0D");
+		printf("Duplicate client error.\n");
 		return;
 	}
 
@@ -178,7 +199,17 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	pAuthenticationPacket->read(digest, 20);
 
 	uint32 t = 0;
-	sha.UpdateData(AccountName);
+	if( m_fullAccountName == NULL )				// should never happen !
+		sha.UpdateData(AccountName);
+	else
+	{
+		sha.UpdateData(*m_fullAccountName);
+
+		// this is unused now. we may as well free up the memory.
+		delete m_fullAccountName;
+		m_fullAccountName = NULL;
+	}
+
 	sha.UpdateData((uint8 *)&t, 4);
 	sha.UpdateData((uint8 *)&mClientSeed, 4);
 	sha.UpdateData((uint8 *)&mSeed, 4);
@@ -205,11 +236,12 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 
 void WorldSocket::Authenticate()
 {
-	ASSERT(pAuthenticationPacket);
 	delete pAuthenticationPacket;
 	pAuthenticationPacket = 0;
 
-	if(m_session->m_accountFlags & 8)
+	if(m_session->m_accountFlags & 16)
+		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x02");
+	else if(m_session->m_accountFlags & 8)
 		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x01");
 	else
 		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x00");
@@ -278,6 +310,7 @@ void WorldSocket::OnRead()
 		mRemaining = mSize = mOpcode = 0;
 
 		// Check for packets that we handle
+		printf("Received Opcode: %u\n", Packet->GetOpcode());
 		switch(Packet->GetOpcode())
 		{
 		case CMSG_PING:
