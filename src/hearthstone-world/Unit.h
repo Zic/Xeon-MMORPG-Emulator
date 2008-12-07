@@ -750,7 +750,7 @@ public:
 	int32 GetAP();
 	int32 GetRAP();
 
-	float GetSize() { return GetFloatValue(OBJECT_FIELD_SCALE_X) * GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS); }
+	HEARTHSTONE_INLINE float GetSize() { return GetFloatValue(OBJECT_FIELD_SCALE_X) * GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS); }
 
 	void CastSpell(Unit* Target, uint32 SpellID, bool triggered);
 	void CastSpell(Unit* Target, SpellEntry* Sp, bool triggered);

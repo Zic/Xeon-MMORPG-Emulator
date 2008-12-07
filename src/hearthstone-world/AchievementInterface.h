@@ -180,6 +180,15 @@ class SERVER_DECL AchievementInterface
 {
 	Player& m_player;
 	map<uint32,AchievementData*> m_achivementDataMap;
+private:
+	void GiveRewardsForAchievement(AchievementEntry * ae);
+	void EventAchievementEarned(AchievementData * pData);
+	void SendCriteriaUpdate(AchievementData * ad, uint32 idx);
+	bool CanCompleteAchievement(AchievementData * ad);
+	AchievementData* CreateAchievementDataEntryForAchievement(AchievementEntry * ae);
+
+	// Gets AchievementData struct. If there is none, one will be created.
+	AchievementData* GetAchievementDataByAchievementID(uint32 ID);
 
 public:
 	AchievementInterface(Player& plr);
@@ -189,16 +198,9 @@ public:
 	void LoadFromDB( QueryResult * pResult );
 	void SaveToDB(QueryBuffer * buffer);
 
-	void EventAchievementEarned(AchievementData * pData);
+	
 	WorldPacket* BuildAchievementEarned(AchievementData * pData);
 	WorldPacket* BuildAchievementData();
-	void SendCriteriaUpdate(AchievementData * ad, uint32 idx);
-
-	bool CanCompleteAchievement(AchievementData * ad);
-	AchievementData* CreateAchievementDataEntryForAchievement(AchievementEntry * ae);
-
-	// Gets AchievementData struct. If there is none, one will be created.
-	AchievementData* GetAchievementDataByAchievementID(uint32 ID);
 
 	bool HasAchievements() { return m_achivementDataMap.size() > 0; }
 

@@ -33,6 +33,7 @@ extern SERVER_DECL SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCo
 extern SERVER_DECL SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >		FishingZoneStorage;
 extern SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							WorldMapInfoStorage;
 extern SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
+extern SERVER_DECL SQLStorage<AchievementReward, HashMapStorageContainer<AchievementReward> >	AchievementRewardStorage;
 
 void Storage_FillTaskList(TaskList & tl);
 void Storage_Cleanup();

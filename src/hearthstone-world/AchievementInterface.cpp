@@ -150,12 +150,47 @@ WorldPacket* AchievementInterface::BuildAchievementData()
 	return data;
 }
 
+void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
+{
+	AchievementReward * ar = AchievementRewardStorage.LookupEntry( ae->ID );
+	if(!ar) return;
+
+	// Reward: Item
+	if( ar->ItemID )
+	{
+		// Just use the in-game mail system and mail it to him.
+		MailMessage msg;
+		memset(&msg, 0, sizeof(MailMessage));
+		
+		Item * pItem = objmgr.CreateItem( ar->ItemID, NULL );
+		if(!pItem) return;
+
+		pItem->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
+		msg.items.push_back(pItem->GetUInt32Value(OBJECT_FIELD_GUID));
+
+		msg.body = "Your reward for completing this achievement is attached below.";
+		msg.subject = string(ae->name);
+
+		msg.sender_guid = m_player.GetGUID();
+		msg.player_guid = m_player.m_playerInfo->guid;
+		msg.delivery_time = (uint32)UNIXTIME;
+		msg.expire_time = 0; // This message NEVER expires.
+		sMailSystem.DeliverMessage(m_player.m_playerInfo->guid, &msg);
+
+		delete pItem;
+	}
+
+	// Reward: Title. We don't yet support titles due to a lack of uint128.
+}
+
 void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 {
 	pData->completed = true;
 	pData->date = (uint32)time(NULL);
 
 	AchievementEntry * ae = dbcAchievement.LookupEntry(pData->id);
+
+	GiveRewardsForAchievement(ae);
 
 	if( m_player.IsInWorld() )
 		m_player.GetSession()->SendPacket( BuildAchievementEarned(pData) );

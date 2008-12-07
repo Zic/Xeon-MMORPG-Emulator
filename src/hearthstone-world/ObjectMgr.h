@@ -53,6 +53,14 @@ struct ZoneGuardEntry
 	uint32 AllianceEntry;
 };
 
+struct AchievementReward
+{
+	uint32 AchievementID;
+	uint32 AllianceTitle;
+	uint32 HordeTitle;
+	uint32 ItemID;
+};
+
 struct ItemPage
 {
     uint32 id;
