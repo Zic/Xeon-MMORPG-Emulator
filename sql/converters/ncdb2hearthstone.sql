@@ -14,26 +14,26 @@ SELECT spawn_id, target_spawn_id, follow_angle, follow_dist
 FROM ncdb_base.creature_formations; 
 
 REPLACE creature_names (entry, name, subname, info_str, Flags1, `type`, family, rank, unk4, spelldataid, male_displayid, female_displayid, male_displayid2, female_displayid2, unknown_float1, unknown_float2, leader)
-SELECT entry, name, subname, info_str, Flags1, `type`, family, rank, unk4, spelldataid, displayid, displayid2, displayid3, displayid4, unknown_float1, unknown_float2, leader
+SELECT creature_entry, name, subname, info_str, Flags1, `type`, family, rank, unk4, spelldataid, displayid, displayid2, displayid3, displayid4, unknown_float1, unknown_float2, leader
 FROM ncdb_base.creature_root;
 
-REPLACE creature_proto (entry, minlevel, maxlevel, faction, minhealth, maxhealth, mana, scale, npcflags, attacktype, attacktime, mindamage, maxdamage, rangedattacktime, rangedmindamage, rangedmaxdamage, equipmodel1, equipinfo1, equipslot1, equipmodel2, equipinfo2, equipslot2, equipmodel3, equipinfo3, equipslot3, respawntime, armor, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, combat_reach, bounding_radius, auras, boss, money, invisibility_type, death_state, extra_a9_flags)
-SELECT t.entry, minlvl, maxlvl, faction, minhp, maxhp, mana, scale, NpcFlags, AttackType, MainAttackTime, MainMinDmg, MainMaxDmg, RangedAttackPower, RangedMinDmg, RangedMaxDmg, equipmodel1, equipinfo1, equipslot1, equipmodel2, equipinfo2, equipslot2, equipmodel3, equipinfo3, equipslot3, RespawnTime, Armor, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, CombatReach, BoundingRadius, Auras, Boss, Money, InvisibilityType, DeathState, ExtraA9Flags
+REPLACE creature_proto (entry, minlevel, maxlevel, faction, minhealth, maxhealth, mana, scale, npcflags, attacktype, attacktime, mindamage, maxdamage, rangedattacktime, rangedmindamage, rangedmaxdamage, equipmodel1, equipmodel2,equipmodel3, respawntime, armor, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, combat_reach, bounding_radius, auras, boss, money, invisibility_type, death_state, extra_a9_flags)
+SELECT t.creature_entry, minlvl, maxlvl, faction, minhp, maxhp, mana, scale, NpcFlags, AttackType, MainAttackTime, MainMinDmg, MainMaxDmg, RangedAttackPower, RangedMinDmg, RangedMaxDmg, e.itemId1, e.itemId2, e.itemId3, RespawnTime, Armor, resistance1, resistance2, resistance3, resistance4, resistance5, resistance6, CombatReach, BoundingRadius, Auras, Boss, Money, InvisibilityType, DeathState, ExtraA9Flags
 FROM ncdb_base.creature_template t LEFT JOIN ncdb_base.creature_equip_template e ON t.EquipmentEntry = e.entry;
 
-UPDATE creature_proto p, ncdb_base.creature_spawns s, ncdb_base.creature_spawns_addon a SET mountdisplayid = mount where s.entry = p.entry AND s.id = a.spawnid;
+UPDATE creature_proto p SET mountdisplayid = (SELECT mount FROM ncdb_base.creature_spawns WHERE creature_entry = p.entry LIMIT 1) WHERE p.entry IN (SELECT creature_entry FROM ncdb_base.creature_spawns WHERE mount > 0)
 
 REPLACE creature_quest_finisher (id, quest)
-SELECT id, quest
+SELECT creature_entry, quest
 FROM ncdb_base.quests_creature_finisher;
 
 REPLACE creature_quest_starter (id, quest)
-SELECT id, quest
+SELECT creature_entry, quest
 FROM ncdb_base.quests_creature_starter;
 
-REPLACE creature_spawns (id, entry, map, position_x, position_y, position_z, orientation, movetype, displayid, faction, flags, bytes0, bytes1, bytes2, emote_state, standstate)
-SELECT s.id, entry, map, position_x, position_y, position_z, orientation, movetype, displayid, faction, flags, bytes0, bytes1, bytes2, emote_state, standstate
-FROM ncdb_base.creature_spawns s LEFT JOIN ncdb_base.creature_spawns_addon a ON s.id = a.spawnid;
+REPLACE creature_spawns (id, entry, map, position_x, position_y, position_z, orientation, movetype, displayid, faction, flags, bytes0, bytes2, emote_state, standstate)
+SELECT spawnid, creature_entry, map, position_x, position_y, position_z, orientation, movetype, displayid, faction, flags, bytes0, bytes2, emote_state, standstate
+FROM ncdb_base.creature_spawns
 
 REPLACE creature_waypoints (spawnid, waypointid, position_x, position_y, position_z, waittime, flags)
 SELECT spawnid, waypointid, position_x, position_y, position_z, waittime, flags
@@ -78,55 +78,56 @@ FROM ncdb_base.quests_objectives
 WHERE ReqSourceId3!=0;
 
 REPLACE item_randomprop_groups (entry_id, randomprops_entryid, chance)
-SELECT entry_id, randomprops_entryid, chance
+SELECT randomprops_group, randomprops_entryid, chance
 FROM ncdb_base.items_randomprop_groups;
 
 REPLACE item_randomsuffix_groups (entry_id, randomsuffix_entryid, chance)
-SELECT entry_id, randomsuffix_entryid, chance
+SELECT suffix_group, randomsuffix_entryid, chance
 FROM ncdb_base.items_randomsuffix_groups;
 
 REPLACE itempages (entry, text, next_page)
-SELECT entry, text, next_page
+SELECT page_entry, text, next_page
 FROM ncdb_base.items_pagetext;
 
 REPLACE itempetfood (entry, food_type)
-SELECT entry, food_type
+SELECT item_entry, food_type
 FROM ncdb_base.items_foodtype;
 
 REPLACE items (entry, class, subclass, field4, name1, name2, name3, name4, displayid, quality, flags, buyprice, sellprice, inventorytype, allowableclass, allowablerace, itemlevel, requiredlevel, RequiredSkill, RequiredSkillRank, RequiredSkillSubRank, RequiredPlayerRank1, RequiredPlayerRank2, RequiredFaction, RequiredFactionStanding, `Unique`, maxcount, ContainerSlots, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, stat_type5, stat_value5, stat_type6, stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, stat_type9, stat_value9, stat_type10, stat_value10, dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, dmg_min3, dmg_max3, dmg_type3, dmg_min4, dmg_max4, dmg_type4, dmg_min5, dmg_max5, dmg_type5, armor, holy_res, fire_res, nature_res, frost_res, shadow_res, arcane_res, delay, ammo_type, `range`, spellid_1, spelltrigger_1, spellcharges_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, spelltrigger_2, spellcharges_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, spellid_3, spelltrigger_3, spellcharges_3, spellcooldown_3, spellcategory_3, spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, spellcooldown_4, spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, page_id, page_language, page_material, quest_id, lock_id, lock_material, sheathID, randomprop, unk203_1, block, itemset, MaxDurability, ZoneNameID, mapid, bagfamily, TotemCategory, socket_color_1, unk201_3, socket_color_2, unk201_5, socket_color_3, unk201_7, socket_bonus, GemProperties, ReqDisenchantSkill, unk2)
-SELECT entry, class, subclass, field4, name1, name2, name3, name4, displayid, quality, flags, buyprice, sellprice, inventorytype, allowableclass, allowablerace, itemlevel, requiredlevel, RequiredSkill, RequiredSkillRank, RequiredSkillSubRank, RequiredPlayerRank1, RequiredPlayerRank2, RequiredFaction, RequiredFactionStanding, `Unique`, maxcount, ContainerSlots, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, stat_type5, stat_value5, stat_type6, stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, stat_type9, stat_value9, stat_type10, stat_value10, dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, dmg_min3, dmg_max3, dmg_type3, dmg_min4, dmg_max4, dmg_type4, dmg_min5, dmg_max5, dmg_type5, armor, holy_res, fire_res, nature_res, frost_res, shadow_res, arcane_res, delay, ammo_type, `range`, spellid_1, spelltrigger_1, spellcharges_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, spelltrigger_2, spellcharges_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, spellid_3, spelltrigger_3, spellcharges_3, spellcooldown_3, spellcategory_3, spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, spellcooldown_4, spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, page_id, page_language, page_material, quest_id, lock_id, lock_material, sheathID, randomprop, randomsuffix, block, itemset, MaxDurability, ZoneNameID, mapid, bagfamily, TotemCategory, socket_color_1, socket_content_1, socket_color_2, socket_content_2, socket_color_3, socket_content_3, socket_bonus, GemProperties, ReqDisenchantSkill, armorDamageModifier
+SELECT item_entry, class, subclass, field4, name1, name2, name3, name4, displayid, quality, flags, buyprice, sellprice, inventorytype, allowableclass, allowablerace, itemlevel, requiredlevel, RequiredSkill, RequiredSkillRank, RequiredSkillSubRank, RequiredPlayerRank1, RequiredPlayerRank2, RequiredFaction, RequiredFactionStanding, `Unique`, maxcount, ContainerSlots, stat_type1, stat_value1, stat_type2, stat_value2, stat_type3, stat_value3, stat_type4, stat_value4, stat_type5, stat_value5, stat_type6, stat_value6, stat_type7, stat_value7, stat_type8, stat_value8, stat_type9, stat_value9, stat_type10, stat_value10, dmg_min1, dmg_max1, dmg_type1, dmg_min2, dmg_max2, dmg_type2, dmg_min3, dmg_max3, dmg_type3, dmg_min4, dmg_max4, dmg_type4, dmg_min5, dmg_max5, dmg_type5, armor, holy_res, fire_res, nature_res, frost_res, shadow_res, arcane_res, delay, ammo_type, `range`, spellid_1, spelltrigger_1, spellcharges_1, spellcooldown_1, spellcategory_1, spellcategorycooldown_1, spellid_2, spelltrigger_2, spellcharges_2, spellcooldown_2, spellcategory_2, spellcategorycooldown_2, spellid_3, spelltrigger_3, spellcharges_3, spellcooldown_3, spellcategory_3, spellcategorycooldown_3, spellid_4, spelltrigger_4, spellcharges_4, spellcooldown_4, spellcategory_4, spellcategorycooldown_4, spellid_5, spelltrigger_5, spellcharges_5, spellcooldown_5, spellcategory_5, spellcategorycooldown_5, bonding, description, page_id, page_language, page_material, quest_id, lock_id, lock_material, sheathID, randomprop, randomsuffix, block, itemset, MaxDurability, ZoneNameID, mapid, bagfamily, TotemCategory, socket_color_1, socket_content_1, socket_color_2, socket_content_2, socket_color_3, socket_content_3, socket_bonus, GemProperties, ReqDisenchantSkill, armorDamageModifier
 FROM ncdb_base.items_root;
 
 -- -----------------------------------------------------
 -- S4: Gameobjects
 REPLACE gameobject_names (entry, `type`, displayId, name, spellfocus, sound1, sound2, sound3, sound4, sound5, sound6, sound7, sound8, sound9, unknown1, unknown2, unknown3, unknown4, unknown5, unknown6, unknown7, unknown8, unknown9, unknown10, unknown11, unknown12, unknown13, unknown14)
-SELECT entry, `Type`, displayid, Name, Field0, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12, Field13, Field14, Field15, Field16, Field17, Field18, Field19, Field20, Field21, Field22, Field23
+SELECT gameobject_entry, `Type`, displayid, Name, Field0, Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11, Field12, Field13, Field14, Field15, Field16, Field17, Field18, Field19, Field20, Field21, Field22, Field23
 FROM ncdb_base.gameobject_root;
 
 REPLACE gameobject_quest_finisher (id, quest)
-SELECT id, quest
+SELECT gameobject_entry, quest
 FROM ncdb_base.quests_gameobject_finisher;
 
 REPLACE gameobject_quest_item_binding (entry, quest, item, item_count)
-SELECT entry, quest, item, item_count
+SELECT gameobject_entry, quest, item, item_count
 FROM ncdb_base.gameobject_quest_item_binding;
 
 REPLACE gameobject_quest_pickup_binding (entry, quest, required_count)
-SELECT entry, quest, required_count
+SELECT gameobject_entry, quest, required_count
 FROM ncdb_base.gameobject_quest_pickup_binding;
 
+
 REPLACE gameobject_quest_starter (id, quest)
-SELECT id, quest
+SELECT gameobject_entry, quest
 FROM ncdb_base.quests_gameobject_starter;
 
 REPLACE gameobject_spawns (id, Entry, map, position_x, position_y, position_z, Facing, orientation1, orientation2, orientation3, orientation4, state, Flags, Faction, Scale)
-SELECT id, Entry, map, position_x, position_y, position_z, Facing, orientation1, orientation2, orientation3, orientation4, State, Flags, Faction, Scale
+SELECT spawnid, gameobject_entry, map, position_x, position_y, position_z, Facing, orientation1, orientation2, orientation3, orientation4, State, Flags, Faction, Scale
 FROM ncdb_base.gameobject_spawns;
 
 -- -----------------------------------------------------
 -- S5: Misc
 REPLACE areatriggers (entry, type, map, screen, name, position_x, position_y, position_z, orientation, required_level)
-SELECT entry, type, target_map, target_screen, name, target_position_x, target_position_y, target_position_z, target_orientation, required_level
+SELECT TriggerID, type, target_map, target_screen, name, target_position_x, target_position_y, target_position_z, target_orientation, required_level
 FROM ncdb_base.areatriggers_template;
 
 REPLACE auctionhouse (creature_entry, `group`)
@@ -138,7 +139,7 @@ SELECT Zone, MinSkill, MaxSkill
 FROM ncdb_base.world_fishing_zones;
 
 REPLACE graveyards (id, position_x, position_y, position_z, orientation, zoneid, adjacentzoneid, mapid, faction, name)
-SELECT id, position_x, position_y, position_z, orientation, zoneid, adjacentzoneid, mapid, faction, name
+SELECT graveyard_id, position_x, position_y, position_z, orientation, zoneid, adjacentzoneid, mapid, faction, name
 FROM ncdb_base.world_graveyards;
 
 REPLACE recall (id, name, MapId, positionX, positionY, positionZ)
@@ -147,41 +148,41 @@ FROM ncdb_base.world_cmdteleports;
 
 -- Use default collision '1', so that the configuration file takes precendence.
 REPLACE worldmap_info (entry, screenid, type, maxplayers, minlevel, repopx, repopy, repopz, repopentry, area_name, flags, cooldown, lvl_mod_a, required_quest, required_item, heroic_keyid_1, heroic_keyid_2, viewingDistance, collision)
-SELECT MapID, ScreenID, Type, MaxPlayers, RequiredLevel, repop_x, repop_y, repop_z, repop_map, MapName, Flags, BossReset, HeroicLevelMod, RequiredQuest, RequiredItem, HeroicKeyID1, HeroicKeyID2, viewingDistance,1
+SELECT MapID, ScreenID, Type, MaxPlayers, RequiredLevel, repop_x, repop_y, repop_z, repop_map, MapName, Flags, InstanceReset, HeroicLevelMod, RequiredQuest, RequiredItem, HeroicKeyID1, HeroicKeyID2, viewingDistance,1
 FROM ncdb_base.world_mapinfo;
 
 -- -----------------------------------------------------
 -- S6: Loot
 REPLACE creatureloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT creature_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_creatures;
 
 REPLACE disenchantingloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT item_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_disenchanting;
 
 REPLACE fishingloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT fishzone_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_fishing;
 
 REPLACE itemloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT item_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_item;
 
 REPLACE objectloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT gameobject_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_gameobject;
 
 REPLACE pickpocketingloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT creature_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_pickpocketing;
 
 REPLACE prospectingloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT item_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_prospecting;
 
 REPLACE skinningloot (entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot)
-SELECT entryid, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
+SELECT creature_entry, itemid, percentchance, heroicpercentchance, mincount, maxcount, ffa_loot
 FROM ncdb_base.loot_skinning;
 
 -- -----------------------------------------------------
@@ -191,34 +192,35 @@ SELECT creatureid, textid
 FROM ncdb_base.npc_gossip_textid;
 
 REPLACE npc_monstersay (entry, event, chance, language, type, monstername, text0, text1, text2, text3, text4)
-SELECT entry, event, chance, language, type, monstername, text0, text1, text2, text3, text4
+SELECT creature_entry, event, chance, language, type, monstername, text0, text1, text2, text3, text4
 FROM ncdb_base.npc_monstersay;
 
 REPLACE npc_text (entry, prob0, text0_0, text0_1, lang0, em0_0, em0_1, em0_2, em0_3, em0_4, em0_5, prob1, text1_0, text1_1, lang1, em1_0, em1_1, em1_2, em1_3, em1_4, em1_5, prob2, text2_0, text2_1, lang2, em2_0, em2_1, em2_2, em2_3, em2_4, em2_5, prob3, text3_0, text3_1, lang3, em3_0, em3_1, em3_2, em3_3, em3_4, em3_5, prob4, text4_0, text4_1, lang4, em4_0, em4_1, em4_2, em4_3, em4_4, em4_5, prob5, text5_0, text5_1, lang5, em5_0, em5_1, em5_2, em5_3, em5_4, em5_5, prob6, text6_0, text6_1, lang6, em6_0, em6_1, em6_2, em6_3, em6_4, em6_5, prob7, text7_0, text7_1, lang7, em7_0, em7_1, em7_2, em7_3, em7_4, em7_5)
-SELECT entry, prob0, text0_0, text0_1, lang0, em0_0, em0_1, em0_2, em0_3, em0_4, em0_5, prob1, text1_0, text1_1, lang1, em1_0, em1_1, em1_2, em1_3, em1_4, em1_5, prob2, text2_0, text2_1, lang2, em2_0, em2_1, em2_2, em2_3, em2_4, em2_5, prob3, text3_0, text3_1, lang3, em3_0, em3_1, em3_2, em3_3, em3_4, em3_5, prob4, text4_0, text4_1, lang4, em4_0, em4_1, em4_2, em4_3, em4_4, em4_5, prob5, text5_0, text5_1, lang5, em5_0, em5_1, em5_2, em5_3, em5_4, em5_5, prob6, text6_0, text6_1, lang6, em6_0, em6_1, em6_2, em6_3, em6_4, em6_5, prob7, text7_0, text7_1, lang7, em7_0, em7_1, em7_2, em7_3, em7_4, em7_5
+SELECT text_entry, prob0, text0_0, text0_1, lang0, em0_0, em0_1, em0_2, em0_3, em0_4, em0_5, prob1, text1_0, text1_1, lang1, em1_0, em1_1, em1_2, em1_3, em1_4, em1_5, prob2, text2_0, text2_1, lang2, em2_0, em2_1, em2_2, em2_3, em2_4, em2_5, prob3, text3_0, text3_1, lang3, em3_0, em3_1, em3_2, em3_3, em3_4, em3_5, prob4, text4_0, text4_1, lang4, em4_0, em4_1, em4_2, em4_3, em4_4, em4_5, prob5, text5_0, text5_1, lang5, em5_0, em5_1, em5_2, em5_3, em5_4, em5_5, prob6, text6_0, text6_1, lang6, em6_0, em6_1, em6_2, em6_3, em6_4, em6_5, prob7, text7_0, text7_1, lang7, em7_0, em7_1, em7_2, em7_3, em7_4, em7_5
 FROM ncdb_base.npc_text;
 
 REPLACE trainer_defs (entry, required_skill, required_skillvalue, req_class, trainer_type, trainer_ui_window_message, can_train_gossip_textid, cannot_train_gossip_textid)
-SELECT entry, required_skill, required_skillvalue, req_class, trainer_type, trainer_ui_window_message, can_train_gossip_textid, cannot_train_gossip_textid
+SELECT creature_entry, required_skill, required_skillvalue, req_class, trainer_type, trainer_ui_window_message, can_train_gossip_textid, cannot_train_gossip_textid
 FROM ncdb_base.npc_trainer_defs;
 
 REPLACE trainer_spells (entry, cast_spell, learn_spell, spellcost, reqspell, reqskill, reqskillvalue, reqlevel, deletespell, is_prof)
-SELECT entry, cast_spell, learn_spell, SpellCost, ReqSpell, ReqSkill, ReqSkillValue, ReqLevel, DeleteSpell, IsProf
-FROM ncdb_base.npc_trainer_spells t INNER JOIN ncdb_base.npc_trainer_spell_settings s ON t.learn_spell = s.SpellID;
+SELECT creature_entry, t.SpellID, 0, SpellCost, ReqSpell, ReqSkill, ReqSkillValue, ReqLevel, DeleteSpell, IsProf
+FROM ncdb_base.npc_trainer_spells t INNER JOIN ncdb_base.npc_trainer_spell_settings s ON t.SpellID = s.SpellID WHERE s.isCast > 0;
+
 REPLACE trainer_spells (entry, cast_spell, learn_spell, spellcost, reqspell, reqskill, reqskillvalue, reqlevel, deletespell, is_prof)
-SELECT entry, cast_spell, learn_spell, SpellCost, ReqSpell, ReqSkill, ReqSkillValue, ReqLevel, DeleteSpell, IsProf
-FROM ncdb_base.npc_trainer_spells t INNER JOIN ncdb_base.npc_trainer_spell_settings s ON t.cast_spell = s.SpellID;
+SELECT creature_entry, 0, t.SpellID, SpellCost, ReqSpell, ReqSkill, ReqSkillValue, ReqLevel, DeleteSpell, IsProf
+FROM ncdb_base.npc_trainer_spells t INNER JOIN ncdb_base.npc_trainer_spell_settings s ON t.SpellID = s.SpellID WHERE s.isCast = 0;
 
 REPLACE vendors (entry, item, amount, max_amount, inctime, extendedcost)
-SELECT v.entry, item, SellAmount, Stock, StockRefill, ExtendedCost
-FROM ncdb_base.npc_vendors v INNER JOIN ncdb_base.items_amounts a ON v.item = a.entry;
+SELECT v.creature_entry, item, v.SellAmount, v.Stock, v.StockRefill, ExtendedCost
+FROM ncdb_base.npc_vendors v INNER JOIN ncdb_base.items_amounts a ON v.item = a.item_entry;
 
 REPLACE transport_data (entry, name, period)
 SELECT entry, name, period
 FROM ncdb_base.world_transport;
 
 REPLACE teleport_coords (id, name, mapId, position_x, position_y, position_z, totrigger)
-SELECT id, name, mapId, position_x, position_y, position_z, totrigger
+SELECT spellid, name, mapId, position_x, position_y, position_z, totrigger
 FROM ncdb_base.spells_teleport_coords;
 
 -- -----------------------------------------------------
