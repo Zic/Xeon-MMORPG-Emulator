@@ -988,8 +988,8 @@ void WorldSession::FullLogin(Player * plr)
 
 	// Retroactive: Level achievement
 	_player->GetAchievementInterface()->HandleAchievementCriteriaLevelUp( _player->getLevel() );
-	// Retroactive: Bank slots
-	_player->GetAchievementInterface()->HandleAchievementCriteriaBuyBankSlot(true);
+	// Retroactive: Bank slots: broken atm :(
+	//_player->GetAchievementInterface()->HandleAchievementCriteriaBuyBankSlot(true);
 
 	// Send achievement data!
 	if( _player->GetAchievementInterface()->HasAchievements() )
