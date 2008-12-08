@@ -180,17 +180,24 @@ ObjectMgr::~ObjectMgr()
 	for(GmTicketList::iterator itr = GM_TicketList.begin(); itr != GM_TicketList.end(); ++itr)
 		delete (*itr);
 
-
 	Log.Notice("ObjectMgr", "Deleting Arena Teams..."); 
 	for(HM_NAMESPACE::hash_map<uint32, ArenaTeam*>::iterator itr = m_arenaTeams.begin(); itr != m_arenaTeams.end(); ++itr) 
 		delete itr->second;
+
+	Log.Notice("ObjectMgr", "Deleting Achievement Cache...");
+	for(AchievementCriteriaMap::iterator itr = m_achievementCriteriaMap.begin(); itr != m_achievementCriteriaMap.end(); ++itr)
+		delete (itr->second);
+
+	Log.Notice("ObjectMgr", "Deleting Achievement Quest Map...");
+	for(map<uint32,set<Quest*>*>::iterator qitr = ZoneToQuestMap.begin(); qitr != ZoneToQuestMap.end(); ++qitr)
+		delete qitr->second;
 }
 
 void ObjectMgr::LoadAchievements()
 {
 	for(uint32 i = 0; i < dbcAchievement.GetNumRows(); ++i)
 	{
-		AchievementEntry * ae = dbcAchievement.LookupEntryForced(i);
+		AchievementEntry * ae = dbcAchievement.LookupRow(i);
 		if(ae)
 		{
 			ae->AssociatedCriteriaCount = 0;
@@ -199,7 +206,7 @@ void ObjectMgr::LoadAchievements()
 
 	for(uint32 i = 0; i < dbcAchivementCriteria.GetNumRows(); ++i)
 	{
-		AchievementCriteriaEntry * ace = dbcAchivementCriteria.LookupEntry( i );
+		AchievementCriteriaEntry * ace = dbcAchivementCriteria.LookupRow( i );
 		if( ace )
 		{
 			AchievementCriteriaMap::iterator itr = m_achievementCriteriaMap.find( ace->requiredType );
@@ -220,7 +227,7 @@ void ObjectMgr::LoadAchievements()
 			AchievementEntry * ae = dbcAchievement.LookupEntryForced( ace->referredAchievement );
 			if( ae )
 			{
-				if( ae->AssociatedCriteriaCount >= 32 ) continue;
+				if(ae->AssociatedCriteriaCount >= 32) continue;
 				ae->AssociatedCriteria[ ae->AssociatedCriteriaCount ] = ace->ID;
 				ae->AssociatedCriteriaCount++;
 			}
