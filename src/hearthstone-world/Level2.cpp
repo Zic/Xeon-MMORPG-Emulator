@@ -802,11 +802,11 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 		<< MSG_COLOR_SUBWHITE << "Informations:\n"
 		<< MSG_COLOR_GREEN << "Entry: " << MSG_COLOR_LIGHTBLUE << GObj->GetEntry()						  << "\n"
 		<< MSG_COLOR_GREEN << "Model: " << MSG_COLOR_LIGHTBLUE << GObj->GetUInt32Value(GAMEOBJECT_DISPLAYID)<< "\n"
-		<< MSG_COLOR_GREEN << "State: " << MSG_COLOR_LIGHTBLUE << GObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE)<< "\n"
+		<< MSG_COLOR_GREEN << "State: " << MSG_COLOR_LIGHTBLUE << (uint32)GObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE)<< "\n"
 		<< MSG_COLOR_GREEN << "flags: " << MSG_COLOR_LIGHTBLUE << GObj->GetUInt32Value(GAMEOBJECT_FLAGS)<< "\n"
 		<< MSG_COLOR_GREEN << "dynflags:" << MSG_COLOR_LIGHTBLUE << GObj->GetUInt32Value(GAMEOBJECT_DYNAMIC) << "\n"
 		<< MSG_COLOR_GREEN << "faction: " << MSG_COLOR_LIGHTBLUE << GObj->GetUInt32Value(GAMEOBJECT_FACTION)<< "\n"
-		<< MSG_COLOR_GREEN << "Type: "  << MSG_COLOR_LIGHTBLUE << GObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID)  << " -- ";
+		<< MSG_COLOR_GREEN << "Type: "  << MSG_COLOR_LIGHTBLUE << (uint32)GObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID)  << " -- ";
 
 	switch( GObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) )
 	{
