@@ -1107,8 +1107,14 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 
 	WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
 
-	if(oldHair != newHair || oldColour != colour || oldFacialHair != newFacialHair)
-		cost += (uint32)cutcosts->val;
+	if(oldHair != newHair)
+		cost += cutcosts->val;
+
+    if((oldColour != colour) && (oldHair == newHair))
+        cost += cutcosts->val * 0.5f;
+
+    if(oldFacialHair != newFacialHair)
+        cost += cutcosts->val * 0.75f;
 
 	if(_player->GetUInt32Value(PLAYER_FIELD_COINAGE) < cost)
 	{		
