@@ -8025,7 +8025,11 @@ void Player::CalculateBaseStats()
 	if(GetPowerType() == POWER_TYPE_MANA)
 	{
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, lvlinfo->Mana);
-		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->Mana - (lvlinfo->Stat[STAT_INTELLECT] * 15));
+		int32 intellectStat = lvlinfo->Stat[STAT_INTELLECT]; // First 20 are only worth 1 point each.
+		int32 manaByIntellect = (intellectStat * 15) - ((intellectStat > 20) ? 20 * 14 : levelone->Stat[INTELLECT]);
+
+		int32 baseMana = lvlinfo->Mana - manaByIntellect;
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, (baseMana < 0) ? lvlinfo->Mana : baseMana);
 	}
 }
 
