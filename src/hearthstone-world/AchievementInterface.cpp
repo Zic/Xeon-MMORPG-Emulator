@@ -1307,6 +1307,9 @@ void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 kill
 		uint32 AchievementID = ace->referredAchievement;
 		uint32 ReqCreature = ace->killed_by_creature.creatureEntry;
 
+		if( ReqCreature != killedMonster )
+			continue;
+
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;
 
