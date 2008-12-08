@@ -192,7 +192,6 @@ private:
 
 public:
 	AchievementInterface(Player& plr);
-
 	~AchievementInterface();
 
 	void LoadFromDB( QueryResult * pResult );

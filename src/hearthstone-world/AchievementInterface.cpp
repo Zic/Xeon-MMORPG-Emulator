@@ -27,7 +27,7 @@ AchievementInterface::AchievementInterface(Player& plr) : m_player(plr)
 
 AchievementInterface::~AchievementInterface()
 {
-	if( m_achivementDataMap.size() )
+	if( m_achivementDataMap.size() > 0 )
 	{
 		std::map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.begin();
 		for(; itr != m_achivementDataMap.end(); ++itr)
@@ -137,8 +137,8 @@ WorldPacket* AchievementInterface::BuildAchievementData()
 			{
 				*data << uint32( ae->AssociatedCriteria[i] );
 				uint32 counterVar = itr->second->counter[i];
-				data->AppendPacked64( (uint64)counterVar );
-				data->append(m_player.GetNewGUID());
+				FastGUIDPack( *data, counterVar );
+				*data << m_player.GetNewGUID();
 				*data << uint32(0);
 				*data << uint32( unixTimeToTimeBitfields( time(NULL) ) );
 				*data << uint32(0);
@@ -316,9 +316,7 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	WorldPacket data(SMSG_CRITERIA_UPDATE, 50);
 	AchievementEntry * ae = dbcAchievement.LookupEntry(ad->id);
 	data << uint32(ae->AssociatedCriteria[idx]);
-
-	data.AppendPacked64((uint64)ad->counter[idx]);
-
+	FastGUIDPack( data, (uint64)ad->counter[idx] );
 	data << m_player.GetNewGUID();   
 	data << uint32(0);
 	data << uint32(unixTimeToTimeBitfields(time(NULL)));
@@ -594,7 +592,7 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
 			if( compareCriteria == ace )
 			{
-				ad->counter[i] = m_player.getLevel();
+				ad->counter[i] = m_player.getLevel() > ReqLevel ? ReqLevel : m_player.getLevel();
 				SendCriteriaUpdate(ad, i);
 			}
 		}
