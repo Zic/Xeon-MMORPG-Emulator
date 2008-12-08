@@ -378,6 +378,12 @@ void Transporter::TransportPassengers(uint32 mapid, uint32 oldmap, float x, floa
 				continue;
 			}
 
+			if(mapid == 571 && !plr->GetSession()->HasFlag(ACCOUNT_FLAG_XPACK_02))
+			{
+				plr->RepopAtGraveyard(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetMapId());
+				continue;
+			}
+
 			// Lucky bitch. Do it like on official.
 			if(plr->isDead())
 			{
