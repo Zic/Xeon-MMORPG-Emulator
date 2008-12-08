@@ -52,6 +52,8 @@ void Player::SendLevelupInfo(uint32 level, uint32 Hp, uint32 Mana, uint32 Stat0,
     packet.unk1 = 0;
     packet.unk2 = 0;
     packet.unk3 = 0;
+	packet.unk4 = 0;
+    packet.unk5 = 0;
 
     // Append stat differences
     packet.Stat0 = Stat0;

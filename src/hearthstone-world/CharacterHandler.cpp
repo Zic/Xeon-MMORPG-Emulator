@@ -1090,7 +1090,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	uint8 newHair = Hair->hair_id;
 	uint8 newFacialHair = facialHair->hair_id;	
 	uint32 level = _player->getLevel();
-	uint32 cost = 0;
+	float cost = 0;
 	uint8 oldHair = _player->GetByte(PLAYER_BYTES, 2);
 	uint8 oldColour = _player->GetByte(PLAYER_BYTES, 3);
 	uint8 oldFacialHair = _player->GetByte(PLAYER_BYTES_2, 0);
