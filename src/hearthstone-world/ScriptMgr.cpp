@@ -897,3 +897,10 @@ void HookInterface::OnAreaTrigger(Player * plr, uint32 areatrigger)
 		(call)(plr, areatrigger);
 	OUTER_LOOP_END
 }
+
+void HookInterface::OnPlayerSaveToDB(Player * pPlayer)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB, tOnPlayerSaveToDB)
+		(call)(pPlayer);
+	OUTER_LOOP_END
+}

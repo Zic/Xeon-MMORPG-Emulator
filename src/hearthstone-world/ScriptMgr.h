@@ -53,6 +53,8 @@ enum ServerHookEvents
 	SERVER_HOOK_EVENT_ON_CONTIENT_CREATE	= 25,
 	SERVER_HOOK_EVENT_ON_POST_SPELL_CAST	= 26,
 	SERVER_HOOK_EVENT_ON_AREATRIGGER		= 27,
+	SERVER_HOOK_EVENT_ON_PLAYER_SAVE_TO_DB	= 28,
+
 
 	NUM_SERVER_HOOKS,
 };
@@ -93,6 +95,7 @@ typedef void(*tOnArenaFinish)(Player * pPlayer, uint32 type, ArenaTeam * pTeam, 
 typedef void(*tOnContinentCreate)(MapMgr *mgr);
 typedef void(*tOnPostSpellCast)(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
 typedef void(*tOnAreaTrigger)(Player * plr, uint32 areatrigger);
+typedef void(*tOnPlayerSaveToDB)(Player* pPlayer);
 
 class Spell;
 class Aura;
@@ -285,6 +288,7 @@ public:
 	void OnContinentCreate(MapMgr *pMgr);
 	void OnPostSpellCast(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
 	void OnAreaTrigger(Player * plr, uint32 areatrigger);
+	void OnPlayerSaveToDB(Player * pPlayer);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()
