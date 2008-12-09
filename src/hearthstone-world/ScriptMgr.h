@@ -95,7 +95,7 @@ typedef void(*tOnArenaFinish)(Player * pPlayer, uint32 type, ArenaTeam * pTeam, 
 typedef void(*tOnContinentCreate)(MapMgr *mgr);
 typedef void(*tOnPostSpellCast)(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
 typedef void(*tOnAreaTrigger)(Player * plr, uint32 areatrigger);
-typedef void(*tOnPlayerSaveToDB)(Player* pPlayer);
+typedef void(*tOnPlayerSaveToDB)(Player* pPlayer, QueryBuffer* buf);
 
 class Spell;
 class Aura;
@@ -288,7 +288,7 @@ public:
 	void OnContinentCreate(MapMgr *pMgr);
 	void OnPostSpellCast(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
 	void OnAreaTrigger(Player * plr, uint32 areatrigger);
-	void OnPlayerSaveToDB(Player * pPlayer);
+	void OnPlayerSaveToDB(Player * pPlayer, QueryBuffer* buf);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()

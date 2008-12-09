@@ -2235,7 +2235,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 
 	//Save Other related player stuff
 
-	sHookInterface.OnPlayerSaveToDB(this);
+	sHookInterface.OnPlayerSaveToDB(this, buf);
 
 	// Inventory
 	 GetItemInterface()->mSaveItemsToDatabase(bNewCharacter, buf);
