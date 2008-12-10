@@ -1316,7 +1316,7 @@ void Player::_EventExploration()
 	{
 		m_AreaID = AreaId;
 		m_areaDBC = dbcArea.LookupEntryForced(m_AreaID);
-		if (m_areaDBC->ZoneId != 0)
+		if (m_areaDBC && m_areaDBC->ZoneId != 0)
 			m_areaDBC = dbcArea.LookupEntryForced(m_areaDBC->ZoneId);
 		UpdatePvPArea();
 		if(GetGroup())
