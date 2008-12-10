@@ -21,7 +21,7 @@
 Mutex m_transportGuidGen;
 uint32 m_transportGuidMax = 50;
 
-bool Transporter::CreateAsTransporter(uint32 EntryID, const char* Name, int32 Time)
+bool Transporter::CreateAsTransporter(uint32 EntryID, const char* Name)
 {
 	// Lookup GameobjectInfo
 	if(!CreateFromProto(EntryID,0,0,0,0,0))
@@ -29,10 +29,6 @@ bool Transporter::CreateAsTransporter(uint32 EntryID, const char* Name, int32 Ti
 	
 	SetUInt32Value(GAMEOBJECT_FLAGS,40);
 	SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-	
-	
-	// Set period
-	m_period = Time;
 
 	// Generate waypoints
 	if(!GenerateWaypoints())
@@ -289,6 +285,7 @@ bool Transporter::GenerateWaypoints()
 	mNextWaypoint = GetNextWaypoint();
 	m_pathTime = timer;
 	m_timer = 0;
+	m_period = t;
 	
 	return true;
 }
@@ -437,10 +434,9 @@ void ObjectMgr::LoadTransporters()
 	do 
 	{
 		uint32 entry = QR->Fetch()[0].GetUInt32();
-		int32 period = QR->Fetch()[2].GetInt32();
 
 		Transporter * pTransporter = new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry);
-		if(!pTransporter->CreateAsTransporter(entry, "", period))
+		if(!pTransporter->CreateAsTransporter(entry, ""))
 		{
 			DEBUG_LOG("Transporter %s failed creation for some reason.", QR->Fetch()[1].GetString());
 			delete pTransporter;
