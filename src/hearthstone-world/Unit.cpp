@@ -6419,3 +6419,9 @@ void Unit::SetPowerType(uint8 type)
 		SetFloatValue(PLAYER_RUNE_REGEN_1_1, 0.100000f);
 	}
 }
+
+//	custom functions for scripting
+void Unit::SetWeaponDisplayId(uint8 slot, uint32 displayId)
+{
+	SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID+slot, displayId);
+}

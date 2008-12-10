@@ -1239,6 +1239,10 @@ public:
 
 	float m_ignoreArmorPctMaceSpec;
 	float m_ignoreArmorPct;
+
+//	custom functions for scripting
+	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
+
 protected:
 	Unit ();
 

@@ -729,3 +729,14 @@ void GameObject::SetRotation(float rad)
 	}
 	SetFloatValue(GAMEOBJECT_ROTATION, rad);
 }
+
+//	custom functions for scripting
+void GameObject::SetState(uint8 state)
+{
+	SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, state);
+}
+
+uint8 GameObject::GetState()
+{
+	return GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
+}
