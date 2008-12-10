@@ -11005,6 +11005,10 @@ void Player::SetKnownTitle( int32 title, bool set )
 		SetUInt64Value( field, current | uint64(1) << title2 );
 	else
 		SetUInt64Value( field, current & ~uint64(1) << title2 );
+
+	// PVP Ranks, Legacy Stuff :P
+	if( title < PVPTITLE_GLADIATOR && title > PVPTITLE_NONE )
+		SetPVPRank( GetTeam() ? title - 14 : title );
 	
 	WorldPacket data( SMSG_TITLE_EARNED, 8 );
 	data << uint32( title ) << uint32( set ? 1 : 0 );
