@@ -134,7 +134,11 @@ bool Transporter::GenerateWaypoints()
 	float tmpDist = 0;
 	for (int i = 0; i < (int)keyFrames.size(); i++)
 	{
+		if( lastStop < 0 || firstStop < 0 ) // IT NEVER STOPS :O
+			continue;
+
 		int j = (i + lastStop) % (int)keyFrames.size();
+
 		if (keyFrames[j].actionflag == 2)
 			tmpDist = 0;
 		else
