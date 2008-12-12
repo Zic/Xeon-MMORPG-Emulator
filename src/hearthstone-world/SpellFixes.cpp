@@ -927,6 +927,9 @@ void ApplyNormalFixes()
 			{
 				sp->Effect[b] = SPELL_EFFECT_APPLY_AREA_AURA;
 			}
+
+			if( b > 0 && sp->Effect[b] == SPELL_EFFECT_SUMMON && sp->EffectApplyAuraName[b - 1] == SPELL_AURA_MOUNTED )
+				sp->Effect[b] = 0; // temp fix.
 		}
 
 		//stupid spell ranking problem
