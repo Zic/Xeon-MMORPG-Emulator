@@ -4464,11 +4464,16 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			}
 		}break;
 	case FORM_FLIGHT:
-		{// druid
+		{//druid
 			freeMovements = true;
-			spellId = 33948; //Flight Form Passive
-			modelId = 20857;
-			//FIXME: model?
+			spellId = 33948;
+			if (apply)
+			{
+				if(m_target->getRace() == 8) //  Nightelf
+					modelId = 20857;
+				else  //  Tauren
+					modelId = 20872;
+			}
 		}break;
 	case FORM_STEALTH:
 		{// rogue		
