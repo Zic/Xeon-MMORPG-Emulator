@@ -6,4 +6,4 @@ autoconf
 autoheader
 automake -a -c
 #reconfigure
-#autoreconf -fi
+#autoreconf -fi 
