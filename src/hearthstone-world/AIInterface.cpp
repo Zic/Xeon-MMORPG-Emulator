@@ -1460,19 +1460,13 @@ Unit* AIInterface::FindTarget()
 		}*/
 
 		AttackReaction(target, 1, 0);
-		if(target->IsPlayer())
-		{
-			WorldPacket data(SMSG_AI_REACTION, 12);
-			data << m_Unit->GetGUID() << uint32(2);		// Aggro sound
-			static_cast< Player* >( target )->GetSession()->SendPacket( &data );
-		}
+		WorldPacket data(SMSG_AI_REACTION, 12);
+		data << m_Unit->GetGUID() << uint32(2);		// Aggro sound
+		m_Unit->SendMessageToSet(&data, false);
+
 		if(target->GetUInt32Value(UNIT_FIELD_CREATEDBY) != 0)
 		{
 			Unit* target2 = m_Unit->GetMapMgr()->GetPlayer(target->GetUInt32Value(UNIT_FIELD_CREATEDBY));
-			/*if(!target2)
-			{
-				target2 = sObjHolder.GetObject<Player>(target->GetUInt32Value(UNIT_FIELD_CREATEDBY));
-			}*/
 			if(target2)
 			{
 				AttackReaction(target2, 1, 0);
