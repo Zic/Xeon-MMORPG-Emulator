@@ -33,7 +33,7 @@ class MapCell
 {
 	friend class MapMgr;
 public:
-	MapCell() {};
+	MapCell();
 	~MapCell();
 
 	typedef std::set<Object*> ObjectSet;
