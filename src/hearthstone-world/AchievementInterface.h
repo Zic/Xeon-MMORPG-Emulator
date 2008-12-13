@@ -190,6 +190,8 @@ private:
 	// Gets AchievementData struct. If there is none, one will be created.
 	AchievementData* GetAchievementDataByAchievementID(uint32 ID);
 
+	WorldPacket* m_achievementInspectPacket;
+
 public:
 	AchievementInterface(Player& plr);
 	~AchievementInterface();
@@ -199,7 +201,7 @@ public:
 
 	
 	WorldPacket* BuildAchievementEarned(AchievementData * pData);
-	WorldPacket* BuildAchievementData();
+	WorldPacket* BuildAchievementData(bool forInspect = false);
 
 	bool HasAchievements() { return m_achivementDataMap.size() > 0; }
 

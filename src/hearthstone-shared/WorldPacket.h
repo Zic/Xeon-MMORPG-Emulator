@@ -22,20 +22,6 @@ public:
 
     __inline uint16 GetOpcode() const { return m_opcode; }
     __inline void SetOpcode(uint16 opcode) { m_opcode = opcode; }
-	__inline void AppendPacked64(uint64 unpacked)
-	{
-		size_t mask_position = wpos();
-		*this << uint8(0);
-		for(uint8 i = 0; i < 8; ++i)
-		{
-			if( unpacked & 0xFF )
-			{
-				_storage[mask_position] |= uint8(1<<i);
-				*this << uint8(unpacked & 0xFF);
-			}
-			unpacked >>= 8;
-		}
-	}
 
 protected:
     uint16 m_opcode;

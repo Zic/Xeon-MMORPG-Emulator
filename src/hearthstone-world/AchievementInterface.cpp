@@ -23,6 +23,7 @@ set<uint32> m_completedRealmFirstAchievements;
 
 AchievementInterface::AchievementInterface(Player& plr) : m_player(plr)
 {
+	m_achievementInspectPacket = NULL;
 }
 
 AchievementInterface::~AchievementInterface()
@@ -35,6 +36,9 @@ AchievementInterface::~AchievementInterface()
 			delete itr->second;
 		}
 	}
+
+	if( m_achievementInspectPacket )
+		delete m_achievementInspectPacket;
 }
 
 void AchievementInterface::LoadFromDB( QueryResult * pResult )
@@ -112,9 +116,15 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 		CharacterDatabase.AddQueryBuffer( buffer );
 }
 
-WorldPacket* AchievementInterface::BuildAchievementData()
+WorldPacket* AchievementInterface::BuildAchievementData(bool forInspect)
 {
-	WorldPacket * data = new WorldPacket(SMSG_ALL_ACHIEVEMENT_DATA, 400);
+	if(forInspect && m_achievementInspectPacket)
+		return m_achievementInspectPacket;
+
+	WorldPacket * data = new WorldPacket(forInspect ? SMSG_RESPOND_INSPECT_ACHIEVEMENTS : SMSG_ALL_ACHIEVEMENT_DATA, 400);
+	if(forInspect)
+		*data << m_player.GetNewGUID();
+
 	std::map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.begin();
 	for(; itr != m_achivementDataMap.end(); ++itr)
 	{
@@ -147,6 +157,10 @@ WorldPacket* AchievementInterface::BuildAchievementData()
 		}
 	}
 	*data << int32(-1);
+
+	if(forInspect)
+		m_achievementInspectPacket = data;
+
 	return data;
 }
 
@@ -231,6 +245,8 @@ WorldPacket* AchievementInterface::BuildAchievementEarned(AchievementData * pDat
 	*data << pData->id;
 	*data << uint32( unixTimeToTimeBitfields(time(NULL)) );
 	*data << uint32(0);
+
+	m_achievementInspectPacket = NULL;
 	return data;
 }
 
@@ -327,6 +343,8 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 		m_player.CopyAndSendDelayedPacket(&data);
 	else
 		m_player.GetSession()->SendPacket(&data);
+
+	m_achievementInspectPacket = NULL;
 }
 
 void AchievementInterface::HandleAchievementCriteriaConditionDeath()

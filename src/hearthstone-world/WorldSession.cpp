@@ -1047,10 +1047,8 @@ void WorldSession::HandleAchievementInspect(WorldPacket &recv_data)
 
 	uint64 rguid = guid.GetOldGuid();
 	Unit * pUnit = GetPlayer()->GetMapMgr()->GetPlayer( GUID_LOPART(rguid) );
-	if( pUnit && pUnit->IsPlayer() )
+	if( pUnit && pUnit->IsPlayer() && TO_PLAYER(pUnit)->GetAchievementInterface()->HasAchievements() )
 	{
-		WorldPacket * data = TO_PLAYER(pUnit)->GetAchievementInterface()->BuildAchievementData();
-		data->SetOpcode(SMSG_RESPOND_INSPECT_ACHIEVEMENTS);
-		//SendPacket(data); doesn't work yet anyways :)
+		SendPacket(TO_PLAYER(pUnit)->GetAchievementInterface()->BuildAchievementData(true));
 	}
 }
