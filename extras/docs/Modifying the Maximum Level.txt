@@ -1,0 +1,15 @@
+The maximum level in Hearthstone at the moment is determined by your account flags, and is hard-coded into the server.
+
+If you're on the normal client, you have access to level 60; if you have TBC, you can be level 70; and if you have WOTLK, you can be level 80.
+
+If for some reason you need to change this, visit World.cpp and find the method World::GetMaxLevel(). If you for example want the maximum level to be 100, regardless of anything else, just make it say:
+
+uint32 World::GetMaxLevel(Player * plr)
+{
+	return 100; // Max level is 100!
+}
+
+If you wish to generate stats for players beyond level 80, you'll need to edit World.h and find:
+#define MAXIMUM_ATTAINABLE_LEVEL 80 and change the 80 to the new maximum stats level. Editing this is NOT RECOMMENDED.
+
+The reason the configuration variables were removed was because of the sheer amount of work involved in changing the maximum level (not only in the core). If you can't follow these fairly simply steps, then modifying the max level may not be for you.
