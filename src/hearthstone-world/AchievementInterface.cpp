@@ -246,7 +246,12 @@ WorldPacket* AchievementInterface::BuildAchievementEarned(AchievementData * pDat
 	*data << uint32( unixTimeToTimeBitfields(time(NULL)) );
 	*data << uint32(0);
 
-	m_achievementInspectPacket = NULL;
+	if( m_achievementInspectPacket )
+	{
+		delete m_achievementInspectPacket;
+		m_achievementInspectPacket = NULL;
+	}
+
 	return data;
 }
 
@@ -344,7 +349,11 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	else
 		m_player.GetSession()->SendPacket(&data);
 
-	m_achievementInspectPacket = NULL;
+	if( m_achievementInspectPacket )
+	{
+		delete m_achievementInspectPacket;
+		m_achievementInspectPacket = NULL;
+	}
 }
 
 void AchievementInterface::HandleAchievementCriteriaConditionDeath()
