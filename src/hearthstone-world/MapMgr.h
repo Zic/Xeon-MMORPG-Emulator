@@ -206,6 +206,9 @@ public:
 
 	HEARTHSTONE_INLINE uint32 GetMapId() { return _mapId; }
 
+	void AddForcedCell(MapCell * c);
+	void RemoveForcedCell(MapCell * c);
+
 	void PushToProcessed(Player* plr);
 
 	HEARTHSTONE_INLINE bool HasPlayers() { return (m_PlayerStorage.size() > 0); }

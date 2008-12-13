@@ -67,9 +67,16 @@ public:
 	void CancelPendingUnload();
 	void Unload();
 
+	void SetPermanentActivity(bool val) { _forcedActive = val; }
+	bool IsForcedActive() { return _forcedActive; }
+
+	uint16 GetPositionX() { return _x; }
+	uint16 GetPositionY() { return _y; }
+
 	ObjectSet _respawnObjects;
 
 private:
+	bool _forcedActive;
 	uint16 _x,_y;
 	ObjectSet _objects;
 	bool _active, _loaded;

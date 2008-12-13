@@ -29,6 +29,7 @@ MapCell::~MapCell()
 
 void MapCell::Init(uint32 x, uint32 y, uint32 mapid, MapMgr *mapmgr)
 {
+	_forcedActive = false;
 	_mapmgr = mapmgr;
 	_active = false;
 	_loaded = false;

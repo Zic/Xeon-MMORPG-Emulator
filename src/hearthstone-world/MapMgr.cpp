@@ -1224,6 +1224,18 @@ void MapMgr::UpdateCellActivity(uint32 x, uint32 y, int radius)
 
 }
 
+void MapMgr::AddForcedCell(MapCell * c)
+{
+	c->SetPermanentActivity(true);
+	UpdateCellActivity(c->GetPositionX(), c->GetPositionY(), 1);
+}
+
+void MapMgr::RemoveForcedCell(MapCell * c)
+{
+	c->SetPermanentActivity(false);
+	UpdateCellActivity(c->GetPositionX(), c->GetPositionY(), 1);
+}
+
 bool MapMgr::_CellActive(uint32 x, uint32 y)
 {
 	uint32 endX = ((x+1) <= _sizeX) ? x + 1 : (_sizeX-1);
@@ -1242,7 +1254,7 @@ bool MapMgr::_CellActive(uint32 x, uint32 y)
 
 			if (objCell)
 			{
-				if (objCell->HasPlayers())
+				if (objCell->HasPlayers() || objCell->IsForcedActive() )
 				{
 					return true;
 				}

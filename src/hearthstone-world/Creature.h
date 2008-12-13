@@ -542,10 +542,10 @@ protected:
 
 	bool m_PickPocketed;
 	uint32 _fields[UNIT_END];
-
-//	custom functions for scripting
-	uint32 GetProtoItemDisplayId(uint8 slot);
 public:
+	//	custom functions for scripting
+	uint32 GetProtoItemDisplayId(uint8 slot);
+
 	// loooooot
 	void GenerateLoot();
 
