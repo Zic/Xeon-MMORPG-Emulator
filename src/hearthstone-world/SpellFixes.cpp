@@ -900,6 +900,8 @@ void ApplyNormalFixes()
 			type |= SPELL_TYPE_HUNTER_MARK;
         else if( namehash == SPELL_HASH_COMMANDING_SHOUT || namehash == SPELL_HASH_BATTLE_SHOUT )
             type |= SPELL_TYPE_WARRIOR_SHOUT;
+		else if( namehash == SPELL_HASH_FROST_PRESENCE || namehash == SPELL_HASH_BLOOD_PRESENCE || namehash == SPELL_HASH_UNHOLY_PRESENCE )
+			type |= SPELL_TYPE_DK_PRESENCE;
 		else if( strstr( sp->Description, "Finishing move")==sp->Description)
 			sp->c_is_flags |= SPELL_FLAG_IS_FINISHING_MOVE;
 		if( IsDamagingSpell( sp ) )

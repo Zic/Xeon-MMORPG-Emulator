@@ -1010,6 +1010,7 @@ enum SpellTypes // SPELL_ENTRY_buffType
     SPELL_TYPE_ELIXIR_FLASK         = SPELL_TYPE_ELIXIR_BATTLE | SPELL_TYPE_ELIXIR_GUARDIAN, //weee, this contains both battle and guardian elixirs ;)
     SPELL_TYPE_HUNTER_MARK			= 0x00200000,
     SPELL_TYPE_WARRIOR_SHOUT        = 0x00400000,
+	SPELL_TYPE_DK_PRESENCE          = 0x00800000,
 };
 
 //custom stuff generated for spells that will not change in time
@@ -1633,7 +1634,7 @@ public:
     void SendChannelUpdate(uint32 time);
     void SendChannelStart(uint32 duration);
     void SendResurrectRequest(Player* target);
-    static void SendHealSpellOnPlayer(Object* caster, Object* target, uint32 dmg,bool critical, uint32 spellid);
+	static void SendHealSpellOnPlayer(Object* caster, Object* target, uint32 dmg, bool critical, uint32 overheal, uint32 spellid);
     static void SendHealManaSpellOnPlayer(Object * caster, Object * target, uint32 dmg, uint32 powertype, uint32 spellid);
     
 
@@ -1652,6 +1653,7 @@ public:
     void SpellEffectInstantKill(uint32 i);
     void SpellEffectSchoolDMG(uint32 i);
     void SpellEffectDummy(uint32 i);
+	void SpellEffectRestoreManaPct(uint32 i);
     void SpellEffectTeleportUnits(uint32 i);
     void SpellEffectApplyAura(uint32 i);
     void SpellEffectPowerDrain(uint32 i);

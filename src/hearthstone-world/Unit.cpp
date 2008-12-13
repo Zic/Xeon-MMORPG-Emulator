@@ -5710,7 +5710,8 @@ void Unit::Heal(Unit *target, uint32 SpellId, uint32 amount)
 {//Static heal
 	if(!target || !SpellId || !amount || !target->isAlive() )
 		return;
-
+	
+	uint32 overheal = 0;
 	uint32 ch=target->GetUInt32Value(UNIT_FIELD_HEALTH);
 	uint32 mh=target->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
 	if(mh!=ch)
@@ -5719,12 +5720,12 @@ void Unit::Heal(Unit *target, uint32 SpellId, uint32 amount)
 		if(ch > mh)
 		{
 			target->SetUInt32Value(UNIT_FIELD_HEALTH, mh);
-			amount += mh-ch;
+			overheal = ch - mh;
 		}
 		else 
 			target->SetUInt32Value(UNIT_FIELD_HEALTH, ch);
 
-		Spell::SendHealSpellOnPlayer(this, target, amount, false, SpellId);
+		Spell::SendHealSpellOnPlayer(this, target, amount, false, overheal, SpellId);
 	}
 }
 void Unit::Energize(Unit* target,uint32 SpellId, uint32 amount,uint32 type)
@@ -5748,7 +5749,7 @@ void Unit::Energize(Unit* target,uint32 SpellId, uint32 amount,uint32 type)
 		datamr << target->GetNewGUID();
 		datamr << this->GetNewGUID();
 		datamr << uint32(SpellId);
-		datamr << uint32(0);
+		datamr << uint32(type);
 		datamr << uint32(amount);
 		this->SendMessageToSet(&datamr,true);
 	}

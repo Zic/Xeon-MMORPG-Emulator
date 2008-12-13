@@ -691,25 +691,24 @@ bool ChatHandler::HandleKnockBackCommand(const char* args, WorldSession *m_sessi
 
 	m_session->GetPlayer()->SendMessageToSet(&data, true);*/
 
-	
-	float f = args ? (float)atof(args) : 0.0f;
-	if(f == 0.0f)
-		f = 5.0f;
-
-	//Player * plr = m_session->GetPlayer();
+	float hspeed, vspeed;
+	Unit* target = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
+	if(!target || !target->IsPlayer())
+		target = m_session->GetPlayer();
+	if(sscanf(args, "%f %f", &hspeed, &vspeed) != 2)
+		return false;
 
 	float dx =sinf(m_session->GetPlayer()->GetOrientation());
 	float dy =cosf(m_session->GetPlayer()->GetOrientation());
 
-	float z = f*0.66f;
-
 	WorldPacket data(SMSG_MOVE_KNOCK_BACK, 50);
-	data << m_session->GetPlayer()->GetNewGUID();
+	data << target->GetNewGUID();
 	data << getMSTime();
 	data << dy << dx;
-	data << f;
-	data << z;
-	m_session->GetPlayer()->SendMessageToSet(&data, true);
+	data << hspeed;
+	data << -vspeed;
+	target->SendMessageToSet(&data, true);
+	TO_PLAYER(target)->DelaySpeedHack(5000);
 
 	return true;
 }

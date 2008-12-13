@@ -242,7 +242,7 @@ void CommandTableStorage::Init()
 		{ "waterwalk",   'd', &ChatHandler::HandleDebugWaterWalk,	   "",							   NULL, 0, 0, 0},
 		{ "castspellne", 'd', &ChatHandler::HandleCastSpellNECommand,   ".castspellne <spellid> - Casts spell on target (only plays animations, doesnt handle effects or range/facing/etc.", NULL, 0, 0, 0 },
 		{ "aggrorange",  'd', &ChatHandler::HandleAggroRangeCommand,	".aggrorange - Shows aggro Range of the selected Creature.", NULL, 0, 0, 0 },
-		{ "knockback ",  'd', &ChatHandler::HandleKnockBackCommand,	 ".knockback <value> - Knocks you back.", NULL, 0, 0, 0 },
+		{ "knockback ",  'd', &ChatHandler::HandleKnockBackCommand,	 ".knockback <hspeed> <vspeed> - Knocks selected player back.", NULL, 0, 0, 0 },
 		{ "fade ",	   'd', &ChatHandler::HandleFadeCommand,		  ".fade <value> - calls ModThreatModifyer().", NULL, 0, 0, 0 },
 		{ "threatMod ",  'd', &ChatHandler::HandleThreatModCommand,	 ".threatMod <value> - calls ModGeneratedThreatModifyer().", NULL, 0, 0, 0 },
 		{ "calcThreat ", 'd', &ChatHandler::HandleCalcThreatCommand,	".calcThreat <dmg> <spellId> - calculates threat.", NULL, 0, 0, 0 },

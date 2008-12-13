@@ -157,7 +157,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,// unknown - 134 // related to summoning objects and removing them, http://www.thottbot.com/s39161
 		&Spell::SpellEffectNULL,// unknown - 135 // no spells
 		&Spell::SpellEffectNULL,// unknown - 136 // http://www.thottbot.com/s41542 and http://www.thottbot.com/s39703
-		&Spell::SpellEffectNULL,// unknown - 137 // http://www.thottbot.com/s41542
+		&Spell::SpellEffectRestoreManaPct,// Restore Mana % - 137 // http://www.thottbot.com/s41542
 		&Spell::SpellEffectNULL,// unknown - 138 // related to superjump or even "*jump" spells http://www.thottbot.com/?e=Unknown%20138
 		&Spell::SpellEffectNULL,// unknown - 139 // no spells
 		&Spell::SpellEffectTeleportUnits,//SPELL_EFFECT_TELEPORT_UNITS - 140 IronForge teleport / portal only it seems
@@ -3759,7 +3759,7 @@ void Spell::SpellEffectHealMaxHealth(uint32 i)   // Heal Max Health
 
 	if( unitTarget->GetTypeId() == TYPEID_PLAYER)
 	{
-		 SendHealSpellOnPlayer( static_cast< Player* >( m_caster ), static_cast< Player* >( unitTarget ), dif, false, pSpellId ? pSpellId : m_spellInfo->Id );
+		 SendHealSpellOnPlayer( static_cast< Player* >( m_caster ), static_cast< Player* >( unitTarget ), dif, false, 0, pSpellId ? pSpellId : m_spellInfo->Id );
 	}
 	unitTarget->ModUnsigned32Value( UNIT_FIELD_HEALTH, dif );
 }
@@ -5053,7 +5053,7 @@ void Spell::SpellEffectSummonCritter(uint32 i)
 
 void Spell::SpellEffectKnockBack(uint32 i)
 {
-	if(!unitTarget || (!playerTarget && !p_caster))
+	if(!unitTarget || !playerTarget || !m_caster)
 		return;
 
 	float dx, dy;
@@ -5085,11 +5085,7 @@ void Spell::SpellEffectKnockBack(uint32 i)
 	if (playerTarget)
 	{
 		playerTarget->GetSession()->SendPacket(&data);
-		playerTarget->blinked = true;
-	}
-	else
-	{
-//		p_caster->GetSession()->SendPacket(&data);
+		playerTarget->DelaySpeedHack( 5000 );
 	}
 }
 
@@ -5950,6 +5946,17 @@ void Spell::SpellEffectApplyAura128(uint32 i)
 		if(m_spellInfo->EffectApplyAuraName[i] != 0)
 			SpellEffectApplyAura(i);
 	}
+}
+
+void Spell::SpellEffectRestoreManaPct(uint32 i)
+{
+	if(!unitTarget || !unitTarget->isAlive())
+		return;
+
+	uint32 maxMana = (uint32)unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
+	uint32 modMana = damage * maxMana / 100;	
+
+	u_caster->Energize(unitTarget, pSpellId ? pSpellId : m_spellInfo->Id, modMana, POWER_TYPE_MANA);
 }
 
 void Spell::SpellEffectTriggerSpellWithValue(uint32 i)

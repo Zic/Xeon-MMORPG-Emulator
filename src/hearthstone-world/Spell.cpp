@@ -4099,19 +4099,19 @@ void Spell::CreateItem(uint32 itemId)
 	}
 }*/
 
-void Spell::SendHealSpellOnPlayer(Object* caster, Object* target, uint32 dmg,bool critical, uint32 spellid)
+void Spell::SendHealSpellOnPlayer( Object* caster, Object* target, uint32 dmg, bool critical, uint32 overheal, uint32 spellid )
 {
 	if(!caster || !target || !target->IsPlayer())
 		return;
 
 	uint8 buf[100];
 	StackPacket data(SMSG_SPELLHEALLOG, buf, 100);
-	// Bur: I know it says obsolete, but I just logged this tonight and got this packet.
 	
 	data << target->GetNewGUID();
 	data << caster->GetNewGUID();
 	data << spellid;
 	data << uint32(dmg);	// amt healed
+	data << uint32(overheal);
 	data << uint8(critical);	 //this is critical message
 
 	caster->SendMessageToSet(&data, true);
@@ -4262,22 +4262,26 @@ void Spell::Heal(int32 amount)
 	if(amount < 0) 
 		amount = 0;
 
+	uint32 overheal = 0;
+	uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+	uint32 maxHealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+	if((curHealth + amount) >= maxHealth)
+	{
+		unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH, maxHealth);
+		overheal = curHealth + amount - maxHealth;
+	} else
+		unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH, amount);
+
 	if( p_caster != NULL )  
 	{
 		if( unitTarget->IsPlayer() )
 		{
-			SendHealSpellOnPlayer( p_caster, static_cast< Player* >( unitTarget ), amount, critical, pSpellId ? pSpellId : m_spellInfo->Id );
+			SendHealSpellOnPlayer( p_caster, static_cast< Player* >( unitTarget ), amount, critical, overheal, pSpellId ? pSpellId : m_spellInfo->Id );
 		}
 		p_caster->m_bgScore.HealingDone += amount;
 		if( p_caster->m_bg != NULL )
 			p_caster->m_bg->UpdatePvPData();
 	}
-	uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-	uint32 maxHealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-	if((curHealth + amount) >= maxHealth)
-		unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH, maxHealth);
-	else
-		unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH, amount);
 
 	if (p_caster)
 	{

@@ -1231,11 +1231,26 @@ void Aura::EventUpdatePlayerAA(float r)
 	{
 		if(!plr->HasActiveAura(m_spellProto->Id))
 		{
-			Aura * aura = new Aura(m_spellProto, -1, u_caster, plr);
-			aura->m_areaAura = true;
-			aura->AddMod(mod->m_type, mod->m_amount, mod->m_miscValue, mod->i);
-			plr->AddAura(aura, this);
-			NewTargets.push_back(plr->GetLowGUID());
+			Aura * aura = NULL;
+			for(i = 0; i < m_modcount; ++i)
+			{
+				/* is this an area aura modifier? */
+				if(m_spellProto->Effect[m_modList[i].i] == SPELL_EFFECT_APPLY_AREA_AURA)
+				{
+					if(!aura)
+					{
+						aura = new Aura(m_spellProto, -1, u_caster, plr);
+						aura->m_areaAura = true;
+					}
+					aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount,
+						m_modList[i].m_miscValue, m_modList[i].i);
+				}
+			}
+			if(aura)
+			{
+				plr->AddAura(aura, this);
+				NewTargets.push_back(plr->GetLowGUID());
+			}
 		}
 	}
 
