@@ -855,8 +855,8 @@ public:
 	Aura* FindAura(uint32 spellId);
 	Aura* FindAura(uint32 spellId, uint64 guid);
 	uint32 GetAuraCount(uint32 spellId);
-	bool SetAurDuration(uint32 spellId,Unit* caster,uint32 duration);
-	bool SetAurDuration(uint32 spellId,uint32 duration);
+	bool SetAuraDuration(uint32 spellId,Unit* caster,uint32 duration);
+	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();
 
 	void CastSpell(Spell * pSpell);

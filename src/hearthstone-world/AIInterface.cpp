@@ -140,6 +140,11 @@ AIInterface::~AIInterface()
 	for(list<AI_Spell*>::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
 		if((*itr)->custom_pointer)
 			delete (*itr);
+
+	if( m_ChainAgroSet && m_Unit->IsCreature() )
+	{
+		m_ChainAgroSet->RemoveAggroEntity( TO_CREATURE(m_Unit) );
+	}
 }
 
 void AIInterface::Init(Unit *un, AIType at, MovementType mt, Unit *owner)
@@ -203,6 +208,11 @@ void AIInterface::HandleEvent(uint32 event, Unit* pUnit, uint32 misc1)
 
 				if(m_AIState != STATE_ATTACKING)
 					StopMovement(0);
+
+				if( m_ChainAgroSet )
+				{
+					m_ChainAgroSet->EventEnterCombat( pUnit );
+				}
 
 				m_AIState = STATE_ATTACKING;
 				firstLeaveCombat = true;

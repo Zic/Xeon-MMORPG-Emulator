@@ -42,6 +42,8 @@ hearthstone_world_SOURCES = \
     Channel.h \
     ChannelHandler.cpp \
     ChannelMgr.h \
+    ChainAggroEntity.cpp \
+    ChainAggroEntity.h \
     CharacterHandler.cpp \
     Chat.cpp \
     Chat.h \

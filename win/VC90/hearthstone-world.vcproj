@@ -1175,6 +1175,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hearthstone-world\ChainAggroEntity.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-world\ChainAggroEntity.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-world\ScriptMgr.cpp"
 				>
 			</File>

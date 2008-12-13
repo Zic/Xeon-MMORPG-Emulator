@@ -3896,7 +3896,7 @@ void Unit::RemoveAllAurasOfType(uint32 auratype)
     }
 }
 
-bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
+bool Unit::SetAuraDuration(uint32 spellId,Unit* caster,uint32 duration)
 {
 	Aura*aur=FindAura(spellId,caster->GetGUID());
 	if(!aur)
@@ -3907,7 +3907,7 @@ bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
 	return true;
 }
 
-bool Unit::SetAurDuration(uint32 spellId,uint32 duration)
+bool Unit::SetAuraDuration(uint32 spellId,uint32 duration)
 {
 	Aura*aur=FindAura(spellId);
 

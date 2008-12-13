@@ -564,7 +564,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 		
 		if(aur) // If the player already have the aura, just extend it.
 		{
-			GetPlayer()->SetAurDuration(15007,aur->GetDuration());
+			GetPlayer()->SetAuraDuration(15007,aur->GetDuration());
 		}
 		else // else add him one, that fucker, he think he will get away!?
 		{

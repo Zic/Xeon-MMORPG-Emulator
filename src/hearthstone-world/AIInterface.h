@@ -213,6 +213,7 @@ typedef HM_NAMESPACE::hash_map<Unit*, int32, HM_NAMESPACE::hash<Unit*> > TargetM
 typedef std::set<Unit*> AssistTargetSet;
 typedef std::map<uint32, AI_Spell*> SpellMap;
 
+class ChainAggroEntity;
 class SERVER_DECL AIInterface
 {
 public:
@@ -343,6 +344,8 @@ public:
 	uint32 m_totemspelltimer;
 	uint32 m_totemspelltime;
 	SpellEntry * totemspell;
+
+	ChainAggroEntity* m_ChainAgroSet;
 
 	float m_sourceX, m_sourceY, m_sourceZ;
 	uint32 m_totalMoveTime;

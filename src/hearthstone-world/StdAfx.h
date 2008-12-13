@@ -159,6 +159,7 @@
 #include "LocalizationMgr.h"
 #include "Vehicle.h"
 #include "AchievementInterface.h"
+#include "ChainAggroEntity.h"
 
 #ifdef CLUSTERING
 	#include "WorkerServerClient.h"
