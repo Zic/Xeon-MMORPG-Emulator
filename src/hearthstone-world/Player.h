@@ -2128,7 +2128,7 @@ public:
 
 #ifdef ENABLE_COMPRESSED_MOVEMENT
 
-class CMovementCompressorThread : public ThreadBase
+class CMovementCompressorThread : public ThreadContext
 {
 	bool running;
 	Mutex m_listLock;
