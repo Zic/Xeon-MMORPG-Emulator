@@ -127,6 +127,7 @@ public:
 	LootMgr();
 	~LootMgr();
 
+	void AddLoot(Loot * loot, uint32 itemid, uint32 mincount, uint32 maxcount, uint32 ffa_loot);
 	void FillCreatureLoot(Loot * loot,uint32 loot_id, bool heroic);
 	void FillGOLoot(Loot * loot,uint32 loot_id, bool heroic);
 	void FillItemLoot(Loot *loot, uint32 loot_id);

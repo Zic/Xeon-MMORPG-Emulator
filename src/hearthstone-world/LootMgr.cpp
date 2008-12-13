@@ -580,6 +580,68 @@ bool LootMgr::IsFishable(uint32 zoneid)
 	return tab!=FishingLoot.end();
 }
 
+void LootMgr::AddLoot(Loot * loot, uint32 itemid, uint32 mincount, uint32 maxcount, uint32 ffa_loot)
+{
+	uint32 i;
+	uint32 count;
+	ItemPrototype *itemproto = ItemPrototypeStorage.LookupEntry(itemid);
+
+	if( itemproto )// this check is needed until loot DB is fixed
+	{
+		if( mincount == maxcount )
+			count = maxcount;
+		else
+			count = RandomUInt(maxcount - mincount) + mincount;
+
+		for( i = 0; i < loot->items.size(); ++i )
+		{
+			//itemid rand match a already placed item, if item is stackable and unique(stack), increment it, otherwise skips
+			if((loot->items[i].item.itemproto == itemproto) && itemproto->MaxCount && ((loot->items[i].iItemsCount + count <= itemproto->MaxCount)))
+			{
+				if(itemproto->Unique && ((loot->items[i].iItemsCount+count) < itemproto->Unique))
+				{
+					loot->items[i].iItemsCount += count;
+					break;
+				}
+				else if (!itemproto->Unique)
+				{
+					loot->items[i].iItemsCount += count;
+					break;
+				}
+			}
+		}
+
+		if( i != loot->items.size() )
+			return;
+
+		_LootItem item;
+		item.itemproto = itemproto;
+		item.displayid = itemproto->DisplayInfoID;
+
+		__LootItem itm;
+		itm.item = item;
+		itm.iItemsCount = count;
+		itm.roll = NULL;
+		itm.passed = false;
+		itm.ffa_loot = ffa_loot;
+		itm.has_looted.clear();
+
+		if( itemproto->Quality > 1 && itemproto->ContainerSlots == 0 )
+		{
+			itm.iRandomProperty=GetRandomProperties( itemproto );
+			itm.iRandomSuffix=GetRandomSuffix( itemproto );
+		}
+		else
+		{
+			// save some calls :P
+			itm.iRandomProperty = NULL;
+			itm.iRandomSuffix = NULL;
+		}
+
+		loot->items.push_back(itm);
+	}
+}
+
 #define NEED 1
 #define GREED 2
 
