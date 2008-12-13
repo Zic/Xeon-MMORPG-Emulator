@@ -41,7 +41,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 	Item *add;
 
 	if(_player->isCasting())
-		_player->InterruptSpell();
+		_player->InterruptCurrentSpell();
 
 	GameObject * pGO = NULL;
 	Object *pLootObj;
@@ -260,7 +260,7 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 	recv_data >> guid;
 
 	if(_player->isCasting())
-		_player->InterruptSpell();
+		_player->InterruptCurrentSpell();
 
 	if(_player->InGroup() && !_player->m_bg)
 	{

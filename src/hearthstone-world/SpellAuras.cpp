@@ -1476,7 +1476,7 @@ void Aura::SpellAuraModPossess(bool apply)
 		{
 			if( m_target->GetTypeId() == TYPEID_UNIT )
 			{
-				m_target->setAItoUse( true );
+				m_target->EnableAI();
 				m_target->m_redirectSpellPackets = 0;
 			}
 
@@ -1634,7 +1634,7 @@ void Aura::EventPeriodicDamage(uint32 amount)
 			{
 				if( GetSpellProto() && GetSpellProto()->NameHash == SPELL_HASH_IGNITE )  //static damage for Ignite. Need to be reworked when "static DoTs" will be implemented
 					bonus_damage=0;
-				else bonus_damage = (float)c->GetSpellDmgBonus(m_target,m_spellProto,amount,true);
+				else bonus_damage = (float)c->GetSpellBonusDamage(m_target,m_spellProto,amount,true);
 				float ticks= float((amp) ? GetDuration()/amp : 0);
 				float fbonus = float(bonus);
 				fbonus += (ticks) ? bonus_damage/ticks : 0;
@@ -2765,7 +2765,7 @@ void Aura::SpellAuraModConfuse(bool apply)
 		m_target->m_special_state |= UNIT_STATE_CONFUSE;
 		m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
-		m_target->setAItoUse(true);
+		m_target->EnableAI();
 		m_target->GetAIInterface()->HandleEvent(EVENT_WANDER, u_caster, 0);
 
 		if(p_target)
@@ -2793,7 +2793,7 @@ void Aura::SpellAuraModConfuse(bool apply)
 			data1 << m_target->GetNewGUID() << uint8(0x01);
 			p_target->GetSession()->SendPacket(&data1);
 
-			m_target->setAItoUse(false);
+			m_target->DisableAI();
 
 			if( u_caster != NULL )
 				sHookInterface.OnEnterCombat( p_target, u_caster );
@@ -2902,7 +2902,7 @@ void Aura::SpellAuraModFear(bool apply)
 		m_target->m_special_state |= UNIT_STATE_FEAR;
 		m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
-		m_target->setAItoUse(true);
+		m_target->EnableAI();
 		m_target->GetAIInterface()->HandleEvent(EVENT_FEAR, u_caster, 0);
 
 		m_target->m_fearmodifiers++;
@@ -2935,7 +2935,7 @@ void Aura::SpellAuraModFear(bool apply)
 				data1 << m_target->GetNewGUID() << uint8(0x01);
 				p_target->GetSession()->SendPacket(&data1);
 
-				m_target->setAItoUse(false);
+				m_target->DisableAI();
 
 				if( u_caster != NULL )
 					sHookInterface.OnEnterCombat( p_target, u_caster );
@@ -3196,20 +3196,20 @@ void Aura::SpellAuraModThreatGenerated(bool apply)
 		return;
 
 	//shaman spell 30672 needs to be based on spell schools
-	if(m_target->GetGeneratedThreatModifyer() == mod->m_amount)
+	if(m_target->GetGeneratedThreatModifier() == mod->m_amount)
 	{
 		mod->m_amount < 0 ? SetPositive() : SetNegative();
-		apply ? m_target->ModGeneratedThreatModifyer(mod->m_amount) : m_target->ModGeneratedThreatModifyer(-(mod->m_amount));
+		apply ? m_target->ModGeneratedThreatModifier(mod->m_amount) : m_target->ModGeneratedThreatModifier(-(mod->m_amount));
 		return;
 	}
 	else // if we this aura is better then the old one, replace the effect.
 	{
 		if(apply)
 		{
-			if(m_target->GetGeneratedThreatModifyer() < mod->m_amount)
+			if(m_target->GetGeneratedThreatModifier() < mod->m_amount)
 			{
-				m_target->ModGeneratedThreatModifyer(0);
-				m_target->ModGeneratedThreatModifyer(mod->m_amount);
+				m_target->ModGeneratedThreatModifier(0);
+				m_target->ModGeneratedThreatModifier(mod->m_amount);
 			}
 		}
 	}
@@ -3286,7 +3286,7 @@ void Aura::SpellAuraModStun(bool apply)
 		m_target->m_rooted--;
 
 		if(m_target->m_rooted == 0)
-			m_target->Unroot();
+			m_target->UnRoot();
 
 		m_target->m_stunned--;
 
@@ -3969,7 +3969,7 @@ void Aura::SpellAuraModRoot(bool apply)
 		m_target->m_rooted--;
 
 		if(m_target->m_rooted == 0)
-			m_target->Unroot();
+			m_target->UnRoot();
 
 		m_target->RemoveFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_FROZEN|0x400000);
 		WorldPacket data(MSG_MOVE_UNROOT, 9+7*4+1*2);
@@ -5050,7 +5050,7 @@ void Aura::EventPeriodicLeech(uint32 amount)
 
 		if(GetDuration())
 		{
-			float fbonus = float( m_caster->GetSpellDmgBonus(m_target,GetSpellProto(),amount,true) ) * 0.5f;
+			float fbonus = float( m_caster->GetSpellBonusDamage(m_target,GetSpellProto(),amount,true) ) * 0.5f;
 			if(fbonus < 0) fbonus = 0.0f;
 			float ticks= float((amp) ? GetDuration()/amp : 0);
 			fbonus = (ticks) ? fbonus/ticks : 0;
@@ -6689,17 +6689,17 @@ void Aura::SpellAuraModTotalThreat( bool apply )
 		else
 			SetNegative();
 
-		if( m_target->GetThreatModifyer() > mod->m_amount ) // replace old mod
+		if( m_target->GetThreatModifier() > mod->m_amount ) // replace old mod
 		{
-			m_target->ModThreatModifyer( 0 );
-			m_target->ModThreatModifyer( mod->m_amount );
+			m_target->ModThreatModifier( 0 );
+			m_target->ModThreatModifier( mod->m_amount );
 		}
 	}
 	else
 	{
-		if( m_target->GetThreatModifyer() == mod->m_amount ) // only remove it if it hasn't been replaced yet
+		if( m_target->GetThreatModifier() == mod->m_amount ) // only remove it if it hasn't been replaced yet
 		{
-			m_target->ModThreatModifyer(-(mod->m_amount));
+			m_target->ModThreatModifier(-(mod->m_amount));
 		}
 	}
 }

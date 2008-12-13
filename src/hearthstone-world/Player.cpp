@@ -6158,8 +6158,8 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	//also remove morph spells
 	if(GetUInt32Value(UNIT_FIELD_DISPLAYID)!=GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID))
 	{
-		RemoveAllAuraType(SPELL_AURA_TRANSFORM);
-		RemoveAllAuraType(SPELL_AURA_MOD_SHAPESHIFT);
+		RemoveAllAurasOfType(SPELL_AURA_TRANSFORM);
+		RemoveAllAurasOfType(SPELL_AURA_MOD_SHAPESHIFT);
 	}
 	
 	SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, modelid );
@@ -8937,7 +8937,7 @@ void Player::Possess(Unit * pTarget)
 	if(pTarget->GetTypeId() == TYPEID_UNIT)
 	{
 		// unit-only stuff.
-		pTarget->setAItoUse(false);
+		pTarget->DisableAI();
 		pTarget->GetAIInterface()->StopMovement(0);
 		pTarget->m_redirectSpellPackets = this;
 	}
@@ -9015,7 +9015,7 @@ void Player::UnPossess()
 	if(pTarget->GetTypeId() == TYPEID_UNIT)
 	{
 		// unit-only stuff.
-		pTarget->setAItoUse(true);
+		pTarget->EnableAI();
 		pTarget->m_redirectSpellPackets = 0;
 	}
 
@@ -9829,14 +9829,14 @@ void Player::EventSummonPet( Pet *new_pet )
 		SpellEntry *spellInfo = dbcSpell.LookupEntry(SpellID);
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_PET_OWNER )
 		{
-			this->RemoveAllAuras( SpellID, this->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			this->RemoveAllAurasBySpellIDOrGUID( SpellID, this->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( this->GetGUID() );
 			Spell *spell = new Spell(this, spellInfo ,true, NULL);	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET )
 		{
-			this->RemoveAllAuras( SpellID, this->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			this->RemoveAllAurasBySpellIDOrGUID( SpellID, this->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( new_pet->GetGUID() );
 			Spell *spell = new Spell(this, spellInfo ,true, NULL);	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
@@ -11154,7 +11154,7 @@ void Player::RemoveGlyph(uint32 slot)
 	if(!glyph)
 		return;
 	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
-	RemoveAllAuras(glyph->SpellID, 0);
+	RemoveAllAurasBySpellIDOrGUID(glyph->SpellID, 0);
 }
 
 static const uint32 glyphType[6] = {0, 1, 1, 0, 1, 0};

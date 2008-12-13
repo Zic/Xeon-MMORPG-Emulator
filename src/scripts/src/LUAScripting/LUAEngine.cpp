@@ -2139,7 +2139,8 @@ int luaUnit_GetAddTank(lua_State * L, Unit * ptr)
 int luaUnit_ClearThreatList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
-	ptr->ClearHateList();
+	if( ptr->GetAIInterface() )
+		ptr->GetAIInterface()->ClearHateList();
 	return 1;
 }
 
@@ -2328,14 +2329,16 @@ int luaUnit_SetMaxHealth(lua_State * L, Unit * ptr)
 int luaUnit_WipeHateList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
-	ptr->WipeHateList();
+	if( ptr->GetAIInterface() )
+		ptr->GetAIInterface()->WipeHateList();
 	return 1;
 }
 
 int luaUnit_WipeTargetList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
-	ptr->GetAIInterface()->WipeTargetList();
+	if( ptr->GetAIInterface() )
+		ptr->GetAIInterface()->WipeTargetList();
 	return 1;
 }
 
@@ -2396,7 +2399,8 @@ int luaUnit_GetPlayerClass(lua_State * L, Unit * ptr)
 int luaUnit_ClearHateList(lua_State * L, Unit * ptr)
 {
  	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
- 	ptr->ClearHateList();
+ 	if( ptr->GetAIInterface() )
+		ptr->GetAIInterface()->ClearHateList();
  	return 1;
 }
 int luaUnit_SetMana(lua_State * L, Unit * ptr)
@@ -2602,7 +2606,7 @@ int luaUnit_Root(lua_State * L, Unit * ptr)
 int luaUnit_Unroot(lua_State * L, Unit * ptr)
 {
 	if(ptr)
-		ptr->Unroot();
+		ptr->UnRoot();
 	return 0;
 }
 int luaUnit_IsCreatureMoving(lua_State * L, Unit * ptr)
@@ -3151,7 +3155,7 @@ int luaUnit_CreateGuardian(lua_State * L, Unit * ptr)
 	uint32 lvl  = luaL_checkint(L, 4);
 	if(!ptr||!guardian_entry||!lvl)
 		return 0;
-	ptr->create_guardian(guardian_entry,duration,angle,lvl);
+	ptr->CreateTemporaryGuardian(guardian_entry,duration,angle,lvl);
 	return 0;
 }
 /*int luaUnit_IsInArc(lua_State * L, Unit * ptr)
@@ -3691,7 +3695,7 @@ int luaUnit_RemoveAurasType(lua_State * L, Unit * ptr)
 	uint32 type = luaL_checkint(L,1);
 	if(ptr && type)
 	{
-		ptr->RemoveAllAuraType(type);
+		ptr->RemoveAllAurasOfType(type);
 	}
 	return 0;
 }

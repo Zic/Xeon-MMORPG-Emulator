@@ -23,7 +23,6 @@ Unit::Unit()
 {
 	m_lastHauntInitialDamage = 0;
 	memset(m_damageOverTimePctIncrease, 0, sizeof(uint32) * 7);
-	memset(m_auracount, 0, sizeof(uint32)*263);
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
 	m_duelWield = false;
@@ -1386,7 +1385,7 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 						case 33619:
 							{
 								//requires Power Word: Shield active
-								int power_word_id = HasAurasWithNameHash( SPELL_HASH_POWER_WORD__SHIELD );
+								int power_word_id = GetAuraCountWithNameHash( SPELL_HASH_POWER_WORD__SHIELD );
 								if( !power_word_id )
 									continue;//this should not ocur unless we made a fuckup somewhere
 								//make a direct strike then exit rest of handler
@@ -3785,7 +3784,7 @@ bool Unit::RemoveAuraNegByNameHash(uint32 namehash)
 	return false;
 }
 
-bool Unit::RemoveAllAuras(uint32 spellId, uint64 guid)
+bool Unit::RemoveAllAurasBySpellIDOrGUID(uint32 spellId, uint64 guid)
 {   
 	bool res = false;
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
@@ -3856,7 +3855,7 @@ bool Unit::RemoveAllNegAuraByNameHash(uint32 namehash)
 	return res;
 }
 
-void Unit::RemoveNegativeAuras()
+void Unit::RemoveAllNegativeAuras()
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
@@ -3884,7 +3883,7 @@ void Unit::RemoveAllAuras()
 }
 
 //ex:to remove morph spells
-void Unit::RemoveAllAuraType(uint32 auratype)
+void Unit::RemoveAllAurasOfType(uint32 auratype)
 {
     for(uint32 x=0;x<MAX_AURAS;x++)
     {
@@ -3922,7 +3921,7 @@ bool Unit::SetAurDuration(uint32 spellId,uint32 duration)
 	return true;
 }
 
-Aura* Unit::FindAuraPosByNameHash(uint32 namehash)
+Aura* Unit::FindPositiveAuraByNameHash(uint32 namehash)
 {
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
@@ -3986,13 +3985,13 @@ void Unit::_UpdateSpells( uint32 time )
 		m_currentSpell->update(time);
 }
 
-void Unit::castSpell( Spell * pSpell )
+void Unit::CastSpell( Spell * pSpell )
 {
 	m_currentSpell = pSpell;
 	pLastSpell = pSpell->m_spellInfo;
 }
 
-int32 Unit::GetSpellDmgBonus(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot)
+int32 Unit::GetSpellBonusDamage(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot)
 {
 	int32 plus_damage = 0;
 	Unit* caster = this;
@@ -4100,7 +4099,7 @@ int32 Unit::GetSpellDmgBonus(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg
 	return res;
 }
 
-void Unit::InterruptSpell()
+void Unit::InterruptCurrentSpell()
 {
 	if(m_currentSpell)
 		m_currentSpell->cancel();
@@ -4198,20 +4197,6 @@ void Unit::SendChatMessage(uint8 type, uint32 lang, const char *msg)
 	data << msg;
 	data << uint8(0x00);
 	SendMessageToSet(&data, true);
-}
-
-void Unit::WipeHateList()
-{ 
-	GetAIInterface()->WipeHateList(); 
-}
-void Unit::ClearHateList()
-{
-	GetAIInterface()->ClearHateList();
-}
-
-void Unit::WipeTargetList() 
-{ 
-	GetAIInterface()->WipeTargetList(); 
 }
 
 void Unit::AddInRangeObject(Object* pObj)
@@ -4553,7 +4538,7 @@ bool Unit::HasAura(uint32 spellid)
 }
 
 
-void Unit::DropAurasOnDeath()
+void Unit::EventDeathAuraRemoval()
 {
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
     {
@@ -4741,7 +4726,7 @@ void Unit::Root()
 	}
 }
 
-void Unit::Unroot()
+void Unit::UnRoot()
 {
 	this->m_special_state &= ~UNIT_STATE_ROOT;
 
@@ -4975,7 +4960,7 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 	}
 }
 
-int Unit::HasAurasWithNameHash(uint32 name_hash)
+int Unit::GetAuraCountWithNameHash(uint32 name_hash)
 {
 	for(uint32 x = 0; x < MAX_AURAS; ++x)
 	{
@@ -5342,7 +5327,7 @@ void Unit::SetFacing(float newo)
 }
 
 //guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
-Unit* Unit::create_guardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl)
+Unit* Unit::CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl)
 {
 	CreatureProto * proto = CreatureProtoStorage.LookupEntry(guardian_entry);
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(guardian_entry);
@@ -5391,10 +5376,8 @@ Unit* Unit::create_guardian(uint32 guardian_entry,uint32 duration,float angle, u
 
 }
 
-float Unit::get_chance_to_daze(Unit *target)
+float Unit::CalculateDazeCastChance(Unit *target)
 {
-//	if(GetTypeId()!=TYPEID_UNIT)
-//		return 0.0f;
 	float attack_skill = float( getLevel() ) * 5.0f;
 	float defense_skill;
 	if( target->IsPlayer() )

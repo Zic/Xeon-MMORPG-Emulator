@@ -957,7 +957,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	recv_data >> amount;
 
 	if(_player->isCasting())
-		_player->InterruptSpell();
+		_player->InterruptCurrentSpell();
 
 	// Check if item exists
 	if(!itemguid)
@@ -1069,7 +1069,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 	recv_data >> amount;
 
 	if( _player->isCasting() )
-		_player->InterruptSpell();
+		_player->InterruptCurrentSpell();
 
 	Creature* unit = _player->GetMapMgr()->GetCreature( GET_LOWGUID_PART(srcguid) );
 	if( unit == NULL || !unit->HasItems() )

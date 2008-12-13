@@ -344,7 +344,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			}break;
 		case SPELL_HASH_INCINERATE:	// Incinerate -> Deals x-x extra damage if the target is affected by immolate
 			{
-				if( unitTarget->HasAurasWithNameHash( SPELL_HASH_IMMOLATE ) )
+				if( unitTarget->GetAuraCountWithNameHash( SPELL_HASH_IMMOLATE ) )
 				{
 					// random extra damage
 					uint32 extra_dmg = 111 + (m_spellInfo->RankNumber * 11) + RandomUInt(m_spellInfo->RankNumber * 11);
@@ -380,10 +380,10 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			break;
 
 		case SPELL_HASH_CONFLAGRATE:
-			if (unitTarget->HasAurasWithNameHash(SPELL_HASH_IMMOLATE))
+			if (unitTarget->GetAuraCountWithNameHash(SPELL_HASH_IMMOLATE))
 				unitTarget->RemoveAuraByNameHash(SPELL_HASH_IMMOLATE);
 			else
-			if (unitTarget->HasAurasWithNameHash(SPELL_HASH_SHADOWFLAME))
+			if (unitTarget->GetAuraCountWithNameHash(SPELL_HASH_SHADOWFLAME))
 				unitTarget->RemoveAuraByNameHash(SPELL_HASH_SHADOWFLAME);
 			break;
 		}
@@ -1765,7 +1765,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 				{
 					uint32 new_dmg = 0;
 					//consume rejuvenetaion and regrowth
-					Aura * taura = unitTarget->FindAuraPosByNameHash( SPELL_HASH_REGROWTH ); //Regrowth
+					Aura * taura = unitTarget->FindPositiveAuraByNameHash( SPELL_HASH_REGROWTH ); //Regrowth
 					if( taura != NULL && taura->GetSpellProto() != NULL)
 					{
 						uint32 amplitude = taura->GetSpellProto()->EffectAmplitude[1] / 1000;
@@ -1781,7 +1781,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 						unitTarget->RemoveAura( taura );
 
 						//do not remove flag if we still can cast it again
-						if( !unitTarget->HasAurasWithNameHash( SPELL_HASH_REJUVENATION ) )
+						if( !unitTarget->GetAuraCountWithNameHash( SPELL_HASH_REJUVENATION ) )
 						{
 							unitTarget->RemoveFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_REJUVENATE );	
 							sEventMgr.RemoveEvents( unitTarget, EVENT_REJUVENATION_FLAG_EXPIRE );
@@ -1789,7 +1789,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 					}
 					else
 					{
-						taura = unitTarget->FindAuraPosByNameHash( SPELL_HASH_REJUVENATION );//Rejuvenation
+						taura = unitTarget->FindPositiveAuraByNameHash( SPELL_HASH_REJUVENATION );//Rejuvenation
 						if( taura != NULL && taura->GetSpellProto() != NULL )
 						{
 							uint32 amplitude = taura->GetSpellProto()->EffectAmplitude[0] / 1000;
@@ -3236,7 +3236,7 @@ void Spell::SpellEffectSummonGuardian(uint32 i) // Summon Guardian
 	for( int i = 0; i < damage; i++ )
 	{
 		float m_fallowAngle = angle_for_each_spawn * i;
-		u_caster->create_guardian(cr_entry,GetDuration(),m_fallowAngle,level);
+		u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level);
 	}
 }
 
@@ -3780,7 +3780,7 @@ void Spell::SpellEffectInterruptCast(uint32 i) // Interrupt Cast
 	if( unitTarget->GetCurrentSpell() != NULL && (unitTarget->GetCurrentSpell()->getState() == SPELL_STATE_PREPARING || unitTarget->GetCurrentSpell()->getState() == SPELL_STATE_CASTING) && unitTarget->GetCurrentSpell() != this )
 	{
 		school=unitTarget->GetCurrentSpell()->m_spellInfo->School;
-		unitTarget->InterruptSpell();
+		unitTarget->InterruptCurrentSpell();
 		if(school)//prevent from casts in this school
 		{
 			unitTarget->SchoolCastPrevent[school]=GetDuration()+getMSTime();
@@ -4487,7 +4487,7 @@ void Spell::SpellEffectSanctuary(uint32 i) // Stop all attacks made to you
 
 	// also cancel any spells we are casting
 	if( u_caster->GetCurrentSpell() != NULL && u_caster->GetCurrentSpell() != this && u_caster->GetCurrentSpell()->getState() == SPELL_STATE_PREPARING )
-		u_caster->InterruptSpell();
+		u_caster->InterruptCurrentSpell();
 }
 
 void Spell::SpellEffectAddComboPoints(uint32 i) // Add Combo Points

@@ -226,7 +226,7 @@ void AIInterface::HandleEvent(uint32 event, Unit* pUnit, uint32 misc1)
 				if( pUnit == NULL ) return;
 
 				if( pUnit->GetTypeId() == TYPEID_UNIT && !pUnit->IsPet() && !pUnit->isAlive() )
-					pUnit->RemoveNegativeAuras();
+					pUnit->RemoveAllNegativeAuras();
 
 				//cancel spells that we are casting. Should remove bug where creatures cast a spell after they died
 //				CancelSpellCast();
@@ -967,7 +967,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							if(m_nextTarget &&
 								!(m_Unit->m_factionDBC->RepListId == -1 && m_Unit->m_faction->FriendlyMask==0 && m_Unit->m_faction->HostileMask==0) /* neutral creature */
 								&& m_nextTarget->IsPlayer() && !m_Unit->IsPet() && health_before_strike>m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH)
-								&& Rand(m_Unit->get_chance_to_daze(m_nextTarget)))
+								&& Rand(m_Unit->CalculateDazeCastChance(m_nextTarget)))
 							{
 								float our_facing=m_Unit->calcRadAngle(m_Unit->GetPositionX(),m_Unit->GetPositionY(),m_nextTarget->GetPositionX(),m_nextTarget->GetPositionY());
 								float his_facing=m_nextTarget->GetOrientation();
@@ -2958,11 +2958,11 @@ Unit *AIInterface::GetMostHated()
 			continue;
 		}
 
-		if((itr->second + itr->first->GetThreatModifyer()) > currentTarget.second)
+		if((itr->second + itr->first->GetThreatModifier()) > currentTarget.second)
 		{
 			/* new target */
 			currentTarget.first = itr->first;
-			currentTarget.second = itr->second + itr->first->GetThreatModifyer();
+			currentTarget.second = itr->second + itr->first->GetThreatModifier();
 			m_currentHighestThreat = currentTarget.second;
 		}
 
@@ -2993,12 +2993,12 @@ Unit *AIInterface::GetSecondHated()
 			continue;
 		}
 
-		if((itr->second + itr->first->GetThreatModifyer()) > currentTarget.second &&
+		if((itr->second + itr->first->GetThreatModifier()) > currentTarget.second &&
 			itr->first != ResultUnit)
 		{
 			/* new target */
 			currentTarget.first = itr->first;
-			currentTarget.second = itr->second + itr->first->GetThreatModifyer();
+			currentTarget.second = itr->second + itr->first->GetThreatModifier();
 			m_currentHighestThreat = currentTarget.second;
 		}
 	}
@@ -3025,12 +3025,12 @@ bool AIInterface::modThreatByPtr(Unit* obj, int32 mod)
 	if(it != m_aiTargets.end())
 	{
 		it->second += mod;
-		if((it->second + obj->GetThreatModifyer()) > m_currentHighestThreat)
+		if((it->second + obj->GetThreatModifier()) > m_currentHighestThreat)
 		{
 			// new target!
 			if(!isTaunted)
 			{
-				m_currentHighestThreat = it->second + obj->GetThreatModifyer();
+				m_currentHighestThreat = it->second + obj->GetThreatModifier();
 				SetNextTarget(obj);
 			}
 		}
@@ -3038,11 +3038,11 @@ bool AIInterface::modThreatByPtr(Unit* obj, int32 mod)
 	else
 	{
 		m_aiTargets.insert( make_pair( obj, mod ) );
-		if((mod + obj->GetThreatModifyer()) > m_currentHighestThreat)
+		if((mod + obj->GetThreatModifier()) > m_currentHighestThreat)
 		{
 			if(!isTaunted)
 			{
-				m_currentHighestThreat = mod + obj->GetThreatModifyer();
+				m_currentHighestThreat = mod + obj->GetThreatModifier();
 				SetNextTarget(obj);
 			}
 		}
@@ -3260,7 +3260,7 @@ uint32 AIInterface::_CalcThreat(uint32 damage, SpellEntry * sp, Unit* Attacker)
 	}
 
 	// modify mod by Affects
-	mod += (mod * Attacker->GetGeneratedThreatModifyer() / 100);
+	mod += (mod * Attacker->GetGeneratedThreatModifier() / 100);
 
 	return mod;
 }
@@ -3287,7 +3287,7 @@ void AIInterface::ResetProcCounts()
 void AIInterface::Event_Summon_EE_totem(uint32 summon_duration)
 {
 	m_totemspelltimer = 0xEFFFFFFF;
-	Unit *ourslave=m_Unit->create_guardian(329,summon_duration,float(-M_PI*2), 0);
+	Unit *ourslave=m_Unit->CreateTemporaryGuardian(329,summon_duration,float(-M_PI*2), 0);
 	if(ourslave)
 	{
 		static_cast<Creature*>(ourslave)->ResistanceModPct[NATURE_DAMAGE]=100;//we should be imune to nature dmg. This can be also set in db
@@ -3304,7 +3304,7 @@ void AIInterface::Event_Summon_FE_totem(uint32 summon_duration)
 	//timer should not reach this value thus not cast this spell again
 	m_totemspelltimer = 0xEFFFFFFF;
 	//creatures do not support PETs and the spell uses that effect so we force a summon guardian thing
-	Unit *ourslave=m_Unit->create_guardian(575,summon_duration,float(-M_PI*2), 0);
+	Unit *ourslave=m_Unit->CreateTemporaryGuardian(575,summon_duration,float(-M_PI*2), 0);
 	if(ourslave)
 	{
 		static_cast<Creature*>(ourslave)->ResistanceModPct[FIRE_DAMAGE]=100;//we should be imune to fire dmg. This can be also set in db

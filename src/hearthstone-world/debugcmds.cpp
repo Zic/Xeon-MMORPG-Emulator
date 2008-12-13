@@ -722,10 +722,10 @@ bool ChatHandler::HandleFadeCommand(const char* args, WorldSession *m_session)
 	if(!v)
 		return false;
 
-	target->ModThreatModifyer(atoi(v));
+	target->ModThreatModifier(atoi(v));
 
 	std::stringstream sstext;
-	sstext << "threat is now reduced by: " << target->GetThreatModifyer() <<'\0';
+	sstext << "threat is now reduced by: " << target->GetThreatModifier() <<'\0';
 
 	SystemMessage(m_session, sstext.str().c_str());
 	return true;
@@ -740,10 +740,10 @@ bool ChatHandler::HandleThreatModCommand(const char* args, WorldSession *m_sessi
 	if(!v)
 		return false;
 
-	target->ModGeneratedThreatModifyer(atoi(v));
+	target->ModGeneratedThreatModifier(atoi(v));
 
 	std::stringstream sstext;
-	sstext << "new threat caused is now reduced by: " << target->GetGeneratedThreatModifyer() << "%" <<'\0';
+	sstext << "new threat caused is now reduced by: " << target->GetGeneratedThreatModifier() << "%" <<'\0';
 
 	SystemMessage(m_session, sstext.str().c_str());
 	return true;
@@ -793,7 +793,7 @@ bool ChatHandler::HandleThreatListCommand(const char* args, WorldSession *m_sess
 			++itr;
 			continue;
 		}
-		sstext << "guid: " << itr->first->GetGUID() << " | threat: " << itr->second << "| threat after mod: " << (itr->second + itr->first->GetThreatModifyer()) << "\n";
+		sstext << "guid: " << itr->first->GetGUID() << " | threat: " << itr->second << "| threat after mod: " << (itr->second + itr->first->GetThreatModifier()) << "\n";
 		++itr;
 	}
 

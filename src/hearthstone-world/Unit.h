@@ -705,15 +705,14 @@ public:
 
     void setAttackTimer(int32 time, bool offhand);
 	bool isAttackReady(bool offhand);
+	bool __fastcall canReachWithAttack(Unit *pVictim);
 
 	HEARTHSTONE_INLINE void SetDuelWield(bool enabled)
 	{
 		m_duelWield = enabled;
 	}
 
-	bool __fastcall canReachWithAttack(Unit *pVictim);
-
-  //void StrikeWithAbility( Unit* pVictim, Spell* spell, uint32 addspelldmg, uint32 weapon_damage_type );
+	
 
 	/// State flags are server-only flags to help me know when to do stuff, like die, or attack
 	HEARTHSTONE_INLINE void addStateFlag(uint32 f) { m_state |= f; };
@@ -732,17 +731,12 @@ public:
 	HEARTHSTONE_INLINE void setGender(uint8 gender) { SetByte(UNIT_FIELD_BYTES_0,2,gender); }
 	HEARTHSTONE_INLINE uint8 getStandState() { return ((uint8)m_uint32Values[UNIT_FIELD_BYTES_1]); }
  
-	//// Combat
-   // void DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId = 0);   // to stop from falling, etc
-	//void AttackerStateUpdate( Unit* pVictim, uint32 weapon_damage_type ); // weapon_damage_type: 0 = melee, 1 = offhand(dualwield), 2 = ranged
 	uint32 GetSpellDidHitResult( Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability );
 	void Strike( Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
-//	void PeriodicAuraLog(Unit *pVictim, SpellEntry* spellID, uint32 damage, uint32 damageType);
-	//void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
+
 	uint32 m_procCounter;
 	uint32 HandleProc(uint32 flag, Unit* Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0);
 	void HandleProcDmgShield(uint32 flag, Unit* attacker);//almost the same as handleproc :P
-//	void HandleProcSpellOnSpell(Unit* Victim,uint32 damage,bool critical);//nasty, some spells proc other spells
 
 	void RemoveExtraStrikeTarget(SpellEntry *spell_info);
 	void AddExtraStrikeTarget(SpellEntry *spell_info, uint32 charges);
@@ -775,8 +769,7 @@ public:
 	void smsg_AttackStop(uint64 victimGuid);
 	
 	bool IsDazed();
-	//this function is used for creatures to get chance to daze for another unit
-	float get_chance_to_daze(Unit *target);
+	float CalculateDazeCastChance(Unit *target);
 
 	// Stealth  
 	HEARTHSTONE_INLINE int32 GetStealthLevel() { return m_stealthLevel; }
@@ -847,37 +840,33 @@ public:
 		RemoveAura(SpellId);
 	}
 
-	uint32 m_auracount[263];
-
 	//! Remove all auras
 	void RemoveAllAuras();
-	bool RemoveAllAuras(uint32 spellId,uint64 guid); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
-    void RemoveAllAuraType(uint32 auratype);//ex:to remove morph spells
+	bool RemoveAllAurasBySpellIDOrGUID(uint32 spellId,uint64 guid); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
+    void RemoveAllAurasOfType(uint32 auratype);//ex:to remove morph spells
 	bool RemoveAllAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAllPosAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAllNegAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAllAurasByMechanic( uint32 MechanicType , uint32 MaxDispel , bool HostileOnly ); // Removes all (de)buffs on unit of a specific mechanic type.
 	
-	void RemoveNegativeAuras();
+	void RemoveAllNegativeAuras();
 	void RemoveAllAreaAuras();
-	// Temporary remove all auras
-	   // Find auras
-	Aura *FindAuraPosByNameHash(uint32 namehash);
+	Aura* FindPositiveAuraByNameHash(uint32 namehash);
 	Aura* FindAura(uint32 spellId);
 	Aura* FindAura(uint32 spellId, uint64 guid);
 	uint32 GetAuraCount(uint32 spellId);
 	bool SetAurDuration(uint32 spellId,Unit* caster,uint32 duration);
 	bool SetAurDuration(uint32 spellId,uint32 duration);
-	void DropAurasOnDeath();
+	void EventDeathAuraRemoval();
 
-	void castSpell(Spell * pSpell);
-	void InterruptSpell();
+	void CastSpell(Spell * pSpell);
+	void InterruptCurrentSpell();
 
 	//caller is the caster
-	int32 GetSpellDmgBonus(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
+	int32 GetSpellBonusDamage(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
    
 	//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
-	Unit* create_guardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
+	Unit* CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
 
 	uint32 m_addDmgOnce;
 	Creature *m_TotemSlots[4];
@@ -919,16 +908,11 @@ public:
 	// AIInterface
 	AIInterface *GetAIInterface() { return m_aiInterface; }
 	void ReplaceAIInterface(AIInterface *new_interface) ;
-	void ClearHateList();
-	void WipeHateList();
-	void WipeTargetList();
-	HEARTHSTONE_INLINE void setAItoUse(bool value){m_useAI = value;}
 
-
-	int32 GetThreatModifyer() { return m_threatModifyer; }
-	void ModThreatModifyer(int32 mod) { m_threatModifyer += mod; }
-	int32 GetGeneratedThreatModifyer() { return m_generatedThreatModifyer; }
-	void ModGeneratedThreatModifyer(int32 mod) { m_generatedThreatModifyer += mod; }
+	int32 GetThreatModifier() { return m_threatModifyer; }
+	void ModThreatModifier(int32 mod) { m_threatModifyer += mod; }
+	int32 GetGeneratedThreatModifier() { return m_generatedThreatModifyer; }
+	void ModGeneratedThreatModifier(int32 mod) { m_generatedThreatModifyer += mod; }
 
 	// DK:Affect
 	HEARTHSTONE_INLINE uint32 IsPacified() { return m_pacified; }
@@ -1087,7 +1071,6 @@ public:
 	int32 m_extrastriketargetc;
 	std::list<ExtraStrike*> m_extraStrikeTargets;
 	int32 m_fearmodifiers;
-	//std::set<SpellEntry*> m_onStrikeSpells;
 
 	int32 m_noInterrupt;
 	int32 m_rooted;
@@ -1106,22 +1089,6 @@ public:
 	void EnableFlight();
 	void DisableFlight();
 
-	// Escort Quests
-	//uint32 m_escortquestid;
-	//uint32 m_escortupdatetimer;
-	//bool bHasEscortQuest;
-	//bool bEscortActive;
-	//bool bStopAtEndOfWaypoints;
-	//bool bReturnOnDie;
-	//Player *q_AttachedPlayer;
-	//uint16 m_escortStartWP;
-	//uint16 m_escortEndWP;
-	/*void InitializeEscortQuest(uint32 questid, bool stopatend, bool returnondie);
-	void EscortSetStartWP(uint32 wp);
-	void EscortSetEndWP(uint32 wp);
-	void StartEscortQuest();
-	void PauseEscortQuest();
-	void EndEscortQuest();*/
 	void MoveToWaypoint(uint32 wp_id);	
 	void PlaySpellVisual(uint64 target, uint32 spellVisual);
 
@@ -1150,27 +1117,21 @@ public:
 
 	HEARTHSTONE_INLINE bool IsSpiritHealer()
 	{
-		switch(GetEntry())
-		{
-		case 6491:  // Spirit Healer
-		case 13116: // Alliance Spirit Guide
-		case 13117: // Horde Spirit Guide
-			{
-				return true;
-			}break;
-		}
+		if(GetUInt32Value(OBJECT_FIELD_ENTRY) == 6491 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 13116 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 113117)
+			return true;
+
 		return false;
 	}
 
 	void Root();
-	void Unroot();
+	void UnRoot();
 
 	void SetFacing(float newo);//only working if creature is idle
 
 	void RemoveAurasByBuffIndexType(uint32 buff_index_type, const uint64 &guid);
 	void RemoveAurasByBuffType(uint32 buff_type, const uint64 &guid,uint32 skip);
 	bool HasAurasOfBuffType(uint32 buff_type, const uint64 &guid,uint32 skip);
-	int	 HasAurasWithNameHash(uint32 name_hash);
+	int	 GetAuraCountWithNameHash(uint32 name_hash);
 	bool HasNegativeAuraWithNameHash(uint32 name_hash); //just to reduce search range in some cases
 	bool HasNegativeAura(uint32 spell_id); //just to reduce search range in some cases
 	bool IsPoisoned();

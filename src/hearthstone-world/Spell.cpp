@@ -1100,7 +1100,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		m_castPositionY = m_caster->GetPositionY();
 		m_castPositionZ = m_caster->GetPositionZ();
 
-		u_caster->castSpell( this );
+		u_caster->CastSpell( this );
 	}
 	else
 		cast( false );
@@ -4393,7 +4393,7 @@ bool Spell::Reflect(Unit *refunit)
 			if(Rand((float)(*i)->chance))
 			{
 				//the god blessed special case : mage - Frost Warding = is an augmentation to frost warding
-				if((*i)->require_aura_hash && u_caster && !u_caster->HasAurasWithNameHash((*i)->require_aura_hash))
+				if((*i)->require_aura_hash && u_caster && !u_caster->GetAuraCountWithNameHash((*i)->require_aura_hash))
                 {
 					continue;
                 }

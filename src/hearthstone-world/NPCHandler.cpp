@@ -415,7 +415,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
  
 	// unstealth meh
 	if( _player->IsStealth() )
-		_player->RemoveAllAuraType( SPELL_AURA_MOD_STEALTH );
+		_player->RemoveAllAurasOfType( SPELL_AURA_MOD_STEALTH );
 
 	// reputation
 	_player->Reputation_OnTalk(qst_giver->m_factionDBC);

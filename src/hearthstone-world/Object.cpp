@@ -1756,7 +1756,7 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 		}
 		
 		/* Remove all Auras */
-		pVictim->DropAurasOnDeath();
+		pVictim->EventDeathAuraRemoval();
 
 		/* Stop victim from attacking */
 		if( this->IsUnit() )
@@ -2102,7 +2102,7 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 	{
 		caster->RemoveAurasByInterruptFlag( AURA_INTERRUPT_ON_START_ATTACK );
 
-		res += caster->GetSpellDmgBonus( pVictim, spellInfo, ( int )res, false );
+		res += caster->GetSpellBonusDamage( pVictim, spellInfo, ( int )res, false );
 		res_after_spelldmg = res;
 //==========================================================================================
 //==============================Post +SpellDamage Bonus Modifications=======================
