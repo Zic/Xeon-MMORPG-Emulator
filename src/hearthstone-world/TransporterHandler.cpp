@@ -430,7 +430,7 @@ void ObjectMgr::LoadTransporters()
 	return;
 #endif
 	Log.Notice("ObjectMgr", "Loading Transports...");
-	QueryResult * QR = WorldDatabase.Query("SELECT * FROM transport_data");
+	QueryResult * QR = WorldDatabase.Query("SELECT entry FROM gameobject_names WHERE type = %u", GAMEOBJECT_TYPE_MO_TRANSPORT);
 	if(!QR) return;
 
 	int64 total = QR->GetRowCount();
