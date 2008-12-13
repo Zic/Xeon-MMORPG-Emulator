@@ -625,6 +625,9 @@ public:
 	/* END ACCESSOR FUNCTIONS                                               */
 	/************************************************************************/
 
+	// declaration to fix scripting
+	HEARTHSTONE_INLINE Loot* GetLoot() { return &m_loot; }
+
 public:
 	// loooooot
 	Loot m_loot;
