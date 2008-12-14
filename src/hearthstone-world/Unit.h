@@ -755,6 +755,7 @@ public:
 
 	bool isCasting();
 	bool IsInInstance();
+	double GetResistanceReducion(Unit *pVictim, uint32 type, float armorReducePct);
     void CalculateResistanceReduction(Unit *pVictim,dealdamage *dmg,SpellEntry* ability, float armorreducepct) ;
 	void RegenerateHealth();
 	void RegeneratePower(bool isinterrupted);
@@ -1008,6 +1009,12 @@ public:
 	{
 		uint32 bytes1 = GetUInt32Value (UNIT_FIELD_BYTES_1);
 		return StandState (uint8 (bytes1));
+	}
+
+	HEARTHSTONE_INLINE uint32 computeOverkill(uint32 damage)
+	{
+		uint32 curHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
+		return (damage > curHealth) ? damage - curHealth : 0;
 	}
 
 	void SendChatMessage(uint8 type, uint32 lang, const char *msg);

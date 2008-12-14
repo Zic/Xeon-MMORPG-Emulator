@@ -1812,6 +1812,7 @@ public:
 
     bool IsAspect();
     bool IsSeal();
+	bool static IsBinary(SpellEntry * sp);
 
     uint32 GetDuration()
     {

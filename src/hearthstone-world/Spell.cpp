@@ -567,27 +567,20 @@ uint8 Spell::_DidHit(const Unit *target)
 	{
 		return SPELL_DID_HIT_IMMUNE; // Moved here from Spell::CanCast
 	}
-	
-	/**** HACK FIX: AoE Snare/Root spells (i.e. Frost Nova) ****/
-	/* If you find any other AoE effects that also apply something that SHOULD be a mechanic, add it here. */
-	if( u_victim->MechanicsDispels[MECHANIC_ROOTED] ||
-		u_victim->MechanicsDispels[MECHANIC_ENSNARED]
-		)
-	{
-	for( int i = 0 ; i < 3 ; ++i )
-		{
-			if( u_victim->MechanicsDispels[MECHANIC_ROOTED] && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_ROOT )
-				return SPELL_DID_HIT_IMMUNE;
-			if( u_victim->MechanicsDispels[MECHANIC_ENSNARED] && m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_DECREASE_SPEED )
-				return SPELL_DID_HIT_IMMUNE;
-		}
-
-	}
 
 	/************************************************************************/
 	/* Check if the target has a % resistance to this mechanic              */
 	/************************************************************************/
-		/* Never mind, it's already done below. Lucky I didn't go through with this, or players would get double resistance. */
+	if( m_spellInfo->MechanicsType<27)
+	{
+		float res;
+		if(p_victim)
+			res = p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+		else 
+			res = u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+		if(Rand(res))
+			return SPELL_DID_HIT_RESIST;
+	}
 
 	/************************************************************************/
 	/* Check if the spell is a melee attack and if it was missed/parried    */
@@ -641,15 +634,6 @@ uint8 Spell::_DidHit(const Unit *target)
 				resistchance = baseresist[2] + (((float)lvldiff-2.0f)*11.0f);
 		}
 	}
-	//check mechanical resistance
-	//i have no idea what is the best pace for this code
-	if( m_spellInfo->MechanicsType<27)
-	{
-		if(p_victim)
-			resistchance += p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
-		else 
-			resistchance += u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
-	}
 	//rating bonus
 	if( p_caster != NULL )
 	{
@@ -673,28 +657,28 @@ uint8 Spell::_DidHit(const Unit *target)
 		resistchance -= hitchance;
 	}
 
+	if(IsBinary(m_spellInfo))
+	{ // need to apply resistance mitigation
+		float mitigation = 1.0f - float (u_caster->GetResistanceReducion(u_victim, m_spellInfo->School, 0.0f));
+		resistchance = 100 - (100 - resistchance) * mitigation; // meaning hitchance * mitigation
+	}
+
+	if(resistchance < 1.0f)
+		resistchance = 1.0f;
+
 	if (m_spellInfo->Attributes & ATTRIBUTES_IGNORE_INVULNERABILITY)
 		resistchance = 0.0f;
 
-	if(resistchance >= 100.0f)
-		return SPELL_DID_HIT_RESIST;
+	if(resistchance > 99.0f)
+		resistchance = 99.0f;
 
-	if(resistchance<=1.0)//resist chance >=1
-	{
-		if( Rand(1.0f) )
-			return SPELL_DID_HIT_RESIST;
-	}
-	else
-	{
-		if( Rand(resistchance) )
-			return SPELL_DID_HIT_RESIST;
-	}
+	uint32 res = (Rand(resistchance) ? SPELL_DID_HIT_RESIST : SPELL_DID_HIT_SUCCESS);
 
 	// spell reflect handler
-	if( Reflect(u_victim) )
-		return SPELL_DID_HIT_REFLECT;
+	if(res == SPELL_DID_HIT_SUCCESS && Reflect(u_victim) )
+		res = SPELL_DID_HIT_REFLECT;
 
-	return SPELL_DID_HIT_SUCCESS;
+	return res;
 }
 
 //generate possible target list for a spell. Use as last resort since it is not acurate
@@ -2656,6 +2640,14 @@ bool Spell::IsSeal()
 		(m_spellInfo->Id == 20292) || (m_spellInfo->Id == 20293) || (m_spellInfo->Id == 20305) || (m_spellInfo->Id == 20306) || (m_spellInfo->Id == 20307) || (m_spellInfo->Id == 20308) || 
 		(m_spellInfo->Id == 20347) || (m_spellInfo->Id == 20348) || (m_spellInfo->Id == 20349) || (m_spellInfo->Id == 20356) || (m_spellInfo->Id == 20357) || (m_spellInfo->Id == 20375) || 
 		(m_spellInfo->Id == 20915) || (m_spellInfo->Id == 20918) || (m_spellInfo->Id == 20919) || (m_spellInfo->Id == 20920) || (m_spellInfo->Id == 21082) || (m_spellInfo->Id == 21084)); 
+}
+
+bool Spell::IsBinary(SpellEntry * sp)
+{
+	// Normally, damage spells are only binary if they have an additional non-damage effect
+	// DoTs used to be binary spells, but this was changed. (WoWwiki)
+	return !(sp->Effect[0] == SPELL_EFFECT_SCHOOL_DAMAGE ||
+		sp->EffectApplyAuraName[0] == SPELL_AURA_PERIODIC_DAMAGE);
 }
 
 uint8 Spell::CanCast(bool tolerate)

@@ -2378,7 +2378,7 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 				uint32 damage = (uint32)( res + abs_dmg );
 				uint32 absorbed = static_cast< Unit* >( this )->AbsorbDamage( school, &damage );
 				DealDamage( static_cast< Unit* >( this ), damage, 2, 0, spellID );
-				SendSpellNonMeleeDamageLog( this, this, spellID, damage, school, absorbed, 0, false, 0, false, this->IsPlayer() );
+				SendSpellNonMeleeDamageLog( this, TO_UNIT(this), spellID, damage, school, absorbed, 0, false, 0, false, this->IsPlayer() );
 			}
 		}
 	}
@@ -2424,17 +2424,18 @@ void Object::SendSpellLog(Object *Caster, Object *Target,uint32 Ability, uint8 S
 }
 
 
-void Object::SendSpellNonMeleeDamageLog( Object* Caster, Object* Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToset )
+void Object::SendSpellNonMeleeDamageLog( Object* Caster, Unit* Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToset )
 {
 	if ((!Caster || !Target) && SpellID)
 		return;
+	uint32 overkill = Target->computeOverkill(Damage);
 
 	WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG,40);
 	data << Target->GetNewGUID();
 	data << Caster->GetNewGUID();
 	data << SpellID;                    // SpellID / AbilityID
 	data << Damage;                     // All Damage
-	data << uint32(0);					// Overkill
+	data << uint32(overkill);			// Overkill
 	data << uint8(g_spellSchoolConversionTable[School]);                     // School
 	data << AbsorbedDamage;             // Absorbed Damage
 	data << ResistedDamage;             // Resisted Damage
@@ -2574,7 +2575,7 @@ void Object::_SetExtension(const string& name, void* ptr)
 }
 
 
-void Object::SendAttackerStateUpdate( Object* Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate )
+void Object::SendAttackerStateUpdate( Unit* Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate )
 {
 	if (!Target || !dmg)
 		return;
@@ -2586,12 +2587,14 @@ void Object::SendAttackerStateUpdate( Object* Target, dealdamage *dmg, uint32 re
 		hit_status|= 0x800000;
 	}
 
+	uint32 overkill = Target->computeOverkill(realdamage);
+
 	data << (uint32)hit_status;   
 	data << GetNewGUID();
 	data << Target->GetNewGUID();
 
 	data << (uint32)realdamage;			// Realdamage;
-	data << (uint32)0;					// Overkill
+	data << (uint32)overkill;			// Overkill
 	data << (uint8)1;					// Damage type counter / swing type
 
 	data << (uint32)g_spellSchoolConversionTable[dmg->school_type];				  // Damage school

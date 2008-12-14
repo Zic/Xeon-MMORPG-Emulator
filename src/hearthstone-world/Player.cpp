@@ -8286,15 +8286,15 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 			}break;
 		case MELEE_HIT_AVOIDANCE_RATING:
 			{
-				
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_MELEE_HIT_AVOIDANCE, val );
 			}break;
 		case RANGED_HIT_AVOIDANCE_RATING:
 			{
-
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_RANGED_HIT_AVOIDANCE, val );
 			}break;
 		case SPELL_HIT_AVOIDANCE_RATING:
 			{
-
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_SPELL_HIT_AVOIDANCE, val );
 			}break;
 		case MELEE_CRITICAL_AVOIDANCE_RATING:
 			{
@@ -8324,13 +8324,13 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 			{
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_MELEE_HIT, val );//melee
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_RANGED_HIT, val );//ranged
-				// maybe should do spell here? (7)
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_SPELL_HIT, val );
 			}break;
 		case CRITICAL_STRIKE_RATING:
 			{
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_MELEE_CRIT, val );//melee
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_RANGED_CRIT, val );//ranged
-				// maybe should do spell here? (10)
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_SPELL_CRIT, val );
 			}break;
 		case HIT_AVOIDANCE_RATING:// this is guessed based on layout of other fields
 			{
@@ -8338,11 +8338,13 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_RANGED_HIT_AVOIDANCE, val );//ranged
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_SPELL_HIT_AVOIDANCE, val );//spell
 			}break;
+		case CRITICAL_AVOIDANCE_RATING:
+			{
+				// todo. what is it?
+			}break;
 		case EXPERTISE_RATING:
-		case EXPERTISE_RATING_2:
 			{
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_EXPERTISE, val );
-				ModUnsigned32Value( PLAYER_EXPERTISE, val );
 			}break;
 		case RESILIENCE_RATING:
 			{
@@ -8354,7 +8356,51 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 			{
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_MELEE_HASTE, val );//melee
 				ModUnsigned32Value( PLAYER_RATING_MODIFIER_RANGED_HASTE, val );//ranged
-				// maybe should do spell here? (19)
+				ModUnsigned32Value( PLAYER_RATING_MODIFIER_SPELL_HASTE, val );
+			}break;
+		case ATTACK_POWER:
+			{
+				ModUnsigned32Value( UNIT_FIELD_ATTACK_POWER_MODS, val );
+			}break;
+		case RANGED_ATTACK_POWER:
+			{
+				ModUnsigned32Value( UNIT_FIELD_RANGED_ATTACK_POWER_MODS, val );
+			}break;
+		case FERAL_ATTACK_POWER:
+			{
+				// todo
+			}break;
+		case SPELL_HEALING_DONE:
+			{
+				for(uint32 school=1;school < 7; ++school)
+				{
+					HealDoneMod[school] += val;
+				}
+				ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, val );
+			}break;
+		case SPELL_DAMAGE_DONE:
+			{
+				for(uint32 school=1;school < 7; ++school)
+				{
+					ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school, val );
+				}
+			}break;
+		case MANA_REGENERATION:
+			{
+				m_ModInterrMRegen += val;
+			}break;
+		case ARMOR_PENETRATION_RATING:
+			{
+				ModUnsigned32Value(PLAYER_RATING_MODIFIER_ARMOR_PENETRATION_RATING, val);
+			}break;
+		case SPELL_POWER:
+			{
+				for(uint32 school=1;school < 7; ++school)
+				{
+					ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school, val );
+					HealDoneMod[school] += val;
+				}
+				ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, val );
 			}break;
 		}
 }

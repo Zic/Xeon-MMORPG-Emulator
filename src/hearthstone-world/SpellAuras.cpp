@@ -8657,14 +8657,10 @@ void Aura::SpellAuraIncreaseRating( bool apply )
 		return;
 
 	Player* plr = static_cast< Player* >( m_target );
-	for( uint32 x = 1; x < 24; x++ )//skip x=0
+	for( uint32 x = 1; x < 25; x++ )//skip x=0
 		if( ( ( ( uint32 )1 ) << x ) & mod->m_miscValue )
-			plr->ModifyBonuses( 11 + x, v );
-
-	//MELEE_CRITICAL_AVOIDANCE_RATING + RANGED_CRITICAL_AVOIDANCE_RATING + SPELL_CRITICAL_AVOIDANCE_RATING
-	//comes only as combination of them  - ModifyBonuses() not adding them individually anyhow
-	if( mod->m_miscValue & (0x0004000|0x0008000|0x0010000) )
-			plr->ModifyBonuses( RESILIENCE_RATING, v );
+			plr->ModUnsigned32Value(PLAYER_FIELD_COMBAT_RATING_1 + x, v);
+			//plr->ModifyBonuses( 11 + x, v );	// not always the same as above. i.e. 11+24 = resilience, but need armor ignore rating
 
 	if( mod->m_miscValue & 1 )//weapon skill
 	{
@@ -8970,6 +8966,8 @@ void Aura::SendPeriodicHealAuraLog(uint32 amt)
 // log message's
 void Aura::SendPeriodicAuraLog(Unit * Caster, Unit * Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags)
 {
+	uint32 overkill = Target->computeOverkill(Amount);
+
 	WorldPacket data(SMSG_PERIODICAURALOG, 46);
 	data << Target->GetNewGUID();		// target guid
 	data << Caster->GetNewGUID();		// caster guid
@@ -8977,7 +8975,7 @@ void Aura::SendPeriodicAuraLog(Unit * Caster, Unit * Target, uint32 SpellID, uin
 	data << (uint32)1;					// unknown? need research?
 	data << uint32(Flags | 0x1);		// aura school
 	data << Amount;						// amount of done to target / heal / damage
-	data << (uint32)0;					// overkill
+	data << (uint32)overkill;			// overkill
 	data << g_spellSchoolConversionTable[School];
 	data << uint32(abs_dmg);
 	data << uint32(resisted_damage);
@@ -8987,6 +8985,8 @@ void Aura::SendPeriodicAuraLog(Unit * Caster, Unit * Target, uint32 SpellID, uin
 
 void Aura::SendPeriodicAuraLog(const uint64& CasterGuid, Unit * Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags)
 {
+	uint32 overkill = Target->computeOverkill(Amount);
+
 	WorldPacket data(SMSG_PERIODICAURALOG, 46);
 	data << Target->GetNewGUID();		// target guid
 	FastGUIDPack(data, CasterGuid);		// caster guid
@@ -8994,7 +8994,7 @@ void Aura::SendPeriodicAuraLog(const uint64& CasterGuid, Unit * Target, uint32 S
 	data << (uint32)1;					// unknown?? need resource?
 	data << uint32(Flags | 0x1);		// aura school
 	data << Amount;						// amount of done to target / heal / damage
-	data << (uint32)0;					// overkill
+	data << (uint32)overkill;			// overkill
 	data << g_spellSchoolConversionTable[School];
 	data << uint32(abs_dmg);
 	data << uint32(resisted_damage);

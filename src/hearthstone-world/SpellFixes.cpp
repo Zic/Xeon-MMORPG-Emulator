@@ -2887,22 +2887,12 @@ void ApplyNormalFixes()
 	}
 
 	//Paladin: Seal of Wisdom
-	uint32 procchance = 0;
-	sp = dbcSpell.LookupEntryForced( 27116 );
-	if( sp != NULL )
-		procchance = sp->procChance;
 	sp = dbcSpell.LookupEntryForced( 20166 );
 	if( sp != NULL )
-		sp->procChance = procchance;
-	sp = dbcSpell.LookupEntryForced( 20356 );
-	if( sp != NULL )
-		sp->procChance = procchance;
-	sp = dbcSpell.LookupEntryForced( 20357 );
-	if( sp != NULL )
-		sp->procChance = procchance;
-	sp = dbcSpell.LookupEntryForced( 27166 );
-	if( sp != NULL )
-		sp->procChance = procchance;
+	{
+		sp->procChance = 12;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+	}
 
 	//Druid: Feral Swiftness
 	sp = dbcSpell.LookupEntryForced( 17002 );
@@ -5174,7 +5164,11 @@ void ApplyNormalFixes()
 	// Memento of Tyrande
 	sp = dbcSpell.LookupEntryForced( 37655 );
 	if( sp != NULL )
+	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->procChance = 10;
+		sp->proc_interval = 45000;
+	}
 
 	// Ashtongue Talisman of Insight
 	sp = dbcSpell.LookupEntryForced( 40482 );

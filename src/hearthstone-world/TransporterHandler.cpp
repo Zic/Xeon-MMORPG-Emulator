@@ -442,7 +442,7 @@ void ObjectMgr::LoadTransporters()
 		Transporter * pTransporter = new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry);
 		if(!pTransporter->CreateAsTransporter(entry, ""))
 		{
-			DEBUG_LOG("Transporter %s failed creation for some reason.", QR->Fetch()[1].GetString());
+			DEBUG_LOG("Transporter %d failed creation for some reason.", entry);
 			delete pTransporter;
 		}else
 		{
