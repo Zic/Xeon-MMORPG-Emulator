@@ -22,6 +22,7 @@
 
 AIInterface::AIInterface()
 {
+	m_ChainAgroSet = NULL;
 	m_summonedGuard = NULL;
 	m_waypoints=NULL;
 	m_canMove = true;
