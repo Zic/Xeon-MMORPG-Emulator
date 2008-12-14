@@ -2555,6 +2555,7 @@ void Spell::HandleAddAura(uint64 guid)
 					charge.spellId=itr->second->GetSpellId();
 					charge.ProcFlag=itr->second->GetSpellProto()->procFlags;
 					charge.lastproc = 0;
+					charge.spell = itr->second->GetSpellProto();
 					Target->m_chargeSpells.insert(make_pair(itr->second->GetSpellId(),charge));
 				}
 			}

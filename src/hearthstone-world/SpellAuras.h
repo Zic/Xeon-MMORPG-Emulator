@@ -336,6 +336,7 @@ struct SpellCharge
     uint32 ProcFlag;
     uint32 lastproc;
     uint32 procdiff;
+	SpellEntry *spell;
 };
 
 

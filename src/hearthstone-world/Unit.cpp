@@ -1721,6 +1721,11 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								else
 									continue;
 							}break;
+						case 51693: // Waylay
+							{
+								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_AMBUSH)
+									continue;
+							}break;
 					}
 				}
 				if(spellId==22858 && isInBack(victim)) //retatliation needs target to be not in front. Can be casted by creatures too
@@ -1761,7 +1766,17 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 				if(iter2->second.ProcFlag==680&&dmg==0) continue;
 				if(CastingSpell)
 				{
+					SpellEntry * spe = iter2->second.spell;
+					uint32 *SpellClassMask = NULL;
+					if(spe)
+						SpellClassMask = spe->EffectSpellClassMask[0];
 
+					if (SpellClassMask && SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2]) {
+						if (!(SpellClassMask[0] & CastingSpell->SpellGroupType[0]) &&
+							!(SpellClassMask[1] & CastingSpell->SpellGroupType[1]) &&
+							!(SpellClassMask[2] & CastingSpell->SpellGroupType[2]))
+							continue;
+					}
 					SpellCastTime *sd = dbcSpellCastTime.LookupEntry(CastingSpell->CastingTimeIndex);
 					if(!sd) continue; // this shouldnt happen though :P
 					//if we did not proc these then we should not remove them
@@ -1790,12 +1805,9 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 						}break;
 					case 14177: //cold blood will get removed on offensive spell
 						{
-							if(victim==this || isFriendly(this, victim))
-								continue;
-
 							// This is part 1 of mutilate. Since Mutilate is TWO spells, we skip this. :P
 							// Instead, the second Strike will remove Cold Blood while they both reap the benefits.
-							if(CastingSpell->Id == 34419)
+							if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
 								continue;
 						}break;
 					}
