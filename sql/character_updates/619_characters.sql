@@ -1,0 +1,1 @@
+ALTER TABLE characters ADD COLUMN `force_reset_talents` tinyint not null;

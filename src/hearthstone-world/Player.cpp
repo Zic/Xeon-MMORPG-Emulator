@@ -2226,7 +2226,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	for(uint32 i = 0; i < 8; ++i)
 		ss << m_uint32Values[PLAYER_FIELD_GLYPHS_1 + i] << ",";
 
-	ss << "')";
+	ss << "', 0)";
 	
 	if(bNewCharacter)
 		CharacterDatabase.WaitExecuteNA(ss.str().c_str());
@@ -3010,6 +3010,12 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	if(GetGuildId())
 		SetUInt32Value(PLAYER_GUILD_TIMESTAMP, (uint32)UNIXTIME);
 
+	bool needTalentReset = get_next_field.GetBool();
+	if( needTalentReset )
+	{
+		Reset_Talents();
+	}
+
 #undef get_next_field
 
 	// load properties
@@ -3067,7 +3073,6 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 
 	if( !isAlive() )
 		myCorpse = objmgr.GetCorpseByOwner(GetLowGUID());
-
 	
 }
 
