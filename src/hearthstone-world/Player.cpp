@@ -4462,7 +4462,7 @@ void Player::UpdateHit(int32 hit)
 void Player::UpdateChances()
 {
 	uint32 pClass = (uint32)getClass();
-	uint32 pLevel = (getLevel() > 70) ? 70 : getLevel();
+	uint32 pLevel = (getLevel() > 80) ? 80 : getLevel();
 
 	float tmp = 0;
 	float defence_contribution = 0;
@@ -4471,8 +4471,8 @@ void Player::UpdateChances()
 	defence_contribution = ( float( _GetSkillLineCurrent( SKILL_DEFENSE, true ) ) - ( float( pLevel ) * 5.0f ) ) * 0.04f;
 	defence_contribution += CalcRating( PLAYER_RATING_MODIFIER_DEFENCE ) * 0.04f;
 
-	// dodge
-	tmp = baseDodge[pClass] + float( GetUInt32Value( UNIT_FIELD_STAT1 ) / dodgeRatio[69][pClass] );
+	// dodge // Use lvl 70 ratio for levels < 75 and 80 ratio for >= 75 for now
+	tmp = baseDodge[pClass] + float( GetUInt32Value( UNIT_FIELD_STAT1 ) / dodgeRatio[(pLevel < 75) ? 69 : 79][pClass] ); 
 	tmp += CalcRating( PLAYER_RATING_MODIFIER_DODGE ) + this->GetDodgeFromSpell();
 	tmp += defence_contribution;
 	if( tmp < 0.0f )tmp = 0.0f;
@@ -4494,6 +4494,10 @@ void Player::UpdateChances()
 
 	//parry
 	tmp = 5.0f + CalcRating( PLAYER_RATING_MODIFIER_PARRY ) + GetParryFromSpell();
+	if(pClass == DEATHKNIGHT) // DK gets 1/4 of strength as parry rating
+	{
+		tmp += CalcPercentForRating(PLAYER_RATING_MODIFIER_PARRY, GetUInt32Value(UNIT_FIELD_STAT0) / 4);
+	}
 	tmp += defence_contribution;
 	if( tmp < 0.0f )tmp = 0.0f;
 
@@ -4696,7 +4700,7 @@ void Player::UpdateStats()
 		SetUInt32Value( UNIT_FIELD_HEALTH, res );
 	}
 
-	if( cl != WARRIOR && cl != ROGUE )
+	if( cl != WARRIOR && cl != ROGUE && cl != DEATHKNIGHT)
 	{
 		// MP
 		int32 mana = GetUInt32Value( UNIT_FIELD_BASE_MANA );
@@ -7585,10 +7589,9 @@ const double BaseRating []= {
 
 };
 */
-float Player::CalcRating( uint32 index )
+float Player::CalcPercentForRating( uint32 index, uint32 rating )
 {
 	uint32 relative_index = index - (PLAYER_FIELD_COMBAT_RATING_1);
-	float rating = float(m_uint32Values[index]);
 	/*if( relative_index <= 10 || ( relative_index >= 14 && relative_index <= 21 ) )
 	{
 		double rating = (double)m_uint32Values[index];
@@ -7604,12 +7607,17 @@ float Player::CalcRating( uint32 index )
 	}
 	else
 		return 0.0f;*/
-
+	
 	uint32 level = m_uint32Values[UNIT_FIELD_LEVEL];
+	if( level > 100 )
+		level = 100;
+
+	if(level < 34 && (index == PLAYER_RATING_MODIFIER_BLOCK || index == PLAYER_RATING_MODIFIER_PARRY || index == PLAYER_RATING_MODIFIER_DEFENCE))
+		level = 34;
 
 	CombatRatingDBC * pDBCEntry = dbcCombatRating.LookupEntryForced( relative_index * 100 + level - 1 );
 	if( pDBCEntry == NULL )
-		return rating;
+		return (float) rating;
 	else
 		return (rating / pDBCEntry->val);
 }

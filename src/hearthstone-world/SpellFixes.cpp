@@ -6120,31 +6120,18 @@ void ApplyNormalFixes()
 	}
 
 	// Mage: Hot Streak
-	sp = dbcSpell.LookupEntryForced(44445);
-	if( sp != NULL )
+	ranks = fill(ids, 44445, 44446, 44448, 0);
+	for(uint32 i = 0; i < ranks; i++)
 	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 48108;
-		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
-		sp->EffectSpellClassMask[0][0] = 0x100013;
-	}
-
-	sp = dbcSpell.LookupEntryForced(44446);
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 48108;
-		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
-		sp->EffectSpellClassMask[0][0] = 0x100013;
-	}
-
-	sp = dbcSpell.LookupEntryForced(44448);
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 48108;
-		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
-		sp->EffectSpellClassMask[0][0] = 0x100013;
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[0] = 48108;
+			sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+			sp->procChance = (i+1) * 33;
+			sp->EffectSpellClassMask[0][0] = 0x100013;
+		}
 	}
 
 	sp = dbcSpell.LookupEntryForced(1122);
@@ -6235,6 +6222,21 @@ void ApplyNormalFixes()
 		if( sp != NULL )
 			sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
 	}
+
+	// Bone Shield
+	sp = dbcSpell.LookupEntryForced( 49222 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
+		sp->proc_interval = 3000;
+	}
+	// Shadow of Death
+	sp = dbcSpell.LookupEntryForced( 49157 );
+	if( sp != NULL )
+	{
+		sp->Effect[0] = 0;	// don't want DKs to be always invincible
+	}
+	
 
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();
