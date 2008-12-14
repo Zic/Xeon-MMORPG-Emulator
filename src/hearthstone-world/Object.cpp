@@ -504,6 +504,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 {
 	bool reset = false;
 
+	uint32 oldState = 0;
 	if(updateMask->GetBit(OBJECT_FIELD_GUID) && target)	   // We're creating.
 	{
 		Creature *pThis = TO_CREATURE(this);
@@ -538,11 +539,16 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 					if( target->GetQuestLogForEntry(info->InvolvedQuestIds[v]) != NULL )
 					{
 						m_uint32Values[GAMEOBJECT_DYNAMIC] = GO_DYNFLAG_QUEST;
-						SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 1);
+						uint32 state = GetUInt32Value(GAMEOBJECT_BYTES_1);
+						oldState = state;
+						uint8 * v = (uint8*)&state;
+						v[GAMEOBJECT_BYTES_STATE] = 1;
+						m_uint32Values[GAMEOBJECT_BYTES_1] = state;
 						m_uint32Values[GAMEOBJECT_FLAGS] &= ~GO_FLAG_IN_USE;
 
 						updateMask->SetBit(GAMEOBJECT_BYTES_1);
 						updateMask->SetBit(GAMEOBJECT_DYNAMIC);
+						updateMask->SetBit(GAMEOBJECT_FLAGS);
 
 						reset = true;
 						break;
@@ -570,11 +576,12 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 	*data << (uint8)bc;
 	data->append( updateMask->GetMask(), bc*4 );
 	  
-	for( uint32 index = 0; index < values_count; index ++ )
+	for( uint32 index = 0; index < values_count; ++index )
 	{
 		if( updateMask->GetBit( index ) )
 		{
 			*data << m_uint32Values[ index ];
+			updateMask->UnsetBit( index );
 		}
 	}
 
@@ -588,7 +595,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 		case TYPEID_GAMEOBJECT:
 			m_uint32Values[GAMEOBJECT_DYNAMIC] = 0;
 			m_uint32Values[GAMEOBJECT_FLAGS] |= GO_FLAG_IN_USE;
-			SetByte( GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 0);
+			m_uint32Values[GAMEOBJECT_BYTES_1] = oldState;
 			break;
 		}
 	}

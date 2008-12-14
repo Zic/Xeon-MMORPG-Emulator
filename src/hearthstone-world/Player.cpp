@@ -6100,12 +6100,11 @@ void Player::UpdateNearbyGameObjects()
 					{
 						go->BuildFieldUpdatePacket(this, GAMEOBJECT_DYNAMIC, GO_DYNFLAG_QUEST);
 
-						uint32 oldBytes = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
-						go->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 1);
-						uint32 newBytes = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
-						go->SetUInt32Value(GAMEOBJECT_BYTES_1, oldBytes);
+						uint32 state = GetUInt32Value(GAMEOBJECT_BYTES_1);
+						uint8 * v = (uint8*)&state;
+						v[GAMEOBJECT_BYTES_STATE] = 1;
 
-						go->BuildFieldUpdatePacket(this, GAMEOBJECT_BYTES_1, newBytes);
+						go->BuildFieldUpdatePacket(this, GAMEOBJECT_BYTES_1, state);
 						go->BuildFieldUpdatePacket(this, GAMEOBJECT_FLAGS, 0);
 						break;
 					}
@@ -6113,15 +6112,12 @@ void Player::UpdateNearbyGameObjects()
 
 				if( v == info->InvolvedQuestCount )
 				{
-					// not on the quest
-					// HUGE WOTLK HACK xD
-					uint32 oldBytes = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
-					go->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 0);
-					uint32 newBytes = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
-					go->SetUInt32Value(GAMEOBJECT_BYTES_1, oldBytes);
+					uint32 state = GetUInt32Value(GAMEOBJECT_BYTES_1);
+					uint8 * v = (uint8*)&state;
+					v[GAMEOBJECT_BYTES_STATE] = 0;
 
 					go->BuildFieldUpdatePacket(this, GAMEOBJECT_DYNAMIC, 0);
-					go->BuildFieldUpdatePacket(this, GAMEOBJECT_BYTES_1, newBytes);
+					go->BuildFieldUpdatePacket(this, GAMEOBJECT_BYTES_1, state);
 					go->BuildFieldUpdatePacket(this, GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
 				}
 			}
