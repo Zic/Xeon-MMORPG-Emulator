@@ -121,7 +121,7 @@ typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;
 
 
 
-class LootMgr : public Singleton < LootMgr >
+class SERVER_DECL LootMgr : public Singleton < LootMgr >
 {
 public:
 	LootMgr();
