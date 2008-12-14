@@ -3351,9 +3351,6 @@ void Unit::smsg_AttackStop(Unit* pVictim)
 	data << pVictim->GetNewGUID();
 	data << uint32(0);
 	SendMessageToSet(&data, true );
-
-	// try to remove attack target
-	CombatStatus.RemoveAttackTarget(pVictim);
 }
 
 void Unit::smsg_AttackStop(uint64 victimGuid)
@@ -6146,6 +6143,17 @@ void Creature::Tag(Player *plr)
 
 	// update tag visual
 	UpdateLootAnimation();
+}
+
+void Unit::SetPower(uint32 type, int32 value)
+{
+	uint32 maxpower = GetUInt32Value(UNIT_FIELD_MAXPOWER1 + type);
+	if(value < 0)
+		value = 0;
+	else if(value > (int32)maxpower)
+		value = maxpower;
+	SetUInt32Value(UNIT_FIELD_POWER1 + type, value);
+	SendPowerUpdate();
 }
 
 void Unit::RemoveStealth()

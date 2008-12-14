@@ -2227,7 +2227,19 @@ bool Spell::HasPower()
 	case POWER_TYPE_RAGE:	{ powerField = UNIT_FIELD_POWER2; }break;
 	case POWER_TYPE_FOCUS:	{ powerField = UNIT_FIELD_POWER3; }break;
 	case POWER_TYPE_ENERGY:	{ powerField = UNIT_FIELD_POWER4; }break;
-	case POWER_TYPE_RUNE:	{ powerField = UNIT_FIELD_POWER6; }break;
+	case POWER_TYPE_RUNE:
+		{
+			if(m_spellInfo->runeCostID && p_caster)
+			{
+				SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
+				uint32 credit = p_caster->HasRunes(RUNE_TYPE_BLOOD, runecost->bloodRuneCost) +
+					p_caster->HasRunes(RUNE_TYPE_FROST, runecost->frostRuneCost) +
+					p_caster->HasRunes(RUNE_TYPE_UNHOLY, runecost->unholyRuneCost);
+				if(credit > 0 && p_caster->HasRunes(RUNE_TYPE_DEATH, credit) > 0)	// Try to take death runes
+					return false;	// Not enough runes
+			}
+			return true;
+		}
 	case POWER_TYPE_RUNIC:	{ powerField = UNIT_FIELD_POWER7; }break;
 	default:{
 		DEBUG_LOG("unknown power type %d", m_spellInfo->powerType);
@@ -2305,7 +2317,21 @@ bool Spell::TakePower()
 		case POWER_TYPE_RAGE:	{ powerField = UNIT_FIELD_POWER2; }break;
 		case POWER_TYPE_FOCUS:	{ powerField = UNIT_FIELD_POWER3; }break;
 		case POWER_TYPE_ENERGY:	{ powerField = UNIT_FIELD_POWER4; }break;
-		case POWER_TYPE_RUNE:	{ powerField = UNIT_FIELD_POWER6; }break;
+		case POWER_TYPE_RUNE:
+			{
+				if(m_spellInfo->runeCostID && p_caster)
+				{
+					SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
+					uint32 credit = p_caster->TakeRunes(RUNE_TYPE_BLOOD, runecost->bloodRuneCost) +
+						p_caster->TakeRunes(RUNE_TYPE_FROST, runecost->frostRuneCost) +
+						p_caster->TakeRunes(RUNE_TYPE_UNHOLY, runecost->unholyRuneCost);
+					if(credit > 0 && p_caster->TakeRunes(RUNE_TYPE_DEATH, credit) > 0)	// Try to take death runes
+						return false;	// Not enough runes
+					if(runecost->runePowerGain)
+						u_caster->SetPower(POWER_TYPE_RUNIC, runecost->runePowerGain + u_caster->GetUInt32Value(UNIT_FIELD_POWER7));
+				}
+				return true;
+			}
 		case POWER_TYPE_RUNIC:	{ powerField = UNIT_FIELD_POWER7; }break;
 		default:{
 			DEBUG_LOG("unknown power type %d", m_spellInfo->powerType);
@@ -2346,21 +2372,6 @@ bool Spell::TakePower()
 		  SM_PIValue(u_caster->SM_PCost,&cost,m_spellInfo->SpellGroupType);
 	}
 
-	if((int32)m_spellInfo->powerType==POWER_TYPE_RUNE)
-	{
-		SpellRuneCostEntry *rc = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
-		if (rc)
-		{
-			if (rc->runePowerGain)
-			{
-				uint32 runicpwr = m_caster->GetUInt32Value(UNIT_FIELD_POWER7) + rc->runePowerGain;
-				if (runicpwr > m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER7))
-					runicpwr = m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER7);
-				m_caster->SetUInt32Value(UNIT_FIELD_POWER7, runicpwr);
-			}
-		}
-	}
-
 	if (cost <=0)
 		return true;
 
@@ -2374,7 +2385,10 @@ bool Spell::TakePower()
 	{
 		if(cost <= currentPower) // Unit has enough power (needed for creatures)
 		{
-			m_caster->SetUInt32Value(powerField, currentPower - cost);
+			if(u_caster)
+				u_caster->SetPower(m_spellInfo->powerType, currentPower - cost);
+			else
+				m_caster->SetUInt32Value(powerField, currentPower - cost);
 			return true;
 		}
 		else

@@ -498,6 +498,14 @@ enum FactionRating
 	REVERED,
 	EXALTED
 };
+enum RuneTypes
+{
+	RUNE_TYPE_BLOOD			= 0,
+	RUNE_TYPE_FROST			= 1,
+	RUNE_TYPE_UNHOLY		= 2,
+	RUNE_TYPE_DEATH			= 3,
+	RUNE_TYPE_RECHARGING	= 4
+};
 struct FactionReputation
 {
 	int32 standing;
@@ -1023,7 +1031,6 @@ public:
 	}
 	uint32 GetMaxPersonalRating();
 
-	static const uint32 PvPRanks[];
 
     /************************************************************************/
     /* Groups                                                               */
@@ -2059,7 +2066,16 @@ public:
 	uint8 SetGlyph(uint32 slot, uint32 glyphId);
 	void InitGlyphSlots();
 	void InitGlyphsForLevel();
+	// Runes
 	uint8 m_runes[6];
+	HEARTHSTONE_INLINE uint8 GetRune(uint32 index)
+	{
+		ASSERT(index < 6);
+		return m_runes[index];
+	}
+	void ConvertRune(uint8 index, uint8 value);
+	uint32 TakeRunes(uint8 type, uint32 count);
+	uint32 HasRunes(uint8 type, uint32 count);
 
 private:
 	// Stuff for "Talent Inspect"

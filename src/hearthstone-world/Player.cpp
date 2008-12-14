@@ -20,39 +20,7 @@
 #include "StdAfx.h"
 UpdateMask Player::m_visibleUpdateMask;
 #define COLLISION_MOUNT_CHECK_INTERVAL 1000
-
-const uint32 Player::PvPRanks[] = { 
-	PVPTITLE_NONE,			// 0
-	PVPTITLE_PRIVATE,		// 1
-	PVPTITLE_CORPORAL,		// 2
-	PVPTITLE_SERGEANT,		// 3
-	PVPTITLE_MASTER_SERGEANT, // 4
-	PVPTITLE_SERGEANT_MAJOR,	// 5
-	PVPTITLE_KNIGHT,			// 6
-	PVPTITLE_KNIGHT_LIEUTENANT, // 7
-	PVPTITLE_KNIGHT_CAPTAIN,	// 8
-	PVPTITLE_KNIGHT_CHAMPION,	// 9
-	PVPTITLE_LIEUTENANT_COMMANDER,	// 10
-	PVPTITLE_COMMANDER,				// 11
-	PVPTITLE_MARSHAL,				// 12
-	PVPTITLE_FIELD_MARSHAL,			// 13
-	PVPTITLE_GRAND_MARSHAL,			// 14
-	PVPTITLE_NONE,					// 15
-	PVPTITLE_SCOUT, 
-	PVPTITLE_GRUNT, 
-	PVPTITLE_HSERGEANT, 
-	PVPTITLE_SENIOR_SERGEANT, 
-	PVPTITLE_FIRST_SERGEANT, 
-	PVPTITLE_STONE_GUARD, 
-	PVPTITLE_BLOOD_GUARD, 
-	PVPTITLE_LEGIONNAIRE, 
-	PVPTITLE_CENTURION, 
-	PVPTITLE_CHAMPION, 
-	PVPTITLE_LIEUTENANT_GENERAL, 
-	PVPTITLE_GENERAL, 
-	PVPTITLE_WARLORD, 
-	PVPTITLE_HIGH_WARLORD 
-};
+static const uint8 baseRunes[6] = {0,0,1,1,2,2};
 
 Player::Player( uint32 guid ) : m_mailBox(guid)
 {
@@ -380,6 +348,10 @@ Player::Player( uint32 guid ) : m_mailBox(guid)
 	for (uint32 x =0;x<3;x++)
 	{
 		m_resist_hit[x]=0;
+	}
+	for(int i = 0; i < 6; ++i)
+	{
+		m_runes[i] = baseRunes[i];
 	}
 	ok_to_remove = false;
 	trigger_on_stun = 0;
@@ -731,13 +703,16 @@ bool Player::Create(WorldPacket& data )
 	//SetUInt32Value(UNIT_FIELD_POWER2, 0 ); // this gets devided by 10
 	SetUInt32Value(UNIT_FIELD_POWER3, info->focus );
 	SetUInt32Value(UNIT_FIELD_POWER4, info->energy );
+	SetUInt32Value(UNIT_FIELD_POWER6, 8);
+	SetUInt32Value(UNIT_FIELD_MAXPOWER7, 0 );
    
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, info->health);
 	SetUInt32Value(UNIT_FIELD_MAXPOWER1, info->mana );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER2, info->rage );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER3, info->focus );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
-	SetUInt32Value(UNIT_FIELD_MAXPOWER7, info->runic );
+	SetUInt32Value(UNIT_FIELD_MAXPOWER7, 1000 );
+	SetUInt32Value(UNIT_FIELD_MAXPOWER6, 8);
 
 	if( sWorld.StartLevel > 1)
 	{
@@ -2657,10 +2632,13 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	//SetUInt32Value(UNIT_FIELD_POWER2, 0);
 	SetUInt32Value(UNIT_FIELD_POWER3, info->focus);
 	SetUInt32Value(UNIT_FIELD_POWER4, info->energy );
+	SetUInt32Value(UNIT_FIELD_POWER6, 8);
+	SetUInt32Value(UNIT_FIELD_POWER7, 0);
 	SetUInt32Value(UNIT_FIELD_MAXPOWER2, info->rage );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER3, info->focus );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
-	SetUInt32Value(UNIT_FIELD_MAXPOWER7, info->runic );
+	SetUInt32Value(UNIT_FIELD_MAXPOWER6, 8);
+	SetUInt32Value(UNIT_FIELD_MAXPOWER7, 1000 );
 	if(getClass() == WARRIOR)
 		SetShapeShift(FORM_BATTLESTANCE);
 
@@ -4117,6 +4095,8 @@ void Player::KillPlayer()
 	SetUInt32Value( UNIT_DYNAMIC_FLAGS, 0x00 );
 	if(this->getClass() == WARRIOR) //rage resets on death
 		SetUInt32Value(UNIT_FIELD_POWER2, 0);
+	if(this->getClass() == DEATHKNIGHT)
+		SetUInt32Value(UNIT_FIELD_POWER7, 0);
 
 	// combo points reset upon death
 	NullComboPoints();
@@ -6025,6 +6005,7 @@ void Player::Reset_ToLevel1()
 	SetUInt32Value(UNIT_FIELD_POWER2, 0 ); // this gets devided by 10
 	SetUInt32Value(UNIT_FIELD_POWER3, info->focus );
 	SetUInt32Value(UNIT_FIELD_POWER4, info->energy );
+	SetUInt32Value(UNIT_FIELD_POWER7, 0 );
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, info->health);
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, info->health);
 	SetUInt32Value(UNIT_FIELD_BASE_MANA, info->mana);
@@ -6032,7 +6013,7 @@ void Player::Reset_ToLevel1()
 	SetUInt32Value(UNIT_FIELD_MAXPOWER2, info->rage );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER3, info->focus );
 	SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
-	SetUInt32Value(UNIT_FIELD_MAXPOWER7, info->runic );
+	SetUInt32Value(UNIT_FIELD_MAXPOWER7, 1000 );
 	SetUInt32Value(UNIT_FIELD_STAT0, info->strength );
 	SetUInt32Value(UNIT_FIELD_STAT1, info->ability );
 	SetUInt32Value(UNIT_FIELD_STAT2, info->stamina );
@@ -6358,14 +6339,11 @@ void Player::CalcStat(uint32 type)
 
 void Player::RegenerateMana(bool is_interrupted)
 {
-	//if (m_interruptRegen)
-	//	return;
-
 	uint32 cur = GetUInt32Value(UNIT_FIELD_POWER1);
 	uint32 mm = GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 	if(cur >= mm)return;
 	float amt = (is_interrupted) ? GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) : GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER);
-	amt /= 5; //floats are Mana Regen Per Sec. Regen Applied every 2 secs so real value =X*2 . Shady
+	amt /= 5;
 	//Apply shit from conf file
 	amt *= sWorld.getRate(RATE_POWER1);
 
@@ -11230,4 +11208,43 @@ uint8 Player::SetGlyph(uint32 slot, uint32 glyphId)
 	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyphId);
 	CastSpell(this, glyph->SpellID, true);	// Apply the glyph effect
 	return 0;
+}
+
+void Player::ConvertRune(uint8 index, uint8 value)
+{
+	ASSERT(index < 6);
+	m_runes[index] = value;
+	if(value >= 4)
+		return;
+
+	WorldPacket data(SMSG_CONVERT_RUNE, 2);
+	data << (uint8)index;
+	data << (uint8)value;
+	SendMessageToSet(&data, true);
+}
+
+uint32 Player::HasRunes(uint8 type, uint32 count)
+{
+	uint32 found = 0;
+	for(uint32 i=0; i<6 && count != found; ++i)
+	{
+		if(GetRune(i) == type)
+			found++;
+	}
+	return (count - found);
+}
+
+uint32 Player::TakeRunes(uint8 type, uint32 count)
+{
+	uint32 found = 0;
+	for(uint32 i=0; i<6 && count != found; ++i)
+	{
+		if(GetRune(i) == type)
+		{
+			ConvertRune(i, RUNE_TYPE_RECHARGING);
+			sEventMgr.AddEvent( this, &Player::ConvertRune, (uint8)i, baseRunes[i], EVENT_PLAYER_RUNE_REGEN + i, 10000, 1, 0 );
+			found++;
+		}
+	}
+	return (count - found);
 }

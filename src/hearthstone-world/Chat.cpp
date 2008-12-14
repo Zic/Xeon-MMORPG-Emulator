@@ -195,6 +195,7 @@ void CommandTableStorage::Init()
 		{ "hp",		 'm', NULL,	"Health Points/HP",	NULL, UNIT_FIELD_HEALTH,	UNIT_FIELD_MAXHEALTH, 1 },
 		{ "mana",	   'm', NULL,	"Mana Points/MP",	  NULL, UNIT_FIELD_POWER1,	UNIT_FIELD_MAXPOWER1, 1 },
 		{ "rage",	   'm', NULL,	"Rage Points",		 NULL, UNIT_FIELD_POWER2,	UNIT_FIELD_MAXPOWER2, 1 },
+		{ "runicpower",'m', NULL,	"Runic Power",		 NULL, UNIT_FIELD_POWER7,	UNIT_FIELD_MAXPOWER7, 1 },
 		{ "energy",	 'm', NULL,	"Energy Points",	   NULL, UNIT_FIELD_POWER4,	UNIT_FIELD_MAXPOWER4, 1 },
 		{ "level",	  'm', &ChatHandler::HandleModifyLevelCommand,"Level", NULL, 0, 0, 0 },
 		{ "armor",	  'm', NULL,	"Armor",			   NULL, UNIT_FIELD_STAT1,			  0,		   1 },

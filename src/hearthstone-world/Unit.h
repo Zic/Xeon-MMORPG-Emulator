@@ -1199,6 +1199,8 @@ public:
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);
 
+	void SetPower(uint32 type, int32 value);
+
 	bool HasAurasOfNameHashWithCaster(uint32 namehash, Unit * caster);
 	int8 m_hasVampiricTouch;
 	int8 m_hasVampiricEmbrace;
