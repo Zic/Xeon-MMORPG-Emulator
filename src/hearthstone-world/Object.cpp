@@ -107,7 +107,7 @@ void Object::EnablePhase(int32 phaseMode)
 
 void Object::DisablePhase(int32 phaseMode)
 {
-	m_phaseMode |= ~phaseMode;
+	m_phaseMode &= ~phaseMode;
 }
 
 void Object::_Create( uint32 mapid, float x, float y, float z, float ang )
