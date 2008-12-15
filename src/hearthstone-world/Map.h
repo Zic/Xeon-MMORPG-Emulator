@@ -54,6 +54,7 @@ typedef struct
 	uint32 channel_target_go;
 	uint32 channel_target_creature;
 	uint16 stand_state;
+	int32 phase;
 }CreatureSpawn;
 
 typedef struct
@@ -74,6 +75,7 @@ typedef struct
 //	uint32	level;
 	float scale;
 	//uint32 stateNpcLink;
+	int32 phase;
 } GOSpawn;
 
 typedef std::vector<CreatureSpawn*> CreatureSpawnList;

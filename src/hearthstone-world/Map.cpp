@@ -93,7 +93,7 @@ Map::~Map()
 bool first_table_warning = true;
 bool CheckResultLengthCreatures(QueryResult * res)
 {
-	if( res->GetFieldCount() != 19 )
+	if( res->GetFieldCount() != 20 )
 	{
 		if( first_table_warning )
 		{
@@ -112,7 +112,7 @@ bool CheckResultLengthCreatures(QueryResult * res)
 bool first_table_warningg = true;
 bool CheckResultLengthGameObject(QueryResult * res)
 {
-	if( res->GetFieldCount() != 16 )
+	if( res->GetFieldCount() != 17 )
 	{
 		if( first_table_warningg )
 		{
@@ -190,6 +190,7 @@ void Map::LoadSpawns(bool reload)
 					cspawn->channel_target_go = fields[16].GetUInt32();
 					cspawn->channel_target_creature = fields[17].GetUInt32();
 					cspawn->stand_state = fields[18].GetUInt16();
+					cspawn->phase = fields[19].GetInt32();
 					spawns[cellx][celly]->CreatureSpawns.push_back(cspawn);
 					++CreatureSpawnCount;
 				}while(result->NextRow());
@@ -226,6 +227,7 @@ void Map::LoadSpawns(bool reload)
 				cspawn->channel_target_creature=0;
 				cspawn->channel_target_go=0;
 				cspawn->stand_state = fields[18].GetUInt16();
+				cspawn->phase = 0;
 				staticSpawns.CreatureSpawns.push_back(cspawn);
 				++CreatureSpawnCount;
 			}while(result->NextRow());
@@ -290,6 +292,7 @@ void Map::LoadSpawns(bool reload)
 					gspawn->flags=fields[12].GetUInt32();
 					gspawn->faction=fields[13].GetUInt32();
 					gspawn->scale = fields[14].GetFloat();
+					gspawn->phase = fields[16].GetInt32();
 					//gspawn->stateNpcLink = fields[15].GetUInt32();
 
 					//uint32 cellx=float2int32(((_maxX-gspawn->x)/_cellSize));

@@ -866,6 +866,8 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	m_runSpeed = m_base_runSpeed = proto->run_speed; //set speeds
 	m_flySpeed = proto->fly_speed;
 
+	m_phaseMode = spawn->phase;
+
 	//Set fields
 	SetUInt32Value(OBJECT_FIELD_ENTRY,proto->Id);
 	SetFloatValue(OBJECT_FIELD_SCALE_X,proto->Scale);

@@ -8479,8 +8479,6 @@ void Player::SaveAuras(stringstream &ss)
 				ss  << aur->GetSpellId() << "," << d << ",";
 		}
 	}
-
-  
 }
 
 void Player::SetShapeShift(uint8 ss)

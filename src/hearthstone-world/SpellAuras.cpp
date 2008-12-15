@@ -280,7 +280,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//257
 		&Aura::SpellAuraNULL,//258
 		&Aura::SpellAuraNULL,//259
-		&Aura::SpellAuraNULL,//260
+		&Aura::SpellAuraSetPhase,//260
 		&Aura::SpellAuraNULL,//261
 		&Aura::SpellAuraFrozenTarget,//262
 		&Aura::SpellAuraNULL,//263
@@ -9023,4 +9023,19 @@ void Aura::SpellAuraModIgnoreArmorPct(bool apply)
 		m_target->m_ignoreArmorPct += (mod->m_amount / 100.0f);
 	else
 		m_target->m_ignoreArmorPct -= (mod->m_amount / 100.0f);
+}
+
+void Aura::SpellAuraSetPhase(bool apply)
+{
+	if( !p_target ) // NPCs/GOs are handled in the DB or by scripts.
+		return;
+
+	if( apply )
+	{
+		p_target->EnablePhase( mod->m_miscValue );
+	}
+	else
+	{
+		p_target->DisablePhase( mod->m_miscValue );
+	}
 }

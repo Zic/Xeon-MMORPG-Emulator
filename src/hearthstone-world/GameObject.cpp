@@ -443,6 +443,7 @@ bool GameObject::Load(GOSpawn *spawn)
 	if(!CreateFromProto(spawn->entry,0,spawn->x,spawn->y,spawn->z,spawn->facing))
 		return false;
 
+	m_phaseMode = spawn->phase;
 	m_spawn = spawn;
 	SetRotation(spawn->facing);
 	SetUInt32Value(GAMEOBJECT_FLAGS,spawn->flags);

@@ -501,7 +501,10 @@ public:
 	void EventSpellHit(Spell *pSpell);
 
 	bool PhasedCanInteract(Object* pObj);
-	void SetPhase(int32 phaseMode, int32 mapIdLimitation = -1, uint32 distanceLimit = 0);
+	bool HasPhase() { return m_phaseMode != 0; }
+	void EnablePhase(int32 phaseMode);
+	void DisablePhase(int32 phaseMode);
+	void SetPhase(int32 phase); // Don't fucking use this.
 
 protected:
 	Object (  );

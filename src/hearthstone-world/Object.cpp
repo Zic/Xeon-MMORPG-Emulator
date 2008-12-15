@@ -95,15 +95,19 @@ Object::~Object( )
 		delete m_extensions;
 }
 
-void Object::SetPhase(int32 phaseMode, int32 mapIdLimitation /* = -1 */, uint32 distanceLimit /* = 0 */)
+void Object::SetPhase(int32 phase)
 {
-	m_phaseMode = phaseMode;
-	m_phaseMapId = mapIdLimitation;
-	m_phaseDistanceLimit = distanceLimit;
-	if( distanceLimit )
-	{
-		m_phaseLocation.ChangeCoords(GetPositionX(), GetPositionY(), GetPositionZ());
-	}
+	m_phaseMode = phase;
+}
+
+void Object::EnablePhase(int32 phaseMode)
+{
+	m_phaseMode |= phaseMode;
+}
+
+void Object::DisablePhase(int32 phaseMode)
+{
+	m_phaseMode |= ~phaseMode;
 }
 
 void Object::_Create( uint32 mapid, float x, float y, float z, float ang )
@@ -2692,10 +2696,13 @@ bool Object::IsInLineOfSight(Object* pObj)
 
 bool Object::PhasedCanInteract(Object* pObj)
 {
-	if( pObj->m_phaseMode == ALL_PHASES ) // -1: All phases. But perhaps this should be limited to GameObjects?
+	if( m_phaseMode == ALL_PHASES || pObj->m_phaseMode == ALL_PHASES ) // -1: All phases. But perhaps this should be limited to GameObjects?
 		return true;
 
-	if( pObj->m_phaseMode == m_phaseMode )
+	if( pObj->m_phaseMode & m_phaseMode || pObj->m_phaseMode == m_phaseMode )
+		return true;
+
+	if( pObj->PhasedCanInteract(this) ) // If they can see us, can we see them?
 		return true;
 
 	return false;
