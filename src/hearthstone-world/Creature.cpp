@@ -296,7 +296,7 @@ void Creature::SaveToDB()
 	else
 		ss << "0,0,0,";
 
-	ss << uint32(GetStandState());
+	ss << uint32(GetStandState()) << ",";
 	ss << m_phaseMode << ")";
 	WorldDatabase.Execute(ss.str().c_str());
 }
