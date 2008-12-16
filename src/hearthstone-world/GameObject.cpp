@@ -271,33 +271,8 @@ void GameObject::SaveToDB()
 		<< GetUInt32Value(GAMEOBJECT_FLAGS) << ","
 		<< GetUInt32Value(GAMEOBJECT_FACTION) << ","
 		<< GetFloatValue(OBJECT_FIELD_SCALE_X) << ","
-		<< "0)";
+		<< "0,0)";
 	WorldDatabase.Execute(ss.str().c_str());
-
-  /*  std::stringstream ss;
-	if (!m_sqlid)
-		m_sqlid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-
-	ss << "DELETE FROM gameobjects WHERE id=" << m_sqlid;
-	sDatabase.Execute(ss.str().c_str());
-
-	ss.rdbuf()->str("");
-	ss << "INSERT INTO gameobjects VALUES ( "
-		<< m_sqlid << ", "
-		<< m_position.x << ", "
-		<< m_position.y << ", "
-		<< m_position.z << ", "
-		<< m_position.o << ", "
-		<< GetZoneId() << ", "
-		<< GetMapId() << ", '";
-
-	for( uint32 index = 0; index < m_valuesCount; index ++ )
-		ss << GetUInt32Value(index) << " ";
-
-	ss << "', ";
-	ss << GetEntry() << ", 0, 0)"; 
-
-	sDatabase.Execute( ss.str( ).c_str( ) );*/
 }
 
 void GameObject::SaveToFile(std::stringstream & name)

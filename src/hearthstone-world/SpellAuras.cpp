@@ -280,8 +280,8 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//257
 		&Aura::SpellAuraIncreaseAPByAttribute,//268
 		&Aura::SpellAuraNULL,//259
-		&Aura::SpellAuraSetPhase,//260
-		&Aura::SpellAuraNULL,//261
+		&Aura::SpellAuraNULL,//260
+		&Aura::SpellAuraSetPhase,//261
 		&Aura::SpellAuraFrozenTarget,//262
 		&Aura::SpellAuraNULL,//263
 		&Aura::SpellAuraNULL,//264
