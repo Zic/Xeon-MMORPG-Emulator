@@ -765,6 +765,11 @@ void ApplyNormalFixes()
 
 		for(uint32 b=0;b<3;++b)
 		{
+			if( sp->Effect[b] == SPELL_EFFECT_SUMMON && sp->EffectBasePoints[b] > 25 )
+			{
+				sp->EffectBasePoints[b] = 0;
+			}
+
 			if(sp->EffectTriggerSpell[b] != 0 && dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[b]) == NULL)
 			{
 				/* proc spell referencing non-existant spell. create a dummy spell for use w/ it. */
