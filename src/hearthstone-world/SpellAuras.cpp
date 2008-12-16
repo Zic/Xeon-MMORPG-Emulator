@@ -278,7 +278,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//255
 		&Aura::SpellAuraNULL,//256
 		&Aura::SpellAuraNULL,//257
-		&Aura::SpellAuraNULL,//258
+		&Aura::SpellAuraIncreaseAPByAttribute,//268
 		&Aura::SpellAuraNULL,//259
 		&Aura::SpellAuraSetPhase,//260
 		&Aura::SpellAuraNULL,//261
@@ -9038,4 +9038,21 @@ void Aura::SpellAuraSetPhase(bool apply)
 	{
 		p_target->DisablePhase( mod->m_miscValue );
 	}
+}
+
+void Aura::SpellAuraIncreaseAPByAttribute(bool apply)
+{
+	int32 stat = mod->m_miscValue;	// Attribute
+	ASSERT(stat > 0 && stat <= 4);	// Check that it is in range
+	if(apply)
+	{
+		mod->realamount = (mod->m_amount * m_target->GetUInt32Value(UNIT_FIELD_STAT0 + stat)) / 100;
+		if(mod->m_amount<0)
+			SetNegative();
+		else
+			SetPositive();
+	}
+	//TODO make it recomputed each time we get AP or stats change
+	m_target->ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, apply ? mod->realamount : -mod->realamount);
+	m_target->CalcDamage();
 }

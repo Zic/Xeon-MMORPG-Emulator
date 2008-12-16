@@ -2761,6 +2761,11 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 31242 ); 
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CAST_SPELL;
+
+	//rogue - Cheap Shot
+	sp = dbcSpell.LookupEntryForced( 1833 ); 
+	if( sp != NULL )
+		sp->Flags3 &= ~FLAGS3_REQ_BEHIND_TARGET;	//Doesn't require to be behind target
 	
 	//rogue - Camouflage.
 	sp = dbcSpell.LookupEntryForced( 13975 ); 
@@ -3599,6 +3604,7 @@ void ApplyNormalFixes()
 		sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
 		sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 		sp->Effect[2] = 0;
+		sp->AuraInterruptFlags |= AURA_INTERRUPT_ON_CAST_SPELL; //The effect is cancelled if you perform or receive any actions
 	}
 
 	//Mage - Icy Veins
@@ -4012,7 +4018,10 @@ void ApplyNormalFixes()
 	//rogue-shiv -> add 1 combo point
 	sp = dbcSpell.LookupEntryForced( 5938 );
 	if( sp != NULL )
+	{
 		sp->Effect[1]=80;
+		sp->Flags3 &= ~FLAGS3_REQ_BEHIND_TARGET;	//Doesn't require to be behind target
+	}
 
 	//warlock - Demonic Sacrifice
 	sp = dbcSpell.LookupEntryForced( 18789 );

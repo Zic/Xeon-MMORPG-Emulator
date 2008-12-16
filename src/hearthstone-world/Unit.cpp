@@ -1772,9 +1772,7 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 						SpellClassMask = spe->EffectSpellClassMask[0];
 
 					if (SpellClassMask && SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2]) {
-						if (!(SpellClassMask[0] & CastingSpell->SpellGroupType[0]) &&
-							!(SpellClassMask[1] & CastingSpell->SpellGroupType[1]) &&
-							!(SpellClassMask[2] & CastingSpell->SpellGroupType[2]))
+						if (!Spell::EffectAffectsSpell(spe, 0, CastingSpell))
 							continue;
 					}
 					SpellCastTime *sd = dbcSpellCastTime.LookupEntry(CastingSpell->CastingTimeIndex);
