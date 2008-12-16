@@ -128,6 +128,12 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 	if(objB->GetTypeId() == TYPEID_CORPSE)
 		return false;
 
+	if( !objA->PhasedCanInteract(objB) )
+		return false;
+
+	if( !objB->PhasedCanInteract(objA) )
+		return false;
+
 	Player *playerA = NULL;
 	Player *playerB = NULL;
 	

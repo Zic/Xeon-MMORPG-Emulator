@@ -227,7 +227,7 @@ void Map::LoadSpawns(bool reload)
 				cspawn->channel_target_creature=0;
 				cspawn->channel_target_go=0;
 				cspawn->stand_state = fields[18].GetUInt16();
-				cspawn->phase = 0;
+				cspawn->phase = 1;
 				staticSpawns.CreatureSpawns.push_back(cspawn);
 				++CreatureSpawnCount;
 			}while(result->NextRow());

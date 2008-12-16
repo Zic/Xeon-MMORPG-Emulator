@@ -24,6 +24,7 @@
 
 class Unit;
 class Spell;
+class Aura;
 
 enum HIGHGUID_TYPE
 {
@@ -505,6 +506,8 @@ public:
 	void EnablePhase(int32 phaseMode);
 	void DisablePhase(int32 phaseMode);
 	void SetPhase(int32 phase); // Don't fucking use this.
+
+	Aura * m_phaseAura;
 
 protected:
 	Object (  );

@@ -28,6 +28,8 @@ using namespace std;
 
 Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 {
+	m_phaseAura = NULL;
+	m_phaseMode = 1;
 	m_mapId = 0;
 	m_zoneId = 0;
 
@@ -67,10 +69,6 @@ Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 	m_loadedFromDB = false;
 	m_loot.gold = 0;
 	m_looted = false;
-
-	m_phaseDistanceLimit = 0;
-	m_phaseMapId = -1;
-	m_phaseMode = 0;
 
 	m_objectsInRange.clear();
 	m_inRangePlayers.clear();
@@ -2695,9 +2693,6 @@ bool Object::PhasedCanInteract(Object* pObj)
 		return true;
 
 	if( pObj->m_phaseMode & m_phaseMode || pObj->m_phaseMode == m_phaseMode )
-		return true;
-
-	if( pObj->PhasedCanInteract(this) ) // If they can see us, can we see them?
 		return true;
 
 	return false;

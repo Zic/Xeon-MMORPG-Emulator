@@ -9036,11 +9036,16 @@ void Aura::SpellAuraSetPhase(bool apply)
 
 	if( apply )
 	{
+		if( p_target->m_phaseAura )
+			p_target->m_phaseAura->Remove();
+
 		p_target->EnablePhase( mod->m_miscValue );
+		p_target->m_phaseAura = this;
 	}
 	else
 	{
-		p_target->DisablePhase( mod->m_miscValue );
+		p_target->SetPhase( 1 );
+		p_target->m_phaseAura = NULL;
 	}
 }
 
