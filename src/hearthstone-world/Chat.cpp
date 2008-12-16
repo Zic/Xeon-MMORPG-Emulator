@@ -698,7 +698,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, Wo
 			}
 			if(table[i].ValueType == 2)
 				result = CmdSetFloatField(m_session, table[i].NormalValueField, table[i].MaxValueField, table[i].Name, text);
-			if(table[i].ValueType == 3)
+			else if(table[i].ValueType == 3)
 			{
 				result = true;
 				if( m_session->GetPlayer()->m_GM_SelectedGO != NULL )
@@ -708,6 +708,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, Wo
 			}
 			else
 				result = CmdSetValueField(m_session, table[i].NormalValueField, table[i].MaxValueField, table[i].Name, text);
+
 			if(!result)
 				RedSystemMessage(m_session, "Must be in the form of (command) <value>, or, (command) <value> <maxvalue>");
 		}
