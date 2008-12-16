@@ -3297,6 +3297,7 @@ uint8 Spell::CanCast(bool tolerate)
 			{
 				case 603: //curse of doom, can't be casted on players
 				case 30910:
+				case 47867:
 				{
 					if(target->IsPlayer())
 						return SPELL_FAILED_TARGET_IS_PLAYER;
@@ -3372,28 +3373,13 @@ uint8 Spell::CanCast(bool tolerate)
 				**********************************************************/
 
 				/* burlex: units are always facing the target! */
-				if( p_caster && m_spellInfo->FacingCasterFlags != FACING_FLAG_SKIPCHECK )
+				if(p_caster && m_spellInfo->FacingCasterFlags)
 				{
-					if( m_spellInfo->Spell_Dmg_Type == SPELL_DMG_TYPE_RANGED )
-					{ // our spell is a ranged spell
-						if(!p_caster->isInFront(target))
-							return SPELL_FAILED_UNIT_NOT_INFRONT;
-					}
-					else
-					{ // our spell is not a ranged spell
-						if( m_spellInfo->FacingCasterFlags == FACING_FLAG_INFRONT )
-						{
-							// must be in front
-							if(!u_caster->isInFront(target))
-								return SPELL_FAILED_UNIT_NOT_INFRONT;
-						}
-						else if( m_spellInfo->FacingCasterFlags == FACING_FLAG_INBACK )
-						{
-							// behind
-							if(target->isInFront(u_caster))
-								return SPELL_FAILED_NOT_BEHIND;
-						}
-					}
+					if(!p_caster->isInFront(target))
+						return SPELL_FAILED_UNIT_NOT_INFRONT;
+					if(m_spellInfo->Flags3 & FLAGS3_REQ_BEHIND_TARGET &&
+						target->isInFront(p_caster))
+						return SPELL_FAILED_NOT_BEHIND;
 				}
 			}
 

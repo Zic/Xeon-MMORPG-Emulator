@@ -449,7 +449,7 @@ enum Flags3
 	FLAGS3_REQ_RANGED_WEAPON  = 0x20000, // this is shit and has nothing to do with auto shot
 	FLAGS3_REVIVE_PET         = 0x40000, // actually 1 spell, revive pet
 	FLAGS3_UNK21              = 0x80000, // this is a group of spells that are triggered by something. (I have no clue on how to name this one)
-	FLAGS3_REQ_BEHIND_TARGET  = 0x100000, //wrong
+	FLAGS3_REQ_BEHIND_TARGET  = 0x100000,
 	FLAGS3_UNK23              = 0x200000,
 	FLAGS3_UNK24              = 0x400000,
 	FLAGS3_UNK25              = 0x800000,
@@ -525,13 +525,6 @@ enum SpellTargetType
     TARGET_TYPE_HUMANOID   = 0x40,
     TARGET_TYPE_CRITTER    = 0x80,
     TARGET_TYPE_MECHANICAL = 0x100,
-};
-
-enum FacingCasterFlags
-{
-	FACING_FLAG_SKIPCHECK	= 0x00,
-	FACING_FLAG_INFRONT		= 0x01,
-	FACING_FLAG_INBACK		= 0x02,
 };
 
 /****************SpellExtraFlags*****************/

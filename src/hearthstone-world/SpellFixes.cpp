@@ -866,11 +866,6 @@ void ApplyNormalFixes()
 		if( !sscanf( sp->Rank, "Rank %d", (unsigned int*)&rank) )
 			rank = 0;
 
-		// Inback hacky fix
-		if (strstr(sp->Description, "Must be behind the target") ||
-		    strstr(sp->Description, "and behind the target"))
-			sp->FacingCasterFlags = FACING_FLAG_INBACK;
-
 		//seal of light 
 		if( namehash == SPELL_HASH_SEAL_OF_LIGHT )			
 			sp->procChance = 45;	/* this will do */
