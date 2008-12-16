@@ -61,8 +61,8 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectDispel,//SPELL_EFFECT_DISPEL - 38
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_LANGUAGE - 39
 		&Spell::SpellEffectDualWield,//SPELL_EFFECT_DUAL_WIELD - 40
-		&Spell::SpellEffectSummonWild,//SPELL_EFFECT_SUMMON_WILD - 41
-		&Spell::SpellEffectSummonGuardian,//SPELL_EFFECT_SUMMON_GUARDIAN - 42
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_WILD - 41
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_GUARDIAN - 42
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER - 43
 		&Spell::SpellEffectSkillStep,//SPELL_EFFECT_SKILL_STEP - 44
 		&Spell::SpellEffectAddHonor,//SPELL_ADD_HONOR - 45
@@ -93,10 +93,10 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_PULL - 70
 		&Spell::SpellEffectPickpocket,//SPELL_EFFECT_PICKPOCKET - 71
 		&Spell::SpellEffectAddFarsight,//SPELL_EFFECT_ADD_FARSIGHT - 72
-		&Spell::SpellEffectSummonPossessed,//SPELL_EFFECT_SUMMON_POSSESSED - 73
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_POSSESSED - 73
 		&Spell::SpellEffectUseGlyph,//SPELL_EFFECT_USE_GLYPH - 74
 		&Spell::SpellEffectHealMechanical,//SPELL_EFFECT_HEAL_MECHANICAL - 75
-		&Spell::SpellEffectSummonObjectWild,//SPELL_EFFECT_SUMMON_OBJECT_WILD - 76
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_OBJECT_WILD - 76
 		&Spell::SpellEffectScriptEffect,//SPELL_EFFECT_SCRIPT_EFFECT - 77
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_ATTACK - 78
 		&Spell::SpellEffectSanctuary,//SPELL_EFFECT_SANCTUARY - 79
@@ -107,17 +107,17 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectStuck,//SPELL_EFFECT_STUCK - 84
 		&Spell::SpellEffectSummonPlayer,//SPELL_EFFECT_SUMMON_PLAYER - 85
 		&Spell::SpellEffectActivateObject,//SPELL_EFFECT_ACTIVATE_OBJECT - 86
-		&Spell::SpellEffectSummonTotem,//SPELL_EFFECT_SUMMON_TOTEM_SLOT1 - 87
-		&Spell::SpellEffectSummonTotem,//SPELL_EFFECT_SUMMON_TOTEM_SLOT2 - 88
-		&Spell::SpellEffectSummonTotem,//SPELL_EFFECT_SUMMON_TOTEM_SLOT3 - 89
-		&Spell::SpellEffectSummonTotem,//SPELL_EFFECT_SUMMON_TOTEM_SLOT4 - 90
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_TOTEM_SLOT1 - 87
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_TOTEM_SLOT2 - 88
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_TOTEM_SLOT3 - 89
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_TOTEM_SLOT4 - 90
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_THREAT_ALL - 91 UNUSED
 		&Spell::SpellEffectEnchantHeldItem,//SPELL_EFFECT_ENCHANT_HELD_ITEM - 92
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_PHANTASM - 93 OLD
 		&Spell::SpellEffectSelfResurrect,//SPELL_EFFECT_SELF_RESURRECT - 94
 		&Spell::SpellEffectSkinning,//SPELL_EFFECT_SKINNING - 95
 		&Spell::SpellEffectCharge,//SPELL_EFFECT_CHARGE - 96
-		&Spell::SpellEffectSummonCritter,//SPELL_EFFECT_SUMMON_CRITTER - 97
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_CRITTER - 97
 		&Spell::SpellEffectKnockBack,//SPELL_EFFECT_KNOCK_BACK - 98
 		&Spell::SpellEffectDisenchant,//SPELL_EFFECT_DISENCHANT - 99
 		&Spell::SpellEffectInebriate,//SPELL_EFFECT_INEBRIATE - 100
@@ -132,7 +132,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectSummonDeadPet,//SPELL_EFFECT_SUMMON_DEAD_PET - 109
 		&Spell::SpellEffectDestroyAllTotems,//SPELL_EFFECT_DESTROY_ALL_TOTEMS - 110
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_DURABILITY_DAMAGE - 111
-		&Spell::SpellEffectSummonDemon,//SPELL_EFFECT_SUMMON_DEMON - 112
+		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_DEMON - 112
 		&Spell::SpellEffectResurrectNew,//SPELL_EFFECT_RESURRECT_NEW - 113
 		&Spell::SpellEffectAttackMe,//SPELL_EFFECT_ATTACK_ME - 114
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_DURABILITY_DAMAGE_PCT - 115
@@ -2269,7 +2269,57 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	m_AreaAura = true;	
 }
 
-void Spell::SpellEffectSummon(uint32 i) // Summon
+void Spell::SpellEffectSummon(uint32 i)
+{
+	switch( m_spellInfo->EffectMiscValueB[i] )
+	{
+	case SUMMON_TYPE_POSSESSED:
+		{
+			SummonPossessed(i);
+			break;
+		}
+	case SUMMON_TYPE_GUARDIAN:
+		{
+			SummonGuardian(i);
+			break;
+		}
+	case SUMMON_TYPE_WILD:
+		{
+			SummonGuardian(i);
+			break;
+		}
+	case SUMMON_TYPE_DEMON:
+		{
+			SummonGuardian(i);
+			break;
+		}
+	case SUMMON_TYPE_TOTEM_1:
+	case SUMMON_TYPE_TOTEM_2:
+	case SUMMON_TYPE_TOTEM_3:
+	case SUMMON_TYPE_TOTEM_4:
+		{
+			SummonTotem(i);
+			break;
+		}
+	case SUMMON_TYPE_SUMMON:
+		{
+			SummonCreature(i);
+			break;
+		}
+	case SUMMON_TYPE_CRITTER:
+		{
+			SummonNonCombatPet(i);
+			break;
+		}
+	default:
+		{
+			SummonCreature(i);
+			break;
+		}
+	}
+}
+
+void Spell::SummonCreature(uint32 i) // Summon
 {
 	if(!p_caster || !p_caster->IsInWorld())
 		return;
@@ -3207,7 +3257,7 @@ void Spell::SpellEffectDualWield(uint32 i)
 	//note: probably here must be not caster but unitVictim
 }
 
-void Spell::SpellEffectSummonWild(uint32 i)  // Summon Wild
+void Spell::SpellEffectSummonWildOld(uint32 i)  // Summon Wild
 {
 	//these are some cretures that have your faction and do not respawn
 	//number of creatures is actualy dmg (the usual formula), sometimes =3 sometimes =1
@@ -3251,7 +3301,7 @@ void Spell::SpellEffectSummonWild(uint32 i)  // Summon Wild
 	}
 }
 
-void Spell::SpellEffectSummonGuardian(uint32 i) // Summon Guardian
+void Spell::SummonGuardian(uint32 i) // Summon Guardian
 {
 	if ( !u_caster )
 		return;
@@ -3931,7 +3981,7 @@ void Spell::SpellEffectAddFarsight(uint32 i) // Add Farsight
 #endif
 }
 
-void Spell::SpellEffectSummonPossessed(uint32 i) // eye of kilrog
+void Spell::SummonPossessed(uint32 i) // eye of kilrog
 {
 	/*
 	m_target->DisableAI();
@@ -4631,30 +4681,30 @@ void Spell::SpellEffectActivateObject(uint32 i) // Activate Object
 	sEventMgr.AddEvent(gameObjTarget, &GameObject::Deactivate, EVENT_GAMEOBJECT_DEACTIVATE, GetDuration(), 1);*/
 }
 
-void Spell::SpellEffectSummonTotem(uint32 i) // Summon Totem
+void Spell::SummonTotem(uint32 i) // Summon Totem
 {
 	if(!p_caster) 
 		return;
 
 	float x = p_caster->GetPositionX();
 	float y = p_caster->GetPositionY();
-	uint32 slot = m_spellInfo->Effect[i] - SPELL_EFFECT_SUMMON_TOTEM_SLOT1;
+	uint32 slot = m_spellInfo->EffectMiscValueB[i] - SUMMON_TYPE_TOTEM_1;
 
-	switch(m_spellInfo->Effect[i])
+	switch(m_spellInfo->EffectMiscValueB[i])
 	{
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: 
+	case SUMMON_TYPE_TOTEM_1: 
 		x -= 1.5f;
 		y -= 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: 
+	case SUMMON_TYPE_TOTEM_2: 
 		x -= 1.5f;
 		y += 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:  
+	case SUMMON_TYPE_TOTEM_3:  
 		x += 1.5f;
 		y -= 1.5f;
 		break;
-	case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: 
+	case SUMMON_TYPE_TOTEM_4: 
 		x += 1.5f;
 		y += 1.5f;
 		break;
@@ -5025,7 +5075,7 @@ void Spell::SpellEffectPlayerPull( uint32 i )
 	p_target->SendMessageToSet( &data, true );   
 }
 
-void Spell::SpellEffectSummonCritter(uint32 i)
+void Spell::SummonNonCombatPet(uint32 i)
 {
 	if(!u_caster || u_caster->IsInWorld() == false)
 		return;
@@ -5389,7 +5439,7 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 	m_caster->SetUInt32Value(UNIT_FIELD_POWER1, (uint32)RetreivedMana);
 }
 
-void Spell::SpellEffectSummonDemon(uint32 i)
+void Spell::SpellEffectSummonDemonOld(uint32 i)
 {
 	if(!p_caster/* ||  p_caster->getClass() != WARLOCK */) //summoning a demon shouldn't be warlock only, see spells 25005, 24934, 24810 etc etc
 		return;

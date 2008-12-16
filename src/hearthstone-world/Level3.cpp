@@ -2180,6 +2180,7 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		//sp->respawnNpcLink = 0;
 		sp->stand_state = 0;
 		sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
+		sp->phase = 0;
 
 		p->Load(sp, (uint32)NULL, NULL);
 	}

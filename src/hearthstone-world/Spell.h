@@ -92,6 +92,21 @@ Range ID|Range|Description
 27        x
 */
 
+enum SUMMON_TYPE
+{
+	SUMMON_TYPE_POSSESSED = 65,
+	SUMMON_TYPE_GUARDIAN = 61,
+	SUMMON_TYPE_WILD = 64,
+	SUMMON_TYPE_DEMON = 66,
+	SUMMON_TYPE_TOTEM_1 = 63,
+	SUMMON_TYPE_TOTEM_2 = 81,
+	SUMMON_TYPE_TOTEM_3 = 82,
+	SUMMON_TYPE_TOTEM_4 = 83,
+	SUMMON_TYPE_SUMMON = 67,
+	SUMMON_TYPE_CRITTER = 41,
+	SUMMON_TYPE_CREATE_TOTEM = 121,
+};
+
 //wooohooo, there are 19 spells that actually require to add a proccounter for these 
 //first spell catched is "presence of mind"
 //an ugly solution would be to add a proc flag to remove aura on event it should expire (like attack or cast) but that is only if count=1
@@ -1661,7 +1676,8 @@ public:
     void SpellEffectParry(uint32 i);
     void SpellEffectCreateItem(uint32 i);
     void SpellEffectPersistentAA(uint32 i);
-    void SpellEffectSummon(uint32 i);
+	void SpellEffectSummon(uint32 i);
+    void SummonCreature(uint32 i);
     void SpellEffectLeap(uint32 i);
     void SpellEffectEnergize(uint32 i);
     void SpellEffectWeaponDmgPerc(uint32 i);
@@ -1671,8 +1687,8 @@ public:
     void SpellEffectLearnSpell(uint32 i);
     void SpellEffectSpellDefense(uint32 i);
     void SpellEffectDispel(uint32 i);
-    void SpellEffectSummonWild(uint32 i);
-    void SpellEffectSummonGuardian(uint32 i);
+    void SpellEffectSummonWildOld(uint32 i);
+    void SummonGuardian(uint32 i);
     void SpellEffectSkillStep(uint32 i);
     void SpellEffectSummonObject(uint32 i);
     void SpellEffectEnchantItem(uint32 i);
@@ -1690,7 +1706,7 @@ public:
     void SpellEffectDistract(uint32 i);
     void SpellEffectPickpocket(uint32 i);
     void SpellEffectAddFarsight(uint32 i);
-    void SpellEffectSummonPossessed(uint32 i);
+    void SummonPossessed(uint32 i);
 	void SpellEffectUseGlyph(uint32 i);
     void SpellEffectHealMechanical(uint32 i);
     void SpellEffectSummonObjectWild(uint32 i);
@@ -1702,12 +1718,12 @@ public:
     void SpellEffectStuck(uint32 i);
     void SpellEffectSummonPlayer(uint32 i);
     void SpellEffectActivateObject(uint32 i);
-    void SpellEffectSummonTotem(uint32 i);
+    void SummonTotem(uint32 i);
     void SpellEffectProficiency(uint32 i);
     void SpellEffectSendEvent(uint32 i);
     void SpellEffectSkinning(uint32 i);
     void SpellEffectCharge(uint32 i);
-    void SpellEffectSummonCritter(uint32 i);
+    void SummonNonCombatPet(uint32 i);
     void SpellEffectKnockBack(uint32 i);
     void SpellEffectInebriate(uint32 i);
     void SpellEffectFeedPet(uint32 i);
@@ -1717,7 +1733,7 @@ public:
     void SpellEffectDispelMechanic(uint32 i);
     void SpellEffectSummonDeadPet(uint32 i);
     void SpellEffectDestroyAllTotems(uint32 i);
-    void SpellEffectSummonDemon(uint32 i);
+    void SpellEffectSummonDemonOld(uint32 i);
     void SpellEffectAttackMe(uint32 i);
     void SpellEffectSkill(uint32 i);
     void SpellEffectApplyPetAura(uint32 i);

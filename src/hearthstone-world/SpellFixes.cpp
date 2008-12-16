@@ -23,21 +23,6 @@
 //#define DUMP_CLASS_SPELLS	1
 //#define DUMP_SPELL_RANKS_SQL	1
 
-enum SUMMON_TYPE
-{
-    SUMMON_TYPE_POSSESSED = 65,
-    SUMMON_TYPE_GUARDIAN = 61,
-    SUMMON_TYPE_WILD = 64,
-    SUMMON_TYPE_DEMON = 66,
-    SUMMON_TYPE_TOTEM_1 = 63,
-    SUMMON_TYPE_TOTEM_2 = 81,
-    SUMMON_TYPE_TOTEM_3 = 82,
-    SUMMON_TYPE_TOTEM_4 = 83,
-    SUMMON_TYPE_SUMMON = 67,
-    SUMMON_TYPE_CRITTER = 41,
-    SUMMON_TYPE_CREATE_TOTEM = 121,
-};
-
 void CreateDummySpell(uint32 id)
 {
 	const char * name = "Dummy Trigger";
@@ -740,27 +725,6 @@ void ApplyNormalFixes()
 		AURASTATE_FLAG_REJUVENATE           = 16384,    //15 //where do i use this ?
 		AURASTATE_FLAG_POISON               = 32768,    //16
 		*/
-
-		// New 2.4.3 summon types
-        for(uint8 i = 0; i<3; i++)
-        {
-            if(!sp->EffectMiscValueB[i])
-                continue;
-
-            switch(sp->EffectMiscValueB[i])
-            {
-                case SUMMON_TYPE_POSSESSED: sp->Effect[i] = SPELL_EFFECT_SUMMON_POSSESSED; break;
-                case SUMMON_TYPE_GUARDIAN: sp->Effect[i] = SPELL_EFFECT_SUMMON_GUARDIAN; break;
-                case SUMMON_TYPE_WILD: sp->Effect[i] = SPELL_EFFECT_SUMMON_WILD; break;
-                case SUMMON_TYPE_DEMON: sp->Effect[i] = SPELL_EFFECT_SUMMON_DEMON; break;
-                case SUMMON_TYPE_TOTEM_1: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT1; break;
-                case SUMMON_TYPE_TOTEM_2: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT2; break;
-                case SUMMON_TYPE_TOTEM_4: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT4; break;
-                case SUMMON_TYPE_CRITTER: sp->Effect[i] = SPELL_EFFECT_SUMMON_CRITTER; break;
-                case SUMMON_TYPE_TOTEM_3: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM_SLOT3; break;
-                //case SUMMON_TYPE_CREATE_TOTEM: sp->Effect[i] = SPELL_EFFECT_SUMMON_TOTEM; break;
-            }
-        }
 
 		// apply on shapeshift change
 		if( sp->NameHash == SPELL_HASH_TRACK_HUMANOIDS )
