@@ -752,7 +752,7 @@ enum SpellEffects
 };
 
 // spell target system
-#define TOTAL_SPELL_TARGET 81 // note: all spells with target type's > 80 are test spells
+#define TOTAL_SPELL_TARGET 88 // note: all spells with target type's > 80 are test spells
 
 enum SPELL_ENTRY
 {
@@ -1757,6 +1757,7 @@ public:
     void SpellEffectSpawn(uint32 i);
     void SpellEffectApplyAura128(uint32 i);
 	void SpellEffectTriggerSpellWithValue(uint32 i);
+	void SpellEffectMegaJump(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);
@@ -1797,6 +1798,7 @@ public:
     void SpellTargetInFrontOfCaster2(uint32 i, uint32 j);
     void SpellTargetTargetPartyMember(uint32 i, uint32 j);
     void SpellTargetSameGroupSameClass(uint32 i, uint32 j);
+	void SpellTargetPositionOfTarget(uint32 i, uint32 j);
 
     void Heal(int32 amount);
 

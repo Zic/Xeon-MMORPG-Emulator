@@ -62,7 +62,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_LANGUAGE - 39
 		&Spell::SpellEffectDualWield,//SPELL_EFFECT_DUAL_WIELD - 40
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_WILD - 41
-		&Spell::SpellEffectNULL,//SPELL_EFFECT_SUMMON_GUARDIAN - 42
+		&Spell::SpellEffectMegaJump,//SPELL_EFFECT_SUMMON_GUARDIAN - 42
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER - 43
 		&Spell::SpellEffectSkillStep,//SPELL_EFFECT_SKILL_STEP - 44
 		&Spell::SpellEffectAddHonor,//SPELL_ADD_HONOR - 45
@@ -453,6 +453,14 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	/*****************************************
 	 *	Class Spells
 	 *****************************************/	
+	case 49576:
+		{
+			if( !p_caster || !unitTarget ) return;
+
+			// Move Effect
+			unitTarget->CastSpellAoF( p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ(), dbcSpell.LookupEntryForced(49575), true); 
+			p_caster->CastSpell( unitTarget, 51399, true ); // Taunt Effect
+		}break;
 
 	/*************************
 	 * WARRIOR SPELLS
@@ -6056,3 +6064,15 @@ void Spell::SpellEffectTriggerSpellWithValue(uint32 i)
 	sp->prepare(&tgt);
 }
 
+void Spell::SpellEffectMegaJump(uint32 i)
+{
+	if(!u_caster) return;
+
+	// Time formula is derived from andy's logs, 271ms to move ~14.5 units
+	float distance = u_caster->GetDistanceSq( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ );
+	uint32 moveTime = FL2UINT((distance * 271.0f) / 212.65f);
+
+	u_caster->GetAIInterface()->SendMoveToPacket( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, moveTime, 0x100 );
+
+	u_caster->SetPosition( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, false );
+}

@@ -104,6 +104,13 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 	&Spell::SpellTargetNULL,					// 78
 	&Spell::SpellTargetNULL,					// 79
 	&Spell::SpellTargetNULL,					// 80
+	&Spell::SpellTargetNULL,					// 81
+	&Spell::SpellTargetNULL,					// 82
+	&Spell::SpellTargetNULL,					// 83
+	&Spell::SpellTargetNULL,					// 84
+	&Spell::SpellTargetNULL,					// 85
+	&Spell::SpellTargetNULL,					// 86
+	&Spell::SpellTargetNULL,					// 87
 	// all 81 > n spelltargettype's are from test spells
 };
 
@@ -573,6 +580,11 @@ void Spell::SpellTargetTypeTAOE(uint32 i, uint32 j)
 	{
 		FillAllTargetsInArea( (LocationVector&)Target->GetPosition(), i );
 	}
+}
+
+void Spell::SpellTargetPositionOfTarget(uint32 i, uint32 j)
+{
+	// Something with AOE. Who knows? 
 }
 
 /// Spell Target Handling for type 30: PBAE Party Based Area Effect
