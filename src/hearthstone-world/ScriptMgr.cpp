@@ -913,3 +913,10 @@ void HookInterface::OnPlayerSaveToDB(Player * pPlayer, QueryBuffer* buf)
 		(call)(pPlayer, buf);
 	OUTER_LOOP_END
 }
+
+void HookInterface::OnAuraRemove(Player * pPlayer, uint32 spellID)
+{
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_AURA_REMOVE, tOnAuraRemove)
+		(call)(pPlayer, spellID);
+	OUTER_LOOP_END
+}

@@ -378,6 +378,14 @@
 				RelativePath="..\src\WorldPvPScripts\ZoneHellfirePeninsula.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\src\WorldPvPScripts\ZoneSilithus.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\WorldPvPScripts\ZoneZangarmarsh.cpp"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

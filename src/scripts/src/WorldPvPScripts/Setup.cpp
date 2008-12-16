@@ -3,6 +3,8 @@
 #include <ScriptSetup.h>
 
 void SetupPvPHellfirePeninsula(ScriptMgr *mgr);
+void SetupPvPSilithus(ScriptMgr *mgr);
+void SetupPvPZangarmarsh(ScriptMgr *mgr);
 
 extern "C" SCRIPT_DECL uint32 _exp_get_script_type()
 {
@@ -11,7 +13,9 @@ extern "C" SCRIPT_DECL uint32 _exp_get_script_type()
 
 extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)	// Comment any script to disable it
 {
-	//SetupPvPHellfirePeninsula(mgr);
+	SetupPvPHellfirePeninsula(mgr);
+	SetupPvPSilithus(mgr);
+	SetupPvPZangarmarsh(mgr);
 }
 
 #ifdef WIN32

@@ -789,6 +789,10 @@ void Aura::Remove()
 	else
 		m_target->CombatStatus.ForceRemoveAttacker( m_casterGuid );
 
+
+	if( caster != NULL && caster->IsPlayer() && caster->IsInWorld() )
+		sHookInterface.OnAuraRemove(TO_PLAYER(caster),m_spellProto->Id);
+
 	/**********************Cooldown**************************
 	* this is only needed for some spells
 	* for now only spells that have:
