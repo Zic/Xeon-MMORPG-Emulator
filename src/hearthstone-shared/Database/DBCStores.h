@@ -45,6 +45,9 @@ struct AchievementEntry
     //uint32 unk_flags; // 59
     //uint32 count; // 60
     uint32 refAchievement; // 61
+
+	uint32 AssociatedCriteria[32]; // Custom stuff
+	uint32 AssociatedCriteriaCount;
 };
  
 struct AchievementCriteriaEntry

@@ -1,1 +1,0 @@
-ALTER TABLE achievements MODIFY COLUMN `progress` longtext NOT NULL

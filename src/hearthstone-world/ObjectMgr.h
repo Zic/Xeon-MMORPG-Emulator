@@ -595,18 +595,7 @@ public:
 	HEARTHSTONE_INLINE GuildMap::iterator GetGuildsBegin() { return mGuild.begin(); }
 	HEARTHSTONE_INLINE GuildMap::iterator GetGuildsEnd() { return mGuild.end(); }
 
-	uint32 GetAchievementCriteriaCount(uint32 achievementId)
-	{
-		return AchievementAssociatedCriteria.find(achievementId)->second->size();
-	}
-
-	uint32 GetCriteriaIDFromAchievementAndIndex(uint32 aId, uint32 idx)
-	{
-		return AchievementAssociatedCriteria.find(aId)->second->at(idx);
-	}
-
 protected:
-	map<uint32,vector<uint32>*> AchievementAssociatedCriteria;
 	RWLock playernamelock;
 	uint32 m_mailid;
 	// highest GUIDs, used for creating new objects
