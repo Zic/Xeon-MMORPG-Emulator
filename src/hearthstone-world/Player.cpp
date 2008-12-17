@@ -3394,8 +3394,8 @@ void Player::RemoveFromWorld()
 	
 	for(uint32 x=0;x<4;x++)
 	{
-		if(m_TotemSlots[x])
-			m_TotemSlots[x]->TotemExpire();
+		if(m_SummonSlots[x])
+			m_SummonSlots[x]->TotemExpire();
 	}
 
 	ResetHeartbeatCoords();

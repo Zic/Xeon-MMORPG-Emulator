@@ -104,7 +104,7 @@ enum SUMMON_TYPE
 	SUMMON_TYPE_TOTEM_4 = 83,
 	SUMMON_TYPE_SUMMON = 67,
 	SUMMON_TYPE_CRITTER = 41,
-	SUMMON_TYPE_CREATE_TOTEM = 121,
+	SUMMON_TYPE_CREATURE_WITH_HEALTH = 121,
 };
 
 //wooohooo, there are 19 spells that actually require to add a proccounter for these 
@@ -1688,6 +1688,7 @@ public:
     void SpellEffectSpellDefense(uint32 i);
     void SpellEffectDispel(uint32 i);
     void SpellEffectSummonWildOld(uint32 i);
+	void SummonCreatureWithHealth(uint32 i);
     void SummonGuardian(uint32 i);
     void SpellEffectSkillStep(uint32 i);
     void SpellEffectSummonObject(uint32 i);
@@ -1917,6 +1918,8 @@ public:
     }
     bool IsStealthSpell();
     bool IsInvisibilitySpell();
+
+	SummonPropertiesEntry * m_summonProperties;
     
     int32 damage;
     Aura* m_triggeredByAura;

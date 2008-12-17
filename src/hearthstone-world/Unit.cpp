@@ -37,10 +37,7 @@ Unit::Unit()
 	m_meleespell = 0;
 	m_meleespell_cn = 0;
 	m_addDmgOnce = 0;
-	m_TotemSlots[0] = NULL;
-	m_TotemSlots[1] = NULL;
-	m_TotemSlots[2] = NULL;
-	m_TotemSlots[3] = NULL;
+	memset(m_SummonSlots, 0, sizeof(Creature*) * 7);
 	m_ObjectSlots[0] = 0;
 	m_ObjectSlots[1] = 0;
 	m_ObjectSlots[2] = 0;

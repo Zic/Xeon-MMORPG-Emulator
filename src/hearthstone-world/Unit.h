@@ -870,7 +870,7 @@ public:
 	Unit* CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
 
 	uint32 m_addDmgOnce;
-	Creature *m_TotemSlots[4];
+	Creature *m_SummonSlots[7];
 	uint32 m_ObjectSlots[4];
 	uint32 m_triggerSpell;
 	uint32 m_triggerDamage;

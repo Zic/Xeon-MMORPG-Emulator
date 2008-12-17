@@ -2279,7 +2279,26 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 
 void Spell::SpellEffectSummon(uint32 i)
 {
-	switch( m_spellInfo->EffectMiscValueB[i] )
+	if(!u_caster) return;
+
+	SummonPropertiesEntry * spe = dbcSummonProps.LookupEntryForced( m_spellInfo->EffectMiscValueB[i] );
+	if(!spe)
+		return;
+
+	m_summonProperties = spe;
+
+	// Delete any objects in my slots. Slot 0 can have unlimited objects.
+	if( spe->slot && u_caster->m_SummonSlots[ spe->slot ] )
+	{
+		if( u_caster->m_SummonSlots[ spe->slot ]->IsTotem() )
+			u_caster->m_SummonSlots[ spe->slot ]->TotemExpire();
+		else
+			u_caster->m_SummonSlots[ spe->slot ]->SafeDelete();
+
+		u_caster->m_SummonSlots[ spe->slot ] = NULL;
+	}
+
+	switch( spe->Id )
 	{
 	case SUMMON_TYPE_POSSESSED:
 		{
@@ -2319,12 +2338,62 @@ void Spell::SpellEffectSummon(uint32 i)
 			SummonNonCombatPet(i);
 			break;
 		}
+	case SUMMON_TYPE_CREATURE_WITH_HEALTH:
+		{
+			SummonCreatureWithHealth(i);
+			break;
+		}
 	default:
 		{
-			SummonCreature(i);
+			if( p_caster )
+			{
+				p_caster->BroadcastMessage("Unhandled summon effect %u for spell %u. Please report to the developers.", m_spellInfo->EffectMiscValueB[i], m_spellInfo->Id);
+			}
 			break;
 		}
 	}
+}
+
+void Spell::SummonCreatureWithHealth(uint32 i)
+{
+	if(!p_caster || !p_caster->IsInWorld())
+		return;
+
+	CreatureInfo * ci = CreatureNameStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
+	CreatureProto * cp = CreatureProtoStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
+	if( !ci || !cp )
+		return;
+
+	float x, y, z;
+	if( m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION && m_targets.m_destX && m_targets.m_destY && m_targets.m_destZ )
+	{
+		x = m_targets.m_destX;
+		y = m_targets.m_destY;
+		z = m_targets.m_destZ;
+	}
+	else
+	{
+		x = u_caster->GetPositionX();
+		y = u_caster->GetPositionY();
+		z = u_caster->GetPositionZ();
+	}
+
+	// Don't think these creatures can move on their own, disabled AI and follow stuff. :P
+	Creature * pCreature;
+	pCreature = p_caster->GetMapMgr()->CreateCreature(cp->Id);
+	pCreature->Load(cp, x, y, z, p_caster->GetOrientation());
+	pCreature->_setFaction();
+	pCreature->GetAIInterface()->Init(pCreature,AITYPE_PET,MOVEMENTTYPE_NONE,u_caster);
+	pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] + 1);
+	pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] + 1);
+	pCreature->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
+	pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+	pCreature->_setFaction();
+	pCreature->DisableAI();
+	u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
+	pCreature->PushToWorld(p_caster->GetMapMgr());
+	sEventMgr.AddEvent(pCreature, &Creature::SafeDelete, EVENT_CREATURE_REMOVE_CORPSE, GetDuration(), 1, 0);
+
 }
 
 void Spell::SummonCreature(uint32 i) // Summon
@@ -2359,6 +2428,7 @@ void Spell::SummonCreature(uint32 i) // Summon
 		summon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 		summon->_setFaction();
 		p_caster->m_tempSummon = summon;
+		p_caster->m_SummonSlots[ m_summonProperties->slot ] = summon;
 	}
 	else
 	{
@@ -2394,6 +2464,7 @@ void Spell::SummonCreature(uint32 i) // Summon
 			pCreature->_setFaction();
 			p_caster->SetUInt64Value(UNIT_FIELD_SUMMON, pCreature->GetGUID());
 			p_caster->m_tempSummon = pCreature;
+			p_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 
 			if ( m_spellInfo->EffectMiscValue[i] == 19668 ) //shadowfiend
 			{
@@ -3315,13 +3386,13 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 		return;
 
 	uint32 cr_entry = m_spellInfo->EffectMiscValue[i];
-	uint32 level = 0/*u_caster->getLevel()*/;
+	uint32 level = u_caster->getLevel();
 	float angle_for_each_spawn = -float(M_PI) * 2 / damage;
 
 	for( int i = 0; i < damage; i++ )
 	{
 		float m_fallowAngle = angle_for_each_spawn * i;
-		u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level);
+		u_caster->m_SummonSlots[ m_summonProperties->slot ] = (Creature*)u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level);
 	}
 }
 
@@ -4696,7 +4767,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	float x = p_caster->GetPositionX();
 	float y = p_caster->GetPositionY();
-	uint32 slot = m_spellInfo->EffectMiscValueB[i] - SUMMON_TYPE_TOTEM_1;
+	uint32 slot = m_summonProperties->slot;
 
 	switch(m_spellInfo->EffectMiscValueB[i])
 	{
@@ -4720,9 +4791,6 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 		break;
 	}
 
-	if(p_caster->m_TotemSlots[slot] != 0)
-		p_caster->m_TotemSlots[slot]->TotemExpire();
-
 	uint32 entry = m_spellInfo->EffectMiscValue[i];
 
 	CreatureInfo* ci = CreatureNameStorage.LookupEntry(entry);
@@ -4742,7 +4810,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	Creature * pTotem = p_caster->GetMapMgr()->CreateCreature(entry);
 
-	p_caster->m_TotemSlots[slot] = pTotem;
+	p_caster->m_SummonSlots[slot] = pTotem;
 	pTotem->SetTotemOwner(p_caster);
 	pTotem->SetTotemSlot(slot);
 
@@ -4800,8 +4868,8 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	pTotem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
 	pTotem->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 	pTotem->SetUInt64Value(UNIT_FIELD_CREATEDBY, p_caster->GetGUID());
-	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, damage);
-	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, damage);
+	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] : 5 );
+	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] : 5);
 	pTotem->SetUInt32Value(UNIT_FIELD_POWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_MAXPOWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
@@ -5100,7 +5168,7 @@ void Spell::SummonNonCombatPet(uint32 i)
 		if(u_caster->critterPet->GetCreatureName() && u_caster->critterPet->GetCreatureName()->Id == SummonCritterID)
 		{
 			u_caster->critterPet->RemoveFromWorld(false,true);
-			delete u_caster->critterPet;
+			u_caster->critterPet->SafeDelete();
 			u_caster->critterPet = NULL;
 			return;
 		}
@@ -5108,7 +5176,7 @@ void Spell::SummonNonCombatPet(uint32 i)
 		else
 		{
 			u_caster->critterPet->RemoveFromWorld(false,true);
-			delete u_caster->critterPet;
+			u_caster->critterPet->SafeDelete();
 			u_caster->critterPet = NULL;
 		}
 	}
@@ -5134,6 +5202,7 @@ void Spell::SummonNonCombatPet(uint32 i)
 	pCreature->bInvincible = true;
 	pCreature->PushToWorld(u_caster->GetMapMgr());
 	u_caster->critterPet = pCreature;
+	u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 }
 
 void Spell::SpellEffectKnockBack(uint32 i)
@@ -5411,12 +5480,14 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 	if(!p_caster || !p_caster->IsInWorld()) return;
 
 	float RetreivedMana = 0.0f;
-	for(uint32 x=0;x<4;x++)
+	for(uint32 x=SUMMON_TYPE_TOTEM_1;x<SUMMON_TYPE_TOTEM_4+1;x++)
 	{
+		SummonPropertiesEntry * spe = dbcSummonProps.LookupEntryForced(x);
+		uint32 slot = spe->slot;
 		// atm totems are considert creature's
-		if(p_caster->m_TotemSlots[x])
+		if(p_caster->m_SummonSlots[slot])
 		{
-			uint32 SpellID = p_caster->m_TotemSlots[x]->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+			uint32 SpellID = p_caster->m_SummonSlots[x]->GetUInt32Value(UNIT_CREATED_BY_SPELL);
 			SpellEntry * sp = dbcSpell.LookupEntry(SpellID);
 			if (!sp)
 				continue;
@@ -5424,17 +5495,8 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 			float pts = float(m_spellInfo->EffectBasePoints[i]+1) / 100.0f;
 			RetreivedMana += float(sp->manaCost) * pts;
 
-			p_caster->m_TotemSlots[x]->TotemExpire();
-		}
-
-		if(p_caster->m_ObjectSlots[x])
-		{
-			GameObject * obj = p_caster->GetMapMgr()->GetGameObject(p_caster->m_ObjectSlots[x]);
-			if(obj)
-			{
-				obj->ExpireAndDelete();
-			}
-			p_caster->m_ObjectSlots[x] = 0;
+			p_caster->m_SummonSlots[slot]->TotemExpire();
+			p_caster->m_SummonSlots[slot] = NULL;
 		}
 	}
 

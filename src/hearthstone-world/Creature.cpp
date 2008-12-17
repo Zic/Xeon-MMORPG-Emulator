@@ -107,7 +107,7 @@ Creature::~Creature()
 	sEventMgr.RemoveEvents(this);
 
 	if(IsTotem())
-		totemOwner->m_TotemSlots[totemSlot] = 0;
+		totemOwner->m_SummonSlots[totemSlot] = 0;
 
 	if(_myScriptClass != 0)
 		_myScriptClass->Destroy();
@@ -725,7 +725,7 @@ void Creature::TotemExpire()
 {
 	if( totemOwner != NULL )
 	{
-		totemOwner->m_TotemSlots[totemSlot] = 0;
+		totemOwner->m_SummonSlots[totemSlot] = 0;
 	}
 	
 	totemSlot = -1;

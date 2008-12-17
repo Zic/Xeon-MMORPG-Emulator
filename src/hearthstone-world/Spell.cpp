@@ -914,9 +914,12 @@ void Spell::GenerateTargets(SpellCastTargets *store_buff)
 					{
 						if( p_caster != NULL )
 						{
-							uint32 slot = m_spellInfo->Effect[i] - SPELL_EFFECT_SUMMON_TOTEM_SLOT1;
-							if(p_caster->m_TotemSlots[slot] != 0)
-								store_buff->m_unitTarget = p_caster->m_TotemSlots[slot]->GetGUID();
+							SummonPropertiesEntry* summonprop = dbcSummonProps.LookupEntryForced( m_spellInfo->EffectMiscValueB[i] );
+							if(!summonprop) return;
+							uint32 slot = summonprop->slot;
+
+							if(p_caster->m_SummonSlots[slot] != 0)
+								store_buff->m_unitTarget = p_caster->m_SummonSlots[slot]->GetGUID();
 						}
 					}break;
 				case 61:{ // targets with the same group/raid and the same class

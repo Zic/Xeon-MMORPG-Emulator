@@ -623,6 +623,16 @@ struct skilllineentry //SkillLine.dbc
 
 };
 
+struct SummonPropertiesEntry
+{
+	uint32 Id;
+	uint32 controltype;
+	uint32 factionId;
+	uint32 type;
+	uint32 slot;
+	uint32 unk2;
+};
+
 // Struct for the entry in Spell.dbc
 struct SpellEntry
 {
@@ -1648,6 +1658,7 @@ extern SERVER_DECL DBCStorage<AchievementCriteriaEntry> dbcAchivementCriteria;
 extern SERVER_DECL DBCStorage<VehicleEntry> dbcVehicle;
 extern SERVER_DECL DBCStorage<VehicleSeatEntry> dbcVehicleSeat;
 extern SERVER_DECL DBCStorage<WorldMapOverlayEntry> dbcWorldMapOverlay;
+extern SERVER_DECL DBCStorage<SummonPropertiesEntry> dbcSummonProps;
 
 bool LoadDBCs();
 
