@@ -7144,6 +7144,7 @@ void Player::ZoneUpdate(uint32 ZoneId)
 	m_playerInfo->lastZone = ZoneId;
 	sHookInterface.OnZone(this, ZoneId, oldzone);
 
+
 	AreaTable *at = dbcArea.LookupEntry(GetAreaID());
 	if(at && at->category == AREAC_SANCTUARY || at->AreaFlags & AREA_SANCTUARY)
 	{
@@ -7161,7 +7162,6 @@ void Player::ZoneUpdate(uint32 ZoneId)
 				m_currentSpell->cancel();
 		}
 	}
-
 
 #ifdef OPTIMIZED_PLAYER_SAVING
 	save_Zone();
@@ -7223,6 +7223,8 @@ void Player::ZoneUpdate(uint32 ZoneId)
 			RemoveAura(flying_aura);
 		}
 	}
+
+	UpdatePvPArea();
 
 	if( IsInWorld() )				// should be
 		m_mapMgr->GetStateManager().SendWorldStates(this);
@@ -7800,6 +7802,8 @@ void Player::SetGuildRank(uint32 guildRank)
 
 void Player::UpdatePvPArea()
 {
+	ForceAreaUpdate();
+
 	if( m_areaDBC == NULL )
 		return;
 
