@@ -375,7 +375,7 @@ void AchievementInterface::HandleAchievementCriteriaConditionDeath()
 			if( ad->counter[i] && ace->raw.additionalRequirement1_type & ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH )
 			{
 				ad->counter[i] = 0;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 	}
@@ -418,7 +418,7 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -504,7 +504,7 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 				}
 
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -545,7 +545,7 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -620,7 +620,7 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = m_player.getLevel() > ReqLevel ? ReqLevel : m_player.getLevel();
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -662,7 +662,7 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + stack;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -706,7 +706,7 @@ void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + stack;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -744,7 +744,7 @@ void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = questCount;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -786,7 +786,7 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillClass(uint32 cl
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -828,7 +828,7 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKillRace(uint32 rac
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -865,7 +865,7 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCostTotal(uint32 
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + cost;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -902,7 +902,7 @@ void AchievementInterface::HandleAchievementCriteriaTalentResetCount()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -948,7 +948,7 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 				else
 					ad->counter[i] = ad->counter[i] + 1;
 
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -985,7 +985,7 @@ void AchievementInterface::HandleAchievementCriteriaFlightPathsTaken()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1040,7 +1040,7 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1077,7 +1077,7 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1086,6 +1086,7 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 	}
 }
 
+#define SCRIPTOK_FALSE { scriptOk = false; break; }
 void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE );
@@ -1106,36 +1107,48 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;
 
+		if(ReqEmote != emoteId)
+			continue; // Wrong emote, newb!
+
 		// Target information is not stored, so we'll have to do this one by one...
 		// --unless the target's name is the description of the criteria! Bahahaha
+		bool scriptOk = false;
 		if( pTarget && pTarget->IsCreature() )
 		{
 			Creature * pCreature = TO_CREATURE(pTarget);
-			if( !ace->name || strlen(ace->name) == 0 || !pCreature->GetCreatureName() || stricmp(pCreature->GetCreatureName()->Name, ace->name) != 0 )
+			if( !(!ace->name || strlen(ace->name) == 0 || !pCreature->GetCreatureName() || stricmp(pCreature->GetCreatureName()->Name, ace->name) != 0) )
 			{
-				continue;
+				scriptOk = true;
 			}
-			// Otherwise we go on happily and complete this achievement.
 		}
-		else
-		{
-			// Script individual ones here...
-			if( ace->ID == 2379 ) // Make Love, Not Warcraft
-			{
-				if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() )
-					continue;
-			}
-			else if( ace->ID == 6261 ) // Winter Veil: A Frosty Shake 
-			{
-				if( m_player.GetZoneId() != 4395 ) // Not in Dalaran
-					continue;
 
-				if( !pTarget || !pTarget->HasAura(21848) ) // Not a Snowman
-					continue;
-			}
-			else
-				continue;
+		string name = string(pAchievementEntry->name);
+		if( name.find("Total") != string::npos )
+		{
+			// It's a statistic, like: "Total Times /Lol'd"
+			scriptOk = true;
 		}
+
+		// Script individual ones here...
+		if( ace->ID == 2379 ) // Make Love, Not Warcraft
+		{
+			if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() || !isHostile(pTarget, &m_player) )
+				SCRIPTOK_FALSE
+
+			scriptOk = true;
+		}
+		else if( ace->ID == 6261 ) // Winter Veil: A Frosty Shake 
+		{
+			if( m_player.GetZoneId() != 4395 ) // Not in Dalaran
+				SCRIPTOK_FALSE
+			
+			if( !pTarget || !pTarget->HasAura(21848) ) // Not a Snowman
+				SCRIPTOK_FALSE
+
+			scriptOk = true;
+		}
+
+		if( !scriptOk ) continue;
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
@@ -1146,7 +1159,7 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1188,7 +1201,7 @@ void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1230,7 +1243,7 @@ void AchievementInterface::HandleAchievementCriteriaReachSkillLevel(uint32 skill
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = skillLevel;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1268,7 +1281,7 @@ void AchievementInterface::HandleAchievementCriteriaWinDuel()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1306,7 +1319,7 @@ void AchievementInterface::HandleAchievementCriteriaLoseDuel()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i] = ad->counter[i] + 1;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1347,7 +1360,7 @@ void AchievementInterface::HandleAchievementCriteriaKilledByCreature(uint32 kill
 			if( compareCriteria == ace )
 			{
 				ad->counter[i]++;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1384,7 +1397,7 @@ void AchievementInterface::HandleAchievementCriteriaKilledByPlayer()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i]++;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1421,7 +1434,7 @@ void AchievementInterface::HandleAchievementCriteriaDeath()
 			if( compareCriteria == ace )
 			{
 				ad->counter[i]++;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
@@ -1464,7 +1477,7 @@ void AchievementInterface::HandleAchievementCriteriaDeathAtMap(uint32 mapId)
 			if( compareCriteria == ace )
 			{
 				ad->counter[i]++;
-				SendCriteriaUpdate(ad, i);
+				SendCriteriaUpdate(ad, i); break;
 			}
 		}
 
