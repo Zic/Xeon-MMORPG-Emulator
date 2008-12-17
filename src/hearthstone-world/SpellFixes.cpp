@@ -6210,11 +6210,11 @@ void ApplyNormalFixes()
 		sp->Effect[0] = 0;	// don't want DKs to be always invincible
 	}
 
-	// Anti-Magic Zone
-	sp = dbcSpell.LookupEntryForced( 51052 );
+	// Death Grip
+	sp = dbcSpell.LookupEntryForced( 49576 );
 	if( sp != NULL )
 	{
-		sp->EffectBasePoints[0] = 0;	// tempfix so that it doesn't spawn 10k npcs.
+		sp->FacingCasterFlags = 0;
 	}
 	
 
