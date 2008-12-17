@@ -271,7 +271,7 @@ void GameObject::SaveToDB()
 		<< GetUInt32Value(GAMEOBJECT_FLAGS) << ","
 		<< GetUInt32Value(GAMEOBJECT_FACTION) << ","
 		<< GetFloatValue(OBJECT_FIELD_SCALE_X) << ","
-		<< "0,0)";
+		<< "0,1)";
 	WorldDatabase.Execute(ss.str().c_str());
 }
 
