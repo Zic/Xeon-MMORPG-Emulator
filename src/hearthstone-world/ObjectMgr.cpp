@@ -195,15 +195,6 @@ ObjectMgr::~ObjectMgr()
 
 void ObjectMgr::LoadAchievements()
 {
-	for(uint32 i = 0; i < dbcAchievement.GetNumRows(); ++i)
-	{
-		AchievementEntry * ae = dbcAchievement.LookupRow(i);
-		if(ae)
-		{
-			ae->AssociatedCriteriaCount = 0;
-		}
-	}
-
 	for(uint32 i = 0; i < dbcAchivementCriteria.GetNumRows(); ++i)
 	{
 		AchievementCriteriaEntry * ace = dbcAchivementCriteria.LookupRow( i );
@@ -224,12 +215,17 @@ void ObjectMgr::LoadAchievements()
 				acs->insert( ace );
 			}
 
-			AchievementEntry * ae = dbcAchievement.LookupEntryForced( ace->referredAchievement );
-			if( ae )
+			
+			map<uint32,vector<uint32>*>::iterator aitr = AchievementAssociatedCriteria.find( ace->referredAchievement );
+			if( aitr != AchievementAssociatedCriteria.end() )
 			{
-				if(ae->AssociatedCriteriaCount >= 32) continue;
-				ae->AssociatedCriteria[ ae->AssociatedCriteriaCount ] = ace->ID;
-				ae->AssociatedCriteriaCount++;
+				aitr->second->push_back( ace->ID );
+			}
+			else
+			{
+				vector<uint32>* mySet = new vector<uint32>;
+				mySet->push_back( ace->ID );
+				AchievementAssociatedCriteria.insert( make_pair( ace->referredAchievement, mySet ) );
 			}
 		}
 	}

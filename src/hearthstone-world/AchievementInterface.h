@@ -25,7 +25,7 @@
 struct AchievementData
 {
 	uint32 id;
-	uint32 counter[32];
+	uint32* counter;
 
 	uint32 date;
 	bool completed;
