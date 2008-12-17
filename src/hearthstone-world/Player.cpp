@@ -7878,6 +7878,7 @@ void Player::UpdatePvPArea()
 
 void Player::BuildFlagUpdateForNonGroupSet(uint32 index, uint32 flag)
 {
+	Group* pGroup = NULL;
     Object *curObj;
     for (Object::InRangeSet::iterator iter = GetInRangeSetBegin(); iter != GetInRangeSetEnd();)
 	{
@@ -7885,14 +7886,10 @@ void Player::BuildFlagUpdateForNonGroupSet(uint32 index, uint32 flag)
 		iter++;
         if(curObj->IsPlayer())
         {
-            Group* pGroup = static_cast< Player* >( curObj )->GetGroup();
-            if( pGroup != NULL && pGroup == GetGroup())
+            pGroup = static_cast< Player* >( curObj )->GetGroup();
+            if( pGroup == NULL || pGroup != GetGroup())
             {
-				//TODO: huh? if this is unneeded change the if to the inverse and don't waste jmp space
-            }
-            else
-            {
-                BuildFieldUpdatePacket( static_cast< Player* >( curObj ), index, flag );
+				BuildFieldUpdatePacket( static_cast< Player* >( curObj ), index, flag );
             }
         }
     }
