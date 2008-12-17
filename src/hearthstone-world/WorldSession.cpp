@@ -31,12 +31,13 @@ OpcodeHandler WorldPacketHandlers[NUM_MSG_TYPES];
 WorldSession::WorldSession(uint32 id, string Name, WorldSocket *sock) : _player(0), _socket(sock), _accountId(id), _accountName(Name),
 _logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), instanceId(0)
 {
+	m_hasDeathKnight = false;
+	m_highestLevel = 0;
 	m_asyncQuery = false;
 	memset(movement_packet, 0, sizeof(movement_packet));
 	memset(&movement_info, 0, sizeof(MovementInfo));
 	m_currMsTime = getMSTime();
 	bDeleted = false;
-	m_deathKnightEnabled = false;
 	m_bIsWLevelSet = false;
 	floodLines = 0;
 	floodTime = UNIXTIME;

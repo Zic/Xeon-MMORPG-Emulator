@@ -1355,6 +1355,9 @@ void World::Rehash(bool load)
 	m_wallhackthreshold = Config.MainConfig.GetFloatDefault("AntiHack", "WallHackThreshold", 5.0f);
 	// ======================================
 
+	m_deathKnightOnePerAccount = Config.MainConfig.GetBoolDefault("DeathKnight", "OnePerRealm", true);
+	m_deathKnightReqLevel = Config.MainConfig.GetIntDefault("DeathKnight", "RequiredLevel", 55);
+
 	if( m_banTable != NULL )
 		free( m_banTable );
 

@@ -287,11 +287,20 @@ public:
 	void LoadAccountDataProc(QueryResult * result);
 	HEARTHSTONE_INLINE bool IsLoggingOut() { return _loggingOut; }
 
-	bool CanCreateDeathKnight() { return m_deathKnightEnabled; }
-	void EnableDeathKnightClass() { m_deathKnightEnabled = true; }
+	bool CanCreateDeathKnight()
+	{
+		if( sWorld.m_deathKnightOnePerAccount && m_hasDeathKnight )
+			return false;
+
+		if( sWorld.m_deathKnightReqLevel <= m_highestLevel )
+			return true;
+
+		return false;
+	}
 
 protected:
-	bool m_deathKnightEnabled;
+	bool m_hasDeathKnight;
+	uint8 m_highestLevel;
 	uint8 DeleteCharacter(uint32 guid);
 
 	/// Login screen opcodes (PlayerHandler.cpp):

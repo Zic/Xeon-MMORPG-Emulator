@@ -495,6 +495,8 @@ public:
 	bool cross_faction_world;
 	bool free_guild_charters;
 	bool m_useIrc;
+	uint32 m_deathKnightReqLevel;
+	bool   m_deathKnightOnePerAccount;
 
 	void SaveAllPlayers();
 

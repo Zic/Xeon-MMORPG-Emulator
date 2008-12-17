@@ -169,10 +169,11 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			data << fields[10].GetFloat();		// Z
 			data << fields[18].GetUInt32();		// GuildID
 
-			if( fields[1].GetUInt8() >= 55 )
-			{
-				EnableDeathKnightClass();
-			}
+			if( fields[1].GetUInt8() > m_highestLevel )
+				m_highestLevel = fields[1].GetUInt8();
+
+			if( Class == DEATHKNIGHT )
+				m_hasDeathKnight = true;
 
 			banned = fields[13].GetUInt32();
 			if(banned && (banned<10 || banned > (uint32)UNIXTIME))
