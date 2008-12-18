@@ -5945,6 +5945,19 @@ void Unit::CancelSpell(Spell * ptr)
 		m_currentSpell->cancel();
 }
 
+void Unit::OnDamageDealt(Unit* pVictim)
+{
+	InRangeSet::iterator itr = m_objectsInRange.begin();
+	InRangeSet::iterator itrend = m_objectsInRange.end();
+	for(; itr != itrend; ++itr)
+	{
+		if( (*itr)->IsCreature() )
+		{
+			CALL_SCRIPT_EVENT((*itr), OnNearbyAttack)(this, pVictim);
+		}
+	}
+}
+
 void Unit::EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage)
 {
 	Unit * victim = m_mapMgr ? m_mapMgr->GetUnit(guid) : NULL;

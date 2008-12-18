@@ -993,6 +993,8 @@ public:
 	int32 * SM_PThreat;
 	void InheritSMMods(Unit *inherit_from);
 
+	// Called when I deal damage
+	void OnDamageDealt(Unit* pVictim);
 	//Events
 	void Emote (EmoteType emote);
 	void EventAddEmote(EmoteType emote, uint32 time);

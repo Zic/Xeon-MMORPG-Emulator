@@ -1500,6 +1500,7 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 
 	if(this->IsUnit())
 	{
+		TO_UNIT(this)->OnDamageDealt(pVictim);
 /*		if(!pVictim->isInCombat() && pVictim->IsPlayer())
 			sHookInterface.OnEnterCombat( static_cast< Player* >( pVictim ), static_cast< Unit* >( this ) );
 
