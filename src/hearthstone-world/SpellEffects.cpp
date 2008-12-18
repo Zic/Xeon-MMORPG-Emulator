@@ -3116,7 +3116,7 @@ void Spell::SpellEffectLearnSpell(uint32 i) // Learn Spell
 		return;
 	}
 
-	if( m_spellInfo->Id == 483 )		// "Learning"
+	if( m_spellInfo->Id == 483 || m_spellInfo->Id == 55884 )		// "Learning"
 	{
 		if( !i_caster || !p_caster )
 			return;

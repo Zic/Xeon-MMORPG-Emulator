@@ -103,12 +103,10 @@ void WorldSession::HandleGMTicketCreateOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleGMTicketUpdateOpcode(WorldPacket & recv_data)
 {
-	uint8 unk1;
 	std::string message = "";
 	WorldPacket data(SMSG_GMTICKET_UPDATETEXT, 4);
 
 	// recv Data
-	recv_data >> unk1;
 	recv_data >> message;
 
 	// Update Ticket
