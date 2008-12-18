@@ -40,6 +40,18 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 	if(objB->m_faction == objA->m_faction || objB->m_factionDBC == objA->m_factionDBC)
 		return false;
 
+	if( objA->IsCreature() && objA->m_faction && objA->m_faction->FactionFlags & 0x1000 )
+	{
+		if( objB->IsPlayer() && objB->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_UNKNOWN2) )
+			return true;
+	}
+
+	if( objB->IsCreature() && objB->m_faction && objB->m_faction->FactionFlags & 0x1000 )
+	{
+		if( objA->IsPlayer() && objA->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_UNKNOWN2) )
+			return true;
+	}
+
 	uint32 faction = objB->m_faction->Mask;
 	uint32 host = objA->m_faction->HostileMask;
 

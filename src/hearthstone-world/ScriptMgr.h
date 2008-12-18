@@ -195,7 +195,6 @@ public:
 	virtual void OnAssistTargetDied(Unit* mAssistTarget) {}
 	virtual void OnFear(Unit* mFeared, uint32 iSpellId) {}
 	virtual void OnFlee(Unit* mFlee) {}
-	virtual void OnNearbyAttack(Unit* pAttacker, Unit* pVictim) {}
 	virtual void OnCallForHelp() {}
 	virtual void OnLoad() {}
 	virtual void OnReachWP(uint32 iWaypointId, bool bForwards) {}

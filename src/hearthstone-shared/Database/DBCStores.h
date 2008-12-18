@@ -966,7 +966,8 @@ struct FactionTemplateDBC
 {
     uint32 ID;
     uint32 Faction;
-    uint32 FactionGroup;
+	uint32 FactionFlags;
+    //uint32 FactionGroup; unused
     uint32 Mask;
     uint32 FriendlyMask;
     uint32 HostileMask;

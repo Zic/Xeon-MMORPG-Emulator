@@ -62,6 +62,7 @@ Player::Player( uint32 guid ) : m_mailBox(guid)
 	m_curSelection		  = 0;
 	m_lootGuid			  = 0;
 	m_Summon				= NULL;
+	m_hasInRangeGuards = 0;
 
 	m_PetNumberMax		  = 0;
 	m_lastShotTime		  = 0;
@@ -2029,6 +2030,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 			player_flags &= ~PLAYER_FLAG_FREE_FOR_ALL_PVP;
 		if(player_flags & PLAYER_FLAG_PVP_TIMER)
 			player_flags &= ~PLAYER_FLAG_PVP_TIMER;
+		if(player_flags & PLAYER_FLAG_UNKNOWN2)
+			player_flags &= ~PLAYER_FLAG_UNKNOWN2;
 	}
 
 	ss << "', "
@@ -5065,6 +5068,9 @@ void Player::AddInRangeObject(Object* pObj)
 			m_CurrentTaxiPath->SendMoveForTime( this, static_cast< Player* >( pObj ), m_taxi_ride_time - ntime);*/
 	}
 
+	if( pObj->IsCreature() && pObj->m_faction->FactionFlags & 0x1000 )
+		m_hasInRangeGuards++;
+
 	Unit::AddInRangeObject(pObj);
 
 	//if the object is a unit send a move packet if they have a destination
@@ -5119,6 +5125,9 @@ void Player::AddInRangeObject(Object* pObj)
 
 void Player::OnRemoveInRangeObject(Object* pObj)
 {
+	if( pObj->IsCreature() && pObj->m_faction->FactionFlags & 0x1000 )
+		m_hasInRangeGuards--;
+
 	//if (/*!CanSee(pObj) && */IsVisible(pObj))
 	//{
 		//RemoveVisibleObject(pObj);

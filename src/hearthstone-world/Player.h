@@ -1076,6 +1076,15 @@ public:
 	HEARTHSTONE_INLINE void         UnSetBanned() { m_banned = 0; }
 	HEARTHSTONE_INLINE string       GetBanReason() {return m_banreason;}
 
+	void SetGuardHostileFlag(bool val) { if(val) SetFlag(PLAYER_FLAGS, PLAYER_FLAG_UNKNOWN2); else RemoveFlag(PLAYER_FLAGS, PLAYER_FLAG_UNKNOWN2); UpdateOppFactionSet(); }
+	void CreateResetGuardHostileFlagEvent()
+	{
+		event_RemoveEvents( EVENT_GUARD_HOSTILE );
+		sEventMgr.AddEvent(this, &Player::SetGuardHostileFlag, false, EVENT_GUARD_HOSTILE, 10000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);	
+	}
+
+	uint32 m_hasInRangeGuards;
+
     /************************************************************************/
     /* Guilds                                                               */
     /************************************************************************/

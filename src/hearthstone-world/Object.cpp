@@ -1500,7 +1500,12 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 
 	if(this->IsUnit())
 	{
-		TO_UNIT(this)->OnDamageDealt(pVictim);
+		if( this != pVictim && pVictim->IsPlayer() && IsPlayer() && TO_PLAYER(this)->m_hasInRangeGuards )
+		{
+			TO_PLAYER(this)->SetGuardHostileFlag(true);
+			TO_PLAYER(this)->CreateResetGuardHostileFlagEvent();
+		}
+
 /*		if(!pVictim->isInCombat() && pVictim->IsPlayer())
 			sHookInterface.OnEnterCombat( static_cast< Player* >( pVictim ), static_cast< Unit* >( this ) );
 
