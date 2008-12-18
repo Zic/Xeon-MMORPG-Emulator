@@ -45,9 +45,12 @@ bool locked = false;
 
 void InitWorldStates(MapMgr *pmgr)
 {
-	pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_SILITHUS_SILITHYST_MAX, SILITHYST_MAX);
-	pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_SILITHUS_GATHERED_ALLIANCE, 0);			
-	pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_SILITHUS_GATHERED_HORDE, 0);
+	if(pmgr->GetMapId() == 1 ) // Kalimdor
+	{
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_SILITHUS_SILITHYST_MAX, SILITHYST_MAX);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_SILITHUS_GATHERED_ALLIANCE, 0);			
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_SILITHUS_GATHERED_HORDE, 0);
+	}
 }
 
 void SilithusZoneHook(Player *plr, uint32 Zone, uint32 OldZone)

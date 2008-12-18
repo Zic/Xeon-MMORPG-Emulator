@@ -74,20 +74,20 @@ void SetGrave(MapMgr *pmgr)
 
 	if( ZMCityOwners == 0 )
 	{
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 1);
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 0);			
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_NEUTRAL, 0);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 1);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 0);			
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_NEUTRAL, 0);
 	}
 	else if( ZMCityOwners == 1 )
 	{
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 1);
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 0);
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_NEUTRAL, 0);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 1);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 0);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_NEUTRAL, 0);
 	}
 	else
 	{
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 0);
-		pmgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 0);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_HORDE, 0);
+		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_ZANGARMARSH_CITY_ALLIANCE, 0);
 	}
 }
 
