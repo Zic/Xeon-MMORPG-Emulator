@@ -328,7 +328,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
 	if( class_ == DEATHKNIGHT && (!HasFlag(ACCOUNT_FLAG_XPACK_02) || !CanCreateDeathKnight() ) )
 	{
-		OutPacket(SMSG_CHAR_CREATE, 1, "\x32");
+		OutPacket(SMSG_CHAR_CREATE, 1, "\x3B");
 		return;
 	}
 
