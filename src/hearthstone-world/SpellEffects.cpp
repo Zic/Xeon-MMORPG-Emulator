@@ -2296,6 +2296,9 @@ void Spell::SpellEffectSummon(uint32 i)
 			u_caster->m_SummonSlots[ spe->slot ]->SafeDelete();
 
 		u_caster->m_SummonSlots[ spe->slot ] = NULL;
+
+		if( i_caster ) // Assume this is the 'toggle off' mode since we had one already.
+			return;
 	}
 
 	switch( spe->Id )
@@ -5162,25 +5165,6 @@ void Spell::SummonNonCombatPet(uint32 i)
 	// when it is 1, it means to just dismiss it if we already have it
 	// when it is 0, it could mean to always summon a new critter, but there seems to be exceptions
 
-	if(u_caster->critterPet)
-	{
-		// if we already have this critter, we will just dismiss it and return
-		if(u_caster->critterPet->GetCreatureName() && u_caster->critterPet->GetCreatureName()->Id == SummonCritterID)
-		{
-			u_caster->critterPet->RemoveFromWorld(false,true);
-			u_caster->critterPet->SafeDelete();
-			u_caster->critterPet = NULL;
-			return;
-		}
-		// this is a different critter, so we will dismiss our current critter and then go on to summon the new one
-		else
-		{
-			u_caster->critterPet->RemoveFromWorld(false,true);
-			u_caster->critterPet->SafeDelete();
-			u_caster->critterPet = NULL;
-		}
-	}
-
 	if(!SummonCritterID) return;
 
 	CreatureInfo * ci = CreatureNameStorage.LookupEntry(SummonCritterID);
@@ -5483,11 +5467,17 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 	for(uint32 x=SUMMON_TYPE_TOTEM_1;x<SUMMON_TYPE_TOTEM_4+1;x++)
 	{
 		SummonPropertiesEntry * spe = dbcSummonProps.LookupEntryForced(x);
+		if(!spe) continue;
+
+		// Ahh this code sucks
+		if( x != SUMMON_TYPE_TOTEM_1 && x!= SUMMON_TYPE_TOTEM_2 && x != SUMMON_TYPE_TOTEM_3 && x != SUMMON_TYPE_TOTEM_4 )
+			continue;
+
 		uint32 slot = spe->slot;
 		// atm totems are considert creature's
 		if(p_caster->m_SummonSlots[slot])
 		{
-			uint32 SpellID = p_caster->m_SummonSlots[x]->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+			uint32 SpellID = p_caster->m_SummonSlots[slot]->GetUInt32Value(UNIT_CREATED_BY_SPELL);
 			SpellEntry * sp = dbcSpell.LookupEntry(SpellID);
 			if (!sp)
 				continue;
