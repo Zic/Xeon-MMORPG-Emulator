@@ -57,6 +57,7 @@ void DayWatcherThread::dupe_tm_pointer(tm * returnvalue, tm * mypointer)
 void DayWatcherThread::update_settings()
 {
 	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_arena_update_time\", %u)", last_arena_time);
+	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_dailies_reset_time\", %u)", last_arena_time);
 }
 
 void DayWatcherThread::load_settings()
@@ -310,7 +311,7 @@ void DayWatcherThread::update_arena()
 void DayWatcherThread::update_daily()
 {
 	Log.Notice("DayWatcherThread", "Running Daily Quest Reset...");
-	CharacterDatabase.WaitExecute("UPDATE characters SET finished_dailies = ''");
+	CharacterDatabase.WaitExecute("UPDATE characters SET finished_daily_quests = ''");
 	objmgr.ResetDailies();
 	last_daily_reset_time = UNIXTIME;
 	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
