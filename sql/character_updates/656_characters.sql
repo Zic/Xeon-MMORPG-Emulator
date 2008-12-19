@@ -1,0 +1,1 @@
+ALTER TABLE characters INSERT COLUMN `finished_daily_quests` longtext not null AFTER `finished_quests`;
