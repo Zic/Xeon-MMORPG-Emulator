@@ -186,7 +186,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	
 	if ((status == QMGR_QUEST_AVAILABLE) || (status == QMGR_QUEST_REPEATABLE) || (status == QMGR_QUEST_CHAT))
 	{
-		sQuestMgr.BuildQuestDetails(&data, qst,qst_giver,1, language);	 // 0 because we want goodbye to function
+		sQuestMgr.BuildQuestDetails(&data, qst,qst_giver,1, language, _player);	 // 0 because we want goodbye to function
 		SendPacket(&data);
 		DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 	}
@@ -536,7 +536,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 	if (status == QMGR_QUEST_FINISHED)
 	{
         WorldPacket data;
-		sQuestMgr.BuildOfferReward(&data, qst, qst_giver, 1, language);
+		sQuestMgr.BuildOfferReward(&data, qst, qst_giver, 1, language, _player);
 		SendPacket(&data);
 		DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 	}
@@ -627,7 +627,7 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 	if (status == QMGR_QUEST_FINISHED)
 	{
 		WorldPacket data;
-		sQuestMgr.BuildOfferReward(&data, qst, qst_giver, 1, language);
+		sQuestMgr.BuildOfferReward(&data, qst, qst_giver, 1, language, _player);
 		SendPacket(&data);
 		DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 	}
@@ -794,7 +794,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 							response = QUEST_SHARE_MSG_CANT_TAKE_QUEST;
 							continue;
 						}
-						if(pPlayer->HasFinishedQuest(questid))
+						if(pPlayer->HasFinishedQuest(questid) || pPlayer->HasFinishedDailyQuest(questid))
 						{
 							response = QUEST_SHARE_MSG_FINISH_QUEST;
 							continue;
@@ -814,7 +814,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 							sQuestMgr.SendPushToPartyResponse(_player, pPlayer, response);
 
 						data.clear();
-						sQuestMgr.BuildQuestDetails(&data, pQuest, pPlayer, 1, pPlayer->GetSession()->language);
+						sQuestMgr.BuildQuestDetails(&data, pQuest, pPlayer, 1, pPlayer->GetSession()->language, _player);
 						pPlayer->GetSession()->SendPacket(&data);
 						pPlayer->SetQuestSharer(pguid);
 					}

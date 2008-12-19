@@ -63,7 +63,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 			return;
 
         WorldPacket data;
-        sQuestMgr.BuildQuestDetails(&data, qst, tmpItem, 0, language);
+        sQuestMgr.BuildQuestDetails(&data, qst, tmpItem, 0, language, _player);
 		SendPacket(&data);
 	}
 	

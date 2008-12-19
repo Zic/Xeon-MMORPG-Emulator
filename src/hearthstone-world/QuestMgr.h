@@ -20,6 +20,12 @@
 #ifndef __QUESTMGR_H
 #define __QUESTMGR_H
 
+enum RepeatableTypes
+{
+	REPEATABLE_QUEST	= 1,
+	REPEATABLE_DAILY	= 2,
+};
+
 struct QuestRelation
 {
 	Quest *qst;
@@ -44,8 +50,8 @@ public:
 	uint32 ActiveQuestsCount(Object* quest_giver, Player* plr);
 
 	//Packet Forging...
-	void BuildOfferReward(WorldPacket* data,Quest* qst, Object* qst_giver, uint32 menutype, uint32 language);
-	void BuildQuestDetails(WorldPacket* data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language);	
+	void BuildOfferReward(WorldPacket* data,Quest* qst, Object* qst_giver, uint32 menutype, uint32 language, Player * plr);
+	void BuildQuestDetails(WorldPacket* data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language, Player * plr);	
 	void BuildRequestItems(WorldPacket* data, Quest* qst, Object* qst_giver, uint32 status, uint32 language);
 	void BuildQuestComplete(Player*, Quest* qst);
 	void BuildQuestList(WorldPacket* data, Object* qst_giver, Player* plr, uint32 language);
@@ -63,6 +69,7 @@ public:
 	void OnPlayerCast(Player* plr, uint32 spellid, uint64& victimguid);
 	void OnPlayerItemPickup(Player* plr, Item* item);
 	void OnPlayerExploreArea(Player* plr, uint32 AreaID);
+	void OnPlayerSlain(Player * plr, Player * victim);
 	void OnQuestAccepted(Player* plr, Quest* qst, Object *qst_giver);
 	void OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint32 reward_slot);
 
@@ -70,6 +77,7 @@ public:
 	void GiveQuestTitleReward(Player * plr, Quest* qst);
 
 	uint32 GenerateQuestXP(Player *pl, Quest *qst);
+	uint32 GenerateRewardMoney(Player *pl, Quest *qst);
 
 	void SendQuestInvalid( INVALID_REASON reason, Player *plyr);
 	void SendQuestFailed(FAILED_REASON failed, Quest *qst, Player *plyr);

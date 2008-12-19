@@ -46,17 +46,17 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 	*data << uint32(0);								// Unknown (always 0)
 	*data << uint32(0);								// Unknown (always 0)
 	*data << uint32(qst->next_quest_id);			// Next Quest ID
-	*data << uint32(qst->reward_money);				// Copper reward
+	*data << uint32(sQuestMgr.GenerateRewardMoney(_player, qst));	// Copper reward
 	
 	*data << uint32(qst->required_money);			// Required Money
 	*data << uint32(qst->effect_on_player);			// Spell casted on player upon completion
 	*data << uint32(qst->reward_spell);				// Spell added to spellbook upon completion
-	*data << uint32(0);								// 2.3.0 - bonus honor
+	*data << uint32(qst->reward_honor);				// 2.3.0 - bonus honor
 	*data << uint32(qst->srcitem);					// Item given at the start of a quest (srcitem)
 	*data << uint32(qst->quest_flags);				// Quest Flags
-	*data << uint32(0);								// Reward Title Id - Player is givn this title upon completion
-	*data << uint32(0);								// 3.0.2
-	*data << uint32(0);								// 3.0.2
+	*data << uint32(qst->reward_title);				// Reward Title Id - Player is givn this title upon completion
+	*data << uint32(qst->required_kill_player);		// 3.0.2
+	*data << uint32(qst->reward_talents);			// 3.0.2
 
 	// (loop 4 times)
 	for(uint32 i = 0; i < 4; ++i)
@@ -133,6 +133,7 @@ QuestLogEntry::QuestLogEntry()
 	mDirty = false;
 	m_slot = -1;
 	completed=0;
+	m_player_slain = 0;
 }
 
 QuestLogEntry::~QuestLogEntry()
@@ -220,6 +221,8 @@ void QuestLogEntry::SaveToDB(QueryBuffer * buf)
 	for(int i = 0; i < 4; ++i)
 		ss << "," << m_mobcount[i];
 
+	ss << "," << m_player_slain;
+
 	ss << ")";
 	
 	if( buf == NULL )
@@ -248,6 +251,7 @@ bool QuestLogEntry::LoadFromDB(Field *fields)
 		else
 			CALL_QUESTSCRIPT_EVENT(this, OnGameObjectActivate)(GetQuest()->required_mob[i], m_plr, this);
 	}
+	m_player_slain = fields[f].GetUInt32();
 	mDirty = false;
 	return true;
 }
@@ -289,6 +293,12 @@ bool QuestLogEntry::CanBeFinished()
 		}
 	}
 
+	if(m_quest->required_kill_player != m_player_slain)
+		return false;
+
+	if(m_plr->GetFinishedDailiesCount() >= 25)
+		return false;
+
 	return true;
 }
 
@@ -298,6 +308,12 @@ void QuestLogEntry::SubtractTime(uint32 value)
 		m_time_left = 0;
 	else
 		m_time_left-=value;
+}
+
+void QuestLogEntry::SetPlayerSlainCount(uint32 count)
+{
+	m_player_slain = count;
+	mDirty = true;
 }
 
 void QuestLogEntry::SetMobCount(uint32 i, uint32 count)

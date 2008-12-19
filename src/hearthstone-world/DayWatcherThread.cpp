@@ -72,11 +72,21 @@ void DayWatcherThread::load_settings()
 	}
 	else
 		last_arena_time = 0;
+
+	result = CharacterDatabase.Query("SELECT setting_value FROM server_settings WHERE setting_id = \"last_dailies_reset_time\"");
+	if(result)
+	{
+		last_daily_reset_time = result->Fetch()[0].GetUInt32();
+		delete result;
+	}
+	else
+		last_daily_reset_time = 0;
 }
 
 void DayWatcherThread::set_tm_pointers()
 {
 	dupe_tm_pointer(localtime(&last_arena_time), &local_last_arena_time);
+	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
 }
 
 uint32 DayWatcherThread::get_timeout_from_string(const char * string, uint32 def)
@@ -143,6 +153,9 @@ bool DayWatcherThread::run()
 
 		if(has_timeout_expired(&local_currenttime, &local_last_arena_time, arena_period))
 			update_arena();
+
+		if(has_timeout_expired(&local_currenttime, &local_last_daily_reset_time, DAILY))
+			update_daily();
         
 		if(m_dirty)
 			update_settings();
@@ -291,6 +304,16 @@ void DayWatcherThread::update_arena()
 	//===========================================================================
 	last_arena_time = UNIXTIME;
 	dupe_tm_pointer(localtime(&last_arena_time), &local_last_arena_time);
+	m_dirty = true;
+}
+
+void DayWatcherThread::update_daily()
+{
+	Log.Notice("DayWatcherThread", "Running Daily Quest Reset...");
+	CharacterDatabase.WaitExecute("UPDATE characters SET finished_dailies = ''");
+	objmgr.ResetDailies();
+	last_daily_reset_time = UNIXTIME;
+	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
 	m_dirty = true;
 }
 

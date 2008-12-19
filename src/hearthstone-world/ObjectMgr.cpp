@@ -2699,6 +2699,24 @@ void ObjectMgr::UpdateArenaTeamWeekly()
 	m_arenaTeamLock.Release();
 }
 
+void ObjectMgr::ResetDailies()
+{
+	_playerslock.AcquireReadLock();
+	PlayerStorageMap::iterator itr = _players.begin();
+	for(; itr != _players.end(); itr++)
+	{
+		Player * pPlayer = itr->second;
+		pPlayer->DailyMutex.Acquire();
+		pPlayer->m_finishedDailyQuests.clear();
+		for(uint32 i = 0; i < 25; i++)
+		{
+			pPlayer->SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + i, 0);
+		}
+		pPlayer->DailyMutex.Release();
+	}
+	_playerslock.ReleaseReadLock();
+}
+
 #ifdef VOICE_CHAT
 void ObjectMgr::GroupVoiceReconnected()
 {

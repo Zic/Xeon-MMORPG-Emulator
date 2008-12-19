@@ -2191,6 +2191,14 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 		ss << (*fq) << ",";
 	}
 
+	ss << "','";
+	// Add player finished daily quests
+	fq = m_finishedDailyQuests.begin();
+	for(; fq != m_finishedDailyQuests.end(); ++fq)
+	{
+		ss << (*fq) << ",";
+	}
+
 	ss << "', ";
 	ss << m_honorRolloverTime << ", ";
 	ss << m_killsToday << ", " << m_killsYesterday << ", " << m_killsLifetime << ", ";
@@ -2914,6 +2922,19 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 		start = end +1;
 	}
 	GetAchievementInterface()->HandleAchievementCriteriaQuestCount( m_finishedQuests.size() );
+
+	DailyMutex.Acquire();
+	start =  (char*)get_next_field.GetString();
+	while(true)
+	{
+		end = strchr(start,',');
+		if(!end)break;
+		*end=0;
+		SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + m_finishedDailyQuests.size(), atol(start));
+		m_finishedDailyQuests.insert(atol(start));
+		start = end +1;
+	}
+	DailyMutex.Release();
 	
 	m_honorRolloverTime = get_next_field.GetUInt32();
 	m_killsToday = get_next_field.GetUInt32();
@@ -4373,6 +4394,22 @@ void Player::AddToFinishedQuests(uint32 quest_id)
 bool Player::HasFinishedQuest(uint32 quest_id)
 {
 	return (m_finishedQuests.find(quest_id) != m_finishedQuests.end());
+}
+
+void Player::AddToFinishedDailyQuests(uint32 quest_id)
+{
+	if(m_finishedDailyQuests.size() >= 25)
+		return;
+
+	DailyMutex.Acquire();
+	SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + m_finishedDailyQuests.size(), quest_id);
+	m_finishedDailyQuests.insert(quest_id);
+	DailyMutex.Release();
+}
+
+bool Player::HasFinishedDailyQuest(uint32 quest_id)
+{
+	return (m_finishedDailyQuests.find(quest_id) != m_finishedDailyQuests.end());
 }
 
 //From Mangos Project

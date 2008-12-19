@@ -83,6 +83,9 @@ uint32 QuestMgr::PlayerMeetsReqs(Player* plr, Quest* qst, bool skiplevelcheck)
 	if (plr->HasFinishedQuest(qst->id) && !qst->is_repeatable)
 		return QMGR_QUEST_NOT_AVAILABLE;
 
+	if (plr->HasFinishedDailyQuest(qst->id))
+		return QMGR_QUEST_NOT_AVAILABLE;
+
 	for(uint32 i = 0; i < 4; ++i)
 	{
 		if (qst->required_quests[i] > 0 && !plr->HasFinishedQuest(qst->required_quests[i]))
@@ -250,7 +253,7 @@ uint32 QuestMgr::ActiveQuestsCount(Object* quest_giver, Player* plr)
 	return questCount;
 }
 
-void QuestMgr::BuildOfferReward(WorldPacket *data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language)
+void QuestMgr::BuildOfferReward(WorldPacket *data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language, Player* plr)
 {
 	LocalizedQuest * lq = (language>0) ? sLocalizationMgr.GetLocalizedQuest(qst->id,language):NULL;
 	ItemPrototype * it;
@@ -309,16 +312,16 @@ void QuestMgr::BuildOfferReward(WorldPacket *data, Quest* qst, Object* qst_giver
     }
 	
 
-	*data << qst->reward_money;
+	*data << GenerateRewardMoney(plr, qst);
+	*data << qst->reward_honor;
+	*data << uint32(0);
 	*data << qst->reward_spell;
-	*data << uint32(0);
-	*data << uint32(0);
-	*data << uint32(0);
-	*data << uint32(0);
-	*data << uint32(0);
+	*data << qst->effect_on_player;
+	*data << qst->reward_title;
+	*data << qst->reward_talents;
 }
 
-void QuestMgr::BuildQuestDetails(WorldPacket *data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language)
+void QuestMgr::BuildQuestDetails(WorldPacket *data, Quest* qst, Object* qst_giver, uint32 menutype, uint32 language, Player* plr)
 {
 	LocalizedQuest * lq = (language>0) ? sLocalizationMgr.GetLocalizedQuest(qst->id,language):NULL;
 	std::map<uint32, uint8>::const_iterator itr;
@@ -377,12 +380,12 @@ void QuestMgr::BuildQuestDetails(WorldPacket *data, Quest* qst, Object* qst_give
 			*data << uint32(0);
 	}
 
-	*data << qst->reward_money;					// Reward Money
-	*data << uint32(0);							// Bonus Honor
+	*data << GenerateRewardMoney(plr, qst);		// Reward Money
+	*data << qst->reward_honor;					// Bonus Honor
 	*data << qst->reward_spell;					// Reward Spell Id
 	*data << qst->effect_on_player;				// Cast Spell Id
-	*data << uint32(0);							// Reward Title Id
-	*data << uint32(0);							// 3.0.2 - Reward Talents
+	*data << qst->reward_title;					// Reward Title Id
+	*data << qst->reward_talents;				// 3.0.2 - Reward Talents
 
 	*data << uint32(4);							// Quantity of emotes, always four
 	*data << uint32(1);							// Emote id 1
@@ -454,11 +457,7 @@ void QuestMgr::BuildRequestItems(WorldPacket *data, Quest* qst, Object* qst_give
 void QuestMgr::BuildQuestComplete(Player*plr, Quest* qst)
 {
 	uint32 xp ;
-	if(plr->getLevel() >= plr->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
-	{
-		plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, qst->reward_xp_as_money);
-		xp = 0;
-	}else
+	if(plr->getLevel() < plr->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
 	{
 		xp = float2int32(GenerateQuestXP(plr,qst) * sWorld.getRate(RATE_QUESTXP));
 		plr->GiveXP(xp, 0, false);
@@ -467,10 +466,9 @@ void QuestMgr::BuildQuestComplete(Player*plr, Quest* qst)
 	WorldPacket data( SMSG_QUESTGIVER_QUEST_COMPLETE,72 );
 
 	data << qst->id;
-	data << uint32(3);
 	data << xp;
-	data << uint32(qst->reward_money);
-	data << uint32(0);						// Honor Points
+	data << uint32(GenerateRewardMoney(plr, qst));
+	data << uint32(qst->reward_honor);		// Honor Points
 	data << uint32(0);						// 3.0.2
 	data << uint32(qst->count_reward_item); //Reward item count
 
@@ -736,6 +734,64 @@ void QuestMgr::OnPlayerKill(Player* plr, Creature* victim)
 	}
 }
 
+void QuestMgr::OnPlayerSlain(Player *plr, Player *victim)
+{
+	if(!plr || !victim)
+		return;
+
+	QuestLogEntry *qle;
+	uint32 i;
+	for(i = 0; i < 25; ++i)
+	{
+		if((qle = plr->GetQuestLogInSlot(i)) && qle->m_player_slain)
+		{
+			qle->SetPlayerSlainCount(qle->m_player_slain + 1);
+			if(qle->CanBeFinished())
+				qle->SendQuestComplete();
+			qle->SaveToDB(NULL);
+		}
+	}
+
+	// Shared kills
+	Player *gplr = NULL;
+
+	if(plr->InGroup())
+	{
+		if(Group* pGroup = plr->GetGroup())
+		{
+			GroupMembersSet::iterator gitr;
+			pGroup->Lock();
+			for(uint32 k = 0; k < pGroup->GetSubGroupCount(); k++)
+			{
+				for(gitr = pGroup->GetSubGroup(k)->GetGroupMembersBegin(); gitr != pGroup->GetSubGroup(k)->GetGroupMembersEnd(); ++gitr)
+				{
+					gplr = (*gitr)->m_loggedInPlayer;
+					if(gplr && gplr != plr && plr->isInRange(gplr,300)) // dont double kills also dont give kills to party members at another side of the world
+					{
+						for( i = 0; i < 25; ++i )
+						{
+							qle = gplr->GetQuestLogInSlot(i);
+							if( qle != NULL )
+							{
+								// dont waste time on quests without mobs
+								if( qle->GetQuest()->required_kill_player == 0 )
+									continue;
+
+								qle->SetPlayerSlainCount(qle->m_player_slain + 1);
+
+								if(qle->CanBeFinished())
+									qle->SendQuestComplete();
+								qle->SaveToDB(NULL);
+							}
+						}
+					}
+				}
+			}
+			pGroup->Unlock();
+		}
+	}
+}
+
 void QuestMgr::OnPlayerCast(Player* plr, uint32 spellid, uint64& victimguid)
 {
 	if(!plr || !plr->HasQuestSpell(spellid))
@@ -899,32 +955,27 @@ void QuestMgr::GiveQuestTitleReward(Player * plr, Quest* qst)
 void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint32 reward_slot)
 {
     QuestLogEntry *qle = NULL;
-    if(!qst->is_repeatable)
-    {
-	    qle = plr->GetQuestLogForEntry(qst->id);
-	    if(!qle)
-		    return;
-    }
+    qle = plr->GetQuestLogForEntry(qst->id);
+    if(!qle)
+	    return;
     BuildQuestComplete(plr, qst);
     if(!qst->is_repeatable) CALL_QUESTSCRIPT_EVENT(qle, OnQuestComplete)(plr, qle);
-	if(!qst->is_repeatable) 
+
+	for (uint32 x=0;x<4;x++)
 	{
-		for (uint32 x=0;x<4;x++)
+		if (qst->required_spell[x]!=0)
 		{
-			if (qst->required_spell[x]!=0)
-			{
-				if (plr->HasQuestSpell(qst->required_spell[x]))
-					plr->RemoveQuestSpell(qst->required_spell[x]);
-			}
-			else if (qst->required_mob[x]!=0)
-			{
-				if (plr->HasQuestMob(qst->required_mob[x]))
-					plr->RemoveQuestMob(qst->required_mob[x]);
-			} 
+			if (plr->HasQuestSpell(qst->required_spell[x]))
+				plr->RemoveQuestSpell(qst->required_spell[x]);
 		}
-		qle->ClearAffectedUnits();
-		qle->Finish();
+		else if (qst->required_mob[x]!=0)
+		{
+			if (plr->HasQuestMob(qst->required_mob[x]))
+				plr->RemoveQuestMob(qst->required_mob[x]);
+		} 
 	}
+	qle->ClearAffectedUnits();
+	qle->Finish();
 	
 	if(qst_giver->GetTypeId() == TYPEID_UNIT)
 	{
@@ -939,7 +990,9 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
     //details: hmm as i can remember, repeatable quests give faction rep still after first completation
     if(IsQuestRepeatable(qst))
     {
-		plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, qst->reward_money);
+		plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, GenerateRewardMoney(plr, qst));
+		plr->ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, qst->reward_talents);
+		HonorHandler::AddHonorPointsToPlayer(plr, qst->reward_honor);
 		// Reputation reward
 		GiveQuestRewardReputation(plr, qst, qst_giver);
 		GiveQuestTitleReward(plr, qst);
@@ -1044,7 +1097,9 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
     }
     else
     {
-	    plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, qst->reward_money);
+	    plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, GenerateRewardMoney(plr, qst));
+		plr->ModUnsigned32Value(PLAYER_CHARACTER_POINTS1, qst->reward_talents);
+		HonorHandler::AddHonorPointsToPlayer(plr, qst->reward_honor);
   	
 	    // Reputation reward
 		GiveQuestRewardReputation(plr, qst, qst_giver);
@@ -1178,10 +1233,16 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
 			    spe->prepare(&tgt);
 		    }
 	    }
-
-	    //Add to finished quests
-	    plr->AddToFinishedQuests(qst->id);
     }
+
+    //Add to finished quests
+	if(qst->is_repeatable == REPEATABLE_DAILY)
+		plr->AddToFinishedDailyQuests(qst->id);
+	else if(!IsQuestRepeatable(qst))
+		plr->AddToFinishedQuests(qst->id);
+
+	if(qst->zone_id)
+		plr->GetAchievementInterface()->HandleAchievementCriteriaCompleteQuestsInZone(qst->zone_id);
 }
 
 /////////////////////////////////////
@@ -1275,6 +1336,17 @@ void QuestMgr::_RemoveChar(char *c, std::string *str)
 		str->erase(pos, 1);
 		pos = str->find(c, 0);
 	}	
+}
+
+uint32 QuestMgr::GenerateRewardMoney( Player * pl, Quest * qst )
+{
+	if ( qst->reward_money < 0 )
+		return 0;
+
+	if ( pl && pl->getLevel() == pl->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL) && qst->is_repeatable == 0 )
+		return qst->reward_money + float2int32( GenerateQuestXP( pl, qst ) * sWorld.getRate( RATE_QUESTXP ) ) * 6;
+	else
+		return qst->reward_money;
 }
 
 uint32 QuestMgr::GenerateQuestXP(Player *plr, Quest *qst)	
@@ -1484,13 +1556,13 @@ bool QuestMgr::OnActivateQuestGiver(Object *qst_giver, Player *plr)
 
 		if ((status == QMGR_QUEST_AVAILABLE) || (status == QMGR_QUEST_REPEATABLE) || (status == QMGR_QUEST_CHAT))
 		{
-			sQuestMgr.BuildQuestDetails(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language);		// 1 because we have 1 quest, and we want goodbye to function
+			sQuestMgr.BuildQuestDetails(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);		// 1 because we have 1 quest, and we want goodbye to function
 			plr->GetSession()->SendPacket(&data);
 			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 		}
 		else if (status == QMGR_QUEST_FINISHED)
 		{
-			sQuestMgr.BuildOfferReward(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language);
+			sQuestMgr.BuildOfferReward(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);
 			plr->GetSession()->SendPacket(&data);
 			//ss
 			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD." );
@@ -1624,7 +1696,6 @@ void QuestMgr::LoadExtraQuestStuff()
 		qst->count_receiveitems = 0;
 		qst->count_reward_item = 0;
 		qst->count_reward_choiceitem = 0;
-		qst->reward_xp_as_money = 0;
 
 		qst->required_mobtype[0] = 0;
 		qst->required_mobtype[1] = 0;
@@ -1632,6 +1703,9 @@ void QuestMgr::LoadExtraQuestStuff()
 		qst->required_mobtype[3] = 0;
 
 		qst->count_requiredquests = 0;
+
+		if(qst->is_repeatable != 0 && (qst->quest_flags & 4096))
+			qst->is_repeatable = REPEATABLE_DAILY;
 
 		for(int i = 0 ; i < 4; ++i)
 		{

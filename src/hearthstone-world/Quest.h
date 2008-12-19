@@ -149,6 +149,8 @@ struct Quest
 	uint32 required_item[4];
 	uint32 required_itemcount[4];
 
+	uint32 required_kill_player;
+
 	uint32 required_mob[4];
 	uint32 required_mobcount[4];
 	uint32 required_spell[4];
@@ -166,8 +168,10 @@ struct Quest
 	uint32 reward_title;
 
 	uint32 reward_money;
+	uint32 reward_honor;
 	uint32 reward_xp;
 	uint32 reward_spell;
+	uint32 reward_talents;
 	uint32 effect_on_player;
 	
 	uint32 point_mapid;
@@ -190,7 +194,6 @@ struct Quest
 	uint32 count_required_item;
 	uint32 required_mobtype[4];
 	uint32 count_reward_item;
-	uint32 reward_xp_as_money;
 
 	QuestScript* pQuestScript;
 };
@@ -225,6 +228,7 @@ public:
 
 	void SetTrigger(uint32 i);
 	void SetMobCount(uint32 i, uint32 count);
+	void SetPlayerSlainCount(uint32 count);
 
 	bool IsUnitAffected(Unit* target);
 	HEARTHSTONE_INLINE bool IsCastQuest() { return iscastquest;}
@@ -236,6 +240,7 @@ public:
 
 	void SendQuestComplete();
 	void SendUpdateAddKill(uint32 i);
+	HEARTHSTONE_INLINE uint32 GetPlayerSlainCount() { return m_player_slain; }
 	HEARTHSTONE_INLINE uint32 GetMobCount(uint32 i) { return m_mobcount[i]; }
 	HEARTHSTONE_INLINE uint32 GetExploredAreas(uint32 i) { return m_explored_areas[i]; }
 
@@ -255,6 +260,8 @@ private:
 	
 	uint32 m_mobcount[4];
 	uint32 m_explored_areas[4];
+
+	uint32 m_player_slain;
 
 	std::set<uint64> m_affected_units;
 	bool iscastquest;

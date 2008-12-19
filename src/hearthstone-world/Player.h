@@ -908,10 +908,13 @@ public:
     void                SetQuestLogSlot(QuestLogEntry *entry, uint32 slot);
     
     HEARTHSTONE_INLINE void         PushToRemovedQuests(uint32 questid)	{ m_removequests.insert(questid);}
+	HEARTHSTONE_INLINE uint32		GetFinishedDailiesCount() { return m_finishedDailyQuests.size(); }
     void                AddToFinishedQuests(uint32 quest_id);
+	void				AddToFinishedDailyQuests(uint32 quest_id);
     void                EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot);
 	
 	bool                HasFinishedQuest(uint32 quest_id);
+	bool				HasFinishedDailyQuest(uint32 quest_id);
 	bool                HasQuestForItem(uint32 itemid);
     bool                CanFinishQuest(Quest* qst);
 	bool                HasQuestSpell(uint32 spellid);
@@ -926,10 +929,12 @@ public:
     std::set<uint32>    m_QuestGOInProgress;
     std::set<uint32>    m_removequests;
     std::set<uint32>    m_finishedQuests;
+	std::set<uint32>	m_finishedDailyQuests;
     uint32              m_questSharer;
     uint32              timed_quest_slot;
 	std::set<uint32>    quest_spells;
 	std::set<uint32>    quest_mobs;
+	Mutex				DailyMutex;
 
     void EventPortToGM(uint32 guid);
 	HEARTHSTONE_INLINE uint32 GetTeam() { return m_team; }

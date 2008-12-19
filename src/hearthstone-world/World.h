@@ -570,6 +570,10 @@ protected:
 		// Update Server time
 		time_t thisTime = UNIXTIME;
 		m_gameTime += thisTime - m_lastTick;
+
+		if(m_gameTime >= 86400)			// One day has passed
+			m_gameTime -= 86400;
+
 		m_lastTick = thisTime;
 
 		return m_gameTime;

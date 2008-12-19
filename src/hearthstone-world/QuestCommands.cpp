@@ -36,7 +36,7 @@ string RemoveQuestFromPlayer(Player *plr, Quest *qst)
 
 	if (plr->HasQuests())
 	{
-		if (plr->HasFinishedQuest(qst->id))
+		if (plr->HasFinishedQuest(qst->id) || plr->HasFinishedDailyQuest(qst->id))
 			recout += "Player has already completed that quest.\n\n";
 		else
 		{
@@ -151,7 +151,7 @@ bool ChatHandler::HandleQuestStatusCommand(const char * args, WorldSession * m_s
 	Quest * qst = QuestStorage.LookupEntry(quest_id);
 	if(qst)
 	{
-		if (plr->HasFinishedQuest(quest_id))
+		if (plr->HasFinishedQuest(quest_id) || plr->HasFinishedDailyQuest(quest_id))
 			recout += "Player has already completed that quest.";
 		else
 		{
@@ -193,7 +193,7 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 	Quest * qst = QuestStorage.LookupEntry(quest_id);
 	if(qst)
 	{
-		if (plr->HasFinishedQuest(quest_id))
+		if (plr->HasFinishedQuest(quest_id) || plr->HasFinishedDailyQuest(quest_id))
 			recout += "Player has already completed that quest.";
 		else
 		{
@@ -239,6 +239,7 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 				
 
 					plr->UpdateNearbyGameObjects();
+				
 					sHookInterface.OnQuestAccept( plr, qst );
 
 					recout += "Quest has been added to the player's quest log.";
@@ -277,8 +278,10 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 	Quest * qst = QuestStorage.LookupEntry(quest_id);
 	if(qst)
 	{
-		if (plr->HasFinishedQuest(quest_id))
+		if (plr->HasFinishedQuest(quest_id) || plr->HasFinishedDailyQuest(quest_id))
 			recout += "Player has already completed that quest.\n\n";
+		else if(qst->is_repeatable == REPEATABLE_DAILY && plr->GetFinishedDailiesCount() >= 25)
+			recout += "Player has reached the maximum number of completed daily quests.\n\n";
 		else
 		{
 			QuestLogEntry * IsPlrOnQuest = plr->GetQuestLogForEntry(quest_id);
@@ -349,7 +352,10 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 			else
 				recout += "The quest has now been completed for that player.";
 
-			plr->AddToFinishedQuests(quest_id);
+			if(qst->is_repeatable == REPEATABLE_DAILY)
+				plr->AddToFinishedDailyQuests(quest_id);
+			else
+				plr->AddToFinishedQuests(quest_id);
 		}
 	}
 	else

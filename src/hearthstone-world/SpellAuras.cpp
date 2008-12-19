@@ -712,7 +712,7 @@ void Aura::Remove()
 	m_deleted = true;
 	sEventMgr.RemoveEvents( this );
 
-	if( !IsPassive() )
+	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		RemoveAuraVisual();
 
 	ASSERT(m_target->m_auras[m_auraSlot] == this);
@@ -986,7 +986,7 @@ void Aura::AddAuraVisual()
 
 void Aura::RemoveAuraVisual()
 {
-	m_target->ModAuraStackCount(this->m_visualSlot, -99999);
+	m_target->ModAuraStackCount(this->m_visualSlot, -1);
 	this->BuildAuraUpdate();
 }
 
