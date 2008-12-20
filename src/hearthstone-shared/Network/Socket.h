@@ -145,27 +145,22 @@ public:
 	void PostEvent(uint32 events);
 
 	// Atomic wrapper functions for increasing read/write locks
-	HEARTHSTONE_INLINE void IncSendLock() { m_writeLockMutex.Acquire(); m_writeLock++; m_writeLockMutex.Release(); }
-	HEARTHSTONE_INLINE void DecSendLock() { m_writeLockMutex.Acquire(); m_writeLock--; m_writeLockMutex.Release(); }
-	HEARTHSTONE_INLINE bool HasSendLock() { bool res; m_writeLockMutex.Acquire(); res = (m_writeLock != 0); m_writeLockMutex.Release(); return res; }
+	HEARTHSTONE_INLINE void IncSendLock() { __sync_add_and_fetch(&m_writeLock, 1); }
+	HEARTHSTONE_INLINE void DecSendLock() { __sync_sub_and_fetch(&m_writeLock, 1); }
+	HEARTHSTONE_INLINE bool HasSendLock() { return (m_writeLock != 0); }
 	bool AcquireSendLock()
 	{
-	  bool rv;
-	  m_writeLockMutex.Acquire();
-	  if(m_writeLock != 0)
-		rv = false;
-	  else
-	  {
-		rv = true;
-	m_writeLock++;
-	  }
-	  m_writeLockMutex.Release();
-	  return rv;
+		if( m_writeLock )
+			return false;
+		else
+		{
+			IncSendLock();
+			return true;
+		}
 	}
 
 private:
-	unsigned int m_writeLock;
-	Mutex m_writeLockMutex;
+	volatile unsigned int m_writeLock;
 #endif
 
 /* FreeBSD - kqueue specific calls */
@@ -179,7 +174,7 @@ public:
 	HEARTHSTONE_INLINE bool HasSendLock() { return (m_writeLock != 0); }
 	bool AcquireSendLock()
 	{
-		if( m_writeLock != 0 )
+		if( m_writeLock )
 			return false;
 
 		__sync_add_and_fetch(&m_writeLock, 1);
