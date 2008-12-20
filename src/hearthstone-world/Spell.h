@@ -1939,7 +1939,7 @@ public:
     bool judgement;
 	uint8 extra_cast_number;
 	uint32 m_glyphIndex;
-	uint32 m_interruptcount;
+	uint32 m_pushbackCount;
 
     bool duelSpell;
 

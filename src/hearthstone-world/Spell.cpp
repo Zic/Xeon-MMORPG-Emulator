@@ -144,7 +144,7 @@ Spell::Spell(Object* Caster, SpellEntry *info, bool triggered, Aura* aur)
 	m_spellInfo = info;
 	m_caster = Caster;
 	duelSpell = false;
-	m_interruptcount = 0;
+	m_pushbackCount = 0;
 
 	switch( Caster->GetTypeId() )
 	{
@@ -1545,10 +1545,12 @@ void Spell::AddTime(uint32 type)
 			if(Rand(p_caster->SpellDelayResist[type]))
 				return;
 		}
-		if(m_spellState==SPELL_STATE_PREPARING && m_interruptcount <= 1)
+		if(m_pushbackCount > 1)
+			return;
+		m_pushbackCount++;
+		if(m_spellState==SPELL_STATE_PREPARING)
 		{
 			int32 delay = 500;
-			m_interruptcount++;
 			m_timer+=delay;
 			if(m_timer>m_castTime)
 			{
@@ -1578,7 +1580,7 @@ void Spell::AddTime(uint32 type)
 		}
 		else if( m_spellInfo->ChannelInterruptFlags != 48140)
 		{
-			int32 delay = GetDuration()/3;
+			int32 delay = GetDuration()/4;
 			m_timer-=delay;
 			if(m_timer<0)
 				m_timer=0;
@@ -1588,7 +1590,6 @@ void Spell::AddTime(uint32 type)
 			m_Delayed = true;
 			if(m_timer>0)
 				SendChannelUpdate(m_timer);
-
 		}
 	}
 }

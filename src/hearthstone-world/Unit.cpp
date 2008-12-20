@@ -5379,7 +5379,7 @@ float Unit::CalculateDazeCastChance(Unit *target)
 }
 
 #define COMBAT_TIMEOUT_IN_SECONDS 5
-#define COMBAT_TIMEOUT_RANGE 506.25			// 22.5
+#define COMBAT_TIMEOUT_RANGE 10000		// 100
 
 void CombatStatusHandler::ClearMyHealers()
 {
