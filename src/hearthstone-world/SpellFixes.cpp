@@ -632,7 +632,7 @@ void ApplyNormalFixes()
 {
 	//Updating spell.dbc
 	SpellEntry *sp;
-	uint32 ids[100], ranks;
+	uint32 ids[100], proc_ids[100], ranks;
 
 	Log.Notice("World", "Processing %u spells...", dbcSpell.GetNumRows());
 	Apply112SpellFixes();
@@ -669,7 +669,6 @@ void ApplyNormalFixes()
 		sp->Unique = false;
 		sp->apply_on_shapeshift_change = false;
 		sp->always_apply = false;
-		sp->procs_per_minute = 0.0f;
 
 		// hash the name
 		//!!!!!!! representing all strings on 32 bits is dangerous. There is a chance to get same hash for a lot of strings ;)
@@ -1051,32 +1050,6 @@ void ApplyNormalFixes()
 
 		case SPELL_HASH_REPENTANCE:
 			sp->buffIndexType = SPELL_TYPE_INDEX_REPENTANCE;
-			break;
-		}
-
-		// PROCS PERMINUTE
-		switch( namehash )
-		{
-		case SPELL_HASH_MAGTHERIDON_MELEE_TRINKET:
-			sp->procs_per_minute = 1.5f;
-			break; // dragonspine trophy
-		case SPELL_HASH_ROMULO_S_POISON:
-			sp->procs_per_minute = 1.5f;
-			break; // romulo's
-		case SPELL_HASH_BLACK_TEMPLE_MELEE_TRINKET:
-			sp->procs_per_minute = 1.0f;
-			break; // madness of the betrayer
-		case SPELL_HASH_BAND_OF_THE_ETERNAL_CHAMPION:
-			sp->proc_interval = 30;
-			break;
-		case SPELL_HASH_BAND_OF_THE_ETERNAL_DEFENDER:
-			sp->proc_interval = 30;
-			break;
-		case SPELL_HASH_BAND_OF_THE_ETERNAL_RESTORER:
-			sp->proc_interval = 30;
-			break;
-		case SPELL_HASH_BAND_OF_THE_ETERNAL_SAGE:
-			sp->proc_interval = 30;
 			break;
 		}
 
@@ -1502,17 +1475,6 @@ void ApplyNormalFixes()
 			sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
 		}
 #endif
-		//more triggered spell ids are wrong. I think blizz is trying to outsmart us :S
-		else if( strstr( sp->Name, "Nature's Guardian"))
-		{
-			sp->EffectTriggerSpell[0] = 31616;
-			sp->proc_interval = 5000;
-		}
-		//Chain Heal all ranks %50 heal value (49 + 1)
-		else if( strstr( sp->Name, "Chain Heal"))
-		{
-			sp->EffectDieSides[0] = 49;
-		}
 		//this starts to be an issue for trigger spell id : Deep Wounds
 		else if( strstr( sp->Name, "Deep Wounds") && sp->EffectTriggerSpell[0])
 		{
@@ -1905,6 +1867,8 @@ void ApplyNormalFixes()
 		//////////////////////////////////////////
 
 		// Insert warrior spell fixes here
+		if( sp->NameHash == SPELL_HASH_MORTAL_STRIKE)
+			sp->maxstack = 1; // Healing reduction shouldn't stack
 
 		//////////////////////////////////////////
 		// PALADIN								//
@@ -1912,31 +1876,19 @@ void ApplyNormalFixes()
 
 		// Insert paladin spell fixes here
 			
-			// Seal of Righteousness - cannot crit
-			if( sp->NameHash == SPELL_HASH_SEAL_OF_RIGHTEOUSNESS )
-				sp->spell_can_crit = false;
+		// Seal of Righteousness - cannot crit
+		if( sp->NameHash == SPELL_HASH_SEAL_OF_RIGHTEOUSNESS )
+			sp->spell_can_crit = false;
+
+		//Seal of Light
+		if( sp->NameHash == SPELL_HASH_SEAL_OF_LIGHT) 
+			sp->Dspell_coef_override = 0.0f;
 
 		//////////////////////////////////////////
 		// HUNTER								//
 		//////////////////////////////////////////
 
 		// Insert hunter spell fixes here
-		//Hunter - Go for the Throat
-		sp = dbcSpell.LookupEntryForced( 34950 );
-		if( sp != NULL )
-			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
-
-		sp = dbcSpell.LookupEntryForced( 34954 );
-		if( sp != NULL )
-			sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
-
-		sp = dbcSpell.LookupEntryForced( 34952 );
-		if( sp != NULL )
-			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
-
-		sp = dbcSpell.LookupEntryForced( 34953 );
-		if( sp != NULL )
-			sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
 				
 		
 			// THESE FIXES ARE GROUPED FOR CODE CLEANLINESS.
@@ -1957,6 +1909,9 @@ void ApplyNormalFixes()
 			{
 				sp->is_ranged_spell = true;
 			}
+
+			if( sp->NameHash == SPELL_HASH_AIMED_SHOT)
+				sp->maxstack = 1; // Healing reduction shouldn't stack
 
 		//////////////////////////////////////////
 		// ROGUE								//
@@ -1979,6 +1934,77 @@ void ApplyNormalFixes()
 			// Lightning Shield - cannot crit
 			if( sp->NameHash == SPELL_HASH_LIGHTNING_SHIELD ) // not a mistake, the correct proc spell for lightning shield is also called lightning shield
 				sp->spell_can_crit = false;
+
+			// Frostbrand Weapon - 10% spd coefficient and 9ppm
+			if( sp->NameHash == SPELL_HASH_FROSTBRAND_ATTACK )
+				sp->Dspell_coef_override = 0.1f;
+
+			if( sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON )
+				sp->ProcsPerMinute = 9.0f;
+
+			// Fire Nova - 21.4% spd coefficient
+			if( sp->NameHash == SPELL_HASH_FIRE_NOVA )
+				sp->Dspell_coef_override = 0.214f;
+
+			// Magma Totem - 6.67% spd coefficient
+			if( sp->NameHash == SPELL_HASH_MAGMA_TOTEM )
+				sp->Dspell_coef_override = 0.0667f;
+
+			// Searing Totem - 16.67% spd coefficient
+			if( sp->NameHash == SPELL_HASH_ATTACK )
+				sp->Dspell_coef_override = 0.1667f;
+
+			// Mana Spring Totem - 4.5% healing coefficient
+			if( sp->NameHash == SPELL_HASH_HEALING_STREAM_TOTEM )
+				sp->Dspell_coef_override = 0.045f;
+
+			// Earth Shield
+			if( sp->NameHash == SPELL_HASH_EARTH_SHIELD) 
+				sp->Dspell_coef_override = 0.2857f;
+
+			// Nature's Guardian
+			if( sp->NameHash == SPELL_HASH_NATURE_S_GUARDIAN ){
+				sp->procFlags = PROC_ON_SPELL_HIT_VICTIM | PROC_ON_MELEE_ATTACK_VICTIM | 
+					PROC_ON_RANGED_ATTACK_VICTIM | PROC_ON_ANY_DAMAGE_VICTIM;
+				sp->proc_interval = 5000;
+				sp->EffectTriggerSpell[0] = 31616;
+			}
+
+			if(sp->NameHash == SPELL_HASH_WINDFURY_WEAPON ||
+				sp->NameHash == SPELL_HASH_FLAMETONGUE_WEAPON ||
+				sp->NameHash == SPELL_HASH_ROCKBITER_WEAPON ||
+				sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON)
+				sp->Flags3 |= FLAGS3_ENCHANT_OWN_ONLY;
+
+			// Stoneclaw Totem
+			if(sp->NameHash == SPELL_HASH_STONECLAW_TOTEM_PASSIVE)
+				sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
+
+			// Flametongue Totem passive target fix
+			if(sp->NameHash == SPELL_HASH_FLAMETONGUE_TOTEM && sp->Attributes & ATTRIBUTES_PASSIVE)
+			{
+				sp->EffectImplicitTargetA[0] = EFF_TARGET_SELF;
+				sp->EffectImplicitTargetB[0] = 0;
+				sp->EffectImplicitTargetA[1] = EFF_TARGET_SELF;
+				sp->EffectImplicitTargetB[1] = 0;
+			}
+
+			// Flurry and Unleashed Rage
+			if(sp->NameHash == SPELL_HASH_FLURRY || sp->NameHash == SPELL_HASH_UNLEASHED_RAGE)
+				sp->procFlags = PROC_ON_CRIT_ATTACK;
+
+			// Healing Stream
+			if(sp->NameHash == SPELL_HASH_HEALING_STREAM_TOTEM && sp->Effect[0] == SPELL_EFFECT_DUMMY)
+			{
+				sp->EffectRadiusIndex[0] = 10; // 30 yards
+				sp->Effect[0] = SPELL_EFFECT_HEAL;
+			}
+			// Mana Spring
+			if(sp->NameHash == SPELL_HASH_MANA_SPRING_TOTEM && sp->Effect[0] == SPELL_EFFECT_DUMMY)
+			{
+				sp->Effect[0] = SPELL_EFFECT_ENERGIZE;
+				sp->EffectMiscValue[0] = POWER_TYPE_MANA;
+			}
 
 		//////////////////////////////////////////
 		// MAGE								//
@@ -2008,6 +2034,10 @@ void ApplyNormalFixes()
 
 		// Insert druid spell fixes here
 
+
+		//////////////////////////////////////////
+		// OTHER								//
+		//////////////////////////////////////////
 
 	}
 
@@ -2094,11 +2124,85 @@ void ApplyNormalFixes()
 	if( sp != NULL && sp->Id == 16164 )
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
 
-	//remove stormstrike effect 0
-	sp = dbcSpell.LookupEntryForced( 17364 );
-	if( sp != NULL && sp->Id == 17364 )
-		sp->Effect[0] = 0;
+	// Flametongue Weapon - 10% spd coefficient
+	sp = dbcSpell.LookupEntryForced( 29469 );
+	if( sp != NULL )
+		sp->fixed_dddhcoef = 0.1f;
 
+	//shaman - Stormstrike
+	sp = dbcSpell.LookupEntryForced( 17364 );
+	if( sp != NULL )
+	{
+		sp->procFlags=PROC_ON_SPELL_HIT_VICTIM;
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+	}
+
+	// Shaman Totem items fixes
+	// Totem of Survival, Totem of the Tundra
+	ranks = fill(ids, 46097, 43860, 43861, 43862, 60564, 60571, 60572, 37575, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectSpellClassMask[0][0] = 0x00100000 | 0x10000000 | 0x80000000; //Earth + Flame + Frost Shocks
+			sp->EffectSpellClassMask[0][1] = 0x08000000;	// Wind Shock
+		}
+	}
+	// Totem of Indomitability, Totem of Dueling (proc on Stormstrike)
+	ranks = fill(ids, 43859, 46096, 43857, 43858, 60765, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectSpellClassMask[0][1] = 0x00000010;  // Stormstrike
+		}
+	}
+	// Totem of Indomitability (proc on Lava Lash)
+	ranks = fill(ids, 60543, 60546, 60548, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectSpellClassMask[0][2] = 0x00000004;  // Lava Lash
+		}
+	}
+
+	// Totem of Third Wind
+	ranks = fill(ids, 46098, 34138, 42370, 43728, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectSpellClassMask[0][0] = 0x00000080;  // Lesser Healing Wave
+		}
+	}
+
+	// Totem of the Elemental Plane
+	sp = dbcSpell.LookupEntryForced( 60770 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->EffectSpellClassMask[0][0] = 0x00000001;  // Lightning Bolt
+	}
+
+	// Fathom-Brooch of the Tidewalker
+	sp = dbcSpell.LookupEntryForced( 37247 ); 
+	if( sp != NULL ){
+		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->proc_interval = 45000;
+	}
+		
 	//Warlock: Nether Protection
 	sp = dbcSpell.LookupEntryForced( 30299 );
 	if (sp != NULL)
@@ -2344,12 +2448,6 @@ void ApplyNormalFixes()
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
-	}
-
-	sp = dbcSpell.LookupEntryForced( 34774 );
-	if( sp != NULL ) //dragonspine trophy proc
-	{
-		sp->procChance = 6;
 	}
 
 	//paladin - Blessing of Light. Changed to scripted because it needs to mod target and should not influence holy nova
@@ -3115,6 +3213,23 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 34839 );
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_RANGED_ATTACK | PROC_TARGET_SELF;
+
+	//Hunter - Go for the Throat
+	sp = dbcSpell.LookupEntryForced( 34950 );
+	if( sp != NULL )
+		sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+
+	sp = dbcSpell.LookupEntryForced( 34954 );
+	if( sp != NULL )
+		sp->procFlags = PROC_ON_RANGED_CRIT_ATTACK;
+
+	sp = dbcSpell.LookupEntryForced( 34952 );
+	if( sp != NULL )
+		sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+
+	sp = dbcSpell.LookupEntryForced( 34953 );
+	if( sp != NULL )
+		sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
 
 	// Hunter - Spirit Bond
 	sp = dbcSpell.LookupEntryForced( 19578 );
@@ -5150,7 +5265,7 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_CRIT_ATTACK;
-		sp->procs_per_minute = 2.0f;
+		sp->ProcsPerMinute = 2.0f;
 	}
 
 	//Thunderfury
@@ -5475,87 +5590,31 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CAST_SPELL;
 
-	//windfury weapon changes. Start to hate these day by day
-	EnchantEntry* Enchantment;
-		
-	Enchantment = dbcEnchant.LookupEntryForced( 283 );
-	if( Enchantment != NULL )
+	// Flametongue weapon
+	ranks = fill(ids, 58792, 58791, 58784, 16313, 16312, 16311, 15569, 15568, 15567, 10400, 0);
+	   fill(proc_ids, 58788, 58787, 58786, 25488, 16344, 16343, 10445, 8029,  8028,  8026,  0);
+	for(uint32 i = 0; i < ranks; i++)
 	{
-		Enchantment->spell[0] = 33757; //this is actually good
-		sp = dbcSpell.LookupEntryForced( 33757 );
+		sp = dbcSpell.LookupEntryForced( ids[i] );
 		if( sp != NULL )
 		{
 			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->procFlags = PROC_ON_MELEE_ATTACK; //we do not need proc on spell ;)
-			sp->EffectTriggerSpell[0] = 8232; //for the logs and rest
-			sp->procChance = 20;
-			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
-			sp->maxstack = 1;
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
+			sp->EffectTriggerSpell[0] = proc_ids[i];
 		}
 	}
 
-	Enchantment = dbcEnchant.LookupEntryForced( 284 );
-	if( Enchantment != NULL )
+	//windfury weapon
+	sp = dbcSpell.LookupEntryForced( 33757 );
+	if( sp != NULL )
 	{
-		Enchantment->spell[0] = 33756; 
-		sp = dbcSpell.LookupEntryForced( 33756 );
-		if( sp != NULL )
-		{
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->procFlags = PROC_ON_MELEE_ATTACK; //we do not need proc on spell ;)
-			sp->EffectTriggerSpell[0] = 8235; //for the logs and rest
-			sp->procChance = 20;
-			sp->proc_interval = 3000; //http://www.wowwiki.com/Windfury_Weapon
-			sp->maxstack = 1;
-		}
-	}
-
-	Enchantment = dbcEnchant.LookupEntryForced( 525 );
-	if( Enchantment != NULL )
-	{
-		Enchantment->spell[0] = 33755; 
-		sp = dbcSpell.LookupEntryForced( 33755 );
-		if( sp != NULL )
-		{
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->procFlags = PROC_ON_MELEE_ATTACK; //we do not need proc on spell ;)
-			sp->EffectTriggerSpell[0] = 10486; //for the logs and rest
-			sp->procChance = 20;
-			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
-			sp->maxstack = 1;
-		}
-	}
-
-	Enchantment = dbcEnchant.LookupEntryForced( 1669 );
-	if( Enchantment != NULL )
-	{
-		Enchantment->spell[0] = 33754; 
-		sp = dbcSpell.LookupEntryForced( 33754 );
-		if( sp != NULL )
-		{
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->procFlags = PROC_ON_MELEE_ATTACK; //we do not need proc on spell ;)
-			sp->EffectTriggerSpell[0] = 16362; //for the logs and rest
-			sp->procChance = 20;
-			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
-			sp->maxstack = 1;
-		}
-	}
-
-	Enchantment = dbcEnchant.LookupEntryForced( 2636 );
-	if( Enchantment != NULL )
-	{
-		Enchantment->spell[0] = 33727; 
-		sp = dbcSpell.LookupEntryForced( 33727 );
-		if( sp != NULL )
-		{
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-			sp->procFlags = PROC_ON_MELEE_ATTACK; //we do not need proc on spell ;)
-			sp->EffectTriggerSpell[0] = 25505; //for the logs and rest
-			sp->procChance = 20;
-			sp->proc_interval = 3000;//http://www.wowwiki.com/Windfury_Weapon
-			sp->maxstack = 1;
-		}
+		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+		sp->EffectTriggerSpell[0] = 25504;
+		sp->procChance = 20;
+		sp->proc_interval = 3000;
+		sp->maxstack = 1;
+		sp->always_apply = true; // so that we can apply 2 wf auras while dual-wielding
 	}
 
 	//for test only
@@ -5955,11 +6014,11 @@ void ApplyNormalFixes()
 		sp->cone_width = 15.0f; // 15 degree cone
 
 
+	// Commendation of Kael'thas
 	sp = dbcSpell.LookupEntryForced( 45057 );
 	if( sp != NULL )
 	{
-		sp->procs_per_minute = 0.5f;
-		sp->proc_interval = 30;
+		sp->proc_interval = 30000;
 	}
 
 	// Recently Dropped Flag
@@ -6216,7 +6275,64 @@ void ApplyNormalFixes()
 	{
 		sp->FacingCasterFlags = 0;
 	}
+
+	// Item procs
+	// dragonspine trophy
+	sp = dbcSpell.LookupEntryForced(34774);
+	if( sp != NULL )
+	{
+		sp->ProcsPerMinute = 1.5f;
+		sp->proc_interval = 20000;
+		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+	}
+
+	// Romulo's Poison Vial
+	sp = dbcSpell.LookupEntryForced(34586);
+	if( sp != NULL )
+	{
+		sp->ProcsPerMinute = 1.6f;
+		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+	}
+	sp = dbcSpell.LookupEntryForced(34587);
+	if( sp != NULL )
+		sp->Dspell_coef_override = 0.0f;
+
+	// madness of the betrayer
+	sp = dbcSpell.LookupEntryForced(40475);
+	if( sp != NULL )
+	{
+		sp->ProcsPerMinute = 1.0f;
+		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+	}
 	
+	// Band of the Eternal Defender
+	sp = dbcSpell.LookupEntryForced(35077);
+	if( sp != NULL )
+	{
+		sp->proc_interval = 55000;
+		sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM;
+	}
+	// Band of the Eternal Champion
+	sp = dbcSpell.LookupEntryForced(35080);
+	if( sp != NULL )
+	{
+		sp->proc_interval = 55000;
+		sp->procFlags = PROC_ON_MELEE_ATTACK;
+	}
+	// Band of the Eternal Restorer
+	sp = dbcSpell.LookupEntryForced(35086);
+	if( sp != NULL )
+	{
+		sp->proc_interval = 55000;
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
+	// Band of the Eternal Sage
+	sp = dbcSpell.LookupEntryForced(35083);
+	if( sp != NULL )
+	{
+		sp->proc_interval = 55000;
+		sp->procFlags = PROC_ON_CAST_SPELL;
+	}
 
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();

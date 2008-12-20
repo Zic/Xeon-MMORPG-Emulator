@@ -749,6 +749,7 @@ struct SpellEntry
     /// CUSTOM: these fields are used for the modifications made in the world.cpp
     uint32 DiminishStatus;                  //
     uint32 proc_interval;                   //!!! CUSTOM, <Fill description for variable>
+	float ProcsPerMinute;                   //!!! CUSTOM, number of procs per minute
     uint32 buffIndexType;					//!!! CUSTOM, <Fill description for variable>
     uint32 c_is_flags;						//!!! CUSTOM, store spell checks in a static way : isdamageind,ishealing
     uint32 buffType;                        //!!! CUSTOM, these are related to creating a item through a spell
@@ -781,7 +782,6 @@ struct SpellEntry
 	bool Unique;											//!!! CUSTOM, Is this a unique effect? ex: Mortal Strike -50% healing.
 
 	uint32 area_aura_update_interval;
-	float procs_per_minute;
 	uint32 skilline;
 };
 

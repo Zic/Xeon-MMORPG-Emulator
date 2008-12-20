@@ -257,8 +257,8 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
         &Aura::SpellAuraNULL,//234 Apply Aura: Reduces Silence or Interrupt effects, Item spell magic http://www.thottbot.com/s42184
 		&Aura::SpellAuraNULL,//235 33206 Instantly reduces a friendly target's threat by $44416s1%, reduces all damage taken by $s1% and increases resistance to Dispel mechanics by $s2% for $d.
 		&Aura::SpellAuraNULL,//236
-		&Aura::SpellAuraNULL,//237
-		&Aura::SpellAuraNULL,//238
+		&Aura::SpellAuraModSpellDamageFromAP,//237 Mod Spell Damage from Attack Power
+		&Aura::SpellAuraModSpellHealingFromAP,//238 Mod Healing from Attack Power
 		&Aura::SpellAuraNULL,//239
 		&Aura::SpellAuraAxeSkillModifier,//240 Increase Axe Skill http://www.wowhead.com/?spell=20574
 		&Aura::SpellAuraNULL,//241
@@ -2990,16 +2990,18 @@ void Aura::EventPeriodicHeal( uint32 amount )
 
 	int32 bonus = 0;
 
-	if( c != NULL && c->IsPlayer() )
+	if( c != NULL )
 	{
-		for(uint32 a = 0; a < 6; a++)
-			bonus += float2int32( static_cast< Player* >( c )->SpellHealDoneByAttribute[a][m_spellProto->School] * static_cast< Player* >( c )->GetUInt32Value( UNIT_FIELD_STAT0 + a) );
-
 		bonus += c->HealDoneMod[GetSpellProto()->School] + m_target->HealTakenMod[m_spellProto->School];
-		//Druid Tree of Life form. it should work not like this, but it's better then nothing. 
-		if( static_cast< Player* >( c )->IsInFeralForm() && static_cast< Player* >( c )->GetShapeShift() == FORM_TREE)
-			bonus += float2int32( 0.25f * static_cast< Player* >( c )->GetUInt32Value( UNIT_FIELD_STAT4 ) );
+		if(c->IsPlayer())
+		{
+			for(uint32 a = 0; a < 6; a++)
+				bonus += float2int32( static_cast< Player* >( c )->SpellHealDoneByAttribute[a][m_spellProto->School] * static_cast< Player* >( c )->GetUInt32Value( UNIT_FIELD_STAT0 + a) );
 
+			//Druid Tree of Life form. it should work not like this, but it's better then nothing. 
+			if( static_cast< Player* >( c )->IsInFeralForm() && static_cast< Player* >( c )->GetShapeShift() == FORM_TREE)
+				bonus += float2int32( 0.25f * static_cast< Player* >( c )->GetUInt32Value( UNIT_FIELD_STAT4 ) );
+		}
 		//Spell Coefficient
 		if( m_spellProto->OTspell_coef_override >= 0 ) //In case we have forced coefficients
 			bonus = float2int32( float( bonus ) * m_spellProto->OTspell_coef_override );
@@ -3038,18 +3040,20 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,GetSpellProto()->SpellGroupType);
 #endif
 	}
+	
+	if(m_spellProto->NameHash != SPELL_HASH_HEALING_STREAM){  // Healing Stream is not a HOT
+		int amp = m_spellProto->EffectAmplitude[mod->i];
+		if( !amp ) 
+			amp = static_cast< EventableObject* >( this )->event_GetEventPeriod( EVENT_AURA_PERIODIC_HEAL );
 
-	int amp = m_spellProto->EffectAmplitude[mod->i];
-	if( !amp ) 
-		amp = static_cast< EventableObject* >( this )->event_GetEventPeriod( EVENT_AURA_PERIODIC_HEAL );
-
-	if( GetDuration() )
-	{
-		int ticks = ( amp > 0 ) ? GetDuration() / amp : 0;
-		bonus = ( ticks > 0 ) ? bonus / ticks : 0;
+		if( GetDuration() )
+		{
+			int ticks = ( amp > 0 ) ? GetDuration() / amp : 0;
+			bonus = ( ticks > 0 ) ? bonus / ticks : 0;
+		}
+		else
+			bonus = 0;
 	}
-	else
-		bonus = 0;
 
     //Downranking
     if( c != NULL && c->IsPlayer() )
@@ -9064,4 +9068,49 @@ void Aura::SpellAuraIncreaseAPByAttribute(bool apply)
 	//TODO make it recomputed each time we get AP or stats change
 	m_target->ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, apply ? mod->realamount : -mod->realamount);
 	m_target->CalcDamage();
+}
+
+void Aura::SpellAuraModSpellDamageFromAP(bool apply)
+{
+	if(!m_target->IsPlayer())
+		return;
+	if(apply)
+	{
+		SetPositive();
+		mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+	}
+	for(uint32 x =0; x<7; x++){
+		if (mod->m_miscValue & (((uint32)1)<<x) ){
+			if(apply)
+				m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + x, mod->realamount );
+			else
+				m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + x, -mod->realamount );
+		}
+	}
+}
+
+void Aura::SpellAuraModSpellHealingFromAP(bool apply)
+{ 
+	if(!m_target->IsPlayer())
+		return;
+	if(apply)
+	{
+		SetPositive();
+		mod->realamount = (mod->m_amount * m_target->GetAP())/100;
+	}
+	for(uint32 x=0;x<7;x++)
+	{
+		if (mod->m_miscValue  & (((uint32)1)<<x) )
+		{
+			if(apply)
+				m_target->HealDoneMod[x] += mod->realamount;
+			else
+				m_target->HealDoneMod[x] -= mod->realamount;
+		}
+	}
+	if(apply)
+		m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, mod->realamount );
+	else
+		m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, -mod->realamount );
+
 }

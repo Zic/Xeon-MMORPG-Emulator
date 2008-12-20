@@ -1740,28 +1740,6 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 		//health is below 30%, we have a mother spell to get value from
 		switch (m_spellInfo->Id)
 		{
-		case 31616:
-			{
-				if(unitTarget && unitTarget->IsPlayer() && pSpellId && unitTarget->GetHealthPct()<30)
-				{
-					//check for that 10 second cooldown
-					SpellEntry *spellInfo = dbcSpell.LookupEntry(pSpellId );
-					if(spellInfo)
-					{
-						//heal value is receivad by the level of current active talent :s
-						//maybe we should use CalculateEffect(uint32 i) to gain SM benefits
-						int32 value = 0;
-						int32 basePoints = spellInfo->EffectBasePoints[i]+1;//+(m_caster->getLevel()*basePointsPerLevel);
-						int32 randomPoints = spellInfo->EffectDieSides[i];
-						if(randomPoints <= 1)
-							value = basePoints;
-						else
-							value = basePoints + rand() % randomPoints;
-						//the value is in percent. Until now it's a fixed 10%
-						Heal(unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*value/100);
-					}
-				}
-			}break;
 		case 34299: //Druid: Improved Leader of the PAck
 			{
 				if (!unitTarget->IsPlayer() || !unitTarget->isAlive())
@@ -4897,6 +4875,11 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	//added by Zack : Some shaman talents are casted on player but it should be inherited or something by totems
 	pTotem->InheritSMMods(p_caster);
+	// Totems get spell damage and healing bonus from the Shaman
+	for(int school=0;school<7;school++){
+		pTotem->ModDamageDone[school] = (int32)(p_caster->GetUInt32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school ) - (int32)p_caster->GetUInt32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + school ));
+		pTotem->HealDoneMod[school] = p_caster->HealDoneMod[school];
+	}
 
 	// Set up AI, depending on our spells.
 	uint32 j;

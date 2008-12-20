@@ -615,6 +615,7 @@ void Unit::GiveGroupXP(Unit *pVictim, Player *PlayerInGroup)
 
 uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, uint32 dmg, uint32 abs )
 {
+	uint32 weapon_damage_type = 1; // todo: port
 	uint32 resisted_dmg = 0;
 
 	++m_procCounter;
@@ -705,8 +706,10 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 					continue;
 			}*/
 			//Custom procchance modifications based on equipped weapon speed.
-			if( this->IsPlayer() && spe != NULL && spe->procs_per_minute > 0.0f )
+			if( this->IsPlayer() && ospinfo != NULL && ospinfo->ProcsPerMinute > 0.0f )
 			{
+				float ppm = ospinfo->ProcsPerMinute;
+
 				Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
 				Item * of = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
 				
@@ -714,12 +717,12 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 				{
 					float mhs = float( mh->GetProto()->Delay );
 					float ohs = float( of->GetProto()->Delay );
-					proc_Chance = float2int32( ( mhs + ohs ) * 0.001f * spe->procs_per_minute / 0.6f );
+					proc_Chance = float2int32( ( mhs + ohs ) * 0.001f * ppm / 0.6f );
 				}
 				else if( mh != NULL )
 				{
 					float mhs = float( mh->GetProto()->Delay );
-					proc_Chance = float2int32( mhs * 0.001f * spe->procs_per_minute / 0.6f );
+					proc_Chance = float2int32( mhs * 0.001f * ppm / 0.6f );
 				}
 				else
 					proc_Chance = 0;
@@ -728,11 +731,11 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 				{
 					if( static_cast< Player* >( this )->GetShapeShift() == FORM_CAT )
 					{
-						proc_Chance = float2int32( spe->procs_per_minute / 0.6f );
+						proc_Chance = float2int32( ppm / 0.6f );
 					}
 					else if( static_cast< Player* >( this )->GetShapeShift() == FORM_BEAR || static_cast< Player* >( this )->GetShapeShift() == FORM_DIREBEAR )
 					{
-						proc_Chance = float2int32( spe->procs_per_minute / 0.24f );
+						proc_Chance = float2int32( ppm / 0.24f );
 					}
 				}
 			}
@@ -808,10 +811,24 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 							if( CastingSpell->Id != 5229 )//enrage
 								continue;
 						}break;
-						case 31616:
+						case 31616: // Nature's Guardian
 						{
-							//yep, another special case: Nature's grace
-							if( GetHealthPct() > 30 )
+							if(GetHealthPct() > 30)
+								continue;
+							//heal value depends on the rank of parent spell
+							//maybe we should use CalculateEffect(uint32 i) to gain SM benefits
+							int32 value = 0;
+							int32 basePoints = ospinfo->EffectBasePoints[0]+1;//+(getLevel()*basePointsPerLevel);
+							int32 randomPoints = ospinfo->EffectDieSides[0];
+							if(randomPoints <= 1)
+								value = basePoints;
+							else
+								value = basePoints + rand() % randomPoints;
+							dmg_overwrite = GetUInt32Value(UNIT_FIELD_MAXHEALTH) * value / 100;
+						}break;
+						case 45058: // Commendation of Kael'thas
+						{
+							if(GetHealthPct() >= 35)
 								continue;
 						}break;
 						case 37309:
@@ -1239,26 +1256,54 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								if( !(CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING)) //healing wave
 									continue;
 							}break;
-						//shaman - windfurry weapon
-						case 8232:
-						case 8235:
-						case 10486:
-						case 16362:
-						case 25505:
+						//shaman - windfury weapon
+						case 25504:
 							{
-								if(!IsPlayer())
+								if(!IsPlayer() || weapon_damage_type < 1 || weapon_damage_type > 2)
 									continue;
-								//!! The wierd thing is that we need the spell thet trigegred this enchant spell in order to output logs ..we are using oldspell info too 
-								//we have to recalc the value of this spell
-								SpellEntry *spellInfo = dbcSpell.LookupEntry(origId);
-								uint32 AP_owerride=GetAP() + spellInfo->EffectBasePoints[0]+1;
-								uint32 dmg = static_cast< Player* >( this )->GetMainMeleeDamage(AP_owerride);
-								SpellEntry *sp_for_the_logs = dbcSpell.LookupEntry(spellId);
-								Strike( victim, MELEE, sp_for_the_logs, dmg, 0, 0, true, false );
-								Strike( victim, MELEE, sp_for_the_logs, dmg, 0, 0, true, false );
-								//nothing else to be done for this trigger
-								continue;
+								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type -1);
+								if( mh == NULL)
+									continue;
+								float mhs = float( mh->GetProto()->Delay );
+								// Calculate extra AP bonus damage
+								uint32 extra_dmg=float2int32(mhs * (ospinfo->EffectBasePoints[0]+1) /14000.0f);
+								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
+								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
+								spellId = 33010; // WF animation
 							}break;
+						// Ancestral Fortitude
+						case 16237:
+						case 16177:
+						case 16236:
+							{
+								if( CastingSpell == NULL ||
+									!( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) )
+									continue;
+							}break;
+						// Flametongue Weapon
+						case 8026:
+						case 8028:
+						case 8029:
+						case 10445:
+						case 16343:
+						case 16344:
+						case 25488:
+						case 58786:
+						case 58787:
+						case 58788:
+							{
+								spellId = 29469;	// Flametongue Weapon proc
+								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
+
+								if( mh != NULL)
+								{
+									float mhs = float( mh->GetProto()->Delay );
+									dmg_overwrite = FL2UINT( mhs * 0.001f * (spe->EffectBasePoints[0] + 1)/88 );
+								}
+								else
+									continue;
+							}break;
+
 						//rogue - Ruthlessness
 						case 14157:
 							{
@@ -1512,6 +1557,14 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) )
 									continue;
 							}break;
+							// Fathom-Brooch of the Tidewalker proc
+						case 37243:
+							{
+								if( !CastingSpell )
+									continue;
+								if( CastingSpell->School != SCHOOL_NATURE )
+									continue;
+							}break;
 						//shaman - Lightning Overload
 						case 39805:
 							{
@@ -1725,6 +1778,8 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 							}break;
 					}
 				}
+				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
+					continue;
 				if(spellId==22858 && isInBack(victim)) //retatliation needs target to be not in front. Can be casted by creatures too
 					continue;
 
