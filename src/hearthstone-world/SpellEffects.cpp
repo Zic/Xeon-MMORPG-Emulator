@@ -2266,7 +2266,7 @@ void Spell::SpellEffectSummon(uint32 i)
 	m_summonProperties = spe;
 
 	// Delete any objects in my slots. Slot 0 can have unlimited objects.
-	if( spe->slot && u_caster->m_SummonSlots[ spe->slot ] )
+	if( spe->slot && spe->slot < 7 && u_caster->m_SummonSlots[ spe->slot ] )
 	{
 		if( u_caster->m_SummonSlots[ spe->slot ]->IsTotem() )
 			u_caster->m_SummonSlots[ spe->slot ]->TotemExpire();
@@ -2371,7 +2371,8 @@ void Spell::SummonCreatureWithHealth(uint32 i)
 	pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 	pCreature->_setFaction();
 	pCreature->DisableAI();
-	u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
+	if( m_summonProperties->slot < 7 )
+		u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 	pCreature->PushToWorld(p_caster->GetMapMgr());
 	sEventMgr.AddEvent(pCreature, &Creature::SafeDelete, EVENT_CREATURE_REMOVE_CORPSE, GetDuration(), 1, 0);
 
@@ -2409,7 +2410,8 @@ void Spell::SummonCreature(uint32 i) // Summon
 		summon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 		summon->_setFaction();
 		p_caster->m_tempSummon = summon;
-		p_caster->m_SummonSlots[ m_summonProperties->slot ] = summon;
+		if( m_summonProperties->slot < 7 )
+			p_caster->m_SummonSlots[ m_summonProperties->slot ] = summon;
 	}
 	else
 	{
@@ -2445,7 +2447,8 @@ void Spell::SummonCreature(uint32 i) // Summon
 			pCreature->_setFaction();
 			p_caster->SetUInt64Value(UNIT_FIELD_SUMMON, pCreature->GetGUID());
 			p_caster->m_tempSummon = pCreature;
-			p_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
+			if( m_summonProperties->slot < 7 )
+				p_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 
 			if ( m_spellInfo->EffectMiscValue[i] == 19668 ) //shadowfiend
 			{
@@ -3373,7 +3376,7 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 	for( int i = 0; i < damage; i++ )
 	{
 		float m_fallowAngle = angle_for_each_spawn * i;
-		u_caster->m_SummonSlots[ m_summonProperties->slot ] = (Creature*)u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level);
+		u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = (Creature*)u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level);
 	}
 }
 
@@ -4791,7 +4794,8 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	Creature * pTotem = p_caster->GetMapMgr()->CreateCreature(entry);
 
-	p_caster->m_SummonSlots[slot] = pTotem;
+	if( slot < 7 )
+		p_caster->m_SummonSlots[slot] = pTotem;
 	pTotem->SetTotemOwner(p_caster);
 	pTotem->SetTotemSlot(slot);
 
@@ -5169,7 +5173,8 @@ void Spell::SummonNonCombatPet(uint32 i)
 	pCreature->bInvincible = true;
 	pCreature->PushToWorld(u_caster->GetMapMgr());
 	u_caster->critterPet = pCreature;
-	u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
+	if( m_summonProperties->slot < 7 )
+		u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 }
 
 void Spell::SpellEffectKnockBack(uint32 i)
