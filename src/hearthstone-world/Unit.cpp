@@ -3863,6 +3863,7 @@ void Unit::RemoveAllAuras()
 		if(m_auras[x])
 		{
 			m_auras[x]->Remove();
+			m_auras[x] = NULL;
 		}
 	}
 }

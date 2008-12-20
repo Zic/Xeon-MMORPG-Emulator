@@ -87,6 +87,12 @@ void InstanceMgr::Load(TaskList * l)
 		{
 			l->AddTask(new Task(new CallbackP1<InstanceMgr,uint32>(this, &InstanceMgr::_CreateMap, itr->Get()->mapid)));
 		}
+
+		if( itr->Get()->flags != 1 && itr->Get()->cooldown == 0 )
+		{
+			Log.Warning("InstanceMgr", "Your worldmap_info has no cooldown for map %u.", itr->Get()->mapid);
+			itr->Get()->cooldown = TIME_MINUTE * 30;
+		}
 		//_CreateMap(itr->Get()->mapid);
 
 		itr->Inc();
