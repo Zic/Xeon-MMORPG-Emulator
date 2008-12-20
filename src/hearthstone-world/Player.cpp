@@ -5958,8 +5958,11 @@ void Player::Reset_Spells()
 
 void Player::ResetTitansGrip()
 {
+	if( HasSpell(46917) )
+		return;
+
 	Item * pOffHand = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-	if( pOffHand->GetProto()->InventoryType != INVTYPE_2HWEAPON )
+	if( !pOffHand || pOffHand->GetProto()->InventoryType != INVTYPE_2HWEAPON )
 		return;
 
 	// We need to remove this weapon
@@ -5981,7 +5984,7 @@ void Player::ResetTitansGrip()
 	msg.expire_time = 0; // Never!
 	msg.player_guid = GetLowGUID();
 	msg.sender_guid = GetGUID();
-	msg.items.push_back(pItem->GetUInt32Value(OBJECT_FIELD_GUID));
+	msg.items.push_back(pOffHand->GetUInt32Value(OBJECT_FIELD_GUID));
 	pOffHand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
 	delete pOffHand;
 

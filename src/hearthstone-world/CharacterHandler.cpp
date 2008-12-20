@@ -996,6 +996,8 @@ void WorldSession::FullLogin(Player * plr)
 	if( _player->GetAchievementInterface()->HasAchievements() )
 		_player->CopyAndSendDelayedPacket(_player->GetAchievementInterface()->BuildAchievementData());
 
+	_player->ResetTitansGrip();
+
 	if(enter_world && !_player->GetMapMgr())
 	{
 		plr->AddToWorld();
