@@ -1025,6 +1025,8 @@ public:
 	void                Reputation_OnTalk(FactionDBC * dbc);
 	static Standing     GetReputationRankFromStanding(int32 Standing_);
 	
+	void ResetTitansGrip();
+	
     /************************************************************************/
     /* Factions                                                             */
     /************************************************************************/

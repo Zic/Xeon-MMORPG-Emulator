@@ -5793,44 +5793,6 @@ bool Player::removeSpell(uint32 SpellID, bool MoveToDeleted, bool SupercededSpel
 	{
 		mSpells.erase(iter);
 		RemoveAura(SpellID,GetGUID());
-
-		// We need to remove the OffHand weapon.
-		if( SpellID == 46917 ) // Titan's Grip
-		{
-			ItemInterface * itemInt = GetItemInterface();
-			Item * pOffhand = itemInt->GetInventoryItem(EQUIPMENT_SLOT_OFFHAND);
-			if( pOffhand )
-			{
-				SlotResult r = itemInt->FindFreeInventorySlot( pOffhand->GetProto() );
-				if(r.Result)
-				{
-					itemInt->SwapItemSlots( EQUIPMENT_SLOT_OFFHAND, r.Slot );
-				}
-				else
-				{
-					// No room!
-					itemInt->SafeRemoveAndRetreiveItemByGuid(pOffhand->GetGUID(), false);
-					pOffhand->RemoveFromWorld();
-					pOffhand->SetOwner( NULL );
-					pOffhand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
-					MailMessage msg;
-					memset(&msg, 0, sizeof(MailMessage));
-					msg.delivery_time = (uint32)UNIXTIME;
-					msg.items.push_back( pOffhand->GetUInt32Value( OBJECT_FIELD_GUID ) );
-					delete pOffhand; // Bye Offhand
-					msg.player_guid = GetGUID();
-					msg.sender_guid = GetGUID();
-					msg.copy_made = false;
-					msg.read_flag = false;
-					msg.deleted_flag = false;
-					msg.message_type = 0;
-					msg.expire_time = 0;
-					msg.subject = "Titan's Grip Offhand Weapon";
-					msg.body = "This weapon was automatically unequipped when you unlearned Titan's Grip.\nUnfortunately, at the time, you had no open bag space, so it was mailed to you.";
-					sMailSystem.DeliverMessage(GetLowGUID(), &msg);
-				}
-			}
-		}
 	}
 	else
 	{
@@ -5994,6 +5956,38 @@ void Player::Reset_Spells()
 	}
 }
 
+void Player::ResetTitansGrip()
+{
+	Item * pOffHand = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
+	if( pOffHand->GetProto()->InventoryType != INVTYPE_2HWEAPON )
+		return;
+
+	// We need to remove this weapon
+	SlotResult s = GetItemInterface()->FindFreeInventorySlot(pOffHand->GetProto());
+	if(s.Result)
+	{
+		GetItemInterface()->SwapItemSlots( EQUIPMENT_SLOT_OFFHAND, s.Slot );
+		pOffHand->m_isDirty = true;
+		return;
+	}
+
+	// No inventory space! We should mail it to him.
+	
+	MailMessage msg;
+	memset(&msg, 0, sizeof(MailMessage));
+	msg.body = "Your offhand weapon was unable to be moved to your inventory after you reset your talents.";
+	msg.subject = string(pOffHand->GetProto()->Name1);
+	msg.delivery_time = UNIXTIME; // Now!
+	msg.expire_time = 0; // Never!
+	msg.player_guid = GetLowGUID();
+	msg.sender_guid = GetGUID();
+	msg.items.push_back(pItem->GetUInt32Value(OBJECT_FIELD_GUID));
+	pOffHand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
+	delete pOffHand;
+
+	sMailSystem.DeliverMessage( GetLowGUID(), &msg);
+}
+
 void Player::Reset_Talents()
 {
 	for(uint32 i = 0; i < 3; ++i)
@@ -6023,6 +6017,9 @@ void Player::Reset_Talents()
 						SpellEntry * sp2 = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[k]);
 						if(!sp2) continue;
 						removeSpellByHashName(sp2->NameHash);
+
+						if( sp2->Id == 46917 ) // Titan's Grip
+							ResetTitansGrip();
 					}
 				}
 
