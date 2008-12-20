@@ -1743,6 +1743,9 @@ void QuestMgr::LoadExtraQuestStuff()
 						{
 							for(uint32 xx = 0; xx < itr->second.count; ++xx )
 							{
+								if( itr->second.items[xx].item.itemproto == NULL )
+									continue; 
+
 								if( itr->second.items[xx].item.itemproto->Class != 12 )
 								{
 									has_other = true;
