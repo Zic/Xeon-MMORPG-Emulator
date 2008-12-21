@@ -106,7 +106,7 @@ Creature::~Creature()
 {
 	sEventMgr.RemoveEvents(this);
 
-	if(IsTotem() && totemSlot >= 0)
+	if(IsTotem() && totemSlot >= 0 && totemOwner)
 		totemOwner->m_SummonSlots[totemSlot] = 0;
 
 	if(_myScriptClass != 0)

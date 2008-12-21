@@ -3416,10 +3416,12 @@ void Player::RemoveFromWorld()
 	//clear buyback
 	GetItemInterface()->EmptyBuyBack();
 	
-	for(uint32 x=0;x<4;x++)
+	for(uint32 x=0;x<7;x++)
 	{
-		if(m_SummonSlots[x])
+		if(m_SummonSlots[x] && m_SummonSlots[x]->IsTotem() )
 			m_SummonSlots[x]->TotemExpire();
+		else if( m_SummonSlots[x] )
+			m_SummonSlots[x]->SafeDelete();
 	}
 
 	ResetHeartbeatCoords();
