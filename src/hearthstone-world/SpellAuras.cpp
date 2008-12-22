@@ -993,7 +993,7 @@ void Aura::RemoveAuraVisual()
 void Aura::BuildAuraUpdate()
 {
 	uint32 spellid = m_spellProto->Id;
-	if(!spellid || m_visualSlot >= MAX_AURAS)
+	if(!m_target || !spellid || m_visualSlot >= MAX_AURAS)
 		return;
 
     WorldPacket data(SMSG_AURA_UPDATE, 50);
@@ -1031,10 +1031,7 @@ void Aura::BuildAuraUpdate()
 		data << GetTimeLeft(); //GetMSExpiryTime();
 	}
 
-	if(!m_target->IsInWorld())
-		p_target->CopyAndSendDelayedPacket(&data);
-	else
-		m_target->SendMessageToSet(&data, true);
+	m_target->SendMessageToSet(&data, true);
 }
 
 void Aura::EventUpdateCreatureAA(float r)
