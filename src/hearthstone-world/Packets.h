@@ -102,9 +102,9 @@ struct packetSMSG_LOG_XP_GAIN
 
 struct packetSMSG_CASTRESULT_EXTRA
 {
+	uint8   MultiCast;
 	uint32	SpellId;
 	uint8	ErrorMessage;
-	uint8   MultiCast;
 	uint32	Extra;
 };
 

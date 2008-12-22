@@ -11216,7 +11216,7 @@ void Player::InitGlyphSlots()
 
 void Player::RemoveGlyph(uint32 slot)
 {
-	if(slot > 5)
+	if(slot < 0 || slot > 5)
 		return; // Glyph doesn't exist
 	// Get info
 	uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot);
