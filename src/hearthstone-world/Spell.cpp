@@ -3886,6 +3886,41 @@ exit:*/
 		if( u_caster != NULL )
 			value+=float2int32(u_caster->GetAP()*0.06f);
 	}
+	else if( m_spellInfo->Id == 60103 && p_caster && i == 0) // Lava Lash
+	{   // Check if offhand is enchanted with Flametongue
+		// TODO less hacky implementation		
+		ItemInterface * ii = p_caster->GetItemInterface();
+		if(ii)
+		{
+			Item * offhandweapon = ii->GetInventoryItem(INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_OFFHAND);
+			if(offhandweapon)
+			{
+				EnchantmentInstance * ei = offhandweapon->GetEnchantment(1);
+				if(ei)
+				{
+					EnchantEntry * e = ei->Enchantment;
+					if(e)
+					{
+						uint32 id = e->Id;
+						switch(id)
+						{
+						case 3:
+						case 4:
+						case 5:
+						case 523:
+						case 1665:
+						case 1666:
+						case 2634:
+						case 3779:
+						case 3780:
+						case 3781:
+							value = value * 125 / 100;
+						}	
+					}
+				}
+			}
+		}
+	}
 	
 	if( p_caster != NULL )
 	{	
@@ -3926,35 +3961,32 @@ exit:*/
 		}
 	 }
 
-	// TODO: INHERIT ITEM MODS FROM REAL ITEM OWNER - BURLEX BUT DO IT PROPERLY
-
-	if( u_caster != NULL )
-	{
-		SM_FIValue(u_caster->SM_FMiscEffect,&value,m_spellInfo->SpellGroupType);
-		SM_FIValue(u_caster->SM_PMiscEffect,&value,m_spellInfo->SpellGroupType);
-
-		SM_FIValue(u_caster->SM_FEffectBonus,&value,m_spellInfo->SpellGroupType);
-		SM_FIValue(u_caster->SM_PEffectBonus,&value,m_spellInfo->SpellGroupType);
-
-	}
-	else if( i_caster != NULL && target)
+	Unit * caster = u_caster;
+	if( i_caster != NULL && target )
 	{	
 		//we should inherit the modifiers from the conjured food caster
 		Unit *item_creator = target->GetMapMgr()->GetUnit( i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) );
 		if( item_creator != NULL )
-		{
-			SM_FIValue(item_creator->SM_FMiscEffect,&value,m_spellInfo->SpellGroupType);
-			SM_FIValue(item_creator->SM_PMiscEffect,&value,m_spellInfo->SpellGroupType);
-
-			SM_FIValue(item_creator->SM_FEffectBonus,&value,m_spellInfo->SpellGroupType);
-			SM_FIValue(item_creator->SM_PEffectBonus,&value,m_spellInfo->SpellGroupType);
-#ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
-			if(spell_flat_modifers!=0 || spell_pct_modifers!=0 || spell_pct_modifers2!=0)
-				printf("!!!!ITEMCASTER ! : spell value mod flat %d , spell value mod pct %d, spell value mod pct2 %d , spell dmg %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,spell_pct_modifers2,value,m_spellInfo->SpellGroupType);
-#endif
-		}
+			caster = item_creator;
 	}
 
+	if( caster != NULL )
+	{
+		int32 spell_flat_modifers=0;
+		int32 spell_pct_modifers=0;
+		SM_FIValue(caster->SM_FMiscEffect,&spell_flat_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM_PMiscEffect,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+
+		SM_FIValue(caster->SM_FEffectBonus,&spell_flat_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM_PEffectBonus,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+
+		if(i == 2 || i == 1 && m_spellInfo->Effect[2] == 0)
+		{	// Only applied to the last effect of spell
+			SM_FIValue(caster->SM_FLastEffectBonus,&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(caster->SM_PLastEffectBonus,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		}
+		value = value + value*spell_pct_modifers/100 + spell_flat_modifers;
+	}
 
 	return value;
 }

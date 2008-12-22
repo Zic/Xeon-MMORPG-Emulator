@@ -78,6 +78,8 @@ Unit::Unit()
 	SM_PDOT=0;
 	SM_FEffectBonus=0;
 	SM_PEffectBonus=0;
+	SM_FLastEffectBonus=0;
+	SM_PLastEffectBonus=0;
 	SM_FDamageBonus=0;
 	SM_PDamageBonus=0;
 	SM_PMiscEffect=0;
@@ -282,6 +284,8 @@ Unit::~Unit()
 	if(SM_PDOT != 0) delete [] SM_PDOT ;
 	if(SM_PEffectBonus != 0) delete [] SM_PEffectBonus ;
     if(SM_FEffectBonus != 0) delete [] SM_FEffectBonus ;
+	if(SM_PLastEffectBonus != 0) delete [] SM_PLastEffectBonus ;
+	if(SM_FLastEffectBonus != 0) delete [] SM_FLastEffectBonus ;
 	if(SM_FDamageBonus != 0) delete [] SM_FDamageBonus ;
 	if(SM_PDamageBonus != 0) delete [] SM_PDamageBonus ;
 	if(SM_PMiscEffect != 0) delete [] SM_PMiscEffect ;
@@ -2769,12 +2773,7 @@ else
 			if(exclusive_damage)
 				dmg.full_damage = exclusive_damage;
 			else
-			{
-				if( weapon_damage_type == MELEE && ability )
-					dmg.full_damage = CalculateDamage( this, pVictim, MELEE, ability->SpellGroupType, ability );
-				else			
-					dmg.full_damage = CalculateDamage( this, pVictim, weapon_damage_type, 0, ability );
-			}
+				dmg.full_damage = CalculateDamage( this, pVictim, weapon_damage_type, ability );
 
 			if(ability && ability->SpellGroupType)
 			{	
@@ -5858,6 +5857,18 @@ void Unit::InheritSMMods(Unit *inherit_from)
 		if(SM_PEffectBonus==0)
 			SM_PEffectBonus = new int32[SPELL_GROUPS];
 		memcpy(SM_PEffectBonus,inherit_from->SM_PEffectBonus,sizeof(int)*SPELL_GROUPS);
+	}
+	if(inherit_from->SM_FLastEffectBonus)
+	{
+		if(SM_FLastEffectBonus==0)
+			SM_FLastEffectBonus = new int32[SPELL_GROUPS];
+	memcpy(SM_FLastEffectBonus,inherit_from->SM_FLastEffectBonus,sizeof(int)*SPELL_GROUPS);
+	}
+	if(inherit_from->SM_PLastEffectBonus)
+	{
+		if(SM_PLastEffectBonus==0)
+			SM_PLastEffectBonus = new int32[SPELL_GROUPS];
+		memcpy(SM_PLastEffectBonus,inherit_from->SM_PLastEffectBonus,sizeof(int)*SPELL_GROUPS);
 	}
 	if(inherit_from->SM_FDamageBonus)
 	{

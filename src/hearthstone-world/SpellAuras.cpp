@@ -2954,10 +2954,6 @@ void Aura::SpellAuraPeriodicHeal( bool apply )
 		SetPositive();
 		int32 amount = mod->m_amount;
 		Unit* caster = GetUnitCaster();
-		if (caster && GetSpellProto()->SpellGroupType) {
-			SM_FIValue(caster->SM_FMiscEffect,&amount,GetSpellProto()->SpellGroupType);
-			SM_PIValue(caster->SM_PMiscEffect,&amount,GetSpellProto()->SpellGroupType);
-		}
 
 		if (amount < 0) return;
 
@@ -5181,10 +5177,6 @@ void Aura::SpellAuraModHitChance(bool apply)
 
 	int32 amount = mod->m_amount;
 	Unit* caster = GetUnitCaster();
-	if (caster && GetSpellProto()->SpellGroupType) {
-		SM_FIValue(caster->SM_FMiscEffect,&amount,GetSpellProto()->SpellGroupType);
-		SM_PIValue(caster->SM_PMiscEffect,&amount,GetSpellProto()->SpellGroupType);
-	}
 
 	if (apply)
 	{
@@ -5758,10 +5750,6 @@ void Aura::SpellAuraSchoolAbsorb(bool apply)
 
 		int32 val = mod->m_amount;
 		Unit* caster = GetUnitCaster();
-		if (caster && GetSpellProto()->SpellGroupType) {
-			SM_FIValue(caster->SM_FMiscEffect,&val,GetSpellProto()->SpellGroupType);
-			SM_PIValue(caster->SM_PMiscEffect,&val,GetSpellProto()->SpellGroupType);
-		}
 
 		Player * plr = static_cast< Player* >( GetUnitCaster() );
 		if( plr )
@@ -6818,6 +6806,10 @@ void Aura::SpellAuraAddPctMod( bool apply )
 	case SMT_EFFECT_BONUS:
 	case SMT_EFFECT:
 		SendModifierLog( &m_target->SM_PEffectBonus, val, AffectedGroups, mod->m_miscValue, true );
+		break;
+
+	case SMT_LAST_EFFECT_BONUS:
+		SendModifierLog( &m_target->SM_PLastEffectBonus, val, AffectedGroups, mod->m_miscValue, true );
 		break;
 
 	case SMT_DAMAGE_DONE:
@@ -7964,7 +7956,6 @@ void Aura::SpellAuraIncreaseSpellDamageByAttribute(bool apply)
 			return;
 
 		val = mod->m_amount;
-		SM_FIValue(pCaster->SM_FEffectBonus,&val,m_spellProto->SpellGroupType);
 
 		if(val<0)
 			SetNegative();
@@ -8115,7 +8106,11 @@ void Aura::SpellAuraAddFlatModifier(bool apply)
 
 	case SMT_EFFECT_BONUS:
 	case SMT_EFFECT:
-		SendModifierLog(&m_target->SM_FEffectBonus,val,AffectedGroups,mod->m_miscValue,true);
+		SendModifierLog(&m_target->SM_FEffectBonus,val,AffectedGroups,mod->m_miscValue);
+		break;
+
+	case SMT_LAST_EFFECT_BONUS:
+		SendModifierLog( &m_target->SM_FLastEffectBonus, val, AffectedGroups, mod->m_miscValue);
 		break;
 
 	case SMT_MISC_EFFECT:

@@ -138,7 +138,7 @@ enum SPELL_MODIFIER_TYPE
     //SMT_CAST_TIME2        =21,// this one looks like cast time...
 	//!!! most spells have both SMT_DAMAGE_DONE and this value. Be carefull case there is no need to apply both !
     SMT_SPELL_VALUE_PCT		=22,// damage done by ability by x% : SELECT id,name,description FROM dbc_spell where (EffectApplyAuraName_1=108 and EffectMiscValue_1=22) or (EffectApplyAuraName_2=108 and EffectMiscValue_2=22) or (EffectApplyAuraName_3=108 and EffectMiscValue_3=22)  its DoT actually
-    SMT_UNKNOWN23           =23,// this seems to be some scripted effect. From 8 spells not even 1 has description what it does
+    SMT_LAST_EFFECT_BONUS   =23,// increases points of last effect in affected spells
     SMT_PENALTY             =24,// This is a modifer for the amount of +spell damage applied to the spell group from spell bonuses
     // 25 dont exist spells with it
     // 26 is obsolete stuff

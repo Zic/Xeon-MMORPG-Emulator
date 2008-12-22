@@ -486,6 +486,26 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			}
 		}break;
 
+	case 5308:
+	case 20658:
+	case 20660:
+	case 20661:
+	case 20662:
+	case 25234:
+	case 25236:
+	case 47470:
+	case 47471:// Execute
+		{
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || unitTarget->GetHealthPct() >= 20 || !m_spellInfo)
+				return;
+			int32 value = m_spellInfo->EffectBasePoints[i]+1 + p_caster->GetAP() / 5;
+			int32 currentRage = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
+			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]);
+			u_caster->SetPower(POWER_TYPE_RAGE, 0); // We use all available rage
+			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647 );
+			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
+		}break;
+
 
 	/*************************
 	 * MAGE SPELLS
@@ -2643,25 +2663,25 @@ void Spell::SpellEffectWeaponDmgPerc(uint32 i) // Weapon Percent damage
 	if(!unitTarget  || !u_caster)
 		return;
 
+	uint32 _type;
+	if( GetType() == SPELL_DMG_TYPE_RANGED )
+		_type = RANGED;
+	else
+	{
+		if (m_spellInfo->Flags4 & 0x1000000)
+			_type = OFFHAND;
+		else
+			_type = MELEE;
+	}
+
 	if( GetType() == SPELL_DMG_TYPE_MAGIC )
 	{
-		float fdmg = (float)CalculateDamage( u_caster, unitTarget, MELEE, 0, m_spellInfo );
+		float fdmg = (float)CalculateDamage( u_caster, unitTarget, _type, m_spellInfo );
 		uint32 dmg = float2int32(fdmg*(float(damage/100.0f)));
 		u_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg, false, false, false);
 	}
 	else
 	{
-		uint32 _type;
-		if( GetType() == SPELL_DMG_TYPE_RANGED )
-			_type = RANGED;
-		else
-		{
-			if (m_spellInfo->Flags4 & 0x1000000)
-				_type =  OFFHAND;
-			else
-				_type = MELEE;
-		}
-
 		u_caster->Strike( unitTarget, _type, m_spellInfo, add_damage, damage, 0, false, true );
 	}
 }
@@ -3844,13 +3864,7 @@ void Spell::SpellEffectThreat(uint32 i) // Threat
 	if(!unitTarget || !unitTarget->isAlive() )
 		return;
 
-	int32 amount = m_spellInfo->EffectBasePoints[i];
-	if (m_spellInfo->SpellGroupType) {
-		SM_FIValue(u_caster->SM_FMiscEffect,&amount,m_spellInfo->SpellGroupType);
-		SM_PIValue(u_caster->SM_PMiscEffect,&amount,m_spellInfo->SpellGroupType);
-	}
-
-	bool chck = unitTarget->GetAIInterface()->modThreatByPtr(u_caster,amount);
+	bool chck = unitTarget->GetAIInterface()->modThreatByPtr(u_caster,damage);
 	if(chck == false)
 		unitTarget->GetAIInterface()->AttackReaction(u_caster,1,0);	
 }
@@ -4978,14 +4992,8 @@ void Spell::SpellEffectSelfResurrect(uint32 i)
 		}break;
 	case 21169: //Reincarnation. Ressurect with 20% health and mana
 		{
-			int32 amt = 20;
-			if( m_spellInfo->SpellGroupType)
-			{
-				SM_FIValue(unitTarget->SM_FMiscEffect,&amt,m_spellInfo->SpellGroupType);
-				SM_PIValue(unitTarget->SM_PMiscEffect,&amt,m_spellInfo->SpellGroupType);
-			}
-			health = uint32((unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*amt)/100);
-			mana = uint32((unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*amt)/100);
+			health = uint32((unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*damage)/100);
+			mana = uint32((unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*damage)/100);
 		}
 		break;
 	default:
@@ -5426,12 +5434,6 @@ void Spell::SpellEffectSummonDeadPet(uint32 i)
 	Pet *pPet = p_caster->GetSummon();
 	if(pPet)
 	{
-		if( m_spellInfo->SpellGroupType)
-		{
-			SM_FIValue(p_caster->SM_FMiscEffect,&damage,m_spellInfo->SpellGroupType);
-			SM_PIValue(p_caster->SM_PMiscEffect,&damage,m_spellInfo->SpellGroupType);
-		}
-
 		pPet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
 		pPet->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)((pPet->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * damage) / 100));
 		pPet->setDeathState(ALIVE);

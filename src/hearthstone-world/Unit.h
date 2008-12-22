@@ -970,6 +970,8 @@ public:
 	int32 * SM_FDOT;//flat
 	int32 * SM_FEffectBonus;//flat
 	int32 * SM_PEffectBonus;//pct
+	int32 * SM_FLastEffectBonus;//flat
+	int32 * SM_PLastEffectBonus;//pct
 	int32 * SM_FDamageBonus;//flat
 	int32 * SM_PDamageBonus;//pct
 	int32 * SM_PMiscEffect;//pct

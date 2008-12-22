@@ -453,7 +453,7 @@ uint32 GainStat(uint16 level, uint8 playerclass,uint8 Stat)
 	return gain;
 }
 
-uint32 CalculateDamage( Unit* pAttacker, Unit* pVictim, uint32 weapon_damage_type, uint32 *spellgroup, SpellEntry* ability ) // spellid is used only for 2-3 spells, that have AP bonus
+uint32 CalculateDamage( Unit* pAttacker, Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability ) // spellid is used only for 2-3 spells, that have AP bonus
 {
 	//TODO: Some awesome formula to determine how much damage to deal
 	//consider this is melee damage
@@ -587,11 +587,11 @@ uint32 CalculateDamage( Unit* pAttacker, Unit* pVictim, uint32 weapon_damage_typ
 			else
 				wspeed = (float)pAttacker->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
 
-			if(spellgroup)
+			if(ability && ability->SpellGroupType)
 			{
 				int32 apall = pAttacker->GetAP();
 				int32 apb=0;
-				SM_FIValue(pAttacker->SM_PAPBonus,&apb,spellgroup);
+				SM_FIValue(pAttacker->SM_PAPBonus,&apb,ability->SpellGroupType);
 
 				if(apb)
 					ap += apall*((float)apb/100);

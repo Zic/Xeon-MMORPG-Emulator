@@ -86,40 +86,6 @@ bool Charge(uint32 i, Spell* pSpell)
     return true;
 }
 
-bool Execute(uint32 i, Spell* pSpell)
-{
-    //uint32 uSpellId = pSpell->m_spellInfo->Id;
-    uint32 base_dmg = pSpell->damage;
-    /*
-    Attempt to finish off a wounded foe, causing 125 damage and converting each extra point
-    of rage into 3 additional damage.  Only usable on enemies that have less than 20% health.
-    */
-
-    Unit * target = pSpell->GetUnitTarget();
-    if(!target || !pSpell->u_caster) return true;
-
-    // "Only usable on enemies that have less than 20% health."
-    if(target->GetHealthPct() > 20)
-    {
-        // send failed
-        pSpell->SendCastResult(SPELL_FAILED_BAD_TARGETS);
-        return true;
-    }
-
-    // get the caster's rage points, and convert them
-    // formula is 3 damage * spell rank * rage points
-    uint32 add_damage = (3 * pSpell->m_spellInfo->RankNumber);
-    add_damage *= pSpell->u_caster->GetUInt32Value(UNIT_FIELD_POWER2) / 10;   // rage is *10 always
-    
-    // send spell damage log
-	//pSpell->u_caster->SpellNonMeleeDamageLog(target, 20647, base_dmg + add_damage, false);
-	SpellEntry *sp_for_the_logs = dbcSpell.LookupEntry(20647);
-	pSpell->u_caster->Strike( target, MELEE, sp_for_the_logs, base_dmg + add_damage, 0, 0, true, true );
-	// zero rage
-    pSpell->u_caster->SetUInt32Value(UNIT_FIELD_POWER2, 0);
-    return true;
-}
-
 bool Bloodrage(uint32 i, Spell* pSpell)
 {
   // Put the player in Combat (gotta find when to put him ooc)
@@ -135,24 +101,6 @@ void SetupWarriorSpells(ScriptMgr * mgr)
     mgr->register_dummy_spell(100, &Charge);      // Rank 1
     mgr->register_dummy_spell(6178, &Charge);     // Rank 2
     mgr->register_dummy_spell(11578, &Charge);    // Rank 3
-
-    /**** Execute ****/
-    /* log isn't working */
-    /*
-      WORLD: got cast spell packet, spellId - 25236, data length = 9
-      Spell::cast 25236, Unit: 2
-      WORLD: Spell effect id = 3, damage = 925
-      WORLD: Recvd CMSG_ATTACKSWING Message
-      WORLD: Sent SMSG_ATTACKSTART
-      Player::Update:  No valid current selection to attack, stopping attack
-    */
-    mgr->register_dummy_spell(5308, &Execute);     // Rank 1
-    mgr->register_dummy_spell(20658, &Execute);    // Rank 2
-    mgr->register_dummy_spell(20660, &Execute);    // Rank 3
-    mgr->register_dummy_spell(20661, &Execute);    // Rank 4
-    mgr->register_dummy_spell(20662, &Execute);    // Rank 5
-    mgr->register_dummy_spell(25234, &Execute);    // Rank 6
-    mgr->register_dummy_spell(25236, &Execute);    // Rank 7
 
     /**** Bloodrage ****/
     /* server debug when blood rages is cast */
