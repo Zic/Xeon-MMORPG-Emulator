@@ -2695,13 +2695,28 @@ bool Object::IsInLineOfSight(Object* pObj)
 
 bool Object::PhasedCanInteract(Object* pObj)
 {
+	bool ret = false;
+
 	if( m_phaseMode == ALL_PHASES || pObj->m_phaseMode == ALL_PHASES ) // -1: All phases. But perhaps this should be limited to GameObjects?
-		return true;
+		ret = true;
 
 	if( pObj->m_phaseMode & m_phaseMode || pObj->m_phaseMode == m_phaseMode )
-		return true;
+		ret = true;
 
-	return false;
+	Player * pObjI = IsPlayer() ? TO_PLAYER(this) : NULL;
+	Player * pObjII = pObj->IsPlayer() ? TO_PLAYER(pObj) : NULL;
+	if( IsPet() ) 
+		pObjI = TO_PET(this)->GetPetOwner();
+	if( pObj->IsPet() )
+		pObjII = TO_PET(pObj)->GetPetOwner();
+
+	// Hack for Acherus: Horde/Alliance can't see each other!
+	if( pObjI && pObjII && GetMapId() == 609 && ( TO_PLAYER(pObj)->GetTeam() != TO_PLAYER(this)->GetTeam() ) )
+	{
+		return false;
+	}
+
+	return ret;
 }
 
 // Returns the base cost of a spell
