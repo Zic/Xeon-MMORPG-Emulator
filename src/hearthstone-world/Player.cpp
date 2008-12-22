@@ -3393,16 +3393,6 @@ void Player::RemoveFromWorld()
 		m_bg = NULL;
 	}
 
-	if(m_tempSummon)
-	{
-		m_tempSummon->RemoveFromWorld(false, true);
-		if(m_tempSummon)
-			m_tempSummon->SafeDelete();
-
-		m_tempSummon = 0;
-		SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-	}
-
 	// Cancel trade if it's active.
 	Player * pTarget;
 	if(mTradeTarget != 0)
@@ -3427,7 +3417,7 @@ void Player::RemoveFromWorld()
 	ResetHeartbeatCoords();
 	ClearSplinePackets();
 
-	if(m_Summon)
+	/*if(m_Summon)
 	{
 		m_Summon->GetAIInterface()->SetPetOwner(0);
 		m_Summon->Remove(true, true, false);
@@ -3436,7 +3426,7 @@ void Player::RemoveFromWorld()
 			m_Summon->ClearPetOwner();
 			m_Summon=NULL;
 		}
-	}
+	}*/
 
 	if(m_SummonedObject)
 	{
@@ -5982,15 +5972,17 @@ void Player::ResetTitansGrip()
 	memset(&msg, 0, sizeof(MailMessage));
 	msg.body = "Your offhand weapon was unable to be moved to your inventory after you reset your talents.";
 	msg.subject = string(pOffHand->GetProto()->Name1);
-	msg.delivery_time = UNIXTIME; // Now!
+	msg.delivery_time = (uint32)UNIXTIME; // Now!
 	msg.expire_time = 0; // Never!
 	msg.player_guid = GetLowGUID();
 	msg.sender_guid = GetGUID();
 	msg.items.push_back(pOffHand->GetUInt32Value(OBJECT_FIELD_GUID));
 	pOffHand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
-	delete pOffHand;
 
 	sMailSystem.DeliverMessage( GetLowGUID(), &msg);
+
+	// This SUCKS.
+	Kick(0);
 }
 
 void Player::Reset_Talents()
@@ -6022,9 +6014,6 @@ void Player::Reset_Talents()
 						SpellEntry * sp2 = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[k]);
 						if(!sp2) continue;
 						removeSpellByHashName(sp2->NameHash);
-
-						if( sp2->Id == 46917 ) // Titan's Grip
-							ResetTitansGrip();
 					}
 				}
 
@@ -6042,6 +6031,9 @@ void Player::Reset_Talents()
 	{
 		SetUInt32Value(PLAYER_CHARACTER_POINTS1, 0); 
 	}
+
+	if( getClass() == WARRIOR )
+		ResetTitansGrip();
 }
 
 void Player::Reset_ToLevel1()

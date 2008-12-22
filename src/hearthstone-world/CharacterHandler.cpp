@@ -815,6 +815,8 @@ void WorldSession::FullLogin(Player * plr)
 	}
 	SendPacket(&data);
 
+	_player->ResetTitansGrip();
+
 	// Set TIME OF LOGIN
 	CharacterDatabase.Execute (
 		"UPDATE characters SET online = 1 WHERE guid = %u" , plr->GetLowGUID());
@@ -995,8 +997,6 @@ void WorldSession::FullLogin(Player * plr)
 	// Send achievement data!
 	if( _player->GetAchievementInterface()->HasAchievements() )
 		_player->CopyAndSendDelayedPacket(_player->GetAchievementInterface()->BuildAchievementData());
-
-	_player->ResetTitansGrip();
 
 	if(enter_world && !_player->GetMapMgr())
 	{
