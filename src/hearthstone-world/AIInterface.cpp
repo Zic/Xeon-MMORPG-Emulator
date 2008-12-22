@@ -3266,8 +3266,8 @@ uint32 AIInterface::_CalcThreat(uint32 damage, SpellEntry * sp, Unit* Attacker)
 
 	if (sp != NULL && sp->SpellGroupType && Attacker)
 	{
-		SM_FIValue(Attacker->SM_FThreat,&mod,sp->SpellGroupType);
-		SM_PIValue(Attacker->SM_PThreat,&mod,sp->SpellGroupType);
+		SM_FIValue(Attacker->SM[SMT_THREAT_REDUCED][0],&mod,sp->SpellGroupType);
+		SM_PIValue(Attacker->SM[SMT_THREAT_REDUCED][1],&mod,sp->SpellGroupType);
 	}
 
 	// modify mod by Affects

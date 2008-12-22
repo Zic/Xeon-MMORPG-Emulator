@@ -323,7 +323,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 		{
 			if(m_spellInfo->SpellGroupType && u_caster)
 			{
-				SM_FIValue(u_caster->SM_PJumpReduce,&reduce,m_spellInfo->SpellGroupType);
+				SM_FIValue(u_caster->SM[SMT_JUMP_REDUCE][1],&reduce,m_spellInfo->SpellGroupType);
 			}
 			chaindamage = chaindamage * reduce / 100;
 		}
@@ -1748,7 +1748,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 			int32 reduce=m_spellInfo->EffectDieSides[i]+1;
 			if(m_spellInfo->SpellGroupType && u_caster)
 			{
-				SM_FIValue(u_caster->SM_PJumpReduce,&reduce,m_spellInfo->SpellGroupType);
+				SM_FIValue(u_caster->SM[SMT_JUMP_REDUCE][1],&reduce,m_spellInfo->SpellGroupType);
 			}
 			chaindamage -= (reduce * chaindamage) / 100;
 			Heal((int32)chaindamage);

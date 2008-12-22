@@ -5610,13 +5610,13 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, Unit* target, bool autoshot 
 
 	if( spellinfo->SpellGroupType )
 	{
-		SM_FFValue( this->SM_FRange, &maxr, spellinfo->SpellGroupType );
-		SM_PFValue( this->SM_PRange, &maxr, spellinfo->SpellGroupType );
+		SM_FFValue( this->SM[SMT_RANGE][0], &maxr, spellinfo->SpellGroupType );
+		SM_PFValue( this->SM[SMT_RANGE][1], &maxr, spellinfo->SpellGroupType );
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		float spell_flat_modifers=0;
 		float spell_pct_modifers=0;
-		SM_FFValue(this->SM_FRange,&spell_flat_modifers,spellinfo->SpellGroupType);
-		SM_FFValue(this->SM_PRange,&spell_pct_modifers,spellinfo->SpellGroupType);
+		SM_FFValue(this->SM[SMT_RANGE][0],&spell_flat_modifers,spellinfo->SpellGroupType);
+		SM_FFValue(this->SM[SMT_RANGE][1],&spell_pct_modifers,spellinfo->SpellGroupType);
 		if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 			printf("!!!!!spell range bonus mod flat %f , spell range bonus pct %f , spell range %f, spell group %u\n",spell_flat_modifers,spell_pct_modifers,maxr,spellinfo->SpellGroupType);
 #endif
@@ -5625,7 +5625,7 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, Unit* target, bool autoshot 
 	//float bonusRange = 0;
 	// another hackfix: bonus range from hunter talent hawk eye: +2/4/6 yard range to ranged weapons
 	//if(autoshot)
-	//SM_FFValue( SM_FRange, &bonusRange, dbcSpell.LookupEntry( 75 )->SpellGroupType ); // HORRIBLE hackfixes :P
+	//SM_FFValue( SM[SMT_RANGE][0], &bonusRange, dbcSpell.LookupEntry( 75 )->SpellGroupType ); // HORRIBLE hackfixes :P
 	// Partha: +2.52yds to max range, this matches the range the client is calculating.
 	// see extra/supalosa_range_research.txt for more info
 	//bonusRange = 2.52f;
@@ -10111,8 +10111,8 @@ void Player::Cooldown_Add(SpellEntry * pSpell, Item * pItemCaster)
 		cool_time = pSpell->CategoryRecoveryTime;
 		if( pSpell->SpellGroupType )
 		{
-			SM_FIValue(SM_FCooldownTime, &cool_time, pSpell->SpellGroupType);
-			SM_PIValue(SM_PCooldownTime, &cool_time, pSpell->SpellGroupType);
+			SM_FIValue(SM[SMT_COOLDOWN_DECREASE][0], &cool_time, pSpell->SpellGroupType);
+			SM_PIValue(SM[SMT_COOLDOWN_DECREASE][1], &cool_time, pSpell->SpellGroupType);
 		}
 
 		_Cooldown_Add( COOLDOWN_TYPE_CATEGORY, pSpell->Category, mstime + cool_time, pSpell->Id, pItemCaster ? pItemCaster->GetProto()->ItemId : 0 );
@@ -10123,8 +10123,8 @@ void Player::Cooldown_Add(SpellEntry * pSpell, Item * pItemCaster)
 		cool_time = pSpell->RecoveryTime;
 		if( pSpell->SpellGroupType )
 		{
-			SM_FIValue(SM_FCooldownTime, &cool_time, pSpell->SpellGroupType);
-			SM_PIValue(SM_PCooldownTime, &cool_time, pSpell->SpellGroupType);
+			SM_FIValue(SM[SMT_COOLDOWN_DECREASE][0], &cool_time, pSpell->SpellGroupType);
+			SM_PIValue(SM[SMT_COOLDOWN_DECREASE][1], &cool_time, pSpell->SpellGroupType);
 		}
 
 		_Cooldown_Add( COOLDOWN_TYPE_SPELL, pSpell->Id, mstime + cool_time, pSpell->Id, pItemCaster ? pItemCaster->GetProto()->ItemId : 0 );
@@ -10829,7 +10829,7 @@ void Player::VampiricSpell(uint32 dmg, Unit* pTarget)
 	{
 		perc = 15;
 		uint32 spellgroup[3] = {4, 0, 0};
-		SM_FIValue(SM_FMiscEffect, &perc, spellgroup);
+		SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, spellgroup);
 
 		bonus = float2int32(fdmg * (float(perc)/100.0f));
 		if( bonus > 0 )
@@ -10851,7 +10851,7 @@ void Player::VampiricSpell(uint32 dmg, Unit* pTarget)
 	if( m_vampiricTouch > 0 && pTarget->m_hasVampiricTouch > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_TOUCH, this) )
 	{
 		perc = 5;
-		//SM_FIValue(SM_FMiscEffect, &perc, 4);
+		//SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, 4);
 
 		bonus = float2int32(fdmg * (float(perc)/100.0f));
 		if( bonus > 0 )

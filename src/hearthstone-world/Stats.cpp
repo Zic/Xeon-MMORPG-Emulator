@@ -590,12 +590,13 @@ uint32 CalculateDamage( Unit* pAttacker, Unit* pVictim, uint32 weapon_damage_typ
 			if(ability && ability->SpellGroupType)
 			{
 				int32 apall = pAttacker->GetAP();
+				/* this spell modifier doesn't exist. also need to clear up how the AP is used here
 				int32 apb=0;
-				SM_FIValue(pAttacker->SM_PAPBonus,&apb,ability->SpellGroupType);
+				SM_FIValue(pAttacker->SM[SMT_ATTACK_POWER_BONUS][1],&apb,ability->SpellGroupType);
 
 				if(apb)
 					ap += apall*((float)apb/100);
-				else
+				else*/
 					ap = float(apall);
 			}
 		}

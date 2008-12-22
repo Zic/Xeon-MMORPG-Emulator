@@ -789,7 +789,7 @@ void Spell::SpellTargetChainTargeting(uint32 i, uint32 j)
 	uint32 jumps=m_spellInfo->EffectChainTarget[i];
 	if(m_spellInfo->SpellGroupType && u_caster)
 	{
-		SM_FIValue(u_caster->SM_FAdditionalTargets,(int32*)&jumps,m_spellInfo->SpellGroupType);
+		SM_FIValue(u_caster->SM[SMT_ADDITIONAL_TARGET][0],(int32*)&jumps,m_spellInfo->SpellGroupType);
 	}
 
 	_AddTargetForced(firstTarget->GetGUID(), i);

@@ -2167,10 +2167,10 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 
 				if( spellInfo->SpellGroupType )
 				{
-					SM_FFValue(caster->SM_CriticalChance, &CritChance, spellInfo->SpellGroupType);
+					SM_FFValue(caster->SM[SMT_CRITICAL][1], &CritChance, spellInfo->SpellGroupType);
 	#ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 					float spell_flat_modifers=0;
-					SM_FFValue(caster->SM_CriticalChance,&spell_flat_modifers,spellInfo->SpellGroupType);
+					SM_FFValue(caster->SM[SMT_CRITICAL][1],&spell_flat_modifers,spellInfo->SpellGroupType);
 					if(spell_flat_modifers!=0)
 						printf("!!!!spell critchance mod flat %f ,spell group %u\n",spell_flat_modifers,spellInfo->SpellGroupType);
 	#endif
@@ -2189,7 +2189,7 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 			{		
 				int32 critical_bonus = 100;
 				if( spellInfo->SpellGroupType )
-					SM_FIValue( caster->SM_PCriticalDamage, &critical_bonus, spellInfo->SpellGroupType );
+					SM_FIValue( caster->SM[SMT_CRITICAL_DAMAGE][1], &critical_bonus, spellInfo->SpellGroupType );
 
 				if( critical_bonus > 0 )
 				{

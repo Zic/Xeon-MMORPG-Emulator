@@ -763,17 +763,6 @@ void Aura::Remove()
 		}
 	}
 
-	if( GetSpellProto()->SpellGroupType && m_target->GetTypeId() == TYPEID_PLAYER )
-	{
-		int32 speedmod = 0;
-		SM_FIValue( m_target->SM_FSpeedMod, &speedmod, m_spellProto->SpellGroupType );
-		if( speedmod )
-		{
-			m_target->m_speedModifier -= speedmod;
-			m_target->UpdateSpeed();
-		}
-	}
-
 	// remove attacker
 	if( caster != NULL)
 	{
@@ -1571,8 +1560,8 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 			Unit*c=GetUnitCaster();
 			if(c)
 			{
-				SM_FIValue(c->SM_FDOT,(int32*)&dmg,gr);
-				SM_PIValue(c->SM_PDOT,(int32*)&dmg,gr);
+				SM_FIValue(c->SM[SMT_SPELL_VALUE_PCT][0],(int32*)&dmg,gr);
+				SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],(int32*)&dmg,gr);
 			}
 		}
 
@@ -3009,7 +2998,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 				if( c->IsPlayer() )
 				{
 					int durmod = 0;
-					SM_FIValue(c->SM_FDur, &durmod, m_spellProto->SpellGroupType);
+					SM_FIValue(c->SM[SMT_DURATION][0], &durmod, m_spellProto->SpellGroupType);
 					bonus += float2int32( float( bonus * durmod ) / 15000.0f );
 				}
 			}
@@ -3020,15 +3009,15 @@ void Aura::EventPeriodicHeal( uint32 amount )
 	{
 		int penalty_pct = 0;
 		int penalty_flt = 0;
-		SM_FIValue( c->SM_FPenalty, &penalty_flt, GetSpellProto()->SpellGroupType );
+		SM_FIValue( c->SM[SMT_PENALTY][0], &penalty_flt, GetSpellProto()->SpellGroupType );
 		bonus += penalty_flt;
-		SM_FIValue( c->SM_PPenalty, &penalty_pct, GetSpellProto()->SpellGroupType );
+		SM_FIValue( c->SM[SMT_PENALTY][1], &penalty_pct, GetSpellProto()->SpellGroupType );
 		bonus += bonus * ( penalty_pct / 100 );
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		int spell_flat_modifers=0;
 		int spell_pct_modifers=0;
-		SM_FIValue(c->SM_FPenalty,&spell_flat_modifers,GetSpellProto()->SpellGroupType);
-		SM_FIValue(c->SM_PPenalty,&spell_pct_modifers,GetSpellProto()->SpellGroupType);
+		SM_FIValue(c->SM[SMT_PENALTY][0],&spell_flat_modifers,GetSpellProto()->SpellGroupType);
+		SM_FIValue(c->SM[SMT_PENALTY][1],&spell_pct_modifers,GetSpellProto()->SpellGroupType);
 		if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 			printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,GetSpellProto()->SpellGroupType);
 #endif
@@ -3071,7 +3060,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		add += m_target->HealTakenMod[m_spellProto->School];
 		add = (int32)(add * c->HealDonePctMod[m_spellProto->School]);
 		if (m_spellProto->SpellGroupType)
-			SM_PIValue(c->SM_PDOT,&add,m_spellProto->SpellGroupType);
+			SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],&add,m_spellProto->SpellGroupType);
 	}
 
 	if((m_target->GetUInt32Value( UNIT_FIELD_HEALTH )+add) > m_target->GetUInt32Value( UNIT_FIELD_MAXHEALTH ))
@@ -3861,8 +3850,8 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 
 	if( spellInfo->SpellGroupType )
 	{
-		SM_FFValue( m_caster->SM_FRange, &maxRange, spellInfo->SpellGroupType );
-		SM_PFValue( m_caster->SM_PRange, &maxRange, spellInfo->SpellGroupType );
+		SM_FFValue( m_caster->SM[SMT_RANGE][0], &maxRange, spellInfo->SpellGroupType );
+		SM_PFValue( m_caster->SM[SMT_RANGE][1], &maxRange, spellInfo->SpellGroupType );
 	}
 
 	if( m_caster->IsStunned() || m_caster->IsFeared() || m_caster->GetDistance2dSq( oTarget ) > ( maxRange*maxRange ) )
@@ -6437,8 +6426,8 @@ void Aura::SpellAuraPeriodicDamagePercent(bool apply)
 		//	Unit*c=GetUnitCaster();
 		//	if(c)
 		//	{
-		//		SM_FIValue(c->SM_FDOT,(int32*)&dmg,gr);
-		//		SM_PIValue(c->SM_PDOT,(int32*)&dmg,gr);
+		//		SM_FIValue(c->SM[SMT_SPELL_VALUE_PCT][0],(int32*)&dmg,gr);
+		//		SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],(int32*)&dmg,gr);
 		//	}		
 		//}
 
@@ -6758,116 +6747,22 @@ void Aura::SpellAuraAddPctMod( bool apply )
 		DEBUG_LOG("spell %u is missing affected groups.\n", m_spellProto->Id);
 		return;
 	}
-
 	//printf("!!! the AffectedGroups %u ,the smt type %u,\n",AffectedGroups,mod->m_miscValue);
 
-	switch( mod->m_miscValue )//let's generate warnings for unknown types of modifiers
+	int32 modifier = mod->m_miscValue;
+
+	if(modifier < 0 || modifier >= SPELL_MODIFIERS)
 	{
-	case SMT_CRITICAL:
-		SendModifierLog( &m_target->SM_CriticalChance, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_DURATION:
-		SendModifierLog( &m_target->SM_PDur, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_RADIUS:
-		SendModifierLog( &m_target->SM_PRadius, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_RANGE:
-		SendModifierLog( &m_target->SM_PRange, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_CAST_TIME:
-		SendModifierLog( &m_target->SM_PCastTime, val, AffectedGroups, mod->m_miscValue, true ); 
-		break;
-
-	case SMT_COST:
-		SendModifierLog( &m_target->SM_PCost, val, AffectedGroups, mod->m_miscValue, true ); 
-		break;
-
-	case SMT_CRITICAL_DAMAGE:
-		SendModifierLog( &m_target->SM_PCriticalDamage, val, AffectedGroups, mod->m_miscValue, true ); 
-		break;
-
-	case SMT_SPELL_VALUE_PCT:
-		SendModifierLog( &m_target->SM_PDOT, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_NONINTERRUPT:
-		SendModifierLog( &m_target->SM_PNonInterrupt, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_JUMP_REDUCE:
-		SendModifierLog( &m_target->SM_PJumpReduce, val, AffectedGroups, mod->m_miscValue, true ); 
-		break;
-
-	case SMT_EFFECT_BONUS:
-	case SMT_EFFECT:
-		SendModifierLog( &m_target->SM_PEffectBonus, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_LAST_EFFECT_BONUS:
-		SendModifierLog( &m_target->SM_PLastEffectBonus, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_DAMAGE_DONE:
-		SendModifierLog( &m_target->SM_PDamageBonus, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_MISC_EFFECT:
-		SendModifierLog( &m_target->SM_PMiscEffect, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	case SMT_PENALTY:
-		SendModifierLog( &m_target->SM_PPenalty, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-	//TODO: disabled until clarified
-	/*
-	case SMT_ATTACK_POWER_BONUS:
-		SendModifierLog(&m_target->SM_PAPBonus,val,AffectedGroups,mod->m_miscValue,true); 
-		break;
-	*/
-	case SMT_COOLDOWN_DECREASE:
-		SendModifierLog( &m_target->SM_PCooldownTime, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-
-	//there are 2 spells in 2.1.1 that will only need attack power bonus
-	case SMT_ATTACK_POWER_AND_DMG_BONUS:
-		{
-			if(GetSpellId()==36563 || GetSpellId()==37186)
-			{
-				SendModifierLog( &m_target->SM_PDamageBonus, val, AffectedGroups, mod->m_miscValue, true );
-			}
-			else
-			{
-				//these are seal of crusader spells
-				SendModifierLog( &m_target->SM_PDamageBonus, val, AffectedGroups, mod->m_miscValue, true );
-				SendModifierLog( &m_target->SM_PAPBonus, val, AffectedGroups, mod->m_miscValue, true ); 
-			}
-		}break;
-	case SMT_THREAT_REDUCED:
-		SendModifierLog(&m_target->SM_PThreat, val, AffectedGroups, mod->m_miscValue, true);
-		break;
-
-	//TODO:
-	/*	
-	case SMT_BLOCK:
-
-	case SMT_TRIGGER:
-	case SMT_TIME:
-		break;
-	*/
-	//unknown Modifier type
-	case SMT_RESIST_DISPEL:
-		SendModifierLog( &m_target->SM_PRezist_dispell, val, AffectedGroups, mod->m_miscValue, true );
-		break;
-	default:
-		DEBUG_LOG( "Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n", mod->m_miscValue, GetSpellId() );
-		//don't add val, though we could formaly could do,but as we don't know what it is-> no sense
-		break;
+		DEBUG_LOG( "Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n", modifier, GetSpellId() );
+		return;
 	}
+
+	if(modifier == SMT_EFFECT_BONUS)
+		modifier = SMT_EFFECT;
+	else if(modifier == SMT_ATTACK_POWER_AND_DMG_BONUS)
+		modifier = SMT_DAMAGE_DONE;
+
+	SendModifierLog(&m_target->SM[modifier][1], val, AffectedGroups, modifier, true);
 }
 
 
@@ -7032,16 +6927,11 @@ void Aura::SpellAuraOverrideClassScripts(bool apply)
 	//Adding bonus to effect
 	switch(mod->m_miscValue)
 	{
-		case 31680:
+		case 4919:
+		case 4920:	//Molten Fury
 			{
 				if(p_target)
-					p_target->m_moltenFuryDamageIncreasePct += 20;
-			}break;
-
-		case 31679:
-			{
-				if(p_target)
-					p_target->m_moltenFuryDamageIncreasePct += 10;
+					p_target->m_moltenFuryDamageIncreasePct += (apply) ? mod->m_amount : -mod->m_amount;
 			}break;
 			//----Shatter---
 			// Increases crit chance against rooted targets by (Rank * 10)%.
@@ -8011,7 +7901,7 @@ void Aura::SpellAuraIncreaseHealingByAttribute(bool apply)
 			return;
 
 		val = mod->m_amount;
-		SM_FIValue(pCaster->SM_FEffectBonus,&val,m_spellProto->SpellGroupType);
+		SM_FIValue(pCaster->SM[SMT_EFFECT][0],&val,m_spellProto->SpellGroupType);
 
 		if(val<0)
 			SetNegative();
@@ -8063,99 +7953,20 @@ void Aura::SpellAuraAddFlatModifier(bool apply)
 		DEBUG_LOG("spell %u is missing affected groups.\n", m_spellProto->Id);
 		return;
 	}
-
-//printf("!!! the AffectedGroups %u ,the smt type %u,\n",AffectedGroups,mod->m_miscValue);
-
-	switch (mod->m_miscValue)//let's generate warnings for unknown types of modifiers
-	{
-	case SMT_CRITICAL:
-		SendModifierLog(&m_target->SM_CriticalChance,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_DURATION:
-		SendModifierLog(&m_target->SM_FDur,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_RADIUS:
-		SendModifierLog(&m_target->SM_FRadius,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_RANGE:
-		SendModifierLog(&m_target->SM_FRange,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_CAST_TIME:
-		SendModifierLog(&m_target->SM_FCastTime,val,AffectedGroups,mod->m_miscValue); 
-		break;
-
-	case SMT_COST:
-		SendModifierLog(&m_target->SM_FCost,val,AffectedGroups,mod->m_miscValue); 
-		break;
-
-	case SMT_SPELL_VALUE_PCT:
-		SendModifierLog(&m_target->SM_FDOT,val,AffectedGroups,mod->m_miscValue); 
-		break;
-
-	case SMT_ADDITIONAL_TARGET:
-		SendModifierLog(&m_target->SM_FAdditionalTargets,val,AffectedGroups,mod->m_miscValue); 
-		break;
-
-	case SMT_DAMAGE_DONE:
-		SendModifierLog(&m_target->SM_FDamageBonus,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_EFFECT_BONUS:
-	case SMT_EFFECT:
-		SendModifierLog(&m_target->SM_FEffectBonus,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_LAST_EFFECT_BONUS:
-		SendModifierLog( &m_target->SM_FLastEffectBonus, val, AffectedGroups, mod->m_miscValue);
-		break;
-
-	case SMT_MISC_EFFECT:
-		SendModifierLog(&m_target->SM_FMiscEffect,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_HITCHANCE:
-		SendModifierLog(&m_target->SM_FHitchance,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-		// as far as I know its not yet used!!!
-	case SMT_PENALTY:
-//		SendModifierLog(&m_target->SM_FPenalty,val,AffectedGroups,mod->m_miscValue);
-		//all values seem to be pct. Based of 8/8 spells
-		SendModifierLog(&m_target->SM_PPenalty,val,AffectedGroups,mod->m_miscValue,true);
-		break;
+	//printf("!!! the AffectedGroups %u ,the smt type %u,\n",AffectedGroups,mod->m_miscValue);
 	
-	case SMT_COOLDOWN_DECREASE:
-		SendModifierLog(&m_target->SM_FCooldownTime, val, AffectedGroups,mod->m_miscValue);
-		break;
+	int32 modifier = mod->m_miscValue;
 
-	case SMT_TRIGGER:
-		SendModifierLog(&m_target->SM_FChanceOfSuccess,val,AffectedGroups,mod->m_miscValue);
-		break;
-
-	case SMT_THREAT_REDUCED:
-		SendModifierLog(&m_target->SM_FThreat, val, AffectedGroups,mod->m_miscValue);
-		break;
-
-/*	case SMT_BLOCK:
-	case SMT_TRIGGER:
-	case SMT_TIME:*/
-		break;
-	case SMT_RESIST_DISPEL:
-		SendModifierLog(&m_target->SM_FRezist_dispell, val, AffectedGroups,mod->m_miscValue);
-		break;
-	default://unknown Modifier type
-		DEBUG_LOG(
-			"Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n",
-			mod->m_miscValue,GetSpellId());
-		//don't add val, though we could formaly could do,but as we don't know what it is-> no sense
-		break;
+	if(modifier < 0 || modifier >= SPELL_MODIFIERS)
+	{
+		DEBUG_LOG( "Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n", modifier, GetSpellId() );
+		return;
 	}
 
-  
+	if(modifier == SMT_EFFECT_BONUS)
+		modifier = SMT_EFFECT;
+
+	SendModifierLog(&m_target->SM[modifier][0],val,AffectedGroups,modifier);
 }
 
 
@@ -8592,6 +8403,7 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		{
 			static_cast< Player* >( m_target )->flying_aura = m_spellProto->Id;
 		}
+		m_target->MechanicsDispels[MECHANIC_POLYMORPHED]++; // Players flying on flying mounts are immune to polymorph.
 	}
 	else
 	{
@@ -8602,6 +8414,7 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		{
 			static_cast< Player* >( m_target )->flying_aura = 0;
 		}
+		m_target->MechanicsDispels[MECHANIC_POLYMORPHED]--;
 	}
 }
 

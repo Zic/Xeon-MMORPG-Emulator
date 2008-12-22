@@ -32,6 +32,7 @@ bool SERVER_DECL Rand(float);
 #define UF_TARGET_DIED  1
 #define UF_ATTACKING	2 // this unit is attacking it's selection
 #define SPELL_GROUPS	96
+#define SPELL_MODIFIERS 30
 #define DIMINISH_GROUPS	26
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
@@ -956,43 +957,7 @@ public:
 	//int32 RangedDamageTakenPct; 
 
 	//SM
-	int32 * SM_CriticalChance;//flat
-	int32 * SM_FDur;//flat
-	int32 * SM_PDur;//pct
-	int32 * SM_PRadius;//pct
-	int32 * SM_FRadius;//flat
-	int32 * SM_PRange;//pct
-	int32 * SM_FRange;//flat
-	int32 * SM_PCastTime;//pct
-	int32 * SM_FCastTime;//flat
-	int32 * SM_PCriticalDamage;
-	int32 * SM_PDOT;//pct
-	int32 * SM_FDOT;//flat
-	int32 * SM_FEffectBonus;//flat
-	int32 * SM_PEffectBonus;//pct
-	int32 * SM_FLastEffectBonus;//flat
-	int32 * SM_PLastEffectBonus;//pct
-	int32 * SM_FDamageBonus;//flat
-	int32 * SM_PDamageBonus;//pct
-	int32 * SM_PMiscEffect;//pct
-	int32 * SM_FMiscEffect;//flat
-	int32 * SM_FHitchance;//flat
-	int32 * SM_PAPBonus;//pct
-	int32 * SM_PCost;
-	int32 * SM_FCost;
-	int32 * SM_PNonInterrupt;
-	int32 * SM_PJumpReduce;
-	int32 * SM_FSpeedMod;
-	int32 * SM_FAdditionalTargets;
-	int32 * SM_FPenalty;//flat
-	int32 * SM_PPenalty;//Pct
-	int32 * SM_PCooldownTime;
-	int32 * SM_FCooldownTime;
-	int32 * SM_FChanceOfSuccess;
-	int32 * SM_FRezist_dispell;
-	int32 * SM_PRezist_dispell;
-	int32 * SM_FThreat;
-	int32 * SM_PThreat;
+	int32 * SM[SPELL_MODIFIERS][2]; // 0 = flat, 1 = percent
 	void InheritSMMods(Unit *inherit_from);
 
 	//Events

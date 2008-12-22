@@ -3695,7 +3695,7 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 12472 );
 	if( sp != NULL )
 	{
-		sp->EffectMiscValue[1] = SMT_TRIGGER;
+		sp->EffectMiscValue[1] = SMT_PROC_CHANCE;
 	}
 
 	//Mage - Wand Specialization. Not the forst thing we messed up. Blizz uses attack as magic and wandds as weapons :S

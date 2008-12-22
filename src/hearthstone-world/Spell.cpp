@@ -436,8 +436,8 @@ uint64 Spell::GetSinglePossibleEnemy(uint32 i,float prange)
 		r = m_spellInfo->base_range_or_radius_sqr;
 		if( m_spellInfo->SpellGroupType && u_caster)
 		{
-			SM_FFValue(u_caster->SM_FRadius,&r,m_spellInfo->SpellGroupType);
-			SM_PFValue(u_caster->SM_PRadius,&r,m_spellInfo->SpellGroupType);
+			SM_FFValue(u_caster->SM[SMT_RADIUS][0],&r,m_spellInfo->SpellGroupType);
+			SM_PFValue(u_caster->SM[SMT_RADIUS][1],&r,m_spellInfo->SpellGroupType);
 		}
 	}
 	float srcx = m_caster->GetPositionX(), srcy = m_caster->GetPositionY(), srcz = m_caster->GetPositionZ();
@@ -485,8 +485,8 @@ uint64 Spell::GetSinglePossibleFriend(uint32 i,float prange)
 		r = m_spellInfo->base_range_or_radius_sqr;
 		if( m_spellInfo->SpellGroupType && u_caster)
 		{
-			SM_FFValue(u_caster->SM_FRadius,&r,m_spellInfo->SpellGroupType);
-			SM_PFValue(u_caster->SM_PRadius,&r,m_spellInfo->SpellGroupType);
+			SM_FFValue(u_caster->SM[SMT_RADIUS][0],&r,m_spellInfo->SpellGroupType);
+			SM_PFValue(u_caster->SM[SMT_RADIUS][1],&r,m_spellInfo->SpellGroupType);
 		}
 	}
 	float srcx=m_caster->GetPositionX(),srcy=m_caster->GetPositionY(),srcz=m_caster->GetPositionZ();
@@ -646,14 +646,14 @@ uint8 Spell::_DidHit(const Unit *target)
 
 	if( m_spellInfo->c_is_flags & SPELL_FLAG_IS_DISPEL_SPELL && m_spellInfo->SpellGroupType && u_caster)
 	{
-		SM_FFValue(u_caster->SM_FRezist_dispell,&resistchance,m_spellInfo->SpellGroupType);
-		SM_PFValue(u_caster->SM_PRezist_dispell,&resistchance,m_spellInfo->SpellGroupType);
+		SM_FFValue(u_caster->SM[SMT_RESIST_DISPEL][0],&resistchance,m_spellInfo->SpellGroupType);
+		SM_PFValue(u_caster->SM[SMT_RESIST_DISPEL][1],&resistchance,m_spellInfo->SpellGroupType);
 	}
 
 	if(m_spellInfo->SpellGroupType && u_caster)
 	{
 		float hitchance=0;
-		SM_FFValue(u_caster->SM_FHitchance,&hitchance,m_spellInfo->SpellGroupType);
+		SM_FFValue(u_caster->SM[SMT_HITCHANCE][0],&hitchance,m_spellInfo->SpellGroupType);
 		resistchance -= hitchance;
 	}
 
@@ -689,8 +689,8 @@ void Spell::GenerateTargets(SpellCastTargets *store_buff)
 	float r = m_spellInfo->base_range_or_radius_sqr;
 	if( m_spellInfo->SpellGroupType && u_caster)
 	{
-		SM_FFValue(u_caster->SM_FRadius,&r,m_spellInfo->SpellGroupType);
-		SM_PFValue(u_caster->SM_PRadius,&r,m_spellInfo->SpellGroupType);
+		SM_FFValue(u_caster->SM[SMT_RADIUS][0],&r,m_spellInfo->SpellGroupType);
+		SM_PFValue(u_caster->SM[SMT_RADIUS][1],&r,m_spellInfo->SpellGroupType);
 	}
 	uint32 cur;
 	for(uint32 i=0;i<3;i++)
@@ -954,13 +954,13 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 
 		if( m_castTime && m_spellInfo->SpellGroupType && u_caster != NULL )
 		{
-			SM_FIValue( u_caster->SM_FCastTime, (int32*)&m_castTime, m_spellInfo->SpellGroupType );
-			SM_PIValue( u_caster->SM_PCastTime, (int32*)&m_castTime, m_spellInfo->SpellGroupType );
+			SM_FIValue( u_caster->SM[SMT_CAST_TIME][0], (int32*)&m_castTime, m_spellInfo->SpellGroupType );
+			SM_PIValue( u_caster->SM[SMT_CAST_TIME][1], (int32*)&m_castTime, m_spellInfo->SpellGroupType );
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 			int spell_flat_modifers=0;
 			int spell_pct_modifers=0;
-			SM_FIValue(u_caster->SM_FCastTime,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(u_caster->SM_PCastTime,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_CAST_TIME][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_CAST_TIME][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 			if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 				printf("!!!!!spell casttime mod flat %d , spell casttime mod pct %d , spell casttime %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,m_castTime,m_spellInfo->SpellGroupType);
 #endif
@@ -1530,10 +1530,10 @@ void Spell::AddTime(uint32 type)
 		if( m_spellInfo->SpellGroupType && u_caster)
 		{
 			float ch=0;
-			SM_FFValue(u_caster->SM_PNonInterrupt,&ch,m_spellInfo->SpellGroupType);
+			SM_FFValue(u_caster->SM[SMT_NONINTERRUPT][1],&ch,m_spellInfo->SpellGroupType);
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 			float spell_pct_modifers=0;
-			SM_FFValue(u_caster->SM_PNonInterrupt,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			SM_FFValue(u_caster->SM[SMT_NONINTERRUPT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 			if(spell_pct_modifers!=0)
 				printf("!!!!!spell interrupt chance mod pct %f , uninterrupt chance %f, spell group %u\n",spell_pct_modifers,ch,m_spellInfo->SpellGroupType);
 #endif
@@ -2281,8 +2281,8 @@ bool Spell::HasPower()
 	//apply modifiers
 	if( m_spellInfo->SpellGroupType && u_caster)
 	{
-		SM_FIValue(u_caster->SM_FCost,&cost,m_spellInfo->SpellGroupType);
-		SM_PIValue(u_caster->SM_PCost,&cost,m_spellInfo->SpellGroupType);
+		SM_FIValue(u_caster->SM[SMT_COST][0],&cost,m_spellInfo->SpellGroupType);
+		SM_PIValue(u_caster->SM[SMT_COST][1],&cost,m_spellInfo->SpellGroupType);
 	}
 
 	if (cost <=0)
@@ -2372,8 +2372,8 @@ bool Spell::TakePower()
 	//apply modifiers
 	if( m_spellInfo->SpellGroupType && u_caster)
 	{
-		  SM_FIValue(u_caster->SM_FCost,&cost,m_spellInfo->SpellGroupType);
-		  SM_PIValue(u_caster->SM_PCost,&cost,m_spellInfo->SpellGroupType);
+		  SM_FIValue(u_caster->SM[SMT_COST][0],&cost,m_spellInfo->SpellGroupType);
+		  SM_PIValue(u_caster->SM[SMT_COST][1],&cost,m_spellInfo->SpellGroupType);
 	}
 
 	if (cost <=0)
@@ -3184,13 +3184,13 @@ uint8 Spell::CanCast(bool tolerate)
 
 	if( m_spellInfo->SpellGroupType && u_caster != NULL )
 	{
-		SM_FFValue( u_caster->SM_FRange, &maxRange, m_spellInfo->SpellGroupType );
-		SM_PFValue( u_caster->SM_PRange, &maxRange, m_spellInfo->SpellGroupType );
+		SM_FFValue( u_caster->SM[SMT_RANGE][0], &maxRange, m_spellInfo->SpellGroupType );
+		SM_PFValue( u_caster->SM[SMT_RANGE][1], &maxRange, m_spellInfo->SpellGroupType );
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		float spell_flat_modifers=0;
 		float spell_pct_modifers=0;
-		SM_FFValue(u_caster->SM_FRange,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-		SM_FFValue(u_caster->SM_PRange,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		SM_FFValue(u_caster->SM[SMT_RANGE][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+		SM_FFValue(u_caster->SM[SMT_RANGE][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 		if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 			printf("!!!!!spell range bonus mod flat %f , spell range bonus pct %f , spell range %f, spell group %u\n",spell_flat_modifers,spell_pct_modifers,maxRange,m_spellInfo->SpellGroupType);
 #endif
@@ -3974,16 +3974,16 @@ exit:*/
 	{
 		int32 spell_flat_modifers=0;
 		int32 spell_pct_modifers=0;
-		SM_FIValue(caster->SM_FMiscEffect,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-		SM_FIValue(caster->SM_PMiscEffect,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_MISC_EFFECT][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_MISC_EFFECT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 
-		SM_FIValue(caster->SM_FEffectBonus,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-		SM_FIValue(caster->SM_PEffectBonus,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_EFFECT][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_EFFECT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 
 		if(i == 2 || i == 1 && m_spellInfo->Effect[2] == 0)
 		{	// Only applied to the last effect of spell
-			SM_FIValue(caster->SM_FLastEffectBonus,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(caster->SM_PLastEffectBonus,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 		}
 		value = value + value*spell_pct_modifers/100 + spell_flat_modifers;
 	}
@@ -4236,16 +4236,16 @@ void Spell::Heal(int32 amount)
 		{
 			int penalty_pct = 0;
 			int penalty_flt = 0;
-			SM_FIValue( u_caster->SM_FPenalty, &penalty_flt, m_spellInfo->SpellGroupType );
+			SM_FIValue( u_caster->SM[SMT_PENALTY][0], &penalty_flt, m_spellInfo->SpellGroupType );
 			bonus += penalty_flt;
-			SM_FIValue( u_caster->SM_PPenalty, &penalty_pct, m_spellInfo->SpellGroupType );
+			SM_FIValue( u_caster->SM[SMT_PENALTY][1], &penalty_pct, m_spellInfo->SpellGroupType );
 			bonus += bonus * ( penalty_pct / 100 );
-			SM_FIValue( u_caster->SM_CriticalChance,&critchance,m_spellInfo->SpellGroupType);
+			SM_FIValue( u_caster->SM[SMT_CRITICAL][1],&critchance,m_spellInfo->SpellGroupType);
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 			int spell_flat_modifers=0;
 			int spell_pct_modifers=0;
-			SM_FIValue(u_caster->SM_FPenalty,&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(u_caster->SM_PPenalty,&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_PENALTY][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_PENALTY][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 			if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 				printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,m_spellInfo->SpellGroupType);
 #endif
@@ -4256,18 +4256,18 @@ void Spell::Heal(int32 amount)
 		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
 
 		if (m_spellInfo->SpellGroupType)
-			SM_FIValue(u_caster->SM_PDamageBonus,&amount,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_DAMAGE_DONE][1],&amount,m_spellInfo->SpellGroupType);
 
 		if(critical = Rand(critchance))
 		{
 			/*int32 critbonus = amount >> 1;
 			if( m_spellInfo->SpellGroupType)
-					SM_PIValue(static_cast<Unit*>(u_caster)->SM_PCriticalDamage, &critbonus, m_spellInfo->SpellGroupType);
+					SM_PIValue(static_cast<Unit*>(u_caster)->SM[SMT_CRITICAL_DAMAGE][1], &critbonus, m_spellInfo->SpellGroupType);
 			amount += critbonus;*/
 
 			int32 critical_bonus = 100;
 			if( m_spellInfo->SpellGroupType )
-				SM_FIValue( u_caster->SM_PCriticalDamage, &critical_bonus, m_spellInfo->SpellGroupType );
+				SM_FIValue( u_caster->SM[SMT_CRITICAL_DAMAGE][1], &critical_bonus, m_spellInfo->SpellGroupType );
 
 			if( critical_bonus > 0 )
 			{
