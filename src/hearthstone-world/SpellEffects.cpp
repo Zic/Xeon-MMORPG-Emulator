@@ -4864,8 +4864,11 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	pTotem->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 	pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 	pTotem->SetUInt32Value(UNIT_FIELD_BYTES_2, 1 | (0x28 << 8));
-	if( p_caster && p_caster->IsPvPFlagged() )
+	if( p_caster->IsPvPFlagged() )
 		pTotem->SetPvPFlag();
+
+	if( p_caster->IsFFAPvPFlagged() )
+		pTotem->SetFFAPvPFlag();
 
 	// Initialize faction stuff.
 	pTotem->m_faction = p_caster->m_faction;

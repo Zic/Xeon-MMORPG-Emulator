@@ -824,6 +824,10 @@ public:
 	DeathState getDeathState() { return m_deathState; }
 	void OnDamageTaken();
 
+	bool IsFFAPvPFlagged();
+	void SetFFAPvPFlag();
+	void RemoveFFAPvPFlag();
+
 	//! Add Aura to unit
 	void AddAura(Aura *aur, Aura *pParentAura);
 	//! Remove aura from unit

@@ -6163,3 +6163,22 @@ void Unit::SetWeaponDisplayId(uint8 slot, uint32 displayId)
 {
 	SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID+slot, displayId);
 }
+
+bool Unit::IsFFAPvPFlagged()
+{ 
+	return HasByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
+}
+
+void Unit::SetFFAPvPFlag()
+{
+	if(IsFFAPvPFlagged()) return;
+
+	SetByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
+}
+
+void Unit::RemoveFFAPvPFlag()
+{
+	if(!IsFFAPvPFlagged()) return;
+
+	RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
+}

@@ -11118,26 +11118,6 @@ void Player::CheckSpellUniqueTargets(SpellEntry *sp, uint64 guid)
 	}
 }
 
-bool Player::IsFFAPvPFlagged()
-{ 
-	return HasByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
-}
-
-void Player::SetFFAPvPFlag()
-{
-	if(IsFFAPvPFlagged()) return;
-
-	SetByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
-}
-
-void Player::RemoveFFAPvPFlag()
-{
-	if(!IsFFAPvPFlagged()) return;
-
-	RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
-}
-
-
 bool Player::HasBattlegroundQueueSlot()
 {
 	if( m_bgIsQueued[0] &&  m_bgIsQueued[1] && m_bgIsQueued[2] )

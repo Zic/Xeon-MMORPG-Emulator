@@ -219,9 +219,11 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 
 		if(playerA->IsFFAPvPFlagged() && playerB->IsFFAPvPFlagged())
 		{
-			if( playerA->m_bg != NULL )
-				if( playerA->GetGroup() == playerB->GetGroup() )
-					return false;
+			if( playerA->GetGroup() && playerA->GetGroup() == playerB->GetGroup() )
+				return false;
+
+			if( playerA == playerB ) // Totems...
+				return false;
 
 			return true;		// can hurt each other in FFA pvp
 		}

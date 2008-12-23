@@ -1669,10 +1669,6 @@ public:
 	  PVP Stuff
 	******************/
 	uint32 m_pvpTimer;
-	
-	bool IsFFAPvPFlagged();
-	void SetFFAPvPFlag();
-	void RemoveFFAPvPFlag();
 
 	//! Do this on /pvp off
 	HEARTHSTONE_INLINE void ResetPvPTimer();
