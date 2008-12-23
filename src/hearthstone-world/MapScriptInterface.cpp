@@ -89,6 +89,7 @@ GameObject* MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY
 		return NULL;
 	}
 	pGameObject->SetInstanceID(mapMgr.GetInstanceID());
+	pGameObject->SetPhase(1);
 
 	if(AddToWorld)
 		pGameObject->PushToWorld(&mapMgr);
@@ -122,6 +123,7 @@ Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, fl
 	//sp->respawnNpcLink = 0;
 	sp->stand_state = 0;
 	sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
+	sp->phase = 1;
 
 	Creature * p = this->mapMgr.CreateCreature(Entry);
 	ASSERT(p);
