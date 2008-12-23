@@ -1997,14 +1997,20 @@ void Spell::SpellEffectCreateItem(uint32 i) // Create item
 			if (m_itemProto->RandomPropId)
 			{
 				RandomProps * iRandomProperty = lootmgr.GetRandomProperties(m_itemProto);
-				newItem->SetRandomProperty(iRandomProperty->ID);
-				newItem->ApplyRandomProperties(false);
+				if( iRandomProperty )
+				{
+					newItem->SetRandomProperty(iRandomProperty->ID);
+					newItem->ApplyRandomProperties(false);
+				}
 			}
 			if (m_itemProto->RandomSuffixId)
 			{
 				ItemRandomSuffixEntry * iRandomSuffix = lootmgr.GetRandomSuffix(m_itemProto);
-				newItem->SetRandomSuffix(iRandomSuffix->id);
-				newItem->ApplyRandomProperties(false);
+				if( iRandomSuffix )
+				{
+					newItem->SetRandomSuffix(iRandomSuffix->id);
+					newItem->ApplyRandomProperties(false);
+				}
 			}
 
 			if(p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
