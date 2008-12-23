@@ -85,9 +85,6 @@ Unit::Unit()
 	m_canMove = 0;
 	m_noInterrupt = 0;
 	m_modlanguage = -1;
-	
-	critterPet = NULL;
-	summonPet = NULL;
 
 	m_useAI = false;
 	for(uint32 x=0;x<10;x++)
@@ -4185,11 +4182,6 @@ void Unit::OnRemoveInRangeObject(Object* pObj)
 				m_currentSpell->cancel();
 
         Object::OnRemoveInRangeObject(pObj);
-        if(critterPet == pObj)
-		{
-			critterPet->SafeDelete();
-			critterPet = 0;
-		}
 	}
     else
     {
@@ -4582,7 +4574,7 @@ bool Unit::HasActiveAura(uint32 spellid,uint64 guid)
 
 void Unit::EventSummonPetExpire()
 {
-	if(summonPet)
+	/*if(summonPet)
 	{
 		if(summonPet->GetEntry() == 7915)//Goblin Bomb
 		{
@@ -4601,7 +4593,7 @@ void Unit::EventSummonPetExpire()
 			delete summonPet;
 			summonPet = NULL;
 		}
-	}
+	}*/
 	sEventMgr.RemoveEvents(this, EVENT_SUMMON_PET_EXPIRE);
 }
 
@@ -4805,12 +4797,6 @@ void Unit::OnPushToWorld()
 void Unit::RemoveFromWorld(bool free_guid)
 {
 	CombatStatus.OnRemoveFromWorld();
-	if(critterPet != 0)
-	{
-		critterPet->RemoveFromWorld(false, true);
-		delete critterPet;
-		critterPet = 0;
-	}
 
 	if(dynObj != 0)
 		dynObj->Remove();

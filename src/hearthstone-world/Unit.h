@@ -1076,9 +1076,6 @@ public:
 	Aura* m_auras[MAX_AURAS+MAX_PASSIVE_AURAS];   
 
 	int32 m_modlanguage;
-	
-	Creature *critterPet;
-	Creature *summonPet;
 
 	HEARTHSTONE_INLINE uint32 GetCharmTempVal() { return m_charmtemp; }
 	HEARTHSTONE_INLINE void SetCharmTempVal(uint32 val) { m_charmtemp = val; }

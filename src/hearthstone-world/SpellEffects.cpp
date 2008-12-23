@@ -206,15 +206,6 @@ void Spell::SpellEffectInstantKill(uint32 i)
 
 	switch(spellId)
 	{
-	case 3617://Goblin Bomb Suicide
-		{
-			if(m_caster->GetTypeId() != TYPEID_UNIT)
-				break;
-			Unit *caster = m_caster->GetMapMgr()->GetPlayer(m_caster->GetUInt32Value(UNIT_FIELD_SUMMONEDBY));
-			caster->summonPet->RemoveFromWorld(false,true);
-			delete caster->summonPet;
-			caster->summonPet = NULL;
-		}break;
 	case 7814:
 	case 7815:
 	case 7816:
@@ -2403,16 +2394,6 @@ void Spell::SummonCreature(uint32 i) // Summon
 	if(!p_caster || !p_caster->IsInWorld())
 		return;
 
-	if(p_caster->m_tempSummon)
-	{
-		p_caster->m_tempSummon->RemoveFromWorld(false,true);
-		if(p_caster->m_tempSummon)
-			p_caster->m_tempSummon->SafeDelete();
-
-		p_caster->m_tempSummon = 0;
-		p_caster->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-	}
-
 	/* This is for summon water elemenal, etc */
 	CreatureInfo * ci = CreatureNameStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
 	CreatureProto * cp = CreatureProtoStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
@@ -2429,7 +2410,6 @@ void Spell::SummonCreature(uint32 i) // Summon
 		summon->AddSpell(dbcSpell.LookupEntry(33395), true);
 		summon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 		summon->_setFaction();
-		p_caster->m_tempSummon = summon;
 		if( m_summonProperties->slot < 7 )
 			p_caster->m_SummonSlots[ m_summonProperties->slot ] = summon;
 	}
@@ -2466,7 +2446,6 @@ void Spell::SummonCreature(uint32 i) // Summon
 			pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 			pCreature->_setFaction();
 			p_caster->SetUInt64Value(UNIT_FIELD_SUMMON, pCreature->GetGUID());
-			p_caster->m_tempSummon = pCreature;
 			if( m_summonProperties->slot < 7 )
 				p_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 
@@ -5180,7 +5159,6 @@ void Spell::SummonNonCombatPet(uint32 i)
 	pCreature->GetAIInterface()->disable_melee = true;
 	pCreature->bInvincible = true;
 	pCreature->PushToWorld(u_caster->GetMapMgr());
-	u_caster->critterPet = pCreature;
 	if( m_summonProperties->slot < 7 )
 		u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
 }
