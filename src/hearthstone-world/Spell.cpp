@@ -3962,7 +3962,7 @@ exit:*/
 	 }
 
 	Unit * caster = u_caster;
-	if( i_caster != NULL && target )
+	if( i_caster != NULL && target && target->GetMapMgr() && i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) )
 	{	
 		//we should inherit the modifiers from the conjured food caster
 		Unit *item_creator = target->GetMapMgr()->GetUnit( i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) );
