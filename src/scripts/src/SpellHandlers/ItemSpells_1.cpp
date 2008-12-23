@@ -293,7 +293,7 @@ bool SummonCritterDummy(uint32 i, Spell *pSpell)
 	if(!pSpell->p_caster) return true;
 
 	uint32 currentCritterID = 0;
-
+/*
 	if(pSpell->p_caster->critterPet && pSpell->p_caster->critterPet->GetCreatureName())
 		currentCritterID = pSpell->p_caster->critterPet->GetCreatureName()->Id;
 
@@ -337,7 +337,7 @@ bool SummonCritterDummy(uint32 i, Spell *pSpell)
 	SpellEntry *spInfo = dbcSpell.LookupEntry(newspell);
 	if(!spInfo) return true;
 
-	pSpell->p_caster->CastSpell(pSpell->p_caster, spInfo, false); // these spells have to check items, so "triggeredspell" must be false
+	pSpell->p_caster->CastSpell(pSpell->p_caster, spInfo, false); // these spells have to check items, so "triggeredspell" must be false*/
 	return true;
 }
 
