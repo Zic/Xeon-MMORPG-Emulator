@@ -4789,6 +4789,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	if( slot < 7 )
 		p_caster->m_SummonSlots[slot] = pTotem;
+
 	pTotem->SetTotemOwner(p_caster);
 	pTotem->SetTotemSlot(slot);
 

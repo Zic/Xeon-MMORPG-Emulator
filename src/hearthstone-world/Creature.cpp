@@ -722,13 +722,7 @@ void Creature::UpdateItemAmount(uint32 itemid)
 }
 
 void Creature::TotemExpire()
-{
-	if( totemOwner != NULL )
-	{
-		if( totemSlot >= 0 )
-			totemOwner->m_SummonSlots[totemSlot] = 0;
-	}
-	
+{	
 	totemSlot = -1;
 	totemOwner = NULL;
 

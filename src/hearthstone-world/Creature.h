@@ -538,7 +538,7 @@ protected:
 	uint32 m_enslaveSpell;
 
 	Player * totemOwner;
-	int32 totemSlot;
+	uint32 totemSlot;
 
 	bool m_PickPocketed;
 	uint32 _fields[UNIT_END];
