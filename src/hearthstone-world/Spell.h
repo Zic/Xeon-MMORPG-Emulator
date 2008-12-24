@@ -125,7 +125,7 @@ enum SPELL_MODIFIER_TYPE
     SMT_NONINTERRUPT        =9,// x% chance not to be interrupted by received damage (no flat)
     SMT_CAST_TIME           =10,// cast time decrease // GOOD
     SMT_COOLDOWN_DECREASE   =11,// cooldown decrease <-probably fully handled by client // GOOD
-    SMT_EFFECT              = 12,//used by shaman elemental weapons and another spell
+    SMT_SECOND_EFFECT_BONUS = 12,// modifies points of second spell effect
 //    SMT_SPEED             =12,// movement speed, while given spell is active(flat is %) // TODO CHECK! ok this is not speed and is used with 23 misc to sometimes so is odd
     // 13 dont exist spells with it
     SMT_COST                =14,// mana/energy/rage cost reduction // GOOD
@@ -142,7 +142,7 @@ enum SPELL_MODIFIER_TYPE
     SMT_PENALTY             =24,// This is a modifer for the amount of +spell damage applied to the spell group from spell bonuses
     // 25 dont exist spells with it
     // 26 is obsolete stuff
-    SMT_EFFECT_BONUS        =27,// mana lost cost per point of damage taken for mana shield,Health or Mana gained from Drain Life and Drain Mana increased by x%.
+    SMT_MULTIPLE_VALUE      =27,// mana lost cost per point of damage taken for mana shield,Health or Mana gained from Drain Life and Drain Mana increased by x%.
     SMT_RESIST_DISPEL       =28,// TODO NEEDS WORK :D
 	// 29 Mod Crowd Damage Test 45365 - Increases the critical strike damage bonus of your Frost spells by 100%
 };
@@ -1917,6 +1917,27 @@ public:
         }*/
         return dmg;
     }
+
+	HEARTHSTONE_INLINE static bool HasMechanic(SpellEntry * sp, uint32 MechanicsType)
+	{
+		return sp->MechanicsType == MechanicsType ||
+			(uint32)sp->EffectMechanic[0] == MechanicsType ||
+			(uint32)sp->EffectMechanic[1] == MechanicsType ||
+			(uint32)sp->EffectMechanic[2] == MechanicsType;
+	}
+	HEARTHSTONE_INLINE static uint32 GetMechanic(SpellEntry * sp)
+	{
+		if(sp->MechanicsType)
+			return sp->MechanicsType;
+		if(sp->EffectMechanic[0])
+			return sp->EffectMechanic[0];
+		if(sp->EffectMechanic[1])
+			return sp->EffectMechanic[1];
+		if(sp->EffectMechanic[2])
+			return sp->EffectMechanic[2];
+		return 0;
+	}
+
     bool IsStealthSpell();
     bool IsInvisibilitySpell();
 

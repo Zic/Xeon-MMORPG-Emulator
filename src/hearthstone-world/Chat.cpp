@@ -366,7 +366,7 @@ void CommandTableStorage::Init()
 		{ "yell",		'n', &ChatHandler::HandleMonsterYellCommand,   ".npc yell <Text> - Makes selected mob yell text <text>.", NULL, 0, 0, 0},
 		{ "come",		'n', &ChatHandler::HandleNpcComeCommand,	   ".npc come - Makes npc move to your position", NULL, 0, 0, 0 },
 		{ "return",	  'n', &ChatHandler::HandleNpcReturnCommand,	 ".npc return - Returns ncp to spawnpoint.", NULL, 0, 0, 0 },
-		{ "spawn", 'n', &ChatHandler::HandleCreatureSpawnCommand, ".npc spawn - Spawns npc of entry <id>", NULL, 0, 0, 0 },
+		{ "spawn", 'n', &ChatHandler::HandleCreatureSpawnCommand, ".npc spawn <id> <save> - Spawns npc of entry <id>", NULL, 0, 0, 0 },
 		{ "spawnlink", 'n', &ChatHandler::HandleNpcSpawnLinkCommand, ".spawnlink sqlentry", NULL, 0, 0, 0 },
 		{ "possess", 'n', &ChatHandler::HandleNpcPossessCommand, ".npc possess - Possess an npc (mind control)", NULL, 0, 0, 0 },
 		{ "unpossess", 'n', &ChatHandler::HandleNpcUnPossessCommand, ".npc unpossess - Unposses any currently possessed npc.", NULL, 0, 0, 0 },

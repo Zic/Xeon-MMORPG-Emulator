@@ -1707,6 +1707,11 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_AMBUSH)
 									continue;
 							}break;
+						case 60503:
+							{
+								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_REND)
+									continue;
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
@@ -4282,24 +4287,25 @@ uint32 Unit::ManaShieldAbsorb(uint32 dmg)
 {
 	if(!m_manashieldamt)
 		return 0;
-	//mana shield group->16. the only
+
+	float coef = m_manaShieldSpell->EffectMultipleValue[0]; // how much mana is drained per damage absorbed
+	SM_FFValue(SM[SMT_MULTIPLE_VALUE][0], &coef, m_manaShieldSpell->SpellGroupType);
+	SM_PFValue(SM[SMT_MULTIPLE_VALUE][1], &coef, m_manaShieldSpell->SpellGroupType);
 
 	uint32 mana = GetUInt32Value(UNIT_FIELD_POWER1);
-	int32 effectbonus = SM[SMT_EFFECT][1] ? SM[SMT_EFFECT][1][16] : 0;
-
-	int32 potential = (mana*50)/((100+effectbonus));
+	int32 potential = float2int32((float)mana / coef);
 	if(potential>m_manashieldamt)
 		potential = m_manashieldamt;
 
 	if((int32)dmg<potential)
 		potential = dmg;
 
-	uint32 cost = (potential*(100+effectbonus))/50;
+	uint32 cost = float2int32(potential * coef);
 
 	SetUInt32Value(UNIT_FIELD_POWER1,mana-cost);
 	m_manashieldamt -= potential;
 	if(!m_manashieldamt)
-		RemoveAura(m_manaShieldId);
+		RemoveAura(m_manaShieldSpell->Id);
 
 	if (potential > 0 && m_incanterAbsorption > 0)
 	{
@@ -4308,7 +4314,7 @@ uint32 Unit::ManaShieldAbsorb(uint32 dmg)
 		{
 			Spell *sp=new Spell(this,spInfo,true,NULL);
 			SpellCastTargets tgt;
-			sp->forced_basepoints[0] = (m_incanterAbsorption * 100) / potential;
+			sp->forced_basepoints[0] = potential * m_incanterAbsorption / 100;
 			tgt.m_unitTarget=this->GetGUID();
 			sp->prepare(&tgt);
 		}

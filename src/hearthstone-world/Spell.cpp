@@ -2672,6 +2672,11 @@ bool Spell::IsBinary(SpellEntry * sp)
 uint8 Spell::CanCast(bool tolerate)
 {
 	uint32 i;
+
+	bool skip = (p_caster && (p_caster->m_skipCastCheck[0] & m_spellInfo->SpellGroupType[0] || 
+		p_caster && p_caster->m_skipCastCheck[1] & m_spellInfo->SpellGroupType[1] || 
+		p_caster && p_caster->m_skipCastCheck[2] & m_spellInfo->SpellGroupType[2])); // related to aura 262
+
 	if(objmgr.IsSpellDisabled(m_spellInfo->Id))
 		return SPELL_FAILED_SPELL_UNAVAILABLE;
 
@@ -3037,7 +3042,7 @@ uint8 Spell::CanCast(bool tolerate)
 			return SPELL_FAILED_REQUIRES_AREA;
 
 		// aurastate check
-		if( m_spellInfo->CasterAuraState )
+		if( m_spellInfo->CasterAuraState)
 		{
 			if( !p_caster->HasFlag( UNIT_FIELD_AURASTATE, 1<<(m_spellInfo->CasterAuraState-1) ) )
 				return SPELL_FAILED_CASTER_AURASTATE;
@@ -3259,7 +3264,7 @@ uint8 Spell::CanCast(bool tolerate)
 				}
 
 				// check aurastate
-				if( m_spellInfo->TargetAuraState )
+				if( m_spellInfo->TargetAuraState && !skip)
 				{
 					if( !target->HasFlag( UNIT_FIELD_AURASTATE, 1<<(m_spellInfo->TargetAuraState-1) ) )
 					{
@@ -3977,8 +3982,11 @@ exit:*/
 		SM_FIValue(caster->SM[SMT_MISC_EFFECT][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
 		SM_FIValue(caster->SM[SMT_MISC_EFFECT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 
-		SM_FIValue(caster->SM[SMT_EFFECT][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
-		SM_FIValue(caster->SM[SMT_EFFECT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		if(i == 1)
+		{
+			SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+		}
 
 		if(i == 2 || i == 1 && m_spellInfo->Effect[2] == 0)
 		{	// Only applied to the last effect of spell

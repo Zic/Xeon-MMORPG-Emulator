@@ -1220,7 +1220,7 @@ protected:
 	//	float getDistance( float Position1X, float Position1Y, float Position2X, float Position2Y );	
 
 	int32 m_manashieldamt;
-	uint32 m_manaShieldId;
+	SpellEntry * m_manaShieldSpell;
 
 	// Quest emote
 	uint8 m_emoteState;

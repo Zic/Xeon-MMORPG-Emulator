@@ -838,10 +838,6 @@ void ApplyNormalFixes()
 		if( namehash == SPELL_HASH_SEAL_OF_LIGHT )			
 			sp->procChance = 45;	/* this will do */
 
-		//seal of command
-		else if( namehash == SPELL_HASH_SEAL_OF_COMMAND )		
-			sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
-
 		//judgement of command
 		else if( namehash == SPELL_HASH_JUDGEMENT_OF_COMMAND )		
 			sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
@@ -1610,6 +1606,7 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_SEAL_OF_COMMAND )
 		{
 			sp->procChance = 25;
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
 			sp->School = SCHOOL_HOLY; //the procspells of the original seal of command have fizical school instead of holy
 			sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC; //heh, crazy spell uses melee/ranged/magic dmg type for 1 spell. Now which one is correct ?
 		}
@@ -5589,6 +5586,39 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 20235 );
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CAST_SPELL;
+
+	// Sudden Death
+	ranks = fill(ids, 29724, 29725, 29723, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
+		}
+	}
+
+	// Taste for Blood
+	ranks = fill(ids, 56638, 56637, 56636, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION;
+		}
+	}
+
+	// Ice Lance
+	ranks = fill(ids, 30455, 42913, 42914, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Dspell_coef_override = 14.29f;
+		}
+	}
 
 	// Flametongue weapon
 	ranks = fill(ids, 58792, 58791, 58784, 16313, 16312, 16311, 15569, 15568, 15567, 10400, 0);

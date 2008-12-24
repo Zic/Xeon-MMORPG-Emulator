@@ -611,7 +611,7 @@ public:
 	void SpellAuraDrinkNew(bool apply);
 	void SpellAuraModSpellDamageFromAP(bool apply);
 	void SpellAuraModSpellHealingFromAP(bool apply);
-	void SpellAuraFrozenTarget(bool apply);
+	void SpellAuraSkipCanCastCheck(bool apply);
 	void EventPeriodicDrink(uint32 amount);
 	void SpellAuraModSpellDamageDOTPct(bool apply);
 	void SpellAuraSetPhase(bool apply);
@@ -675,6 +675,15 @@ public:
 		}
 
 		return false;
+	}
+
+	HEARTHSTONE_INLINE bool HasMechanic(uint32 MechanicsType)
+	{
+		return Spell::HasMechanic(m_spellProto, MechanicsType);
+	}
+	HEARTHSTONE_INLINE uint32 GetMechanic()
+	{
+		return Spell::GetMechanic(m_spellProto);
 	}
 
 	bool m_castInDuel;

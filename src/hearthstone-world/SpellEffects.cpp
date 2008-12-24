@@ -487,14 +487,26 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 47470:
 	case 47471:// Execute
 		{
-			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || unitTarget->GetHealthPct() >= 20 || !m_spellInfo)
+			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo)
 				return;
 			int32 value = m_spellInfo->EffectBasePoints[i]+1 + p_caster->GetAP() / 5;
 			int32 currentRage = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
-			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]);
-			u_caster->SetPower(POWER_TYPE_RAGE, 0); // We use all available rage
+			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]); 
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647 );
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
+			uint32 rageLeft = 0; // We use all available rage by default
+			for(uint32 x = 0; x < MAX_POSITIVE_AURAS; ++x)
+			{ // Look for Sudden Death
+				if(u_caster->m_auras[x] && u_caster->m_auras[x]->GetSpellProto()->Id == 52437)
+				{
+					SpellEntry * sd = dbcSpell.LookupEntry(u_caster->m_auras[x]->pSpellId);
+					if(sd)
+						rageLeft = sd->RankNumber > 1 ? sd->RankNumber * 30 + 10 : sd->RankNumber * 30;
+					u_caster->m_auras[x]->Remove(); // Sudden Death is removed after 1 execute
+					break;
+				}
+			}
+			u_caster->SetPower(POWER_TYPE_RAGE, rageLeft);
 		}break;
 
 
@@ -1711,6 +1723,15 @@ void Spell::SpellEffectHealthLeech(uint32 i) // Health Leech
 		amt = curHealth;
 	}
 	m_caster->DealDamage(unitTarget, damage, 0, 0, m_spellInfo->Id);
+
+	float coef = m_spellInfo->EffectMultipleValue[i]; // how much health is restored per damage dealt
+	if(u_caster)
+	{
+		SM_FFValue(u_caster->SM[SMT_MULTIPLE_VALUE][0], &coef, m_spellInfo->SpellGroupType);
+		SM_PFValue(u_caster->SM[SMT_MULTIPLE_VALUE][1], &coef, m_spellInfo->SpellGroupType);
+	}
+
+	amt = float2int32((float)amt * coef);
 
 	uint32 playerCurHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
 	uint32 playerMaxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -3841,7 +3862,15 @@ void Spell::SpellEffectPowerBurn(uint32 i) // power burn
 	int32 mana = (int32)min( (int32)unitTarget->GetUInt32Value( UNIT_FIELD_POWER1 ), damage );
 	unitTarget->ModUnsigned32Value(UNIT_FIELD_POWER1,-mana);
 	
-	m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id, (uint32)(mana * m_spellInfo->EffectMultipleValue[i]), pSpellId==0,true);   
+	float coef = m_spellInfo->EffectMultipleValue[i]; // damage per mana burned
+	if(u_caster)
+	{
+		SM_FFValue(u_caster->SM[SMT_MULTIPLE_VALUE][0], &coef, m_spellInfo->SpellGroupType);
+		SM_PFValue(u_caster->SM[SMT_MULTIPLE_VALUE][1], &coef, m_spellInfo->SpellGroupType);
+	}
+	mana = float2int32((float)mana * coef);
+
+	m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id, mana, pSpellId==0,true);   
 }
 
 void Spell::SpellEffectThreat(uint32 i) // Threat

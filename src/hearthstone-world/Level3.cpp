@@ -2139,7 +2139,7 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		if( sscanf(args, "%u", &entry) != 1 )
 			return false;
 
-		save = 0;
+		save = (uint32) m_session->CanUseCommand('z');
 	}
 
 	if( save && !m_session->CanUseCommand('z') )
