@@ -5618,7 +5618,7 @@ void ApplyNormalFixes()
 		sp = dbcSpell.LookupEntryForced( ids[i] );
 		if( sp != NULL )
 		{
-			sp->Dspell_coef_override = 14.29f;
+			sp->Dspell_coef_override = .1429f;
 		}
 	}
 
