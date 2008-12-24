@@ -1387,6 +1387,8 @@ void ApplyNormalFixes()
 						pr|=PROC_ON_AUTO_SHOT_HIT;
 					if( strstr( desc,"after getting a critical effect from your"))
 						pr=PROC_ON_SPELL_CRIT_HIT;
+					if( strstr( desc, "with a melee weapon"))
+						pr|=PROC_ON_MELEE_ATTACK;
 //					if( strstr( desc,"Your critical strikes from Fire damage"))
 //						pr|=PROC_ON_SPELL_CRIT_HIT;
 				}//end "if procspellaura"

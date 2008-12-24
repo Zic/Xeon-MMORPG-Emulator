@@ -508,6 +508,13 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			}
 			u_caster->SetPower(POWER_TYPE_RAGE, rageLeft);
 		}break;
+	case 12809: // Concussion Blow ( in wotlk deal damage based on AP )
+		{
+			if( !p_caster || !p_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo)
+				return;
+			uint32 damage = ((m_spellInfo->EffectBasePoints[i]+1)*(p_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)+p_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS))/100);
+			p_caster->DealDamage(unitTarget,damage,0,0,spellId);
+		}
 
 
 	/*************************
@@ -1042,14 +1049,22 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 11689:
 	case 27222:
 	case 57946:
-		{//converts base+1 points of health into mana
+		{//converts base+1+spirit*x points of health into mana
 			if(!p_caster || !playerTarget)
 				return;
 
-			uint32 damage = (((m_spellInfo->EffectBasePoints[i]+1)*(100+playerTarget->m_lifetapbonus))/100)+((playerTarget->GetDamageDoneMod(m_spellInfo->School)*80)/100);
+			uint32 mod;	// spirit bonus coefficient multiplied by 2
+			if(m_spellInfo->Id == 1454) mod = 2;
+			else if(m_spellInfo->Id == 1455) mod = 3;
+			else if(m_spellInfo->Id == 1456) mod = 4;
+			else if(m_spellInfo->Id == 11687) mod = 5;
+			else mod = 6;
+
+			uint32 damage = m_spellInfo->EffectBasePoints[i] + 1 + mod * playerTarget->GetUInt32Value(UNIT_FIELD_STAT4) / 2;
 			if (damage >= playerTarget->GetUInt32Value(UNIT_FIELD_HEALTH))
 				return;
 			p_caster->DealDamage(playerTarget,damage,0,0,spellId);
+			damage = damage * (100 + playerTarget->m_lifetapbonus) / 100;	// Apply improved life tap
 			p_caster->Energize(playerTarget, pSpellId ? pSpellId : m_spellInfo->Id, damage, POWER_TYPE_MANA);
 		}break;
 	case 974:
