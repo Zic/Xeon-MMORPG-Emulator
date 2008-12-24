@@ -512,7 +512,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if( !p_caster || !p_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo)
 				return;
-			uint32 damage = ((m_spellInfo->EffectBasePoints[i]+1)*(p_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER)+p_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS))/100);
+			uint32 damage = (m_spellInfo->EffectBasePoints[i] + 1) * (p_caster->GetAP()) / 100;
 			p_caster->DealDamage(unitTarget,damage,0,0,spellId);
 		}
 

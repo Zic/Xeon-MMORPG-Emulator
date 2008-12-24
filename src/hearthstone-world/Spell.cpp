@@ -654,6 +654,7 @@ uint8 Spell::_DidHit(const Unit *target)
 	{
 		float hitchance=0;
 		SM_FFValue(u_caster->SM[SMT_HITCHANCE][0],&hitchance,m_spellInfo->SpellGroupType);
+		SM_PFValue(u_caster->SM[SMT_HITCHANCE][1],&hitchance,m_spellInfo->SpellGroupType);
 		resistchance -= hitchance;
 	}
 
@@ -1458,11 +1459,11 @@ void Spell::cast(bool check)
 		{
 			for( x = 0; x < 3; ++x )
 			{
-				//if( m_spellInfo->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL )
-				//{
+				if( m_spellInfo->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL )
+				{
 					_SetTargets(m_caster->GetGUID());
 					HandleEffects(x);
-				//}
+				}
 			}
 		}
 		for( x = 0; x < 3; ++x )
@@ -4248,7 +4249,8 @@ void Spell::Heal(int32 amount)
 			bonus += penalty_flt;
 			SM_FIValue( u_caster->SM[SMT_PENALTY][1], &penalty_pct, m_spellInfo->SpellGroupType );
 			bonus += bonus * ( penalty_pct / 100 );
-			SM_FIValue( u_caster->SM[SMT_CRITICAL][1],&critchance,m_spellInfo->SpellGroupType);
+			SM_FIValue( u_caster->SM[SMT_CRITICAL][0],&critchance,m_spellInfo->SpellGroupType);
+			SM_PIValue( u_caster->SM[SMT_CRITICAL][1],&critchance,m_spellInfo->SpellGroupType);
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 			int spell_flat_modifers=0;
 			int spell_pct_modifers=0;

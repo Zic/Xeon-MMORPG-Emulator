@@ -1707,10 +1707,15 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_AMBUSH)
 									continue;
 							}break;
-						case 60503:
+						case 60503: // Taste for Blood
 							{
 								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_REND)
 									continue;
+							}break;
+						case 31803:
+						case 53742: // Seal of Vengeance, Seal of Corruption
+							{
+								dmg_overwrite = float2int32((0.013f * GetDamageDoneMod(SCHOOL_HOLY) + 0.025f * GetAP()) * 6);
 							}break;
 					}
 				}
@@ -1759,7 +1764,7 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 					if(spe)
 						SpellClassMask = spe->EffectSpellClassMask[0];
 
-					if (SpellClassMask && SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2]) {
+					if (SpellClassMask && (SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2])) {
 						if (!Spell::EffectAffectsSpell(spe, 0, CastingSpell))
 							continue;
 					}
@@ -1796,6 +1801,11 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 							if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
 								continue;
 						}break;
+					case 53817:	//shaman - Maelstrom Weapon
+						{
+							RemoveAllAurasBySpellIDOrGUID(53817, 0);	// Remove whole stack 
+							continue;
+						}
 					}
 				}
 				if(iter2->second.lastproc!=0)
@@ -2242,7 +2252,10 @@ uint32 Unit::GetSpellDidHitResult( Unit* pVictim, uint32 weapon_damage_type, Spe
 	}
 
 	if( ability && ability->SpellGroupType )
+	{
 		SM_FFValue( SM[SMT_HITCHANCE][0], &hitchance, ability->SpellGroupType );
+		SM_PFValue( SM[SMT_HITCHANCE][1], &hitchance, ability->SpellGroupType );
+	}
 	
 	// overpower nana
 	if( ability != NULL && ability->Attributes & ATTRIBUTES_CANT_BE_DPB )
@@ -2519,8 +2532,10 @@ else
 
 	if(ability && ability->SpellGroupType)
 	{
-		SM_FFValue(SM[SMT_CRITICAL][1],&crit,ability->SpellGroupType);
+		SM_FFValue(SM[SMT_CRITICAL][0],&crit,ability->SpellGroupType);
+		SM_PFValue(SM[SMT_CRITICAL][1],&crit,ability->SpellGroupType);
 		SM_FFValue(SM[SMT_HITCHANCE][0],&hitchance,ability->SpellGroupType);
+		SM_PFValue(SM[SMT_HITCHANCE][1],&hitchance,ability->SpellGroupType);
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		float spell_flat_modifers=0;
 		SM_FFValue(SM[SMT_CRITICAL][1],&spell_flat_modifers,ability->SpellGroupType);
@@ -3397,7 +3412,7 @@ void Unit::AddAura(Aura *aur, Aura *pParentAura)
 		//uint32 aurName = aur->GetSpellProto()->Name;
 		//uint32 aurRank = aur->GetSpellProto()->Rank;
 		uint32 maxStack = aur->GetSpellProto()->maxstack;
-		if( aur->GetSpellProto()->procCharges > 0 )
+		if( aur->GetSpellProto()->procCharges > (int32)maxStack )
 			maxStack=aur->GetSpellProto()->procCharges;
 		if( IsPlayer() && static_cast< Player* >( this )->stack_cheat )
 			maxStack = 999;

@@ -63,21 +63,6 @@ void Apply112SpellFixes()
 	if(sp != NULL)
 		sp->procChance = 10;
 
-	// Spell 8033 Proc Chance (Frostbrand Weapon Rank 1)
-	sp = dbcSpell.LookupEntryForced(8033);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 8034 Proc Chance (Frostbrand Attack Rank 1)
-	sp = dbcSpell.LookupEntryForced(8034);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 8037 Proc Chance (Frostbrand Attack Rank 2)
-	sp = dbcSpell.LookupEntryForced(8037);
-	if(sp != NULL)
-		sp->procChance = 10;
-
 	// Spell 8182 Proc Chance (Frost Resistance Rank 1)
 	sp = dbcSpell.LookupEntryForced(8182);
 	if(sp != NULL)
@@ -87,21 +72,6 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(8185);
 	if(sp != NULL)
 		sp->procChance = 100;
-
-	// Spell 8516 Proc Chance (Windfury Totem Rank 1)
-	sp = dbcSpell.LookupEntryForced(8516);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 10456 Proc Chance (Frostbrand Weapon Rank 3)
-	sp = dbcSpell.LookupEntryForced(10456);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 10458 Proc Chance (Frostbrand Attack Rank 3)
-	sp = dbcSpell.LookupEntryForced(10458);
-	if(sp != NULL)
-		sp->procChance = 10;
 
 	// Spell 10476 Proc Chance (Frost Resistance Rank 2)
 	sp = dbcSpell.LookupEntryForced(10476);
@@ -122,16 +92,6 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(10535);
 	if(sp != NULL)
 		sp->procChance = 100;
-
-	// Spell 10608 Proc Chance (Windfury Totem Rank 2)
-	sp = dbcSpell.LookupEntryForced(10608);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 10610 Proc Chance (Windfury Totem Rank 3)
-	sp = dbcSpell.LookupEntryForced(10610);
-	if(sp != NULL)
-		sp->procChance = 10;
 
 	// Spell 11687 Proc Chance (Life Tap Rank 4)
 	sp = dbcSpell.LookupEntryForced(11687);
@@ -230,26 +190,6 @@ void Apply112SpellFixes()
 
 	// Spell 15642 Proc Chance (Ironfoe )
 	sp = dbcSpell.LookupEntryForced(15642);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16352 Proc Chance (Frostbrand Attack Rank 4)
-	sp = dbcSpell.LookupEntryForced(16352);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16353 Proc Chance (Frostbrand Attack Rank 5)
-	sp = dbcSpell.LookupEntryForced(16353);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16355 Proc Chance (Frostbrand Weapon Rank 4)
-	sp = dbcSpell.LookupEntryForced(16355);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16356 Proc Chance (Frostbrand Weapon Rank 5)
-	sp = dbcSpell.LookupEntryForced(16356);
 	if(sp != NULL)
 		sp->procChance = 10;
 
@@ -367,21 +307,6 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(27867);
 	if(sp != NULL)
 		sp->procChance = 2;
-
-	// Spell 25500 Proc Chance (Frostbrand Weapon Rank 6)
-	sp = dbcSpell.LookupEntryForced(25500);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 25501 Proc Chance (Frostbrand Attack Rank 6)
-	sp = dbcSpell.LookupEntryForced(25501);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 38617 Proc Chance (Frostbrand Attack )
-	sp = dbcSpell.LookupEntryForced(38617);
-	if(sp != NULL)
-		sp->procChance = 10;
 }
 
 void DumpSpellsSQL()
@@ -813,6 +738,7 @@ void ApplyNormalFixes()
 			sp->self_cast_only = true;
 
 		sp->proc_interval = 0;//trigger at each event
+		sp->ProcsPerMinute = 0;
 		sp->c_is_flags = 0;
 		sp->spell_coef_flags = 0;
 		sp->Dspell_coef_override = -1;
@@ -2136,6 +2062,22 @@ void ApplyNormalFixes()
 		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
 	}
 
+	// shaman - Maelstrom Weapon
+	ranks = fill(ids, 51528, 51529, 51530, 51531, 51532, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->ProcsPerMinute = (i + 1) * 2.5f;
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
+		}
+	}
+	// Maelstorm proc charge removal
+	sp = dbcSpell.LookupEntryForced( 53817 ); 
+	if( sp != NULL )
+		sp->procFlags = PROC_ON_CAST_SPELL;
+
 	// Shaman Totem items fixes
 	// Totem of Survival, Totem of the Tundra
 	ranks = fill(ids, 46097, 43860, 43861, 43862, 60564, 60571, 60572, 37575, 0);
@@ -2481,13 +2423,28 @@ void ApplyNormalFixes()
 		sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 	}
 
-	//paladin - Seal of Vengeance
-	sp = dbcSpell.LookupEntryForced( 31801 );
-	if( sp != NULL )
+	//paladin - Seal of Vengeance, Seal of Corruption
+	ranks = fill(ids, 31801, 53736, 0);
+	fill(proc_ids, 31803, 53742, 0);
+	for(uint32 i = 0; i < ranks; i++)
 	{
-		sp->procFlags = PROC_ON_MELEE_ATTACK;
-        sp->EffectTriggerSpell[0] = 31803;
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
+			sp->ProcsPerMinute = 20.0f;
+			sp->EffectTriggerSpell[0] = proc_ids[i];
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+		}
+	}
+	ranks = fill(ids, 31803, 53742, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Dspell_coef_override = 0.0f;
+		}
 	}
 
 	//paladin - Reckoning
@@ -5263,8 +5220,9 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 16864 );
 	if( sp != NULL )
 	{
-		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_CRIT_ATTACK;
-		sp->ProcsPerMinute = 2.0f;
+		sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_CAST_SPELL;
+		sp->procChance = 6;
+		sp->proc_interval = 10000;
 	}
 
 	//Thunderfury
@@ -5618,7 +5576,7 @@ void ApplyNormalFixes()
 		sp = dbcSpell.LookupEntryForced( ids[i] );
 		if( sp != NULL )
 		{
-			sp->Dspell_coef_override = .1429f;
+			sp->Dspell_coef_override = 0.1429f;
 		}
 	}
 
