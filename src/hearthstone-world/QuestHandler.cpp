@@ -259,7 +259,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 		bValid = true;
 		bSkipLevelCheck=true;
 		qst = QuestStorage.LookupEntry(quest_id);
-		if( qst->id != quest_giver->GetProto()->QuestId )
+		if( qst && qst->id != quest_giver->GetProto()->QuestId )
 			return;
 	}
 	else if(guidtype==HIGHGUID_TYPE_PLAYER)
