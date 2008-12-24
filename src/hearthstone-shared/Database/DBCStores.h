@@ -741,7 +741,7 @@ struct SpellEntry
 	uint32 MinReputation;                   //223   only one spellid:6994 has this value = 4 UNUSED
 	uint32 RequiredAuraVision;              //224  3 spells 1 or 2   
 	uint32 TotemCategory[2];				//225-226
-	uint32 RequiresAreaId;					//227
+	int32 RequiresAreaId;					//227
 	uint32 School;							//228
 	uint32 runeCostID;                      //229
     //uint32 spellMissileID;                //230 not used
