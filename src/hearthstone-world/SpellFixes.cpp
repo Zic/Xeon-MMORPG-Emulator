@@ -2242,53 +2242,16 @@ void ApplyNormalFixes()
 	}
 
     //Priest - Holy Nova
-    sp = dbcSpell.LookupEntryForced( 15237 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 23455;
-    }
-    sp = dbcSpell.LookupEntryForced( 15430 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 23458;
-    }
-    sp = dbcSpell.LookupEntryForced( 15431 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 23459;
-    }
-    sp = dbcSpell.LookupEntryForced( 27799 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 27803;
-    }
-    sp = dbcSpell.LookupEntryForced( 27800 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 27804;
-    }
-    sp = dbcSpell.LookupEntryForced( 27801 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 27805;
-    }
-    sp = dbcSpell.LookupEntryForced( 25331 );
-    if( sp != NULL )
-    {
-        sp->Effect[1] = 64;
-        sp->EffectTriggerSpell[1] = 25329;
-    }
-
-	sp = dbcSpell.LookupEntryForced( 30427 );
-	if( sp != NULL )
+	ranks = fill(ids, 15237, 15430, 15431, 27799, 27800, 27801, 25331, 48077, 48078, 0);
+	   fill(proc_ids, 23455, 23458, 23459, 27803, 27804, 27805, 25329, 48075, 48076, 0);
+	for(uint32 i = 0; i < ranks; i++)
 	{
-		sp->Effect[0] = SPELL_EFFECT_DUMMY;
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[1] = proc_ids[i];
+		}
 	}
 
 	// Moroes' garrote targets a single enemy instead of us

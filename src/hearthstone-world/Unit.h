@@ -33,7 +33,7 @@ bool SERVER_DECL Rand(float);
 #define UF_ATTACKING	2 // this unit is attacking it's selection
 #define SPELL_GROUPS	96
 #define SPELL_MODIFIERS 30
-#define DIMINISH_GROUPS	1
+#define DIMINISH_GROUPS	13
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 
