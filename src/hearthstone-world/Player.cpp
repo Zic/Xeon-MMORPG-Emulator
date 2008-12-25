@@ -8134,10 +8134,6 @@ void Player::CompleteLoading()
 		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
 			continue; //do not load auras that only exist while pet exist. We should recast these when pet is created anyway
 
-		// bad auras!
-		if( sp->Attributes & ATTRIBUTES_PASSIVE || (sp->Attributes & ATTRIBUTES_PASSIVE && sp->AttributesEx & 1024) )
-			continue;
-
 		Aura * a;
 		if(sp->Id == 8326 || sp->Id == 9036 || sp->Id == 20584 || sp->Id == 15007)		// death auras
 		{
@@ -8503,6 +8499,8 @@ void Player::SaveAuras(stringstream &ss)
 				skip = true;
 				break;
 			}
+			if( aur->m_spellProto->AuraInterruptFlags & AURA_INTERRUPT_ON_STAND_UP) // To prevent food/drink bug
+				skip = true;
 
 			//disabled proc spells until proper loading is fixed. Some spells tend to block or not remove when restored
 			if(aur->GetSpellProto()->procFlags)

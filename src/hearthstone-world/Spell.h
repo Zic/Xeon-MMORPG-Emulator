@@ -263,7 +263,8 @@ enum SpellCastTargetFlags
     TARGET_FLAG_TRADE_ITEM          = 0x1000,
     TARGET_FLAG_STRING              = 0x2000,
     TARGET_FLAG_ITEM2               = 0x4000,
-    TARGET_FLAG_CORPSE2             = 0x8000
+    TARGET_FLAG_CORPSE2             = 0x8000,
+	TARGET_FLAG_GLYPH				= 0x20000,
 };
 
 enum procFlags
@@ -1876,6 +1877,15 @@ public:
                     SM_FIValue(u_caster->SM[SMT_DURATION][0],(int32*)&this->Dur,m_spellInfo->SpellGroupType);
                     SM_PIValue(u_caster->SM[SMT_DURATION][1],(int32*)&this->Dur,m_spellInfo->SpellGroupType);
                 }
+				// Limit duration in PvP but not applying diminishing returns
+				if(unitTarget && unitTarget->IsPlayer() && this->Dur > 10000)
+				{
+					switch(m_spellInfo->NameHash)
+					{
+					case SPELL_HASH_CURSE_OF_TONGUES:
+						this->Dur = 10000;
+					}
+				}
             }
             else
             {

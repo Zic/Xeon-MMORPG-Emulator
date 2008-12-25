@@ -2183,6 +2183,13 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 			if( CritChance > 95 ) CritChance = 95;
 			critical = Rand(CritChance);
 			//sLog.outString( "SpellNonMeleeDamageLog: Crit Chance %f%%, WasCrit = %s" , CritChance , critical ? "Yes" : "No" );
+			Aura *fs = NULL;
+			if(spellInfo->NameHash == SPELL_HASH_LAVA_BURST && (fs = pVictim->FindNegativeAuraByNameHash(SPELL_HASH_FLAME_SHOCK)) != NULL)
+			{
+				critical = true;
+				if(caster && !caster->HasAura(55447))	// Glyph of Flame Shock
+					fs->Remove();
+			}
 //==========================================================================================
 //==============================Spell Critical Hit==========================================
 //==========================================================================================
