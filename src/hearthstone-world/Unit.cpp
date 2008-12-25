@@ -593,7 +593,7 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 		{
 			uint32 spellId = itr2->spellId;
 
-			if( itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_CAST_SPELL) {
+			if( itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND) {
 				if( CastingSpell == NULL )
 					continue;
 
@@ -1040,40 +1040,11 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 									continue;
 							}break;
 						//warlock - Soul Leech
-						//this whole spell should get rewriten. Uses bad formulas, bad trigger method, spell is rewriten ...
 						case 30294:
 							{
-								if( CastingSpell == NULL )
-									continue;//this should not ocur unless we made a fuckup somewhere
-								//only trigger effect for specified spells
-								uint32 amount;
-								switch( CastingSpell->NameHash )
-								{
-									case SPELL_HASH_SHADOW_BOLT: //Shadow Bolt
-									case SPELL_HASH_SOUL_FIRE: //Soul Fire
-									case SPELL_HASH_INCINERATE: //Incinerate
-									case SPELL_HASH_SEARING_PAIN: //Searing Pain
-									case SPELL_HASH_CONFLAGRATE: //Conflagrate
-									{
-										amount = CastingSpell->EffectBasePoints[0]+1;
-									}break;
-									case SPELL_HASH_SHADOWBURN: //Shadowburn
-									{
-										amount = CastingSpell->EffectBasePoints[1]+1;
-									}break;
-									default:
-										amount=0;
-								}
-								if(!amount)
+								if( dmg == (uint32) -1 )
 									continue;
-								SpellEntry *spellInfo = dbcSpell.LookupEntry(spellId );
-								if(!spellInfo)
-									continue;
-								Spell *spell = new Spell(this, spellInfo ,true, NULL);
-								spell->SetUnitTarget(this);
-								spell->Heal(amount*(ospinfo->EffectBasePoints[0]+1)/100);
-								delete spell;
-								continue;
+								dmg_overwrite = (ospinfo->EffectBasePoints[0]+1) * dmg / 100;
 							}break;
 						//warlock - pyroclasm
 						case 18093:
@@ -2649,23 +2620,24 @@ else
 		vstate = DODGE;
 		vproc |= PROC_ON_DODGE_VICTIM;
 		pVictim->Emote(EMOTE_ONESHOT_PARRYUNARMED);			// Animation
-		if( pVictim->IsPlayer() )
+		//allmighty warrior overpower
+		if( this->IsPlayer() && TO_PLAYER(this)->getClass() == WARRIOR)
 		{
-			//allmighty warrior overpower
-			if( this->IsPlayer() && static_cast< Player* >( this )->getClass() == WARRIOR )
-			{
-				static_cast< Player* >( this )->AddComboPoints( pVictim->GetGUID(), 1 );
-				static_cast< Player* >( this )->UpdateComboPoints();
-				if( !sEventMgr.HasEvent( static_cast< Player* >( this ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET ) )
-					sEventMgr.AddEvent( static_cast< Player* >( this ), &Player::NullComboPoints, (uint32)EVENT_COMBO_POINT_CLEAR_FOR_TARGET, (uint32)5000, (uint32)1, (uint32)0 );
-				else
-					sEventMgr.ModifyEventTimeLeft( static_cast< Player* >( this ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET, 5000 ,0 );
-			}
-			pVictim->SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_DODGE_BLOCK);	//SB@L: Enables spells requiring dodge
-			if(!sEventMgr.HasEvent(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE))
-				sEventMgr.AddEvent(pVictim,&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_DODGE_BLOCK,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,1,0);
-			else sEventMgr.ModifyEventTimeLeft(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,0);
+			static_cast< Player* >( this )->AddComboPoints( pVictim->GetGUID(), 1 );
+			static_cast< Player* >( this )->UpdateComboPoints();
+			if( !sEventMgr.HasEvent( static_cast< Player* >( this ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET ) )
+				sEventMgr.AddEvent( static_cast< Player* >( this ), &Player::NullComboPoints, (uint32)EVENT_COMBO_POINT_CLEAR_FOR_TARGET, (uint32)5000, (uint32)1, (uint32)0 );
+			else
+				sEventMgr.ModifyEventTimeLeft( static_cast< Player* >( this ), EVENT_COMBO_POINT_CLEAR_FOR_TARGET, 5000 ,0 );
 		}
+		if(this->IsPlayer() && TO_PLAYER(this)->getClass() == DEATHKNIGHT)
+		{
+			CastSpell(GetGUID(), 56817, true);	// client side aura enabling Rune Strike
+		}
+		pVictim->SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_DODGE_BLOCK);	//SB@L: Enables spells requiring dodge
+		if(!sEventMgr.HasEvent(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE))
+			sEventMgr.AddEvent(pVictim,&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_DODGE_BLOCK,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,1,0);
+		else sEventMgr.ModifyEventTimeLeft(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000,0);
 		break;
 //--------------------------------parry-----------------------------------------------------
 	case 2:

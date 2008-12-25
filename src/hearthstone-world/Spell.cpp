@@ -3880,6 +3880,11 @@ exit:*/
 			value+=(uint32)(u_caster->GetAP()*0.04f);
 
 	}
+	else if(i == 1 && (m_spellInfo->Id == 46968 || m_spellInfo->Id == 12809)) // Shockwave, Concussion Blow
+	{
+		if( u_caster != NULL )
+			value = (m_spellInfo->EffectBasePoints[2] + 1) * (u_caster->GetAP()) / 100;
+	}
 	else if( m_spellInfo->NameHash == SPELL_HASH_MONGOOSE_BITE ) //Mongoose Bite
 	{
 		// ${$AP*0.2+$m1} damage.

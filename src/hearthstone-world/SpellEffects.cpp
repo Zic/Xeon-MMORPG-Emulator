@@ -508,13 +508,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			}
 			u_caster->SetPower(POWER_TYPE_RAGE, rageLeft);
 		}break;
-	case 12809: // Concussion Blow ( in wotlk deal damage based on AP )
-		{
-			if( !p_caster || !p_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo)
-				return;
-			uint32 damage = (m_spellInfo->EffectBasePoints[i] + 1) * (p_caster->GetAP()) / 100;
-			p_caster->DealDamage(unitTarget,damage,0,0,spellId);
-		}
 
 
 	/*************************
@@ -3844,6 +3837,13 @@ void Spell::SpellEffectWeapondamage( uint32 i ) // Weapon damage +
 	//Hackfix for Mangle
 	if( m_spellInfo->NameHash == SPELL_HASH_MANGLE___CAT && u_caster->IsPlayer() )
 		static_cast< Player* >( u_caster )->AddComboPoints( unitTarget->GetGUID(), 1 );
+
+	// Rune Strike
+	if(m_spellInfo->Id == 56815 && u_caster)
+	{
+		add_damage = u_caster->GetAP() / 5;
+		return;
+	}
 
 	// Hacky fix for druid spells where it would "double attack".
 	if( m_spellInfo->Effect[2] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE || m_spellInfo->Effect[1] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE )

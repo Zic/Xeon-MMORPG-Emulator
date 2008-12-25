@@ -4592,29 +4592,18 @@ void ApplyNormalFixes()
 	}
 
 	//warlock - soul leech
-	sp = dbcSpell.LookupEntryForced( 30293 );
-	if( sp != NULL )
+	ranks = fill(ids, 30293, 30295, 30296, 0);
+	for(uint32 i = 0; i < ranks; i++)
 	{
-		sp->Effect[0] = 6; //aura
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 30294;
-		sp->procFlags = uint32(PROC_ON_CAST_SPELL|PROC_TARGET_SELF);
-	}
-	sp = dbcSpell.LookupEntryForced( 30295 );
-	if( sp != NULL )
-	{
-		sp->Effect[0] = 6; //aura
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 30294;
-		sp->procFlags = uint32(PROC_ON_CAST_SPELL|PROC_TARGET_SELF);
-	}
-	sp = dbcSpell.LookupEntryForced( 30296 );
-	if( sp != NULL )
-	{
-		sp->Effect[0] = 6; //aura
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectTriggerSpell[0] = 30294;
-		sp->procFlags = uint32(PROC_ON_CAST_SPELL|PROC_TARGET_SELF);
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[0] = 30294;
+			sp->procChance = (i + 1) * 10;
+			sp->procFlags = PROC_ON_SPELL_LAND;
+		}
 	}
 
 	//warlock - Pyroclasm
@@ -6264,6 +6253,18 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 	{
 		sp->FacingCasterFlags = 0;
+	}
+
+	// Fiery Payback disable until it's properly implemented
+	sp = dbcSpell.LookupEntryForced( 44441 );
+	if( sp != NULL )
+	{
+		sp->Effect[0] = sp->Effect[1] = sp->Effect[2] = 0;
+	}
+	sp = dbcSpell.LookupEntryForced( 44440 );
+	if( sp != NULL )
+	{
+		sp->Effect[0] = sp->Effect[1] = sp->Effect[2] = 0;
 	}
 
 	// Item procs
