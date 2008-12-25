@@ -1164,11 +1164,27 @@ uint32 Unit::HandleProc( uint32 flag, Unit* victim, SpellEntry* CastingSpell, ui
 								if(!IsPlayer() || weapon_damage_type < 1 || weapon_damage_type > 2)
 									continue;
 								Item * mh = static_cast< Player* >( this )->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type -1);
-								if( mh == NULL)
-									continue;
+								if(!mh) continue;
+								uint32 apBonus = 46; // use rank 1 bonus as default
+								EnchantmentInstance * ei = mh->GetEnchantment(1);
+								if(!ei) continue;
+								EnchantEntry * e = ei->Enchantment;
+								if(!e) continue;
+								switch(e->Id)
+								{
+								case 284: apBonus = 119; break;
+								case 525: apBonus = 249; break;
+								case 1669: apBonus = 333; break;
+								case 2636: apBonus = 445; break;
+								case 3785: apBonus = 835; break;
+								case 3786: apBonus = 1090; break;
+								case 3787: apBonus = 1250; break;
+								}	
 								float mhs = float( mh->GetProto()->Delay );
 								// Calculate extra AP bonus damage
-								uint32 extra_dmg=float2int32(mhs * (ospinfo->EffectBasePoints[0]+1) /14000.0f);
+								uint32 extra_dmg=float2int32(mhs * apBonus / 14000.0f);
+								if(weapon_damage_type == 2)	// offhand gets 50% bonus
+									extra_dmg /= 2;
 								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
 								Strike( victim, weapon_damage_type-1, spe, extra_dmg, 0, 0, false, false );
 								spellId = 33010; // WF animation

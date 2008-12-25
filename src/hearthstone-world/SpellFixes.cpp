@@ -1898,7 +1898,8 @@ void ApplyNormalFixes()
 			if(sp->NameHash == SPELL_HASH_WINDFURY_WEAPON ||
 				sp->NameHash == SPELL_HASH_FLAMETONGUE_WEAPON ||
 				sp->NameHash == SPELL_HASH_ROCKBITER_WEAPON ||
-				sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON)
+				sp->NameHash == SPELL_HASH_FROSTBRAND_WEAPON ||
+				sp->NameHash == SPELL_HASH_EARTHLIVING_WEAPON)
 				sp->Flags3 |= FLAGS3_ENCHANT_OWN_ONLY;
 
 			// Stoneclaw Totem
