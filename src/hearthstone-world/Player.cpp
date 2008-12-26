@@ -8000,6 +8000,7 @@ void Player::PvPToggle()
     }
     else if(sWorld.GetRealmType() == REALM_PVP)
     {
+		ForceAreaUpdate();
 	    if(m_areaDBC == NULL)
             return;
 
