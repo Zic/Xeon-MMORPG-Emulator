@@ -346,7 +346,7 @@ void CBattlegroundManager::AddGroupToArena(CBattleground * bg, Group * group, in
 
 int CBattlegroundManager::CreateArenaType(int type, Group * group1, Group * group2)
 {
-	Arena * ar = ((Arena*)CreateInstance(type, LEVEL_GROUP_70));
+	Arena * ar = ((Arena*)CreateInstance(type, LEVEL_GROUP_RATED_ARENA));
 	if (ar == NULL)
 	{
 		Log.Error("BattlegroundMgr", "%s (%u): Couldn't create Arena Instance", __FILE__, __LINE__);
@@ -1910,9 +1910,9 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 					return;
 				}
 
-				if((*itx)->lastLevel < 70)
+				if((*itx)->lastLevel < 80)
 				{
-					m_session->SystemMessage("Sorry, some of your party members are not level 70.");
+					m_session->SystemMessage("Sorry, some of your party members are not level 80.");
 					pGroup->Unlock();
 					return;
 				}
@@ -2002,7 +2002,7 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 bool CBattleground::CanPlayerJoin(Player * plr)
 {
-	return HasFreeSlots(plr->m_bgTeam) && (plr->m_bg == NULL);
+	return HasFreeSlots(plr->m_bgTeam);
 }
 
 void CBattleground::QueueAtNearestSpiritGuide(Player *plr, Creature *old)
