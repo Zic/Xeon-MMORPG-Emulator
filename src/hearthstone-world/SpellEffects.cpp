@@ -882,7 +882,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 49894:
 	case 49895: //Death Coil
 		{
-			if(!u_caster)
+			if(!u_caster || !unitTarget)
 				return;
 			if(spellId == 52375)
 				damage = damage * 2 / 5;	// 40% for rank 1
