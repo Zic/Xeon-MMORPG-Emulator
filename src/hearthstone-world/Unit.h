@@ -1093,7 +1093,7 @@ public:
 
 	HEARTHSTONE_INLINE bool IsSpiritHealer()
 	{
-		if(GetUInt32Value(OBJECT_FIELD_ENTRY) == 6491 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 13116 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 113117)
+		if(GetUInt32Value(OBJECT_FIELD_ENTRY) == 6491 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 13116 || GetUInt32Value(OBJECT_FIELD_ENTRY) == 13117)
 			return true;
 
 		return false;
