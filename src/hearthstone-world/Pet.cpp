@@ -256,6 +256,9 @@ Pet::~Pet()
 
 	if(IsInWorld())
 		this->Remove(false, true, true);
+
+	if( m_Owner )
+		m_Owner->SetSummon(NULL);
 }
 
 void Pet::Update(uint32 time)
