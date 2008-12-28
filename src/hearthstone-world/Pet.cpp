@@ -308,14 +308,14 @@ void Pet::Update(uint32 time)
 		}
 	}
 
-	if( m_Owner->IsPvPFlagged() && !IsPvPFlagged())
+	if( m_Owner && m_Owner->IsPvPFlagged() && !IsPvPFlagged())
 		SetPvPFlag();
-	else if( !m_Owner->IsPvPFlagged() )
+	else if( m_Owner && !m_Owner->IsPvPFlagged() )
 		RemovePvPFlag();
 
-	if( m_Owner->IsFFAPvPFlagged() && !IsFFAPvPFlagged() ) 
+	if( m_Owner && m_Owner->IsFFAPvPFlagged() && !IsFFAPvPFlagged() ) 
 		SetFFAPvPFlag();
-	else if( !m_Owner->IsFFAPvPFlagged() )
+	else if( m_Owner && !m_Owner->IsFFAPvPFlagged() )
 		RemoveFFAPvPFlag();
 
 	if(bExpires)
