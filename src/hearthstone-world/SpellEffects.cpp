@@ -4634,6 +4634,9 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 		}break;
 	case 47193: // [Warlock] Demonic Empowerment
 		{
+			if(!unitTarget)
+				return;
+
 			uint32 nspellid = 0;
 			if ( unitTarget->GetUInt32Value( OBJECT_FIELD_ENTRY ) == 416 ) //Imp
 				nspellid = 54444;
