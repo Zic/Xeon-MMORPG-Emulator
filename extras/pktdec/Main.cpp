@@ -1216,37 +1216,10 @@ void parseFile(char *filename) {
 }
 
 int main(int argc, char *argv[]) {
-	struct stat buf;
 	int i;
 
-	memset(&opts, 0, sizeof(opts));
-
-	for (;;) {
-		int c = getopt(argc, argv, "i");
-		if (c == -1) break;
-
-		switch (c) {
-			case 'i': opts.visual_items = 1;
-		}
-	}
-
-	itemsbuf = NULL;
-	if (opts.visual_items && stat("visual_items.sql", &buf)) {
-		itemsbuf = (char*)malloc(buf.st_size);
-
-		FILE *f = fopen("visual_items.sql", "r");
-		if (f) {
-			fread(itemsbuf, 1, buf.st_size, f);
-			fclose(f);
-		}
-	}			 
-
-	for (i=optind; i<argc; i++) {
+	for (i=0; i<argc; i++) {
 		parseFile(argv[i]);
-	}
-
-	if (itemsbuf) {
-		free(itemsbuf);
 	}
 
 	return 0;
