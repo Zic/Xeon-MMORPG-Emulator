@@ -646,7 +646,7 @@ enum SpellEffects
     SPELL_EFFECT_LANGUAGE,                  //    39
     SPELL_EFFECT_DUAL_WIELD,                //    40    
     SPELL_EFFECT_SUMMON_WILD,               //    41    
-    SPELL_EFFECT_SUMMON_GUARDIAN,           //    42    
+    SPELL_EFFECT_MEGA_JUMP,					//    42    
     SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER,//    43
     SPELL_EFFECT_SKILL_STEP,                //    44    
     SPELL_EFFECT_UNDEFINED_45,              //    45    

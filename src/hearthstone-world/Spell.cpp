@@ -1459,7 +1459,7 @@ void Spell::cast(bool check)
 		{
 			for( x = 0; x < 3; ++x )
 			{
-				if( m_spellInfo->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL )
+				if( m_spellInfo->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL || m_spellInfo->Effect[x] == SPELL_EFFECT_MEGA_JUMP )
 				{
 					_SetTargets(m_caster->GetGUID());
 					HandleEffects(x);
