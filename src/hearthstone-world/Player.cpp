@@ -9120,7 +9120,7 @@ void Player::UnPossess()
 
 	/* send "switch mover" packet */
 	WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
-	data << GetNewGUID() << uint8(1);
+	data << GetNewGUID() << uint8(0);
 	m_session->SendPacket(&data);
 
 	if(pTarget->m_temp_summon)
