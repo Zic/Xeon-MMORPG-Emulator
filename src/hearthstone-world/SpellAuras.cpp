@@ -3684,6 +3684,8 @@ void Aura::EventPeriodicManaPct(float RegenPct)
 	{
 		m_target->Emote(EMOTE_ONESHOT_EAT);
 	}
+
+	m_target->SendPowerUpdate();
 }
 
 void Aura::SpellAuraModResistance(bool apply)
@@ -6520,6 +6522,7 @@ void Aura::SpellAuraGhost(bool apply)
 			static_cast< Player* >( m_target )->SetMovement(MOVE_LAND_WALK, 7);
 		} 
 	}
+	m_target->SendPowerUpdate();
 }
 
 void Aura::SpellAuraMagnet(bool apply)

@@ -3071,6 +3071,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, maxLevel);
 
 	UpdateTalentInspectBuffer();
+	SetFlag(UNIT_FIELD_FLAGS_2, 0x800); // enables automatic power regen
 	m_session->FullLogin(this);
 	m_session->m_loggingInPlayer=NULL;
 
@@ -3346,6 +3347,8 @@ void Player::OnPushToWorld()
 
 	z_axisposition = 0.0f;
 	m_changingMaps = false;
+
+	SendPowerUpdate();
 }
 
 void Player::ResetHeartbeatCoords()

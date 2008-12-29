@@ -342,10 +342,6 @@ void Unit::Update( uint32 p_time )
 				m_diminishActive = false;
 		}
 
-		if((IsPlayer() || IsPet()) && 
-		   m_updateMask.GetBit(UNIT_FIELD_POWER1+GetPowerType()))
-			SendPowerUpdate();
-
 /*		//if health changed since last time. Would be perfect if it would work for creatures too :)
 		if(m_updateMask.GetBit(UNIT_FIELD_HEALTH))
 			EventHealthChangeSinceLastUpdate();*/
@@ -5704,6 +5700,7 @@ void Unit::Energize(Unit* target,uint32 SpellId, uint32 amount,uint32 type)
 		datamr << uint32(type);
 		datamr << uint32(amount);
 		this->SendMessageToSet(&datamr,true);
+		target->SendPowerUpdate();
 	}
 }
 
@@ -6180,6 +6177,8 @@ void Unit::SetPowerType(uint8 type)
 		SetFloatValue(PLAYER_RUNE_REGEN_1, 0.100000f);
 		SetFloatValue(PLAYER_RUNE_REGEN_1_1, 0.100000f);
 	}
+
+	SendPowerUpdate();
 }
 
 //	custom functions for scripting
