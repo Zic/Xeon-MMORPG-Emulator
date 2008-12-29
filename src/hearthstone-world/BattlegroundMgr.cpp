@@ -339,9 +339,20 @@ void CBattlegroundManager::AddGroupToArena(CBattleground * bg, Group * group, in
 			{
 				bg->AddPlayer(plr, nteam);
 				plr->SetTeam(nteam);
+				ArenaTeamMember * atm = team->GetMember(plr->m_playerInfo);
+				if(atm)
+				{
+					atm->Played_ThisSeason++;
+					atm->Played_ThisWeek++;
+				}
 			}
 		}
 	}
+
+	team->m_stat_gamesplayedseason++;
+	team->m_stat_gamesplayedweek++;
+
+	team->SaveToDB();
 }
 
 int CBattlegroundManager::CreateArenaType(int type, Group * group1, Group * group2)
