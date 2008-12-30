@@ -661,7 +661,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 		// handle stuff for the last tick
 		// change the flag depending on cp status
-		if( m_CPStatus[i] < 50 )
+		if( m_CPStatus[i] > 50 )
 		{
 			if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_HORDE )
 			{
@@ -686,7 +686,7 @@ void EyeOfTheStorm::UpdateCPs()
 				m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_EOTS_HORDE_BASES, m_towerCount[1] );
 			}
 		}
-		else if( m_CPStatus[i] > 50 )
+		else if( m_CPStatus[i] < 50 )
 		{
 			if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_ALLIANCE )
 			{
@@ -785,9 +785,9 @@ void EyeOfTheStorm::UpdateCPs()
 			if( delta > 25 )
 				delta = 25;
 
-			m_CPStatus[i] += delta;
-			if( m_CPStatus[i] >= 100 )
-				m_CPStatus[i] = 100;
+			m_CPStatus[i] -= delta;
+			if( m_CPStatus[i] < 0 )
+				m_CPStatus[i] = 0;
 		}
 		else if( plrcounts[1] > plrcounts[0] )
 		{
@@ -798,10 +798,10 @@ void EyeOfTheStorm::UpdateCPs()
 			if( delta > 25 )
 				delta = 25;
 
-			if( delta > m_CPStatus[i] )
-				m_CPStatus[i] = 0;
-			else
-				m_CPStatus[i] -= delta;
+			
+			m_CPStatus[i] += delta;
+			if( m_CPStatus[i] > 100 )
+				m_CPStatus[i] = 100;
 		}
 	}
 
