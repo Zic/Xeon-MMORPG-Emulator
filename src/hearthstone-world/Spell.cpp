@@ -1858,6 +1858,7 @@ void Spell::SendSpellStart()
 	StackPacket data(SMSG_SPELL_START, buf, 1000);
 
 	uint32 cast_flags = 2;
+	cast_flags |= 0x200800;
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 		cast_flags |= 0x20;
@@ -1877,6 +1878,23 @@ void Spell::SendSpellStart()
 	data << (uint32)m_castTime;
 		
 	m_targets.write( data );
+
+	if (cast_flags & 0x800) //send new mana
+		data << uint32( u_caster ? u_caster->GetUInt32Value(UNIT_FIELD_POWER1 + u_caster->GetPowerType()) : 0);
+
+	if (cast_flags & 0x200000 && p_caster) //send new runes
+	{
+		SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
+		uint8 theoretical = p_caster->TheoreticalUseRunes(runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost);
+		data << p_caster->m_runemask << theoretical;
+
+		for (uint8 i=0; i<6; ++i)
+		{
+			if ((1 << i) & p_caster->m_runemask)
+				if (!((1 << i) & theoretical))
+					data << uint8(0); // I love you, Andy--in a gay way.
+		}
+	}
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 	{
@@ -2237,11 +2255,8 @@ bool Spell::HasPower()
 			if(m_spellInfo->runeCostID && p_caster)
 			{
 				SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
-				uint32 credit = p_caster->HasRunes(RUNE_TYPE_BLOOD, runecost->bloodRuneCost) +
-					p_caster->HasRunes(RUNE_TYPE_FROST, runecost->frostRuneCost) +
-					p_caster->HasRunes(RUNE_TYPE_UNHOLY, runecost->unholyRuneCost);
-				if(credit > 0 && p_caster->HasRunes(RUNE_TYPE_DEATH, credit) > 0)	// Try to take death runes
-					return false;	// Not enough runes
+				if( !p_caster->CanUseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost) )
+					return false;
 			}
 			return true;
 		}
@@ -2327,11 +2342,9 @@ bool Spell::TakePower()
 				if(m_spellInfo->runeCostID && p_caster)
 				{
 					SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
-					uint32 credit = p_caster->TakeRunes(RUNE_TYPE_BLOOD, runecost->bloodRuneCost) +
-						p_caster->TakeRunes(RUNE_TYPE_FROST, runecost->frostRuneCost) +
-						p_caster->TakeRunes(RUNE_TYPE_UNHOLY, runecost->unholyRuneCost);
-					if(credit > 0 && p_caster->TakeRunes(RUNE_TYPE_DEATH, credit) > 0)	// Try to take death runes
-						return false;	// Not enough runes
+					if( !p_caster->CanUseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost) )
+						return false;
+					p_caster->UseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost);
 					if(runecost->runePowerGain)
 						u_caster->SetPower(POWER_TYPE_RUNIC, runecost->runePowerGain + u_caster->GetUInt32Value(UNIT_FIELD_POWER7));
 				}

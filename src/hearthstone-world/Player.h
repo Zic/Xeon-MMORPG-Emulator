@@ -2092,14 +2092,15 @@ public:
 	void InitGlyphsForLevel();
 	// Runes
 	uint8 m_runes[6];
-	HEARTHSTONE_INLINE uint8 GetRune(uint32 index)
-	{
-		ASSERT(index < 6);
-		return m_runes[index];
-	}
+	uint8 m_runemask;
+
 	void ConvertRune(uint8 index, uint8 value);
-	uint32 TakeRunes(uint8 type, uint32 count);
-	uint32 HasRunes(uint8 type, uint32 count);
+	void ScheduleRuneRefresh(uint8 index);
+
+	bool CanUseRunes(uint8 blood, uint8 frost, uint8 unholy);
+	void UseRunes(uint8 blood, uint8 frost, uint8 unholy);
+	uint8 TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy);
+
 
 private:
 	// Stuff for "Talent Inspect"

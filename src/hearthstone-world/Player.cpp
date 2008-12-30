@@ -24,6 +24,7 @@ static const uint8 baseRunes[6] = {0,0,1,1,2,2};
 
 Player::Player( uint32 guid ) : m_mailBox(guid)
 {
+	m_runemask = 0x3F;
 	m_bgRatedQueue = false;
 	m_massSummonEnabled = false;
 	m_objectTypeId = TYPEID_PLAYER;
@@ -11252,7 +11253,8 @@ void Player::ConvertRune(uint8 index, uint8 value)
 {
 	ASSERT(index < 6);
 	m_runes[index] = value;
-	if(value >= 4)
+	m_runemask |= (1 << index);
+	if(value >= RUNE_TYPE_RECHARGING)
 		return;
 
 	WorldPacket data(SMSG_CONVERT_RUNE, 2);
@@ -11261,28 +11263,124 @@ void Player::ConvertRune(uint8 index, uint8 value)
 	SendMessageToSet(&data, true);
 }
 
-uint32 Player::HasRunes(uint8 type, uint32 count)
+bool Player::CanUseRunes(uint8 blood, uint8 frost, uint8 unholy)
 {
-	uint32 found = 0;
-	for(uint32 i=0; i<6 && count != found; ++i)
+	uint8 death = 0;
+	for(uint8 i = 0; i < 6; ++i)
 	{
-		if(GetRune(i) == type)
-			found++;
+		if( m_runes[ i ] == RUNE_TYPE_BLOOD && blood )
+			blood--;
+		if( m_runes[ i ] == RUNE_TYPE_FROST && frost )
+			frost--;
+		if( m_runes[ i ] == RUNE_TYPE_UNHOLY && unholy )
+			unholy--;
+
+		if( m_runes[ i ] == RUNE_TYPE_DEATH )
+			death++;
 	}
-	return (count - found);
+
+	uint8 res = blood + frost + unholy;
+	if( res == 0 )
+		return true;
+
+	if( death >= (blood + frost + unholy) )
+		return true;
+
+	return false;
 }
 
-uint32 Player::TakeRunes(uint8 type, uint32 count)
+void Player::ScheduleRuneRefresh(uint8 index)
 {
-	uint32 found = 0;
-	for(uint32 i=0; i<6 && count != found; ++i)
+	sEventMgr.AddEvent( this, &Player::ConvertRune, (uint8)index, baseRunes[index], EVENT_PLAYER_RUNE_REGEN + index, 10000, 0, 0);
+}
+
+void Player::UseRunes(uint8 blood, uint8 frost, uint8 unholy)
+{
+	uint8 death = 0;
+	for(uint8 i = 0; i < 6; ++i)
 	{
-		if(GetRune(i) == type)
+		if( m_runes[ i ] == RUNE_TYPE_BLOOD && blood )
 		{
-			ConvertRune(i, RUNE_TYPE_RECHARGING);
-			sEventMgr.AddEvent( this, &Player::ConvertRune, (uint8)i, baseRunes[i], EVENT_PLAYER_RUNE_REGEN + i, 10000, 1, 0 );
-			found++;
+			blood--;
+			m_runemask &= ~(1 << i);
+			m_runes[ i ] = RUNE_TYPE_RECHARGING;
+			ScheduleRuneRefresh(i);
+		}
+		if( m_runes[ i ] == RUNE_TYPE_FROST && frost )
+		{
+			frost--;
+			m_runemask &= ~(1 << i);
+			m_runes[ i ] = RUNE_TYPE_RECHARGING;
+			ScheduleRuneRefresh(i);
+		}
+		if( m_runes[ i ] == RUNE_TYPE_UNHOLY && unholy )
+		{
+			unholy--;
+			m_runemask &= ~(1 << i);
+			m_runes[ i ] = RUNE_TYPE_RECHARGING;
+			ScheduleRuneRefresh(i);
+		}
+
+		if( m_runes[ i ] == RUNE_TYPE_DEATH )
+			death++;
+	}
+
+	uint8 res = blood + frost + unholy;
+
+	if( res == 0 )
+		return;
+
+	for(uint8 i = 0; i < 6; ++i)
+	{
+		if( m_runes[ i ] == RUNE_TYPE_DEATH && res )
+		{
+			res--;
+			m_runemask &= ~(1 << i);
+			m_runes[ i ] = RUNE_TYPE_RECHARGING;
+			ScheduleRuneRefresh(i);
 		}
 	}
-	return (count - found);
+}
+
+uint8 Player::TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy)
+{
+	uint8 runemask = m_runemask;
+	uint8 death = 0;
+	for(uint8 i = 0; i < 6; ++i)
+	{
+		if( m_runes[ i ] == RUNE_TYPE_BLOOD && blood )
+		{
+			blood--;
+			runemask &= ~(1 << i);
+		}
+		if( m_runes[ i ] == RUNE_TYPE_FROST && frost )
+		{
+			frost--;
+			runemask &= ~(1 << i);
+		}
+		if( m_runes[ i ] == RUNE_TYPE_UNHOLY && unholy )
+		{
+			unholy--;
+			runemask &= ~(1 << i);
+		}
+
+		if( m_runes[ i ] == RUNE_TYPE_DEATH )
+			death++;
+	}
+
+	uint8 res = blood + frost + unholy;
+
+	if( res == 0 )
+		return runemask;
+
+	for(uint8 i = 0; i < 6; ++i)
+	{
+		if( m_runes[ i ] == RUNE_TYPE_DEATH && res )
+		{
+			res--;
+			runemask &= ~(1 << i);
+		}
+	}
+	
+	return runemask;
 }
