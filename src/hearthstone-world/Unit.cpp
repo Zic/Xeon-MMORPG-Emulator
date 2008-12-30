@@ -3232,6 +3232,7 @@ else
 		if( GetUInt32Value( UNIT_FIELD_POWER2 ) > 1000 )
 			ModUnsigned32Value( UNIT_FIELD_POWER2, 1000 - GetUInt32Value( UNIT_FIELD_POWER2 ) );
 
+		SendPowerUpdate();
 	}
 
 	// I am receiving damage!
@@ -3251,7 +3252,7 @@ else
 		pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, (int32)val );
 		if( pVictim->GetUInt32Value( UNIT_FIELD_POWER2) > 1000 )
 			pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, 1000 - pVictim->GetUInt32Value( UNIT_FIELD_POWER2 ) );
-
+		pVictim->SendPowerUpdate();
 	}
 		
 	RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_START_ATTACK);

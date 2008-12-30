@@ -1547,6 +1547,7 @@ void Object::DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32
 				rage = pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER2);
 			
 			pVictim->SetUInt32Value(UNIT_FIELD_POWER2, rage);
+			pVictim->SendPowerUpdate();
 		}
 
 	if( pVictim->IsPlayer() )
