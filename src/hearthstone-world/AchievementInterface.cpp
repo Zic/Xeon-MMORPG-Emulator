@@ -49,9 +49,9 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 	do 
 	{
 		Field * fields = pResult->Fetch();
-		uint32 achievementid = fields[2].GetUInt32();
-		string criteriaprogress = fields[3].GetString();
-		bool completed = (fields[4].GetUInt32() > 0);
+		uint32 achievementid = fields[1].GetUInt32();
+		string criteriaprogress = fields[2].GetString();
+		bool completed = (fields[3].GetUInt32() > 0);
 
 		AchievementEntry * ae = dbcAchievement.LookupEntry( achievementid );
 		AchievementData * ad = new AchievementData;
@@ -60,7 +60,7 @@ void AchievementInterface::LoadFromDB( QueryResult * pResult )
 		ad->id = achievementid;
 		ad->num_criterias = ae->AssociatedCriteriaCount;
 		ad->completed = completed;
-		ad->date = fields[4].GetUInt32();
+		ad->date = fields[3].GetUInt32();
 		
 		if( ad->completed && string(ae->name).find("Realm First!") != string::npos )
 			m_completedRealmFirstAchievements.insert( ae->ID );
