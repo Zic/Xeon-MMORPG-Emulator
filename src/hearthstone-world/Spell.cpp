@@ -1059,6 +1059,15 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	}
 	else
 	{
+		if( !HasPower() )
+		{
+			SendCastResult(SPELL_FAILED_NO_POWER);
+			// in case we're out of sync
+			if( p_caster )
+				p_caster->SendPowerUpdate();
+
+			return SPELL_FAILED_NO_POWER;
+		}
 		SendSpellStart();
 
 		// start cooldown handler

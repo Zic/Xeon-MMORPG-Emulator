@@ -6253,12 +6253,31 @@ void Aura::SpellAuraModRegen(bool apply)
 
 void Aura::SpellAuraDrinkNew(bool apply)
 {
-	if( apply )
+	// what the fuck?
+	if( m_spellProto->NameHash == SPELL_HASH_DRINK )
 	{
-		SetPositive();
-		sEventMgr.AddEvent(this, &Aura::EventPeriodicDrink, uint32(float2int32(float(mod->m_amount)/5.0f)),
-			EVENT_AURA_PERIODIC_REGEN, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		if( apply )
+		{
+			SetPositive();
+			sEventMgr.AddEvent(this, &Aura::EventPeriodicDrink, uint32(float2int32(float(mod->m_amount)/5.0f)),
+				EVENT_AURA_PERIODIC_REGEN, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		}
+		return;
 	}
+
+	if( apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
+	{
+		sEventMgr.AddEvent( this, &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	}
+	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
+		EventPeriodicSpeedModify( -100 );
+
+}
+
+void Aura::EventPeriodicSpeedModify(int32 mod)
+{
+	m_target->m_speedModifier += mod;
+	m_target->UpdateSpeed();
 }
 
 void Aura::EventPeriodicDrink(uint32 amount)
@@ -6266,7 +6285,6 @@ void Aura::EventPeriodicDrink(uint32 amount)
 	uint32 v = m_target->GetUInt32Value(UNIT_FIELD_POWER1) + amount;
 	if( v > m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
 		v = m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
-
 	m_target->SetUInt32Value(UNIT_FIELD_POWER1, v);
 }
 

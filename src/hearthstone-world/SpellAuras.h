@@ -636,6 +636,7 @@ public:
 	void EventPeriodicHealPct(float);
 	void EventPeriodicManaPct(float);
 	void EventPeriodicRegenManaStatPct(uint32 perc,uint32 stat);
+	void EventPeriodicSpeedModify(int32 mod);
 	void RelocateEvents();
 	int32 event_GetInstanceID();
 
