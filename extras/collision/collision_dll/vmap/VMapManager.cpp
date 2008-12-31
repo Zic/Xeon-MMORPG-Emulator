@@ -23,7 +23,7 @@
 #define snprintf _snprintf
 #endif
 
-#define MAX_MAPS 600
+#define MAX_MAPS 700
 
 //#define COLLISION_VISUAL_DEBUG 1
 #ifdef COLLISION_VISUAL_DEBUG
@@ -115,6 +115,7 @@ namespace VMAP
 	{
 		switch( mapid )
 		{
+		case 571:
 		case 509:
 		case 469:
 		case 189:
