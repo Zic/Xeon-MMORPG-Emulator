@@ -26,6 +26,9 @@
 
 #include <string.h>
 
+//gcc 4.3 fix
+#include <limits.h>
+
 #ifdef _ASSEMBLER_DEBUG
 FILE *g_df = NULL;
 #endif
@@ -71,7 +74,6 @@ namespace VMAP
         addWorldAreaMapId(0);                               //Azeroth
         addWorldAreaMapId(1);                               //Kalimdor
         addWorldAreaMapId(530);                             //Expansion01
-		addWorldAreaMapId(571);								//Northrend
     }
     //=================================================================
 

@@ -1160,7 +1160,7 @@ namespace G3D {
                         }
 
                         startTime = minTime;
-                        endTime   = min((double)maxTime, splitTime);
+						endTime   = std::min((double)maxTime, splitTime);
                         endTime2  = square(endTime);
 
                         double rayLocation = ray.origin[splitAxis] +
