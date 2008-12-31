@@ -43,6 +43,7 @@ void CCollideInterface::Init()
 
 void CCollideInterface::ActivateMap(uint32 mapId)
 {
+	if( !CollisionMgr ) return;
 	m_mapCreateLock.Acquire();
 	if( m_mapLocks[mapId] == NULL )
 	{
@@ -58,6 +59,7 @@ void CCollideInterface::ActivateMap(uint32 mapId)
 
 void CCollideInterface::DeactivateMap(uint32 mapId)
 {
+	if( !CollisionMgr ) return;
 	m_mapCreateLock.Acquire();
 	ASSERT(m_mapLocks[mapId] != NULL);
 	--m_mapLocks[mapId]->m_loadCount;
@@ -74,6 +76,7 @@ void CCollideInterface::DeactivateMap(uint32 mapId)
 void CCollideInterface::ActivateTile(uint32 mapId, uint32 tileX, uint32 tileY)
 {
 	ASSERT(m_mapLocks[mapId] != NULL);
+	if( !CollisionMgr ) return;
 	// acquire write lock
 	m_mapLocks[mapId]->m_lock.AcquireWriteLock();
 	if( m_mapLocks[mapId]->m_tileLoadCount[tileX][tileY] == 0 )
@@ -89,6 +92,8 @@ void CCollideInterface::ActivateTile(uint32 mapId, uint32 tileX, uint32 tileY)
 void CCollideInterface::DeactivateTile(uint32 mapId, uint32 tileX, uint32 tileY)
 {
 	ASSERT(m_mapLocks[mapId] != NULL);
+	if( !CollisionMgr ) return;
+
 	// get write lock
 	m_mapLocks[mapId]->m_lock.AcquireWriteLock();
 	if( (--m_mapLocks[mapId]->m_tileLoadCount[tileX][tileY]) == 0 )
@@ -106,7 +111,7 @@ bool CCollideInterface::CheckLOS(uint32 mapId, float x1, float y1, float z1, flo
 	m_mapLocks[mapId]->m_lock.AcquireReadLock();
 
 	// get data
-	bool res = CollisionMgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2);
+	bool res = CollisionMgr ? CollisionMgr->isInLineOfSight(mapId, x1, y1, z1, x2, y2, z2) : true;
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseReadLock();
@@ -123,7 +128,7 @@ bool CCollideInterface::GetFirstPoint(uint32 mapId, float x1, float y1, float z1
 	m_mapLocks[mapId]->m_lock.AcquireReadLock();
 
 	// get data
-	bool res = CollisionMgr->getObjectHitPos(mapId, x1, y1, z1, x2, y2, z2, outx, outy, outz, distmod);
+	bool res = (CollisionMgr ? CollisionMgr->getObjectHitPos(mapId, x1, y1, z1, x2, y2, z2, outx, outy, outz, distmod) : false);
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseReadLock();
@@ -140,7 +145,7 @@ float CCollideInterface::GetHeight(uint32 mapId, float x, float y, float z)
 	m_mapLocks[mapId]->m_lock.AcquireReadLock();
 
 	// get data
-	float res = CollisionMgr->getHeight(mapId, x, y, z);
+	float res = CollisionMgr ? CollisionMgr->getHeight(mapId, x, y, z) : NO_WMO_HEIGHT;
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseReadLock();
@@ -157,7 +162,7 @@ bool CCollideInterface::IsIndoor(uint32 mapId, float x, float y, float z)
 	m_mapLocks[mapId]->m_lock.AcquireReadLock();
 
 	// get data
-	bool res = CollisionMgr->isInDoors(mapId, x, y, z);
+	bool res = CollisionMgr ? CollisionMgr->isInDoors(mapId, x, y, z) : true;
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseReadLock();
@@ -174,7 +179,7 @@ bool CCollideInterface::IsOutdoor(uint32 mapId, float x, float y, float z)
 	m_mapLocks[mapId]->m_lock.AcquireReadLock();
 
 	// get data
-	bool res = CollisionMgr->isOutDoors(mapId, x, y, z);
+	bool res = CollisionMgr ? CollisionMgr->isOutDoors(mapId, x, y, z) : true; 
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseReadLock();
