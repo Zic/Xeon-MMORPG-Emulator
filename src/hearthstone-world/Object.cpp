@@ -2279,8 +2279,8 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 
 //------------------------------absorption--------------------------------------------------	
 	uint32 ress=(uint32)res;
-	uint32 abs_dmg = pVictim->AbsorbDamage(school, &ress);
-	uint32 ms_abs_dmg= pVictim->ManaShieldAbsorb(ress);
+	uint32 abs_dmg = pVictim->AbsorbDamage(school, &ress, dbcSpell.LookupEntryForced(spellID));
+	uint32 ms_abs_dmg= pVictim->ManaShieldAbsorb(ress, dbcSpell.LookupEntryForced(spellID));
 	if (ms_abs_dmg)
 	{
 		if(ms_abs_dmg > ress)
@@ -2395,7 +2395,7 @@ void Object::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 			if( spellID == 32379 || spellID == 32996 ) 
 			{
 				uint32 damage = (uint32)( res + abs_dmg );
-				uint32 absorbed = static_cast< Unit* >( this )->AbsorbDamage( school, &damage );
+				uint32 absorbed = static_cast< Unit* >( this )->AbsorbDamage( school, &damage, dbcSpell.LookupEntryForced(spellID) );
 				DealDamage( static_cast< Unit* >( this ), damage, 2, 0, spellID );
 				SendSpellNonMeleeDamageLog( this, TO_UNIT(this), spellID, damage, school, absorbed, 0, false, 0, false, this->IsPlayer() );
 			}

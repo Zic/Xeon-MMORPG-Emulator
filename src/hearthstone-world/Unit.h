@@ -765,7 +765,7 @@ public:
 	HEARTHSTONE_INLINE void setPRegenTimer(uint32 time) {m_P_regenTimer = time; }
 	HEARTHSTONE_INLINE void DelayPowerRegeneration(uint32 time) { m_P_regenTimer = time; if (!m_interruptedRegenTime) m_interruptedRegenTime = 2000; }
 	void DeMorph();
-	uint32 ManaShieldAbsorb(uint32 dmg);
+	uint32 ManaShieldAbsorb(uint32 dmg, SpellEntry* sp);
 	void smsg_AttackStart(Unit* pVictim);
 	void smsg_AttackStop(Unit* pVictim);
 	void smsg_AttackStop(uint64 victimGuid);
@@ -950,7 +950,7 @@ public:
 	float BaseOffhandDamage[2];
 	float BaseRangedDamage[2];
 	SchoolAbsorb Absorbs[7];
-	uint32 AbsorbDamage(uint32 School,uint32 * dmg);//returns amt of absorbed dmg, decreases dmg by absorbed value
+	uint32 AbsorbDamage(uint32 School,uint32 * dmg, SpellEntry * pSpell);//returns amt of absorbed dmg, decreases dmg by absorbed value
 	int32 RAPvModifier;
 	int32 APvModifier;
 	uint64 stalkedby;

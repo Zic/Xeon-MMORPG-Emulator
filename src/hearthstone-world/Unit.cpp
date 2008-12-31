@@ -2909,11 +2909,11 @@ else
 //==========================================================================================
 //--------------------------absorption------------------------------------------------------
 			uint32 dm = dmg.full_damage;
-			abs = pVictim->AbsorbDamage(dmg.school_type,(uint32*)&dm);
+			abs = pVictim->AbsorbDamage(dmg.school_type,(uint32*)&dm, ability);
 		
 			if(dmg.full_damage > (int32)blocked_damage)
 			{
-				uint32 sh = pVictim->ManaShieldAbsorb(dmg.full_damage);
+				uint32 sh = pVictim->ManaShieldAbsorb(dmg.full_damage, ability);
 //--------------------------armor reducing--------------------------------------------------
 				if(sh)
 				{
@@ -4298,9 +4298,12 @@ void Unit::CalcDamage()
 }
 
 //returns absorbed dmg
-uint32 Unit::ManaShieldAbsorb(uint32 dmg)
+uint32 Unit::ManaShieldAbsorb(uint32 dmg, SpellEntry* sp)
 {
 	if(!m_manashieldamt)
+		return 0;
+
+	if( sp && sp->c_is_flags & SPELL_FLAG_PIERCES_ABSORBTION_EFF )
 		return 0;
 
 	float coef = m_manaShieldSpell->EffectMultipleValue[0]; // how much mana is drained per damage absorbed
@@ -4358,9 +4361,12 @@ void Unit::RemoveAllAreaAuras()
 	}
 }
 */
-uint32 Unit::AbsorbDamage( uint32 School, uint32* dmg )
+uint32 Unit::AbsorbDamage( uint32 School, uint32* dmg, SpellEntry * pSpell )
 {
 	if( dmg == NULL )
+		return 0;
+
+	if( pSpell && pSpell->c_is_flags & SPELL_FLAG_PIERCES_ABSORBTION_EFF )
 		return 0;
 
 	SchoolAbsorb::iterator i, j;

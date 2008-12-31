@@ -2372,10 +2372,7 @@ void Spell::SpellEffectSummon(uint32 i)
 		}
 	default:
 		{
-			if( p_caster )
-			{
-				p_caster->BroadcastMessage("Unhandled summon effect %u for spell %u. Please report to the developers.", m_spellInfo->EffectMiscValueB[i], m_spellInfo->Id);
-			}
+			SummonGuardian(i);
 			break;
 		}
 	}
@@ -4849,7 +4846,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	float landh;
 	if (p_caster->GetMapMgr() && p_caster->GetMapMgr()->IsCollisionEnabled())
 	{
-		float landh = CollideInterface.GetHeight(p_caster->GetMapId(), x, y, p_caster->GetPositionZ());
+		landh = CollideInterface.GetHeight(p_caster->GetMapId(), x, y, p_caster->GetPositionZ());
 		if(landh == NO_WMO_HEIGHT)
 			landh = p_caster->GetMapMgr()->GetLandHeight(x,y);
 	}
@@ -5002,6 +4999,17 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 
 	// Set up the deletion event. The totem needs to expire after a certain time, or upon its death.
 	sEventMgr.AddEvent(pTotem, &Creature::TotemExpire, EVENT_TOTEM_EXPIRE, GetDuration(), 1,0);
+
+	if( p_caster )
+	{
+		WorldPacket data(SMSG_TOTEM_CREATED, 20);
+		data << uint8(m_summonProperties->slot - 1);
+		data << pTotem->GetGUID();
+		data << GetDuration();
+		data << m_spellInfo->Id;
+		p_caster->CopyAndSendDelayedPacket(&data);
+	}
+	
 }
 
 void Spell::SpellEffectSelfResurrect(uint32 i)

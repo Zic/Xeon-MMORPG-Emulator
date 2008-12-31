@@ -578,7 +578,7 @@ uint8 Spell::_DidHit(const Unit *target)
 			res = p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
 		else 
 			res = u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
-		if(Rand(res))
+		if( !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_NOT_RESISTABLE) && Rand(res))
 			return SPELL_DID_HIT_RESIST;
 	}
 
@@ -672,6 +672,9 @@ uint8 Spell::_DidHit(const Unit *target)
 
 	if(resistchance > 99.0f)
 		resistchance = 99.0f;
+
+	if( m_spellInfo->c_is_flags & SPELL_FLAG_IS_NOT_RESISTABLE )
+		resistchance = 0.0f;
 
 	uint32 res = (Rand(resistchance) ? SPELL_DID_HIT_RESIST : SPELL_DID_HIT_SUCCESS);
 

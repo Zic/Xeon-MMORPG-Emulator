@@ -1495,6 +1495,12 @@ void ApplyNormalFixes()
 			sp->c_is_flags |= SPELL_FLAG_IS_POISON;
 		}
 
+		if( strstr( sp->Description, "cannot be resisted" ) )
+			sp->c_is_flags |= SPELL_FLAG_IS_NOT_RESISTABLE;
+
+		if( strstr( sp->Description, "pierces through all absorption effects" ) )
+			sp->c_is_flags |= SPELL_FLAG_PIERCES_ABSORBTION_EFF;
+
 		//Set Silencing spells mech.
 		        // Set default mechanics if we don't already have one
         if( !sp->MechanicsType )

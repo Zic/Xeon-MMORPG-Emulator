@@ -1653,8 +1653,8 @@ void Aura::EventPeriodicDamage(uint32 amount)
 		}
 
 		uint32 ress=(uint32)res;
-		uint32 abs_dmg = m_target->AbsorbDamage(school, &ress);
-		uint32 ms_abs_dmg= m_target->ManaShieldAbsorb(ress);
+		uint32 abs_dmg = m_target->AbsorbDamage(school, &ress, m_spellProto);
+		uint32 ms_abs_dmg= m_target->ManaShieldAbsorb(ress, m_spellProto);
 		if (ms_abs_dmg)
 		{
 			if(ms_abs_dmg > ress)
