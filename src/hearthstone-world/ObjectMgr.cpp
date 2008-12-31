@@ -1580,162 +1580,167 @@ void ObjectMgr::GenerateLevelUpInfo()
 
 			// Generate each level's information
 			uint32 MaxLevel = MAXIMUM_ATTAINABLE_LEVEL + 1;
-			LevelInfo* lvl=0, lastlvl;
-			lastlvl.HP = PCI->health;
-			lastlvl.Mana = PCI->mana;
-			lastlvl.Stat[0] = PCI->strength;
-			lastlvl.Stat[1] = PCI->ability;
-			lastlvl.Stat[2] = PCI->stamina;
-			lastlvl.Stat[3] = PCI->intellect;
-			lastlvl.Stat[4] = PCI->spirit;
-			lastlvl.XPToNextLevel = 400;
+			LevelInfo* lvl=new LevelInfo;
+			lvl->HP = PCI->health;
+			lvl->Mana = PCI->mana;
+			lvl->Stat[0] = PCI->strength;
+			lvl->Stat[1] = PCI->ability;
+			lvl->Stat[2] = PCI->stamina;
+			lvl->Stat[3] = PCI->intellect;
+			lvl->Stat[4] = PCI->spirit;
+			lvl->XPToNextLevel = 400;
+			lvl->BaseHP = PCI->health;
+			lvl->BaseMana = PCI->mana;
 			LevelMap * lMap = new LevelMap;
-
-			// Create first level.
-			lvl = new LevelInfo;
-			*lvl = lastlvl;
 
 			// Insert into map
 			lMap->insert( LevelMap::value_type( 1, lvl ) );
 
-			uint32 val;
 			for(uint32 Level = 2; Level < MaxLevel; ++Level)
 			{
 				lvl = new LevelInfo;
+				memset(lvl, 0, sizeof(LevelInfo));
 
 				// Calculate Stats
 				for(uint32 s = 0; s < 5; ++s)
 				{
-					val = GainStat(Level, Class, s);
-					lvl->Stat[s] = lastlvl.Stat[s] + val;
-				}
-
-				// Calculate HP/Mana
-				uint32 TotalHealthGain = 0;
-				uint32 TotalManaGain = 0;
-
-				switch(Class)
-				{
-				case DEATHKNIGHT:
-					TotalHealthGain+=125;
-					break;
-					
-				case WARRIOR:
-					if(Level<13)TotalHealthGain+=19;
-					else if(Level <36) TotalHealthGain+=Level+6;
-//					else if(Level >60) TotalHealthGain+=Level+100;
-					else if(Level >60) TotalHealthGain+=Level+206;
-					else TotalHealthGain+=2*Level-30;
-					break;
-				case HUNTER:
-					if(Level<13)TotalHealthGain+=17;
-//					else if(Level >60) TotalHealthGain+=Level+45;
-					else if(Level >60) TotalHealthGain+=Level+161;
-					else TotalHealthGain+=Level+4;
-
-					if(Level<11)TotalManaGain+=29;
-					else if(Level<27)TotalManaGain+=Level+18;
-//					else if(Level>60)TotalManaGain+=Level+20;
-					else if(Level>60)TotalManaGain+=Level+150;
-					else TotalManaGain+=45;
-					break;
-				case ROGUE:
-					if(Level <15)TotalHealthGain+=17;
-//					else if(Level >60) TotalHealthGain+=Level+110;
-					else if(Level >60) TotalHealthGain+=Level+191;
-					else TotalHealthGain+=Level+2;
-					break;
-				case DRUID:
-					if(Level < 17)TotalHealthGain+=17;
-//					else if(Level >60) TotalHealthGain+=Level+55;
-					else if(Level >60) TotalHealthGain+=Level+176;
-					else TotalHealthGain+=Level;
-
-					if(Level < 26)TotalManaGain+=Level+20;
-//					else if(Level>60)TotalManaGain+=Level+25;
-					else if(Level>60)TotalManaGain+=Level+150;
-					else TotalManaGain+=45;
-					break;
-				case MAGE:
-					if(Level < 23)TotalHealthGain+=15;
-//					else if(Level >60) TotalHealthGain+=Level+40;
-					else if(Level >60) TotalHealthGain+=Level+190;
-					else TotalHealthGain+=Level-8;
-
-					if(Level <28)TotalManaGain+=Level+23;
-//					else if(Level>60)TotalManaGain+=Level+26;
-					else if(Level>60)TotalManaGain+=Level+115;
-					else TotalManaGain+=51;
-					break;
-				case SHAMAN:
-					if(Level <16)TotalHealthGain+=17;
-//					else if(Level >60) TotalHealthGain+=Level+75;
-					else if(Level >60) TotalHealthGain+=Level+157;
-					else TotalHealthGain+=Level+1;
-
-					if(Level<22)TotalManaGain+=Level+19;
-//					else if(Level>60)TotalManaGain+=Level+70;
-					else if(Level>60)TotalManaGain+=Level+175;
-					else TotalManaGain+=49;
-					break;
-				case WARLOCK:
-					if(Level <17)TotalHealthGain+=17;
-//					else if(Level >60) TotalHealthGain+=Level+50;
-					else if(Level >60) TotalHealthGain+=Level+192;
-					else TotalHealthGain+=Level-2;
-
-					if(Level< 30)TotalManaGain+=Level+21;
-//					else if(Level>60)TotalManaGain+=Level+25;
-					else if(Level>60)TotalManaGain+=Level+121;
-					else TotalManaGain+=51;
-					break;
-				case PALADIN:
-					if(Level < 14)TotalHealthGain+=18;
-//					else if(Level >60) TotalHealthGain+=Level+55;
-					else if(Level >60) TotalHealthGain+=Level+167;
-					else TotalHealthGain+=Level+4;
-
-					if(Level<30)TotalManaGain+=Level+17;
-//					else if(Level>60)TotalManaGain+=Level+100;
-					else if(Level>60)TotalManaGain+=Level+131;
-					else TotalManaGain+=42;
-					break;
-				case PRIEST:
-					if(Level <21)TotalHealthGain+=15;
-//					else if(Level >60) TotalHealthGain+=Level+40;
-					else if(Level >60) TotalHealthGain+=Level+157;
-					else TotalHealthGain+=Level-6;
-
-					if(Level <22)TotalManaGain+=Level+22;
-					else if(Level <32)TotalManaGain+=Level+37;
-//					else if(Level>60)TotalManaGain+=Level+35;
-					else if(Level>60)TotalManaGain+=Level+207;
-					else TotalManaGain+=54;
-					break;
+					lvl->Stat[s] = CalcStatForLevel( Level, Class, s );
+					if( s == STAT_STRENGTH )
+						lvl->Stat[s] += PCI->strength;
+					if( s == STAT_INTELLECT )
+						lvl->Stat[s] += PCI->intellect;
+					if( s == STAT_STAMINA )
+						lvl->Stat[s] += PCI->stamina;
+					if( s == STAT_SPIRIT )
+						lvl->Stat[s] += PCI->spirit;
+					if( s == STAT_AGILITY )
+						lvl->Stat[s] += PCI->ability;
 				}
 
 				// Apply HP/Mana
-				lvl->HP = lastlvl.HP + TotalHealthGain;
-				lvl->Mana = lastlvl.Mana + TotalManaGain;
+				uint32 HP = 0;
+				if( lvl->Stat[STAT_STAMINA] > 20 )
+				{
+					HP = 20;
+					HP += ( (lvl->Stat[STAT_STAMINA]-20) * 10);
+				}
+				else
+					HP = lvl->Stat[STAT_STAMINA];
+
+				uint32 Mana = 0;
+				if( lvl->Stat[STAT_INTELLECT] > 20 )
+				{
+					Mana = 20;
+					Mana += ((lvl->Stat[STAT_INTELLECT]-20) * 10);
+				}
+				else
+					Mana = lvl->Stat[STAT_INTELLECT];
+
+				uint32 BaseHP = 0;
+				uint32 BaseMana = 0;
+
+				// Description: We're calculating the Base Mana and HP that we get per level. These are based off of
+				// the total value at level 80 and are probably incorrect at lower levels.
+				// At a future date, we should attempt to correct them for those levels by decreasing the amount at
+				// lower levels.
+				// The first attempt at doing so is below.
+				#define NORMALIZATION \
+				if(Level <= 15) \
+				{\
+					BaseMana /= 2; \
+					BaseHP /= 2; \
+				}\
+				else if(Level <= 40) \
+				{\
+					BaseMana = uint32(BaseMana / 1.7f); \
+					BaseHP = uint32(BaseMana / 1.7f); \
+				}\
+				else if(Level <= 70) \
+				{\
+					BaseMana = uint32(BaseMana / 1.21f); \
+					BaseHP = uint32(BaseHP / 1.21f); \
+				}\
+
+
+
+				switch(Class)
+				{
+				case PRIEST:
+					{
+						BaseMana = uint32(48.2875f * Level);
+						BaseHP = uint32(87 * Level);
+						NORMALIZATION
+						break;
+					}
+				case WARRIOR:
+					{
+						BaseHP = uint32(107.7625f * Level);
+						NORMALIZATION
+						break;
+					}
+				case DEATHKNIGHT:
+					{
+						BaseHP = uint32(107.7625f * Level);
+						NORMALIZATION
+						break;
+					}
+				case HUNTER:
+					{
+						BaseHP = uint32(104.325f * Level);
+						BaseMana = uint32(63.075f * Level);
+						NORMALIZATION
+						break;
+					}
+				case ROGUE:
+					{
+						BaseHP = uint32(95.05f * Level);
+						NORMALIZATION
+						break;
+					}
+				case SHAMAN:
+					{
+						BaseHP = uint32(85.1125f * Level);
+						BaseMana = uint32(54.95f * Level);
+						NORMALIZATION
+						break;
+					}
+				case DRUID:
+					{
+						BaseHP = uint32(92.7125f * Level);
+						BaseMana = uint32(43.7f * Level);
+						NORMALIZATION
+						break;
+					}
+				case PALADIN:
+					{
+						BaseHP = uint32(87.05f * Level);
+						BaseMana = uint32(54.925f * Level);
+						NORMALIZATION
+						break;
+					}
+				case MAGE:
+					{
+						BaseHP = uint32(87.0375f * Level);
+						BaseMana = uint32(40.85f * Level);
+						NORMALIZATION
+						break;
+					}
+				case WARLOCK:
+					{
+						BaseHP = uint32(104.425f * Level);
+						BaseMana = uint32(52.975f * Level);
+						NORMALIZATION
+						break;
+					}
+				}
+
+				lvl->HP = HP + BaseHP;
+				lvl->Mana = Mana + BaseMana;
+				lvl->BaseHP = BaseHP;
+				lvl->BaseMana = BaseMana;
 
 				// Calculate next level XP
 				uint32 nextLvlXP = 0;
-/*				if( Level > 0 && Level <= 30 )
-				{
-					nextLvlXP = ((int)((((double)(8 * Level * ((Level * 5) + 45)))/100)+0.5))*100;
-				}
-				else if( Level == 31 )
-				{
-					nextLvlXP = ((int)((((double)(((8 * Level) + 3) * ((Level * 5) + 45)))/100)+0.5))*100;
-				}
-				else if( Level == 32 )
-				{
-					nextLvlXP = ((int)((((double)(((8 * Level) + 6) * ((Level * 5) + 45)))/100)+0.5))*100;
-				}
-				else
-				{
-					nextLvlXP = ((int)((((double)(((8 * Level) + ((Level - 30) * 5)) * ((Level * 5) + 45)))/100)+0.5))*100;
-				}*/
 
 				//this is a fixed table taken from 2.3.0 wow. This can;t get more blizzlike with the "if" cases ;)
 				if( ( Level - 1 ) < MAX_PREDEFINED_NEXTLEVELXP )
@@ -1754,8 +1759,6 @@ void ObjectMgr::GenerateLevelUpInfo()
 				}
 
 				lvl->XPToNextLevel = nextLvlXP;
-				lastlvl = *lvl;
-				lastlvl.HP = lastlvl.HP;
 
 				// Apply to map.
 				lMap->insert( LevelMap::value_type( Level, lvl ) );

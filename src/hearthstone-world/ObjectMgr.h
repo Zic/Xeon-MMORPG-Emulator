@@ -117,6 +117,8 @@ struct LevelInfo
 {
 	uint32 HP;
 	uint32 Mana;
+	uint32 BaseHP;
+	uint32 BaseMana;
 	uint32 Stat[5];
 	uint32 XPToNextLevel;
 };

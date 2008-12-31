@@ -8063,17 +8063,13 @@ void Player::CalculateBaseStats()
 
 	LevelInfo * levelone = objmgr.GetLevelInfo(this->getRace(),this->getClass(),1);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, lvlinfo->HP);
-	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->HP);
+	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->BaseHP);
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, lvlinfo->XPToNextLevel);
 
 	if(GetPowerType() == POWER_TYPE_MANA)
 	{
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, lvlinfo->Mana);
-		int32 intellectStat = lvlinfo->Stat[STAT_INTELLECT]; // First 20 are only worth 1 point each.
-		int32 manaByIntellect = (intellectStat * 15) - ((intellectStat > 20) ? 20 * 14 : levelone->Stat[INTELLECT]);
-
-		int32 baseMana = lvlinfo->Mana - manaByIntellect;
-		SetUInt32Value(UNIT_FIELD_BASE_MANA, (baseMana < 0) ? lvlinfo->Mana : baseMana);
+		SetUInt32Value(UNIT_FIELD_BASE_MANA, lvlinfo->BaseMana);
 	}
 }
 
