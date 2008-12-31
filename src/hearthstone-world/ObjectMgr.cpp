@@ -1617,11 +1617,8 @@ void ObjectMgr::GenerateLevelUpInfo()
 				switch(Class)
 				{
 				case DEATHKNIGHT:
-					if(Level<13)TotalHealthGain+=19;
-					else if(Level <36) TotalHealthGain+=Level+6;
-//					else if(Level >60) TotalHealthGain+=Level+100;
-					else if(Level >60) TotalHealthGain+=Level+206;
-					else TotalHealthGain+=2*Level-30;
+					TotalHealthGain+=125;
+					break;
 					
 				case WARRIOR:
 					if(Level<13)TotalHealthGain+=19;

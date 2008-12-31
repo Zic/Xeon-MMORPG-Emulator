@@ -324,6 +324,15 @@ uint32 CalculateStat(uint16 level,double a3, double a2, double a1, double a0)
 	diff = result1-result2;
 	return diff;
 }
+
+uint32 CalculateStatIncrease(uint16 level, float inc)
+{
+	float a = level * inc;
+	float b = (level - 1) * inc;
+
+	return (uint32)(a - b); // truncate: working as intended.
+}
+
 //Partialy taken from WoWWoW Source
 uint32 GainStat(uint16 level, uint8 playerclass,uint8 Stat)
 {
@@ -334,11 +343,12 @@ uint32 GainStat(uint16 level, uint8 playerclass,uint8 Stat)
 		{
 			switch(Stat)
 			{
-			case STAT_STRENGTH:  { gain = CalculateStat(level, 0.000039, 0.006902, 1.080040, -1.051701); }break;
-			case STAT_AGILITY:   { gain = CalculateStat(level, 0.000022, 0.004600, 0.655333, -0.600356); }break;
-			case STAT_STAMINA:   { gain = CalculateStat(level, 0.000059, 0.004044, 1.040000, -1.488504); }break;
-			case STAT_INTELLECT: { gain = CalculateStat(level, 0.000002, 0.001003, 0.100890, -0.076055); }break;
-			case STAT_SPIRIT:	{ gain = CalculateStat(level, 0.000006, 0.002031, 0.278360, -0.340077); }break;
+				// fuck whoever wrote the CalculateStat() system. it sucks.
+			case STAT_STRENGTH:  { gain = CalculateStatIncrease(level, 2.56f); } break;
+			case STAT_AGILITY:   { gain = CalculateStatIncrease(level, 1.64f); } break;
+			case STAT_STAMINA:   { gain = CalculateStatIncrease(level, 2.36f); } break;
+			case STAT_INTELLECT: { gain = CalculateStatIncrease(level, 0.4f); } break;
+			case STAT_SPIRIT:	{ gain = CalculateStatIncrease(level, 0.76f); } break;
 			}
 		}break;
 	case WARRIOR:
