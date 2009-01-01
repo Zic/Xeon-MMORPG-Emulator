@@ -236,7 +236,8 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 				SendChatPacket(data, 1, lang, this);
 				for(set<Player*>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 				{
-					(*itr)->GetSession()->SendChatPacket(data, 1, lang, this);
+					if( (*itr)->GetSession() )
+						(*itr)->GetSession()->SendChatPacket(data, 1, lang, this);
 				}
 			}
 			delete data;
@@ -363,10 +364,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			{
 				if(GetPlayer()->m_modlanguage >=0)
 					data = sChatHandler.FillMessageData( CHAT_MSG_WHISPER, GetPlayer()->m_modlanguage,  msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
-				else
+				else if(player->GetSession() )
 					data = sChatHandler.FillMessageData( CHAT_MSG_WHISPER, ((CanUseCommand('c') || player->GetSession()->CanUseCommand('c')) && lang != -1) ? LANG_UNIVERSAL : lang,  msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
 
-				player->GetSession()->SendPacket(data);
+				if( player->GetSession() )
+					player->AttemptSendPacket(data);
 				delete data;
 			}
 
@@ -581,6 +583,7 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recvPacket)
 	CHECK_PACKET_SIZE(recvPacket, 29);
 
     // the 0 in the out packet is unknown
+	if( !GetPlayer()->GetSession() )
     GetPlayer()->GetSession()->OutPacket(SMSG_COMPLAIN_RESULT, 1, 0 );
 
 	/* This whole thing is guess-work */

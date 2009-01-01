@@ -194,7 +194,7 @@ void Guild::SendPacket(WorldPacket * data)
 	for(GuildMemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
 	{
 		if(itr->first->m_loggedInPlayer != NULL && itr->first->m_loggedInPlayer->GetSession())
-			itr->first->m_loggedInPlayer->GetSession()->SendPacket(data);
+			itr->first->m_loggedInPlayer->AttemptSendPacket(data);
 	}
 	m_lock.Release();
 }
@@ -1004,7 +1004,7 @@ void Guild::GuildChat(const char * szMessage, WorldSession * pClient, int32 iTyp
 	for(GuildMemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
 	{
 		if(itr->second->pRank->CanPerformCommand(GR_RIGHT_GCHATLISTEN) && itr->first->m_loggedInPlayer)
-			itr->first->m_loggedInPlayer->GetSession()->SendPacket(data);
+			itr->first->m_loggedInPlayer->AttemptSendPacket(data);
 	}
 	m_lock.Release();
 
@@ -1031,7 +1031,7 @@ void Guild::OfficerChat(const char * szMessage, WorldSession * pClient, int32 iT
 	for(GuildMemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
 	{
 		if(itr->second->pRank->CanPerformCommand(GR_RIGHT_OFFCHATLISTEN) && itr->first->m_loggedInPlayer)
-			itr->first->m_loggedInPlayer->GetSession()->SendPacket(data);
+			itr->first->m_loggedInPlayer->AttemptSendPacket(data);
 	}
 	m_lock.Release();
 
@@ -1200,7 +1200,7 @@ void Guild::SendGuildQuery(WorldSession * pClient)
 		for(GuildMemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
 		{
 			if(itr->first->m_loggedInPlayer)
-				itr->first->m_loggedInPlayer->GetSession()->SendPacket(&data);
+				itr->first->m_loggedInPlayer->AttemptSendPacket(&data);
 		}
 	}
 

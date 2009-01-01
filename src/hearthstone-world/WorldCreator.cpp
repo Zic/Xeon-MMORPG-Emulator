@@ -634,7 +634,7 @@ void InstanceMgr::ResetSavedInstances(Player * plr)
 
 					// <mapid> has been reset.
 					data << uint32(in->m_mapId);
-					plr->GetSession()->SendPacket(&data);
+					plr->AttemptSendPacket(&data);
 
 					// destroy the instance
 					_DeleteInstance(in, true);
@@ -781,11 +781,11 @@ void InstanceMgr::BuildSavedInstancesForPlayer(Player * plr)
 
 						data.SetOpcode(SMSG_UPDATE_LAST_INSTANCE);
 						data << uint32(in->m_mapId);
-						plr->GetSession()->SendPacket(&data);
+						plr->AttemptSendPacket(&data);
 
 						data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
 						data << uint32(0x01);
-						plr->GetSession()->SendPacket(&data);
+						plr->AttemptSendPacket(&data);
 					
 						return;
 					}
@@ -797,7 +797,7 @@ void InstanceMgr::BuildSavedInstancesForPlayer(Player * plr)
 
 	data.SetOpcode(SMSG_UPDATE_INSTANCE_OWNERSHIP);
 	data << uint32(0x00);
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void InstanceMgr::BuildRaidSavedInstancesForPlayer(Player * plr)
@@ -834,7 +834,7 @@ void InstanceMgr::BuildRaidSavedInstancesForPlayer(Player * plr)
 	m_mapLock.Release();
 
 	*(uint32*)&data.contents()[0] = counter;
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void Instance::SaveToDB()
@@ -889,7 +889,7 @@ void InstanceMgr::PlayerLeftGroup(Group * pGroup, Player * pPlayer)
 					if(!pPlayer->raidgrouponlysent && pPlayer->GetInstanceID() == (int32)in->m_instanceId)
 					{
 						data << uint32(60000) << uint32(1);
-						pPlayer->GetSession()->SendPacket(&data);
+						pPlayer->AttemptSendPacket(&data);
 						pPlayer->raidgrouponlysent=true;
 	
 						sEventMgr.AddEvent(pPlayer, &Player::EjectFromInstance, EVENT_PLAYER_EJECT_FROM_INSTANCE, 60000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);

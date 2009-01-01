@@ -207,7 +207,7 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 	GiveRewardsForAchievement(ae);
 
 	if( m_player.IsInWorld() )
-		m_player.GetSession()->SendPacket( BuildAchievementEarned(pData) );
+		m_player.AttemptSendPacket( BuildAchievementEarned(pData) );
 	else
 		m_player.CopyAndSendDelayedPacket( BuildAchievementEarned(pData) );
 
@@ -347,7 +347,7 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	if( !m_player.IsInWorld() )
 		m_player.CopyAndSendDelayedPacket(&data);
 	else
-		m_player.GetSession()->SendPacket(&data);
+		m_player.AttemptSendPacket(&data);
 
 	if( m_achievementInspectPacket )
 	{

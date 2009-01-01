@@ -395,7 +395,7 @@ void Transporter::TransportPassengers(uint32 mapid, uint32 oldmap, float x, floa
 			}
 
 			plr->m_lockTransportVariables = true;
-			plr->GetSession()->SendPacket(&Pending);
+			plr->AttemptSendPacket(&Pending);
 			plr->_Relocate(mapid, v, false, true, 0);
 		}
 	}

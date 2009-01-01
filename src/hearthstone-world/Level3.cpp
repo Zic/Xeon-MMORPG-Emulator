@@ -532,7 +532,7 @@ bool ChatHandler::HandleGMTicketDelByIdCommand(const char* args, WorldSession *m
 		WorldPacket data(SMSG_GMTICKET_DELETETICKET, 4);
 		data << uint32(9);
 
-		plr->GetSession()->SendPacket( &data );
+		plr->AttemptSendPacket( &data );
 	}
 
 	return true;

@@ -152,7 +152,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		for(LooterSet::iterator itr = pLootObj->m_loot.looters.begin(); itr != pLootObj->m_loot.looters.end(); ++itr)
 		{
 			if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
-				plr->GetSession()->SendPacket(&data);
+				plr->AttemptSendPacket(&data);
 		}
 	}
 	else
@@ -161,7 +161,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		WorldPacket data(1);
 		data.SetOpcode(SMSG_LOOT_REMOVED);
 		data << lootSlot;
-		_player->GetSession()->SendPacket(&data);
+		_player->AttemptSendPacket(&data);
 	}
 
 	/* any left yet? (for fishing bobbers) */
@@ -246,7 +246,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 				continue;
 
 			(*itr)->ModUnsigned32Value(PLAYER_FIELD_COINAGE, share);
-			(*itr)->GetSession()->SendPacket(&pkt);
+			(*itr)->AttemptSendPacket(&pkt);
 		}
 	}
 }
@@ -1361,7 +1361,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			plyr->m_lastRunSpeed = 0; //counteract mount-bug; reset speed to zero to force update SetPlayerSpeed in next line.
 			plyr->SetPlayerSpeed(RUN,plyr->m_base_runSpeed);
 			WorldPacket data(SMSG_ENABLE_BARBER_SHOP, 0);
-			plyr->GetSession()->SendPacket(&data);
+			plyr->AttemptSendPacket(&data);
 		}break;
 	}   
 }
@@ -1725,7 +1725,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 		for(LooterSet::iterator itr = pLoot->looters.begin(); itr != pLoot->looters.end(); ++itr)
 		{
 			if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
-				plr->GetSession()->SendPacket(&data);
+				plr->AttemptSendPacket(&data);
 		}
 	}
 	else
@@ -1979,7 +1979,7 @@ void WorldSession::HandleDungeonDifficultyOpcode(WorldPacket& recv_data)
 				if((*itr)->m_loggedInPlayer)
 				{
                     (*itr)->m_loggedInPlayer->iInstanceType = data;
-					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&pData);
+					(*itr)->m_loggedInPlayer->AttemptSendPacket(&pData);
 				}
 			}
 		}

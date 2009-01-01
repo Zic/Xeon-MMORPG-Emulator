@@ -283,6 +283,8 @@ public:
 	int32 m_moveDelayTime;
 	int32 m_clientTimeDelay;
 
+	set<Player*> m_pendingPlayers;
+
 	void CharacterEnumProc(QueryResult * result);
 	void LoadAccountDataProc(QueryResult * result);
 	HEARTHSTONE_INLINE bool IsLoggingOut() { return _loggingOut; }

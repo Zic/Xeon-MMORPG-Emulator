@@ -531,7 +531,7 @@ void GameObject::FishHooked(Player * player)
 	data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM); 
 	data << GetGUID();
 	data << (uint32)(0); // value < 4
-	player->GetSession()->SendPacket(&data);
+	player->AttemptSendPacket(&data);
 	//SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
 	//BuildFieldUpdatePacket(player, GAMEOBJECT_FLAGS, 32);
 	SetUInt32Value(GAMEOBJECT_FLAGS, 32);

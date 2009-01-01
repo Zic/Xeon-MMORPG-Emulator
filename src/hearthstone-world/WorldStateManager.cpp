@@ -138,7 +138,7 @@ void WorldStateManager::SendWorldStates(Player *pPlayer)
 
 	// append the count, and send away
 	*(uint16*)(&data.contents()[12]) = state_count;
-	pPlayer->GetSession()->SendPacket(&data);	
+	pPlayer->AttemptSendPacket(&data);	
 }
 
 void WorldStateManager::ClearWorldStates(Player *pPlayer)
@@ -154,7 +154,7 @@ void WorldStateManager::ClearWorldStates(Player *pPlayer)
 	data << uint32(0) << uint16(0) << uint16(0) << uint16(0);
 
 	// send
-	pPlayer->GetSession()->SendPacket(&data);
+	pPlayer->AttemptSendPacket(&data);
 }
 
 const string WorldStateManager::GetPersistantSetting(const char *szKeyName, const char *szDefaultValue)

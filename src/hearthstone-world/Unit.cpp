@@ -3070,7 +3070,7 @@ else
 					WorldPacket data( 5 );
 					data.SetOpcode( SMSG_UPDATE_AURA_DURATION );
 					data << (uint8)pVictim->m_auras[x]->GetAuraSlot() << 20000;
-					static_cast< Player* >( pVictim )->GetSession()->SendPacket( &data );
+					static_cast< Player* >( pVictim )->AttemptSendPacket( &data );
 				}
 				*/
 				// However, there is also an opcode that tells the caster that the aura has been refreshed.
@@ -3324,7 +3324,7 @@ void Unit::smsg_AttackStop(Unit* pVictim)
 		data << pVictim->GetNewGUID();
 		data << uint8(0);
 		data << uint32(0);
-		static_cast< Player* >( this )->GetSession()->SendPacket( &data );
+		static_cast< Player* >( this )->AttemptSendPacket( &data );
 		data.clear();
 	}
 
@@ -4121,7 +4121,7 @@ void Unit::SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, Pla
 	data << uint32(MessageLength);
 	data << msg;
 	data << uint8(0x00);
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void Unit::SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, const char * msg)

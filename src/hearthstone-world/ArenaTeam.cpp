@@ -113,7 +113,7 @@ void ArenaTeam::SendPacket(WorldPacket * data)
 	{
 		info = m_members[i].Info;
 		if(info && info->m_loggedInPlayer)
-			info->m_loggedInPlayer->GetSession()->SendPacket(data);
+			info->m_loggedInPlayer->AttemptSendPacket(data);
 	}
 }
 
@@ -435,7 +435,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 	plr->m_arenateaminviteguid = _player->m_playerInfo->arenaTeam[pTeam->m_type]->m_id;
 	data << _player->GetName();
 	data << _player->m_playerInfo->arenaTeam[pTeam->m_type]->m_name;
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void WorldSession::HandleArenaTeamRemoveMemberOpcode(WorldPacket & recv_data)

@@ -480,7 +480,7 @@ void QuestMgr::BuildQuestComplete(Player*plr, Quest* qst)
 			data << qst->reward_itemcount[i];
 		}
 	}
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void QuestMgr::BuildQuestList(WorldPacket *data, Object* qst_giver, Player *plr, uint32 language)
@@ -577,7 +577,7 @@ void QuestMgr::SendQuestUpdateAddKill(Player* plr, uint32 questid, uint32 entry,
 	WorldPacket data(32);
 	data.SetOpcode(SMSG_QUESTUPDATE_ADD_KILL);
 	data << questid << entry << count << tcount << guid;
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 void QuestMgr::BuildQuestUpdateComplete(WorldPacket* data, Quest* qst)
@@ -593,7 +593,7 @@ void QuestMgr::SendPushToPartyResponse(Player *plr, Player* pTarget, uint32 resp
 	data << pTarget->GetGUID();
 	data << response;
 	data << uint8(0);
-	plr->GetSession()->SendPacket(&data);
+	plr->AttemptSendPacket(&data);
 }
 
 bool QuestMgr::OnGameObjectActivate(Player *plr, GameObject *go)
@@ -858,7 +858,7 @@ void QuestMgr::OnPlayerItemPickup(Player* plr, Item* item)
 						WorldPacket data(8);
 						data.SetOpcode(SMSG_QUESTUPDATE_ADD_ITEM);
 						data << qle->GetQuest()->required_item[j] << uint32(1);
-						plr->GetSession()->SendPacket(&data);
+						plr->AttemptSendPacket(&data);
 						if(qle->CanBeFinished())
 						{
 							plr->UpdateNearbyGameObjects();
@@ -1203,7 +1203,7 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
 			    data << uint32(0);
 			    data << uint16(2);
 			    data << plr->GetGUID();
-			    plr->GetSession()->SendPacket( &data );
+			    plr->AttemptSendPacket( &data );
 
 			    data.Initialize( SMSG_SPELL_GO );
 			    data << qst_giver->GetNewGUID() << qst_giver->GetNewGUID();
@@ -1214,7 +1214,7 @@ void QuestMgr::OnQuestFinished(Player* plr, Quest* qst, Object *qst_giver, uint3
 			    data << uint8(0);
 			    data << uint16(2);
 			    data << plr->GetGUID();
-			    plr->GetSession()->SendPacket( &data );
+			    plr->AttemptSendPacket( &data );
 
 			    // Teach the spell
 			    plr->addSpell(qst->reward_spell);
@@ -1420,7 +1420,7 @@ void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, Player *plyr)
     data.Initialize(SMSG_QUESTGIVER_QUEST_FAILED);
     data << uint32(qst->id);
     data << failed;
-    plyr->GetSession()->SendPacket(&data);
+    plyr->AttemptSendPacket(&data);
 	DEBUG_LOG("WORLD:Sent SMSG_QUESTGIVER_QUEST_FAILED");
 }
 
@@ -1557,27 +1557,27 @@ bool QuestMgr::OnActivateQuestGiver(Object *qst_giver, Player *plr)
 		if ((status == QMGR_QUEST_AVAILABLE) || (status == QMGR_QUEST_REPEATABLE) || (status == QMGR_QUEST_CHAT))
 		{
 			sQuestMgr.BuildQuestDetails(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);		// 1 because we have 1 quest, and we want goodbye to function
-			plr->GetSession()->SendPacket(&data);
+			plr->AttemptSendPacket(&data);
 			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 		}
 		else if (status == QMGR_QUEST_FINISHED)
 		{
 			sQuestMgr.BuildOfferReward(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);
-			plr->GetSession()->SendPacket(&data);
+			plr->AttemptSendPacket(&data);
 			//ss
 			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD." );
 		}
 		else if (status == QMGR_QUEST_NOT_FINISHED)
 		{
 			sQuestMgr.BuildRequestItems(&data, (*itr)->qst, qst_giver, status, plr->GetSession()->language);
-			plr->GetSession()->SendPacket(&data);
+			plr->AttemptSendPacket(&data);
 			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 		}
 	}
 	else 
 	{
 		sQuestMgr.BuildQuestList(&data, qst_giver ,plr, plr->GetSession()->language);
-		plr->GetSession()->SendPacket(&data);
+		plr->AttemptSendPacket(&data);
 		DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST." );
 	}
 	return true;

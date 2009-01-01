@@ -2603,7 +2603,7 @@ void Spell::SpellEffectLeap(uint32 i) // Leap
 		data << cosf(p_caster->GetOrientation()) << sinf(p_caster->GetOrientation());
 		data << radius;
 		data << float(-10.0f);
-		p_caster->GetSession()->SendPacket(&data);
+		p_caster->AttemptSendPacket(&data);
 		//m_caster->SendMessageToSet(&data, true);
 
 		// reset heartbeat for a little while, 2 seconds maybe?
@@ -2835,7 +2835,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 					//30% chance to not be able to reskin on fail
 					((Creature*)unitTarget)->Skinned = true;
 					WorldPacket *pkt=unitTarget->BuildFieldUpdatePacket(UNIT_FIELD_FLAGS,0);
-					static_cast< Player* >( m_caster )->GetSession()->SendPacket(pkt);
+					static_cast< Player* >( m_caster )->AttemptSendPacket(pkt);
 					delete pkt;
 
 				}*/
@@ -3659,7 +3659,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 					itr != pGroup->GetGroupMembersEnd(); ++itr)
 				{
 					if((*itr)->m_loggedInPlayer && m_caster != (*itr)->m_loggedInPlayer)
-						(*itr)->m_loggedInPlayer->GetSession()->SendPacket(pkt);
+						(*itr)->m_loggedInPlayer->AttemptSendPacket(pkt);
 				}
 				p_caster->GetGroup()->Unlock();
 			}
@@ -3789,7 +3789,7 @@ void Spell::SpellEffectSummonPet(uint32 i) //summon - pet
 		{
 			WorldPacket data(SMSG_AREA_TRIGGER_MESSAGE, 50);
 			data << uint32(0) << "You do not have any pets to call." << uint8(0);
-			p_caster->GetSession()->SendPacket(&data);
+			p_caster->AttemptSendPacket(&data);
 		}
 		return;
 	}
@@ -4100,7 +4100,7 @@ void Spell::SummonPossessed(uint32 i) // eye of kilrog
 
 	WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE);
 	data << m_target->GetNewGUID() << uint8(1);
-	pCaster->GetSession()->SendPacket(&data);
+	pCaster->AttemptSendPacket(&data);
 	*/
 
 /*
@@ -5085,7 +5085,7 @@ void Spell::SpellEffectSkinning(uint32 i)
 
 		//still lootable
 		//pkt=unitTarget->BuildFieldUpdatePacket(UNIT_DYNAMIC_FLAGS,U_DYN_FLAG_LOOTABLE);
-		//static_cast< Player* >( m_caster )->GetSession()->SendPacket(pkt);
+		//static_cast< Player* >( m_caster )->AttemptSendPacket(pkt);
 		//delete pkt;	 
 		DetermineSkillUp(SKILL_SKINNING,sk<lvl*5?sk/5:lvl);
 	}
@@ -5261,7 +5261,7 @@ void Spell::SpellEffectKnockBack(uint32 i)
 	data << -value2;
 	if (playerTarget)
 	{
-		playerTarget->GetSession()->SendPacket(&data);
+		playerTarget->AttemptSendPacket(&data);
 		playerTarget->DelaySpeedHack( 5000 );
 	}
 }

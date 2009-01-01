@@ -350,7 +350,7 @@ void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
 	data.put(8, count);
 	data.put(12, count);
 
-    plr->GetSession()->SendPacket(&data);
+    plr->AttemptSendPacket(&data);
 }
 
 void LfgMgr::SetPlayerInLfmList(Player * pl, uint32 LfgDungeonId)

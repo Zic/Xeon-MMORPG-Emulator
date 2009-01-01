@@ -163,7 +163,7 @@ void WorldSession::HandleReadyCheckOpcode(WorldPacket& recv_data)
 			data << _player->GetGUID();
 			data << ready;
 			if(pGroup->GetLeader() && pGroup->GetLeader()->m_loggedInPlayer)
-				pGroup->GetLeader()->m_loggedInPlayer->GetSession()->SendPacket(&data);
+				pGroup->GetLeader()->m_loggedInPlayer->AttemptSendPacket(&data);
 		}
 	}
 }
