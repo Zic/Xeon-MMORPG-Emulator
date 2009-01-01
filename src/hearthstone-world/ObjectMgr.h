@@ -225,7 +225,7 @@ protected:
 	std::vector<GossipMenuItem> Menu;
 };
 
-class Charter
+class SERVER_DECL Charter
 {
 public:
 	uint32 GetNumberOfSlotsByType()
