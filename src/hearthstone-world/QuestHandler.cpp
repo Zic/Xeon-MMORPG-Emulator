@@ -774,7 +774,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 						data << pPlayer->GetGUID();
 						data << uint32(QUEST_SHARE_MSG_SHARING_QUEST);
 						data << uint8(0);
-						_player->AttemptSendPacket(&data);
+						_player->GetSession()->SendPacket(&data);
 
 						uint32 response = 0;
 						if(_player->GetDistance2dSq(pPlayer) > 100)
@@ -815,7 +815,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 
 						data.clear();
 						sQuestMgr.BuildQuestDetails(&data, pQuest, pPlayer, 1, pPlayer->GetSession()->language, _player);
-						pPlayer->AttemptSendPacket(&data);
+						pPlayer->GetSession()->SendPacket(&data);
 						pPlayer->SetQuestSharer(pguid);
 					}
 				}
@@ -844,7 +844,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 			data << guid;
 			data << uint32(msg);
 			data << uint8(0);
-			pPlayer->AttemptSendPacket(&data);
+			pPlayer->GetSession()->SendPacket(&data);
 			GetPlayer()->SetQuestSharer(0);
 		}
 	}

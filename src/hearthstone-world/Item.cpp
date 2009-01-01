@@ -595,7 +595,7 @@ int32 Item::AddEnchantment( EnchantEntry* Enchantment, uint32 Duration, bool Per
 		EnchantLog << m_uint32Values[OBJECT_FIELD_ENTRY];
 		EnchantLog << Enchantment->Id;
 		EnchantLog << uint8(0);
-		owner->AttemptSendPacket( &EnchantLog );
+		owner->GetSession()->SendPacket( &EnchantLog );
 
 		if( owner->GetTradeTarget() )
 		{

@@ -783,7 +783,7 @@ void LootRoll::Finalize()
 			if(_player->InGroup())
 				_player->GetGroup()->SendPacketToAll(&data);
 			else
-				_player->AttemptSendPacket(&data);
+				_player->GetSession()->SendPacket(&data);
 		}
 
 		/* item can now be looted by anyone :) */
@@ -799,7 +799,7 @@ void LootRoll::Finalize()
 	if(_player->InGroup())
 		_player->GetGroup()->SendPacketToAll(&data);
 	else
-		_player->AttemptSendPacket(&data);
+		_player->GetSession()->SendPacket(&data);
 
 	ItemPrototype* it = ItemPrototypeStorage.LookupEntry(itemid);
 
@@ -861,7 +861,7 @@ void LootRoll::Finalize()
 	for(LooterSet::iterator itr = pLoot->looters.begin(); itr != pLoot->looters.end(); ++itr)
 	{
 		if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
-			plr->AttemptSendPacket(&data);
+			plr->GetSession()->SendPacket(&data);
 	}
 
 	/*WorldPacket idata(45);
@@ -870,7 +870,7 @@ void LootRoll::Finalize()
 	if(_player->InGroup())
 		_player->GetGroup()->SendPacketToAll(&idata);
 	else
-		_player->AttemptSendPacket(&idata);*/
+		_player->GetSession()->SendPacket(&idata);*/
 
 	delete this;
 }
@@ -906,7 +906,7 @@ void LootRoll::PlayerRolled(Player *player, uint8 choice)
 	if(player->InGroup())
 		player->GetGroup()->SendPacketToAll(&data);
 	else
-		player->AttemptSendPacket(&data);
+		player->GetSession()->SendPacket(&data);
 	
 	// check for early completion
 	if(!--_remaining)

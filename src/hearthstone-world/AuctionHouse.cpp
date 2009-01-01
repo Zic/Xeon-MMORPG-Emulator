@@ -306,7 +306,7 @@ void AuctionHouse::SendBidListPacket(Player * plr, WorldPacket * packet)
 	}
 	data << count;
 	auctionLock.ReleaseReadLock();
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }
 
 void AuctionHouse::UpdateItemOwnerships(uint32 oldGuid, uint32 newGuid)
@@ -357,7 +357,7 @@ void AuctionHouse::SendOwnerListPacket(Player * plr, WorldPacket * packet)
 	}
 	data << count;
 	auctionLock.ReleaseReadLock();
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }
 
 void AuctionHouse::SendAuctionNotificationPacket(Player * plr, Auction * auct)
@@ -371,7 +371,7 @@ void AuctionHouse::SendAuctionNotificationPacket(Player * plr, Auction * auct)
 	data << auct->pItem->GetEntry();
 	data << uint32(0);
 	
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
@@ -667,7 +667,7 @@ void AuctionHouse::SendAuctionList(Player * plr, WorldPacket * packet)
 	// total count
 	data << uint32(1 + counted_items);
 	auctionLock.ReleaseReadLock();
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )

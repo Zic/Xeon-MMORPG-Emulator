@@ -69,7 +69,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 		data.SetOpcode(SMSG_GROUP_INVITE);
 		data << uint8(0);
 		data << GetPlayer()->GetName();
-		player->AttemptSendPacket(&data);
+		player->GetSession()->SendPacket(&data);
 		return;
 	}
 	
@@ -104,7 +104,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 	data << uint8(1);
 	data << GetPlayer()->GetName();
 
-	player->AttemptSendPacket(&data);
+	player->GetSession()->SendPacket(&data);
 
 	uint32 gtype = 0;
 	if(group)
@@ -172,7 +172,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 
 	data << GetPlayer()->GetName();
 
-	player->AttemptSendPacket( &data );
+	player->GetSession()->SendPacket( &data );
 	player->SetInviter(0);
 	_player->SetInviter(0);
 }
@@ -381,6 +381,6 @@ void WorldSession::SendPartyCommandResult(Player *pPlayer, uint32 p1, std::strin
 			data << name.c_str();
 
 		data << err;
-		pPlayer->AttemptSendPacket(&data);
+		pPlayer->GetSession()->SendPacket(&data);
 	}
 }

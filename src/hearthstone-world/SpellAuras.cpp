@@ -2346,7 +2346,7 @@ void Aura::SpellAuraDummy(bool apply)
 
 				WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
 				data << m_target->GetNewGUID() << uint8(0);
-				pCaster->AttemptSendPacket(&data);
+				pCaster->GetSession()->SendPacket(&data);
 			}
 			else
 			{
@@ -2363,7 +2363,7 @@ void Aura::SpellAuraDummy(bool apply)
 
 				WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
 				data << pCaster->GetNewGUID() << uint8(1);
-				pCaster->AttemptSendPacket(&data);
+				pCaster->GetSession()->SendPacket(&data);
 			}
 		}break;
 	case 570:   // far sight
@@ -2764,7 +2764,7 @@ void Aura::SpellAuraModConfuse(bool apply)
 			WorldPacket data1(9);
 			data1.Initialize(SMSG_CLIENT_CONTROL_UPDATE);
 			data1 << m_target->GetNewGUID() << uint8(0x00);
-			p_target->AttemptSendPacket(&data1);
+			p_target->GetSession()->SendPacket(&data1);
 			p_target->DelaySpeedHack( GetDuration() );
 		}
 	}
@@ -2781,7 +2781,7 @@ void Aura::SpellAuraModConfuse(bool apply)
 			WorldPacket data1(9);
 			data1.Initialize(SMSG_CLIENT_CONTROL_UPDATE);
 			data1 << m_target->GetNewGUID() << uint8(0x01);
-			p_target->AttemptSendPacket(&data1);
+			p_target->GetSession()->SendPacket(&data1);
 
 			m_target->DisableAI();
 
@@ -2850,7 +2850,7 @@ void Aura::SpellAuraModCharm(bool apply)
 			data << uint32(PET_SPELL_AGRESSIVE);
 			data << uint32(PET_SPELL_DEFENSIVE);
 			data << uint32(PET_SPELL_PASSIVE);
-			caster->AttemptSendPacket(&data);
+			caster->GetSession()->SendPacket(&data);
 			target->SetEnslaveSpell(m_spellProto->Id);
 		}
 	}
@@ -2870,7 +2870,7 @@ void Aura::SpellAuraModCharm(bool apply)
 			caster->SetUInt64Value(UNIT_FIELD_CHARM, 0);
 			WorldPacket data(SMSG_PET_SPELLS, 8);
 			data << uint64(0);
-			caster->AttemptSendPacket(&data);
+			caster->GetSession()->SendPacket(&data);
 			target->SetEnslaveSpell(0);
 		}
 	}
@@ -2902,7 +2902,7 @@ void Aura::SpellAuraModFear(bool apply)
 			WorldPacket data1(9);
 			data1.Initialize(SMSG_CLIENT_CONTROL_UPDATE);
 			data1 << m_target->GetNewGUID() << uint8(0x00);
-			p_target->AttemptSendPacket(&data1);
+			p_target->GetSession()->SendPacket(&data1);
 			p_target->DelaySpeedHack( GetDuration() + 2000 );
 		}
 	}
@@ -2923,7 +2923,7 @@ void Aura::SpellAuraModFear(bool apply)
 				WorldPacket data1(9);
 				data1.Initialize(SMSG_CLIENT_CONTROL_UPDATE);
 				data1 << m_target->GetNewGUID() << uint8(0x01);
-				p_target->AttemptSendPacket(&data1);
+				p_target->GetSession()->SendPacket(&data1);
 
 				m_target->DisableAI();
 
@@ -4464,7 +4464,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				/*WorldPacket data(12);
 				data.SetOpcode(SMSG_COOLDOWN_EVENT);
 				data << (uint32)GetSpellProto()->Id << m_target->GetGUID();
-				static_cast< Player* >( m_target )->AttemptSendPacket(&data);*/
+				static_cast< Player* >( m_target )->GetSession()->SendPacket(&data);*/
 				packetSMSG_COOLDOWN_EVENT cd;
 				cd.spellid = m_spellProto->Id;
 				cd.guid = m_target->GetGUID();
@@ -5133,7 +5133,7 @@ void Aura::EventPeriodicLeech(uint32 amount)
 	//deal damage before we add healing bonus to damage
 	m_target->DealDamage(m_target, Amount, 0, 0, GetSpellProto()->Id,true);
 
-	float coef = m_spellProto->EffectMultipleValue[mod->i]; // how much health is restored per damage dealt
+	float coef = m_spellProto->EffectMultipleValue[0]; // how much health is restored per damage dealt
 	SM_FFValue(m_caster->SM[SMT_MULTIPLE_VALUE][0], &coef, m_spellProto->SpellGroupType);
 	SM_PFValue(m_caster->SM[SMT_MULTIPLE_VALUE][1], &coef, m_spellProto->SpellGroupType);
 	Amount = float2int32((float)Amount * coef);
@@ -5463,7 +5463,7 @@ void Aura::SpellAuraIncreaseSwimSpeed(bool apply)
 		data << m_target->GetNewGUID();
 		data << (uint32)2;
 		data << m_target->m_swimSpeed;
-		static_cast< Player* >( m_target )->AttemptSendPacket(&data);
+		static_cast< Player* >( m_target )->GetSession()->SendPacket(&data);
 	}   
 }
 
@@ -5642,7 +5642,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 			data << uint32( 0xFFFFFFFF );
 			data << uint8( 0 );
 			data << uint32( m_spellProto->Id );		// ???
-			pTarget->AttemptSendPacket( &data );
+			pTarget->GetSession()->SendPacket( &data );
 
 			data.Initialize(0x03BE);
 			data << pTarget->GetGUID();
@@ -5668,7 +5668,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 						if( static_cast< Player* >( *itr )->isCasting() && TO_PLAYER(*itr)->GetCurrentSpell()->GetSpellProto() != m_spellProto )
 							static_cast< Player* >( *itr )->CancelSpell( NULL ); //cancel current casting spell
 
-						static_cast< Player* >( *itr )->AttemptSendPacket( &data );
+						static_cast< Player* >( *itr )->GetSession()->SendPacket( &data );
 					}
 				}
 			}
@@ -5683,7 +5683,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 			//pTarget->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
 			data.SetOpcode(SMSG_STOP_MIRROR_TIMER);
 			data << uint32(2);
-			pTarget->AttemptSendPacket(&data);
+			pTarget->GetSession()->SendPacket(&data);
 		}
 	}
 }
@@ -6714,7 +6714,7 @@ void Aura::SpellAuraWaterWalk( bool apply )
 			data << m_target->GetNewGUID();
 			data << uint32( 4 );		
 		}
-		static_cast< Player* >( m_target )->AttemptSendPacket( &data );
+		static_cast< Player* >( m_target )->GetSession()->SendPacket( &data );
 	}
 }
 
@@ -6744,7 +6744,7 @@ void Aura::SpellAuraHover( bool apply )
 		WorldPacket data( apply ? SMSG_MOVE_SET_HOVER : SMSG_MOVE_UNSET_HOVER, 13 );
 		data << m_target->GetNewGUID();
 		data << uint32( 0 );
-		static_cast< Player* >( m_target )->AttemptSendPacket( &data );
+		static_cast< Player* >( m_target )->GetSession()->SendPacket( &data );
 	}
 }
 
@@ -7427,7 +7427,7 @@ void Aura::SpellAuraForceReaction( bool apply )
 		data << itr->second;
 	}
 
-	p_target->AttemptSendPacket( &data );
+	p_target->GetSession()->SendPacket( &data );
 }
 
 void Aura::SpellAuraModRangedHaste(bool apply)
@@ -7633,7 +7633,7 @@ void Aura::SpellAuraSafeFall(bool apply)
 
 	data << m_target->GetNewGUID();
 	data << uint32( 0 );
-	static_cast< Player* >( m_target )->AttemptSendPacket( &data );
+	static_cast< Player* >( m_target )->GetSession()->SendPacket( &data );
 }
 
 void Aura::SpellAuraModReputationAdjust(bool apply)
@@ -7734,7 +7734,7 @@ void Aura::SpellAuraWaterBreathing( bool apply )
 			WorldPacket data( 4 );
 			data.SetOpcode( SMSG_STOP_MIRROR_TIMER );
 			data << uint32( 1 );
-			static_cast< Player* >( m_target )->AttemptSendPacket( &data );
+			static_cast< Player* >( m_target )->GetSession()->SendPacket( &data );
 			static_cast< Player* >( m_target )->m_UnderwaterState = 0;			
 	   }
 
@@ -8734,7 +8734,7 @@ void Aura::SendInterrupted(uint8 result, Object * m_caster)
 		data << uint8(0); //extra_cast_number
 		data << uint32(m_spellProto->Id);
 		data << uint8( result );
-		static_cast< Player* >( m_caster )->AttemptSendPacket( &data );
+		static_cast< Player* >( m_caster )->GetSession()->SendPacket( &data );
 	}
 
 	data.Initialize( SMSG_SPELL_FAILED_OTHER );

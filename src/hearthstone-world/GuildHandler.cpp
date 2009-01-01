@@ -106,7 +106,7 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 	WorldPacket data(SMSG_GUILD_INVITE, 100);
 	data << _player->GetName();
 	data << pGuild->GetGuildName();
-	plyr->AttemptSendPacket(&data);
+	plyr->GetSession()->SendPacket(&data);
 
 	plyr->SetGuildInvitersGuid( _player->GetLowGUID() );	
 }
@@ -157,7 +157,7 @@ void WorldSession::HandleGuildDecline(WorldPacket & recv_data)
 
 	data.Initialize(SMSG_GUILD_DECLINE);
 	data << plyr->GetName();
-	inviter->AttemptSendPacket(&data);
+	inviter->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandleSetGuildInformation(WorldPacket & recv_data)
@@ -726,7 +726,7 @@ void SendShowSignatures(Charter * c, uint64 i, Player * p)
 		data << uint64(c->Signatures[i]) << uint32(1);
 	}
 	data << uint8(0);
-	p->AttemptSendPacket(&data);
+	p->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandleCharterShowSignatures(WorldPacket & recv_data)
@@ -908,7 +908,7 @@ void WorldSession::HandleCharterSign( WorldPacket & recv_data )
 
 	WorldPacket data(SMSG_PETITION_SIGN_RESULTS, 100);
 	data << item_guid << _player->GetGUID() << uint32(0);
-	l->AttemptSendPacket(&data);
+	l->GetSession()->SendPacket(&data);
 	data.clear();
 	data << item_guid << (uint64)c->GetLeader() << uint32(0);
 	SendPacket(&data);

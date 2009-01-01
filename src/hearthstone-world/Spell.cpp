@@ -1328,7 +1328,7 @@ void Spell::cast(bool check)
 				data << m_spellInfo->Id;
 				data << p_caster->GetNewGUID();
 				data << uint32(m_spellInfo->RecoveryTime ? m_spellInfo->RecoveryTime : 2300);
-				p_caster->AttemptSendPacket(&data);
+				p_caster->GetSession()->SendPacket(&data);
 			}
 
 			// Note: [Warlock] Immolation Aura somehow has these flags, but it's not channeled
@@ -2161,7 +2161,7 @@ void Spell::SendInterrupted(uint8 result)
 		data << uint8(extra_cast_number);
 		data << uint32(m_spellInfo->Id);
 		data << uint8(result);
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 	}
 
 	data.Initialize(SMSG_SPELL_FAILED_OTHER);
@@ -2242,7 +2242,7 @@ void Spell::SendResurrectRequest(Player* target)
 	data << m_caster->GetGUID();
 	data << uint32(0) << uint8(0);
 
-	target->AttemptSendPacket(&data);
+	target->GetSession()->SendPacket(&data);
 }
 
 bool Spell::HasPower()
@@ -4686,7 +4686,7 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 	data << ((target != 0) ? target->GetNewGUID() : uint8(0));
 	data << m_spellInfo->Id;
 	
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }*/
 
 /*void Spell::SendCastSuccess(const uint64& guid)

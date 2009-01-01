@@ -150,7 +150,7 @@ void WeatherMgr::SendWeather(Player *plr)  //Update weather when player has chan
 	{
 		WorldPacket data(SMSG_WEATHER, 9);
 		BuildWeatherPacket(&data, 0, 0);
-		plr->AttemptSendPacket( &data );
+		plr->GetSession()->SendPacket( &data );
 		plr->m_lastSeenWeather = 0;
 
 		return;
@@ -268,5 +268,5 @@ void WeatherInfo::SendUpdate(Player *plr) //Updates weather for player's zone-ch
 
 	WorldPacket data(SMSG_WEATHER, 9);
 	BuildWeatherPacket(&data, m_currentEffect, m_currentDensity);
-	plr->AttemptSendPacket( &data );
+	plr->GetSession()->SendPacket( &data );
 }

@@ -80,8 +80,7 @@ bool ChatHandler::HandleRenameAllCharacter(const char * args, WorldSession * m_s
 				if( pPlayer != NULL )
 				{
 					pPlayer->rename_pending = true;
-					if( pPlayer->GetSession() )
-						pPlayer->GetSession()->SystemMessage("Your character has had a force rename set, you will be prompted to rename your character at next login in conformance with server rules.");
+					pPlayer->GetSession()->SystemMessage("Your character has had a force rename set, you will be prompted to rename your character at next login in conformance with server rules.");
 				}
 
 				CharacterDatabase.WaitExecute("UPDATE characters SET forced_rename_pending = 1 WHERE guid = %u", uGuid);
@@ -147,13 +146,6 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			flags = fields[17].GetUInt32();
 			race = fields[3].GetUInt8();
 
-			Player * p = objmgr.GetPlayer( (uint32)guid );
-			if( p )
-			{
-				p->SetSession(this);
-				m_pendingPlayers.insert(p);
-			}
-
 			if( _side < 0 )
 			{
 				// work out the side
@@ -201,8 +193,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 
 			if(Class==9 || Class==3)
 			{
-				if(!p)
-					res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid="I64FMTD" AND active=1", guid);
+				res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid="I64FMTD" AND active=1", guid);
 
 				if(res)
 				{
@@ -691,28 +682,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	DEBUG_LOG( "WORLD: Recvd Player Logon Message" );
 
 	recv_data >> playerGuid; // this is the GUID selected by the player
-	Player * loggedInPlayer = objmgr.GetPlayer((uint32)playerGuid);
-
-	// I have a player that's still active, make sure we lose the reference to this worldsession
-	// since it's safe to delete again. :P
-	set<Player*>::iterator itr = m_pendingPlayers.begin();
-	for(; itr != m_pendingPlayers.end(); ++itr)
+	if(objmgr.GetPlayer((uint32)playerGuid) != NULL || m_loggingInPlayer || _player)
 	{
-		(*itr)->SetSession(NULL);
-		(*itr)->ScheduleDeletion(true);
-	}
-
-	if(loggedInPlayer != NULL || m_loggingInPlayer || _player)
-	{
-		if( loggedInPlayer )
-		{
-			// I'm alive, yay!
-			sEventMgr.RemoveEvents( loggedInPlayer, EVENT_PLAYER_DELETE );
-			loggedInPlayer->ok_to_remove = false;
-			loggedInPlayer->SetSession(this);
-			FullLogin( loggedInPlayer );
-			return;
-		}
 		// A character with that name already exists 0x3E
 		uint8 respons = CHAR_LOGIN_DUPLICATE_CHARACTER;
 		OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);

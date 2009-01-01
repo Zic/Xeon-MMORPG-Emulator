@@ -155,7 +155,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 						WorldPacket data(SMSG_PVP_CREDIT, 12);
 						uint32 pvppoints = pts * 10;
 						data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
-						(*vtr)->AttemptSendPacket(&data);
+						(*vtr)->GetSession()->SendPacket(&data);
 					}
 				}
 			}
@@ -194,7 +194,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 			                WorldPacket data(SMSG_PVP_CREDIT, 12);
 			                uint32 pvppoints = GroupPoints * 10;
 			                data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
-			                gPlayer->AttemptSendPacket(&data);
+			                gPlayer->GetSession()->SendPacket(&data);
 		                }
 						//patch by emsy
                         // If we are in Halaa
@@ -237,7 +237,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 			    WorldPacket data(SMSG_PVP_CREDIT, 12);
 			    uint32 pvppoints = Points * 10;
 			    data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
-			    pPlayer->AttemptSendPacket(&data);
+			    pPlayer->GetSession()->SendPacket(&data);
 		    }
 			//patch by emsy
             // If we are in Halaa

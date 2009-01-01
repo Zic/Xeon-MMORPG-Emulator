@@ -368,10 +368,10 @@ void Group::Update()
 				data << uint8( m_LootThreshold );
 				data << uint8( m_difficulty );
 
-				if( !(*itr1)->m_loggedInPlayer->IsInWorld() && (*itr1)->m_loggedInPlayer->GetSession() )
+				if( !(*itr1)->m_loggedInPlayer->IsInWorld() )
 					(*itr1)->m_loggedInPlayer->CopyAndSendDelayedPacket( &data );
-				else if( (*itr1)->m_loggedInPlayer->GetSession() )
-					(*itr1)->m_loggedInPlayer->AttemptSendPacket( &data );
+				else
+					(*itr1)->m_loggedInPlayer->GetSession()->SendPacket( &data );
 			}		
 		}
 	}
@@ -429,8 +429,8 @@ void SubGroup::Disband()
 			{
 				if( (*itr)->m_loggedInPlayer->GetSession() != NULL )
 				{
-					(*itr)->m_loggedInPlayer->AttemptSendPacket(&data);
-					(*itr)->m_loggedInPlayer->AttemptSendPacket(&data2);
+					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data);
+					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data2);
 				}
 			}
 
@@ -534,11 +534,11 @@ void Group::RemovePlayer(PlayerInfo * info)
 			SendNullUpdate( pPlayer );
 
 			data.SetOpcode( SMSG_GROUP_DESTROYED );
-			pPlayer->AttemptSendPacket( &data );
+			pPlayer->GetSession()->SendPacket( &data );
 
 			data.Initialize( SMSG_PARTY_COMMAND_RESULT );
 			data << uint32(2) << uint8(0) << uint32(0);  // you leave the group
-			pPlayer->AttemptSendPacket( &data );
+			pPlayer->GetSession()->SendPacket( &data );
 		}
 
 		//Remove some party auras.
@@ -635,8 +635,8 @@ void Group::SendPacketToAllButOne(WorldPacket *packet, Player *pSkipTarget)
 	{
 		for(itr = m_SubGroups[i]->GetGroupMembersBegin(); itr != m_SubGroups[i]->GetGroupMembersEnd(); ++itr)
 		{
-			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget && (*itr)->m_loggedInPlayer->GetSession())
-				(*itr)->m_loggedInPlayer->AttemptSendPacket(packet);
+			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget)
+				(*itr)->m_loggedInPlayer->GetSession()->SendPacket(packet);
 		}
 	}
 	
@@ -652,8 +652,8 @@ void Group::SendPacketToAllButOne(StackPacket *packet, Player *pSkipTarget)
 	{
 		for(itr = m_SubGroups[i]->GetGroupMembersBegin(); itr != m_SubGroups[i]->GetGroupMembersEnd(); ++itr)
 		{
-			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget && (*itr)->m_loggedInPlayer->GetSession() )
-				(*itr)->m_loggedInPlayer->AttemptSendPacket(packet);
+			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget)
+				(*itr)->m_loggedInPlayer->GetSession()->SendPacket(packet);
 		}
 	}
 
@@ -669,7 +669,7 @@ void Group::OutPacketToAllButOne(uint16 op, uint16 len, const void* data, Player
 	{
 		for(itr = m_SubGroups[i]->GetGroupMembersBegin(); itr != m_SubGroups[i]->GetGroupMembersEnd(); ++itr)
 		{
-			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget && (*itr)->m_loggedInPlayer->GetSession())
+			if((*itr)->m_loggedInPlayer != NULL && (*itr)->m_loggedInPlayer != pSkipTarget)
 				(*itr)->m_loggedInPlayer->GetSession()->OutPacket( op, len, data );
 		}
 	}
@@ -780,8 +780,7 @@ void Group::SendNullUpdate( Player *pPlayer )
 	// this packet is 24 bytes long.		// AS OF 2.1.0
 	uint8 buffer[24];
 	memset(buffer, 0, 24);
-	if( pPlayer->GetSession() )
-		pPlayer->GetSession()->OutPacket( SMSG_GROUP_LIST, 24, buffer );
+	pPlayer->GetSession()->OutPacket( SMSG_GROUP_LIST, 24, buffer );
 }
 
 // player is object class becouse its called from unit class
@@ -976,8 +975,8 @@ void Group::UpdateOutOfRangePlayer(Player * pPlayer, uint32 Flags, bool Distribu
 
 				if(plr && plr != pPlayer)
 				{
-					if(plr->GetDistance2dSq(pPlayer) > dist && plr->GetSession())
-						plr->AttemptSendPacket(data);
+					if(plr->GetDistance2dSq(pPlayer) > dist)
+						plr->GetSession()->SendPacket(data);
 				}
 			}
 		}
@@ -990,6 +989,7 @@ void Group::UpdateOutOfRangePlayer(Player * pPlayer, uint32 Flags, bool Distribu
 
 void Group::UpdateAllOutOfRangePlayersFor(Player * pPlayer)
 {
+	return;
 	WorldPacket data(150);
 	WorldPacket data2(150);
 
@@ -1016,8 +1016,7 @@ void Group::UpdateAllOutOfRangePlayersFor(Player * pPlayer)
 			if(!plr->IsVisible(pPlayer))
 			{
 				UpdateOutOfRangePlayer(plr, GROUP_UPDATE_TYPE_FULL_CREATE, false, &data);
-				if( pPlayer->GetSession() )
-					pPlayer->AttemptSendPacket(&data);
+				pPlayer->GetSession()->SendPacket(&data);
 			}
 		}
 	}
@@ -1353,8 +1352,7 @@ void Group::SendVoiceUpdate()
 
 		//data << uint8( 0x47 );
 
-		if(pl->GetSession())
-			pl->AttemptSendPacket( &data );
+		pl->GetSession()->SendPacket( &data );
 		data.wpos( pos );
 	}
 

@@ -24,7 +24,6 @@ static const uint8 baseRunes[6] = {0,0,1,1,2,2};
 
 Player::Player( uint32 guid ) : m_mailBox(guid)
 {
-	m_accountId = 0;
 	m_runemask = 0x3F;
 	m_bgRatedQueue = false;
 	m_massSummonEnabled = false;
@@ -448,48 +447,6 @@ Player::Player( uint32 guid ) : m_mailBox(guid)
 	m_visibleObjects.clear();
 }
 
-void Player::EventPlayerDelete()
-{
-	if( GetSession() )
-	{
-		// reschedule to avoid possible race condition
-		ScheduleDeletion();
-		return;
-	}
-
-	if(!queuedDeleteLock.AttemptAcquire()) // only one thread can, or needs to delete this.
-		return;
-
-	delete this;
-}
-
-bool Player::AttemptSendPacket(WorldPacket* data)
-{
-	if( !GetSession() )
-		return false;
-
-	GetSession()->SendPacket(data);
-	return true;
-}
-
-bool Player::AttemptSendPacket(StackPacket* data)
-{
-	if( !GetSession() )
-		return false;
-
-	GetSession()->SendPacket(data);
-	return true;
-}
-
-
-void Player::ScheduleDeletion(bool instant)
-{	
-	if(!instant)
-		sEventMgr.AddEvent( this, &Player::EventPlayerDelete, EVENT_PLAYER_DELETE, TIME_MINUTE * 5, 0, 0);
-	else
-		EventPlayerDelete();
-}
-
 void Player::OnLogin()
 {
 
@@ -498,7 +455,6 @@ void Player::OnLogin()
 
 Player::~Player ( )
 {
-	//printf("Player::~Player\n");
 	int i;
 
 	if(!ok_to_remove)
@@ -511,10 +467,6 @@ Player::~Player ( )
 #endif
 		objmgr.RemovePlayer(this);
 	}
-
-	SaveToDB( false );
-
-	objmgr.RemovePlayer(this);
 
 	if(m_session)
 		m_session->SetPlayer(0);
@@ -1615,7 +1567,7 @@ void Player::smsg_InitialSpells()
 
 	
 	*(uint16*)&data.contents()[pos] = (uint16)itemCount;
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 
 	uint32 v = 0;
 	GetSession()->OutPacket(0x041d, 4, &v);
@@ -2029,7 +1981,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << "REPLACE INTO characters VALUES ("
 		
 	<< GetLowGUID() << ", "
-	<< m_accountId << ","
+	<< GetSession()->GetAccountId() << ","
 
 	// stat saving
 	<< "'" << m_name << "', "
@@ -2131,7 +2083,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	<< (uint32)UNIXTIME << ",";
 	
 	//online state
-	if( ok_to_remove || bNewCharacter )
+	if(GetSession()->_loggingOut || bNewCharacter)
 	{
 		ss << "0,";
 	}
@@ -2403,7 +2355,6 @@ bool Player::LoadFromDB(uint32 guid)
 
 void Player::LoadFromDBProc(QueryResultVector & results)
 {
-	m_accountId = GetSession()->GetAccountId();
 	uint32 field_index = 2;
 #define get_next_field fields[field_index++]
 
@@ -4091,7 +4042,7 @@ Corpse *Player::RepopRequestedPlayer()
 		/* Corpse reclaim delay */
 		WorldPacket data2( SMSG_CORPSE_RECLAIM_DELAY, 4 );
 		data2 << (uint32)( CORPSE_RECLAIM_TIME_MS );
-		AttemptSendPacket( &data2 );
+		GetSession()->SendPacket( &data2 );
 	}
 
 	if( myCorpse != NULL )
@@ -5569,7 +5520,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 								if( (*itr)->m_loggedInPlayer->m_passOnLoot )
 									iter->roll->PlayerRolled( (*itr)->m_loggedInPlayer, 3 );		// passed
 								else
-									(*itr)->m_loggedInPlayer->AttemptSendPacket(&data2);
+									(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data2);
 							}
 						}
 					}
@@ -5577,7 +5528,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 				}
 				else
 				{
-					AttemptSendPacket(&data2);
+					GetSession()->SendPacket(&data2);
 				}
 			}			
 		}
@@ -5613,7 +5564,7 @@ void Player::SendTalentResetConfirm()
 	WorldPacket data(MSG_TALENT_WIPE_CONFIRM, 12);
 	data << GetGUID();
 	data << CalcTalentResetCost(GetTalentResetTimes());
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 }
 void Player::SendPetUntrainConfirm()
 {
@@ -5623,7 +5574,7 @@ void Player::SendPetUntrainConfirm()
 	WorldPacket data( SMSG_PET_UNLEARN_CONFIRM, 12 );
 	data << pPet->GetGUID();
 	data << pPet->GetUntrainCost();
-	AttemptSendPacket( &data );
+	GetSession()->SendPacket( &data );
 }
 
 int32 Player::CanShootRangedWeapon( uint32 spellid, Unit* target, bool autoshot )
@@ -5869,7 +5820,7 @@ void Player::EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_sl
 {
 	WorldPacket fail;
 	sQuestMgr.BuildQuestFailed(&fail, qst->id);
-	AttemptSendPacket(&fail);
+	GetSession()->SendPacket(&fail);
 	CALL_QUESTSCRIPT_EVENT(qle, OnQuestCancel)(this);
 	qle->Finish();
 }
@@ -5885,7 +5836,7 @@ void Player::SendInitialLogonPackets()
     data << m_bind_pos_z;
     data << m_bind_mapid;
     data << m_bind_zoneid;
-    AttemptSendPacket( &data );
+    GetSession()->SendPacket( &data );
 
 	//Proficiencies
     //SendSetProficiency(4,armor_proficiency);
@@ -5902,7 +5853,7 @@ void Player::SendInitialLogonPackets()
 	data.Initialize( SMSG_TUTORIAL_FLAGS );
 	for (int i = 0; i < 8; i++)
 		data << uint32( m_Tutorials[i] );
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 
 	//Initial Spells
 	smsg_InitialSpells();
@@ -5973,7 +5924,7 @@ void Player::SendInitialLogonPackets()
 
     data << (uint32)gameTime;
 	data << (float)0.0166666669777748f;  // Normal Game Speed
-	AttemptSendPacket( &data );
+	GetSession()->SendPacket( &data );
 
 	DEBUG_LOG("WORLD: Sent initial logon packets for %s.", GetName());
 }
@@ -6553,7 +6504,7 @@ void Player::_Relocate(uint32 mapid, const LocationVector & v, bool sendpending,
 	{
 		data.SetOpcode(SMSG_TRANSFER_PENDING);
 		data << mapid;
-		AttemptSendPacket(&data);
+		GetSession()->SendPacket(&data);
 	}
 
 	if(m_mapId != mapid || force_new_world)
@@ -6563,7 +6514,7 @@ void Player::_Relocate(uint32 mapid, const LocationVector & v, bool sendpending,
 		{
 			data.Initialize(SMSG_TRANSFER_ABORTED);
 			data << mapid << status;
-			AttemptSendPacket(&data);
+			GetSession()->SendPacket(&data);
 			return;
 		}
 
@@ -6577,7 +6528,7 @@ void Player::_Relocate(uint32 mapid, const LocationVector & v, bool sendpending,
 
 		data.Initialize(SMSG_NEW_WORLD);
 		data << (uint32)mapid << v << v.o;
-		AttemptSendPacket( &data );
+		GetSession()->SendPacket( &data );
 		SetMapId(mapid);
 		SetPlayerStatus(TRANSFER_PENDING);
 	}
@@ -6731,7 +6682,7 @@ void Player::ClearCooldownForSpell(uint32 spell_id)
 		WorldPacket data(12);
 		data.SetOpcode(SMSG_CLEAR_COOLDOWN);
 		data << spell_id << GetGUID();
-		AttemptSendPacket(&data);
+		GetSession()->SendPacket(&data);
 	}
 
 	// remove cooldown data from Server side lists
@@ -7375,7 +7326,7 @@ void Player::SendTradeUpdate()
 		}
 	}
 
-	pTarget->AttemptSendPacket(&data);
+	pTarget->GetSession()->SendPacket(&data);
 }
 
 void Player::RequestDuel(Player *pTarget)
@@ -7420,7 +7371,7 @@ void Player::RequestDuel(Player *pTarget)
 	WorldPacket data(SMSG_DUEL_REQUESTED, 16);
 	data << pGameObj->GetGUID();
 	data << GetGUID();
-	pTarget->AttemptSendPacket(&data);
+	pTarget->GetSession()->SendPacket(&data);
 }
 
 void Player::DuelCountdown()
@@ -7777,7 +7728,7 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 	{
 		WorldPacket data(SMSG_TRANSFER_PENDING, 4);
 		data << uint32(MapID);
-		AttemptSendPacket(&data);
+		GetSession()->SendPacket(&data);
 		sClusterInterface.RequestTransfer(this, MapID, instance_id, vec);
 		return;
 	}
@@ -7851,11 +7802,11 @@ void Player::SafeTeleport(MapMgr * mgr, LocationVector vec)
 	m_instanceId = mgr->GetInstanceID();
 	WorldPacket data(SMSG_TRANSFER_PENDING, 20);
 	data << mgr->GetMapId();
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 
 	data.Initialize(SMSG_NEW_WORLD);
 	data << mgr->GetMapId() << vec << vec.o;
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 
 	SetPlayerStatus(TRANSFER_PENDING);
 	m_sentTeleportPosition = vec;
@@ -8239,7 +8190,7 @@ void Player::CompleteLoading()
 	{
 		WorldPacket data2(SMSG_RAID_GROUP_ONLY, 8);
 		data2 << uint32(0xFFFFFFFF) << uint32(0);
-		AttemptSendPacket(&data2);
+		GetSession()->SendPacket(&data2);
 		raidgrouponlysent=false;
 	}
 
@@ -10788,7 +10739,7 @@ void Player::Social_TellFriendsOnline()
 	{
 		pl = objmgr.GetPlayer(*itr);
 		if( pl != NULL )
-			pl->AttemptSendPacket(&data);
+			pl->GetSession()->SendPacket(&data);
 	}
 	m_socialLock.Release();
 }
@@ -10808,7 +10759,7 @@ void Player::Social_TellFriendsOffline()
 	{
 		pl = objmgr.GetPlayer(*itr);
 		if( pl != NULL )
-			pl->AttemptSendPacket(&data);
+			pl->GetSession()->SendPacket(&data);
 	}
 	m_socialLock.Release();
 }

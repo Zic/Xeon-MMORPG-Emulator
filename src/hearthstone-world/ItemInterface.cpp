@@ -2403,7 +2403,7 @@ void ItemInterface::BuildInventoryChangeError(Item *SrcItem, Item *DstItem, uint
 	data << (DstItem ? DstItem->GetGUID() : uint64(0));
 	data << uint8(0);
 
-	m_pOwner->AttemptSendPacket( &data );
+	m_pOwner->GetSession()->SendPacket( &data );
 }
 
 void ItemInterface::EmptyBuyBack()

@@ -417,7 +417,7 @@ void QuestLogEntry::SendQuestComplete()
 	WorldPacket data(4);
 	data.SetOpcode(SMSG_QUESTUPDATE_COMPLETE);
 	data << m_quest->id;
-	m_plr->AttemptSendPacket(&data);
+	m_plr->GetSession()->SendPacket(&data);
 	CALL_QUESTSCRIPT_EVENT(this, OnQuestComplete)(m_plr, this);
 }
 

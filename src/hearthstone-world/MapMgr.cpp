@@ -181,7 +181,7 @@ void MapMgr::PushObject(Object *obj)
 				obj->GetPositionV()->ChangeCoords(plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
 				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
 				WorldPacket * data = plr->BuildTeleportAckMsg(plr->GetPosition());
-				plr->AttemptSendPacket(data);
+				plr->GetSession()->SendPacket(data);
 				delete data;
 			}
 		}
@@ -217,7 +217,7 @@ void MapMgr::PushObject(Object *obj)
 				obj->GetPositionV()->ChangeCoords(plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
 				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
 				WorldPacket * data = plr->BuildTeleportAckMsg(plr->GetPosition());
-				plr->AttemptSendPacket(data);
+				plr->GetSession()->SendPacket(data);
 				delete data;
 			}
 		}
@@ -694,7 +694,7 @@ void MapMgr::ChangeObjectLocation( Object *obj )
 				obj->GetPositionV()->ChangeCoords(plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
 				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
 				WorldPacket * data = plr->BuildTeleportAckMsg(plr->GetPosition());
-				plr->AttemptSendPacket(data);
+				plr->GetSession()->SendPacket(data);
 				delete data;
 			}
 		}
@@ -1487,7 +1487,7 @@ void MapMgr::BeginInstanceExpireCountdown()
 	for(itr = m_PlayerStorage.begin(); itr != m_PlayerStorage.end(); ++itr)
 	{
 		if(!itr->second->raidgrouponlysent)
-			itr->second->AttemptSendPacket(&data);
+			itr->second->GetSession()->SendPacket(&data);
 	}
 
 	// set our expire time to 60 seconds.
@@ -1754,7 +1754,7 @@ void MapMgr::SendMessageToCellPlayers(Object * obj, WorldPacket * packet, uint32
 				{
 					if((*iter)->IsPlayer())
 					{
-						static_cast< Player* >(*iter)->AttemptSendPacket(packet);
+						static_cast< Player* >(*iter)->GetSession()->SendPacket(packet);
 					}
 				}
 			}
@@ -1787,7 +1787,7 @@ void MapMgr::SendChatMessageToCellPlayers(Object * obj, WorldPacket * packet, ui
 				{
 					if((*iter)->IsPlayer())
 					{
-						//static_cast< Player* >(*iter)->AttemptSendPacket(packet);
+						//static_cast< Player* >(*iter)->GetSession()->SendPacket(packet);
 						static_cast< Player* >(*iter)->GetSession()->SendChatPacket(packet, langpos, lang, originator);
 					}
 				}
@@ -1881,7 +1881,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacke
 			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			p->AttemptSendPacket(pData);
+			p->GetSession()->SendPacket(pData);
 		}
 	}
 }
@@ -1901,7 +1901,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacke
 			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			p->AttemptSendPacket(pData);
+			p->GetSession()->SendPacket(pData);
 		}
 	}
 }
@@ -1978,6 +1978,6 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 		if( ( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask) )
 			continue;
 
-		p->AttemptSendPacket(&data);
+		p->GetSession()->SendPacket(&data);
 	}
 }

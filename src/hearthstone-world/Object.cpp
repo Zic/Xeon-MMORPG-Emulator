@@ -310,7 +310,7 @@ void Object::DestroyForPlayer(Player *target) const
 	WorldPacket data(SMSG_DESTROY_OBJECT, 8);
 	data << GetGUID();
 
-	target->AttemptSendPacket( &data );
+	target->GetSession()->SendPacket( &data );
 }
 
 
@@ -736,7 +736,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 {
 	if(bToSelf && m_objectTypeId == TYPEID_PLAYER)
 	{
-		static_cast< Player* >( this )->AttemptSendPacket(data);		
+		static_cast< Player* >( this )->GetSession()->SendPacket(data);		
 	}
 
 	if(!IsInWorld())
@@ -756,7 +756,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 			{
 				ASSERT((*itr)->GetSession());
 				if((*itr)->GetSession()->GetPermissionCount() > 0 && (*itr)->GetTeam()==myteam && PhasedCanInteract(*itr))
-					(*itr)->AttemptSendPacket(data);
+					(*itr)->GetSession()->SendPacket(data);
 			}
 		}
 		else
@@ -765,7 +765,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 			{
 				ASSERT((*itr)->GetSession());
 				if((*itr)->GetTeam()==myteam && PhasedCanInteract(*itr))
-					(*itr)->AttemptSendPacket(data);
+					(*itr)->GetSession()->SendPacket(data);
 			}
 		}
 	}
@@ -777,7 +777,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 			{
 				ASSERT((*itr)->GetSession());
 				if((*itr)->GetSession()->GetPermissionCount() > 0 && PhasedCanInteract(*itr))
-					(*itr)->AttemptSendPacket(data);
+					(*itr)->GetSession()->SendPacket(data);
 			}
 		}
 		else
@@ -786,7 +786,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 			{
 				ASSERT((*itr)->GetSession());
 				if( PhasedCanInteract(*itr) )
-					(*itr)->AttemptSendPacket(data);
+					(*itr)->GetSession()->SendPacket(data);
 			}
 		}
 	}

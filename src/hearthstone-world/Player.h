@@ -936,14 +936,6 @@ public:
 	std::set<uint32>    quest_mobs;
 	Mutex				DailyMutex;
 
-	FastMutex queuedDeleteLock;
-
-	void EventPlayerDelete();
-	HEARTHSTONE_INLINE void ScheduleDeletion(bool instant = false);
-
-	bool AttemptSendPacket(WorldPacket* data);
-	bool AttemptSendPacket(StackPacket * data);
-
     void EventPortToGM(uint32 guid);
 	HEARTHSTONE_INLINE uint32 GetTeam() { return m_team; }
 	HEARTHSTONE_INLINE void SetTeam(uint32 t) { m_team = t; m_bgTeam=t; }
@@ -1208,7 +1200,7 @@ public:
 	void SendDelayedPacket(WorldPacket *data, bool bDeleteOnSend)
 	{
 		if(data == NULL) return;
-		if(GetSession() != NULL) AttemptSendPacket(data);
+		if(GetSession() != NULL) GetSession()->SendPacket(data);
 		if(bDeleteOnSend) delete data;
 	}
 	float offhand_dmg_mod;
@@ -1339,8 +1331,6 @@ public:
 	AIInterface* waypointunit;
 	
 	uint32 m_nextSave;
-	uint32 m_accountId;
-
 	//Tutorials
 	uint32 GetTutorialInt(uint32 intId );
 	void SetTutorialInt(uint32 intId, uint32 value);

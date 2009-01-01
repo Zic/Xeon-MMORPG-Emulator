@@ -72,16 +72,6 @@ WorldSession::~WorldSession()
 		LogoutPlayer(true);
 	}
 
-	if( m_pendingPlayers.size() )
-	{
-		set<Player*>::iterator itr = m_pendingPlayers.begin();
-		for(; itr != m_pendingPlayers.end(); ++itr)
-		{
-			// Players aren't deleted while a session is active, so all of these should be valid ptrs still.
-			(*itr)->SetSession(NULL);
-		}
-	}
-
 	if(permissions)
 		delete [] permissions;
 
@@ -321,13 +311,17 @@ void WorldSession::LogoutPlayer(bool Save)
 		// Save HP/Mana
 		_player->load_health = _player->GetUInt32Value( UNIT_FIELD_HEALTH );
 		_player->load_mana = _player->GetUInt32Value( UNIT_FIELD_POWER1 );
-			
+		
+		objmgr.RemovePlayer( _player );		
 		_player->ok_to_remove = true;
 
 		if( _player->GetSummon() != NULL )
 			_player->GetSummon()->Remove( false, true, false );
 
 		//_player->SaveAuras();
+
+		if( Save )
+			_player->SaveToDB(false);
 		
 		_player->RemoveAllAuras();
 		if( _player->IsInWorld() )
@@ -375,7 +369,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		}
 		_player->ObjUnlock();
 
-		_player->ScheduleDeletion();
+		delete _player;
 		_player = NULL;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);

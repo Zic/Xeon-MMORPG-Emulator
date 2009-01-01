@@ -309,7 +309,7 @@ void TaxiPath::SendMoveForTime(Player *riding, Player *to, uint32 time)
 		*data << pn->x << pn->y << pn->z;
 		itr++;
 	}
-	//to->AttemptSendPacket(&data);
+	//to->GetSession()->SendPacket(&data);
 	to->delayedPackets.add(data);*/
 }
 

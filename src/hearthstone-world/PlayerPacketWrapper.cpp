@@ -37,7 +37,7 @@ void Player::Gossip_SendPOI(float X, float Y, uint32 Icon, uint32 Flags, uint32 
 	data << Icon;
 	data << Data;
 	data << Name;
-	AttemptSendPacket(&data);
+	GetSession()->SendPacket(&data);
 }
   
 void Player::SendLevelupInfo(uint32 level, uint32 Hp, uint32 Mana, uint32 Stat0, uint32 Stat1, uint32 Stat2, uint32 Stat3, uint32 Stat4)

@@ -1331,7 +1331,7 @@ void CBattleground::DistributePacketToAll(WorldPacket * packet)
 			continue;
 
 		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
-			(*itr)->AttemptSendPacket(packet);
+			(*itr)->GetSession()->SendPacket(packet);
 	}
 	m_mainLock.Release();
 }
@@ -1345,7 +1345,7 @@ void CBattleground::DistributePacketToTeam(WorldPacket * packet, uint32 Team)
 		return;
 	}
 	for(set<Player*>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
-		(*itr)->AttemptSendPacket(packet);
+		(*itr)->GetSession()->SendPacket(packet);
 	m_mainLock.Release();
 }
 
@@ -1382,7 +1382,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(Player * plr, uint32 queu
 		data << uint32(0);
 		data << uint32(60);
 		data << uint8(1); // Normal BG queue, 0 = arena?
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 		return;
 	}
 	// We're no longer queued!
@@ -1390,7 +1390,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(Player * plr, uint32 queu
 	{
 		//Log.Notice("BattlegroundManager", "No queue slot active for %u.", queueSlot);
 		data << uint32(queueSlot) << uint64(0);
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 		return;
 	}
 
@@ -1443,7 +1443,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(Player * plr, uint32 queu
 		data << uint32(2);
 		data << plr->m_pendingBattleground[queueSlot]->GetMapMgr()->GetMapId();
 		data << uint32(0); // Time
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 		return;
 	}
 
@@ -1451,7 +1451,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(Player * plr, uint32 queu
 	// And we're waiting...
 	data << uint32(GetAverageQueueTime(Type)*1000);		// average time in msec
 	data << uint32(0);
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 	
 }
 
@@ -1514,7 +1514,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(Player * plr, uint32 queu
 		}
 	}
 
-	plr->AttemptSendPacket(&data);
+	plr->GetSession()->SendPacket(&data);
 }*/
 
 void CBattleground::RemovePlayer(Player * plr, bool logout)
@@ -1567,7 +1567,7 @@ void CBattleground::RemovePlayer(Player * plr, bool logout)
 		/* send some null world states */
 		data.Initialize(SMSG_INIT_WORLD_STATES);
 		data << uint32(plr->GetMapId()) << uint32(0) << uint32(0);
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 	}
 
 	if(!m_ended && m_players[0].size() == 0 && m_players[1].size() == 0)
@@ -1598,7 +1598,7 @@ void CBattleground::SendPVPData(Player * plr)
 	{*/
 		WorldPacket data(10*(m_players[0].size()+m_players[1].size())+50);
 		BuildPvPUpdateDataPacket(&data);
-		plr->AttemptSendPacket(&data);
+		plr->GetSession()->SendPacket(&data);
 	/*}*/
 	
 	m_mainLock.Release();
@@ -1963,7 +1963,7 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 					(*itx)->m_loggedInPlayer->m_bgQueueInstanceId[0] = 0;
 					(*itx)->m_loggedInPlayer->m_bgQueueType[0] = BattlegroundType;
 					(*itx)->m_loggedInPlayer->m_bgQueueTime[0] = (uint32)UNIXTIME;
-					(*itx)->m_loggedInPlayer->AttemptSendPacket(&data);
+					(*itx)->m_loggedInPlayer->GetSession()->SendPacket(&data);
 					(*itx)->m_loggedInPlayer->m_bgEntryPointX=(*itx)->m_loggedInPlayer->GetPositionX();
 					(*itx)->m_loggedInPlayer->m_bgEntryPointY=(*itx)->m_loggedInPlayer->GetPositionY();
 					(*itx)->m_loggedInPlayer->m_bgEntryPointZ=(*itx)->m_loggedInPlayer->GetPositionZ();

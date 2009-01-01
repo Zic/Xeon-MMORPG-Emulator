@@ -360,7 +360,7 @@ bool ChatHandler::HandleFaceCommand(const char* args, WorldSession *m_session)
 	// update movment for others
 	//obj->BuildMovementUpdateBlock(&upd,0);
 	//upd.BuildPacket( &data );
-	//AttemptSendPacket( &packet );
+	//GetSession()->SendPacket( &packet );
 	//obj->BuildMovementUpdateBlock(data,0)
 	//obj->SendMessageToSet(&data,false);
 	DEBUG_LOG("facing sent");

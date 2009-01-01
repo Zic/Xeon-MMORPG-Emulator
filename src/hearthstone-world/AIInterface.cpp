@@ -1230,7 +1230,7 @@ void AIInterface::DismissPet()
 	WorldPacket data;
 	data.Initialize(SMSG_PET_SPELLS);
 	data << (uint64)0;
-	static_cast< Player* >( m_PetOwner )->AttemptSendPacket(&data);
+	static_cast< Player* >( m_PetOwner )->GetSession()->SendPacket(&data);
 	
 	sEventMgr.RemoveEvents(((Creature*)m_Unit));
 	if(m_Unit->IsInWorld())
@@ -1794,14 +1794,14 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 	m_Unit->SendMessageToSet( &data, self );
 #else
 	if( m_Unit->GetTypeId() == TYPEID_PLAYER )
-		static_cast<Player*>(m_Unit)->AttemptSendPacket(&data);
+		static_cast<Player*>(m_Unit)->GetSession()->SendPacket(&data);
 
 	for(set<Player*>::iterator itr = m_Unit->GetInRangePlayerSetBegin(); itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		if( (*itr)->GetPositionNC().Distance2DSq( m_Unit->GetPosition() ) >= World::m_movementCompressThresholdCreatures )
 			(*itr)->AppendMovementData( SMSG_MONSTER_MOVE, data.GetSize(), (const uint8*)data.GetBufferPointer() );
 		else
-			(*itr)->AttemptSendPacket(&data);
+			(*itr)->GetSession()->SendPacket(&data);
 	}
 #endif
 }
@@ -2001,7 +2001,7 @@ void AIInterface::SendCurrentMove(Player* plyr/*uint64 guid*/)
 	data << moveTime;
 	data << uint32(1); //Number of Waypoints
 	data << m_destinationX << m_destinationY << m_destinationZ;
-	plyr->AttemptSendPacket(&data);*/
+	plyr->GetSession()->SendPacket(&data);*/
 
 }
 
@@ -2158,7 +2158,7 @@ bool AIInterface::showWayPoints(Player* pPlayer, bool Backwards)
 			WorldPacket data1;
 			data1.Initialize(SMSG_FORCE_MOVE_ROOT);
 			data1 << pWayPoint->GetNewGUID();
-			pPlayer->AttemptSendPacket( &data1 );
+			pPlayer->GetSession()->SendPacket( &data1 );
 
 			//Cleanup
 			delete pWayPoint;
