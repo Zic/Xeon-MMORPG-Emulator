@@ -5054,11 +5054,8 @@ void Aura::EventPeriodicLeech(uint32 amount)
 
 	// Apply bonus from [Warlock] Soul Siphon
 	if (m_caster->m_soulSiphon.amt) {
-		// Use hashmap to prevent counting duplicate auras (stacked ones, from the same unit)
-		map_t auras = NULL;
-		uint32 bonus;
-		int32 pct;
-		int32 count=0;
+		// Use set to prevent counting duplicate auras (stacked ones, from the same unit)
+		set<uint32> auras;
 
 		for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 		{
@@ -5070,52 +5067,19 @@ void Aura::EventPeriodicLeech(uint32 amount)
 					skilllinespell *sk;
 
 					sk = objmgr.GetSpellSkill(aura->GetSpellId());
-					if(sk && sk->skilline == SKILL_AFFLICTION) {
-						map_t ids = NULL;
-						int found = 0;
-
-						if (auras == NULL) {
-							// No skill yet, create the hashmaps
-							auras = hashmap64_new();
-							ids = hashmap_new();
-							hashmap64_put(auras, aura->GetCasterGUID(), (any_t)ids);
-						} else {
-							if (hashmap64_get(auras, aura->GetCasterGUID(), &ids) != MAP_OK) {
-								ids = hashmap_new();
-								hashmap64_put(auras, aura->GetCasterGUID(), (any_t)ids);
-							} else {
-								if (hashmap_get(ids, aura->GetSpellId(), NULL) == MAP_OK) {
-									found = 1;
-								}
-							}
-						}
-
-						if (found == 0) {
-							hashmap_put(ids, aura->GetSpellId(), NULL);
-						}
+					if(sk && sk->skilline == SKILL_AFFLICTION)
+					{
+						auras.insert( aura->GetSpellId() );
 					}
-	            }
-			}
-		}
-
-		if (auras) {
-			for (int i=0; i<hashmap64_length(auras); i++) {
-				uint64 guid;
-				map_t ids;
-
-				if (hashmap64_get_index(auras, i, (int64*)&guid, &ids) == MAP_OK) {
-					count+= hashmap_length(ids);
-					hashmap_free(ids);
 				}
 			}
-
-			hashmap64_free(auras);
 		}
 
-		pct = count * m_caster->m_soulSiphon.amt;
-		if (pct > m_caster->m_soulSiphon.max)
-			pct = m_caster->m_soulSiphon.max;
-		bonus = (Amount * pct) / 100;
+		uint32 siphonbonus = count * m_caster->m_soulSiphon.amt;
+		if( siphonbonus > m_caster->m_soulSiphon.max )
+			siphonbonus = m_caster->m_soulSiphon.max;
+
+		bonus = (Amount * siphonbonus) / 100;
 		Amount+= bonus;
 	}
 	

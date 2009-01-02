@@ -5957,39 +5957,32 @@ void Player::Reset_Spells()
 
 void Player::ResetTitansGrip()
 {
-	if( HasSpell(46917) )
+	if(HasSpell(46917) || !GetItemInterface())
 		return;
 
-	Item * pOffHand = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-	if( !pOffHand || pOffHand->GetProto()->InventoryType != INVTYPE_2HWEAPON )
-		return;
-
-	// We need to remove this weapon
-	SlotResult s = GetItemInterface()->FindFreeInventorySlot(pOffHand->GetProto());
-	if(s.Result)
+	Item * mainhand = GetItemInterface()->GetInventoryItem(INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_MAINHAND);
+	Item * offhand = GetItemInterface()->GetInventoryItem(INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_OFFHAND);
+	if(offhand && (offhand->GetProto()->InventoryType == INVTYPE_2HWEAPON ||
+		mainhand && mainhand->GetProto()->InventoryType == INVTYPE_2HWEAPON))
 	{
-		GetItemInterface()->SwapItemSlots( EQUIPMENT_SLOT_OFFHAND, s.Slot );
-		pOffHand->m_isDirty = true;
-		return;
+		// we need to de-equip this
+		offhand = GetItemInterface()->SafeRemoveAndRetreiveItemFromSlot(INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_OFFHAND, false);
+		if( offhand == NULL )
+			return;     // should never happen
+		SlotResult result = GetItemInterface()->FindFreeInventorySlot(offhand->GetProto());
+		if( !result.Result )
+		{
+			// no free slots for this item. try to send it by mail
+			offhand->RemoveFromWorld();
+			offhand->SetOwner( NULL );
+			offhand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
+			sMailSystem.SendAutomatedMessage(NORMAL, GetGUID(), GetGUID(), "Your offhand item", "", 0, 0, offhand->GetUInt32Value(OBJECT_FIELD_GUID), 1);
+			delete offhand;
+		}
+		else if( !GetItemInterface()->SafeAddItem(offhand, result.ContainerSlot, result.Slot) )
+			if( !GetItemInterface()->AddItemToFreeSlot(offhand) )   // shouldn't happen either.
+				delete offhand;
 	}
-
-	// No inventory space! We should mail it to him.
-	
-	MailMessage msg;
-	memset(&msg, 0, sizeof(MailMessage));
-	msg.body = "Your offhand weapon was unable to be moved to your inventory after you reset your talents.";
-	msg.subject = string(pOffHand->GetProto()->Name1);
-	msg.delivery_time = (uint32)UNIXTIME; // Now!
-	msg.expire_time = 0; // Never!
-	msg.player_guid = GetLowGUID();
-	msg.sender_guid = GetGUID();
-	msg.items.push_back(pOffHand->GetUInt32Value(OBJECT_FIELD_GUID));
-	pOffHand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
-
-	sMailSystem.DeliverMessage( GetLowGUID(), &msg);
-
-	// This SUCKS.
-	Kick(0);
 }
 
 void Player::Reset_Talents()

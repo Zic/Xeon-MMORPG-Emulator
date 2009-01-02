@@ -4300,7 +4300,7 @@ void Unit::CalcDamage()
 //returns absorbed dmg
 uint32 Unit::ManaShieldAbsorb(uint32 dmg, SpellEntry* sp)
 {
-	if(!m_manashieldamt)
+	if(!m_manashieldamt || !m_manaShieldSpell)
 		return 0;
 
 	if( sp && sp->c_is_flags & SPELL_FLAG_PIERCES_ABSORBTION_EFF )
