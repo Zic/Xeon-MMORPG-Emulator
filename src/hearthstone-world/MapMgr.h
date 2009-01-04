@@ -114,7 +114,7 @@ public:
 /////////////////////////////////////////////
 	uint32 m_CreatureArraySize;
 	uint32 m_CreatureHighGuid;
-	CreaturePointer* m_CreatureStorage;
+	HM_NAMESPACE::unordered_map<uint32,CreaturePointer> m_CreatureStorage;
 	CreaturePointer CreateCreature(uint32 entry);
 
 	__inline CreaturePointer GetCreature(uint32 guid)

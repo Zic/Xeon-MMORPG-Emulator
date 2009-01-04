@@ -34,7 +34,7 @@ Container::Container(uint32 high,uint32 low) : Item()
 	SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );//always 1
 
 
-	m_Slot = NULL;
+	memset(m_Slot, 0, 72 * sizeof(shared_ptr<Item>));
 	random_suffix=random_prop=0;
 }
 
@@ -81,10 +81,6 @@ void Container::LoadFromDB( Field*fields )
   
 
 	SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
-
-	m_Slot = new shared_ptr<Item>[m_itemProto->ContainerSlots];
-	memset(m_Slot, 0, sizeof(shared_ptr<Item>)*(m_itemProto->ContainerSlots));
-
 }
 
 void Container::Create( uint32 itemid, shared_ptr<Player>owner )
@@ -103,9 +99,6 @@ void Container::Create( uint32 itemid, shared_ptr<Player>owner )
 	}
 	SetUInt32Value( ITEM_FIELD_STACK_COUNT, 1 );
 	SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
-
-	m_Slot = new shared_ptr<Item>[m_itemProto->ContainerSlots];
-	memset(m_Slot, 0, sizeof(shared_ptr<Item>)*(m_itemProto->ContainerSlots));
 
 	m_owner = owner;
 }
@@ -324,7 +317,7 @@ bool Container::AddItemToFreeSlot(shared_ptr<Item>pItem, uint32 * r_slot)
 
 void Container::SaveBagToDB(int8 slot, bool first, QueryBuffer * buf)
 {
-	((shared_ptr<Item>)this)->SaveToDB(INVENTORY_SLOT_NOT_SET, slot, first, buf);
+	SaveToDB(INVENTORY_SLOT_NOT_SET, slot, first, buf);
 
 	for(uint32 i = 0; i < m_itemProto->ContainerSlots; i++)
 	{

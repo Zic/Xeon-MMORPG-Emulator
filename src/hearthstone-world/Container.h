@@ -52,7 +52,7 @@ public:
 	void SaveBagToDB(int8 slot, bool first, QueryBuffer * buf);
 
 protected:
-	shared_ptr<Item>* m_Slot;
+	shared_ptr<Item> m_Slot[72];
 	uint32 __fields[CONTAINER_END];
 };
 

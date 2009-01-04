@@ -27,6 +27,9 @@
 ItemInterface::ItemInterface( shared_ptr<Player>pPlayer )
 {
 	m_pOwner = pPlayer;
+	memset(m_pItems, 0, sizeof(shared_ptr<Item>)*MAX_INVENTORY_SLOT);
+	memset(m_pBuyBack, 0, sizeof(shared_ptr<Item>)*MAX_BUYBACK_SLOT);
+
 	for(uint8 i = 0; i < MAX_INVENTORY_SLOT; ++i )
 	{
 		m_pItems[i] = ItemPointer();
@@ -2837,13 +2840,15 @@ void ItemInterface::mLoadItemsFromDatabase(QueryResult * result)
 			{
 				if( proto->InventoryType == INVTYPE_BAG )
 				{
-					item = shared_ptr<Item>(new Container( HIGHGUID_TYPE_CONTAINER, fields[1].GetUInt32() ));
+					item = ItemPointer(new Container( HIGHGUID_TYPE_CONTAINER, fields[1].GetUInt32() ));
+					item->Init();
 					TO_CONTAINER( item )->LoadFromDB( fields );
 
 				}
 				else
 				{
-					item = shared_ptr<Item>(new Item( HIGHGUID_TYPE_ITEM, fields[1].GetUInt32() ));
+					item = ItemPointer(new Item( HIGHGUID_TYPE_ITEM, fields[1].GetUInt32() ));
+					item->Init();
 					item->LoadFromDB( fields, m_pOwner, false);
 
 				}

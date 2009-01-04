@@ -41,8 +41,8 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 	m_CreatureArraySize = map->CreatureSpawnCount;
 
 	//m_CreatureStorage = new CreaturePointer[m_CreatureArraySize];
-	m_CreatureStorage = (CreaturePointer*)malloc(sizeof(CreaturePointer) * m_CreatureArraySize);
-	memset(m_CreatureStorage,0,sizeof(CreaturePointer)*m_CreatureArraySize);
+	//m_CreatureStorage = (CreaturePointer*)malloc(sizeof(CreaturePointer) * m_CreatureArraySize);
+	//memset(m_CreatureStorage,0,sizeof(CreaturePointer)*m_CreatureArraySize);
 
 	m_GOHighGuid = m_CreatureHighGuid = 0;
 	m_DynamicObjectHighGuid=0; 
@@ -131,7 +131,7 @@ void MapMgr::Destructor()
 	}
 
 
-	free(m_CreatureStorage);
+	//free(m_CreatureStorage);
 
 	shared_ptr<Corpse> pCorpse;
 	for(set<shared_ptr<Corpse>>::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
@@ -1862,17 +1862,10 @@ CreaturePointer MapMgr::CreateCreature(uint32 entry)
 		return cr;
 	}
 
-	if(++m_CreatureHighGuid  >= m_CreatureArraySize)
-	{
-		// Reallocate array with larger size.
-		m_CreatureArraySize += RESERVE_EXPAND_SIZE;
-		m_CreatureStorage = (CreaturePointer*)realloc(m_CreatureStorage, sizeof(CreaturePointer) * m_CreatureArraySize);
-		memset(&m_CreatureStorage[m_CreatureHighGuid],0,(m_CreatureArraySize-m_CreatureHighGuid)*sizeof(CreaturePointer));
-	}
-
-	newguid |= m_CreatureHighGuid;
+	newguid |= ++m_CreatureHighGuid;
 	CreaturePointer cr = CreaturePointer(new Creature(newguid));
 	cr->Init();
+	m_CreatureStorage.insert( make_pair< uint32, CreaturePointer >(cr->GetUIdFromGUID(), cr));
 	return cr;
 }
 

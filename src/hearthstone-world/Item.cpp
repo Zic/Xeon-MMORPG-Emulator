@@ -368,7 +368,7 @@ void Item::DeleteFromDB()
 		/* deleting a shared_ptr<Container> */
 		for( uint32 i = 0; i < m_itemProto->ContainerSlots; ++i )
 		{
-			if( static_cast<Container*>( this )->GetItem( i ) != NULL )
+			if( CAST(Container,shared_from_this())->GetItem( i ) != NULL )
 			{
 				/* abort the delete */
 				return;
