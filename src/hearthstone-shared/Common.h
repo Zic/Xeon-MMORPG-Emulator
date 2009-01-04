@@ -226,9 +226,15 @@ enum MsTimeVariables
 #include <sstream>
 #include <algorithm>
 //#include <iostream>
+#ifdef WIN32
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#else
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
+#endif
 
 #if defined (__GNUC__)
 #  define GCC_VERSION (__GNUC__ * 10000 \
@@ -310,6 +316,9 @@ using std::hash_map;
 
 using std::tr1::shared_ptr;
 using namespace std::tr1;
+#ifndef WIN32
+#define shared_ptr std::tr1::shared_ptr
+#endif
 #undef HM_NAMESPACE
 #define HM_NAMESPACE tr1
 #define hash_map unordered_map

@@ -127,7 +127,7 @@ class MapMgr;
 class SERVER_DECL Object : public EventableObject
 {
 public:
-	typedef std::set<shared_ptr<Object>> InRangeSet;
+	typedef std::set< shared_ptr<Object> > InRangeSet;
 	typedef std::map<string, void*> ExtensionSet;
 
 	virtual ~Object ( );
