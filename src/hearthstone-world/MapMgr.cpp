@@ -100,8 +100,12 @@ void MapMgr::Init()
 // call me to break the circular reference, perform cleanup
 void MapMgr::Destructor()
 {
+	// in case this goes feeefeee
+	shared_ptr<MapMgr> pThis = CAST(MapMgr,shared_from_this());
+
 	sEventMgr.RemoveEvents(shared_from_this());
 	delete ScriptInterface;
+	delete m_stateManager;
 
 	// Remove objects
 	if(_cells)

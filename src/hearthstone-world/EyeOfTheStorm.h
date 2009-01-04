@@ -29,6 +29,7 @@ class EyeOfTheStorm : public CBattleground
 public:
 	EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~EyeOfTheStorm();
+	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
 	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);

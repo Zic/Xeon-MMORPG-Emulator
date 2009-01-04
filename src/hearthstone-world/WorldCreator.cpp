@@ -919,6 +919,7 @@ shared_ptr<MapMgr> InstanceMgr::CreateBattlegroundInstance(uint32 mapid)
 	}
 
 	shared_ptr<MapMgr> ret = shared_ptr<MapMgr>(new MapMgr(m_maps[mapid],mapid,GenerateInstanceID()));
+	ret->Init();
 	Instance * pInstance = new Instance();
 	pInstance->m_creation = UNIXTIME;
 	pInstance->m_creatorGroup = 0;

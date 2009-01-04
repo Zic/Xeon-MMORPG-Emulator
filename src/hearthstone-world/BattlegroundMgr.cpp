@@ -788,7 +788,6 @@ CBattleground::CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgrou
 	m_losingteam = 0xff;
 	m_startTime = (uint32)UNIXTIME;
 	m_lastResurrect = (uint32)UNIXTIME;
-	sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::EventResurrectPlayers, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 30000, 0,0);
 
 	/* create raid groups */
 	for(uint32 i = 0; i < 2; ++i)
@@ -797,6 +796,11 @@ CBattleground::CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgrou
 		m_groups[i]->SetFlag(GROUP_FLAG_DONT_DISBAND_WITH_NO_MEMBERS | GROUP_FLAG_BATTLEGROUND_GROUP);
 		m_groups[i]->ExpandToRaid();
 	}
+}
+
+void CBattleground::Init()
+{
+	sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::EventResurrectPlayers, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 30000, 0,0);
 }
 
 CBattleground::~CBattleground()
@@ -1184,6 +1188,7 @@ shared_ptr<CBattleground> CBattlegroundManager::CreateInstance(uint32 Type, uint
 
 		iid = ++m_maxBattlegroundId;
         bg = shared_ptr<Arena>(new Arena(mgr, iid, LevelGroup, Type, players_per_side));
+		bg->Init();
 		mgr->m_battleground = bg;
 		Log.Success("BattlegroundManager", "Created arena battleground type %u for level group %u on map %u.", Type, LevelGroup, mapid);
 		sEventMgr.AddEvent(bg, &CBattleground::EventCreate, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 1, 1,0);
@@ -1231,6 +1236,7 @@ shared_ptr<CBattleground> CBattlegroundManager::CreateInstance(uint32 Type, uint
 	/* Call the create function */
 	iid = ++m_maxBattlegroundId;
 	bg = cfunc(mgr, iid, LevelGroup, Type);	
+	bg->Init();
 	bg->SetIsWeekend(isWeekend);
 	mgr->m_battleground = bg;
 	sEventMgr.AddEvent(bg, &CBattleground::EventCreate, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 1, 1,0);

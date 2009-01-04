@@ -20,10 +20,10 @@
 #include "StdAfx.h"
 
 //										   <10 <20 <30 <40 <50 <60 <70  70
-static int flagHonorTable[8]			= {  0,  5,  8, 14, 23, 38, 40, 40 };
-static int winHonorTable[8]				= {  0,  2,  4,  7, 11, 19, 20, 20 };
-static int extraCompleteHonorTable[8]	= {  0,  7, 12, 20, 34, 57, 59, 59 }; // extras only for weekends
-static int extraWinHonorTable[8]		= {  0,  5,  8, 14, 23, 38, 40, 40 };
+static int flagHonorTable[8]			= {  0,  5,  8, 14, 23, 38, 40, 40, 40 };
+static int winHonorTable[8]				= {  0,  2,  4,  7, 11, 19, 20, 20, 20 };
+static int extraCompleteHonorTable[8]	= {  0,  7, 12, 20, 34, 57, 59, 59, 59 }; // extras only for weekends
+static int extraWinHonorTable[8]		= {  0,  5,  8, 14, 23, 38, 40, 40, 40 };
 
 WarsongGulch::WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr, id, lgroup, t)
 {
@@ -37,7 +37,19 @@ WarsongGulch::WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uin
 	m_resurrectMap.clear();
 
 	m_flagHolders[0] = m_flagHolders[1] = 0;
-	
+
+	m_flagAtBase[0] = m_flagAtBase[1] = 0;
+	m_scores[0] = m_scores[1] = 0;
+
+	m_playerCountPerTeam = 10;
+	m_lgroup = lgroup;
+}
+
+void WarsongGulch::Init()
+{
+	CBattleground::Init();
+	uint32 i;
+
 	/* create the buffs */
 	for(i = 0; i < 6; ++i)
 		SpawnBuff(i);
@@ -70,11 +82,6 @@ WarsongGulch::WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uin
 		m_dropFlags[i]->SetFloatValue(OBJECT_FIELD_SCALE_X, 2.5f);
 	}
 
-	m_flagAtBase[0] = m_flagAtBase[1] = 0;
-	m_scores[0] = m_scores[1] = 0;
-
-	m_playerCountPerTeam = 10;
-	m_lgroup = lgroup;
 }
 
 WarsongGulch::~WarsongGulch()

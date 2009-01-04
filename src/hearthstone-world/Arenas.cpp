@@ -65,6 +65,11 @@ Arena::Arena(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t, uint32 
 	m_teams[0] = m_teams[1] = NULL;
 }
 
+void Arena::Init()
+{
+	CBattleground::Init();
+}
+
 Arena::~Arena()
 {
 	int i;

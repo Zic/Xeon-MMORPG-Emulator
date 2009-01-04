@@ -37,6 +37,7 @@ public:
 	bool rated_match;
 	Arena(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side);
 	virtual ~Arena();
+	virtual void Init();
 
 	bool HookHandleRepop(PlayerPointer plr);
 	void OnAddPlayer(PlayerPointer plr);

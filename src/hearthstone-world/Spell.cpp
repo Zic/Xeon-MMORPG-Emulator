@@ -1776,6 +1776,8 @@ void Spell::finish()
 	otherwise it's instant spell and we delete it right after completion
 	*/
 	
+	SpellPointer spl = spell_shared_from_this(); // feeefeee! <3
+
 	if( u_caster != NULL )
 	{
 		if( u_caster->GetCurrentSpell() == shared_from_this() )

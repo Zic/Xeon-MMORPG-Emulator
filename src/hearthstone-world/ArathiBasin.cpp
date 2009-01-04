@@ -429,6 +429,11 @@ ArathiBasin::ArathiBasin(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint3
 	}
 }
 
+void ArathiBasin::Init()
+{
+	CBattleground::Init();
+}
+
 ArathiBasin::~ArathiBasin()
 {
 	// gates are always spawned, so mapmgr will clean them up

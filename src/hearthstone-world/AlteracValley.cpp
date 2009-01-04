@@ -1380,6 +1380,11 @@ AlteracValley::AlteracValley(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, u
 	memset(m_nodes, 0, sizeof(m_nodes));
 }
 
+void AlteracValley::Init()
+{
+	CBattleground::Init();
+}
+
 AlteracValley::~AlteracValley()
 {
 

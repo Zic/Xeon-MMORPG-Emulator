@@ -73,6 +73,7 @@ protected:
 public:
 	ArathiBasin(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~ArathiBasin();
+	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
 	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);

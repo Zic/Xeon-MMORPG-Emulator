@@ -301,6 +301,7 @@ public:
 	/* Creating a battleground requires a pre-existing map manager */
 	CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgroup, uint32 type);
 	virtual ~CBattleground();
+	virtual void Init();
 
 	/* Has it ended? */
 	HEARTHSTONE_INLINE bool HasEnded() { return m_ended; }

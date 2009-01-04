@@ -149,6 +149,11 @@ EyeOfTheStorm::EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, u
 	m_resourceRewards[0] = m_resourceRewards[1] = 330;
 }
 
+void EyeOfTheStorm::Init()
+{
+	CBattleground::Init();
+}
+
 EyeOfTheStorm::~EyeOfTheStorm()
 {
 	for(uint32 i = 0; i < EOTS_TOWER_COUNT; ++i)

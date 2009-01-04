@@ -32,6 +32,7 @@ class WarsongGulch : public CBattleground
 public:
 	WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~WarsongGulch();
+	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
 	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);

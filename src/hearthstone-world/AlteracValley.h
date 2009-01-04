@@ -213,6 +213,7 @@ protected:
 public:
 	AlteracValley(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~AlteracValley();
+	virtual void Init();
 
 	void EventAssaultControlPoint(uint32 x);
 
