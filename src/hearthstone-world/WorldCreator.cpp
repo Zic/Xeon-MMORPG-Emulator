@@ -401,6 +401,7 @@ shared_ptr<MapMgr> InstanceMgr::_CreateInstance(Instance * in)
 
 	// we don't have to check for world map info here, since the instance wouldn't have been saved if it didn't have any.
 	in->m_mapMgr = shared_ptr<MapMgr>(new MapMgr(m_maps[in->m_mapId], in->m_mapId, in->m_instanceId));
+	in->m_mapMgr->Init();
 	in->m_mapMgr->pInstance = in;
 	in->m_mapMgr->iInstanceMode = in->m_difficulty;
 	in->m_mapMgr->InactiveMoveTime = 60+UNIXTIME;
