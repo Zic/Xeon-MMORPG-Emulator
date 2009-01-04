@@ -133,8 +133,8 @@ void DynamicObject::UpdateTargets()
 	{
 //		FactionRangeList::iterator itr  = m_inRangeOppFactions.begin();
 //		FactionRangeList::iterator iend = m_inRangeOppFactions.end();
-		std::set<shared_ptr<Object>>::iterator itr = GetInRangeSetBegin(),itr2;
-		std::set<shared_ptr<Object>>::iterator iend = GetInRangeSetEnd();
+		std::set<shared_ptr<Object> >::iterator itr = GetInRangeSetBegin(),itr2;
+		std::set<shared_ptr<Object> >::iterator iend = GetInRangeSetEnd();
 		UnitPointer target;
 		shared_ptr<Aura>pAura;
 		float radius = m_floatValues[DYNAMICOBJECT_RADIUS]*m_floatValues[DYNAMICOBJECT_RADIUS];

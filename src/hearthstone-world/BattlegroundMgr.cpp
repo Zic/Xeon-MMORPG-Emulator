@@ -156,7 +156,7 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 
 	/* Append the battlegrounds */
 	m_instanceLock.Acquire();
-	for(map<uint32, shared_ptr<CBattleground>>::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
+	for(map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
 	{
         if( itr->second->GetLevelGroup() == LevelGroup  && !itr->second->HasEnded() )
 		{
@@ -194,7 +194,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 	{
 		/* We haven't picked the first instance. This means we've specified an instance to join. */
 		m_instanceLock.Acquire();
-		map<uint32, shared_ptr<CBattleground>>::iterator itr = m_instances[bgtype].find(instance);
+		map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[bgtype].find(instance);
 
 		if(itr == m_instances[bgtype].end())
 		{
@@ -377,7 +377,7 @@ int CBattlegroundManager::CreateArenaType(int type, Group * group1, Group * grou
 	return 0;
 }
 
-void CBattlegroundManager::AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j)
+void CBattlegroundManager::AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j)
 {
 	PlayerPointer plr = *playerVec->begin();
 	playerVec->pop_front();
@@ -393,7 +393,7 @@ void CBattlegroundManager::AddPlayerToBg(shared_ptr<CBattleground> bg, deque<sha
 	}
 }
 
-void CBattlegroundManager::AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j, int Team)
+void CBattlegroundManager::AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j, int Team)
 {
 	if (bg->HasFreeSlots(Team))
 	{
@@ -407,13 +407,13 @@ void CBattlegroundManager::AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque
 
 void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 {
-	deque<shared_ptr<Player>> tempPlayerVec[2];
+	deque<shared_ptr<Player> > tempPlayerVec[2];
 	uint32 i,j,k;
 	PlayerPointer plr;
 	shared_ptr<CBattleground> bg;
 	list<uint32>::iterator it3, it4;
-	//vector<shared_ptr<Player>>::iterator it6;
-	map<uint32, shared_ptr<CBattleground>>::iterator iitr;
+	//vector<shared_ptr<Player> >::iterator it6;
+	map<uint32, shared_ptr<CBattleground> >::iterator iitr;
 	shared_ptr<Arena>  arena;
 	int32 team;
 	m_queueLock.Acquire();
@@ -766,7 +766,7 @@ void CBattlegroundManager::RemoveGroupFromQueues(Group * grp)
 bool CBattlegroundManager::CanCreateInstance(uint32 Type, uint32 LevelGroup)
 {
 	/*uint32 lc = 0;
-	for(map<uint32, shared_ptr<CBattleground>>::iterator itr = m_instances[Type].begin(); itr != m_instances[Type].end(); ++itr)
+	for(map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[Type].begin(); itr != m_instances[Type].end(); ++itr)
 	{
 		if(itr->second->GetLevelGroup() == LevelGroup)
 		{
@@ -872,7 +872,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 			ArenaTeam * teams[2] = {NULL,NULL};
 			for(uint32 i = 0; i < 2; ++i)
 			{
-				for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+				for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
 					teams[i] = (*itr)->m_playerInfo->arenaTeam[ ((Arena*)this)->GetArenaTeamType() ];
 					if(teams[i])
@@ -917,7 +917,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 		*data << uint32(m_players[0].size() + m_players[1].size());
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				*data << (*itr)->GetGUID();
 				bs = &(*itr)->m_bgScore;
@@ -949,7 +949,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 		uint32 fcount = BGPvPDataFieldCount[GetType()];
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				if( (*itr)->m_isGmInvisible ) continue;
 				*data << (*itr)->GetGUID();
@@ -1340,7 +1340,7 @@ void CBattleground::DistributePacketToAll(WorldPacket * packet)
 		if( !m_players[i].size() )
 			continue;
 
-		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			(*itr)->GetSession()->SendPacket(packet);
 	}
 	m_mainLock.Release();
@@ -1354,7 +1354,7 @@ void CBattleground::DistributePacketToTeam(WorldPacket * packet, uint32 Team)
 		m_mainLock.Release();
 		return;
 	}
-	for(set<shared_ptr<Player>>::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
+	for(set<shared_ptr<Player> >::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
 		(*itr)->GetSession()->SendPacket(packet);
 	m_mainLock.Release();
 }
@@ -1665,7 +1665,7 @@ void CBattleground::Close()
 	m_ended = true;
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		set<shared_ptr<Player>>::iterator itr;
+		set<shared_ptr<Player> >::iterator itr;
 		set<uint32>::iterator it2;
 		uint32 guid;
 		PlayerPointer plr;
@@ -2061,7 +2061,7 @@ void CBattleground::QueueAtNearestSpiritGuide(PlayerPointer plr, CreaturePointer
 
 void CBattleground::GiveHonorToTeam(uint32 team, uint32 amt)
 {
-	for(set<shared_ptr<Player>>::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
+	for(set<shared_ptr<Player> >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
 	{
 		PlayerPointer plr = (*itx);
 		if(!plr) continue;

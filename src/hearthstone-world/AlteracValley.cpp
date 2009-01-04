@@ -1520,13 +1520,13 @@ void AlteracValley::OnCreate()
 void AlteracValley::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
 	}
 
 	// open gates
-	for(list<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -1684,7 +1684,7 @@ void AlteracValley::Finish(uint32 losingTeam)
 	SpellEntry * loser_spell = dbcSpell.LookupEntry(24954);
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
 			(*itr)->Root();
 

@@ -714,7 +714,7 @@ void AIInterface::_UpdateTargets()
 	if( m_updateAssist )
 	{
 		m_updateAssist = false;
-	/*	deque<shared_ptr<Unit>> tokill;
+	/*	deque<shared_ptr<Unit> > tokill;
 
 		//modified for vs2005 compatibility
 		for(i = m_assistTargets.begin(); i != m_assistTargets.end(); ++i)
@@ -725,7 +725,7 @@ void AIInterface::_UpdateTargets()
 			}
 		}
 
-		for(deque<shared_ptr<Unit>>::iterator i2 = tokill.begin(); i2 != tokill.end(); ++i2)
+		for(deque<shared_ptr<Unit> >::iterator i2 = tokill.begin(); i2 != tokill.end(); ++i2)
 			m_assistTargets.erase(*i2);*/
 
 		for(i = m_assistTargets.begin(); i != m_assistTargets.end();)
@@ -742,7 +742,7 @@ void AIInterface::_UpdateTargets()
 	if( m_updateTargets )
 	{
 		m_updateTargets = false;
-		/*deque<shared_ptr<Unit>> tokill;
+		/*deque<shared_ptr<Unit> > tokill;
 
 		//modified for vs2005 compatibility
 		for(itr = m_aiTargets.begin(); itr != m_aiTargets.end();++itr)
@@ -752,7 +752,7 @@ void AIInterface::_UpdateTargets()
 				tokill.push_back(itr->first);
 			}
 		}
-		for(deque<shared_ptr<Unit>>::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
+		for(deque<shared_ptr<Unit> >::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
 			m_aiTargets.erase((*itr));
 		tokill.clear();*/
 
@@ -1365,7 +1365,7 @@ UnitPointer AIInterface::FindTarget()
 	float crange;
 	float z_diff;
 
-	std::set<shared_ptr<Object>>::iterator itr, it2;
+	std::set<shared_ptr<Object> >::iterator itr, it2;
 	shared_ptr<Object>pObj;
 	shared_ptr<Unit>pUnit;
 	float dist;
@@ -1547,7 +1547,7 @@ bool AIInterface::FindFriends(float dist)
 	bool result = false;
 	TargetMap::iterator it;
 
-	std::set<shared_ptr<Object>>::iterator itr;
+	std::set<shared_ptr<Object> >::iterator itr;
 	shared_ptr<Unit>pUnit;
 
 	
@@ -1801,7 +1801,7 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 	if( m_Unit->GetTypeId() == TYPEID_PLAYER )
 		TO_PLAYER(m_Unit)->GetSession()->SendPacket(&data);
 
-	for(set<shared_ptr<Player>>::iterator itr = m_Unit->GetInRangePlayerSetBegin(); itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
+	for(set<shared_ptr<Player> >::iterator itr = m_Unit->GetInRangePlayerSetBegin(); itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		if( (*itr)->GetPositionNC().Distance2DSq( m_Unit->GetPosition() ) >= World::m_movementCompressThresholdCreatures )
 			(*itr)->AppendMovementData( SMSG_MONSTER_MOVE, data.GetSize(), (const uint8*)data.GetBufferPointer() );
@@ -3338,7 +3338,7 @@ void AIInterface::UpdateCivilian()
 		return;
 
 	PlayerPointer target = NULLPLR;
-	std::set<shared_ptr<Player>>::iterator itr = m_Unit->GetInRangePlayerSetBegin();
+	std::set<shared_ptr<Player> >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
 	for(; itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		PlayerPointer pOpp = *itr;

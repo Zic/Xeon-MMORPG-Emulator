@@ -723,7 +723,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				break;
 			shared_ptr<Unit>targets[3];
 			int targets_got=0;
-			for(std::set<shared_ptr<Object>>::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
+			for(std::set<shared_ptr<Object> >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
 			{
 				i2 = itr++;
 				// don't add objects that are not units and that are dead
@@ -804,7 +804,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 					// decrement counter
 					--grp->m_prayerOfMendingCount;
 					
-					vector<shared_ptr<Player>> possible_targets;
+					vector<shared_ptr<Player> > possible_targets;
 					SubGroup *sg;
 					grp->Lock();
 					for(uint32 sgid = 0; sgid < grp->GetSubGroupCount(); ++sgid)
@@ -1675,7 +1675,7 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	//check if we already have stronger aura
 	AuraPointer pAura;
 
-	std::map<uint32,shared_ptr<Aura>>::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
+	std::map<uint32,shared_ptr<Aura> >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
 	//if we do not make a check to see if the aura owner is the same as the caster then we will stack the 2 auras and they will not be visible client sided
 	if(itr==unitTarget->tmpAura.end())
 	{
@@ -2723,7 +2723,7 @@ void Spell::SpellEffectTriggerMissile(uint32 i) // Trigger Missile
 
 	float spellRadius = GetRadius(i);
 
-	for(std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for(std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if(!((*itr)->IsUnit()) || !(TO_UNIT(*itr))->isAlive())
 			continue;
@@ -3103,7 +3103,7 @@ void Spell::SpellEffectApplyAA(uint32 i) // Apply Area Aura
 		return;
 
 	shared_ptr<Aura>pAura;
-	std::map<uint32,shared_ptr<Aura>>::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
+	std::map<uint32,shared_ptr<Aura> >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
 	if(itr==unitTarget->tmpAura.end())
 	{
 		pAura= shared_ptr<Aura>(new Aura(m_spellInfo,GetDuration(),m_caster,unitTarget));

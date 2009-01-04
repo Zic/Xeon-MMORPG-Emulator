@@ -203,7 +203,7 @@ namespace std
 	};
 };
 
-typedef std::set<shared_ptr<Unit>> AssistTargetSet;
+typedef std::set<shared_ptr<Unit> > AssistTargetSet;
 typedef std::map<uint32, AI_Spell*> SpellMap;
 
 class ChainAggroEntity;

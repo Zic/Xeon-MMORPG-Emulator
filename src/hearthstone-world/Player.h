@@ -1627,7 +1627,7 @@ public:
 	uint32 m_arenaPoints;
 	bool m_honorless;
 	uint32 m_lastSeenWeather;
-	set<shared_ptr<Object>> m_visibleFarsightObjects;
+	set<shared_ptr<Object> > m_visibleFarsightObjects;
 	void EventTeleport(uint32 mapid, float x, float y, float z);
 	void ApplyLevelInfo(LevelInfo* Info, uint32 Level);
 	void BroadcastMessage(const char* Format, ...);
@@ -1637,7 +1637,7 @@ public:
 	void RemoveSummonSpell(uint32 Entry, uint32 SpellID);
 	set<uint32>* GetSummonSpells(uint32 Entry);
 	LockedQueue<WorldPacket*> delayedPackets;
-	set<shared_ptr<Player>> gmTargets;
+	set<shared_ptr<Player> > gmTargets;
 	uint32 m_UnderwaterMaxTime;
 	uint32 m_UnderwaterLastDmg;
 	HEARTHSTONE_INLINE void setMyCorpse(shared_ptr<Corpse> corpse) { myCorpse = corpse; }
@@ -1698,7 +1698,7 @@ public:
 	void OnPrePushToWorld();
 	void OnWorldPortAck();
 	uint32 m_TeleportState;
-	set<shared_ptr<Unit>> visiblityChangableSet;
+	set<shared_ptr<Unit> > visiblityChangableSet;
 	bool m_beingPushed;
 	bool CanSignCharter(Charter * charter, PlayerPointer requester);
 	uint32 flying_aura;
@@ -1968,7 +1968,7 @@ protected:
 	// Channels
 	std::set<uint32> m_channels;
 	// Visible objects
-	std::set<shared_ptr<Object>> m_visibleObjects;
+	std::set<shared_ptr<Object> > m_visibleObjects;
 	// Groups/Raids
 	uint32 m_GroupInviter;
 	uint8 m_StableSlotCount;
@@ -2175,7 +2175,7 @@ class CMovementCompressorThread : public ThreadContext
 {
 	bool running;
 	Mutex m_listLock;
-	set<shared_ptr<Player>> m_players;
+	set<shared_ptr<Player> > m_players;
 public:
 	CMovementCompressorThread() { running = true; }
 

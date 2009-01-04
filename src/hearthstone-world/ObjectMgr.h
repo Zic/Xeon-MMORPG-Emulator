@@ -286,7 +286,7 @@ public:
 };
 
 typedef std::map<uint32, std::list<SpellEntry*>* >                  OverrideIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player>>                     PlayerStorageMap;
+typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player> >                     PlayerStorageMap;
 typedef std::list<GM_Ticket*>                                       GmTicketList;
 
 #ifndef WIN32
@@ -334,18 +334,18 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, Group*>						GroupMap;
 	
     // HashMap typedef's
-    typedef HM_NAMESPACE::hash_map<uint64, shared_ptr<Item>>                       ItemMap;
+    typedef HM_NAMESPACE::hash_map<uint64, shared_ptr<Item> >                       ItemMap;
 	typedef HM_NAMESPACE::hash_map<uint32, CorpseData*>                 CorpseCollectorMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerInfo*>                 PlayerNameMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerCreateInfo*>           PlayerCreateInfoMap;
 	typedef HM_NAMESPACE::hash_map<uint32, Guild*>                      GuildMap;
 	typedef HM_NAMESPACE::hash_map<uint32, skilllinespell*>             SLMap;
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<CreatureItem>*>  VendorMap;
-    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter>>                TransportMap;
+    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >                TransportMap;
 	typedef HM_NAMESPACE::hash_map<uint32, Trainer*>                    TrainerMap;
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<TrainerSpell*> > TrainerSpellMap;
     typedef HM_NAMESPACE::hash_map<uint32, ReputationModifier*>         ReputationModMap;
-    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Corpse>>                     CorpseMap;
+    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Corpse> >                     CorpseMap;
     
     // Map typedef's
     typedef std::map<uint32, LevelInfo*>                                LevelMap;

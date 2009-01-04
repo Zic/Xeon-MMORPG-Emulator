@@ -440,7 +440,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		/************************************************************************/
 		/* Distribute to all inrange players.                                   */
 		/************************************************************************/
-		for(set<shared_ptr<Player>>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
+		for(set<shared_ptr<Player> >::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 		{
 			*(uint32*)&movement_packet[pos+6] = uint32(move_time + (*itr)->GetSession()->m_moveDelayTime);
 #if defined(ENABLE_COMPRESSED_MOVEMENT) && defined(ENABLE_COMPRESSED_MOVEMENT_FOR_PLAYERS)

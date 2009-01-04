@@ -1986,7 +1986,7 @@ void Player::InitVisibleUpdateBits()
 		Player::m_visibleUpdateMask.SetBit(i);*/
 
 	/* fuck i hate const - burlex */
-	/*if(target && target->GetGroup() == const_cast<shared_ptr<Player>>(plr_shared_from_this())->GetGroup() && const_cast<shared_ptr<Player>>(plr_shared_from_this())->GetSubGroup() == target->GetSubGroup())
+	/*if(target && target->GetGroup() == const_cast<shared_ptr<Player>>(plr_shared_from_this())->GetGroup() && const_cast<shared_ptr<Player> >(plr_shared_from_this())->GetSubGroup() == target->GetSubGroup())
 	{
 	// quest fields are the same for party members
 	for(uint32 i = PLAYER_QUEST_LOG_1_01; i < PLAYER_QUEST_LOG_25_2; ++i)
@@ -10000,7 +10000,7 @@ void Player::AppendMovementData(uint32 op, uint32 sz, const uint8* data)
 
 bool CMovementCompressorThread::run()
 {
-	set<shared_ptr<Player>>::iterator itr;
+	set<shared_ptr<Player> >::iterator itr;
 	while(running)
 	{
 		m_listLock.Acquire();

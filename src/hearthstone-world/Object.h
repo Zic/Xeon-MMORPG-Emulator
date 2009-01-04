@@ -415,11 +415,11 @@ public:
 
 	bool IsInRangeOppFactSet(ObjectPointer pObj) { return (m_oppFactsInRange.count(pObj) > 0); }
 	void UpdateOppFactionSet();
-	HEARTHSTONE_INLINE std::set<shared_ptr<Object>>::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Object>>::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player>>::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player>>::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player>> * GetInRangePlayerSet() { return &m_inRangePlayers; };
+	HEARTHSTONE_INLINE std::set<shared_ptr<Object> >::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Object> >::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player> >::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player> >::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player> > * GetInRangePlayerSet() { return &m_inRangePlayers; };
 
 	void __fastcall SendMessageToSet(WorldPacket *data, bool self,bool myteam_only=false);
 	HEARTHSTONE_INLINE void SendMessageToSet(StackPacket * data, bool self) { OutPacketToSet(data->GetOpcode(), (uint16)data->GetSize(), data->GetBufferPointer(), self); }
@@ -554,9 +554,9 @@ protected:
 
 	//! Set of Objects in range.
 	//! TODO: that functionality should be moved into WorldServer.
-	std::set<shared_ptr<Object>> m_objectsInRange;
-	std::set<shared_ptr<Player>> m_inRangePlayers;
-	std::set<shared_ptr<Object>> m_oppFactsInRange;
+	std::set<shared_ptr<Object> > m_objectsInRange;
+	std::set<shared_ptr<Player> > m_inRangePlayers;
+	std::set<shared_ptr<Object> > m_oppFactsInRange;
    
   
 	//! Remove object from map

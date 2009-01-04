@@ -99,7 +99,7 @@ public:
 
 private:
 	RWLock itemLock;
-	HM_NAMESPACE::hash_map<uint64, shared_ptr<Item>> auctionedItems;
+	HM_NAMESPACE::hash_map<uint64, shared_ptr<Item> > auctionedItems;
 
 	RWLock auctionLock;
 	HM_NAMESPACE::hash_map<uint32, Auction*> auctions;

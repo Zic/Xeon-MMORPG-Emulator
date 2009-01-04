@@ -131,7 +131,7 @@ static inline uint32 GetLevelGrouping(uint32 level)
 class CBattlegroundManager : public Singleton<CBattlegroundManager>, public EventableObject
 {
 	/* Battleground Instance Map */
-	map<uint32, shared_ptr<CBattleground>> m_instances[BATTLEGROUND_NUM_TYPES];
+	map<uint32, shared_ptr<CBattleground> > m_instances[BATTLEGROUND_NUM_TYPES];
 	Mutex m_instanceLock;
 
 	/* Max Id */
@@ -190,10 +190,10 @@ public:
 	int CreateArenaType(int type, Group * group1, Group * group2);
 
 	/* Add player to bg team */
-	void AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j, int Team);
+	void AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j, int Team);
 
 	/* Add player to bg */
-	void AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j);
+	void AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j);
 
 	/* Add a group to an arena */
 	void AddGroupToArena(shared_ptr<CBattleground> bg, Group * group, int nteam);
@@ -227,7 +227,7 @@ public:
 	friend class AVNode;
 
 	/* Team->Player Map */
-	set<shared_ptr<Player>> m_players[2];
+	set<shared_ptr<Player> > m_players[2];
 	void Lock() { m_mainLock.Acquire(); }
 	void Unlock() { m_mainLock.Release(); }
 	HEARTHSTONE_INLINE bool IsArena() { return (m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5); }

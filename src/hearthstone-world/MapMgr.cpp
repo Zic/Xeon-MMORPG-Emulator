@@ -126,7 +126,7 @@ void MapMgr::Destructor()
 		}
 	}
 
-	for(set<shared_ptr<Object>>::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+	for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 	{
 		if((*itr)->IsInWorld())
 			(*itr)->RemoveFromWorld(false);
@@ -138,7 +138,7 @@ void MapMgr::Destructor()
 	//free(m_CreatureStorage);
 
 	shared_ptr<Corpse> pCorpse;
-	for(set<shared_ptr<Corpse>>::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
+	for(set<shared_ptr<Corpse> >::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
 	{
 		pCorpse = *itr;
 		++itr;
@@ -351,7 +351,7 @@ void MapMgr::PushObject(shared_ptr<Object>obj)
 		/* Add the map wide objects */
 		if(_mapWideStaticObjects.size())
 		{
-			for(set<shared_ptr<Object>>::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+			for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 			{
 				count = (*itr)->BuildCreateUpdateBlockForPlayer(&m_createBuffer, plObj);
 				plObj->PushCreationData(&m_createBuffer, count);
@@ -534,7 +534,7 @@ void MapMgr::RemoveObject(shared_ptr<Object>obj, bool free_guid)
 	// Remove the session from our set if it is a player.
 	if(plObj)
 	{
-		for(set<shared_ptr<Object>>::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+		for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 		{
 			plObj->PushOutOfRange((*itr)->GetNewGUID());
 		}
@@ -1034,8 +1034,8 @@ void MapMgr::_UpdateObjects()
 
 	shared_ptr<Object>pObj;
 	shared_ptr<Player>pOwner;
-	//std::set<shared_ptr<Object>>::iterator it_start, it_end, itr;
-	std::set<shared_ptr<Player>>::iterator it_start, it_end, itr;
+	//std::set<shared_ptr<Object> >::iterator it_start, it_end, itr;
+	std::set<shared_ptr<Player> >::iterator it_start, it_end, itr;
 	PlayerPointer lplr;
 	uint32 count = 0;
 	
@@ -1386,7 +1386,7 @@ bool MapMgr::Do()
 	}
 
 	/* add static objects */
-	for(set<shared_ptr<Object>>::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+	for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 		PushStaticObject(*itr);
 
 	/* load corpses */

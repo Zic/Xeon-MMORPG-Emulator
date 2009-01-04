@@ -611,8 +611,8 @@ void EyeOfTheStorm::UpdateCPs()
 	//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 	//   doing lookups of objects that have already been updated
 
-	set<shared_ptr<Player>>::iterator itr;
-	set<shared_ptr<Player>>::iterator itrend;
+	set<shared_ptr<Player> >::iterator itr;
+	set<shared_ptr<Player> >::iterator itrend;
 	map<uint32,uint32>::iterator it2, it3;
 	uint32 timeptr = (uint32)UNIXTIME;
 	bool in_range;
@@ -867,7 +867,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	{
 		m_resourceRewards[team] += 330;
 
-		for(set<shared_ptr<Player>>::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
+		for(set<shared_ptr<Player> >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
 		{
 			PlayerPointer plr = (*itx);
 			if(!plr) continue;
@@ -893,7 +893,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				(*itr)->Root();
 
@@ -1020,7 +1020,7 @@ void EyeOfTheStorm::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}

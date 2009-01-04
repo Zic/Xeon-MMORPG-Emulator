@@ -25,7 +25,7 @@ class WarsongGulch : public CBattleground
 	shared_ptr<GameObject> m_homeFlags[2];
 	shared_ptr<GameObject> m_dropFlags[2];
 	uint32 m_flagHolders[2];
-	list<shared_ptr<GameObject>> m_gates;
+	list<shared_ptr<GameObject> > m_gates;
 	uint32 m_scores[2];
 	uint32 m_lgroup;
 	bool m_flagAtBase[2];

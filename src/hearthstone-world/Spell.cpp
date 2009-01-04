@@ -288,7 +288,7 @@ void Spell::FillSpecifiedTargetsInArea(uint32 i,float srcx,float srcy,float srcz
     //IsStealth()
     float r = range * range;
 	//uint8 did_hit_result;
-    for(std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+    for(std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
     {
         // don't add objects that are not units and that are dead
         if( !( (*itr)->IsUnit() ) || ! TO_UNIT( *itr )->isAlive())
@@ -349,7 +349,7 @@ void Spell::FillAllTargetsInArea(uint32 i,float srcx,float srcy,float srcz, floa
 	//TargetsList *tmpMap=&m_targetUnits[i];
 	float r = range*range;
 	//uint8 did_hit_result;
-	for( std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for( std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if( !( (*itr)->IsUnit() ) || ! TO_UNIT(*itr)->isAlive() || ( (*itr)->GetTypeId()==TYPEID_UNIT && TO_CREATURE(*itr)->IsTotem() ) || !(*itr)->PhasedCanInteract(m_caster))
 			continue;
@@ -395,7 +395,7 @@ void Spell::FillAllFriendlyInArea( uint32 i, float srcx, float srcy, float srcz,
 	//TargetsList *tmpMap=&m_targetUnits[i];
 	float r = range * range;
 	//uint8 did_hit_result;
-	for( std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for( std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if( !((*itr)->IsUnit()) || !TO_UNIT(*itr)->isAlive() || !(*itr)->PhasedCanInteract(m_caster))
 			continue;
@@ -451,7 +451,7 @@ uint64 Spell::GetSinglePossibleEnemy(uint32 i,float prange)
 		}
 	}
 	float srcx = m_caster->GetPositionX(), srcy = m_caster->GetPositionY(), srcz = m_caster->GetPositionZ();
-	for( std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for( std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if( !( (*itr)->IsUnit() ) || !TO_UNIT(*itr)->isAlive() || !(*itr)->PhasedCanInteract(m_caster))
 			continue;
@@ -500,7 +500,7 @@ uint64 Spell::GetSinglePossibleFriend(uint32 i,float prange)
 		}
 	}
 	float srcx=m_caster->GetPositionX(),srcy=m_caster->GetPositionY(),srcz=m_caster->GetPositionZ();
-	for(std::set<shared_ptr<Object>>::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for(std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if( !( (*itr)->IsUnit() ) || !TO_UNIT(*itr)->isAlive() )
 			continue;
@@ -2583,7 +2583,7 @@ void Spell::HandleAddAura(uint64 guid)
 	if(Target->GetInstanceID()!=m_caster->GetInstanceID())
 		return;
 
-	std::map<uint32,shared_ptr<Aura>>::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
+	std::map<uint32,shared_ptr<Aura> >::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
 	if(itr!=Target->tmpAura.end())
 	{
 		if(itr->second != NULL)
@@ -3048,7 +3048,7 @@ uint8 Spell::CanCast(bool tolerate)
 
 			bool found = false;
 
-			for(std::set<shared_ptr<Object>>::iterator itr = p_caster->GetInRangeSetBegin(); itr != p_caster->GetInRangeSetEnd(); itr++ )
+			for(std::set<shared_ptr<Object> >::iterator itr = p_caster->GetInRangeSetBegin(); itr != p_caster->GetInRangeSetEnd(); itr++ )
 			{
 				if((*itr)->GetTypeId() != TYPEID_GAMEOBJECT)
 					continue;
@@ -4380,12 +4380,12 @@ void Spell::Heal(int32 amount)
 		uint32 base_threat=Spell::GetBaseThreat(amount);
 		int count = 0;
 		shared_ptr<Unit>unit;
-		std::vector<shared_ptr<Unit>> target_threat;
+		std::vector<shared_ptr<Unit> > target_threat;
 		if(base_threat)
 		{
 			target_threat.reserve(u_caster->GetInRangeCount()); // this helps speed
 
-			for(std::set<shared_ptr<Object>>::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
+			for(std::set<shared_ptr<Object> >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
 			{
 				if((*itr)->GetTypeId() != TYPEID_UNIT)
 					continue;
@@ -4406,7 +4406,7 @@ void Spell::Heal(int32 amount)
 			*/
 			uint32 threat = base_threat / (count * 2);
 				
-			for(std::vector<shared_ptr<Unit>>::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
+			for(std::vector<shared_ptr<Unit> >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
 				TO_UNIT(*itr)->GetAIInterface()->HealReaction( u_caster, unitTarget, threat );

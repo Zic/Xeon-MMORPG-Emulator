@@ -92,9 +92,9 @@ struct TWayPoint {
 
 typedef std::map<uint32, TWayPoint> WaypointMap;
 typedef std::map<uint32, TWayPoint>::iterator WaypointIterator;
-typedef std::map<uint32, shared_ptr<Player>> PassengerMap;
-typedef std::map<uint32, shared_ptr<Player>>::iterator PassengerIterator;
-typedef std::map<uint32, shared_ptr<Object>> TransportNPCMap;
+typedef std::map<uint32, shared_ptr<Player> > PassengerMap;
+typedef std::map<uint32, shared_ptr<Player> >::iterator PassengerIterator;
+typedef std::map<uint32, shared_ptr<Object> > TransportNPCMap;
 
 bool FillTransporterPathVector(uint32 PathID, TransportPath & Path);
 

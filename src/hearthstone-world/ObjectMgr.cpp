@@ -2085,7 +2085,7 @@ shared_ptr<Transporter> ObjectMgr::GetTransporter(uint32 guid)
 {
 	shared_ptr<Transporter> rv;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter>>::const_iterator itr = mTransports.find(guid);
+	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >::const_iterator itr = mTransports.find(guid);
 	rv = (itr != mTransports.end()) ? itr->second : NULLTRANSPORT;
 	_TransportLock.Release();
 	return rv;
@@ -2102,7 +2102,7 @@ shared_ptr<Transporter> ObjectMgr::GetTransporterByEntry(uint32 entry)
 {
 	shared_ptr<Transporter> rv = NULLTRANSPORT;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter>>::iterator itr = mTransports.begin();
+	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >::iterator itr = mTransports.begin();
 	for(; itr != mTransports.end(); ++itr)
 	{
 		if(itr->second->GetEntry() == entry)

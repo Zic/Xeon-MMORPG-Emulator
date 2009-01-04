@@ -252,7 +252,7 @@ void Arena::OnCreate()
 	}
 
 	/* push gates into world */
-	for(set<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 		(*itr)->PushToWorld(m_mapMgr);
 
 	
@@ -274,7 +274,7 @@ void Arena::OnStart()
 {
 	/* remove arena readyness buff */
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			shared_ptr<Player>plr = *itr;
 			plr->RemoveAura(ARENA_PREPARATION);
 			hashmap_put(m_players2[i], plr->GetLowGUID(), (any_t)1);
@@ -294,7 +294,7 @@ void Arena::OnStart()
 	}
 
 	/* open gates */
-	for(set<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -418,7 +418,7 @@ void Arena::Finish()
 	for(int i = 0; i < 2; i++)
 	{
 		bool victorious = (i != m_losingteam);
-		set<shared_ptr<Player>>::iterator itr = m_players[i].begin();
+		set<shared_ptr<Player> >::iterator itr = m_players[i].begin();
 		for(; itr != m_players[i].end(); itr++)
 		{
 			PlayerPointer plr = (shared_ptr<Player>)(*itr);

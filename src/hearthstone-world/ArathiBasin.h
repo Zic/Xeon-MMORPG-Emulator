@@ -58,7 +58,7 @@ public:
 	bool m_nearingVictory[2];
 
 protected:
-	list<shared_ptr<GameObject>> m_gates;
+	list<shared_ptr<GameObject> > m_gates;
 	
 	uint32 m_resources[2];
 	uint32 m_capturedBases[2];

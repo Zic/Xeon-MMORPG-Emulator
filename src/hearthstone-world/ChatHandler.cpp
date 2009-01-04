@@ -234,7 +234,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 				data = sChatHandler.FillMessageData( CHAT_MSG_SAY, lang, msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
 				SendChatPacket(data, 1, lang, this);
-				for(set<shared_ptr<Player>>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
+				for(set<shared_ptr<Player> >::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 				{
 					(*itr)->GetSession()->SendChatPacket(data, 1, lang, this);
 				}

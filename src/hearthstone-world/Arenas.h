@@ -22,7 +22,7 @@ struct PlayerInfo;
 
 class Arena : public CBattleground
 {
-	set<shared_ptr<GameObject>> m_gates;
+	set<shared_ptr<GameObject> > m_gates;
 	uint32 m_arenateamtype;
 
 	uint32 m_pcWorldStates[2];

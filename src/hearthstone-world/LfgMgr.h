@@ -36,7 +36,7 @@ class LfgMgr : public Singleton < LfgMgr >, EventableObject
 {
 public:	
 	
-	typedef list<shared_ptr<Player>> LfgPlayerList;
+	typedef list<shared_ptr<Player> > LfgPlayerList;
 
 	LfgMgr();
 	~LfgMgr();
@@ -65,8 +65,8 @@ protected:
 class LfgMatch
 {
 public:
-	set<shared_ptr<Player>> PendingPlayers;
-	set<shared_ptr<Player>> AcceptedPlayers;
+	set<shared_ptr<Player> > PendingPlayers;
+	set<shared_ptr<Player> > AcceptedPlayers;
 	Mutex lock;
 	uint32 DungeonId;
     Group * pGroup;

@@ -1120,9 +1120,9 @@ void Aura::EventRelocateRandomTarget()
 	PlayerPointer p_caster = TO_PLAYER(u_caster);
 
 	// Ok, let's do it. :D
-	set<shared_ptr<Unit>> enemies;
+	set<shared_ptr<Unit> > enemies;
 
-	set<shared_ptr<Object>>::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
+	set<shared_ptr<Object> >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
 	for(; itr != u_caster->GetInRangeOppFactsSetEnd(); ++itr)
 	{
 		if( !(*itr)->IsUnit() )
@@ -1150,7 +1150,7 @@ void Aura::EventRelocateRandomTarget()
 		return;
 
 	uint32 random = RandomUInt(enemies.size() - 1);
-	set<shared_ptr<Unit>>::iterator it2 = enemies.begin();
+	set<shared_ptr<Unit> >::iterator it2 = enemies.begin();
 	while( random-- )
 		it2++;
 
@@ -3104,7 +3104,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		{
 			target_threat.reserve(u_caster->GetInRangeCount()); // this helps speed
 
-			for(std::set<shared_ptr<Object>>::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
+			for(std::set<shared_ptr<Object> >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
 			{
 				if((*itr)->GetTypeId() != TYPEID_UNIT)
 					continue;
@@ -3125,7 +3125,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			*/
 			uint32 threat = base_threat / (count * 2);
 
-			for(std::vector<shared_ptr<Unit>>::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
+			for(std::vector<shared_ptr<Unit> >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
 				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat);
@@ -5616,7 +5616,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 //			pTarget->setDeathState(DEAD);
 
 			//now get rid of mobs agro. pTarget->CombatStatus.AttackersForgetHate() - this works only for already attacking mobs
-		    for(std::set<shared_ptr<Object>>::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
+		    for(std::set<shared_ptr<Object> >::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
 			{
 				if((*itr)->IsUnit() && (TO_UNIT(*itr))->isAlive())
 				{

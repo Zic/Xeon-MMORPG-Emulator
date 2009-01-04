@@ -56,16 +56,16 @@ enum ObjectActiveState
 	OBJECT_STATE_ACTIVE   = 2,
 };
 
-typedef std::set<shared_ptr<Object>> ObjectSet;
-typedef std::set<shared_ptr<Object>> UpdateQueue;
-typedef std::set<shared_ptr<Player>> PUpdateQueue;
-typedef std::set<shared_ptr<Player>> PlayerSet;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Object>> StorageMap;
+typedef std::set<shared_ptr<Object> > ObjectSet;
+typedef std::set<shared_ptr<Object> > UpdateQueue;
+typedef std::set<shared_ptr<Player> > PUpdateQueue;
+typedef std::set<shared_ptr<Player> > PlayerSet;
+typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Object> > StorageMap;
 typedef set<uint64> CombatProgressMap;
 typedef set<CreaturePointer> CreatureSet;
-typedef set<shared_ptr<GameObject>> GameObjectSet;
+typedef set<shared_ptr<GameObject> > GameObjectSet;
 typedef HM_NAMESPACE::hash_map<uint32, CreaturePointer> CreatureSqlIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject>> GameObjectSqlIdMap;
+typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectSqlIdMap;
 
 #define MAX_TRANSPORTERS_PER_MAP 25
 
@@ -89,7 +89,7 @@ public:
 ////////////////////////////////////////////////////////
 // Local (mapmgr) storage/generation of GameObjects
 /////////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject>> GameObjectMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectMap;
 	GameObjectMap m_gameObjectStorage;
 	uint32 m_GOHighGuid;
 	shared_ptr<GameObject> CreateGameObject(uint32 entry);
@@ -129,7 +129,7 @@ public:
 // Local (mapmgr) storage/generation of DynamicObjects
 ////////////////////////////////////////////
 	uint32 m_DynamicObjectHighGuid;
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<DynamicObject>> DynamicObjectStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<DynamicObject> > DynamicObjectStorageMap;
 	DynamicObjectStorageMap m_DynamicObjectStorage;
 	shared_ptr<DynamicObject> CreateDynamicObject();
 	
@@ -142,7 +142,7 @@ public:
 //////////////////////////////////////////////////////////
 // Local (mapmgr) storage of pets
 ///////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Pet>> PetStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Pet> > PetStorageMap;
 	PetStorageMap m_PetStorage;
 	__inline shared_ptr<Pet> GetPet(uint32 guid)
 	{
@@ -155,7 +155,7 @@ public:
 ////////////////////////////////
     
     // double typedef lolz// a compile breaker..
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player>>                     PlayerStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player> >                     PlayerStorageMap;
 	PlayerStorageMap m_PlayerStorage;
 	__inline PlayerPointer GetPlayer(uint32 guid)
 	{
@@ -277,7 +277,7 @@ private:
 	//! Objects that exist on map
  
 	uint32 _mapId;
-	set<shared_ptr<Object>> _mapWideStaticObjects;
+	set<shared_ptr<Object> > _mapWideStaticObjects;
 
 	bool _CellActive(uint32 x, uint32 y);
 	void UpdateInRangeSet(shared_ptr<Object>obj, shared_ptr<Player>plObj, MapCell* cell);
@@ -313,7 +313,7 @@ public:
 	CreatureSet activeCreatures;
 	EventableObjectHolder eventHolder;
 	shared_ptr<CBattleground> m_battleground;
-	set<shared_ptr<Corpse>> m_corpses;
+	set<shared_ptr<Corpse> > m_corpses;
 	CreatureSqlIdMap _sqlids_creatures;
 	GameObjectSqlIdMap _sqlids_gameobjects;
 

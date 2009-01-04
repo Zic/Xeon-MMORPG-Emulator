@@ -123,13 +123,13 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 		if( pPlayer->m_bg )
 		{
 			// hackfix for battlegrounds (since the gorups there are disabled, we need to do this manually)
-			vector<shared_ptr<Player>> toadd;
+			vector<shared_ptr<Player> > toadd;
 			uint32 t = pPlayer->m_bgTeam;
 			toadd.reserve(15);		// shouldnt have more than this
 			pPlayer->m_bg->Lock();
-			set<shared_ptr<Player>> * s = &pPlayer->m_bg->m_players[t];
+			set<shared_ptr<Player> > * s = &pPlayer->m_bg->m_players[t];
 
-			for(set<shared_ptr<Player>>::iterator itr = s->begin(); itr != s->end(); ++itr)
+			for(set<shared_ptr<Player> >::iterator itr = s->begin(); itr != s->end(); ++itr)
 			{
 				if((*itr) == pPlayer || (*itr)->isInRange(pPlayer,40.0f))
 					toadd.push_back(*itr);
@@ -138,7 +138,7 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 			if( toadd.size() > 0 )
 			{
 				uint32 pts = Points / (uint32)toadd.size();
-				for(vector<shared_ptr<Player>>::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
+				for(vector<shared_ptr<Player> >::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
 				{
 					AddHonorPointsToPlayer(*vtr, pts);
 

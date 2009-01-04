@@ -22,8 +22,8 @@
 
 struct SpellEntry;
 
-typedef set<shared_ptr<Unit>>  DynamicObjectList;
-typedef set<shared_ptr<Unit>>  FactionRangeList;
+typedef set<shared_ptr<Unit> >  DynamicObjectList;
+typedef set<shared_ptr<Unit> >  FactionRangeList;
 
 class SERVER_DECL DynamicObject : public Object
 {

@@ -121,7 +121,7 @@ void AuctionHouse::AddAuction(Auction * auct)
 
 	// add the item
 	itemLock.AcquireWriteLock();
-	auctionedItems.insert( HM_NAMESPACE::hash_map<uint64, shared_ptr<Item>>::value_type( auct->pItem->GetGUID(), auct->pItem ) );
+	auctionedItems.insert( HM_NAMESPACE::hash_map<uint64, shared_ptr<Item> >::value_type( auct->pItem->GetGUID(), auct->pItem ) );
 	itemLock.ReleaseWriteLock();
 
 	DEBUG_LOG("AuctionHouse", "%u: Add auction %u, expire@ %u.", dbc->id, auct->Id, auct->ExpiryTime);

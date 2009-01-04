@@ -137,7 +137,7 @@ void WeatherMgr::LoadFromDB()
 
 void WeatherMgr::SendWeather(shared_ptr<Player>plr)  //Update weather when player has changed zone (WorldSession::HandleZoneUpdateOpcode)
 {
-	std::map<uint32, shared_ptr<WeatherInfo>>::iterator itr;
+	std::map<uint32, shared_ptr<WeatherInfo> >::iterator itr;
 	itr = m_zoneWeathers.find(plr->GetZoneId());
 
 	if (itr == m_zoneWeathers.end())
