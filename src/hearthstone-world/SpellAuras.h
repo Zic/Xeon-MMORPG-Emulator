@@ -348,7 +348,8 @@ class SERVER_DECL Aura : public EventableObject
 {
 	uint64 periodic_target;
 public:
-    Aura(SpellEntry *proto, int32 duration,Object* caster, Unit *target);
+    Aura(SpellEntry *proto, int32 duration,ObjectPointer caster, shared_ptr<Unit>target);
+
 	void ExpireRemove();
     void Remove();
     void Expire();
@@ -377,12 +378,12 @@ public:
 	void SetNegative(signed char value=1) { m_positive -= value; }
 	void SetPositive(signed char value=1) { m_positive += value; }
 
-	Object* GetCaster();
+	ObjectPointer GetCaster();
 	HEARTHSTONE_INLINE uint64 GetCasterGUID(){return m_casterGuid;}
-	Unit* GetUnitCaster();
-	HEARTHSTONE_INLINE Unit* GetTarget() { return m_target; }
+	UnitPointer GetUnitCaster();
+	HEARTHSTONE_INLINE UnitPointer GetTarget() { return m_target; }
 
-	Aura* StrongerThat(Aura *aur);
+	AuraPointer  StrongerThat(AuraPointer aur);
 	void ApplyModifiers(bool apply);
 	void UpdateModifiers();
 	void AddAuraVisual();
@@ -392,7 +393,7 @@ public:
 	void EventUpdatePlayerAA(float r);
 	void EventRelocateRandomTarget();
 	void RemoveAA();
-	void AttemptDispel(Unit * pCaster, bool canResist = true);
+	void AttemptDispel(UnitPointer pCaster, bool canResist = true);
 	bool m_dispelled;
 	uint32 m_resistPctChance;
 		
@@ -642,8 +643,8 @@ public:
 
 	// log message's
 	void SendPeriodicHealAuraLog(uint32 amt);
-	void SendPeriodicAuraLog(Unit * Caster, Unit * Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
-	void SendPeriodicAuraLog(const uint64& CasterGuid, Unit * Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
+	void SendPeriodicAuraLog(UnitPointer Caster, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
+	void SendPeriodicAuraLog(const uint64& CasterGuid, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
 
 	bool WasCastInDuel() { return m_castInDuel; }
 
@@ -693,7 +694,7 @@ private:
 	uint32 GetCasterFaction() { return m_casterfaction; }
 	void SetCasterFaction(uint32 faction){ m_casterfaction = faction; }
 
-	HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1, Object * o,float square_r)
+	HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1, ObjectPointer o,float square_r)
 	{
 		float t;
 		float r;
@@ -706,8 +707,8 @@ private:
 		return ( r<=square_r);
 	}
 	
-	Unit* m_target;
-	Player * p_target;
+	UnitPointer m_target;
+	PlayerPointer p_target;
 	uint32 timeleft;
 	int32 m_duration; // in msecs
 //	bool m_positive;
@@ -721,8 +722,8 @@ private:
 protected:
 	uint32 m_casterfaction;
 
-	void SendInterrupted(uint8 result, Object * m_caster);
-	void SendChannelUpdate(uint32 time, Object * m_caster);
+	void SendInterrupted(uint8 result, ObjectPointer m_caster);
+	void SendChannelUpdate(uint32 time, ObjectPointer m_caster);
 public:
 	bool m_deleted;
 	bool m_creatureAA;

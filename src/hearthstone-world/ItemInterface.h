@@ -48,18 +48,18 @@ class SERVER_DECL ItemInterface
 {
 private:
 	SlotResult result;
-	Player *m_pOwner;
-	Item* m_pItems[MAX_INVENTORY_SLOT];
-	Item* m_pBuyBack[MAX_BUYBACK_SLOT];
+	shared_ptr<Player>m_pOwner;
+	ItemPointer m_pItems[MAX_INVENTORY_SLOT];
+	ItemPointer m_pBuyBack[MAX_BUYBACK_SLOT];
 
-	AddItemResult m_AddItem(Item *item, int8 ContainerSlot, int8 slot);
+	AddItemResult m_AddItem(shared_ptr<Item>item, int8 ContainerSlot, int8 slot);
 
 public:
 	friend class ItemIterator;
-	ItemInterface( Player *pPlayer );
+	ItemInterface( PlayerPointer pPlayer );
 	~ItemInterface();
 
-	Player *GetOwner() { return m_pOwner; }
+	shared_ptr<Player>GetOwner() { return m_pOwner; }
 	bool IsBagSlot(int8 slot);
 
 	uint32 m_CreateForPlayer(ByteBuffer *data);
@@ -68,28 +68,28 @@ public:
 	void mLoadItemsFromDatabase(QueryResult * result);
 	void mSaveItemsToDatabase(bool first, QueryBuffer * buf);
 
-	Item *GetInventoryItem(int8 slot);
-	Item *GetInventoryItem(int8 ContainerSlot, int8 slot);
+	shared_ptr<Item>GetInventoryItem(int8 slot);
+	shared_ptr<Item>GetInventoryItem(int8 ContainerSlot, int8 slot);
 	int8 GetInventorySlotById(uint32 ID);
 	int8 GetInventorySlotByGuid(uint64 guid);
 	int8 GetBagSlotByGuid(uint64 guid);
 
-	Item *SafeAddItem(uint32 ItemId, int8 ContainerSlot, int8 slot);
-	AddItemResult SafeAddItem(Item *pItem, int8 ContainerSlot, int8 slot);
-	Item *SafeRemoveAndRetreiveItemFromSlot(int8 ContainerSlot, int8 slot, bool destroy); //doesnt destroy item from memory
-	Item *SafeRemoveAndRetreiveItemByGuid(uint64 guid, bool destroy);
-	Item *SafeRemoveAndRetreiveItemByGuidRemoveStats(uint64 guid, bool destroy);
+	shared_ptr<Item>SafeAddItem(uint32 ItemId, int8 ContainerSlot, int8 slot);
+	AddItemResult SafeAddItem(shared_ptr<Item>pItem, int8 ContainerSlot, int8 slot);
+	shared_ptr<Item>SafeRemoveAndRetreiveItemFromSlot(int8 ContainerSlot, int8 slot, bool destroy); //doesnt destroy item from memory
+	shared_ptr<Item>SafeRemoveAndRetreiveItemByGuid(uint64 guid, bool destroy);
+	shared_ptr<Item>SafeRemoveAndRetreiveItemByGuidRemoveStats(uint64 guid, bool destroy);
 	bool SafeFullRemoveItemFromSlot(int8 ContainerSlot, int8 slot); //destroys item fully
 	bool SafeFullRemoveItemByGuid(uint64 guid); //destroys item fully
-	AddItemResult AddItemToFreeSlot(Item *item);
-	AddItemResult AddItemToFreeBankSlot(Item *item);
+	AddItemResult AddItemToFreeSlot(shared_ptr<Item>item);
+	AddItemResult AddItemToFreeBankSlot(shared_ptr<Item>item);
 	
-	Item* FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBank);
+	ItemPointer FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBank);
 	uint32 GetItemCount(uint32 itemid, bool IncBank = false);
 	uint32 RemoveItemAmt(uint32 id, uint32 amt);
-	uint32 RemoveItemAmt_ProtectPointer(uint32 id, uint32 amt, Item** pointer);
+	uint32 RemoveItemAmt_ProtectPointer(uint32 id, uint32 amt, shared_ptr<Item>* pointer);
 	void RemoveAllConjured();
-	void BuyItem(ItemPrototype *item, uint32 total_amount, Creature * pVendor, ItemExtendedCostEntry *ec);
+	void BuyItem(ItemPrototype *item, uint32 total_amount, CreaturePointer pVendor, ItemExtendedCostEntry *ec);
 
 	uint32 CalculateFreeSlots(ItemPrototype *proto);
 	void ReduceItemDurability();
@@ -104,30 +104,30 @@ public:
 	SlotResult FindAmmoBag();
 	int8 FindFreeBackPackSlot();
 	int8 FindFreeKeyringSlot();
-	int8 FindSpecialBag(Item *item);
+	int8 FindSpecialBag(shared_ptr<Item>item);
 
 
 	int8 CanEquipItemInSlot(int8 DstInvSlot, int8 slot, ItemPrototype* item, bool ignore_combat = false, bool skip_2h_check = false);
 	int8 CanReceiveItem(ItemPrototype * item, uint32 amount, ItemExtendedCostEntry *ec);
-	int8 CanAffordItem(ItemPrototype * item,uint32 amount, Creature * pVendor, ItemExtendedCostEntry *ec);
+	int8 CanAffordItem(ItemPrototype * item,uint32 amount, CreaturePointer pVendor, ItemExtendedCostEntry *ec);
 	int8 GetItemSlotByType(uint32 type);
-	Item* GetItemByGUID(uint64 itemGuid);
+	ItemPointer GetItemByGUID(uint64 itemGuid);
 
 
-	void BuildInventoryChangeError(Item *SrcItem, Item *DstItem, uint8 Error);
+	void BuildInventoryChangeError(shared_ptr<Item>SrcItem, shared_ptr<Item>DstItem, uint8 Error);
 	void SwapItemSlots(int8 srcslot, int8 dstslot);
 
 	int8 GetInternalBankSlotFromPlayer(int8 islot); //converts inventory slots into 0-x numbers
 
 	//buyback stuff
-	HEARTHSTONE_INLINE Item* GetBuyBack(int32 slot) 
+	HEARTHSTONE_INLINE ItemPointer GetBuyBack(int32 slot) 
 	{ 
 		if(slot >= 0 && slot <= 12)
 			return m_pBuyBack[slot];
 		else 
-			return NULL;
+			return NULLITEM;
 	}
-	void AddBuyBackItem(Item* it, uint32 price);
+	void AddBuyBackItem(ItemPointer it, uint32 price);
 	void RemoveBuyBackItem(uint32 index);
 	void EmptyBuyBack();
 	bool IsEquipped(uint32 itemid);
@@ -184,11 +184,11 @@ class ItemIterator
 	bool m_searchInProgress;
 	uint32 m_slot;
 	uint32 m_containerSlot;
-	Container * m_container;
-	Item * m_currentItem;
+	shared_ptr<Container> m_container;
+	ItemPointer m_currentItem;
 	ItemInterface* m_target;
 public:
-	ItemIterator(ItemInterface* target) : m_atEnd(false),m_searchInProgress(false),m_slot(0),m_containerSlot(0),m_container(NULL),m_target(target) {}
+	ItemIterator(ItemInterface* target) : m_atEnd(false),m_searchInProgress(false),m_slot(0),m_containerSlot(0),m_container(NULLCONTAINER),m_target(target) {}
 	~ItemIterator() { if(m_searchInProgress) { EndSearch(); } }
 
 	void BeginSearch()
@@ -197,8 +197,8 @@ public:
 		ASSERT(!m_searchInProgress);
 		m_atEnd=false;
 		m_searchInProgress=true;
-		m_container=NULL;
-		m_currentItem=NULL;
+		m_container=NULLCONTAINER;
+		m_currentItem=NULLITEM;
 		m_slot=0;
 		Increment();
 	}
@@ -211,12 +211,12 @@ public:
 		m_searchInProgress=false;
 	}
 
-	Item* operator*() const
+	ItemPointer operator*() const
 	{
 		return m_currentItem;
 	}
 
-	Item* operator->() const
+	ItemPointer operator->() const
 	{
 		return m_currentItem;
 	}
@@ -244,7 +244,7 @@ public:
 			}
 
 			// unset this
-			m_container=NULL;
+			m_container=NULLCONTAINER;
 		}
 
 		for(; m_slot < MAX_INVENTORY_SLOT; ++m_slot)
@@ -254,11 +254,11 @@ public:
 				if(m_target->m_pItems[m_slot]->IsContainer())
 				{
 					// we are a container :O lets look inside the box!
-					m_container = ((Container*)m_target->m_pItems[m_slot]);
+					m_container = TO_CONTAINER(m_target->m_pItems[m_slot]);
 					m_containerSlot = 0;
 
 					// clear the pointer up. so we can tell if we found an item or not
-					m_currentItem = NULL;
+					m_currentItem = NULLITEM;
 
 					// increment m_slot so we don't search this container again
 					++m_slot;
@@ -284,10 +284,10 @@ public:
 
 		// if we're here we've searched all items.
 		m_atEnd=true;
-		m_currentItem=NULL;
+		m_currentItem=NULLITEM;
 	}
 
-	HEARTHSTONE_INLINE Item* Grab() { return m_currentItem; }
+	HEARTHSTONE_INLINE ItemPointer Grab() { return m_currentItem; }
 	HEARTHSTONE_INLINE bool End() { return m_atEnd; }
 };
 

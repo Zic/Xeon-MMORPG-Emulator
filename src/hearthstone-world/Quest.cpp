@@ -141,7 +141,7 @@ QuestLogEntry::~QuestLogEntry()
 
 }
 
-void QuestLogEntry::Init(Quest* quest, Player* plr, uint32 slot)
+void QuestLogEntry::Init(Quest* quest, PlayerPointer plr, uint32 slot)
 {
 	ASSERT(quest);
 	ASSERT(plr);
@@ -188,14 +188,14 @@ void QuestLogEntry::ClearAffectedUnits()
 	if (m_affected_units.size()>0)
 		m_affected_units.clear();
 }
-void QuestLogEntry::AddAffectedUnit(Unit* target)
+void QuestLogEntry::AddAffectedUnit(UnitPointer target)
 {
 	if (!target)
 		return;
 	if (!IsUnitAffected(target))
 		m_affected_units.insert(target->GetGUID());
 }
-bool QuestLogEntry::IsUnitAffected(Unit* target)
+bool QuestLogEntry::IsUnitAffected(UnitPointer target)
 {
 	if (!target)
 		return true;

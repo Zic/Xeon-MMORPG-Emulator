@@ -22,7 +22,7 @@
 Item::Item()//this is called when constructing as container
 {
 	m_itemProto = NULL;
-	m_owner = NULL;
+	m_owner = NULLPLR;
 	locked = false;
 	wrapped_item_id = 0;
 
@@ -44,7 +44,7 @@ Item::Item( uint32 high, uint32 low )
 	SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );//always 1
 
 	m_itemProto = NULL;
-	m_owner = NULL;
+	m_owner = NULLPLR;
 	locked = false;
 	m_isDirty = true;
 	random_prop = 0;
@@ -52,9 +52,18 @@ Item::Item( uint32 high, uint32 low )
 	wrapped_item_id = 0;
 }
 
+void Item::Init()
+{
+	Object::Init();
+}
+
 Item::~Item()
 {
-	sEventMgr.RemoveEvents( this );
+}
+
+void Item::Destructor()
+{
+	sEventMgr.RemoveEvents( shared_from_this() );
 
 	EnchantmentMap::iterator itr;
 	for( itr = Enchantments.begin(); itr != Enchantments.end(); ++itr )
@@ -69,10 +78,11 @@ Item::~Item()
 	if( IsInWorld() )
 		RemoveFromWorld();
 
-	m_owner = NULL;
+	m_owner = NULLPLR;
+	Object::Destructor();
 }
 
-void Item::Create( uint32 itemid, Player* owner )
+void Item::Create( uint32 itemid, PlayerPointer owner )
 {
 	SetUInt32Value( OBJECT_FIELD_ENTRY, itemid );
  
@@ -103,7 +113,7 @@ void Item::Create( uint32 itemid, Player* owner )
 		locked = false;
 }
 
-void Item::LoadFromDB(Field* fields, Player* plr, bool light )
+void Item::LoadFromDB(Field* fields, PlayerPointer plr, bool light )
 {
 	uint32 itemid = fields[2].GetUInt32();
 	uint32 random_prop, random_suffix;
@@ -355,10 +365,10 @@ void Item::DeleteFromDB()
 {
 	if( m_itemProto->ContainerSlots>0 && GetTypeId() == TYPEID_CONTAINER )
 	{
-		/* deleting a container */
+		/* deleting a shared_ptr<Container> */
 		for( uint32 i = 0; i < m_itemProto->ContainerSlots; ++i )
 		{
-			if( static_cast< Container* >( this )->GetItem( i ) != NULL )
+			if( static_cast<Container*>( this )->GetItem( i ) != NULL )
 			{
 				/* abort the delete */
 				return;
@@ -451,7 +461,7 @@ uint32 GetSellPriceForItem( ItemPrototype *proto, uint32 count )
 	return cost;
 }
 
-uint32 GetBuyPriceForItem( ItemPrototype* proto, uint32 count, Player* plr, Creature* vendor )
+uint32 GetBuyPriceForItem( ItemPrototype* proto, uint32 count, PlayerPointer plr, CreaturePointer vendor )
 {
 	int32 cost = proto->BuyPrice;
 
@@ -472,7 +482,7 @@ uint32 GetSellPriceForItem( uint32 itemid, uint32 count )
 		return 1;
 }
 
-uint32 GetBuyPriceForItem( uint32 itemid, uint32 count, Player* plr, Creature* vendor )
+uint32 GetBuyPriceForItem( uint32 itemid, uint32 count, PlayerPointer plr, CreaturePointer vendor )
 {
 	if( ItemPrototype* proto = ItemPrototypeStorage.LookupEntry( itemid ) )
 		return GetBuyPriceForItem( proto, count, plr, vendor );
@@ -492,17 +502,17 @@ void Item::RemoveFromWorld()
 		return;
 
 	mSemaphoreTeleport = true;
-	m_mapMgr->RemoveObject( this, false );
-	m_mapMgr = NULL;
+	m_mapMgr->RemoveObject( obj_shared_from_this(), false );
+	m_mapMgr = NULLMAPMGR;
   
 	// update our event holder
 	event_Relocate();
 }
 
-void Item::SetOwner( Player* owner )
+void Item::SetOwner( PlayerPointer owner )
 { 
 	if( owner != NULL )
-		SetUInt64Value( ITEM_FIELD_OWNER, static_cast< Object* >( owner )->GetGUID() );
+		SetUInt64Value( ITEM_FIELD_OWNER, static_cast< ObjectPointer >( owner )->GetGUID() );
 	else SetUInt64Value( ITEM_FIELD_OWNER, 0 );
 
 	m_owner = owner; 
@@ -575,12 +585,12 @@ int32 Item::AddEnchantment( EnchantEntry* Enchantment, uint32 Duration, bool Per
 	if( m_owner == NULL )
 		return Slot;
 
-	Player * owner = m_owner;
+	PlayerPointer owner = m_owner;
 
 	// Add the removal event.
 	if( Duration )
 	{
-		sEventMgr.AddEvent( this, &Item::RemoveEnchantment, uint32(Slot), EVENT_REMOVE_ENCHANTMENT1 + Slot, Duration * 1000, 1, 0 );
+		sEventMgr.AddEvent( item_shared_from_this(), &Item::RemoveEnchantment, uint32(Slot), EVENT_REMOVE_ENCHANTMENT1 + Slot, Duration * 1000, 1, 0 );
 	}
 
 	// No need to send the log packet, if the owner isn't in world (we're still loading)
@@ -759,7 +769,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 					{
 						SpellCastTargets targets( m_owner->GetGUID() );
 						SpellEntry* sp;
-						Spell* spell;
+						SpellPointer spell;
 						
 						if( Entry->spell[c] != 0 )
 						{
@@ -767,8 +777,8 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 							if( sp == NULL )
 								continue;
 
-							spell = new Spell( m_owner, sp, true, 0 );
-							spell->i_caster = this;
+							spell = shared_ptr<Spell>(new Spell( m_owner, sp, true, NULLAURA ));
+							spell->i_caster = item_shared_from_this();
 							spell->prepare( &targets );
 						}
 					}

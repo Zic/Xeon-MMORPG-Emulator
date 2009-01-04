@@ -25,7 +25,7 @@
 
 bool ChatHandler::HandleResetReputationCommand(const char *args, WorldSession *m_session)
 {
-	Player *plr = getSelectedChar(m_session);
+	shared_ptr<Player>plr = getSelectedChar(m_session);
 	if(!plr)
 	{
 		SystemMessage(m_session, "Select a player or yourself first.");
@@ -40,7 +40,7 @@ bool ChatHandler::HandleResetReputationCommand(const char *args, WorldSession *m
 
 bool ChatHandler::HandleInvincibleCommand(const char *args, WorldSession *m_session)
 {
-	Player *chr = getSelectedChar(m_session);
+	shared_ptr<Player>chr = getSelectedChar(m_session);
 	char msg[100];
 	if(chr)
 	{
@@ -58,7 +58,7 @@ bool ChatHandler::HandleInvincibleCommand(const char *args, WorldSession *m_sess
 bool ChatHandler::HandleInvisibleCommand(const char *args, WorldSession *m_session)
 {
 	char msg[256];
-	Player* pChar =m_session->GetPlayer();
+	PlayerPointer pChar =m_session->GetPlayer();
 
 	snprintf(msg, 256, "Invisibility and Invincibility are now ");
 	if(pChar->m_isGmInvisible)
@@ -87,7 +87,7 @@ bool ChatHandler::CreateGuildCommand(const char* args, WorldSession *m_session)
 	if(!*args)
 		return false;
 
-	Player * ptarget = getSelectedChar(m_session);
+	PlayerPointer ptarget = getSelectedChar(m_session);
 	if(!ptarget) return false;
 
 	if(strlen((char*)args)>75)
@@ -131,7 +131,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 	{
 		SystemMessage(m_session, "You should select a creature.");
@@ -150,7 +150,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 
 	BlueSystemMessage(m_session, "Deleted creature ID %u", unit->m_spawn ? unit->m_spawn->id : 0);
 	
-	MapMgr *unitMgr = unit->GetMapMgr();
+	shared_ptr<MapMgr>unitMgr = unit->GetMapMgr();
 	if(unit->IsInWorld())
 	{
 		unit->RemoveFromWorld(false,true);
@@ -182,7 +182,8 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 		}
 	}
 
-	delete unit;
+	unit->Destructor();
+	unit = NULLCREATURE;
 
 	return true;
 }
@@ -206,7 +207,7 @@ bool ChatHandler::HandleItemCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a creature.");
@@ -257,7 +258,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args, WorldSession *m_sess
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a creature.");
@@ -312,7 +313,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args, WorldSession *m_session
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a creature.");
@@ -352,7 +353,7 @@ bool ChatHandler::HandleSaveAllCommand(const char *args, WorldSession *m_session
 
 bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 {
-	Unit * target = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
+	UnitPointer target = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
 	if(target == 0)
 	{
 		RedSystemMessage(m_session, "A valid selection is required.");
@@ -362,11 +363,11 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 	switch(target->GetTypeId())
 	{
 	case TYPEID_PLAYER:
-		sGMLog.writefromsession(m_session, "used kill command on PLAYER %s", static_cast< Player* >( target )->GetName() );
+		sGMLog.writefromsession(m_session, "used kill command on PLAYER %s", TO_PLAYER( target )->GetName() );
 		break;
 
 	case TYPEID_UNIT:
-		sGMLog.writefromsession(m_session, "used kill command on CREATURE %s", static_cast< Creature* >( target )->GetCreatureName() ? static_cast< Creature* >( target )->GetCreatureName()->Name : "unknown");
+		sGMLog.writefromsession(m_session, "used kill command on CREATURE %s", TO_CREATURE( target )->GetCreatureName() ? TO_CREATURE( target )->GetCreatureName()->Name : "unknown");
 		break;
 	}
 	
@@ -374,7 +375,7 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 	// If we're killing a player, send a message indicating a gm killed them.
 	if(target->IsPlayer())
 	{
-		Player * plr = static_cast< Player* >(target);
+		PlayerPointer plr = TO_PLAYER(target);
 		m_session->GetPlayer()->DealDamage(plr, plr->GetUInt32Value(UNIT_FIELD_HEALTH),0,0,0);
 		//plr->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 		plr->KillPlayer();
@@ -388,14 +389,14 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 		if(se == 0) return false;
 
 		SpellCastTargets targets(target->GetGUID());
-		Spell * sp = new Spell(m_session->GetPlayer(), se, true, 0);
+		shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(m_session->GetPlayer(), se, true, NULLAURA));
 		sp->prepare(&targets);
 
 /*		SpellEntry * se = dbcSpell.LookupEntry(20479);
 		if(se == 0) return false;
 		
 		SpellCastTargets targets(target->GetGUID());
-		Spell * sp = new Spell(target, se, true, 0);
+		shared_ptr<Spell>sp = new Spell(target, se, true, 0);
 		sp->prepare(&targets);*/
 	}
 
@@ -404,7 +405,7 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleKillByPlrCommand( const char *args , WorldSession *m_session )
 {
-	Player *plr = objmgr.GetPlayer(args, false);
+	shared_ptr<Player>plr = objmgr.GetPlayer(args, false);
 	if(!plr)
 	{
 		RedSystemMessage(m_session, "Player %s is not online or does not exist.", args);
@@ -426,8 +427,8 @@ bool ChatHandler::HandleKillByPlrCommand( const char *args , WorldSession *m_ses
 }
 bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_session)
 {
-	Unit *caster = m_session->GetPlayer();
-	Unit *target = getSelectedChar(m_session, false);
+	shared_ptr<Unit>caster = m_session->GetPlayer();
+	shared_ptr<Unit>target = getSelectedChar(m_session, false);
 	if(!target)
 		target = getSelectedCreature(m_session, false);
 	if(!target)
@@ -444,11 +445,12 @@ bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_sessi
 		return false;
 	}
 	
-	Spell *sp = new Spell(caster, spellentry, false, NULL);
+	SpellPointer sp = SpellPointer(new Spell(caster, spellentry, false, NULLAURA));
 	if(!sp)
 	{
 		RedSystemMessage(m_session, "Spell failed creation!");
-		delete sp;
+		sp->Destructor();
+		sp = NULLSPELL;
 		return false;
 	}
 
@@ -461,7 +463,7 @@ bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_sessi
 
 bool ChatHandler::HandleMonsterCastCommand(const char * args, WorldSession * m_session)
 {
-	Unit *crt = getSelectedCreature(m_session, false);
+	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
 	if(!crt)
 	{
 		RedSystemMessage(m_session, "Please select a creature before using this command.");
@@ -474,8 +476,8 @@ bool ChatHandler::HandleMonsterCastCommand(const char * args, WorldSession * m_s
 
 bool ChatHandler::HandleCastSpellNECommand(const char* args, WorldSession *m_session)
 {
-	Unit *caster = m_session->GetPlayer();
-	Unit *target = getSelectedChar(m_session, false);
+	shared_ptr<Unit>caster = m_session->GetPlayer();
+	shared_ptr<Unit>target = getSelectedChar(m_session, false);
 	if(!target)
 		target = getSelectedCreature(m_session, false);
 	if(!target)
@@ -523,7 +525,7 @@ bool ChatHandler::HandleCastSpellNECommand(const char* args, WorldSession *m_ses
 
 bool ChatHandler::HandleMonsterSayCommand(const char* args, WorldSession *m_session)
 {
-	Unit *crt = getSelectedCreature(m_session, false);
+	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
 	if(!crt)
 		crt = getSelectedChar(m_session, false);
 
@@ -548,7 +550,7 @@ bool ChatHandler::HandleMonsterSayCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleMonsterYellCommand(const char* args, WorldSession *m_session)
 {
-	Unit *crt = getSelectedCreature(m_session, false);
+	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
 	if(!crt)
 		crt = getSelectedChar(m_session, false);
 
@@ -574,10 +576,10 @@ bool ChatHandler::HandleMonsterYellCommand(const char* args, WorldSession *m_ses
 
 bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 {
-	GameObject *GObj = NULL;
+	shared_ptr<GameObject>GObj = NULLGOB;
 
-	std::set<Object*>::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
-	std::set<Object*>::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
+	std::set<shared_ptr<Object>>::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
+	std::set<shared_ptr<Object>>::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
 	float cDist = 9999.0f;
 	float nDist = 0.0f;
 	bool bUseNext = false;
@@ -602,7 +604,7 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 					if(bUseNext)
 					{
 						// Select the first.
-						GObj = static_cast<GameObject*>(*Itr);
+						GObj = TO_GAMEOBJECT(*Itr);
 						break;
 					} else {
 						if(((*Itr) == m_session->GetPlayer()->m_GM_SelectedGO))
@@ -625,7 +627,7 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 				{
 					cDist = nDist;
 					nDist = 0.0f;
-					GObj = (GameObject*)(*Itr);
+					GObj = TO_GAMEOBJECT(*Itr);
 				}
 			}
 		}
@@ -648,7 +650,7 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGODelete(const char *args, WorldSession *m_session)
 {
-	GameObject *GObj = m_session->GetPlayer()->m_GM_SelectedGO;
+	shared_ptr<GameObject>GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");
@@ -678,28 +680,10 @@ bool ChatHandler::HandleGODelete(const char *args, WorldSession *m_session)
 		}
 	}
 	GObj->Despawn(0);
-	
-	delete GObj;
+	GObj->Destructor();
+	GObj = NULLGOB;
 
-	m_session->GetPlayer()->m_GM_SelectedGO = 0;
-  /*  std::stringstream sstext;
-
-	GameObject *GObj = m_session->GetPlayer()->m_GM_SelectedGO;
-	if( !GObj )
-	{
-		RedSystemMessage(m_session, "No selected GameObject...");
-		return true;
-	}
-
-	GObj->GetMapMgr()->GetBaseMap()->GetTemplate()->RemoveIndex<GameObject>(GObj);	// remove index
-	GObj->Despawn(3600000);
-	GObj->DeleteFromDB();
-	sObjHolder.Delete<GameObject>(GObj);
-
-	m_session->GetPlayer()->m_GM_SelectedGO = NULL;
-
-	GreenSystemMessage(m_session, "GameObject successfully deleted from world and database !");
-*/
+	m_session->GetPlayer()->m_GM_SelectedGO = NULLGOB;
 	return true;
 }
 
@@ -736,9 +720,9 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 	sstext << "Spawning GameObject By Entry '" << EntryID << "'" << '\0';
 	SystemMessage(m_session, sstext.str().c_str());
 
-	GameObject *go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
+	shared_ptr<GameObject>go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
 	
-	Player *chr = m_session->GetPlayer();
+	shared_ptr<Player>chr = m_session->GetPlayer();
 	uint32 mapid = chr->GetMapId();
 	float x = chr->GetPositionX();
 	float y = chr->GetPositionY();
@@ -789,7 +773,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 {
 	std::stringstream sstext;
 	GameObjectInfo *GOInfo = NULL;
-	GameObject *GObj = NULL;
+	shared_ptr<GameObject> GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -842,7 +826,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 
 	sstext
 		<< "\n"
-		<< MSG_COLOR_GREEN << "Distance: " << MSG_COLOR_LIGHTBLUE << GObj->CalcDistance((Object*)m_session->GetPlayer());
+		<< MSG_COLOR_GREEN << "Distance: " << MSG_COLOR_LIGHTBLUE << GObj->CalcDistance(m_session->GetPlayer());
 
 	GOInfo = GameObjectNameStorage.LookupEntry(GObj->GetEntry());
 	if( !GOInfo )
@@ -866,7 +850,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOEnable(const char *args, WorldSession *m_session)
 {
-	GameObject *GObj = NULL;
+	shared_ptr<GameObject>GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -888,7 +872,7 @@ bool ChatHandler::HandleGOEnable(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOActivate(const char* args, WorldSession *m_session)
 {
-	GameObject *GObj = NULL;
+	shared_ptr<GameObject>GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -912,7 +896,7 @@ bool ChatHandler::HandleGOActivate(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOScale(const char* args, WorldSession* m_session)
 {
-	GameObject *go = m_session->GetPlayer()->m_GM_SelectedGO;
+	shared_ptr<GameObject>go = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !go )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");
@@ -932,7 +916,7 @@ bool ChatHandler::HandleGOScale(const char* args, WorldSession* m_session)
 
 bool ChatHandler::HandleReviveStringcommand(const char* args, WorldSession* m_session)
 {
-	Player *plr = objmgr.GetPlayer(args, false);
+	shared_ptr<Player>plr = objmgr.GetPlayer(args, false);
 	if(!plr)
 	{
 		RedSystemMessage(m_session, "Could not find player %s.", args);
@@ -967,13 +951,13 @@ bool ChatHandler::HandleMountCommand(const char *args, WorldSession *m_session)
 		return true;
 	}
 
-	Unit *m_target = NULL;
-	Player *m_plyr = getSelectedChar(m_session, false);
+	shared_ptr<Unit>m_target = NULLUNIT;
+	shared_ptr<Player>m_plyr = getSelectedChar(m_session, false);
 	if(m_plyr)
 		m_target = m_plyr;
 	else
 	{
-		Creature *m_crt = getSelectedCreature(m_session, false);
+		CreaturePointer m_crt = getSelectedCreature(m_session, false);
 		if(m_crt)
 			m_target = m_crt;
 	}
@@ -1030,7 +1014,7 @@ bool ChatHandler::HandleAddAIAgentCommand(const char* args, WorldSession *m_sess
 	if(!Misc2)
 		return false;
 
-	Unit* target = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
+	UnitPointer target = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!target)
 	{
 		RedSystemMessage(m_session, "You have to select a Creature!");
@@ -1041,7 +1025,7 @@ bool ChatHandler::HandleAddAIAgentCommand(const char* args, WorldSession *m_sess
 	qry << "INSERT INTO ai_agents set entryId = '" << target->GetUInt32Value(OBJECT_FIELD_ENTRY) << "', AI_AGENT = '" << atoi(agent) << "', procEvent = '" << atoi(procEvent)<< "', procChance = '" << atoi(procChance)<< "', procCount = '" << atoi(procCount)<< "', spellId = '" << atoi(spellId)<< "', spellType = '" << atoi(spellType)<< "', spelltargetType = '" << atoi(spelltargetType)<< "', spellCooldown = '" << atoi(spellCooldown)<< "', floatMisc1 = '" << atof(floatMisc1)<< "', Misc2  ='" << atoi(Misc2)<< "'";
 	WorldDatabase.Execute( qry.str().c_str( ) );
 
-	AI_Spell * sp = new AI_Spell;
+	AI_Spell*sp = new AI_Spell;
 	sp->agent = atoi(agent);
 	sp->procChance = atoi(procChance);
 /*	sp->procCount = atoi(procCount);*/
@@ -1071,7 +1055,7 @@ bool ChatHandler::HandleAddAIAgentCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleListAIAgentCommand(const char* args, WorldSession *m_session)
 {
-	Unit* target = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
+	UnitPointer target = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!target)
 	{
 		RedSystemMessage(m_session, "You have to select a Creature!");
@@ -1135,7 +1119,7 @@ bool ChatHandler::HandleGOExport(const char * args, WorldSession * m_session)
 
 	BlueSystemMessage(m_session, "Go saved to: %s", name.str().c_str());*/
 
-	Creature * pCreature = getSelectedCreature(m_session, true);
+	CreaturePointer pCreature = getSelectedCreature(m_session, true);
 	if(!pCreature) return true;
 	WorldDatabase.WaitExecute("INSERT INTO creature_names_export SELECT * FROM creature_names WHERE entry = %u", pCreature->GetEntry());
 	WorldDatabase.WaitExecute("INSERT INTO creature_proto_export SELECT * FROM creature_proto WHERE entry = %u", pCreature->GetEntry());
@@ -1155,8 +1139,8 @@ bool ChatHandler::HandleGOExport(const char * args, WorldSession * m_session)
 bool ChatHandler::HandleNpcComeCommand(const char* args, WorldSession* m_session)
 {
 	// moves npc to players location
-	Player * plr = m_session->GetPlayer();
-	Creature * crt = getSelectedCreature(m_session, true);
+	PlayerPointer plr = m_session->GetPlayer();
+	CreaturePointer crt = getSelectedCreature(m_session, true);
 	if(!crt) return true;
 
 	crt->GetAIInterface()->MoveTo(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetOrientation());

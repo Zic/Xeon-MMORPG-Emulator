@@ -226,6 +226,9 @@ enum MsTimeVariables
 #include <sstream>
 #include <algorithm>
 //#include <iostream>
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
 
 #if defined (__GNUC__)
 #  define GCC_VERSION (__GNUC__ * 10000 \
@@ -304,6 +307,12 @@ namespace __gnu_cxx
 #define HM_NAMESPACE std
 using std::hash_map;
 #endif
+
+using std::tr1::shared_ptr;
+using namespace std::tr1;
+#undef HM_NAMESPACE
+#define HM_NAMESPACE tr1
+#define hash_map unordered_map
 
 /* Use correct types for x64 platforms, too */
 #if COMPILER != COMPILER_GNU

@@ -74,7 +74,7 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket &recv_data)
 }
 
 // Returns -1 if indeterminable.
-int32 GetBattlegroundTypeFromCreature(Creature* pCreature)
+int32 GetBattlegroundTypeFromCreature(CreaturePointer pCreature)
 {
 	if( pCreature->m_factionDBC->ID == 890 ) // Silverwing Sentinels
 		return BATTLEGROUND_WARSONG_GULCH;
@@ -127,7 +127,7 @@ int32 GetBattlegroundTypeFromCreature(Creature* pCreature)
 	return -1;
 }
 
-void WorldSession::SendBattlegroundList(Creature* pCreature, uint32 mapid)
+void WorldSession::SendBattlegroundList(CreaturePointer pCreature, uint32 mapid)
 {
 	if(!pCreature)
 		return;
@@ -146,7 +146,7 @@ void WorldSession::HandleBattleMasterHelloOpcode(WorldPacket &recv_data)
 	recv_data >> guid;
 
 	CHECK_INWORLD_RETURN;
-	Creature * pCreature = _player->GetMapMgr()->GetCreature( GET_LOWGUID_PART(guid) );
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature( GET_LOWGUID_PART(guid) );
 	if( pCreature == NULL )
 		return;
 
@@ -165,7 +165,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode(WorldPacket &recv_data)
 	uint64 guid;
 	recv_data >> guid;
 
-	Creature * psg = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer psg = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(psg == NULL)
 		return;
 	
@@ -185,7 +185,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket &recv_data)
 	if(!_player->IsInWorld() || !_player->m_bg) return;
 	uint64 guid;
 	recv_data >> guid;
-	Creature * psg = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer psg = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(psg == NULL)
 		return;
 
@@ -257,7 +257,7 @@ void WorldSession::HandleInspectHonorStatsOpcode( WorldPacket &recv_data )
     uint64 guid;
     recv_data >> guid;
 
-	Player* player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
+	PlayerPointer player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
 	if( player == NULL )
 		return;
 	
@@ -281,7 +281,7 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Player* player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
+    PlayerPointer player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
 	if( player == NULL )
 		return;
 

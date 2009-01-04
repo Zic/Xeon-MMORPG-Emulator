@@ -19,7 +19,7 @@
 
 #include "StdAfx.h"
 
-bool isHostile(Object* objA, Object* objB)// B is hostile for A?
+bool isHostile(ObjectPointer objA, ObjectPointer objB)// B is hostile for A?
 {
 	if(!objA || !objB)
 		return false;
@@ -79,12 +79,12 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 	// We check this after the normal isHostile test, that way if we're
 	// on the opposite team we'll already know :p
 
-	if( hostile && ( objA->IsPlayer() || objA->IsPet() || ( objA->IsUnit() && !objA->IsPlayer() && static_cast< Creature* >( objA )->IsTotem() && static_cast< Creature* >( objA )->GetTotemOwner()->IsPvPFlagged() ) ) )
+	if( hostile && ( objA->IsPlayer() || objA->IsPet() || ( objA->IsUnit() && !objA->IsPlayer() && TO_CREATURE(objA)->IsTotem() && TO_CREATURE( objA )->GetTotemOwner()->IsPvPFlagged() ) ) )
 	{
 		if( objB->IsPlayer() )
 		{
 			// Check PvP Flags.
-			if( static_cast< Player* >( objB )->IsPvPFlagged() )
+			if( TO_PLAYER(objB)->IsPvPFlagged() )
 				return true;
 			else
 				return false;
@@ -92,7 +92,7 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 		if( objB->IsPet() )
 		{
 			// Check PvP Flags.
-			if( static_cast< Pet* >( objB )->GetPetOwner() != NULL && static_cast< Pet* >( objB )->GetPetOwner()->GetMapMgr() == objB->GetMapMgr() && static_cast< Pet* >( objB )->GetPetOwner()->IsPvPFlagged() )
+			if( TO_PET( objB )->GetPetOwner() != NULL && TO_PET( objB )->GetPetOwner()->GetMapMgr() == objB->GetMapMgr() && TO_PET( objB )->GetPetOwner()->IsPvPFlagged() )
 				return true;
 			else
 				return false;
@@ -103,18 +103,18 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 	if(objA->IsPlayer() && !objB->IsPlayer())	   // PvE
 	{
 		if(objB->m_factionDBC->RepListId >= 0)
-			hostile = static_cast< Player* >( objA )->IsHostileBasedOnReputation( objB->m_factionDBC );
+			hostile = TO_PLAYER( objA )->IsHostileBasedOnReputation( objB->m_factionDBC );
 	}
 	
 	if(objB->IsPlayer() && !objA->IsPlayer())	   // PvE
 	{
 		if(objA->m_factionDBC->RepListId >= 0)
-			hostile = static_cast< Player* >( objB )->IsHostileBasedOnReputation( objA->m_factionDBC );
+			hostile = TO_PLAYER( objB )->IsHostileBasedOnReputation( objA->m_factionDBC );
 	}
 
-	if( objA->IsPlayer() && objB->IsPlayer() && static_cast<Player*>(objA)->m_bg != NULL )
+	if( objA->IsPlayer() && objB->IsPlayer() && TO_PLAYER(objA)->m_bg != NULL )
 	{
-		if( static_cast<Player*>(objA)->m_bgTeam != static_cast<Player*>(objB)->m_bgTeam )
+		if( TO_PLAYER(objA)->m_bgTeam != TO_PLAYER(objB)->m_bgTeam )
 			return true;
 	}
 
@@ -123,7 +123,7 @@ bool isHostile(Object* objA, Object* objB)// B is hostile for A?
 
 /// Where we check if we object A can attack object B. This is used in many feature's
 /// Including the spell class and the player class.
-bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack B?
+bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth)// A can attack B?
 {
 	if(!objA || !objB || objB->m_factionDBC == NULL || objA->m_factionDBC == NULL)
 		return false;
@@ -146,8 +146,8 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 	if( !objB->PhasedCanInteract(objA) )
 		return false;
 
-	Player *playerA = NULL;
-	Player *playerB = NULL;
+	PlayerPointer playerA = NULLPLR;
+	PlayerPointer playerB = NULLPLR;
 	
 	// Players in feign death flags can't be attacked
 	if(objA->IsPlayer())
@@ -193,15 +193,15 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
         /// we cannot attack sheathed units. Maybe checked in other places too ?
 		/// !! warning, this presumes that objA is attacking ObjB
         /// Capt: Added the possibility to disregard this (regarding the spell class)
-		if(static_cast<Unit *>(objB)->IsStealth() && CheckStealth)
+		if(TO_UNIT(objB)->IsStealth() && CheckStealth)
 			return false;
 	}
 
 	if(objA->IsPlayer() && objB->IsPlayer())
 	{
 		if(
-			static_cast< Player* >( objA )->DuelingWith == static_cast< Player* >(objB) && 
-			static_cast< Player* >( objA )->GetDuelState() == DUEL_STATE_STARTED
+			TO_PLAYER( objA )->DuelingWith == TO_PLAYER(objB) && 
+			TO_PLAYER( objA )->GetDuelState() == DUEL_STATE_STARTED
 			)
 		return true;
 
@@ -239,8 +239,8 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 		return false;
 
 	bool attackable = isHostile(objA, objB); // B is attackable if its hostile for A
-	/*if((objA->m_faction->HostileMask & 8) && (objB->m_factionDBC->RepListId != 0) && 
-		(objB->GetTypeId() != TYPEID_PLAYER) && objB->m_faction->Faction != 31) // B is attackable if its a neutral Creature*/
+	if((objA->m_faction->HostileMask & 8) && (objB->m_factionDBC->RepListId != 0) && 
+		(objB->GetTypeId() != TYPEID_PLAYER) && objB->m_faction->Faction != 31) // B is attackable if its a neutral CreaturePointer/
 
 	// Neutral Creature Check
 	if(objA->IsPlayer() || objA->IsPet())
@@ -261,7 +261,7 @@ bool isAttackable(Object* objA, Object* objB, bool CheckStealth)// A can attack 
 	return attackable;
 }
 
-bool isCombatSupport(Object* objA, Object* objB)// B combat supports A?
+bool isCombatSupport(ObjectPointer objA, ObjectPointer objB)// B combat supports A?
 {
 	if(!objA || !objB)
 		return false;
@@ -302,7 +302,7 @@ bool isCombatSupport(Object* objA, Object* objB)// B combat supports A?
 }
 
 
-bool isAlliance(Object* objA)// A is alliance?
+bool isAlliance(ObjectPointer objA)// A is alliance?
 {
 	FactionTemplateDBC * m_sw_faction = dbcFactionTemplate.LookupEntry(11);
 	FactionDBC * m_sw_factionDBC = dbcFaction.LookupEntry(72);

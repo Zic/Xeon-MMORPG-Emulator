@@ -178,7 +178,7 @@ typedef std::map<uint32, AchievementCriteriaSet*>					AchievementCriteriaMap;
 
 class SERVER_DECL AchievementInterface
 {
-	Player& m_player;
+	PlayerPointer m_player;
 	map<uint32,AchievementData*> m_achivementDataMap;
 private:
 	void GiveRewardsForAchievement(AchievementEntry * ae);
@@ -193,7 +193,7 @@ private:
 	WorldPacket* m_achievementInspectPacket;
 
 public:
-	AchievementInterface(Player& plr);
+	AchievementInterface(PlayerPointer plr);
 	~AchievementInterface();
 
 	void LoadFromDB( QueryResult * pResult );
@@ -211,7 +211,7 @@ public:
 	// Handlers for misc events
 	//-----------------------------------------------------------------
 	void HandleAchievementCriteriaKillCreature(uint32 killedMonster);
-	void HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, CBattleground * bg);
+	void HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, shared_ptr<CBattleground> bg);
 	void HandleAchievementCriteriaRequiresAchievement(uint32 achievementId);
 	void HandleAchievementCriteriaLevelUp(uint32 level);
 	void HandleAchievementCriteriaOwnItem(uint32 itemId, uint32 stack = 1);
@@ -225,7 +225,7 @@ public:
 	void HandleAchievementCriteriaBuyBankSlot(bool retroactive = false);
 	void HandleAchievementCriteriaFlightPathsTaken();
 	void HandleAchievementCriteriaExploreArea(uint32 areaId, uint32 explorationFlags);
-	void HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget);
+	void HandleAchievementCriteriaDoEmote(uint32 emoteId, UnitPointer pTarget);
 	void HandleAchievementCriteriaCompleteQuestsInZone(uint32 zoneId);
 	void HandleAchievementCriteriaReachSkillLevel(uint32 skillId, uint32 skillLevel);
 	void HandleAchievementCriteriaWinDuel();

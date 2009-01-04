@@ -311,7 +311,7 @@ struct SERVER_DECL GuildBankTab
 	uint8 iTabId;
 	char * szTabName;
 	char * szTabIcon;
-	Item * pSlots[MAX_GUILD_BANK_SLOTS];
+	ItemPointer pSlots[MAX_GUILD_BANK_SLOTS];
 	list<GuildBankEvent*> lLog;
 };
 

@@ -76,7 +76,7 @@ enum CHANNEL_NOTIFY_FLAGS
 class Channel
 {
 	Mutex m_lock;
-	typedef map<Player*, uint32> MemberMap;
+	typedef map<shared_ptr<Player>, uint32> MemberMap;
 	MemberMap m_members;
 	set<uint32> m_bannedMembers;
 public:
@@ -100,38 +100,38 @@ public:
 	Channel(const char * name, uint32 team, uint32 type_id, uint32 id);
 	~Channel();
 
-	void AttemptJoin(Player * plr, const char * password);
-	void Part(Player * plr, bool silent);
-	void Kick(Player * plr, Player * die_player, bool ban);
-	void Invite(Player * plr, Player * new_player);
-	void Moderate(Player * plr);
-	void Mute(Player * plr, Player * die_player);
-	void Voice(Player * plr, Player * v_player);
-	void Unmute(Player * plr, Player * die_player);
-	void Devoice(Player * plr, Player * v_player);
-	void Say(Player * plr, const char * message, Player * for_gm_client, bool forced);
-	void Unban(Player * plr, PlayerInfo * bplr);
-	void GiveModerator(Player * plr, Player * new_player);
-	void TakeModerator(Player * plr, Player * new_player);
-	void Announce(Player * plr);
-	void Password(Player * plr, const char * pass);
-	void List(Player * plr);
-	void GetOwner(Player * plr);
+	void AttemptJoin(PlayerPointer plr, const char * password);
+	void Part(PlayerPointer plr, bool silent);
+	void Kick(PlayerPointer plr, PlayerPointer die_player, bool ban);
+	void Invite(PlayerPointer plr, PlayerPointer new_player);
+	void Moderate(PlayerPointer plr);
+	void Mute(PlayerPointer plr, PlayerPointer die_player);
+	void Voice(PlayerPointer plr, PlayerPointer v_player);
+	void Unmute(PlayerPointer plr, PlayerPointer die_player);
+	void Devoice(PlayerPointer plr, PlayerPointer v_player);
+	void Say(PlayerPointer plr, const char * message, PlayerPointer for_gm_client, bool forced);
+	void Unban(PlayerPointer plr, PlayerInfo * bplr);
+	void GiveModerator(PlayerPointer plr, PlayerPointer new_player);
+	void TakeModerator(PlayerPointer plr, PlayerPointer new_player);
+	void Announce(PlayerPointer plr);
+	void Password(PlayerPointer plr, const char * pass);
+	void List(PlayerPointer plr);
+	void GetOwner(PlayerPointer plr);
 
-	void SetOwner(Player * oldpl, Player * plr);
+	void SetOwner(PlayerPointer oldpl, PlayerPointer plr);
 
 	// Packet Forging
-	void SendAlreadyOn(Player * plr, Player * plr2);
-	void SendYouAreBanned(Player * plr);
-	void SendNotOn(Player * plr);
-	void SendNotOwner(Player * plr);
-	void SendYouCantSpeak(Player * plr);
-	void SendModeChange(Player * plr, uint8 old_flags, uint8 new_flags);
+	void SendAlreadyOn(PlayerPointer plr, PlayerPointer plr2);
+	void SendYouAreBanned(PlayerPointer plr);
+	void SendNotOn(PlayerPointer plr);
+	void SendNotOwner(PlayerPointer plr);
+	void SendYouCantSpeak(PlayerPointer plr);
+	void SendModeChange(PlayerPointer plr, uint8 old_flags, uint8 new_flags);
 
 	void SendToAll(WorldPacket * data);
-	void SendToAll(WorldPacket * data, Player * plr);
+	void SendToAll(WorldPacket * data, PlayerPointer plr);
 
-	bool HasMember(Player * pPlayer);
+	bool HasMember(PlayerPointer pPlayer);
 };
 
 class ChannelIterator
@@ -162,12 +162,12 @@ public:
 		m_searchInProgress=false;
 	}
 
-	Player* operator*() const
+	PlayerPointer operator*() const
 	{
 		return m_itr->first;
 	}
 
-	Player* operator->() const
+	PlayerPointer operator->() const
 	{
 		return m_itr->first;
 	}
@@ -183,7 +183,7 @@ public:
 		++m_itr;
 	}
 
-	HEARTHSTONE_INLINE Player* Grab() { return m_itr->first; }
+	HEARTHSTONE_INLINE PlayerPointer Grab() { return m_itr->first; }
 	HEARTHSTONE_INLINE bool End() { return (m_itr==m_endItr)?true:false; }
 };
 

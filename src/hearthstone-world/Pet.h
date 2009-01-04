@@ -117,9 +117,11 @@ class SERVER_DECL Pet : public Creature
 public:
 	Pet(uint64 guid);
 	~Pet();
+	virtual void Init();
+	virtual void Destructor();
 
-	void LoadFromDB(Player* owner, PlayerPet * pi);
-	void CreateAsSummon(uint32 entry, CreatureInfo *ci, Creature *created_from_creature, Unit* owner, SpellEntry *created_by_spell, uint32 type, uint32 expiretime);
+	void LoadFromDB(PlayerPointer owner, PlayerPet * pi);
+	void CreateAsSummon(uint32 entry, CreatureInfo *ci, CreaturePointer created_from_creature, UnitPointer owner, SpellEntry *created_by_spell, uint32 type, uint32 expiretime);
 
 	virtual void Update(uint32 time);
 	void OnPushToWorld();
@@ -158,8 +160,8 @@ public:
 
 	void DelayedRemove(bool bTime, bool bDeath);
 
-	HEARTHSTONE_INLINE Player* GetPetOwner() { return m_Owner; }
-	HEARTHSTONE_INLINE void ClearPetOwner() { m_Owner = 0; }
+	HEARTHSTONE_INLINE PlayerPointer GetPetOwner() { return m_Owner; }
+	HEARTHSTONE_INLINE void ClearPetOwner() { m_Owner = NULLPLR; }
 	void GiveXP(uint32 xp);
 	uint32 GetNextLevelXP(uint32 currentlevel);
 	void ApplyStatsForLevel();
@@ -200,11 +202,11 @@ public:
 		return DEFAULT_SPELL_STATE;
 	}
 	
-	AI_Spell * CreateAISpell(SpellEntry * info);
+	AI_Spell*CreateAISpell(SpellEntry * info);
 	HEARTHSTONE_INLINE PetSpellMap* GetSpells() { return &mSpells; }
 	HEARTHSTONE_INLINE bool IsSummon() { return Summon; }
 
-	void __fastcall SetAutoCastSpell(AI_Spell * sp);
+	void __fastcall SetAutoCastSpell(AI_Spell*sp);
 	void Rename(string NewName);
 	HEARTHSTONE_INLINE string& GetName() { return m_name; }
 	void AddPetSpellToOwner(uint32 spellId);
@@ -213,15 +215,15 @@ public:
 	void UpdateTP();
 	
 	void HandleAutoCastEvent(uint32 Type);
-	AI_Spell * HandleAutoCastEvent();
+	AI_Spell*HandleAutoCastEvent();
 	void SetPetSpellState(uint32 spell, uint16 state);
-	void SetAutoCast(AI_Spell * sp, bool on);
+	void SetAutoCast(AI_Spell*sp, bool on);
 	float GetHappinessDmgMod() { return 0.25f * GetHappinessState() + 0.5f; };
 	const char* GetPetName() { return m_name.c_str(); }
 
 protected:
 	bool bHasLoyalty;
-	Player *m_Owner;
+	shared_ptr<Player>m_Owner;
 	uint32 m_PetXP;
 	PetSpellMap mSpells;
 	PlayerPet * mPi;

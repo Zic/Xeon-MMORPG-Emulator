@@ -30,22 +30,22 @@
 #include "StdAfx.h"
 createFileSingleton(StructFactory);
 
-MapScriptInterface::MapScriptInterface(MapMgr & mgr) : mapMgr(mgr)
+MapScriptInterface::MapScriptInterface(shared_ptr<MapMgr> mgr)
 {
-
+	mapMgr = mgr;
 }
 
 MapScriptInterface::~MapScriptInterface()
 {
-	mapMgr.ScriptInterface = 0;
+	mapMgr->ScriptInterface = 0;
 }
 
 uint32 MapScriptInterface::GetPlayerCountInRadius(float x, float y, float z /* = 0.0f */, float radius /* = 5.0f */)
 {
 	// use a cell radius of 2
 	uint32 PlayerCount = 0;
-	uint32 cellX = mapMgr.GetPosX(x);
-	uint32 cellY = mapMgr.GetPosY(y);
+	uint32 cellX = mapMgr->GetPosX(x);
+	uint32 cellY = mapMgr->GetPosY(y);
 
 	uint32 endX = cellX < _sizeX ? cellX + 1 : _sizeX;
 	uint32 endY = cellY < _sizeY ? cellY + 1 : _sizeY;
@@ -58,7 +58,7 @@ uint32 MapScriptInterface::GetPlayerCountInRadius(float x, float y, float z /* =
 	{
 		for(uint32 cy = startY; cy < endY; ++cy)
 		{
-			pCell = mapMgr.GetCell(cx, cy);
+			pCell = mapMgr->GetCell(cx, cy);
 			if(pCell == 0 || pCell->GetPlayerCount() == 0)
 				continue;
 
@@ -79,31 +79,32 @@ uint32 MapScriptInterface::GetPlayerCountInRadius(float x, float y, float z /* =
 	return PlayerCount;
 }
 
-GameObject* MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2)
+shared_ptr<GameObject> MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2)
 {
    
-	GameObject *pGameObject = mapMgr.CreateGameObject(Entry);
-	if(!pGameObject->CreateFromProto(Entry, mapMgr.GetMapId(), cX, cY, cZ, cO))
+	shared_ptr<GameObject>pGameObject = mapMgr->CreateGameObject(Entry);
+	if(!pGameObject->CreateFromProto(Entry, mapMgr->GetMapId(), cX, cY, cZ, cO))
 	{
-		delete pGameObject;
-		return NULL;
+		pGameObject->Destructor();
+		pGameObject = NULLGOB;
+		return NULLGOB;
 	}
-	pGameObject->SetInstanceID(mapMgr.GetInstanceID());
+	pGameObject->SetInstanceID(mapMgr->GetInstanceID());
 	pGameObject->SetPhase(1);
 
 	if(AddToWorld)
-		pGameObject->PushToWorld(&mapMgr);
+		pGameObject->PushToWorld(mapMgr);
 
 	return pGameObject;
 }
 
-Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2)
+CreaturePointer MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2)
 {
 	CreatureProto * proto = CreatureProtoStorage.LookupEntry(Entry);
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(Entry);
 	if(proto == 0 || info == 0)
 	{
-		return 0;
+		return NULLCREATURE;
 	}
 
 	CreatureSpawn * sp = new CreatureSpawn;
@@ -125,23 +126,25 @@ Creature* MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float cY, fl
 	sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
 	sp->phase = 1;
 
-	Creature * p = this->mapMgr.CreateCreature(Entry);
+	CreaturePointer p = this->mapMgr->CreateCreature(Entry);
 	ASSERT(p);
 	p->Load(sp, (uint32)NULL, NULL);
 	p->m_spawn = NULL;
 	delete sp;
-	p->PushToWorld(&mapMgr);
+	p->PushToWorld(mapMgr);
 	return p;
 }
 
-void MapScriptInterface::DeleteCreature(Creature* ptr)
+void MapScriptInterface::DeleteCreature(CreaturePointer ptr)
 {
-	delete ptr;
+	ptr->Destructor();
+	ptr = NULLCREATURE;
 }
 
-void MapScriptInterface::DeleteGameObject(GameObject *ptr)
+void MapScriptInterface::DeleteGameObject(shared_ptr<GameObject>ptr)
 {
-	delete ptr;
+	ptr->Destructor();
+	ptr = NULLGOB;
 }
 
 WayPoint * StructFactory::CreateWaypoint()

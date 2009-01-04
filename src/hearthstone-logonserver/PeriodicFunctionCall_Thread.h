@@ -26,7 +26,7 @@ public:
 	template<class T>
 		PeriodicFunctionCaller(T * callback, void (T::*method)(), uint32 Interval)
 	{
-		cb = new CallbackP0<T>(callback, method);
+		cb = new NoSharedPtrCallbackP0<T>(callback, method);
 		interval = Interval;
 		running = true;
 	}

@@ -147,7 +147,7 @@ void ArenaTeam::Destroy()
 bool ArenaTeam::AddMember(PlayerInfo * info)
 {
 	uint32 base_field;
-	Player * plr = info->m_loggedInPlayer;
+	PlayerPointer plr = info->m_loggedInPlayer;
 	if(m_memberCount >= m_slots)
 		return false;
 
@@ -395,7 +395,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 	if(!pTeam->HasMember(GetPlayer()->GetLowGUID()))
 		GetPlayer()->SoftDisconnect();
 
-	Player * plr = objmgr.GetPlayer(player_name.c_str(), false);
+	PlayerPointer plr = objmgr.GetPlayer(player_name.c_str(), false);
 	if(plr == NULL)
 	{
 		SystemMessage("Player `%s` is non-existent or not online.", player_name.c_str());
@@ -551,7 +551,7 @@ void WorldSession::HandleArenaTeamInviteDenyOpcode(WorldPacket & recv_data)
 	if(team == NULL)
 		return;
 
-	Player * plr = objmgr.GetPlayer(team->m_leader);
+	PlayerPointer plr = objmgr.GetPlayer(team->m_leader);
 	if(plr != NULL)
 		plr->GetSession()->SystemMessage("%s denied your arena team invitation for %s.", _player->GetName(), team->m_name.c_str());
 }

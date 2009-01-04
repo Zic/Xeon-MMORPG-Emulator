@@ -28,7 +28,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 1);
 	WorldPacket data(100);
 	std::string membername;
-	Player * player = NULL;
+	PlayerPointer player = NULLPLR;
 	Group *group = NULL;
 
 	recv_data >> membername;
@@ -132,7 +132,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 
-	Player *player = objmgr.GetPlayer(_player->GetInviter());
+	shared_ptr<Player>player = objmgr.GetPlayer(_player->GetInviter());
 	if ( !player )
 		return;
 	
@@ -167,7 +167,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(SMSG_GROUP_DECLINE, 100);
 
-	Player *player = objmgr.GetPlayer(_player->GetInviter());
+	shared_ptr<Player>player = objmgr.GetPlayer(_player->GetInviter());
 	if(!player) return;
 
 	data << GetPlayer()->GetName();
@@ -186,7 +186,7 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 1);
 	std::string membername;
 	Group *group;
-	Player * player;
+	PlayerPointer player;
 	PlayerInfo * info;
 
 	recv_data >> membername;
@@ -241,7 +241,7 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 1);
 	WorldPacket data;
 	uint64 MemberGuid;
-	Player * player;
+	PlayerPointer player;
 
 	recv_data >> MemberGuid;
 	
@@ -308,7 +308,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 	}
 	
 	// TODO: fix me burlex 
-	//Player *plyr = objmgr.GetPlayer((uint32)lootMaster);
+	//shared_ptr<Player>plyr = objmgr.GetPlayer((uint32)lootMaster);
 	//if(!plyr)return;
 	Group* pGroup = _player->GetGroup();
 	if( pGroup != NULL)
@@ -366,7 +366,7 @@ void WorldSession::HandleSetPlayerIconOpcode(WorldPacket& recv_data)
 	}
 }
 
-void WorldSession::SendPartyCommandResult(Player *pPlayer, uint32 p1, std::string name, uint32 err)
+void WorldSession::SendPartyCommandResult(shared_ptr<Player>pPlayer, uint32 p1, std::string name, uint32 err)
 {
 	if(!_player->IsInWorld()) return;
 	// if error message do not work, please sniff it and leave me a message

@@ -40,7 +40,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 		return;
 
 //	printf("Got ATTACK SWING: %08X %08X\n", GUID_HIPART(guid), GUID_LOPART(guid));
-	Unit *pEnemy = _player->GetMapMgr()->GetUnit(guid);
+	shared_ptr<Unit>pEnemy = _player->GetMapMgr()->GetUnit(guid);
 	//printf("Pointer: %08X\n", pEnemy);
 
 	if(!pEnemy)
@@ -67,7 +67,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 	/*if(pEnemy->IsPlayer() && isHostile(_player, pEnemy))
 	{
 		// don't in duel.. this should be done in dealdamage anyway :S
-		if( static_cast< Player* >( pEnemy )->GetTeam() != _player->GetTeam() )
+		if( TO_PLAYER( pEnemy )->GetTeam() != _player->GetTeam() )
 			_player->SetPvPFlag();
 	}*/
 }
@@ -76,7 +76,7 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 	uint64 guid = GetPlayer()->GetSelection();
-	Unit *pEnemy = NULL;
+	shared_ptr<Unit>pEnemy = NULLUNIT;
 
 	if(guid)
 	{

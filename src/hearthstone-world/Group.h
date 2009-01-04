@@ -63,7 +63,7 @@ struct PlayerInfo;
 typedef struct
 {
 	PlayerInfo * player_info;
-	Player * player;
+	PlayerPointer player;
 }GroupMember;
 
 class Group;
@@ -124,29 +124,29 @@ public:
 	void RemovePlayer(PlayerInfo * info);
 
 	// Leaders and Looting
-	void SetLeader(Player* pPlayer,bool silent);
-	void SetLooter(Player *pPlayer, uint8 method, uint16 threshold);
+	void SetLeader(PlayerPointer pPlayer,bool silent);
+	void SetLooter(shared_ptr<Player>pPlayer, uint8 method, uint16 threshold);
 
 	// Transferring data to clients
 	void Update();
 
-	HEARTHSTONE_INLINE void SendPacketToAll(WorldPacket *packet) { SendPacketToAllButOne(packet, NULL); }
-	void SendPacketToAllButOne(WorldPacket *packet, Player *pSkipTarget);
+	HEARTHSTONE_INLINE void SendPacketToAll(WorldPacket *packet) { SendPacketToAllButOne(packet, NULLPLR); }
+	void SendPacketToAllButOne(WorldPacket *packet, shared_ptr<Player>pSkipTarget);
 
-	HEARTHSTONE_INLINE void SendPacketToAll(StackPacket *packet) { SendPacketToAllButOne(packet, NULL); }
-	void SendPacketToAllButOne(StackPacket *packet, Player *pSkipTarget);
+	HEARTHSTONE_INLINE void SendPacketToAll(StackPacket *packet) { SendPacketToAllButOne(packet, NULLPLR); }
+	void SendPacketToAllButOne(StackPacket *packet, shared_ptr<Player>pSkipTarget);
 
-	HEARTHSTONE_INLINE void OutPacketToAll(uint16 op, uint16 len, const void* data) { OutPacketToAllButOne(op, len, data, NULL); }
-	void OutPacketToAllButOne(uint16 op, uint16 len, const void* data, Player *pSkipTarget);
+	HEARTHSTONE_INLINE void OutPacketToAll(uint16 op, uint16 len, const void* data) { OutPacketToAllButOne(op, len, data, NULLPLR); }
+	void OutPacketToAllButOne(uint16 op, uint16 len, const void* data, shared_ptr<Player>pSkipTarget);
 
-	void SendNullUpdate(Player *pPlayer);
+	void SendNullUpdate(shared_ptr<Player>pPlayer);
 
 	// Group Combat
-	void SendPartyKillLog(Object * player, Object * Unit);
+	void SendPartyKillLog(ObjectPointer player, ObjectPointer Unit);
 
 	// Destroying/Converting
 	void Disband();
-	Player* FindFirstPlayer();
+	PlayerPointer FindFirstPlayer();
 	
 	// Accessing functions
 	HEARTHSTONE_INLINE SubGroup* GetSubGroup(uint32 Id)
@@ -166,7 +166,7 @@ public:
 
 	void MovePlayer(PlayerInfo* info, uint8 subgroup);
 
-	bool HasMember(Player *pPlayer);
+	bool HasMember(shared_ptr<Player>pPlayer);
 	bool HasMember(PlayerInfo * info);
 	HEARTHSTONE_INLINE uint32 MemberCount(void) { return m_MemberCount; }
 	HEARTHSTONE_INLINE bool IsFull() { return ((m_GroupType == GROUP_TYPE_PARTY && m_MemberCount >= MAX_GROUP_SIZE_PARTY) || (m_GroupType == GROUP_TYPE_RAID && m_MemberCount >= MAX_GROUP_SIZE_RAID)); }
@@ -181,10 +181,10 @@ public:
 	HEARTHSTONE_INLINE uint8 GetGroupType() { return m_GroupType; }
 	HEARTHSTONE_INLINE uint32 GetID() { return m_Id; }
 
-	void UpdateOutOfRangePlayer(Player * pPlayer, uint32 Flags, bool Distribute, WorldPacket * Packet);
-	void UpdateAllOutOfRangePlayersFor(Player * pPlayer);
-	void HandleUpdateFieldChange(uint32 Index, Player * pPlayer);
-	void HandlePartialChange(uint32 Type, Player * pPlayer);
+	void UpdateOutOfRangePlayer(PlayerPointer pPlayer, uint32 Flags, bool Distribute, WorldPacket * Packet);
+	void UpdateAllOutOfRangePlayersFor(PlayerPointer pPlayer);
+	void HandleUpdateFieldChange(uint32 Index, PlayerPointer pPlayer);
+	void HandlePartialChange(uint32 Type, PlayerPointer pPlayer);
 
 	uint64 m_targetIcons[8];
 	HEARTHSTONE_INLINE Mutex& getLock() { return m_groupLock; }

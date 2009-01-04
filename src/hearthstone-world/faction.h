@@ -22,17 +22,17 @@
 
 #include "Unit.h"
 
-SERVER_DECL bool isHostile(Object* objA, Object* objB); // B is hostile for A?
-SERVER_DECL bool isAttackable(Object* objA, Object* objB, bool CheckStealth = true); // A can attack B?
-SERVER_DECL bool isCombatSupport(Object* objA, Object* objB); // B combat supports A?;
-SERVER_DECL bool isAlliance(Object* objA); // A is alliance?
+SERVER_DECL bool isHostile(ObjectPointer objA, ObjectPointer objB); // B is hostile for A?
+SERVER_DECL bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth = true); // A can attack B?
+SERVER_DECL bool isCombatSupport(ObjectPointer objA, ObjectPointer objB); // B combat supports A?;
+SERVER_DECL bool isAlliance(ObjectPointer objA); // A is alliance?
 
-HEARTHSTONE_INLINE bool isFriendly(Object* objA, Object* objB)// B is friendly to A if its not hostile
+HEARTHSTONE_INLINE bool isFriendly(ObjectPointer objA, ObjectPointer objB)// B is friendly to A if its not hostile
 {
 	return !isHostile(objA, objB);
 }
 
-HEARTHSTONE_INLINE bool isSameFaction(Object* objA, Object* objB)
+HEARTHSTONE_INLINE bool isSameFaction(ObjectPointer objA, ObjectPointer objB)
 {
 	// shouldn't be necessary but still
 	if( objA->m_faction == NULL || objB->m_faction == NULL )

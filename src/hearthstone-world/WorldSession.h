@@ -159,7 +159,7 @@ public:
 	WorldSession(uint32 id, string Name, WorldSocket *sock);
 	~WorldSession();
 
-	Player * m_loggingInPlayer;
+	PlayerPointer m_loggingInPlayer;
 	HEARTHSTONE_INLINE void SendPacket(WorldPacket* packet)
 	{
 		if(_socket && _socket->IsConnected())
@@ -186,7 +186,7 @@ public:
 	uint32 m_lastPing;
 
 	HEARTHSTONE_INLINE uint32 GetAccountId() const { return _accountId; }
-	HEARTHSTONE_INLINE Player* GetPlayer() { return _player; }
+	HEARTHSTONE_INLINE PlayerPointer GetPlayer() { return _player; }
 	
 	/* Acct flags */
 	void SetAccountFlags(uint32 flags) { _accountFlags = flags; }
@@ -213,7 +213,7 @@ public:
 	{
 		_socket = sock;
 	}
-	HEARTHSTONE_INLINE void SetPlayer(Player *plr) { _player = plr; }
+	HEARTHSTONE_INLINE void SetPlayer(shared_ptr<Player>plr) { _player = plr; }
 	
 	HEARTHSTONE_INLINE void SetAccountData(uint32 index, char* data, bool initial,uint32 sz)
 	{
@@ -264,7 +264,7 @@ public:
 
 	int __fastcall Update(uint32 InstanceID);
 
-	void SendItemPushResult(Item * pItem, bool Created, bool Received, bool SendToSet, bool NewItem, uint8 DestBagSlot, uint32 DestSlot, uint32 AddCount);
+	void SendItemPushResult(ItemPointer pItem, bool Created, bool Received, bool SendToSet, bool NewItem, uint8 DestBagSlot, uint32 DestSlot, uint32 AddCount);
 	void SendBuyFailed(uint64 guid, uint32 itemid, uint8 error);
 	void SendSellItem(uint64 vendorguid, uint64 itemid, uint8 error);
 	void SendNotification(const char *message, ...);
@@ -387,7 +387,7 @@ protected:
 	void HandleLootMethodOpcode(WorldPacket& recvPacket);
 	void HandleMinimapPingOpcode(WorldPacket& recvPacket);
 	void HandleSetPlayerIconOpcode(WorldPacket& recv_data);
-	void SendPartyCommandResult(Player *pPlayer, uint32 p1, std::string name, uint32 err);
+	void SendPartyCommandResult(shared_ptr<Player>pPlayer, uint32 p1, std::string name, uint32 err);
 
 	// Raid
 	void HandleConvertGroupToRaidOpcode(WorldPacket& recvPacket);
@@ -688,17 +688,17 @@ protected:
 
 public:
 
-	void SendInventoryList(Creature* pCreature);
-	void SendTrainerList(Creature* pCreature);
-	void SendCharterRequest(Creature* pCreature);
-	void SendTaxiList(Creature* pCreature);
-	void SendInnkeeperBind(Creature* pCreature);
-	void SendBattlegroundList(Creature* pCreature, uint32 mapid);
-	void SendBankerList(Creature* pCreature);
-	void SendTabardHelp(Creature* pCreature);
-	void SendAuctionList(Creature* pCreature);
-	void SendSpiritHealerRequest(Creature* pCreature);
-	void FullLogin(Player * plr);
+	void SendInventoryList(CreaturePointer pCreature);
+	void SendTrainerList(CreaturePointer pCreature);
+	void SendCharterRequest(CreaturePointer pCreature);
+	void SendTaxiList(CreaturePointer pCreature);
+	void SendInnkeeperBind(CreaturePointer pCreature);
+	void SendBattlegroundList(CreaturePointer pCreature, uint32 mapid);
+	void SendBankerList(CreaturePointer pCreature);
+	void SendTabardHelp(CreaturePointer pCreature);
+	void SendAuctionList(CreaturePointer pCreature);
+	void SendSpiritHealerRequest(CreaturePointer pCreature);
+	void FullLogin(PlayerPointer plr);
 
 	float m_wLevel; // Level of water the player is currently in
 	bool m_bIsWLevelSet; // Does the m_wLevel variable contain up-to-date information about water level?
@@ -707,7 +707,7 @@ public:
 
 private:
 	friend class Player;
-	Player *_player;
+	shared_ptr<Player>_player;
 	WorldSocket *_socket;
 		
 	/* Preallocated buffers for movement handlers */

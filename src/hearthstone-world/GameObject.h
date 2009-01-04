@@ -125,7 +125,7 @@ enum GameObjectDynFlags
 	GO_DYNFLAG_QUEST		= 0x09,
 };
 
-#define CALL_GO_SCRIPT_EVENT(obj, func) if(obj->GetTypeId() == TYPEID_GAMEOBJECT && static_cast<GameObject*>(obj)->GetScript() != NULL) static_cast<GameObject*>(obj)->GetScript()->func
+#define CALL_GO_SCRIPT_EVENT(obj, func) if(obj->GetTypeId() == TYPEID_GAMEOBJECT && obj->GetScript() != NULL) obj->GetScript()->func
 
 class SERVER_DECL GameObject : public Object
 {
@@ -133,7 +133,7 @@ public:
 	/************************************************************************/
 	/* LUA Stuff                                                            */
 	/************************************************************************/
-/*	typedef struct { const char *name; int(*mfunc)(lua_State*,GameObject*); } RegType;
+/*	typedef struct { const char *name; int(*mfunc)(lua_State*,shared_ptr<GameObject>); } RegType;
 	static const char className[];
 	static RegType methods[];
 
@@ -142,6 +142,8 @@ public:
 
 	GameObject(uint64 guid);
 	~GameObject( );
+	virtual void Init();
+	virtual void Destructor();
 
 	HEARTHSTONE_INLINE GameObjectInfo* GetInfo() { return pInfo; }
 	HEARTHSTONE_INLINE void SetInfo(GameObjectInfo * goi) { pInfo = goi; }
@@ -154,7 +156,7 @@ public:
 
 	virtual void Update(uint32 p_time);
 
-	void Spawn(MapMgr * m);
+	void Spawn(shared_ptr<MapMgr> m);
 	void Despawn(uint32 time);
 
 	//void _EnvironmentalDamageUpdate();
@@ -169,9 +171,9 @@ public:
 	void SetRotation(float rad);
 
 	//Fishing stuff
-	void UseFishingNode(Player *player);
-	void EndFishing(Player* player,bool abort);
-	void FishHooked(Player * player);
+	void UseFishingNode(shared_ptr<Player>player);
+	void EndFishing(PlayerPointer player,bool abort);
+	void FishHooked(PlayerPointer player);
 	
 	// Quests
 	void _LoadQuests();
@@ -185,7 +187,7 @@ public:
 	std::list<QuestRelation *>::iterator QuestsEnd() { return m_quests->end(); };
 	void SetQuestList(std::list<QuestRelation *>* qst_lst) { m_quests = qst_lst; };
 
-	void SetSummoned(Unit *mob)
+	void SetSummoned(shared_ptr<Unit>mob)
 	{
 		m_summoner = mob;
 		m_summonedGo = true;
@@ -218,10 +220,10 @@ public:
 	int32 charges;//used for type==22,to limit number of usages.
 	bool invisible;//invisible
 	uint8 invisibilityFlag;
-	Unit* m_summoner;
+	UnitPointer m_summoner;
 	int8 bannerslot;
 	int8 bannerauraslot;
-	CBattleground * m_battleground;
+	shared_ptr<CBattleground> m_battleground;
 
 	void CallScriptUpdate();
    
@@ -233,7 +235,7 @@ public:
 	HEARTHSTONE_INLINE bool HasAI() { return spell != 0; }
 	GOSpawn * m_spawn;
 	void OnPushToWorld();
-	void OnRemoveInRangeObject(Object* pObj);
+	void OnRemoveInRangeObject(ObjectPointer pObj);
 	void RemoveFromWorld(bool free_guid);
 
 	HEARTHSTONE_INLINE bool CanMine(){return (mines_remaining > 0);}

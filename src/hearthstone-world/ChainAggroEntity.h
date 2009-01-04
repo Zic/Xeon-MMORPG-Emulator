@@ -7,19 +7,19 @@ class SERVER_DECL ChainAggroEntity
 	friend class AIInterface;
 
 private:
-	set<Creature*> m_agroEntitySet;
+	set<CreaturePointer> m_agroEntitySet;
 public:
-	ChainAggroEntity(Creature* pOwner);
+	ChainAggroEntity(CreaturePointer pOwner);
 	~ChainAggroEntity();
 
-	static ChainAggroEntity* Create(Creature* pCreature) { return new ChainAggroEntity(pCreature); }
+	static ChainAggroEntity* Create(CreaturePointer pCreature) { return new ChainAggroEntity(pCreature); }
 
-	void AddAggroEntity(Creature* pCreature);
-	void RemoveAggroEntity(Creature* pCreature);
+	void AddAggroEntity(CreaturePointer pCreature);
+	void RemoveAggroEntity(CreaturePointer pCreature);
 
 	void Delete();
 
-	void EventEnterCombat(Unit* pTarget);
+	void EventEnterCombat(UnitPointer pTarget);
 };
 
 

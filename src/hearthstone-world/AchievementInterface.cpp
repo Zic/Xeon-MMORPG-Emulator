@@ -21,13 +21,16 @@
 
 set<uint32> m_completedRealmFirstAchievements;
 
-AchievementInterface::AchievementInterface(Player& plr) : m_player(plr)
+AchievementInterface::AchievementInterface(PlayerPointer plr)
 {
+	m_player = plr;
 	m_achievementInspectPacket = NULL;
 }
 
 AchievementInterface::~AchievementInterface()
 {
+	m_player = NULLPLR;
+
 	if( m_achivementDataMap.size() > 0 )
 	{
 		std::map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.begin();
@@ -100,7 +103,7 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 		AchievementData * ad = itr->second;
 		std::stringstream ss;
 		ss << "REPLACE INTO achievements (player,achievementid,progress,completed) VALUES (";
-		ss << m_player.GetLowGUID() << ",";
+		ss << m_player->GetLowGUID() << ",";
 		ss << ad->id << ",";
 		ss << "'";
 		for(uint32 i = 0; i < ad->num_criterias; ++i)
@@ -123,7 +126,7 @@ WorldPacket* AchievementInterface::BuildAchievementData(bool forInspect)
 
 	WorldPacket * data = new WorldPacket(forInspect ? SMSG_RESPOND_INSPECT_ACHIEVEMENTS : SMSG_ALL_ACHIEVEMENT_DATA, 400);
 	if(forInspect)
-		*data << m_player.GetNewGUID();
+		*data << m_player->GetNewGUID();
 
 	std::map<uint32,AchievementData*>::iterator itr = m_achivementDataMap.begin();
 	for(; itr != m_achivementDataMap.end(); ++itr)
@@ -148,7 +151,7 @@ WorldPacket* AchievementInterface::BuildAchievementData(bool forInspect)
 				*data << uint32( ae->AssociatedCriteria[i] );
 				uint32 counterVar = itr->second->counter[i];
 				FastGUIDPack( *data, counterVar );
-				*data << m_player.GetNewGUID();
+				*data << m_player->GetNewGUID();
 				*data << uint32(0);
 				*data << uint32( unixTimeToTimeBitfields( time(NULL) ) );
 				*data << uint32(0);
@@ -176,7 +179,7 @@ void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
 		MailMessage msg;
 		memset(&msg, 0, sizeof(MailMessage));
 		
-		Item * pItem = objmgr.CreateItem( ar->ItemID, NULL );
+		ItemPointer pItem = objmgr.CreateItem( ar->ItemID, NULLPLR );
 		if(!pItem) return;
 
 		pItem->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
@@ -185,13 +188,14 @@ void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
 		msg.body = "Your reward for completing this achievement is attached below.";
 		msg.subject = string(ae->name);
 
-		msg.sender_guid = m_player.GetGUID();
-		msg.player_guid = m_player.m_playerInfo->guid;
+		msg.sender_guid = m_player->GetGUID();
+		msg.player_guid = m_player->m_playerInfo->guid;
 		msg.delivery_time = (uint32)UNIXTIME;
 		msg.expire_time = 0; // This message NEVER expires.
-		sMailSystem.DeliverMessage(m_player.m_playerInfo->guid, &msg);
+		sMailSystem.DeliverMessage(m_player->m_playerInfo->guid, &msg);
 
-		delete pItem;
+		pItem->Destructor();
+		pItem = NULLITEM;
 	}
 
 	// Reward: Title. We don't yet support titles due to a lack of uint128.
@@ -206,10 +210,10 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 
 	GiveRewardsForAchievement(ae);
 
-	if( m_player.IsInWorld() )
-		m_player.GetSession()->SendPacket( BuildAchievementEarned(pData) );
+	if( m_player->IsInWorld() )
+		m_player->GetSession()->SendPacket( BuildAchievementEarned(pData) );
 	else
-		m_player.CopyAndSendDelayedPacket( BuildAchievementEarned(pData) );
+		m_player->CopyAndSendDelayedPacket( BuildAchievementEarned(pData) );
 
 	HandleAchievementCriteriaRequiresAchievement(pData->id);
 
@@ -220,19 +224,19 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 
 		// Send to my team
 		WorldPacket data(SMSG_SERVER_FIRST_ACHIEVEMENT, 60);
-		data << m_player.GetName();
-		data << m_player.GetGUID();
+		data << m_player->GetName();
+		data << m_player->GetGUID();
 		data << ae->ID;
 		data << uint32(1);
-		sWorld.SendFactionMessage(&data, m_player.GetTeam());
+		sWorld.SendFactionMessage(&data, m_player->GetTeam());
 
 		// Send to the other team (no clickable link)
 		WorldPacket data2(SMSG_SERVER_FIRST_ACHIEVEMENT, 60);
-		data2 << m_player.GetName();
-		data2 << m_player.GetGUID();
+		data2 << m_player->GetName();
+		data2 << m_player->GetGUID();
 		data2 << ae->ID;
 		data2 << uint32(0);
-		sWorld.SendFactionMessage(&data2, m_player.GetTeam() ? 0 : 1);
+		sWorld.SendFactionMessage(&data2, m_player->GetTeam() ? 0 : 1);
 	}
 }
 
@@ -241,7 +245,7 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 WorldPacket* AchievementInterface::BuildAchievementEarned(AchievementData * pData)
 {
 	WorldPacket * data = new WorldPacket(SMSG_ACHIEVEMENT_EARNED, 40);
-	*data << m_player.GetNewGUID();
+	*data << m_player->GetNewGUID();
 	*data << pData->id;
 	*data << uint32( unixTimeToTimeBitfields(time(NULL)) );
 	*data << uint32(0);
@@ -285,7 +289,7 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 		AchievementCriteriaEntry * ace = dbcAchivementCriteria.LookupEntry(ach->AssociatedCriteria[i]);
 		uint32 ReqCount = ace->raw.field4 ? ace->raw.field4 : 1;
 
-		if( ace->groupFlag & ACHIEVEMENT_CRITERIA_GROUP_NOT_IN_GROUP && m_player.GetGroup() )
+		if( ace->groupFlag & ACHIEVEMENT_CRITERIA_GROUP_NOT_IN_GROUP && m_player->GetGroup() )
 			return false;
 
 		if( ace->timeLimit && ace->timeLimit < ad->completionTimeLast )
@@ -294,10 +298,10 @@ bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 		if( ad->counter[i] < ReqCount )
 			thisFail = true;
 
-		if( ach->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && m_player.GetTeam() == 1 )
+		if( ach->factionFlag == ACHIEVEMENT_FACTION_ALLIANCE && m_player->GetTeam() == 1 )
 			thisFail = true;
 
-		if( ach->factionFlag == ACHIEVEMENT_FACTION_HORDE && m_player.GetTeam() == 0 )
+		if( ach->factionFlag == ACHIEVEMENT_FACTION_HORDE && m_player->GetTeam() == 0 )
 			thisFail = true;
 
 		if( thisFail && ace->completionFlag & ACHIEVEMENT_CRITERIA_COMPLETE_ONE_FLAG )
@@ -338,16 +342,16 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	AchievementEntry * ae = dbcAchievement.LookupEntry(ad->id);
 	data << uint32(ae->AssociatedCriteria[idx]);
 	FastGUIDPack( data, (uint64)ad->counter[idx] );
-	data << m_player.GetNewGUID();   
+	data << m_player->GetNewGUID();   
 	data << uint32(0);
 	data << uint32(unixTimeToTimeBitfields(time(NULL)));
 	data << uint32(0);
 	data << uint32(0); 
 
-	if( !m_player.IsInWorld() )
-		m_player.CopyAndSendDelayedPacket(&data);
+	if( !m_player->IsInWorld() )
+		m_player->CopyAndSendDelayedPacket(&data);
 	else
-		m_player.GetSession()->SendPacket(&data);
+		m_player->GetSession()->SendPacket(&data);
 
 	if( m_achievementInspectPacket )
 	{
@@ -427,7 +431,7 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 	}
 }
 
-void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, CBattleground * bg)
+void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, shared_ptr<CBattleground> bg)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_WIN_BG );
 	if(itr == objmgr.m_achievementCriteriaMap.end())
@@ -466,7 +470,7 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 				// AV stuff :P
 				if( bg->GetType() == BATTLEGROUND_ALTERAC_VALLEY )
 				{
-					AlteracValley * pAV = (AlteracValley*)bg;
+					shared_ptr<AlteracValley> pAV = TO_ALTERACVALLEY(bg);
 					if( pAchievementEntry->ID == 225 ||  pAchievementEntry->ID == 1164) // AV: Everything Counts
 					{
 						continue; // We do not support mines yet in AV
@@ -604,10 +608,10 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 				}
 			}
 
-			if( ReqClass && m_player.getClass() != ReqClass )
+			if( ReqClass && m_player->getClass() != ReqClass )
 				continue;
 
-			if( ReqRace && m_player.getRace() != ReqRace )
+			if( ReqRace && m_player->getRace() != ReqRace )
 				continue;
 		}
 
@@ -619,7 +623,7 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 			compareCriteria = dbcAchivementCriteria.LookupEntry( pAchievementEntry->AssociatedCriteria[i] );			
 			if( compareCriteria == ace )
 			{
-				ad->counter[i] = m_player.getLevel() > ReqLevel ? ReqLevel : m_player.getLevel();
+				ad->counter[i] = m_player->getLevel() > ReqLevel ? ReqLevel : m_player->getLevel();
 				SendCriteriaUpdate(ad, i); break;
 			}
 		}
@@ -941,7 +945,7 @@ void AchievementInterface::HandleAchievementCriteriaBuyBankSlot(bool retroactive
 			{
 				if( retroactive )
 				{
-					uint32 bytes = m_player.GetUInt32Value(PLAYER_BYTES_2);
+					uint32 bytes = m_player->GetUInt32Value(PLAYER_BYTES_2);
 					uint32 slots = (uint8)(bytes >> 16);
 					ad->counter[i] = slots > ReqSlots ? ReqSlots : slots;
 				}
@@ -1025,7 +1029,7 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 		offset += PLAYER_EXPLORED_ZONES_1;
 
 		uint32 val = (uint32)(1 << (at->explorationFlag % 32));
-		uint32 currFields = m_player.GetUInt32Value(offset);
+		uint32 currFields = m_player->GetUInt32Value(offset);
 
 		// Not explored /sadface
 		if( !(currFields & val) )
@@ -1087,7 +1091,7 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 }
 
 #define SCRIPTOK_FALSE { scriptOk = false; break; }
-void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit * pTarget)
+void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, UnitPointer pTarget)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_DO_EMOTE );
 	if(itr == objmgr.m_achievementCriteriaMap.end())
@@ -1115,7 +1119,7 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 		bool scriptOk = false;
 		if( pTarget && pTarget->IsCreature() )
 		{
-			Creature * pCreature = TO_CREATURE(pTarget);
+			CreaturePointer pCreature = TO_CREATURE(pTarget);
 			if( !(!ace->name || strlen(ace->name) == 0 || !pCreature->GetCreatureName() || stricmp(pCreature->GetCreatureName()->Name, ace->name) != 0) )
 			{
 				scriptOk = true;
@@ -1132,14 +1136,14 @@ void AchievementInterface::HandleAchievementCriteriaDoEmote(uint32 emoteId, Unit
 		// Script individual ones here...
 		if( ace->ID == 2379 ) // Make Love, Not Warcraft
 		{
-			if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() || !isHostile(pTarget, &m_player) )
+			if( !pTarget || !pTarget->IsPlayer() || !pTarget->isDead() || !isHostile(pTarget, m_player) )
 				SCRIPTOK_FALSE
 
 			scriptOk = true;
 		}
 		else if( ace->ID == 6261 ) // Winter Veil: A Frosty Shake 
 		{
-			if( m_player.GetZoneId() != 4395 ) // Not in Dalaran
+			if( m_player->GetZoneId() != 4395 ) // Not in Dalaran
 				SCRIPTOK_FALSE
 			
 			if( !pTarget || !pTarget->HasAura(21848) ) // Not a Snowman
@@ -1442,7 +1446,7 @@ void AchievementInterface::HandleAchievementCriteriaDeath()
 			EventAchievementEarned(ad);
 	}
 
-	HandleAchievementCriteriaDeathAtMap(m_player.GetMapId());
+	HandleAchievementCriteriaDeathAtMap(m_player->GetMapId());
 }
 
 void AchievementInterface::HandleAchievementCriteriaDeathAtMap(uint32 mapId)

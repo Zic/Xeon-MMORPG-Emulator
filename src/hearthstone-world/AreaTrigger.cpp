@@ -59,7 +59,7 @@ const char * AreaTriggerFailureMessages[] = {
 	"You must have The Lich King Expansion to access this content.",
 };
 
-uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, Player * pPlayer, MapInfo * pMapInfo)
+uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, PlayerPointer pPlayer, MapInfo * pMapInfo)
 {
 	if(pAreaTrigger->required_level && pPlayer->getLevel() < pAreaTrigger->required_level)
 		return AREA_TRIGGER_FAILURE_LEVEL;
@@ -95,8 +95,9 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 
 	if (pPlayer->iInstanceType >= MODE_HEROIC && 
 		pMapInfo->type == INSTANCE_MULTIMODE && 
-		!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_1, false) && 
-		!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_2, false))
+		(pMapInfo->heroic_key_1 &&
+		!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_1, false)) || 
+		pMapInfo->heroic_key_2 && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_2, false))
 		return AREA_TRIGGER_FAILURE_NO_KEY;
 
 	if(pPlayer->getLevel()<70 && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)

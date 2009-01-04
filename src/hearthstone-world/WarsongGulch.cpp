@@ -25,7 +25,7 @@ static int winHonorTable[8]				= {  0,  2,  4,  7, 11, 19, 20, 20 };
 static int extraCompleteHonorTable[8]	= {  0,  7, 12, 20, 34, 57, 59, 59 }; // extras only for weekends
 static int extraWinHonorTable[8]		= {  0,  5,  8, 14, 23, 38, 40, 40 };
 
-WarsongGulch::WarsongGulch(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr, id, lgroup, t)
+WarsongGulch::WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr, id, lgroup, t)
 {
 	int i;
 
@@ -83,12 +83,15 @@ WarsongGulch::~WarsongGulch()
 	for(uint32 i = 0; i < 6; ++i)
 	{
 		// buffs may not be spawned, so delete them if they're not
-		if(m_buffs[i] && m_buffs[i]->IsInWorld()==false)
-			delete m_buffs[i];
+		if(m_buffs[i] && !m_buffs[i]->IsInWorld())
+		{
+			m_buffs[i]->Destructor();
+			m_buffs[i] = NULLGOB;
+		}
 	}
 }
 
-void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
+void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 {
 	int32 buffslot = -1;
 	switch(id)
@@ -119,7 +122,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 		{
 			/* apply the buff */
 			SpellEntry * sp = dbcSpell.LookupEntry(m_buffs[buffslot]->GetInfo()->sound3);
-			Spell * s = new Spell(plr, sp, true, 0);
+			shared_ptr<Spell>s = shared_ptr<Spell>(new Spell(plr, sp, true, NULLAURA));
 			SpellCastTargets targets(plr->GetGUID());
 			s->prepare(&targets);
 
@@ -141,7 +144,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 		m_flagHolders[plr->GetTeam()] = 0;
 		plr->m_bgHasFlag = 0;
 
-		/* remove flag aura from player */
+		/* remove flag aura from shared_ptr<Player>/
 		plr->RemoveAura(23333+(plr->GetTeam() * 2));
 
 		/* capture flag points */
@@ -161,7 +164,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 			m_homeFlags[plr->GetTeam()]->PushToWorld(m_mapMgr);
 
 		/* give each player on that team a bonus according to flagHonorTable */
-		for(set<Player*>::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
+		for(set<shared_ptr<Player>>::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
 		{
 			(*itr)->m_bgScore.BonusHonor += flagHonorTable[m_lgroup];
 			HonorHandler::AddHonorPointsToPlayer((*itr), flagHonorTable[m_lgroup]);
@@ -175,8 +178,8 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 			m_losingteam = plr->GetTeam() ? 0 : 1;
 			m_nextPvPUpdateTime = 0;
 
-			sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_CLOSE);
-			sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+			sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_CLOSE);
+			sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 			m_mainLock.Acquire();
 			/* add the marks of honor to all players */
@@ -184,7 +187,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 			SpellEntry * loser_spell = dbcSpell.LookupEntry(24950);
 			for(uint32 i = 0; i < 2; ++i)
 			{
-				for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+				for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
 					(*itr)->Root();
 
@@ -213,7 +216,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 						HonorHandler::AddHonorPointsToPlayer((*itr), honor);
 						(*itr)->CastSpell((*itr), winner_spell, true);
 						uint32 diff = abs(int32(m_scores[i] - m_scores[i ? 0 : 1]));
-						(*itr)->GetAchievementInterface()->HandleAchievementCriteriaWinBattleground( m_mapMgr->GetMapId(), diff, ((uint32)UNIXTIME - m_startTime) / 1000, this);
+						(*itr)->GetAchievementInterface()->HandleAchievementCriteriaWinBattleground( m_mapMgr->GetMapId(), diff, ((uint32)UNIXTIME - m_startTime) / 1000, TO_CBATTLEGROUND(shared_from_this()));
 					}
 				}
 			}
@@ -228,7 +231,7 @@ void WarsongGulch::HookOnAreaTrigger(Player * plr, uint32 id)
 
 }
 
-void WarsongGulch::DropFlag(Player * plr)
+void WarsongGulch::DropFlag(PlayerPointer plr)
 {
 	if(!plr->m_bgHasFlag || m_dropFlags[plr->GetTeam()]->IsInWorld())
 		return;
@@ -248,7 +251,7 @@ void WarsongGulch::DropFlag(Player * plr)
 
 	plr->CastSpell(plr, BG_RECENTLY_DROPPED_FLAG, true);
 
-	sEventMgr.AddEvent( this, &WarsongGulch::ReturnFlag, plr->GetTeam(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + plr->GetTeam(), 5000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+	sEventMgr.AddEvent( TO_WARSONGGULCH(shared_from_this()), &WarsongGulch::ReturnFlag, plr->GetTeam(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + plr->GetTeam(), 5000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 
 	if( plr->GetTeam() == 1 )
 		SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE, plr->GetGUID(), "The Alliance flag was dropped by %s!", plr->GetName() );
@@ -256,7 +259,7 @@ void WarsongGulch::DropFlag(Player * plr)
 		SendChatMessage( CHAT_MSG_BG_EVENT_HORDE, plr->GetGUID(), "The Horde flag was dropped by %s!", plr->GetName() );
 }
 
-void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
+void WarsongGulch::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
 {
 	/* picking up a dropped flag */
 	if(m_dropFlags[plr->GetTeam()] != obj)
@@ -266,7 +269,7 @@ void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
 			(obj->GetEntry() == 179786 && plr->GetTeam() == 1) )
 		{
 			uint32 x = plr->GetTeam() ? 0 : 1;
-			sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + plr->GetTeam());
+			sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + plr->GetTeam());
 
 			if( m_dropFlags[x]->IsInWorld() )
 				m_dropFlags[x]->RemoveFromWorld(false);
@@ -295,9 +298,9 @@ void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
 	}
 
 	if( plr->GetTeam() == 0 )
-		sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG);
+		sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG);
 	else
-		sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + 1);
+		sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_WSG_AUTO_RETURN_FLAG + 1);
 
 	if( m_dropFlags[plr->GetTeam()]->IsInWorld() )
 		m_dropFlags[plr->GetTeam()]->RemoveFromWorld(false);
@@ -313,7 +316,7 @@ void WarsongGulch::HookFlagDrop(Player * plr, GameObject * obj)
 	m_dropFlags[plr->GetTeam()]->SetNewGuid(m_mapMgr->GenerateGameobjectGuid());
 	
 	SpellEntry * pSp = dbcSpell.LookupEntry(23333 + (plr->GetTeam() * 2));
-	Spell * sp = new Spell(plr, pSp, true, 0);
+	shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(plr, pSp, true, NULLAURA));
 	SpellCastTargets targets(plr->GetGUID());
 	sp->prepare(&targets);
 	m_mapMgr->GetStateManager().UpdateWorldState(plr->GetTeam() ? WORLDSTATE_WSG_ALLIANCE_FLAG_DISPLAY : WORLDSTATE_WSG_HORDE_FLAG_DISPLAY, 2);
@@ -338,7 +341,7 @@ void WarsongGulch::ReturnFlag(uint32 team)
 	m_flagAtBase[team] = true;
 }
 
-void WarsongGulch::HookFlagStand(Player * plr, GameObject * obj)
+void WarsongGulch::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
 {
 	if(m_flagHolders[plr->GetTeam()] || m_homeFlags[plr->GetTeam()] != obj)
 	{
@@ -356,7 +359,7 @@ void WarsongGulch::HookFlagStand(Player * plr, GameObject * obj)
 		return;
 
 	SpellEntry * pSp = dbcSpell.LookupEntry(23333 + (plr->GetTeam() * 2));
-	Spell * sp = new Spell(plr, pSp, true, 0);
+	shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(plr, pSp, true, NULLAURA));
 	SpellCastTargets targets(plr->GetGUID());
 	sp->prepare(&targets);
 
@@ -377,7 +380,7 @@ void WarsongGulch::HookFlagStand(Player * plr, GameObject * obj)
 	m_mapMgr->GetStateManager().UpdateWorldState(plr->GetTeam() ? WORLDSTATE_WSG_ALLIANCE_FLAG_DISPLAY : WORLDSTATE_WSG_HORDE_FLAG_DISPLAY, 2);
 }
 
-void WarsongGulch::HookOnPlayerKill(Player * plr, Unit * pVictim)
+void WarsongGulch::HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim)
 {
 	if(pVictim->IsPlayer())
 	{
@@ -386,19 +389,19 @@ void WarsongGulch::HookOnPlayerKill(Player * plr, Unit * pVictim)
 	}
 }
 
-void WarsongGulch::HookOnHK(Player * plr)
+void WarsongGulch::HookOnHK(PlayerPointer plr)
 {
 	plr->m_bgScore.HonorableKills++;
 	UpdatePvPData();
 }
 
-void WarsongGulch::OnAddPlayer(Player * plr)
+void WarsongGulch::OnAddPlayer(PlayerPointer plr)
 {
 	if(!m_started)
 		plr->CastSpell(plr, BG_PREPARATION, true);
 }
 
-void WarsongGulch::OnRemovePlayer(Player * plr)
+void WarsongGulch::OnRemovePlayer(PlayerPointer plr)
 {
 	/* drop the flag if we have it */
 	if(plr->m_bgHasFlag)
@@ -415,7 +418,7 @@ LocationVector WarsongGulch::GetStartingCoords(uint32 Team)
 		return LocationVector(1519.530273f, 1481.868408f, 352.023743f, 3.141593f);
 }
 
-void WarsongGulch::HookOnPlayerDeath(Player * plr)
+void WarsongGulch::HookOnPlayerDeath(PlayerPointer plr)
 {
 	plr->m_bgScore.Deaths++;
 
@@ -426,14 +429,14 @@ void WarsongGulch::HookOnPlayerDeath(Player * plr)
 	UpdatePvPData();
 }
 
-void WarsongGulch::HookOnMount(Player * plr)
+void WarsongGulch::HookOnMount(PlayerPointer plr)
 {
 	/* do we have the flag? */
 	if(plr->m_bgHasFlag)
 		DropFlag( plr ); // Well that was better now wasn't it? :)
 }
 
-bool WarsongGulch::HookHandleRepop(Player * plr)
+bool WarsongGulch::HookHandleRepop(PlayerPointer plr)
 {
     LocationVector dest;
 	if(plr->GetTeam())
@@ -497,7 +500,7 @@ void WarsongGulch::OnCreate()
 	}
 
 	// Alliance Gates
-	GameObject *gate = SpawnGameObject(179921, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
+	shared_ptr<GameObject>gate = SpawnGameObject(179921, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
 	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
@@ -550,13 +553,13 @@ void WarsongGulch::OnCreate()
 void WarsongGulch::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
 	}
 
 	/* open the gates */
-	for(list<GameObject*>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -578,7 +581,7 @@ void WarsongGulch::OnStart()
 	m_started = true;
 }
 
-void WarsongGulch::HookGenerateLoot(Player *plr, Corpse *pCorpse)
+void WarsongGulch::HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

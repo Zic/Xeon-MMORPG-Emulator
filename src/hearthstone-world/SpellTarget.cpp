@@ -305,13 +305,13 @@ void Spell::SpellTargetSingleTargetEnemy(uint32 i, uint32 j)
 {
 	if(!m_caster->IsInWorld())
 		return;
-	Unit * pTarget = m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget);
+	UnitPointer pTarget = m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget);
 	if(!pTarget)
 		return;
 
 	if(m_spellInfo->TargetCreatureType && pTarget->GetTypeId()==TYPEID_UNIT)
 	{		
-		Creature* cr = static_cast< Creature* >( pTarget );
+		CreaturePointer cr = TO_CREATURE( pTarget );
 		
 		if( cr == NULL )
 			return;
@@ -370,19 +370,19 @@ void Spell::SpellTargetSingleTargetEnemy(uint32 i, uint32 j)
 		uint32 jumps=m_spellInfo->EffectChainTarget[i]-1;
 		float range=GetMaxRange(dbcSpellRange.LookupEntry(m_spellInfo->rangeIndex));//this is probably wrong
 		range*=range;
-		std::set<Object*>::iterator itr;
+		std::set<shared_ptr<Object>>::iterator itr;
 		for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 		{
 			if((*itr)->GetGUID()==m_targets.m_unitTarget)
 				continue;
-			if( !((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive())
+			if( !((*itr)->IsUnit()) || !TO_UNIT(*itr)->isAlive())
 				continue;
 
 			if(IsInrange(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),(*itr),range))
 			{
-				if(isAttackable(u_caster,(Unit*)(*itr)))
+				if(isAttackable(u_caster,TO_UNIT(*itr)))
 				{
-					_AddTarget(((Unit*)*itr), i);
+					_AddTarget(TO_UNIT(*itr), i);
 					if(!--jumps)
 						return;
 				}
@@ -417,14 +417,14 @@ void Spell::SpellTargetLandUnderCaster(uint32 i, uint32 j) /// I don't think thi
 /// Spell Target Handling for type 18: All Party Members around the Caster in given range NOT RAID
 void Spell::SpellTargetAllPartyMembersRangeNR(uint32 i, uint32 j)
 {
-	Player* p = p_caster;
+	PlayerPointer p = p_caster;
 
 	if( p == NULL )
 	{
-		if( static_cast< Creature* >( u_caster)->IsTotem() )
-			p = static_cast< Player* >( static_cast< Creature* >( u_caster )->GetTotemOwner() );
-		else if( u_caster->IsPet() && static_cast< Pet* >( u_caster )->GetPetOwner() ) 
-			p = static_cast< Pet* >( u_caster )->GetPetOwner();
+		if( TO_CREATURE( u_caster)->IsTotem() )
+			p = TO_PLAYER( TO_CREATURE( u_caster )->GetTotemOwner() );
+		else if( u_caster->IsPet() && TO_PET( u_caster )->GetPetOwner() ) 
+			p = TO_PET( u_caster )->GetPetOwner();
 	}
 
 	if( p == NULL )
@@ -455,11 +455,11 @@ void Spell::SpellTargetAllPartyMembersRangeNR(uint32 i, uint32 j)
 /// Spell Target Handling for type 21: Single Target Friend
 void Spell::SpellTargetSingleTargetFriend(uint32 i, uint32 j)
 {
-	Unit *Target;
+	shared_ptr<Unit>Target;
 	if(m_targets.m_unitTarget == m_caster->GetGUID())
 		Target = u_caster;
 	else
-		Target = m_caster->GetMapMgr() ? m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget) : NULL;
+		Target = m_caster->GetMapMgr() ? m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget) : NULLUNIT;
 	if(!Target)
 		return;
 
@@ -486,21 +486,21 @@ void Spell::SpellTargetSingleGameobjectTarget(uint32 i, uint32 j)
 /// Spell Target Handling for type 24: Targets in Front of the Caster
 void Spell::SpellTargetInFrontOfCaster(uint32 i, uint32 j)
 {
-	std::set<Object*>::iterator itr;
+	std::set<shared_ptr<Object>>::iterator itr;
 
 	if( m_spellInfo->cone_width == 0.0f )
 	{
 		for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 		{
-			if(!((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive())
+			if(!((*itr)->IsUnit()) || !TO_UNIT(*itr)->isAlive())
 				continue;
 			//is Creature in range
-			if(m_caster->isInRange((Unit*)(*itr),GetRadius(i)))
+			if(m_caster->isInRange((*itr),GetRadius(i)))
 			{
-				if(m_caster->isInFront((Unit*)(*itr)))
+				if(m_caster->isInFront(*itr))
 				{
-					if(isAttackable(u_caster, (Unit*)(*itr)))
-						_AddTarget(((Unit*)(*itr)), i);
+					if(isAttackable(u_caster, (*itr)))
+						_AddTarget(TO_UNIT(*itr), i);
 				}
 			}
 		}
@@ -509,15 +509,15 @@ void Spell::SpellTargetInFrontOfCaster(uint32 i, uint32 j)
 	{
 		for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 		{
-			if(!((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive())
+			if(!((*itr)->IsUnit()) || !TO_UNIT(*itr)->isAlive())
 				continue;
 			//is Creature in range
 			if(m_caster->isInArc(*itr, m_spellInfo->cone_width))
 			{
-				if(m_caster->isInFront((Unit*)(*itr)))
+				if(m_caster->isInFront((*itr)))
 				{
-					if(isAttackable(u_caster, (Unit*)(*itr)))
-						_AddTarget(((Unit*)(*itr)), i);
+					if(isAttackable(u_caster, (*itr)))
+						_AddTarget(TO_UNIT(*itr), i);
 				}
 			}
 		}
@@ -544,8 +544,8 @@ void Spell::SpellTargetGameobject_itemTarget(uint32 i, uint32 j)
 /// Spell Target Handling for type 27: target is owner of pet
 void Spell::SpellTargetPetOwner(uint32 i, uint32 j)
 { 
-	if( u_caster->IsPet() && ((Pet*)u_caster)->GetPetOwner() )
-		_AddTargetForced( ((Pet*)u_caster)->GetPetOwner()->GetGUID(), i );
+	if( u_caster->IsPet() && TO_PET(u_caster)->GetPetOwner() )
+		_AddTargetForced( TO_PET(u_caster)->GetPetOwner()->GetGUID(), i );
 }
 
 /// this is handled in DO
@@ -569,7 +569,7 @@ mysql> select id,name from spell where EffectImplicitTargetb1 = 29;
 /// Spell Target Handling for type 29: all object around the the caster / object (so it seems)
 void Spell::SpellTargetTypeTAOE(uint32 i, uint32 j)
 {
-	Unit* Target = m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget);
+	UnitPointer Target = m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget);
 	if( Target == NULL )
 		return;
 
@@ -622,12 +622,12 @@ void Spell::SpellTargetNearbyPartyMembers(uint32 i, uint32 j)
 	{
 		if( u_caster->GetTypeId()==TYPEID_UNIT)
 		{
-			if( static_cast< Creature* >( u_caster )->IsTotem() )
+			if( TO_CREATURE( u_caster )->IsTotem() )
 			{
 				float r = GetRadius(i);
 				r *= r;
 
-				Player* p = static_cast< Player* >( static_cast< Creature* >( u_caster )->GetTotemOwner() );
+				PlayerPointer p = TO_PLAYER( TO_CREATURE( u_caster )->GetTotemOwner() );
 				
 				if( p == NULL)
 					return;
@@ -663,7 +663,7 @@ void Spell::SpellTargetSingleTargetPartyMember(uint32 i, uint32 j)
 	if(!m_caster->IsInWorld())
 		return;
 
-	Unit* Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
+	UnitPointer Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		return;
 	float r=GetMaxRange(dbcSpellRange.LookupEntry(m_spellInfo->rangeIndex));
@@ -684,7 +684,7 @@ void Spell::SpellTargetPartyMember(uint32 i, uint32 j)
 		return;
 
 	// if no group target self
-	Player * Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
+	PlayerPointer Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		return;
 
@@ -717,7 +717,7 @@ void Spell::SpellTargetDummyTarget(uint32 i, uint32 j)
 	if(m_spellInfo->Id == 30427)
 	{
 		uint32 cloudtype;
-		Creature *creature;
+		CreaturePointer creature = NULLCREATURE;
 
 		if(!p_caster)
 			return;
@@ -726,7 +726,7 @@ void Spell::SpellTargetDummyTarget(uint32 i, uint32 j)
 		{
 			if((*itr)->GetTypeId() == TYPEID_UNIT && p_caster->GetDistance2dSq((*itr)) < 400)
 			{
-				creature=static_cast<Creature *>((*itr));
+				creature= TO_CREATURE(*itr);
 				cloudtype=creature->GetEntry();
 				if(cloudtype == 24222 || cloudtype == 17408 || cloudtype == 17407 || cloudtype == 17378)
 				{
@@ -765,7 +765,7 @@ void Spell::SpellTargetChainTargeting(uint32 i, uint32 j)
 		return;
 
 	//if selected target is party member, then jumps on party
-	Unit* firstTarget;
+	UnitPointer firstTarget;
 
 	bool PartyOnly = false;
 	float range = GetMaxRange(dbcSpellRange.LookupEntry(m_spellInfo->rangeIndex));//this is probably wrong,
@@ -776,7 +776,7 @@ void Spell::SpellTargetChainTargeting(uint32 i, uint32 j)
 	if( firstTarget && p_caster != NULL )
 	{
 		if( p_caster->InGroup() )
-			if( p_caster->GetSubGroup() == static_cast< Player* >( firstTarget )->GetSubGroup() )
+			if( p_caster->GetSubGroup() == TO_PLAYER( firstTarget )->GetSubGroup() )
 				PartyOnly=true;					
 	}
 	else
@@ -825,15 +825,15 @@ void Spell::SpellTargetChainTargeting(uint32 i, uint32 j)
 	}//find nearby friendly target
 	else
 	{
-		std::set<Object*>::iterator itr;
+		std::set<shared_ptr<Object>>::iterator itr;
 		for( itr = firstTarget->GetInRangeSetBegin(); itr != firstTarget->GetInRangeSetEnd(); itr++ )
 		{
-			if( !(*itr)->IsUnit() || !((Unit*)(*itr))->isAlive())
+			if( !(*itr)->IsUnit() || !TO_UNIT(*itr)->isAlive())
 				continue;
 
 			if(IsInrange(firstTarget->GetPositionX(),firstTarget->GetPositionY(),firstTarget->GetPositionZ(),*itr, range))
 			{
-				if(!isAttackable(u_caster,(Unit*)(*itr)))
+				if(!isAttackable(u_caster,TO_UNIT(*itr)))
 				{
 					_AddTargetForced((*itr)->GetGUID(), i);
 					if(!--jumps)
@@ -863,7 +863,7 @@ void Spell::SpellTargetSimpleTargetAdd(uint32 i, uint32 j)
 /// Spell Target Handling for type 53: Target Area by Players CurrentSelection()
 void Spell::SpellTargetTargetAreaSelectedUnit(uint32 i, uint32 j)
 {
-	Unit *Target = NULL;
+	shared_ptr<Unit>Target = NULLUNIT;
 	if(m_caster->IsInWorld())
 	{
 		if(p_caster)
@@ -881,19 +881,19 @@ void Spell::SpellTargetTargetAreaSelectedUnit(uint32 i, uint32 j)
 /// Spell Target Handling for type 54: Targets in Front of the Caster
 void Spell::SpellTargetInFrontOfCaster2(uint32 i, uint32 j)
 {
-	std::set<Object*>::iterator itr;
+	std::set<shared_ptr<Object>>::iterator itr;
 
 	for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
-		if(!((*itr)->IsUnit()) || !((Unit*)(*itr))->isAlive())
+		if(!((*itr)->IsUnit()) || !TO_UNIT(*itr)->isAlive())
 			continue;
 		//is Creature in range
-		if(m_caster->isInRange((Unit*)(*itr),GetRadius(i)))
+		if(m_caster->isInRange(TO_UNIT(*itr),GetRadius(i)))
 		{
-			if(m_caster->isInFront((Unit*)(*itr)))
+			if(m_caster->isInFront(TO_UNIT(*itr)))
 			{
-				if(isAttackable(u_caster, (Unit*)(*itr)))
-					_AddTarget(((Unit*)*itr), i);
+				if(isAttackable(u_caster, TO_UNIT(*itr)))
+					_AddTarget(TO_UNIT(*itr), i);
 			}
 		}
 	}
@@ -914,7 +914,7 @@ void Spell::SpellTargetTargetPartyMember(uint32 i, uint32 j)
 	if(!m_caster->IsInWorld())
 		return;
 
-	Unit* Target = m_caster->GetMapMgr()->GetPlayer ((uint32)m_targets.m_unitTarget);
+	UnitPointer Target = m_caster->GetMapMgr()->GetPlayer ((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		Target = u_caster;
 	if(!Target)
@@ -931,7 +931,7 @@ void Spell::SpellTargetSameGroupSameClass(uint32 i, uint32 j)
 	if(!m_caster->IsInWorld())
 		return;
 
-	Player * Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
+	PlayerPointer Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		return;
 

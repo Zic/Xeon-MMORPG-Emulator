@@ -35,7 +35,7 @@ public:
 	~WeatherMgr();
 
 	void LoadFromDB();
-	void SendWeather(Player *plr);
+	void SendWeather(shared_ptr<Player>plr);
 
 private:
 	std::map<uint32, WeatherInfo*> m_zoneWeathers;
@@ -51,7 +51,7 @@ public:
 	void BuildUp();
 	void Update();	
 	void SendUpdate();
-	void SendUpdate(Player *plr);
+	void SendUpdate(shared_ptr<Player>plr);
 
 protected:
 	void _GenerateWeather();

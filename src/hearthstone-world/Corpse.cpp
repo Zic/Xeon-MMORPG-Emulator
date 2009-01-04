@@ -36,19 +36,27 @@ Corpse::Corpse(uint32 high, uint32 low)
 
 	m_state = CORPSE_STATE_BODY;
 	_loadedfromdb = false;
-
-	if(high!=0)
-	objmgr.AddCorpse(this);
 }
 
 Corpse::~Corpse()
 {
-	objmgr.RemoveCorpse(this);
+}
+
+void Corpse::Init()
+{
+	if(GetUInt32Value(OBJECT_FIELD_GUID+1) != 0)
+		objmgr.AddCorpse(TO_CORPSE(shared_from_this()));
+}
+
+void Corpse::Destructor()
+{
+	objmgr.RemoveCorpse(TO_CORPSE(shared_from_this()));
 	//just in case
+	Object::Destructor();
 }
 
 
-void Corpse::Create( Player *owner, uint32 mapid, float x, float y, float z, float ang )
+void Corpse::Create( shared_ptr<Player>owner, uint32 mapid, float x, float y, float z, float ang )
 {
 	Object::_Create( mapid, x, y, z, ang);
 
@@ -115,7 +123,7 @@ void Corpse::SpawnBones()
 			SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
 	}
 	DeleteFromDB();
-	objmgr.CorpseAddEventDespawn(this);
+	objmgr.CorpseAddEventDespawn(TO_CORPSE(shared_from_this()));
 	SetCorpseState(CORPSE_STATE_BONES);
 }
 

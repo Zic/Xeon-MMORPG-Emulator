@@ -92,9 +92,9 @@ struct TWayPoint {
 
 typedef std::map<uint32, TWayPoint> WaypointMap;
 typedef std::map<uint32, TWayPoint>::iterator WaypointIterator;
-typedef std::map<uint32, Player*> PassengerMap;
-typedef std::map<uint32, Player*>::iterator PassengerIterator;
-typedef std::map<uint32, Object*> TransportNPCMap;
+typedef std::map<uint32, shared_ptr<Player>> PassengerMap;
+typedef std::map<uint32, shared_ptr<Player>>::iterator PassengerIterator;
+typedef std::map<uint32, shared_ptr<Object>> TransportNPCMap;
 
 bool FillTransporterPathVector(uint32 PathID, TransportPath & Path);
 
@@ -106,6 +106,7 @@ class Transporter : public GameObject
 public:
 	Transporter(uint64 guid);
 	~Transporter();
+	virtual void Destructor();
 
 	bool CreateAsTransporter(uint32 EntryID, const char* Name);
 	void UpdatePosition();
@@ -113,9 +114,9 @@ public:
 
 	bool GenerateWaypoints();
 
-	HEARTHSTONE_INLINE void AddPlayer(Player *pPlayer) { mPassengers[pPlayer->GetLowGUID()] = pPlayer; }
-	HEARTHSTONE_INLINE void RemovePlayer(Player *pPlayer) {mPassengers.erase(pPlayer->GetLowGUID()); }
-	HEARTHSTONE_INLINE bool HasPlayer(Player* pPlayer) { return mPassengers.find(pPlayer->GetLowGUID()) != mPassengers.end(); }
+	HEARTHSTONE_INLINE void AddPlayer(shared_ptr<Player>pPlayer) { mPassengers[pPlayer->GetLowGUID()] = pPlayer; }
+	HEARTHSTONE_INLINE void RemovePlayer(shared_ptr<Player>pPlayer) {mPassengers.erase(pPlayer->GetLowGUID()); }
+	HEARTHSTONE_INLINE bool HasPlayer(PlayerPointer pPlayer) { return mPassengers.find(pPlayer->GetLowGUID()) != mPassengers.end(); }
 	HEARTHSTONE_INLINE void SetPeriod(uint32 val) { m_period = val; }
 
 	uint32 m_pathTime;
@@ -125,11 +126,11 @@ public:
 	WaypointIterator mNextWaypoint;
 
 	void OnPushToWorld();
-	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, Player *target );
-	void DestroyTransportNPCs(Player * target);
+	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
+	void DestroyTransportNPCs(PlayerPointer target);
 	void AddNPC(uint32 Entry, float offsetX, float offsetY, float offsetZ, float offsetO);
-	Creature * GetCreature(uint32 Guid);
-	GameObject * GetGameObject(uint32 Guid);
+	CreaturePointer GetCreature(uint32 Guid);
+	shared_ptr<GameObject> GetGameObject(uint32 Guid);
 
 private:
 	

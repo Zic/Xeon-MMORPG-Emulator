@@ -587,7 +587,7 @@ struct ItemPrototype
 typedef struct {
 	uint32 setid;
 	uint32 itemscount;
-	//Spell* spell[8];
+	//SpellPointer spell[8];
 }ItemSet;
 #pragma pack(pop)
 

@@ -30,7 +30,12 @@ Vehicle::~Vehicle()
 {
 }
 
-void Vehicle::Create(CreatureProto * cp, uint32 vehicleEntry, Player * pRider)
+void Vehicle::Destructor()
+{
+	Creature::Destructor();
+}
+
+void Vehicle::Create(CreatureProto * cp, uint32 vehicleEntry, PlayerPointer pRider)
 {
 	VehicleEntry * ve = dbcVehicle.LookupEntry( vehicleEntry );
 	if(!ve)
@@ -48,8 +53,8 @@ void Vehicle::Create(CreatureProto * cp, uint32 vehicleEntry, Player * pRider)
 		}
 	}
 
-	m_passengers = (Unit**)malloc(sizeof(Unit*) * m_maxPassengers);
-	memset( m_passengers, 0, sizeof(Unit*) * m_maxPassengers);
+	m_passengers = (shared_ptr<Unit>*)malloc(sizeof(shared_ptr<Unit>) * m_maxPassengers);
+	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
 
 	if( pRider )
 		AddPassenger( pRider );
@@ -59,7 +64,7 @@ void Vehicle::Update(uint32 time)
 {
 }
 
-void Vehicle::AddPassenger(Unit * pPassenger)
+void Vehicle::AddPassenger(UnitPointer pPassenger)
 {
 	// Find an available seat
 	for(uint32 i = 0; i < m_maxPassengers; ++i)
@@ -76,7 +81,7 @@ void Vehicle::RemovePassenger(uint32 passengerSlot)
 {
 }
 
-bool Vehicle::HasPassenger(Unit * pPassenger)
+bool Vehicle::HasPassenger(UnitPointer pPassenger)
 {
 	for(uint32 i = 0; i < m_maxPassengers; ++i)
 	{
@@ -86,7 +91,7 @@ bool Vehicle::HasPassenger(Unit * pPassenger)
 	return false;
 }
 
-void Vehicle::_AddToSlot(Unit * pPassenger, uint32 slot)
+void Vehicle::_AddToSlot(UnitPointer pPassenger, uint32 slot)
 {
 	assert( slot < m_maxPassengers );
 	m_passengers[ slot ] = pPassenger;
@@ -94,7 +99,7 @@ void Vehicle::_AddToSlot(Unit * pPassenger, uint32 slot)
 	// This is where the real magic happens
 	if( pPassenger->IsPlayer() )
 	{
-		Player * pPlayer = TO_PLAYER(pPassenger);
+		PlayerPointer pPlayer = TO_PLAYER(pPassenger);
 		pPlayer->Root();
 	}
 }

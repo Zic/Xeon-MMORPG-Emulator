@@ -18,7 +18,7 @@
  */
 
 //
-// MapMgr.h
+// mapMgr->h
 //
 
 #ifndef __MAPMGR_H
@@ -56,16 +56,16 @@ enum ObjectActiveState
 	OBJECT_STATE_ACTIVE   = 2,
 };
 
-typedef std::set<Object*> ObjectSet;
-typedef std::set<Object*> UpdateQueue;
-typedef std::set<Player*> PUpdateQueue;
-typedef std::set<Player*> PlayerSet;
-typedef HM_NAMESPACE::hash_map<uint32, Object*> StorageMap;
+typedef std::set<shared_ptr<Object>> ObjectSet;
+typedef std::set<shared_ptr<Object>> UpdateQueue;
+typedef std::set<shared_ptr<Player>> PUpdateQueue;
+typedef std::set<shared_ptr<Player>> PlayerSet;
+typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Object>> StorageMap;
 typedef set<uint64> CombatProgressMap;
-typedef set<Creature*> CreatureSet;
-typedef set<GameObject*> GameObjectSet;
-typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureSqlIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectSqlIdMap;
+typedef set<CreaturePointer> CreatureSet;
+typedef set<shared_ptr<GameObject>> GameObjectSet;
+typedef HM_NAMESPACE::hash_map<uint32, CreaturePointer> CreatureSqlIdMap;
+typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject>> GameObjectSqlIdMap;
 
 #define MAX_TRANSPORTERS_PER_MAP 25
 
@@ -84,15 +84,15 @@ public:
 
 	Mutex m_objectinsertlock;
 	ObjectSet m_objectinsertpool;
-	void AddObject(Object *);
+	void AddObject(shared_ptr<Object>);
 
 ////////////////////////////////////////////////////////
 // Local (mapmgr) storage/generation of GameObjects
 /////////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject>> GameObjectMap;
 	GameObjectMap m_gameObjectStorage;
 	uint32 m_GOHighGuid;
-	GameObject * CreateGameObject(uint32 entry);
+	shared_ptr<GameObject> CreateGameObject(uint32 entry);
 
 	HEARTHSTONE_INLINE uint32 GenerateGameobjectGuid()
 	{
@@ -100,11 +100,11 @@ public:
 		return ++m_GOHighGuid;
 	}
 
-	HEARTHSTONE_INLINE GameObject * GetGameObject(uint32 guid)
+	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObject(uint32 guid)
 	{
 		GameObjectMap::iterator itr = m_gameObjectStorage.find(guid);
 		if( itr == m_gameObjectStorage.end() )
-			return NULL;
+			return NULLGOB;
 
 		return itr->second;
 	}
@@ -114,13 +114,14 @@ public:
 /////////////////////////////////////////////
 	uint32 m_CreatureArraySize;
 	uint32 m_CreatureHighGuid;
-	Creature ** m_CreatureStorage;
-	Creature * CreateCreature(uint32 entry);
+	CreaturePointer* m_CreatureStorage;
+	CreaturePointer CreateCreature(uint32 entry);
 
-	__inline Creature * GetCreature(uint32 guid)
+	__inline CreaturePointer GetCreature(uint32 guid)
 	{
 		if(guid > m_CreatureHighGuid)
-			return 0;
+			return NULLCREATURE;
+
 		return m_CreatureStorage[guid];
 	}
 
@@ -128,25 +129,25 @@ public:
 // Local (mapmgr) storage/generation of DynamicObjects
 ////////////////////////////////////////////
 	uint32 m_DynamicObjectHighGuid;
-	typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<DynamicObject>> DynamicObjectStorageMap;
 	DynamicObjectStorageMap m_DynamicObjectStorage;
-	DynamicObject * CreateDynamicObject();
+	shared_ptr<DynamicObject> CreateDynamicObject();
 	
-	HEARTHSTONE_INLINE DynamicObject * GetDynamicObject(uint32 guid)
+	HEARTHSTONE_INLINE shared_ptr<DynamicObject> GetDynamicObject(uint32 guid)
 	{
 		DynamicObjectStorageMap::iterator itr = m_DynamicObjectStorage.find(guid);
-		return (itr != m_DynamicObjectStorage.end()) ? itr->second : 0;
+		return (itr != m_DynamicObjectStorage.end()) ? itr->second : NULLDYN;
 	}
 
 //////////////////////////////////////////////////////////
 // Local (mapmgr) storage of pets
 ///////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, Pet*> PetStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Pet>> PetStorageMap;
 	PetStorageMap m_PetStorage;
-	__inline Pet * GetPet(uint32 guid)
+	__inline shared_ptr<Pet> GetPet(uint32 guid)
 	{
 		PetStorageMap::iterator itr = m_PetStorage.find(guid);
-		return (itr != m_PetStorage.end()) ? itr->second : 0;
+		return (itr != m_PetStorage.end()) ? itr->second : NULLPET;
 	}
 
 //////////////////////////////////////////////////////////
@@ -154,12 +155,12 @@ public:
 ////////////////////////////////
     
     // double typedef lolz// a compile breaker..
-	typedef HM_NAMESPACE::hash_map<uint32, Player*>                     PlayerStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player>>                     PlayerStorageMap;
 	PlayerStorageMap m_PlayerStorage;
-	__inline Player * GetPlayer(uint32 guid)
+	__inline PlayerPointer GetPlayer(uint32 guid)
 	{
 		PlayerStorageMap::iterator itr = m_PlayerStorage.find(guid);
-		return (itr != m_PlayerStorage.end()) ? itr->second : 0;
+		return (itr != m_PlayerStorage.end()) ? itr->second : NULLPLR;
 	}
 
 //////////////////////////////////////////////////////////
@@ -178,23 +179,25 @@ public:
 //////////////////////////////////////////////////////////
 // Lookup Wrappers
 ///////////////////////////////////
-	Unit * GetUnit(const uint64 & guid);
-	Object * _GetObject(const uint64 & guid);
+	UnitPointer GetUnit(const uint64 & guid);
+	ObjectPointer _GetObject(const uint64 & guid);
 
 	bool run();
 	bool Do();
 
 	MapMgr(Map *map, uint32 mapid, uint32 instanceid);
 	~MapMgr();
+	void Init();
+	void Destructor();
 
-	void PushObject(Object *obj);
-	void PushStaticObject(Object * obj);
-	void RemoveObject(Object *obj, bool free_guid);
-	void ChangeObjectLocation(Object *obj); // update inrange lists
-	void ChangeFarsightLocation(Player *plr, Creature *farsight);
+	void PushObject(shared_ptr<Object>obj);
+	void PushStaticObject(ObjectPointer obj);
+	void RemoveObject(shared_ptr<Object>obj, bool free_guid);
+	void ChangeObjectLocation(shared_ptr<Object>obj); // update inrange lists
+	void ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight);
 
 	//! Mark object as updated
-	void ObjectUpdated(Object *obj);
+	void ObjectUpdated(shared_ptr<Object>obj);
 	void UpdateCellActivity(uint32 x, uint32 y, int radius);
 
 	// Terrain Functions
@@ -209,7 +212,7 @@ public:
 	void AddForcedCell(MapCell * c);
 	void RemoveForcedCell(MapCell * c);
 
-	void PushToProcessed(Player* plr);
+	void PushToProcessed(PlayerPointer plr);
 
 	HEARTHSTONE_INLINE bool HasPlayers() { return (m_PlayerStorage.size() > 0); }
 	HEARTHSTONE_INLINE bool IsCombatInProgress() { return (_combatProgress.size() > 0); }
@@ -237,14 +240,14 @@ public:
     uint32 iInstanceMode;
 
 	void UnloadCell(uint32 x,uint32 y);
-	void EventRespawnCreature(Creature * c, MapCell * p);
-	void EventRespawnGameObject(GameObject * o, MapCell * c);
-	void SendMessageToCellPlayers(Object * obj, WorldPacket * packet, uint32 cell_radius = 2);
-	void SendChatMessageToCellPlayers(Object * obj, WorldPacket * packet, uint32 cell_radius, uint32 langpos, int32 lang, WorldSession * originator);
+	void EventRespawnCreature(CreaturePointer c, MapCell * p);
+	void EventRespawnGameObject(shared_ptr<GameObject> o, MapCell * c);
+	void SendMessageToCellPlayers(ObjectPointer obj, WorldPacket * packet, uint32 cell_radius = 2);
+	void SendChatMessageToCellPlayers(ObjectPointer obj, WorldPacket * packet, uint32 cell_radius, uint32 langpos, int32 lang, WorldSession * originator);
 
 	Instance * pInstance;
 	void BeginInstanceExpireCountdown();
-	void HookOnAreaTrigger(Player * plr, uint32 id);
+	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	
 	// better hope to clear any references to us when calling this :P
 	void InstanceShutdown()
@@ -274,10 +277,10 @@ private:
 	//! Objects that exist on map
  
 	uint32 _mapId;
-	set<Object*> _mapWideStaticObjects;
+	set<shared_ptr<Object>> _mapWideStaticObjects;
 
 	bool _CellActive(uint32 x, uint32 y);
-	void UpdateInRangeSet(Object *obj, Player *plObj, MapCell* cell);
+	void UpdateInRangeSet(shared_ptr<Object>obj, shared_ptr<Player>plObj, MapCell* cell);
 
 public:
 	// Distance a Player can "see" other objects and receive updates from them (!! ALREADY dist*dist !!)
@@ -309,13 +312,13 @@ public:
 	GameObjectSet activeGameObjects;
 	CreatureSet activeCreatures;
 	EventableObjectHolder eventHolder;
-	CBattleground * m_battleground;
-	set<Corpse*> m_corpses;
+	shared_ptr<CBattleground> m_battleground;
+	set<shared_ptr<Corpse>> m_corpses;
 	CreatureSqlIdMap _sqlids_creatures;
 	GameObjectSqlIdMap _sqlids_gameobjects;
 
-	Creature * GetSqlIdCreature(uint32 sqlid);
-	GameObject * GetSqlIdGameObject(uint32 sqlid);
+	CreaturePointer GetSqlIdCreature(uint32 sqlid);
+	shared_ptr<GameObject> GetSqlIdGameObject(uint32 sqlid);
 	deque<uint32> _reusable_guids_creature;
 
 	bool forced_expire;
@@ -323,7 +326,7 @@ public:
 	bool thread_running;
 
 	// world state manager stuff
-	WorldStateManager m_stateManager;
+	WorldStateManager* m_stateManager;
 
 	// bytebuffer caching
 	ByteBuffer m_updateBuffer;
@@ -334,7 +337,7 @@ public:
 public:
 
 	// get!
-	HEARTHSTONE_INLINE WorldStateManager& GetStateManager() { return m_stateManager; }
+	HEARTHSTONE_INLINE WorldStateManager& GetStateManager() { return *m_stateManager; }
 
 	// send packet functions for state manager
 	void SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacket *pData);

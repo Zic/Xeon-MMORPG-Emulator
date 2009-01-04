@@ -150,7 +150,7 @@ bool ChatHandler::HandleStartCommand(const char* args, WorldSession *m_session)
 	std::string race;
 	uint32 raceid = 0;
 
-	Player *m_plyr = getSelectedChar(m_session, false);
+	shared_ptr<Player>m_plyr = getSelectedChar(m_session, false);
 
 	if (m_plyr && args && strlen(args) < 2)
 	{
@@ -289,15 +289,15 @@ bool ChatHandler::HandleNYICommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleDismountCommand(const char* args, WorldSession *m_session)
 {
-	Unit *m_target = NULL;
+	shared_ptr<Unit>m_target = NULLUNIT;
 
-	Player *p_target = getSelectedChar(m_session, false);
+	shared_ptr<Player>p_target = getSelectedChar(m_session, false);
 
 	if(p_target)
 		m_target = p_target;
 	else
 	{
-		Creature *m_crt = getSelectedCreature(m_session, false);
+		CreaturePointer m_crt = getSelectedCreature(m_session, false);
 		if(m_crt)
 			m_target = m_crt;
 	}
@@ -380,18 +380,18 @@ bool ChatHandler::HandleRangeCheckCommand( const char *args , WorldSession *m_se
 		return true;
 	}
 
-	Unit *unit = m_session->GetPlayer()->GetMapMgr()->GetUnit( guid );
+	shared_ptr<Unit>unit = m_session->GetPlayer()->GetMapMgr()->GetUnit( guid );
 	if(!unit)
 	{
 		m_session->SystemMessage("Invalid selection imo.");
 		return true;
 	}
-	float DistSq = unit->GetDistanceSq( static_cast<Object*>(m_session->GetPlayer()) );
+	float DistSq = unit->GetDistanceSq( TO_OBJECT(m_session->GetPlayer()) );
 	m_session->SystemMessage( "GetDistanceSq  :   %u" , FL2UINT( DistSq ) );
 	LocationVector locvec( m_session->GetPlayer()->GetPositionX() , m_session->GetPlayer()->GetPositionY() , m_session->GetPlayer()->GetPositionZ() );
 	float DistReal = unit->CalcDistance( locvec );
 	m_session->SystemMessage( "CalcDistance   :   %u" , FL2UINT( DistReal ) );
-	float Dist2DSq = unit->GetDistance2dSq( static_cast<Object*>(m_session->GetPlayer()) );
+	float Dist2DSq = unit->GetDistance2dSq( TO_OBJECT(m_session->GetPlayer()) );
 	m_session->SystemMessage( "GetDistance2dSq:   %u" , FL2UINT( Dist2DSq ) );
 	return true;
 }
@@ -407,7 +407,7 @@ bool ChatHandler::HandleGmLogCommentCommand( const char *args , WorldSession *m_
 bool ChatHandler::HandleRatingsCommand( const char *args , WorldSession *m_session )
 {
 	m_session->SystemMessage("Ratings!!!");
-	Player* m_plyr = getSelectedChar(m_session, false);
+	PlayerPointer m_plyr = getSelectedChar(m_session, false);
 	for( uint32 i = 0; i < 24; i++ )
 	{
 		m_plyr->ModUnsigned32Value( PLAYER_FIELD_COMBAT_RATING_1 + i, i );

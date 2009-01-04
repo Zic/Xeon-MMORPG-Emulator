@@ -38,7 +38,7 @@ void WorldSession::HandleSetVisibleRankOpcode(WorldPacket& recv_data)
 	}
 }
 
-void HonorHandler::AddHonorPointsToPlayer(Player *pPlayer, uint32 uAmount)
+void HonorHandler::AddHonorPointsToPlayer(shared_ptr<Player>pPlayer, uint32 uAmount)
 {
 	pPlayer->m_honorPoints += uAmount;
 	pPlayer->m_honorToday += uAmount;
@@ -49,7 +49,7 @@ void HonorHandler::AddHonorPointsToPlayer(Player *pPlayer, uint32 uAmount)
 	RecalculateHonorFields(pPlayer);
 }
 
-int32 HonorHandler::CalculateHonorPointsForKill( Player *pPlayer, Unit* pVictim )
+int32 HonorHandler::CalculateHonorPointsForKill( shared_ptr<Player>pPlayer, UnitPointer pVictim )
 {
 	// this sucks.. ;p
 	if( pVictim == NULL )
@@ -89,28 +89,28 @@ int32 HonorHandler::CalculateHonorPointsForKill( Player *pPlayer, Unit* pVictim 
 	return honor_points;
 }
 
-void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
+void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pVictim )
 {
 	if( pVictim == NULL || pPlayer == NULL || !pVictim->IsPlayer() || !pPlayer->IsPlayer() )
 		return;
 
-	if( static_cast< Player* >( pVictim )->m_honorless )
+	if( TO_PLAYER( pVictim )->m_honorless )
 		return;
 
     if( pVictim->IsPlayer() )
 	{
 		if( pPlayer->m_bg )
 		{
-			if( static_cast< Player* >( pVictim )->m_bgTeam == pPlayer->m_bgTeam )
+			if( TO_PLAYER( pVictim )->m_bgTeam == pPlayer->m_bgTeam )
 				return;
 
 			// patch 2.4, players killed >50 times in battlegrounds won't be worth honor for the rest of that bg
-			if( static_cast<Player*>(pVictim)->m_bgScore.Deaths >= 50 )
+			if( TO_PLAYER(pVictim)->m_bgScore.Deaths >= 50 )
 				return;
 		}
 		else
 		{
-			if( pPlayer->GetTeam() == static_cast< Player* >( pVictim )->GetTeam() )
+			if( pPlayer->GetTeam() == TO_PLAYER( pVictim )->GetTeam() )
 				return;
 		}
 	}
@@ -123,13 +123,13 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 		if( pPlayer->m_bg )
 		{
 			// hackfix for battlegrounds (since the gorups there are disabled, we need to do this manually)
-			vector<Player*> toadd;
+			vector<shared_ptr<Player>> toadd;
 			uint32 t = pPlayer->m_bgTeam;
 			toadd.reserve(15);		// shouldnt have more than this
 			pPlayer->m_bg->Lock();
-			set<Player*> * s = &pPlayer->m_bg->m_players[t];
+			set<shared_ptr<Player>> * s = &pPlayer->m_bg->m_players[t];
 
-			for(set<Player*>::iterator itr = s->begin(); itr != s->end(); ++itr)
+			for(set<shared_ptr<Player>>::iterator itr = s->begin(); itr != s->end(); ++itr)
 			{
 				if((*itr) == pPlayer || (*itr)->isInRange(pPlayer,40.0f))
 					toadd.push_back(*itr);
@@ -138,7 +138,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 			if( toadd.size() > 0 )
 			{
 				uint32 pts = Points / (uint32)toadd.size();
-				for(vector<Player*>::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
+				for(vector<shared_ptr<Player>>::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
 				{
 					AddHonorPointsToPlayer(*vtr, pts);
 
@@ -154,7 +154,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 						// Send PVP credit
 						WorldPacket data(SMSG_PVP_CREDIT, 12);
 						uint32 pvppoints = pts * 10;
-						data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+						data << pvppoints << pVictim->GetGUID() << uint32(TO_PLAYER(pVictim)->GetPVPRank());
 						(*vtr)->GetSession()->SendPacket(&data);
 					}
 				}
@@ -165,7 +165,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 		else if(pPlayer->GetGroup())
         {
             Group *pGroup = pPlayer->GetGroup();
-            Player *gPlayer = NULL;
+            shared_ptr<Player>gPlayer = NULLPLR;
             int32 GroupPoints;
 			pGroup->Lock();
             GroupPoints = (Points / (pGroup->MemberCount() ? pGroup->MemberCount() : 1));
@@ -186,14 +186,14 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 						if(gPlayer->m_bg)
 							gPlayer->m_bg->HookOnHK(gPlayer);
 
-						sHookInterface.OnHonorableKill(gPlayer, ((Player*)pVictim));
+						sHookInterface.OnHonorableKill(gPlayer, TO_PLAYER(pVictim));
 		                AddHonorPointsToPlayer(gPlayer, GroupPoints);
                         if(pVictim)
 		                {
 			                // Send PVP credit
 			                WorldPacket data(SMSG_PVP_CREDIT, 12);
 			                uint32 pvppoints = GroupPoints * 10;
-			                data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+			                data << pvppoints << pVictim->GetGUID() << uint32(TO_PLAYER(pVictim)->GetPVPRank());
 			                gPlayer->GetSession()->SendPacket(&data);
 		                }
 						//patch by emsy
@@ -230,13 +230,13 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 			if(pPlayer->m_bg)
 				pPlayer->m_bg->HookOnHK(pPlayer);
 
-			sHookInterface.OnHonorableKill(pPlayer, ((Player*)pVictim));
+			sHookInterface.OnHonorableKill(pPlayer, TO_PLAYER(pVictim));
 		    if(pVictim)
 		    {
 			    // Send PVP credit
 			    WorldPacket data(SMSG_PVP_CREDIT, 12);
 			    uint32 pvppoints = Points * 10;
-			    data << pvppoints << pVictim->GetGUID() << uint32(static_cast< Player* >(pVictim)->GetPVPRank());
+			    data << pvppoints << pVictim->GetGUID() << uint32(TO_PLAYER(pVictim)->GetPVPRank());
 			    pPlayer->GetSession()->SendPacket(&data);
 		    }
 			//patch by emsy
@@ -251,7 +251,7 @@ void HonorHandler::OnPlayerKilledUnit( Player *pPlayer, Unit* pVictim )
 	}
 }
 
-void HonorHandler::RecalculateHonorFields(Player *pPlayer)
+void HonorHandler::RecalculateHonorFields(shared_ptr<Player>pPlayer)
 {
 	pPlayer->SetUInt32Value(PLAYER_FIELD_KILLS, uint16(pPlayer->m_killsToday) | ( pPlayer->m_killsYesterday << 16 ) );
 	pPlayer->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, pPlayer->m_honorToday);
@@ -264,7 +264,7 @@ void HonorHandler::RecalculateHonorFields(Player *pPlayer)
 bool ChatHandler::HandleAddKillCommand(const char* args, WorldSession* m_session)
 {
 	uint32 KillAmount = args ? atol(args) : 1;
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(plr == 0)
 		return true;
 
@@ -272,7 +272,7 @@ bool ChatHandler::HandleAddKillCommand(const char* args, WorldSession* m_session
 	GreenSystemMessage(plr->GetSession(), "You have had %u honor kills added to your character.", KillAmount);
 
 	for(uint32 i = 0; i < KillAmount; ++i)
-		HonorHandler::OnPlayerKilledUnit(plr, 0);
+		HonorHandler::OnPlayerKilledUnit(plr, NULLPLR);
 
 	return true;
 }
@@ -280,7 +280,7 @@ bool ChatHandler::HandleAddKillCommand(const char* args, WorldSession* m_session
 bool ChatHandler::HandleAddHonorCommand(const char* args, WorldSession* m_session)
 {
 	uint32 HonorAmount = args ? atol(args) : 1;
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(plr == 0)
 		return true;
 

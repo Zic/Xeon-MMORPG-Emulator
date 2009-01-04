@@ -86,7 +86,7 @@ bool ChatHandler::HandleRecallAddCommand(const char* args, WorldSession *m_sessi
 	}while (result->NextRow());
 	delete result;
 
-	Player* plr = m_session->GetPlayer();
+	PlayerPointer plr = m_session->GetPlayer();
 	std::stringstream ss;
 	
 	string rc_locname = string(args);
@@ -178,7 +178,7 @@ bool ChatHandler::HandleRecallPortPlayerCommand(const char* args, WorldSession *
 	if(sscanf(args, "%s %s", player, location) != 2)
 		return false;
 
-	Player * plr = objmgr.GetPlayer(player, false);
+	PlayerPointer plr = objmgr.GetPlayer(player, false);
 	if(!plr) return false;
 
 	QueryResult *result = WorldDatabase.Query( "SELECT * FROM recall ORDER BY name" );

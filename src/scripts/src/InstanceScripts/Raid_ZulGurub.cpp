@@ -26,7 +26,7 @@ public:
 	SP_AI_Spell spells[6];
 	bool m_spellcheck[6];
 
-    JeklikAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    JeklikAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 6;
@@ -79,7 +79,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		// bat transform
@@ -87,7 +87,7 @@ public:
 		_unit->PlaySoundToSet(8417);
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
@@ -95,7 +95,7 @@ public:
 		_unit->RemoveAura(TRANSFORM_BAT);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -116,7 +116,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -180,7 +180,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    VenoxisAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    VenoxisAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -223,12 +223,12 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
@@ -236,7 +236,7 @@ public:
 		_unit->RemoveAura(TRANSFORM_SNAKE);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -259,7 +259,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;

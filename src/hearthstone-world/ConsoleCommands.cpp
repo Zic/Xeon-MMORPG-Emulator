@@ -127,7 +127,7 @@ bool HandleKickCommand(BaseConsole * pConsole, int argc, const char * argv[])
 		return false;
 
 	char pAnnounce[1024];
-	Player * pPlayer;
+	PlayerPointer pPlayer;
 
 	pPlayer = objmgr.GetPlayer(argv[1]);
 	if( pPlayer == NULL )
@@ -238,7 +238,7 @@ bool HandlePlayerInfoCommand(BaseConsole * pConsole, int argc, const char * argv
 	if(argc < 2)
 		return false;
 
-	Player * plr = objmgr.GetPlayer(argv[1]);
+	PlayerPointer plr = objmgr.GetPlayer(argv[1]);
 	if( plr == NULL )
 	{
 		pConsole->Write("Player not found.\r\n");

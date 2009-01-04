@@ -22,11 +22,11 @@ struct PlayerInfo;
 
 class Arena : public CBattleground
 {
-	set<GameObject*> m_gates;
+	set<shared_ptr<GameObject>> m_gates;
 	uint32 m_arenateamtype;
 
 	uint32 m_pcWorldStates[2];
-	GameObject * m_buffs[2];
+	shared_ptr<GameObject> m_buffs[2];
 	ArenaTeam * m_teams[2];
 
 	uint32 m_playersCount[2];
@@ -35,22 +35,22 @@ class Arena : public CBattleground
 
 public:
 	bool rated_match;
-	Arena(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side);
+	Arena(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side);
 	virtual ~Arena();
 
-	bool HookHandleRepop(Player * plr);
-	void OnAddPlayer(Player * plr);
-	void OnRemovePlayer(Player * plr);
+	bool HookHandleRepop(PlayerPointer plr);
+	void OnAddPlayer(PlayerPointer plr);
+	void OnRemovePlayer(PlayerPointer plr);
 	void OnCreate();
-	void HookOnPlayerDeath(Player * plr);
-	void HookOnPlayerKill(Player * plr, Unit * pVictim);
-	void HookOnHK(Player * plr);
+	void HookOnPlayerDeath(PlayerPointer plr);
+	void HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim);
+	void HookOnHK(PlayerPointer plr);
 	void HookOnShadowSight();
 	void UpdatePlayerCounts();
 	LocationVector GetStartingCoords(uint32 Team);
 	virtual const char * GetName() { return "Arena"; }
 	void OnStart();
-	bool CanPlayerJoin(Player * plr)
+	bool CanPlayerJoin(PlayerPointer plr)
 	{
 		if(m_started)
 			return false;
@@ -58,13 +58,13 @@ public:
 			return CBattleground::CanPlayerJoin(plr);
 	}
 
-	bool CreateCorpse(Player * plr) { return false; }
+	bool CreateCorpse(PlayerPointer plr) { return false; }
 
 	/* dummy stuff */
-	void HookOnMount(Player * plr) {}
-	void HookFlagDrop(Player * plr, GameObject * obj) {}
-	void HookFlagStand(Player * plr, GameObject * obj) {}
-	void HookOnAreaTrigger(Player * plr, uint32 id);
+	void HookOnMount(PlayerPointer plr) {}
+	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj) {}
+	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj) {}
+	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 
 	void BuffRespawn(uint32 buffId);
 
@@ -86,7 +86,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return false; }
-	void HookGenerateLoot(Player *plr, Corpse *pCorpse) {}
+	void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse) {}
 
 	uint32 CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome);
 };

@@ -22,7 +22,7 @@
 /* Spell Defs                                                           */
 /************************************************************************/
 
-bool Charge(uint32 i, Spell* pSpell)
+bool Charge(uint32 i, SpellPointer pSpell)
 {
     uint32 rage_to_gen;
     switch(pSpell->m_spellInfo->Id)
@@ -86,7 +86,7 @@ bool Charge(uint32 i, Spell* pSpell)
     return true;
 }
 
-bool Bloodrage(uint32 i, Spell* pSpell)
+bool Bloodrage(uint32 i, SpellPointer pSpell)
 {
   // Put the player in Combat (gotta find when to put him ooc)
 

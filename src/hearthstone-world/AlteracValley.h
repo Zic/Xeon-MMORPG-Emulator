@@ -86,27 +86,27 @@ struct AVNodeTemplate
 class AlteracValley;
 class AVNode
 {
-	AlteracValley &m_bg;
+	shared_ptr<AlteracValley> m_bg;
 	AVNodeTemplate *m_template;
 
 	// boss, changes ownership upon death?
-	Creature *m_boss;
+	CreaturePointer m_boss;
 
 	// guards, need to be respawned when changes ownership
-	vector<Creature*> m_guards;
+	vector<CreaturePointer> m_guards;
 
 	// peon locations, used in mines (todo)
-	vector<Creature*> m_peonLocations;
+	vector<CreaturePointer> m_peonLocations;
 
 	// control point (capturable)
-	GameObject *m_flag;
+	shared_ptr<GameObject>m_flag;
 
 	// aura (light-shiny stuff)
-	GameObject *m_aura;
-	GameObject *m_glow;
+	shared_ptr<GameObject>m_aura;
+	shared_ptr<GameObject>m_glow;
 
 	// home NPc
-	Creature *m_homeNPC;
+	CreaturePointer m_homeNPC;
 
 	// destroyed flag (prevent all actions)
 	bool m_destroyed;
@@ -117,20 +117,20 @@ class AVNode
 	uint32 m_nodeId;
 
 	// spirit guides
-	Creature *m_spiritGuide;
+	CreaturePointer m_spiritGuide;
 
 public:
 	friend class AlteracValley;
 
 	// constructor
-	AVNode(AlteracValley &parent, AVNodeTemplate *tmpl, uint32 node_id);
+	AVNode(shared_ptr<AlteracValley> parent, AVNodeTemplate *tmpl, uint32 node_id);
 	~AVNode();
 
 	// initial spawn
 	void Spawn();
 
 	// assault
-	void Assault(Player *plr);
+	void Assault(shared_ptr<Player>plr);
 
 	// capture event
 	void Capture();
@@ -205,40 +205,40 @@ public:
 class AlteracValley : public CBattleground
 {
 protected:
-	list<GameObject*> m_gates;
+	list<shared_ptr<GameObject>> m_gates;
 	uint32 m_reinforcements[2];
 	bool m_nearingVictory[2];
 	AVNode *m_nodes[AV_NUM_CONTROL_POINTS];
 
 public:
-	AlteracValley(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t);
+	AlteracValley(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~AlteracValley();
 
 	void EventAssaultControlPoint(uint32 x);
 
-	void HookOnPlayerDeath(Player * plr);
-	void HookFlagDrop(Player * plr, GameObject * obj);
-	void HookFlagStand(Player * plr, GameObject * obj);
-	void HookOnMount(Player * plr);
-	void HookOnAreaTrigger(Player * plr, uint32 id);
-	bool HookHandleRepop(Player * plr);
-	void OnAddPlayer(Player * plr);
-	void OnRemovePlayer(Player * plr);
+	void HookOnPlayerDeath(PlayerPointer plr);
+	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookOnMount(PlayerPointer plr);
+	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
+	bool HookHandleRepop(PlayerPointer plr);
+	void OnAddPlayer(PlayerPointer plr);
+	void OnRemovePlayer(PlayerPointer plr);
 	void OnCreate();
-	void HookOnPlayerKill(Player * plr, Unit * pVictim);
-	void HookOnUnitKill(Player * plr, Unit * pVictim);
-	void HookOnHK(Player * plr);
+	void HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim);
+	void HookOnUnitKill(PlayerPointer plr, UnitPointer pVictim);
+	void HookOnHK(PlayerPointer plr);
 	void HookOnShadowSight();
 	LocationVector GetStartingCoords(uint32 Team);
-	void DropFlag(Player * plr);
+	void DropFlag(PlayerPointer plr);
 
-	static CBattleground * Create(MapMgr * m, uint32 i, uint32 l, uint32 t) { return new AlteracValley(m, i, l, t); }
+	static shared_ptr<CBattleground> Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<AlteracValley>(new AlteracValley(m, i, l, t)); }
 
 	const char * GetName() { return "Alterac Valley"; }
 	void OnStart();
 
 	void EventUpdateResources();
-	bool HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * pSpell);
+	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
 
 	/* AV Functions */
 	void AddReinforcements(uint32 teamId, uint32 amt);
@@ -247,7 +247,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(Player *plr, Corpse *pCorpse);
+	void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse);
 
 	/* herald */
 	void Herald(const char *format, ...);

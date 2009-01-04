@@ -188,10 +188,10 @@ public:
 	void RedSystemMessage(WorldSession *m_session, const char *message, ...);
 	void GreenSystemMessage(WorldSession *m_session, const char *message, ...);
 	void BlueSystemMessage(WorldSession *m_session, const char *message, ...);
-	void RedSystemMessageToPlr(Player* plr, const char *message, ...);
-	void GreenSystemMessageToPlr(Player* plr, const char *message, ...);
-	void BlueSystemMessageToPlr(Player* plr, const char *message, ...);
-	void SystemMessageToPlr(Player *plr, const char *message, ...);
+	void RedSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
+	void GreenSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
+	void BlueSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
+	void SystemMessageToPlr(shared_ptr<Player>plr, const char *message, ...);
 	   
 protected:
 
@@ -366,8 +366,8 @@ protected:
 	//BG
 	bool HandleSetBGScoreCommand(const char* args, WorldSession *m_session);
 
-	Player* getSelectedChar(WorldSession *m_session, bool showerror = true);
-	Creature * getSelectedCreature(WorldSession *m_session, bool showerror = true);
+	PlayerPointer getSelectedChar(WorldSession *m_session, bool showerror = true);
+	CreaturePointer getSelectedCreature(WorldSession *m_session, bool showerror = true);
 	bool HandleGOScale(const char* args, WorldSession *m_session);
 	bool HandleReviveStringcommand(const char* args, WorldSession* m_session);
 	bool HandleMountCommand(const char* args, WorldSession* m_session);

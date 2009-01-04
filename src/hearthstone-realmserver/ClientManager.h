@@ -39,7 +39,7 @@ public:
 	/* destroy rplayerinfo struct */
 	void DestroyRPlayerInfo(uint32 guid);
 
-	/* get rplayer */
+	/* get rshared_ptr<Player>/
 	HEARTHSTONE_INLINE RPlayerInfo * GetRPlayer(uint32 guid)
 	{
 		ClientMap::iterator itr = m_clients.find(guid);

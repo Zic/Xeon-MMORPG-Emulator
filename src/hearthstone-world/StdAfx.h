@@ -38,6 +38,7 @@
 //#include <fstream>
 
 #include "../hearthstone-shared/Common.h"
+#include "../hearthstone-shared/SharedPtr.h"
 #include "../hearthstone-shared/MersenneTwister.h"
 #include "../hearthstone-shared/WorldPacket.h"
 #include "../hearthstone-shared/Log.h"

@@ -24,8 +24,8 @@ public:
 	ChannelMgr();
 	~ChannelMgr();
 
-	Channel *GetCreateChannel(const char *name, Player * p, uint32 type_id);
-	Channel *GetChannel(const char *name, Player * p);
+	Channel *GetCreateChannel(const char *name, PlayerPointer p, uint32 type_id);
+	Channel *GetChannel(const char *name, PlayerPointer p);
 	Channel * GetChannel(const char * name, uint32 team);
 	Channel *GetChannel(uint32 id);
 #ifdef VOICE_CHAT

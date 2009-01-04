@@ -27,24 +27,24 @@
 class EyeOfTheStorm : public CBattleground
 {
 public:
-	EyeOfTheStorm(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t);
+	EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
 	~EyeOfTheStorm();
 
-	void HookOnPlayerDeath(Player * plr);
-	void HookFlagDrop(Player * plr, GameObject * obj);
-	void HookFlagStand(Player * plr, GameObject * obj);
-	void HookOnMount(Player * plr);
-	void HookOnAreaTrigger(Player * plr, uint32 id);
-	bool HookHandleRepop(Player * plr);
-	void OnAddPlayer(Player * plr);
-	void OnRemovePlayer(Player * plr);
+	void HookOnPlayerDeath(PlayerPointer plr);
+	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookOnMount(PlayerPointer plr);
+	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
+	bool HookHandleRepop(PlayerPointer plr);
+	void OnAddPlayer(PlayerPointer plr);
+	void OnRemovePlayer(PlayerPointer plr);
 	void OnCreate();
-	void HookOnPlayerKill(Player * plr, Unit * pVictim);
-	void HookOnHK(Player * plr);
+	void HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim);
+	void HookOnHK(PlayerPointer plr);
 	void HookOnShadowSight();
 	void SpawnBuff(uint32 x);
 	LocationVector GetStartingCoords(uint32 Team);
-	static CBattleground * Create(MapMgr * m, uint32 i, uint32 l, uint32 t) { return new EyeOfTheStorm(m, i, l, t); }
+	static shared_ptr<CBattleground> Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<EyeOfTheStorm>(new EyeOfTheStorm(m, i, l, t)); }
 
 	const char * GetName() { return "Eye of the Storm"; }
 	void OnStart();
@@ -57,14 +57,14 @@ public:
 
 	void RespawnCPFlag(uint32 i, uint32 id);		// 0 = Neutral, <0 = Leaning towards alliance, >0 Leaning towards horde
 
-	bool HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * pSpell);
-	void DropFlag(Player * plr);
+	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
+	void DropFlag(PlayerPointer plr);
 	void EventResetFlag();
-	void RepopPlayersOfTeam(int32 team, Creature * sh);
+	void RepopPlayersOfTeam(int32 team, CreaturePointer sh);
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(Player *plr, Corpse *pCorpse);
+	void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 
@@ -73,20 +73,20 @@ protected:
 	int32 m_CPStatus[EOTS_TOWER_COUNT];		
 	uint32 m_flagHolder;
 
-	GameObject * m_standFlag;
-	GameObject * m_dropFlag;
+	shared_ptr<GameObject> m_standFlag;
+	shared_ptr<GameObject> m_dropFlag;
 
-	GameObject * m_CPStatusGO[EOTS_TOWER_COUNT];
-	GameObject * m_CPBanner[EOTS_TOWER_COUNT];
-	GameObject * m_bubbles[2];
-	GameObject * m_EOTSbuffs[4];
+	shared_ptr<GameObject> m_CPStatusGO[EOTS_TOWER_COUNT];
+	shared_ptr<GameObject> m_CPBanner[EOTS_TOWER_COUNT];
+	shared_ptr<GameObject> m_bubbles[2];
+	shared_ptr<GameObject> m_EOTSbuffs[4];
 
 	typedef map<uint32, uint32> EOTSStoredPlayerMap;
 	EOTSStoredPlayerMap m_CPStored[EOTS_TOWER_COUNT];
 	int32 m_towerCount[2];
 
 	uint32 m_points[2];
-	Creature * m_spiritGuides[EOTS_TOWER_COUNT];
+	CreaturePointer m_spiritGuides[EOTS_TOWER_COUNT];
 };
 
 #endif		// _EOTS_H

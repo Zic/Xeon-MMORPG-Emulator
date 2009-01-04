@@ -79,7 +79,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 	if(_player->m_CurrentTransporter && _player->GetMapId() != _player->m_CurrentTransporter->GetMapId())
 	{
 		/* wow, our pc must really suck. */
-		Transporter * pTrans = _player->m_CurrentTransporter;
+		shared_ptr<Transporter> pTrans = _player->m_CurrentTransporter;
 		float c_tposx = pTrans->GetPositionX() + _player->m_TransporterX;
 		float c_tposy = pTrans->GetPositionY() + _player->m_TransporterY;
 		float c_tposz = pTrans->GetPositionZ() + _player->m_TransporterZ;
@@ -140,7 +140,7 @@ void WorldSession::HandleMoveTeleportAckOpcode( WorldPacket & recv_data )
 
 }
 
-void _HandleBreathing(MovementInfo &movement_info, Player * _player, WorldSession * pSession)
+void _HandleBreathing(MovementInfo &movement_info, PlayerPointer _player, WorldSession * pSession)
 {
 
 	// no water breathing is required
@@ -312,12 +312,12 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		return;
 
 	// spell cancel on movement, for now only fishing is added
-	Object * t_go = _player->m_SummonedObject;
+	ObjectPointer t_go = _player->m_SummonedObject;
 	uint32 mstime = mTimeStamp();
 	if (t_go)
 	{
 		if (t_go->GetEntry() == GO_FISHING_BOBBER)
-			((GameObject*)t_go)->EndFishing(GetPlayer(),true);
+			TO_GAMEOBJECT(t_go)->EndFishing(GetPlayer(),true);
 	}
 
 	/************************************************************************/
@@ -440,7 +440,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		/************************************************************************/
 		/* Distribute to all inrange players.                                   */
 		/************************************************************************/
-		for(set<Player*>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
+		for(set<shared_ptr<Player>>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 		{
 			*(uint32*)&movement_packet[pos+6] = uint32(move_time + (*itr)->GetSession()->m_moveDelayTime);
 #if defined(ENABLE_COMPRESSED_MOVEMENT) && defined(ENABLE_COMPRESSED_MOVEMENT_FOR_PLAYERS)
@@ -524,7 +524,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			if(_player->m_CurrentTransporter)
 			{
 				_player->m_CurrentTransporter->RemovePlayer(_player);
-				_player->m_CurrentTransporter = NULL;
+				_player->m_CurrentTransporter = NULLTRANSPORT;
 			}
 
 			_player->m_TransporterGUID = 0;
@@ -563,7 +563,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		/*float x = movement_info.x - movement_info.transX;
 		float y = movement_info.y - movement_info.transY;
 		float z = movement_info.z - movement_info.transZ;
-		Transporter* trans = _player->m_CurrentTransporter;
+		shared_ptr<Transporter> trans = _player->m_CurrentTransporter;
 		if(trans) sChatHandler.SystemMessageToPlr(_player, "Client t pos: %f %f\nServer t pos: %f %f   Diff: %f %f", x,y, trans->GetPositionX(), trans->GetPositionY(), trans->CalcDistance(x,y,z), trans->CalcDistance(movement_info.x, movement_info.y, movement_info.z));*/
 	}
 
@@ -727,7 +727,7 @@ void WorldSession::HandleWorldportOpcode(WorldPacket & recv_data)
 void WorldSession::HandleTeleportToUnitOpcode(WorldPacket & recv_data)
 {
 	uint8 unk;
-	Unit * target;
+	UnitPointer target;
 	recv_data >> unk;
 
 	if(!_player->IsInWorld())

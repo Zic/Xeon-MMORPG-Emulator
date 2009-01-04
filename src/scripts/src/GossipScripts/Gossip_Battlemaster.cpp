@@ -4,7 +4,7 @@
 class SCRIPT_DECL WarsongGulchBattlemaster : public GossipScript
 {
 public:
-    void GossipHello(Object* pObject, Player * plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  plr, bool AutoSend)
     {
         GossipMenu *Menu;
         uint32 Team = plr->GetTeam();
@@ -31,13 +31,13 @@ public:
             Menu->SendTo(plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player * plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
     {
         // Send battleground list.
 		if(pObject->GetTypeId()!=TYPEID_UNIT)
 			return;
 
-        plr->GetSession()->SendBattlegroundList(((Creature*)pObject), 2);  // WSG = 2
+        plr->GetSession()->SendBattlegroundList(TO_CREATURE(pObject), 2);  // WSG = 2
     }
 
     void Destroy()
@@ -49,7 +49,7 @@ public:
 class SCRIPT_DECL ArathiBasinBattlemaster : public GossipScript
 {
 public:
-    void GossipHello(Object* pObject, Player * plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  plr, bool AutoSend)
     {
         GossipMenu *Menu;
         uint32 Team = plr->GetTeam();
@@ -76,13 +76,13 @@ public:
             Menu->SendTo(plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player * plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
     {
 		// Send battleground list.
 		if(pObject->GetTypeId()!=TYPEID_UNIT)
 			return;
 
-		plr->GetSession()->SendBattlegroundList(((Creature*)pObject), 3);  // WSG = 2
+		plr->GetSession()->SendBattlegroundList(TO_CREATURE(pObject), 3);  // WSG = 2
     }
 
     void Destroy()
@@ -94,7 +94,7 @@ public:
 class SCRIPT_DECL AlteracValleyBattlemaster : public GossipScript
 {
 public:
-    void GossipHello(Object* pObject, Player * plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  plr, bool AutoSend)
 	{
         GossipMenu *Menu;
         uint32 Team = plr->GetTeam();
@@ -121,13 +121,13 @@ public:
             Menu->SendTo(plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player * plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
     {
 		// Send battleground list.
 		if(pObject->GetTypeId()!=TYPEID_UNIT)
 			return;
 
-		plr->GetSession()->SendBattlegroundList(((Creature*)pObject), 1);  // WSG = 2
+		plr->GetSession()->SendBattlegroundList(TO_CREATURE(pObject), 1);  // WSG = 2
     }
 
     void Destroy()
@@ -139,7 +139,7 @@ public:
 class SCRIPT_DECL EOTSBattlemaster : public GossipScript
 {
 public:
-	void GossipHello(Object* pObject, Player * plr, bool AutoSend)
+	void GossipHello(ObjectPointer pObject, PlayerPointer  plr, bool AutoSend)
 	{
 		GossipMenu *Menu;
 		uint32 Team = plr->GetTeam();
@@ -166,13 +166,13 @@ public:
 			Menu->SendTo(plr);
 	}
 
-	void GossipSelectOption(Object* pObject, Player * plr, uint32 Id, uint32 IntId, const char * Code)
+	void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
 	{
 		// Send battleground list.
 		if(pObject->GetTypeId()!=TYPEID_UNIT)
 			return;
 
-		plr->GetSession()->SendBattlegroundList(((Creature*)pObject), 7);  // WSG = 2
+		plr->GetSession()->SendBattlegroundList(TO_CREATURE(pObject), 7);  // WSG = 2
 	}
 
 	void Destroy()

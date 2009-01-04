@@ -127,18 +127,18 @@ const uint32 EOTSTowerIds[EOTS_TOWER_COUNT] = { EOTS_GO_BE_TOWER, EOTS_GO_FELREA
 #define EOTS_NETHERWING_FLAG_SPELL 34976
 //#define EOTS_CAPTURE_RATE 20
 
-EyeOfTheStorm::EyeOfTheStorm(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
+EyeOfTheStorm::EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
 	uint32 i;
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		m_EOTSbuffs[i] = NULL;
+		m_EOTSbuffs[i] = NULLGOB;
 		m_CPStatus[i] = 50;
-		m_CPBanner[i] = NULL;
-		m_CPStatusGO[i] = NULL;
+		m_CPBanner[i] = NULLGOB;
+		m_CPStatusGO[i] = NULLGOB;
 
-		m_spiritGuides[i] = NULL;
+		m_spiritGuides[i] = NULLCREATURE;
 	}
 
 	m_flagHolder = 0;
@@ -155,21 +155,24 @@ EyeOfTheStorm::~EyeOfTheStorm()
 	{
 		if(m_EOTSbuffs[i] != NULL)
 		{
-			m_EOTSbuffs[i]->m_battleground = NULL;
+			m_EOTSbuffs[i]->m_battleground = NULLBATTLEGROUND;
 			if( !m_EOTSbuffs[i]->IsInWorld() )
-			delete m_EOTSbuffs[i];
+			{
+				m_EOTSbuffs[i]->Destructor();
+				m_EOTSbuffs[i] = NULLGOB;
+			}
 		}
 	}
 }
 
-void EyeOfTheStorm::RepopPlayersOfTeam(int32 team, Creature * sh)
+void EyeOfTheStorm::RepopPlayersOfTeam(int32 team, CreaturePointer sh)
 {
-	map<Creature*,set<uint32> >::iterator itr = m_resurrectMap.find(sh);
+	map<CreaturePointer,set<uint32> >::iterator itr = m_resurrectMap.find(sh);
 	if( itr != m_resurrectMap.end() )
 	{
 		for( set<uint32>::iterator it2 = itr->second.begin(); it2 != itr->second.end(); ++it2 )
 		{
-			Player* r_plr = m_mapMgr->GetPlayer( *it2 );
+			PlayerPointer r_plr = m_mapMgr->GetPlayer( *it2 );
 			if( r_plr != NULL && (team < 0 || (int32)r_plr->GetTeam() == team) && r_plr->isDead() )
 			{
 				HookHandleRepop( r_plr );
@@ -179,7 +182,7 @@ void EyeOfTheStorm::RepopPlayersOfTeam(int32 team, Creature * sh)
 	}
 }
 
-bool EyeOfTheStorm::HookHandleRepop(Player * plr)
+bool EyeOfTheStorm::HookHandleRepop(PlayerPointer plr)
 {
 	uint32 i;
 	uint32 t = plr->GetTeam();
@@ -207,7 +210,7 @@ bool EyeOfTheStorm::HookHandleRepop(Player * plr)
 	return true;
 }
 
-void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
+void EyeOfTheStorm::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 {
 	int32 tid = -1;
 	int32 bonusid = -1;
@@ -248,7 +251,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
 			SpellEntry * sp = dbcSpell.LookupEntryForced(spellid);
 			if(sp)
 			{
-				Spell * pSpell = new Spell(plr, sp, true, NULL);
+				shared_ptr<Spell>pSpell = shared_ptr<Spell>(new Spell(plr, sp, true, NULLAURA));
 				SpellCastTargets targets(plr->GetGUID());
 				pSpell->prepare(&targets);
 			}
@@ -318,7 +321,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(Player * plr, uint32 id)
 	plr->RemoveAura( EOTS_NETHERWING_FLAG_SPELL );
 }
 
-void EyeOfTheStorm::HookOnPlayerDeath(Player * plr)
+void EyeOfTheStorm::HookOnPlayerDeath(PlayerPointer plr)
 {
 		
 	if(plr->m_bgHasFlag)
@@ -329,7 +332,7 @@ void EyeOfTheStorm::HookOnPlayerDeath(Player * plr)
 	UpdatePvPData();
 }
 
-void EyeOfTheStorm::HookFlagDrop(Player * plr, GameObject * obj)
+void EyeOfTheStorm::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
 {
 	if( !m_dropFlag->IsInWorld() )
 		return;
@@ -351,12 +354,12 @@ void EyeOfTheStorm::HookFlagDrop(Player * plr, GameObject * obj)
 	event_RemoveEvents( EVENT_EOTS_RESET_FLAG );
 }
 
-void EyeOfTheStorm::HookFlagStand(Player * plr, GameObject * obj)
+void EyeOfTheStorm::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
 {
 
 }
 
-bool EyeOfTheStorm::HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * pSpell)
+bool EyeOfTheStorm::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
 {
 	if( m_flagHolder != 0 )
 		return false;
@@ -372,7 +375,7 @@ bool EyeOfTheStorm::HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell *
 	return true;
 }
 
-void EyeOfTheStorm::HookOnMount(Player * plr)
+void EyeOfTheStorm::HookOnMount(PlayerPointer plr)
 {
 	if( m_flagHolder == plr->GetLowGUID() )
 	{
@@ -381,13 +384,13 @@ void EyeOfTheStorm::HookOnMount(Player * plr)
 	}
 }
 
-void EyeOfTheStorm::OnAddPlayer(Player * plr)
+void EyeOfTheStorm::OnAddPlayer(PlayerPointer plr)
 {
 	if(!m_started)
 		plr->CastSpell(plr, BG_PREPARATION, true);
 }
 
-void EyeOfTheStorm::OnRemovePlayer(Player * plr)
+void EyeOfTheStorm::OnRemovePlayer(PlayerPointer plr)
 {
 	if( m_flagHolder == plr->GetLowGUID() )
 	{
@@ -399,7 +402,7 @@ void EyeOfTheStorm::OnRemovePlayer(Player * plr)
 		plr->RemoveAura(BG_PREPARATION);
 }
 
-void EyeOfTheStorm::DropFlag(Player * plr)
+void EyeOfTheStorm::DropFlag(PlayerPointer plr)
 {
 	if( m_flagHolder != plr->GetLowGUID() )
 		return;
@@ -420,7 +423,7 @@ void EyeOfTheStorm::DropFlag(Player * plr)
 	m_dropFlag->PushToWorld( m_mapMgr );
 	m_flagHolder = 0;
 
-	sEventMgr.AddEvent( this, &EyeOfTheStorm::EventResetFlag, EVENT_EOTS_RESET_FLAG, 60000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+	sEventMgr.AddEvent( TO_EYEOFTHESTORM(shared_from_this()), &EyeOfTheStorm::EventResetFlag, EVENT_EOTS_RESET_FLAG, 60000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 }
 
 void EyeOfTheStorm::EventResetFlag()
@@ -603,13 +606,13 @@ void EyeOfTheStorm::UpdateCPs()
 	//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 	//   doing lookups of objects that have already been updated
 
-	set<Player*>::iterator itr;
-	set<Player*>::iterator itrend;
+	set<shared_ptr<Player>>::iterator itr;
+	set<shared_ptr<Player>>::iterator itrend;
 	map<uint32,uint32>::iterator it2, it3;
 	uint32 timeptr = (uint32)UNIXTIME;
 	bool in_range;
 	bool is_valid;
-	Player *plr;
+	shared_ptr<Player>plr;
 	uint32 i;
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
@@ -671,7 +674,7 @@ void EyeOfTheStorm::UpdateCPs()
 					RepopPlayersOfTeam( 0, m_spiritGuides[i] );
 					m_spiritGuides[i]->Despawn( 0, 0 );
 					RemoveSpiritGuide( m_spiritGuides[i] );
-					m_spiritGuides[i] = NULL;
+					m_spiritGuides[i] = NULLCREATURE;
 				}
 
 				m_spiritGuides[i] = SpawnSpiritGuide( EOTSGraveyardLocations[i][0], EOTSGraveyardLocations[i][1], EOTSGraveyardLocations[i][2], 0, 1 );
@@ -696,7 +699,7 @@ void EyeOfTheStorm::UpdateCPs()
 					RepopPlayersOfTeam( 1, m_spiritGuides[i] );
 					m_spiritGuides[i]->Despawn( 0, 0 );
 					RemoveSpiritGuide( m_spiritGuides[i] );
-					m_spiritGuides[i] = NULL;
+					m_spiritGuides[i] = NULLCREATURE;
 				}
 
 				m_spiritGuides[i] = SpawnSpiritGuide( EOTSGraveyardLocations[i][0], EOTSGraveyardLocations[i][1], EOTSGraveyardLocations[i][2], 0, 0 );
@@ -745,7 +748,7 @@ void EyeOfTheStorm::UpdateCPs()
 						RepopPlayersOfTeam( -1, m_spiritGuides[i] );
 						m_spiritGuides[i]->Despawn( 0, 0 );
 						RemoveSpiritGuide( m_spiritGuides[i] );
-						m_spiritGuides[i] = NULL;
+						m_spiritGuides[i] = NULLCREATURE;
 					}
 
 					// set some world states
@@ -859,9 +862,9 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	{
 		m_resourceRewards[team] += 330;
 
-		for(set<Player*>::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
+		for(set<shared_ptr<Player>>::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
 		{
-			Player * plr = (*itx);
+			PlayerPointer plr = (*itx);
 			if(!plr) continue;
 
 			HonorHandler::AddHonorPointsToPlayer( plr, 240 / extraHonorDiv );
@@ -877,15 +880,15 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 		m_losingteam = (team) ? 0 : 1;
 		m_nextPvPUpdateTime = 0;
 
-		sEventMgr.RemoveEvents(this);
-		sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+		sEventMgr.RemoveEvents(shared_from_this());
+		sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 		/* add the marks of honor to all players */
 		m_mainLock.Acquire();
 
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				(*itr)->Root();
 
@@ -903,10 +906,10 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				{
 					HonorHandler::AddHonorPointsToPlayer( (*itr), 240 / extraHonorDiv );
 					uint32 diff = abs((int32)(m_points[i] - m_points[i ? 0 : 1]));
-					(*itr)->GetAchievementInterface()->HandleAchievementCriteriaWinBattleground( m_mapMgr->GetMapId(), diff, ((uint32)UNIXTIME - m_startTime) / 1000, this);
+					(*itr)->GetAchievementInterface()->HandleAchievementCriteriaWinBattleground( m_mapMgr->GetMapId(), diff, ((uint32)UNIXTIME - m_startTime) / 1000, TO_CBATTLEGROUND(shared_from_this()));
 				}
 
-				Item *pReward;
+				shared_ptr<Item>pReward;
 				SlotResult res;
 				if( ( pReward = (*itr)->GetItemInterface()->FindItemLessMax(EOTS_MARK_ID, item_count, false) ) == NULL )
 				{
@@ -923,7 +926,10 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 					if( !(*itr)->GetItemInterface()->SafeAddItem(pReward, res.ContainerSlot, res.Slot) )
 					{
 						if( !(*itr)->GetItemInterface()->AddItemToFreeSlot(pReward) )
-							delete pReward;
+						{
+							pReward->Destructor();
+							pReward = NULLITEM;
+						}
 					}
 					(*itr)->GetSession()->SendItemPushResult(pReward,true,false,true,false,res.ContainerSlot,res.Slot, item_count);
 				}
@@ -948,7 +954,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	return false;
 }
 
-void EyeOfTheStorm::HookOnPlayerKill(Player * plr, Unit * pVictim)
+void EyeOfTheStorm::HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim)
 {
 	if ( pVictim->IsPlayer() )
 	{
@@ -957,7 +963,7 @@ void EyeOfTheStorm::HookOnPlayerKill(Player * plr, Unit * pVictim)
 	}
 }
 
-void EyeOfTheStorm::HookOnHK(Player * plr)
+void EyeOfTheStorm::HookOnHK(PlayerPointer plr)
 {
 	plr->m_bgScore.HonorableKills++;
 	UpdatePvPData();
@@ -1009,7 +1015,7 @@ void EyeOfTheStorm::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
@@ -1018,8 +1024,8 @@ void EyeOfTheStorm::OnStart()
 	uint32 i;
 
 	/* start the events */
-	sEventMgr.AddEvent(this, &EyeOfTheStorm::GeneratePoints, EVENT_EOTS_GIVE_POINTS, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-	sEventMgr.AddEvent(this, &EyeOfTheStorm::UpdateCPs, EVENT_EOTS_CHECK_CAPTURE_POINT_STATUS, 5000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.AddEvent(TO_EYEOFTHESTORM(shared_from_this()), &EyeOfTheStorm::GeneratePoints, EVENT_EOTS_GIVE_POINTS, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.AddEvent(TO_EYEOFTHESTORM(shared_from_this()), &EyeOfTheStorm::UpdateCPs, EVENT_EOTS_CHECK_CAPTURE_POINT_STATUS, 5000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 
 	/* spirit guides */
 	AddSpiritGuide(SpawnSpiritGuide( EOTSStartLocations[0][0], EOTSStartLocations[0][1], EOTSStartLocations[0][2], 0, 0 ));
@@ -1029,15 +1035,15 @@ void EyeOfTheStorm::OnStart()
 	for( i = 0; i < 2; ++i )
 	{
 		m_bubbles[i]->RemoveFromWorld(false);
-		delete m_bubbles[i];
-		m_bubbles[i] = NULL;
+		m_bubbles[i]->Destructor();
+		m_bubbles[i] = NULLGOB;
 	}
 
 	m_started = true;
 	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
 }
 
-void EyeOfTheStorm::HookGenerateLoot(Player *plr, Corpse *pCorpse)
+void EyeOfTheStorm::HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

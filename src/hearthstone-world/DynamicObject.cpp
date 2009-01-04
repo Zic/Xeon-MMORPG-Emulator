@@ -33,19 +33,28 @@ DynamicObject::DynamicObject(uint32 high, uint32 low)
 	m_floatValues[OBJECT_FIELD_SCALE_X] = 1;
 
 
-	m_parentSpell=NULL;
+	m_parentSpell=NULLSPELL;
 	m_aliveDuration = 0;
-	u_caster = 0;
+	u_caster = NULLUNIT;
 	m_spellProto = 0;
-	p_caster = 0;
+	p_caster = NULLPLR;
 }
 
 DynamicObject::~DynamicObject()
 {
+}
+
+void DynamicObject::Init()
+{
+	Object::Init();
+}
+
+void DynamicObject::Destructor()
+{
 	// remove aura from all targets
 	DynamicObjectList::iterator jtr  = targets.begin();
 	DynamicObjectList::iterator jend = targets.end();
-	Unit * target;
+	UnitPointer target;
 
 	while(jtr != jend)
 	{
@@ -54,11 +63,13 @@ DynamicObject::~DynamicObject()
 		target->RemoveAura(m_spellProto->Id);
 	}
 
-	if(u_caster->dynObj == this)
-		u_caster->dynObj = 0;
+	if(u_caster->dynObj == shared_from_this() )
+		u_caster->dynObj = NULLDYN;
+
+	Object::Destructor();
 }
 
-void DynamicObject::Create(Unit * caster, Spell * pSpell, float x, float y, float z, uint32 duration, float radius)
+void DynamicObject::Create(UnitPointer caster, shared_ptr<Spell>pSpell, float x, float y, float z, uint32 duration, float radius)
 {
 	Object::_Create(caster->GetMapId(),x, y, z, 0);
 	if(pSpell->g_caster)
@@ -89,7 +100,7 @@ void DynamicObject::Create(Unit * caster, Spell * pSpell, float x, float y, floa
 		caster->dynObj->m_aliveDuration = 1;
 		caster->dynObj->UpdateTargets();
 	}
-	caster->dynObj = this;
+	caster->dynObj = TO_DYNAMICOBJECT(shared_from_this());
 	if(pSpell->g_caster)
 	{
 	   PushToWorld(pSpell->g_caster->GetMapMgr());
@@ -97,18 +108,18 @@ void DynamicObject::Create(Unit * caster, Spell * pSpell, float x, float y, floa
 		PushToWorld(caster->GetMapMgr());
 	
   
-	sEventMgr.AddEvent(this, &DynamicObject::UpdateTargets, EVENT_DYNAMICOBJECT_UPDATE, 100, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.AddEvent(TO_DYNAMICOBJECT(shared_from_this()), &DynamicObject::UpdateTargets, EVENT_DYNAMICOBJECT_UPDATE, 100, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
-void DynamicObject::AddInRangeObject( Object* pObj )
+void DynamicObject::AddInRangeObject( ObjectPointer pObj )
 {
 	Object::AddInRangeObject( pObj );
 }
 
-void DynamicObject::OnRemoveInRangeObject( Object* pObj )
+void DynamicObject::OnRemoveInRangeObject( ObjectPointer pObj )
 {
 	if( pObj->IsUnit() )
-		targets.erase( static_cast< Unit* >( pObj ) );
+		targets.erase( TO_UNIT(pObj) );
 
 	Object::OnRemoveInRangeObject( pObj );
 }
@@ -122,10 +133,10 @@ void DynamicObject::UpdateTargets()
 	{
 //		FactionRangeList::iterator itr  = m_inRangeOppFactions.begin();
 //		FactionRangeList::iterator iend = m_inRangeOppFactions.end();
-		std::set<Object*>::iterator itr = GetInRangeSetBegin(),itr2;
-		std::set<Object*>::iterator iend = GetInRangeSetEnd();
-		Unit * target;
-		Aura * pAura;
+		std::set<shared_ptr<Object>>::iterator itr = GetInRangeSetBegin(),itr2;
+		std::set<shared_ptr<Object>>::iterator iend = GetInRangeSetEnd();
+		UnitPointer target;
+		shared_ptr<Aura>pAura;
 		float radius = m_floatValues[DYNAMICOBJECT_RADIUS]*m_floatValues[DYNAMICOBJECT_RADIUS];
 
 		while(itr != iend)
@@ -136,10 +147,10 @@ void DynamicObject::UpdateTargets()
 			itr2 = itr;
 			++itr;
 
-			if( !( (*itr2)->IsUnit() ) || ! static_cast< Unit* >( *itr2 )->isAlive() || ((*itr2)->GetTypeId()==TYPEID_UNIT && ((Creature*)*itr2)->IsTotem() ) )
+			if( !( (*itr2)->IsUnit() ) || ! TO_UNIT( *itr2 )->isAlive() || ((*itr2)->GetTypeId()==TYPEID_UNIT && TO_CREATURE(*itr2)->IsTotem() ) )
 				continue;
 
-			target = static_cast< Unit* >( *itr2 );
+			target = TO_UNIT( *itr2 );
 
 			if( !isAttackable( p_caster, target, !(m_spellProto->c_is_flags & SPELL_FLAG_IS_TARGETINGSTEALTHED) ) )
 				continue;
@@ -150,7 +161,7 @@ void DynamicObject::UpdateTargets()
 
 			if(GetDistanceSq(target) <= radius)
 			{
-				pAura = new Aura(m_spellProto, m_aliveDuration, u_caster, target);
+				pAura = shared_ptr<Aura>(new Aura(m_spellProto, m_aliveDuration, u_caster, target));
 				for(uint32 i = 0; i < 3; ++i)
 				{
 					if(m_spellProto->Effect[i] == 27)
@@ -159,7 +170,7 @@ void DynamicObject::UpdateTargets()
 							m_spellProto->EffectBasePoints[i]+1, m_spellProto->EffectMiscValue[i], i);
 					}
 				}
-				target->AddAura(pAura, NULL);
+				target->AddAura(pAura, NULLAURA);
 				if(p_caster)
 				{
 					p_caster->HandleProc(PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL,target, m_spellProto);
@@ -200,7 +211,7 @@ void DynamicObject::UpdateTargets()
 	{
 		DynamicObjectList::iterator jtr  = targets.begin();
 		DynamicObjectList::iterator jend = targets.end();
-		Unit * target;
+		UnitPointer target;
 
 		while(jtr != jend)
 		{
@@ -217,6 +228,6 @@ void DynamicObject::Remove()
 {
 	if(IsInWorld())
 		RemoveFromWorld(true);
-	delete this;
+	Destructor();
 }
 

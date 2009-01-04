@@ -76,7 +76,7 @@ bool ChatHandler::HandleRenameAllCharacter(const char * args, WorldSession * m_s
 			if( !VerifyName(pName, szLen) )
 			{
 				printf("renaming character %s, %u\n", pName,uGuid);
-                Player * pPlayer = objmgr.GetPlayer(uGuid);
+                PlayerPointer pPlayer = objmgr.GetPlayer(uGuid);
 				if( pPlayer != NULL )
 				{
 					pPlayer->rename_pending = true;
@@ -349,13 +349,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 	//checking number of chars is useless since client will not allow to create more than 10 chars
 	//as the 'create' button will not appear (unless we want to decrease maximum number of characters)
 
-	Player * pNewChar = objmgr.CreatePlayer();
+	PlayerPointer pNewChar = objmgr.CreatePlayer();
 	pNewChar->SetSession(this);
 	if(!pNewChar->Create( recv_data ))
 	{
 		// failed.
 		pNewChar->ok_to_remove = true;
-		delete pNewChar;
+		pNewChar->Destructor();
+		pNewChar = NULLPLR;
 		return;
 	}
 
@@ -366,7 +367,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 		if( ((pNewChar->GetTeam()== 0) && (_side == 1)) || ((pNewChar->GetTeam()== 1) && (_side == 0)) )
 		{
 			pNewChar->ok_to_remove = true;
-			delete pNewChar;
+			pNewChar->Destructor();
+			pNewChar = NULLPLR; // die!
 			WorldPacket data(1);
 			data.SetOpcode(SMSG_CHAR_CREATE);
 			data << (uint8)ALL_CHARS_ON_PVP_REALM_MUST_AT_SAME_SIDE+1;
@@ -405,7 +407,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 	objmgr.AddPlayerInfo(pn);
 
 	pNewChar->ok_to_remove = true;
-	delete  pNewChar;
+	pNewChar->Destructor();
+	pNewChar = NULLPLR;
 
 	// CHAR_CREATE_SUCCESS
 	OutPacket(SMSG_CHAR_CREATE, 1, "\x2F");
@@ -579,7 +582,7 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 
 		CharacterDatabase.WaitExecute("DELETE FROM characters WHERE guid = %u", (uint32)guid);
 
-		Corpse * c=objmgr.GetCorpseByOwner((uint32)guid);
+		shared_ptr<Corpse> c=objmgr.GetCorpseByOwner((uint32)guid);
 		if(c)
 			CharacterDatabase.Execute("DELETE FROM corpses WHERE guid = %u", c->GetLowGUID());
 
@@ -690,8 +693,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 		return;
 	}
 
-	Player* plr = new Player((uint32)playerGuid);
-	ASSERT(plr);
+	PlayerPointer plr = shared_ptr<Player>(new Player((uint32)playerGuid));
+	plr->Init();
 	plr->SetSession(this);
 	m_bIsWLevelSet = false;
 	
@@ -700,7 +703,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	plr->LoadFromDB((uint32)playerGuid);
 }
 
-void WorldSession::FullLogin(Player * plr)
+void WorldSession::FullLogin(PlayerPointer plr)
 {
 	DEBUG_LOG("WorldSession", "Fully loading player %u", plr->GetLowGUID());
 	SetPlayer(plr); 
@@ -826,7 +829,7 @@ void WorldSession::FullLogin(Player * plr)
 	// Find our transporter and add us if we're on one.
 	if(plr->m_TransporterGUID != 0)
 	{
-		Transporter * pTrans = objmgr.GetTransporter(GUID_LOPART(plr->m_TransporterGUID));
+		shared_ptr<Transporter> pTrans = objmgr.GetTransporter(GUID_LOPART(plr->m_TransporterGUID));
 		if(pTrans)
 		{
 			if(plr->isDead())
@@ -951,15 +954,15 @@ void WorldSession::FullLogin(Player * plr)
 	//death system checkout
 	if(_player->GetUInt32Value(UNIT_FIELD_HEALTH) == 0 || _player->isDead() || _player->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_DEATH_WORLD_ENABLE))
 	{
-		Corpse * corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
+		shared_ptr<Corpse> corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
 		if( corpse != NULL )
 		{
-			MapMgr *myMgr = sInstanceMgr.GetInstance(_player);
+			shared_ptr<MapMgr>myMgr = sInstanceMgr.GetInstance(_player);
 			if( myMgr == NULL || (myMgr->GetMapInfo()->type != INSTANCE_NULL && myMgr->GetMapInfo()->type != INSTANCE_PVP)
 				|| (myMgr->GetMapId() == corpse->GetMapId()) )	
 			{
 				// instance death, screw it, revive them
-				_player->ResurrectPlayer(NULL);
+				_player->ResurrectPlayer(NULLPLR);
 				_player->SpawnCorpseBones();
 				//_player->KillPlayer();
 				//_player->RepopRequestedPlayer();
@@ -984,7 +987,7 @@ void WorldSession::FullLogin(Player * plr)
 			else
 			{
 				// just revive them
-				_player->ResurrectPlayer(NULL);
+				_player->ResurrectPlayer(NULLPLR);
 			}
 		}
 	}
@@ -1044,7 +1047,7 @@ bool ChatHandler::HandleRenameCommand(const char * args, WorldSession * m_sessio
 	pi->name = strdup(new_name.c_str());
 
 	// look in world for him
-	Player * plr = objmgr.GetPlayer(pi->guid);
+	PlayerPointer plr = objmgr.GetPlayer(pi->guid);
 	if(plr != 0)
 	{
 		plr->SetName(new_name);
@@ -1069,7 +1072,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	data << uint32(1) // not enough money
 	data << uint32(2) // you must be sitting on the barber's chair
 	
-	GameObject * barberChair = _player->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), BARBERCHAIR_ID);
+	shared_ptr<GameObject> barberChair = _player->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), BARBERCHAIR_ID);
 	if(!barberChair || _player->GetStandState() != STANDSTATE_SIT_MEDIUM_CHAIR)
 	{
 		data << uint32(2);

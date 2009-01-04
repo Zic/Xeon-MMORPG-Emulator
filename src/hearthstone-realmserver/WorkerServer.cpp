@@ -135,7 +135,7 @@ void WServer::HandleTeleportRequest(WorldPacket & pck)
 			}
 			else
 			{
-				/* notify the old server to pack the player info together to send to the new server, and delete the player */
+				/* notify the old server to pack the player info together to send to the new server, and delete the shared_ptr<Player>/
 				data << sessionid << uint8(0) << mapid << instanceid << vec << vec.o;
 				SendPacket(&data);
 			}

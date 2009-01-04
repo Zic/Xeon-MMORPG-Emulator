@@ -599,14 +599,6 @@
 			Name="Util"
 			>
 			<File
-				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\hearthstone-shared\ByteBuffer.h"
 				>
 			</File>
@@ -628,6 +620,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hearthstone-shared\Errors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.h"
 				>
 			</File>
 			<File
@@ -708,10 +708,6 @@
 			</Filter>
 		</Filter>
 		<File
-			RelativePath="..\..\src\hearthstone-shared\hearthstoneConfig.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\hearthstone-shared\AuthCodes.h"
 			>
 		</File>
@@ -729,6 +725,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-shared\FastQueue.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-shared\hearthstoneConfig.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-shared\SharedPtr.h"
 			>
 		</File>
 		<File

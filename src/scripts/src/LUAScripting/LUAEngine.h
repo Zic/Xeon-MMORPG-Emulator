@@ -106,10 +106,10 @@ public:
 	void RegisterCoreFunctions();
 	HEARTHSTONE_INLINE Mutex& GetLock() { return m_Lock; }
 
-	void OnUnitEvent(Unit * pUnit, const char * FunctionName, uint32 EventType, Unit * pMiscUnit, uint32 Misc);
-	void OnQuestEvent(Player * QuestOwner, const char * FunctionName, uint32 QuestID, uint32 EventType, Object * QuestStarter);
-	void OnGameObjectEvent(GameObject * pGameObject, const char * FunctionName, uint32 EventType, Unit * pMiscUnit);
-	void CallFunction(Unit * pUnit, const char * FuncName);
+	void OnUnitEvent(UnitPointer  pUnit, const char * FunctionName, uint32 EventType, UnitPointer  pMiscUnit, uint32 Misc);
+	void OnQuestEvent(PlayerPointer  QuestOwner, const char * FunctionName, uint32 QuestID, uint32 EventType, ObjectPointer  QuestStarter);
+	void OnGameObjectEvent(GameObjectPointer  pGameObject, const char * FunctionName, uint32 EventType, UnitPointer  pMiscUnit);
+	void CallFunction(UnitPointer  pUnit, const char * FuncName);
 };
 
 struct LuaUnitBinding { const char * Functions[CREATURE_EVENT_COUNT]; };

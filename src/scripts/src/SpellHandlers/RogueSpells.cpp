@@ -18,11 +18,11 @@
 #include "StdAfx.h"
 #include "Setup.h"
 
-bool Envenom(uint32 i, Spell * pSpell)
+bool Envenom(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
-	Player * pPlayer = pSpell->p_caster;
+	PlayerPointer  pPlayer = pSpell->p_caster;
 
 	// This is approximate, meh.
 	uint32 points = pSpell->damage / 180;

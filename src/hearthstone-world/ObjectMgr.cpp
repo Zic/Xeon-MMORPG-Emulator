@@ -262,7 +262,7 @@ void ObjectMgr::LoadAchievements()
 // Groups
 //
 
-Group * ObjectMgr::GetGroupByLeader(Player* pPlayer)
+Group * ObjectMgr::GetGroupByLeader(PlayerPointer pPlayer)
 {
 	GroupMap::iterator itr;
 	Group * ret=NULL;
@@ -621,25 +621,27 @@ void ObjectMgr::LoadGuilds()
 	Log.Notice("ObjectMgr", "%u guilds loaded.", mGuild.size());
 }
 
-Corpse* ObjectMgr::LoadCorpse(uint32 guid)
+shared_ptr<Corpse> ObjectMgr::LoadCorpse(uint32 guid)
 {
-	Corpse *pCorpse;
+	shared_ptr<Corpse>pCorpse;
 	QueryResult *result = CharacterDatabase.Query("SELECT * FROM Corpses WHERE guid =%u ", guid );
 
 	if( !result )
-		return NULL;
+		return NULLCORPSE;
 	
 	do
 	{
 		Field *fields = result->Fetch();
-		pCorpse = new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32());
+		pCorpse = shared_ptr<Corpse>(new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
+		pCorpse->Init();
 		pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 		pCorpse->SetZoneId(fields[5].GetUInt32());
 		pCorpse->SetMapId(fields[6].GetUInt32());
 		pCorpse->LoadValues( fields[7].GetString());
 		if(pCorpse->GetUInt32Value(CORPSE_FIELD_DISPLAY_ID) == 0)
 		{
-			delete pCorpse;
+			pCorpse->Destructor();
+			pCorpse = NULLCORPSE;
 			continue;
 		}
 
@@ -658,10 +660,10 @@ Corpse* ObjectMgr::LoadCorpse(uint32 guid)
 // Live corpse retreival.
 // comments: I use the same tricky method to start from the last corpse instead of the first
 //------------------------------------------------------
-Corpse *ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
+shared_ptr<Corpse> ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
 {
 	CorpseMap::const_iterator itr;
-	Corpse *rv = NULL;
+	shared_ptr<Corpse> rv = NULLCORPSE;
 	_corpseslock.Acquire();
 	for (itr = m_corpses.begin();itr != m_corpses.end(); ++itr)
 	{
@@ -677,10 +679,10 @@ Corpse *ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
 	return rv;
 }
 
-void ObjectMgr::DelinkPlayerCorpses(Player *pOwner)
+void ObjectMgr::DelinkPlayerCorpses(PlayerPointer pOwner)
 {
 	//dupe protection agaisnt crashs
-	Corpse * c;
+	shared_ptr<Corpse> c;
 	c=this->GetCorpseByOwner(pOwner->GetLowGUID());
 	if(!c)return;
 	sEventMgr.AddEvent(c, &Corpse::Delink, EVENT_CORPSE_SPAWN_BONES, 1, 1, 0);
@@ -869,9 +871,9 @@ void ObjectMgr::ProcessGameobjectQuests()
 	Log.Notice("ObjectMgr", "%u NPC Gossip TextIds loaded.", mNpcToGossipText.size());
 }
 
-Player* ObjectMgr::GetPlayer(const char* name, bool caseSensitive)
+PlayerPointer ObjectMgr::GetPlayer(const char* name, bool caseSensitive)
 {
-	Player * rv = NULL;
+	PlayerPointer rv = NULLPLR;
 	PlayerStorageMap::const_iterator itr;
 	_playerslock.AcquireReadLock();	
 
@@ -905,15 +907,13 @@ Player* ObjectMgr::GetPlayer(const char* name, bool caseSensitive)
 	return rv;
 }
 
-Player* ObjectMgr::GetPlayer(uint32 guid)
+PlayerPointer ObjectMgr::GetPlayer(uint32 guid)
 {
-	Player * rv;
-	
+	PlayerPointer rv;
 	_playerslock.AcquireReadLock();	
 	PlayerStorageMap::const_iterator itr = _players.find(guid);
-	rv = (itr != _players.end()) ? itr->second : 0;
+	rv = (itr != _players.end()) ? itr->second : NULLPLR;
 	_playerslock.ReleaseReadLock();
-
 	return rv;
 }
 
@@ -1215,48 +1215,48 @@ void ObjectMgr::LoadSpellFixes()
 	}	
 }
 
-Item * ObjectMgr::CreateItem(uint32 entry,Player * owner)
+ItemPointer ObjectMgr::CreateItem(uint32 entry,PlayerPointer owner)
 {
 	ItemPrototype * proto = ItemPrototypeStorage.LookupEntry(entry);
-	if(proto == 0) return 0;
+	if(proto == 0) return NULLITEM;
 
 	if(proto->InventoryType == INVTYPE_BAG)
 	{
-		Container * pContainer = new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER));
+		shared_ptr<Container> pContainer = shared_ptr<Container>(new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
 		pContainer->Create( entry, owner);
 		pContainer->SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 		return pContainer;
 	}
 	else
 	{
-		Item * pItem = new Item(HIGHGUID_TYPE_ITEM,GenerateLowGuid(HIGHGUID_TYPE_ITEM));
+		ItemPointer pItem = shared_ptr<Item>(new Item(HIGHGUID_TYPE_ITEM,GenerateLowGuid(HIGHGUID_TYPE_ITEM)));
 		pItem->Create(entry, owner);
 		pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 		return pItem;
 	}
 }
 
-Item * ObjectMgr::LoadItem(uint64 guid)
+ItemPointer ObjectMgr::LoadItem(uint64 guid)
 {
 	QueryResult * result = CharacterDatabase.Query("SELECT * FROM playeritems WHERE guid = %u", GUID_LOPART(guid));
-	Item * pReturn = 0;
+	ItemPointer pReturn = NULLITEM;
 
 	if(result)
 	{
 		ItemPrototype * pProto = ItemPrototypeStorage.LookupEntry(result->Fetch()[2].GetUInt32());
 		if(!pProto)
-			return NULL;
+			return NULLITEM;
 
 		if(pProto->InventoryType == INVTYPE_BAG)
 		{
-			Container * pContainer = new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid);
+			shared_ptr<Container> pContainer = shared_ptr<Container>(new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid));
 			pContainer->LoadFromDB(result->Fetch());
 			pReturn = pContainer;
 		}
 		else
 		{
-			Item * pItem = new Item(HIGHGUID_TYPE_ITEM,(uint32)guid);
-			pItem->LoadFromDB(result->Fetch(), 0, false);
+			ItemPointer pItem = shared_ptr<Item>(new Item(HIGHGUID_TYPE_ITEM,(uint32)guid));
+			pItem->LoadFromDB(result->Fetch(), NULLPLR, false);
 			pReturn = pItem;
 		}
 		delete result;
@@ -1265,9 +1265,9 @@ Item * ObjectMgr::LoadItem(uint64 guid)
 	return pReturn;
 }
 
-void ObjectMgr::LoadCorpses(MapMgr * mgr)
+void ObjectMgr::LoadCorpses(shared_ptr<MapMgr> mgr)
 {
-	Corpse *pCorpse = NULL;
+	shared_ptr<Corpse>pCorpse = NULLCORPSE;
 
 	QueryResult *result = CharacterDatabase.Query("SELECT * FROM corpses WHERE instanceId = %u", mgr->GetInstanceID());
 
@@ -1276,7 +1276,8 @@ void ObjectMgr::LoadCorpses(MapMgr * mgr)
 		do
 		{
 			Field *fields = result->Fetch();
-			pCorpse = new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32());
+			pCorpse = shared_ptr<Corpse>(new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
+			pCorpse->Init();
 			pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 			pCorpse->SetZoneId(fields[5].GetUInt32());
 			pCorpse->SetMapId(fields[6].GetUInt32());
@@ -1284,7 +1285,8 @@ void ObjectMgr::LoadCorpses(MapMgr * mgr)
 			pCorpse->LoadValues( fields[8].GetString());
 			if(pCorpse->GetUInt32Value(CORPSE_FIELD_DISPLAY_ID) == 0)
 			{
-				delete pCorpse;
+				pCorpse->Destructor();
+				pCorpse = NULLCORPSE;
 				continue;
 			}
 
@@ -1300,22 +1302,26 @@ std::list<ItemPrototype*>* ObjectMgr::GetListForItemSet(uint32 setid)
 	return mItemSets[setid];
 }
 
-void ObjectMgr::CorpseAddEventDespawn(Corpse *pCorpse)
+void ObjectMgr::CorpseAddEventDespawn(shared_ptr<Corpse> pCorpse)
 {
 	if(!pCorpse->IsInWorld())
-		delete pCorpse;
+	{
+		pCorpse->Destructor();
+		pCorpse = NULLCORPSE;
+	}
 	else
 		sEventMgr.AddEvent(pCorpse->GetMapMgr(), &MapMgr::EventCorpseDespawn, pCorpse->GetGUID(), EVENT_CORPSE_DESPAWN, 600000, 1,0);
 }
 
 void ObjectMgr::DespawnCorpse(uint64 Guid)
 {
-	Corpse * pCorpse = objmgr.GetCorpse((uint32)Guid);
+	shared_ptr<Corpse> pCorpse = objmgr.GetCorpse((uint32)Guid);
 	if(pCorpse == 0)	// Already Deleted
 		return;
 	
 	pCorpse->Despawn();
-	delete pCorpse;
+	pCorpse->Destructor();
+	pCorpse = NULLCORPSE;
 }
 
 void ObjectMgr::CorpseCollectorUnload()
@@ -1324,11 +1330,13 @@ void ObjectMgr::CorpseCollectorUnload()
 	_corpseslock.Acquire();
 	for (itr = m_corpses.begin(); itr != m_corpses.end();)
 	{
-		Corpse * c =itr->second;
+		shared_ptr<Corpse> c =itr->second;
 		++itr;
 		if(c->IsInWorld())
 			c->RemoveFromWorld(false);
-		delete c;
+
+		c->Destructor();
+		c = NULLCORPSE;
 	}
 	m_corpses.clear();
 	_corpseslock.Release();
@@ -1378,7 +1386,7 @@ void GossipMenu::BuildPacket(WorldPacket& Packet)
 	}
 }
 
-void GossipMenu::SendTo(Player* Plr)
+void GossipMenu::SendTo(PlayerPointer Plr)
 {
 	WorldPacket data(SMSG_GOSSIP_MESSAGE, Menu.size() * 50 + 12);
 	BuildPacket(data);
@@ -1386,7 +1394,7 @@ void GossipMenu::SendTo(Player* Plr)
 	Plr->GetSession()->SendPacket(&data);
 }
 
-void ObjectMgr::CreateGossipMenuForPlayer(GossipMenu** Location, uint64 Guid, uint32 TextID, Player* Plr)
+void ObjectMgr::CreateGossipMenuForPlayer(GossipMenu** Location, uint64 Guid, uint32 TextID, PlayerPointer Plr)
 {
 	GossipMenu *Menu = new GossipMenu(Guid, TextID);
 	ASSERT(Menu);
@@ -1999,7 +2007,7 @@ WayPointMap*ObjectMgr::GetWayPointMap(uint32 spawnid)
 	else return NULL;
 }
 
-Pet * ObjectMgr::CreatePet()
+shared_ptr<Pet> ObjectMgr::CreatePet()
 {
 	uint32 guid;
 	m_petlock.Acquire();
@@ -2007,26 +2015,30 @@ Pet * ObjectMgr::CreatePet()
 	m_petlock.Release();
 
 	uint64 fullguid = ((uint64)HIGHGUID_TYPE_PET << 32) | ((uint64)guid << 24) | guid;
-	return new Pet(fullguid);
+	shared_ptr<Pet> pet = shared_ptr<Pet>(new Pet(fullguid));
+	pet->Init();
+	return pet;
 }
 
-Player * ObjectMgr::CreatePlayer()
+PlayerPointer ObjectMgr::CreatePlayer()
 {
 	uint32 guid;
 	m_playerguidlock.Acquire();
 	guid =++m_hiPlayerGuid;
 	m_playerguidlock.Release();
-	return new Player(guid);
+	PlayerPointer p = shared_ptr<Player>(new Player(guid));
+	p->Init();
+	return p;
 }
 
-void ObjectMgr::AddPlayer(Player * p)//add it to global storage
+void ObjectMgr::AddPlayer(PlayerPointer p)//add it to global storage
 {
 	_playerslock.AcquireWriteLock();
 	_players[p->GetLowGUID()] = p;
 	_playerslock.ReleaseWriteLock();
 }
 
-void ObjectMgr::RemovePlayer(Player * p)
+void ObjectMgr::RemovePlayer(PlayerPointer p)
 {
 	_playerslock.AcquireWriteLock();
 	_players.erase(p->GetLowGUID());
@@ -2034,61 +2046,63 @@ void ObjectMgr::RemovePlayer(Player * p)
 
 }
 
-Corpse * ObjectMgr::CreateCorpse()
+shared_ptr<Corpse> ObjectMgr::CreateCorpse()
 {
 	uint32 guid;
 	m_corpseguidlock.Acquire();
 	guid =++m_hiCorpseGuid;
 	m_corpseguidlock.Release();
-	return new Corpse(HIGHGUID_TYPE_CORPSE,guid);
+	CorpsePointer pCorpse = CorpsePointer(new Corpse(HIGHGUID_TYPE_CORPSE,guid));
+	pCorpse->Init();
+	return pCorpse;
 }
 
-void ObjectMgr::AddCorpse(Corpse * p)//add it to global storage
+void ObjectMgr::AddCorpse(shared_ptr<Corpse> p)//add it to global storage
 {
 	_corpseslock.Acquire();
 	m_corpses[p->GetLowGUID()]=p;
 	_corpseslock.Release();
 }
 
-void ObjectMgr::RemoveCorpse(Corpse * p)
+void ObjectMgr::RemoveCorpse(shared_ptr<Corpse> p)
 {
 	_corpseslock.Acquire();
 	m_corpses.erase(p->GetLowGUID());
 	_corpseslock.Release();
 }
 
-Corpse * ObjectMgr::GetCorpse(uint32 corpseguid)
+shared_ptr<Corpse> ObjectMgr::GetCorpse(uint32 corpseguid)
 {
-	Corpse * rv;
+	shared_ptr<Corpse> rv;
 	_corpseslock.Acquire();
 	CorpseMap::const_iterator itr = m_corpses.find(corpseguid);
-	rv = (itr != m_corpses.end()) ? itr->second : 0;
+	rv = (itr != m_corpses.end()) ? itr->second : NULLCORPSE;
 	_corpseslock.Release();
 	return rv;
 }
 
-Transporter * ObjectMgr::GetTransporter(uint32 guid)
+shared_ptr<Transporter> ObjectMgr::GetTransporter(uint32 guid)
 {
-	Transporter * rv;
+	shared_ptr<Transporter> rv;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, Transporter*>::const_iterator itr = mTransports.find(guid);
-	rv = (itr != mTransports.end()) ? itr->second : 0;
+	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter>>::const_iterator itr = mTransports.find(guid);
+	rv = (itr != mTransports.end()) ? itr->second : NULLTRANSPORT;
 	_TransportLock.Release();
 	return rv;
 }
 
-void ObjectMgr::AddTransport(Transporter *pTransporter)
+void ObjectMgr::AddTransport(shared_ptr<Transporter>pTransporter)
 {
 	_TransportLock.Acquire();
 	mTransports[pTransporter->GetUIdFromGUID()]=pTransporter;
  	_TransportLock.Release();
 }
 
-Transporter * ObjectMgr::GetTransporterByEntry(uint32 entry)
+shared_ptr<Transporter> ObjectMgr::GetTransporterByEntry(uint32 entry)
 {
-	Transporter * rv = 0;
+	shared_ptr<Transporter> rv = NULLTRANSPORT;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, Transporter*>::iterator itr = mTransports.begin();
+	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter>>::iterator itr = mTransports.begin();
 	for(; itr != mTransports.end(); ++itr)
 	{
 		if(itr->second->GetEntry() == entry)
@@ -2436,7 +2450,7 @@ void ObjectMgr::LoadMonsterSay()
 	delete result;
 }
 
-void ObjectMgr::HandleMonsterSayEvent(Creature * pCreature, MONSTER_SAY_EVENTS Event)
+void ObjectMgr::HandleMonsterSayEvent(CreaturePointer pCreature, MONSTER_SAY_EVENTS Event)
 {
 	MonsterSayMap::iterator itr = mMonsterSays[Event].find(pCreature->GetEntry());
 	if(itr == mMonsterSays[Event].end())
@@ -2494,7 +2508,7 @@ void ObjectMgr::LoadInstanceReputationModifiers()
 	Log.Notice("ObjectMgr", "%u instance reputation modifiers loaded.", m_reputation_instance.size());
 }
 
-bool ObjectMgr::HandleInstanceReputationModifiers(Player * pPlayer, Unit * pVictim)
+bool ObjectMgr::HandleInstanceReputationModifiers(PlayerPointer pPlayer, UnitPointer pVictim)
 {
 	uint32 team = pPlayer->GetTeam();
 	bool is_boss;
@@ -2505,8 +2519,8 @@ bool ObjectMgr::HandleInstanceReputationModifiers(Player * pPlayer, Unit * pVict
 	if(itr == m_reputation_instance.end())
 		return false;
 
-	is_boss = 0;//static_cast< Creature* >( pVictim )->GetCreatureName() ? ((Creature*)pVictim)->GetCreatureName()->Rank : 0;
-	if( !is_boss && static_cast< Creature* >( pVictim )->proto && static_cast< Creature* >( pVictim )->proto->boss )
+	is_boss = 0;//TO_CREATURE( pVictim )->GetCreatureName() ? TO_CREATURE(pVictim)->GetCreatureName()->Rank : 0;
+	if( !is_boss && TO_CREATURE( pVictim )->proto && TO_CREATURE( pVictim )->proto->boss )
 		is_boss = 1;
 
 	// Apply the bonuses as normal.
@@ -2705,7 +2719,7 @@ void ObjectMgr::ResetDailies()
 	PlayerStorageMap::iterator itr = _players.begin();
 	for(; itr != _players.end(); itr++)
 	{
-		Player * pPlayer = itr->second;
+		PlayerPointer pPlayer = itr->second;
 		pPlayer->DailyMutex.Acquire();
 		pPlayer->m_finishedDailyQuests.clear();
 		for(uint32 i = 0; i < 25; i++)

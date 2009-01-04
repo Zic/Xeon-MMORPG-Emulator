@@ -33,14 +33,14 @@
 class DrektharAI : public CreatureAIScript
 {
 public:
-	std::set<Unit*> slaves;
+	std::set<UnitPointer> slaves;
 	ADD_CREATURE_FACTORY_FUNCTION(DrektharAI);
 
 	uint32 nrspells;
 	SP_AI_Spell spells[3];
 	bool m_spellcheck[3];
 
-	DrektharAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	DrektharAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		nrspells = 3;
 
@@ -75,30 +75,30 @@ public:
 		spells[2].attackstoptimer = 2000; // 1sec
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Stormpike filth! In my keep?! Slay them all!");
 		_unit->PlaySoundToSet(SOUND_ALLIANCE_CAPTURE);
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 				pSlave->GetAIInterface()->AttackReaction( mTarget, 1 );
 		}
 	}
 
-	void OnCombatStop(Unit* mTarget)
+	void OnCombatStop(UnitPointer mTarget)
 	{
 		RemoveAIUpdateEvent();
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 			{
 				pSlave->GetAIInterface()->WipeTargetList();
@@ -109,7 +109,7 @@ public:
 		}
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer  mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
@@ -142,10 +142,10 @@ public:
 			_unit->GetAIInterface()->MoveTo(_unit->GetSpawnX(), _unit->GetSpawnY(), _unit->GetSpawnZ(), _unit->GetSpawnO());
 		}
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 			{
 				pSlave->GetAIInterface()->WipeTargetList();
@@ -161,7 +161,7 @@ public:
 		if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
 		{
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(uint32 i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -197,14 +197,14 @@ public:
 class VanndarStormpikeAI : public CreatureAIScript
 {
 public:
-	std::set<Unit*> slaves;
+	std::set<UnitPointer> slaves;
 	ADD_CREATURE_FACTORY_FUNCTION(VanndarStormpikeAI);
 
 	uint32 nrspells;
 	SP_AI_Spell spells[3];
 	bool m_spellcheck[3];
 
-	VanndarStormpikeAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	VanndarStormpikeAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		// -- Number of spells to add --
 		nrspells = 3;
@@ -247,7 +247,7 @@ public:
 		_unit->MechanicsDispels[ DISPEL_MECHANIC_BANISH ] = 1;
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		// Avatar!
@@ -256,29 +256,29 @@ public:
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Soldiers of Stormpike, your General is under attack! I require aid! Come! Come! Slay these mangy Frostwolf dogs.");
 		_unit->PlaySoundToSet(SOUND_HORDE_CAPTURE);
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 				pSlave->GetAIInterface()->AttackReaction( mTarget, 1 );
 		}
 	}
 
-	void OnDamageTaken(Unit* mAttacker, float fAmount)
+	void OnDamageTaken(UnitPointer mAttacker, float fAmount)
 	{
 
 	}
 
-	void OnCombatStop(Unit* mTarget)
+	void OnCombatStop(UnitPointer mTarget)
 	{
 		RemoveAIUpdateEvent();
 		_unit->RemoveAura(VANNDAR_AVATAR);
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 			{
 				pSlave->GetAIInterface()->WipeTargetList();
@@ -289,7 +289,7 @@ public:
 		}
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer  mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
@@ -327,10 +327,10 @@ public:
 			_unit->GetAIInterface()->MoveTo(_unit->GetSpawnX(), _unit->GetSpawnY(), _unit->GetSpawnZ(), _unit->GetSpawnO());
 		}
 
-		std::set<Unit*>::iterator itr = slaves.begin();
+		std::set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
-			Unit * pSlave = *itr;
+			UnitPointer  pSlave = *itr;
 			if(pSlave && pSlave->isAlive())
 			{
 				pSlave->GetAIInterface()->WipeTargetList();
@@ -346,7 +346,7 @@ public:
 		if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
 		{
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(uint32 i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -382,13 +382,13 @@ public:
 class SelfBuffNPCAI : public CreatureAIScript
 {
 public:
-	Creature* m_master;
+	CreaturePointer m_master;
 
 	ADD_CREATURE_FACTORY_FUNCTION(SelfBuffNPCAI);
 
-	SelfBuffNPCAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	SelfBuffNPCAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
-		m_master = NULL;
+		m_master = NULLCREATURE;
 		uint32 castspell = 0;
 		uint32 linkNpc = 0;
 		switch(pCreature->GetEntry())
@@ -436,7 +436,7 @@ public:
 
 		if( linkNpc )
 		{
-			Creature * pLink = _unit->GetMapMgr()->GetInterface()->GetCreatureNearestCoords( _unit->GetPositionX(), _unit->GetPositionY(), _unit->GetPositionZ(), linkNpc);
+			CreaturePointer  pLink = _unit->GetMapMgr()->GetInterface()->GetCreatureNearestCoords( _unit->GetPositionX(), _unit->GetPositionY(), _unit->GetPositionZ(), linkNpc);
 			if( pLink && pLink->GetEntry() == CN_VANNDAR_STORMPIKE)
 			{
 				static_cast<VanndarStormpikeAI*>(pLink->GetScript())->slaves.insert( _unit );
@@ -450,7 +450,7 @@ public:
 		}
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		if( m_master && m_master->isAlive() )
 			m_master->GetAIInterface()->AttackReaction( mTarget, 1 );
@@ -462,7 +462,7 @@ class BowmanAI : public CreatureAIScript
 public:
 	ADD_CREATURE_FACTORY_FUNCTION(BowmanAI);
 
-	BowmanAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	BowmanAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		pCreature->GetAIInterface()->m_canMove = false;
 	}
@@ -472,28 +472,28 @@ public:
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		
 	}
 
-	void OnCombatStop(Unit* mTarget)
+	void OnCombatStop(UnitPointer mTarget)
 	{
 
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer  mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
 
 	void AIUpdate()
 	{
-		std::set<Object*>::iterator itr = _unit->GetInRangeOppFactsSetBegin();
+		std::set<ObjectPointer>::iterator itr = _unit->GetInRangeOppFactsSetBegin();
 		for(; itr != _unit->GetInRangeOppFactsSetEnd(); itr++)
 		{
-			Object * pObj = (*itr);
-			if( pObj->IsUnit() && _unit->CanSee( static_cast<Unit*>(pObj) ))
+			ObjectPointer  pObj = (*itr);
+			if( pObj->IsUnit() && _unit->CanSee( TO_UNIT(pObj) ))
 			{
 				if( pObj->IsPlayer() && TO_PLAYER(pObj)->m_isGmInvisible )
 					continue;
@@ -523,7 +523,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-	CaptainGalvangarAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	CaptainGalvangarAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		nrspells = 4;
 
@@ -562,7 +562,7 @@ public:
 		spells[3].attackstoptimer = 1000; // 1sec
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		
@@ -570,14 +570,14 @@ public:
 		_unit->PlaySoundToSet(SOUND_ALLIANCE_CAPTURE);
 	}
 
-	void OnCombatStop(Unit* mTarget)
+	void OnCombatStop(UnitPointer mTarget)
 	{
 		_unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
 		_unit->GetAIInterface()->SetAIState(STATE_IDLE);
 		RemoveAIUpdateEvent();
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer  mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
@@ -603,7 +603,7 @@ public:
 		if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
 		{
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(uint32 i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -645,7 +645,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-	BalindaStonehearthAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	BalindaStonehearthAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		nrspells = 4;
 
@@ -686,7 +686,7 @@ public:
 		_unit->GetAIInterface()->m_canMove = false;
 	}
 
-	void OnCombatStart(Unit* mTarget)
+	void OnCombatStart(UnitPointer mTarget)
 	{
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 
@@ -694,14 +694,14 @@ public:
 		_unit->PlaySoundToSet(SOUND_ALLIANCE_CAPTURE);
 	}
 
-	void OnCombatStop(Unit* mTarget)
+	void OnCombatStop(UnitPointer mTarget)
 	{
 		_unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
 		_unit->GetAIInterface()->SetAIState(STATE_IDLE);
 		RemoveAIUpdateEvent();
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer  mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
@@ -727,7 +727,7 @@ public:
 		if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
 		{
 			float comulativeperc = 0;
-			Unit *target = NULL;
+			UnitPointer target = NULLUNIT;
 			for(uint32 i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;

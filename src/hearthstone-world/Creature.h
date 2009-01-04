@@ -233,7 +233,7 @@ class CreatureAIScript;
 class GossipScript;
 class AuctionHouse;
 struct Trainer;
-#define CALL_SCRIPT_EVENT(obj, func) if(obj->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(obj)->GetScript() != NULL) static_cast<Creature*>(obj)->GetScript()->func
+#define CALL_SCRIPT_EVENT(obj, func) if(obj->GetTypeId() == TYPEID_UNIT && TO_CREATURE(obj)->GetScript() != NULL) TO_CREATURE(obj)->GetScript()->func
 
 ///////////////////
 /// Creature object
@@ -244,11 +244,14 @@ public:
 
 	Creature(uint64 guid);
 	virtual ~Creature();
+	virtual void Init();
+	virtual void Destructor();
+
     bool Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info);
 	void Load(CreatureProto * proto_, float x, float y, float z, float o = 0.0f);
 
 	void AddToWorld();
-	void AddToWorld(MapMgr * pMapMgr);
+	void AddToWorld(shared_ptr<MapMgr> pMapMgr);
 	void RemoveFromWorld(bool addrespawnevent, bool free_guid);
 
 	/// Creation
@@ -370,7 +373,7 @@ public:
 	void RegenerateMana();
 	int BaseAttackType;
 
-	bool CanSee(Unit* obj) // * Invisibility & Stealth Detection - Partha *
+	bool CanSee(UnitPointer obj) // * Invisibility & Stealth Detection - Partha *
 	{
 		if(!obj)
 			return false;
@@ -413,7 +416,7 @@ public:
 	}
 
 	//Make this unit face another unit
-	bool setInFront(Unit* target);
+	bool setInFront(UnitPointer target);
 
 	bool Skinned;
 
@@ -435,15 +438,15 @@ public:
 
 	void OnJustDied();
 	void OnRemoveCorpse();
-	void OnRespawn(MapMgr * m);
+	void OnRespawn(shared_ptr<MapMgr> m);
 	void SafeDelete();
 	//void Despawn();
 	void SummonExpire(); // this is used for guardians. They are non respawnable creatures linked to a player
 
 
 	// In Range
-	void AddInRangeObject(Object* pObj);
-	void OnRemoveInRangeObject(Object* pObj);
+	void AddInRangeObject(ObjectPointer pObj);
+	void OnRemoveInRangeObject(ObjectPointer pObj);
 	void ClearInRangeSet();
 
 	// Demon
@@ -457,8 +460,8 @@ public:
 	void SetEnslaveSpell(uint32 spellId) { m_enslaveSpell = spellId; }
 	bool RemoveEnslave();
 
-	HEARTHSTONE_INLINE Player *GetTotemOwner() { return totemOwner; }
-	HEARTHSTONE_INLINE void SetTotemOwner(Player *owner) { totemOwner = owner; }
+	HEARTHSTONE_INLINE shared_ptr<Player>GetTotemOwner() { return totemOwner; }
+	HEARTHSTONE_INLINE void SetTotemOwner(shared_ptr<Player>owner) { totemOwner = owner; }
 	HEARTHSTONE_INLINE uint32 GetTotemSlot() { return totemSlot; }
 	HEARTHSTONE_INLINE void SetTotemSlot(uint32 slot) { totemSlot = slot; }
 
@@ -504,11 +507,11 @@ public:
 	bool CanAddToWorld();
 
 	WayPointMap * m_custom_waypoint_map;
-	Player * m_escorter;
+	PlayerPointer m_escorter;
 	void DestroyCustomWaypointMap();
 	bool IsInLimboState() { return m_limbostate; }
 	uint32 GetLineByFamily(CreatureFamilyEntry * family){return family->skilline ? family->skilline : 0;};
-	void RemoveLimboState(Unit * healer);
+	void RemoveLimboState(UnitPointer healer);
 	void SetGuardWaypoints();
 	bool m_corpseEvent;
 	MapCell * m_respawnCell;
@@ -537,7 +540,7 @@ protected:
 	uint32 m_enslaveCount;
 	uint32 m_enslaveSpell;
 
-	Player * totemOwner;
+	PlayerPointer totemOwner;
 	uint32 totemSlot;
 
 	bool m_PickPocketed;
@@ -561,7 +564,7 @@ public:
 	void ClearTag();
 
 	// tags the object by a certain player.
-	void Tag(Player *plr);
+	void Tag(shared_ptr<Player>plr);
 
 	// used by bgs
 	bool m_noDeleteAfterDespawn;

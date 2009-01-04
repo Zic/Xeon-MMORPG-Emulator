@@ -39,7 +39,7 @@ trainertype trainer_types[TRAINER_TYPE_MAX] =
 {	"Weapon Master",		 0 },
 };
 
-bool CanTrainAt(Player * plr, Trainer * trn)
+bool CanTrainAt(PlayerPointer plr, Trainer * trn)
 {
 	if ( (trn->RequiredClass && plr->getClass() != trn->RequiredClass) ||
 		 (trn->RequiredSkill && !plr->_HasSkillLine(trn->RequiredSkill)) ||
@@ -59,13 +59,13 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld()) return;
 	uint64 guid;
 	recv_data >> guid;
-	Creature *pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature) return;
 
 	SendTabardHelp(pCreature);
 }
 
-void WorldSession::SendTabardHelp(Creature* pCreature)
+void WorldSession::SendTabardHelp(CreaturePointer pCreature)
 {
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(8);
@@ -84,13 +84,13 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 	uint64 guid;
 	recv_data >> guid;
 
-	Creature *pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature) return;
 
 	SendBankerList(pCreature);
 }
 
-void WorldSession::SendBankerList(Creature* pCreature)
+void WorldSession::SendBankerList(CreaturePointer pCreature)
 {
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(8);
@@ -110,14 +110,14 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 	// Inits, grab creature, check.
 	uint64 guid;
 	recv_data >> guid;
-	Creature *train = GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer train = GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!train) return;
 
 	_player->Reputation_OnTalk(train->m_factionDBC);
 	SendTrainerList(train);
 }
 
-void WorldSession::SendTrainerList(Creature* pCreature)
+void WorldSession::SendTrainerList(CreaturePointer pCreature)
 {
 	Trainer * pTrainer = pCreature->GetTrainer();
 	//if(pTrainer == 0 || !CanTrainAt(_player, pTrainer)) return;
@@ -133,7 +133,7 @@ void WorldSession::SendTrainerList(Creature* pCreature)
 	}
 
 	WorldPacket data(SMSG_TRAINER_LIST, 5000);
-	TrainerSpell * pSpell;
+	TrainerSpell* pSpell;
 	uint32 Spacer = 0;
 	uint32 Count=0;
 	uint8 Status;
@@ -180,13 +180,13 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvPacket)
 	uint32 TeachingSpellID;
 
 	recvPacket >> Guid >> TeachingSpellID;
-	Creature *pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(Guid));
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(Guid));
 	if(pCreature == 0) return;
 
 	Trainer *pTrainer = pCreature->GetTrainer();
 	if(pTrainer == 0 || !CanTrainAt(_player, pTrainer)) return;
 
-	TrainerSpell * pSpell=NULL;
+	TrainerSpell* pSpell=NULL;
 	for(vector<TrainerSpell>::iterator itr = pTrainer->Spells.begin(); itr != pTrainer->Spells.end(); ++itr)
 	{
 		if( ( itr->pCastRealSpell && itr->pCastRealSpell->Id == TeachingSpellID ) ||
@@ -271,7 +271,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvPacket)
 	}
 }
 
-uint8 WorldSession::TrainerGetSpellStatus(TrainerSpell* pSpell)
+uint8 WorldSession::TrainerGetSpellStatus(TrainerSpell*  pSpell)
 {
 	if(!pSpell->pCastSpell && !pSpell->pLearnSpell)
 		return TRAINER_STATUS_NOT_LEARNABLE;
@@ -304,13 +304,13 @@ void WorldSession::HandleCharterShowListOpcode( WorldPacket & recv_data )
 	uint64 guid;
 	recv_data >> guid;
 
-	Creature *pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature) return;
 
 	SendCharterRequest(pCreature);
 }
 
-void WorldSession::SendCharterRequest(Creature* pCreature)
+void WorldSession::SendCharterRequest(CreaturePointer pCreature)
 {
 	if(!_player->IsInWorld()) return;
 	if(pCreature && pCreature->GetEntry()==19861 ||
@@ -371,14 +371,14 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld()) return;
 	uint64 guid;
 	recv_data >> guid;
-	Creature* auctioneer = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer auctioneer = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!auctioneer)
 		return;
 
 	SendAuctionList(auctioneer);
 }
 
-void WorldSession::SendAuctionList(Creature* auctioneer)
+void WorldSession::SendAuctionList(CreaturePointer auctioneer)
 {
 	AuctionHouse* AH = sAuctionMgr.GetAuctionHouse(auctioneer->GetEntry());
 	if(!AH)
@@ -405,7 +405,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	std::set<uint32> ql;
 
 	recv_data >> guid;
-	Creature *qst_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer qst_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!qst_giver) 
 		return;
 
@@ -504,12 +504,12 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 	DEBUG_LOG("WORLD: CMSG_GOSSIP_SELECT_OPTION Option %i Guid %.8X", option, guid );
 	GossipScript * Script=NULL;
-	Object * qst_giver=NULL;
+	ObjectPointer qst_giver=NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *crt = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer crt = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(!crt)
 			return;
 
@@ -518,7 +518,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	}
 	else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		Item * pitem = _player->GetItemInterface()->GetItemByGUID(guid);
+		ItemPointer pitem = _player->GetItemInterface()->GetItemByGUID(guid);
 		if(pitem==NULL)
 			return;
 
@@ -556,11 +556,11 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld() ||!_player->isDead()) return;
 	GetPlayer( )->DeathDurabilityLoss(0.25);
-	GetPlayer( )->ResurrectPlayer(NULL);
+	GetPlayer( )->ResurrectPlayer(NULLPLR);
 
 	if(_player->getLevel() > 10)
 	{
-		Aura *aur = GetPlayer()->FindAura(15007);
+		AuraPointer aur = GetPlayer()->FindAura(15007);
 		
 		if(aur) // If the player already have the aura, just extend it.
 		{
@@ -571,7 +571,7 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 			SpellEntry *spellInfo = dbcSpell.LookupEntry( 15007 );//resurrection sickness
 			SpellCastTargets targets;
 			targets.m_unitTarget = GetPlayer()->GetGUID();
-			Spell*sp=new Spell(_player,spellInfo,true,NULL);
+			shared_ptr<Spell>sp= shared_ptr<Spell>(new Spell(_player,spellInfo,true,NULLAURA));
 			sp->prepare(&targets);
 		}
 	}
@@ -651,7 +651,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 	uint64 guid;
 	recv_data >> guid;
 
-	Creature *pC = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pC = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pC) return;
 
 	SendInnkeeperBind(pC);
@@ -660,7 +660,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 #define ITEM_ID_HEARTH_STONE 6948
 #define BIND_SPELL_ID 3286
 
-void WorldSession::SendInnkeeperBind(Creature* pCreature)
+void WorldSession::SendInnkeeperBind(CreaturePointer pCreature)
 {
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(45);
@@ -683,14 +683,17 @@ void WorldSession::SendInnkeeperBind(Creature* pCreature)
 		// We don't have a hearthstone. Add one.
 		if(_player->GetItemInterface()->CalculateFreeSlots(NULL) > 0)
 		{
-			Item *item = objmgr.CreateItem( ITEM_ID_HEARTH_STONE, _player);
+			shared_ptr<Item>item = objmgr.CreateItem( ITEM_ID_HEARTH_STONE, _player);
 			if( _player->GetItemInterface()->AddItemToFreeSlot(item) )
 			{
 				SlotResult * lr = _player->GetItemInterface()->LastSearchResult();
 				SendItemPushResult(item,false,true,false,true,lr->ContainerSlot,lr->Slot,1);
 			}
 			else
-				delete item;
+			{
+				item->Destructor();
+				item = NULLITEM;
+			}
 		}
 	}
 
@@ -735,7 +738,7 @@ void WorldSession::SendInnkeeperBind(Creature* pCreature)
 #undef ITEM_ID_HEARTH_STONE
 #undef BIND_SPELL_ID
 
-void WorldSession::SendSpiritHealerRequest(Creature* pCreature)
+void WorldSession::SendSpiritHealerRequest(CreaturePointer pCreature)
 {
 	WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
 	data << pCreature->GetGUID();

@@ -25,7 +25,7 @@ void WorldSession::HandleInitiateTrade(WorldPacket & recv_data)
 	CHECK_PACKET_SIZE(recv_data, 8);
 	uint64 guid;
 	recv_data >> guid;
-	Player * pTarget = _player->GetMapMgr()->GetPlayer((uint32)guid);
+	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer((uint32)guid);
 	uint32 TradeStatus = TRADE_STATUS_PROPOSED;
 	WorldPacket data(SMSG_TRADE_STATUS, 12);
 
@@ -70,7 +70,7 @@ void WorldSession::HandleBeginTrade(WorldPacket & recv_data)
 	if(!_player->IsInWorld()) return;
 	uint32 TradeStatus = TRADE_STATUS_INITIATED;
 
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
 	if(_player->mTradeTarget == 0 || plr == 0)
 	{
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
@@ -95,7 +95,7 @@ void WorldSession::HandleBusyTrade(WorldPacket & recv_data)
 	if(!_player->IsInWorld()) return;
 	uint32 TradeStatus = TRADE_STATUS_PLAYER_BUSY;
 
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
 	if(_player->mTradeTarget == 0 || plr == 0)
 	{
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
@@ -118,7 +118,7 @@ void WorldSession::HandleIgnoreTrade(WorldPacket & recv_data)
 	if(!_player->IsInWorld()) return;
 	uint32 TradeStatus = TRADE_STATUS_PLAYER_IGNORED;
 
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
 	if(_player->mTradeTarget == 0 || plr == 0)
 	{
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
@@ -145,7 +145,7 @@ void WorldSession::HandleCancelTrade(WorldPacket & recv_data)
     uint32 TradeStatus = TRADE_STATUS_CANCELLED;
     OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
 
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
     if(plr)
     {
         if(plr->m_session && plr->m_session->GetSocket())
@@ -162,7 +162,7 @@ void WorldSession::HandleCancelTrade(WorldPacket & recv_data)
 void WorldSession::HandleUnacceptTrade(WorldPacket & recv_data)
 {
 	if(!_player->IsInWorld()) return;
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
 	_player->ResetTradeVariables();
 
 	if(_player->mTradeTarget == 0 || plr == 0)
@@ -187,9 +187,9 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 	uint8 TradeSlot = recv_data.contents()[0];
 	int8 SourceBag = recv_data.contents()[1];
 	uint8 SourceSlot = recv_data.contents()[2];
-	Player * pTarget = _player->GetMapMgr()->GetPlayer( _player->mTradeTarget );
+	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer( _player->mTradeTarget );
 
-	Item * pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
+	ItemPointer pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
 	if( pTarget == NULL || pItem == 0 || TradeSlot > 6 || ( TradeSlot < 6 && pItem->IsSoulbound() ) )
 		return;
 
@@ -197,7 +197,7 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 	if( SourceBag == INVENTORY_SLOT_NOT_SET && SourceSlot < INVENTORY_SLOT_BAG_END && SourceSlot >= INVENTORY_SLOT_BAG_START )
 		return;
 
-	if( pItem->GetProto()->ContainerSlots > 0 && ((Container*)pItem)->HasItems() )
+	if( pItem->GetProto()->ContainerSlots > 0 && TO_CONTAINER(pItem)->HasItems() )
 		return;
 
 	if(TradeSlot < 6 && pItem->IsSoulbound())
@@ -247,13 +247,13 @@ void WorldSession::HandleClearTradeItem(WorldPacket & recv_data)
 	if(TradeSlot > 6)
 		return;
 
-	_player->mTradeItems[TradeSlot] = 0;
+	_player->mTradeItems[TradeSlot] = NULLITEM;
 	_player->SendTradeUpdate();
 }
 
 void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 {
-	Player * plr = _player->GetTradeTarget();
+	PlayerPointer plr = _player->GetTradeTarget();
 	if(_player->mTradeTarget == 0 || !plr)
 		return;
 
@@ -268,7 +268,7 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 		// Ready!
 		uint32 ItemCount = 0;
 		uint32 TargetItemCount = 0;
-		Player * pTarget = plr;
+		PlayerPointer pTarget = plr;
 
 		// Calculate Item Count
 		for(uint32 Index = 0; Index < 7; ++Index)
@@ -287,7 +287,7 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 		{
 			TradeStatus = TRADE_STATUS_COMPLETE;
 			uint64 Guid;
-			Item * pItem;
+			ItemPointer pItem;
 			
 			// Remove all items from the players inventory
 			for(uint32 Index = 0; Index < 6; ++Index)
@@ -295,9 +295,9 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 				Guid = _player->mTradeItems[Index] ? _player->mTradeItems[Index]->GetGUID() : 0;
 				if(Guid != 0)
 				{
-					if( _player->mTradeItems[Index]->IsSoulbound() || ( _player->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && ((Container*)_player->mTradeItems[Index])->HasItems() ) )
+					if( _player->mTradeItems[Index]->IsSoulbound() || ( _player->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && TO_CONTAINER(_player->mTradeItems[Index])->HasItems() ) )
 					{
-						_player->mTradeItems[Index] = NULL;
+						_player->mTradeItems[Index] = NULLITEM;
 					}
 					else
 					{
@@ -312,9 +312,9 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 				Guid = pTarget->mTradeItems[Index] ? pTarget->mTradeItems[Index]->GetGUID() : 0;
 				if(Guid != 0)
 				{
-					if( pTarget->mTradeItems[Index]->IsSoulbound() || ( pTarget->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && ((Container*)pTarget->mTradeItems[Index])->HasItems() ) )
+					if( pTarget->mTradeItems[Index]->IsSoulbound() || ( pTarget->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && TO_CONTAINER(pTarget->mTradeItems[Index])->HasItems() ) )
 					{
-						pTarget->mTradeItems[Index] = NULL;
+						pTarget->mTradeItems[Index] = NULLITEM;
 					}
 					else
 					{
@@ -331,7 +331,10 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 				{
 					pItem->SetOwner(pTarget);
 					if( !pTarget->m_ItemInterface->AddItemToFreeSlot(pItem) )
-						delete pItem;
+					{
+						pItem->Destructor();
+						pItem = NULLITEM;
+					}
 				}
 
 				pItem = pTarget->mTradeItems[Index];
@@ -339,7 +342,10 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 				{
 					pItem->SetOwner(_player);
 					if( !_player->m_ItemInterface->AddItemToFreeSlot(pItem) )
-						delete pItem;
+					{
+						pItem->Destructor();
+						pItem = NULLITEM;
+					}
 				}
 			}
 

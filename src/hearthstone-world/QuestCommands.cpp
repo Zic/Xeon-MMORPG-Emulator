@@ -30,7 +30,7 @@ HEARTHSTONE_INLINE std::string MyConvertFloatToString(const float arg)
 	return out.str();
 }
 
-string RemoveQuestFromPlayer(Player *plr, Quest *qst)
+string RemoveQuestFromPlayer(shared_ptr<Player>plr, Quest *qst)
 {
 	std::string recout = "|cff00ff00";
 
@@ -138,7 +138,7 @@ bool ChatHandler::HandleQuestStatusCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -180,7 +180,7 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 {
 	if(!*args) return false;
 
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -220,20 +220,26 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 					{
 						if(qst->receive_items[i])
 						{
-							Item *item = objmgr.CreateItem( qst->receive_items[i], plr);
+							shared_ptr<Item>item = objmgr.CreateItem( qst->receive_items[i], plr);
 							if(!plr->GetItemInterface()->AddItemToFreeSlot(item))
-								delete item;
+							{
+								item->Destructor();
+								item = NULLITEM;
+							}
 						}
 					}
 
 					if(qst->srcitem && qst->srcitem != qst->receive_items[0])
 					{
-						Item * item = objmgr.CreateItem( qst->srcitem, plr);
+						ItemPointer item = objmgr.CreateItem( qst->srcitem, plr);
 						if(item)
 						{
 							item->SetUInt32Value(ITEM_FIELD_STACK_COUNT, qst->srcitemcount ? qst->srcitemcount : 1);
 							if(!plr->GetItemInterface()->AddItemToFreeSlot(item))
-								delete item;
+							{
+								item->Destructor();
+								item = NULLITEM;
+							}
 						}
 					}
 				
@@ -265,7 +271,7 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -316,16 +322,16 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 				else
 				{
 					// I need some way to get the guid without targeting the creature or looking through all the spawns...
-					Object *quest_giver;
+					shared_ptr<Object>quest_giver;
 
 					for(uint32 guid=1; guid < plr->GetMapMgr()->m_CreatureArraySize; guid++)
 					{
-						Creature *pCreature = plr->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+						CreaturePointer pCreature = plr->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 						if(pCreature)
 						{
 							if(pCreature->GetEntry() == giver_id) //found creature
 							{
-								quest_giver = (Object*)pCreature;
+								quest_giver = TO_OBJECT(pCreature);
 								guid = plr->GetMapMgr()->m_CreatureArraySize;
 							}
 						}
@@ -563,7 +569,7 @@ bool ChatHandler::HandleQuestListCommand(const char * args, WorldSession * m_ses
 			return true;
 		}
 
-		Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(unit)
 		{
 			if (!unit->isQuestGiver())
@@ -592,7 +598,7 @@ bool ChatHandler::HandleQuestListCommand(const char * args, WorldSession * m_ses
 
 	if(quest_giver == 0)
 	{
-		Player *plr = getSelectedChar(m_session, true);
+		shared_ptr<Player>plr = getSelectedChar(m_session, true);
 		if(!plr)
 		{
 			plr = m_session->GetPlayer();
@@ -702,7 +708,7 @@ bool ChatHandler::HandleQuestAddStartCommand(const char * args, WorldSession * m
 		return false;
 	}
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 	{
 		SystemMessage(m_session, "You must target an npc.");
@@ -786,7 +792,7 @@ bool ChatHandler::HandleQuestAddFinishCommand(const char * args, WorldSession * 
 		return false;
 	}
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 	{
 		SystemMessage(m_session, "You must target an npc.");
@@ -883,7 +889,7 @@ bool ChatHandler::HandleQuestDelStartCommand(const char * args, WorldSession * m
 		return false;
 	}
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 	{
 		SystemMessage(m_session, "You must target an npc.");
@@ -967,7 +973,7 @@ bool ChatHandler::HandleQuestDelFinishCommand(const char * args, WorldSession * 
 		return false;
 	}
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 	{
 		SystemMessage(m_session, "You must target an npc.");
@@ -1252,7 +1258,7 @@ bool ChatHandler::HandleQuestLoadCommand(const char * args, WorldSession * m_ses
 	if (guid == 0)
 		return true;
 
-	Creature *unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer unit = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!unit)
 		return true;
 
@@ -1269,7 +1275,7 @@ bool ChatHandler::HandleQuestRemoveCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	Player *plr = getSelectedChar(m_session, true);
+	shared_ptr<Player>plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();

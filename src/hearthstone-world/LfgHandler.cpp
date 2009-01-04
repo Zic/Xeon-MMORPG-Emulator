@@ -200,7 +200,7 @@ void WorldSession::HandleLfgInviteAccept(WorldPacket & recvPacket)
 			{
 				// all players have accepted
 				Group * pGroup = new Group(true);
-				for(set<Player*>::iterator itr = _player->m_lfgMatch->AcceptedPlayers.begin(); itr != _player->m_lfgMatch->AcceptedPlayers.end(); ++itr)
+				for(set<shared_ptr<Player>>::iterator itr = _player->m_lfgMatch->AcceptedPlayers.begin(); itr != _player->m_lfgMatch->AcceptedPlayers.end(); ++itr)
 					pGroup->AddMember((*itr)->m_playerInfo);
 
 				_player->m_lfgMatch->pGroup = pGroup;
@@ -210,7 +210,7 @@ void WorldSession::HandleLfgInviteAccept(WorldPacket & recvPacket)
 	}
 	else
 	{
-		Player * pPlayer = objmgr.GetPlayer(_player->m_lfgInviterGuid);
+		PlayerPointer pPlayer = objmgr.GetPlayer(_player->m_lfgInviterGuid);
 		if( pPlayer == NULL )
 		{
 			OutPacket(SMSG_LFG_AUTOJOIN_FAILED_NO_PLAYER);			// Matched Player(s) have gone offline.

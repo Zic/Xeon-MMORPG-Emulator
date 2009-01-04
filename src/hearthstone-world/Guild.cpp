@@ -69,7 +69,10 @@ Guild::~Guild()
 	{
 		for(uint32 i = 0; i < MAX_GUILD_BANK_SLOTS; ++i)
 			if((*itr)->pSlots[i] != NULL)
-				delete (*itr)->pSlots[i];
+			{
+				(*itr)->pSlots[i]->Destructor();
+				(*itr)->pSlots[i] = NULLITEM;
+			}
 
 		for(list<GuildBankEvent*>::iterator it2 = (*itr)->lLog.begin(); it2 != (*itr)->lLog.end(); ++it2)
 			delete (*it2);
@@ -570,15 +573,15 @@ bool Guild::LoadFromDB(Field * f)
 			pTab->szTabName = (strlen(result->Fetch()[2].GetString()) > 0) ? strdup(result->Fetch()[2].GetString()) : NULL;
 			pTab->szTabIcon = (strlen(result->Fetch()[3].GetString()) > 0) ? strdup(result->Fetch()[3].GetString()) : NULL;
 			
-			memset(pTab->pSlots, 0, sizeof(Item*) * MAX_GUILD_BANK_SLOTS);
+			memset(pTab->pSlots, 0, sizeof(shared_ptr<Item>) * MAX_GUILD_BANK_SLOTS);
 
 			if(res2)
 			{
 				do 
 				{
 					//Field *itemfields = objmgr.GetCachedItem(res2->Fetch()[3].GetUInt32());
-					//Item * pItem = (itemfields == NULL) ? NULL : objmgr.LoadItem(itemfields);
-					Item * pItem = objmgr.LoadItem(res2->Fetch()[3].GetUInt64());
+					//ItemPointer pItem = (itemfields == NULL) ? NULL : objmgr.LoadItem(itemfields);
+					ItemPointer pItem = objmgr.LoadItem(res2->Fetch()[3].GetUInt64());
 					if(pItem == NULL)
 					{
 						printf("Deleting guildbank item for invalid item %u (%u)\n", GetGuildId(), res2->Fetch()[3].GetUInt32());
@@ -1086,7 +1089,7 @@ void Guild::SendGuildRoster(WorldSession * pClient)
 	WorldPacket data(SMSG_GUILD_ROSTER, (60*10) + (100 * m_members.size()) + 100);
 	GuildMemberMap::iterator itr;
 	GuildRank * r;
-	Player * pPlayer;
+	PlayerPointer pPlayer;
 	uint32 i, j;
 	uint32 c =0;
 	uint32 pos;
@@ -1231,7 +1234,7 @@ void Guild::BuyBankTab(WorldSession * pClient)
 
 	GuildBankTab * pTab = new GuildBankTab;
 	pTab->iTabId = m_bankTabCount;
-	memset(pTab->pSlots, 0, sizeof(Item*)*MAX_GUILD_BANK_SLOTS);
+	memset(pTab->pSlots, 0, sizeof(shared_ptr<Item>)*MAX_GUILD_BANK_SLOTS);
 	pTab->szTabName=NULL;
 	pTab->szTabIcon=NULL;
 

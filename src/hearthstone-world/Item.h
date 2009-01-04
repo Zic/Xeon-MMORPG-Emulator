@@ -119,19 +119,21 @@ public:
 	Item();
 	Item( uint32 high, uint32 low );
 	virtual ~Item();
+	virtual void Destructor();
+	virtual void Init();
 
-	void Create( uint32 itemid, Player* owner );
+	void Create( uint32 itemid, PlayerPointer owner );
 
 	HEARTHSTONE_INLINE ItemPrototype* GetProto() const { return m_itemProto; }
 	HEARTHSTONE_INLINE void SetProto( ItemPrototype* pr ) { m_itemProto = pr; }
 
-	HEARTHSTONE_INLINE Player* GetOwner() const { return m_owner; }
-	void SetOwner( Player* owner );
+	HEARTHSTONE_INLINE PlayerPointer GetOwner() const { return m_owner; }
+	void SetOwner( PlayerPointer owner );
 
 	HEARTHSTONE_INLINE bool IsContainer(){ return ( m_objectTypeId == TYPEID_CONTAINER ) ? true : false; }
 	
 	//! DB Serialization
-	void LoadFromDB( Field *fields, Player* plr, bool light );
+	void LoadFromDB( Field *fields, PlayerPointer plr, bool light );
 	void SaveToDB( int8 containerslot, int8 slot, bool firstsave, QueryBuffer* buf );
 	bool LoadAuctionItemFromDB( uint64 guid );
 	void DeleteFromDB();
@@ -248,7 +250,7 @@ protected:
 	ItemPrototype* m_itemProto;
 	EnchantmentMap Enchantments;
 	uint32 _fields[ITEM_END];//this mem is wasted in case of container... but this will be fixed in future
-	Player* m_owner; // let's not bother the manager with unneeded requests
+	PlayerPointer m_owner; // let's not bother the manager with unneeded requests
 	uint32 random_prop;
 	uint32 random_suffix;
 };
@@ -256,9 +258,9 @@ protected:
 uint32 GetSkillByProto( uint32, uint32 );
 
 uint32 GetSellPriceForItem( ItemPrototype* proto, uint32 count );
-uint32 GetBuyPriceForItem( ItemPrototype* proto, uint32 count, Player* plr, Creature* vendor );
+uint32 GetBuyPriceForItem( ItemPrototype* proto, uint32 count, PlayerPointer plr, CreaturePointer vendor );
 
 uint32 GetSellPriceForItem( uint32 itemid, uint32 count);
-uint32 GetBuyPriceForItem( uint32 itemid, uint32 count, Player* plr, Creature* vendor );
+uint32 GetBuyPriceForItem( uint32 itemid, uint32 count, PlayerPointer plr, CreaturePointer vendor );
 
 #endif

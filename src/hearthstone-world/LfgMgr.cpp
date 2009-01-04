@@ -49,7 +49,7 @@ LfgMgr::~LfgMgr()
 	
 }
 
-bool LfgMgr::AttemptLfgJoin(Player * pl, uint32 LfgDungeonId)
+bool LfgMgr::AttemptLfgJoin(PlayerPointer pl, uint32 LfgDungeonId)
 {
 	if( pl == NULL )
 		return false;
@@ -61,7 +61,7 @@ bool LfgMgr::AttemptLfgJoin(Player * pl, uint32 LfgDungeonId)
 	// search for any groups that have auto add members enabled, also have this dungeon, and add him
 	// if one is found.
 	/*LfgPlayerList itr;
-	Player * plr;
+	PlayerPointer plr;
 
 	// make sure the dungeon is usable by autojoin (should never be true)
 	if(LfgDungeonTypes[LfgDungeonId] != LFG_INSTANCE && LfgDungeonTypes[LfgDungeonId] != LFG_HEROIC_DUNGEON)
@@ -85,7 +85,7 @@ bool LfgMgr::AttemptLfgJoin(Player * pl, uint32 LfgDungeonId)
 	return false;
 }
 
-void LfgMgr::SetPlayerInLFGqueue(Player *pl,uint32 LfgDungeonId)
+void LfgMgr::SetPlayerInLFGqueue(shared_ptr<Player>pl,uint32 LfgDungeonId)
 {
 	if( pl == NULL )
 		return;
@@ -102,7 +102,7 @@ void LfgMgr::SetPlayerInLFGqueue(Player *pl,uint32 LfgDungeonId)
 	m_lock.Release();
 }
 
-void LfgMgr::RemovePlayerFromLfgQueues(Player * pl)
+void LfgMgr::RemovePlayerFromLfgQueues(PlayerPointer pl)
 {
 	if( pl == NULL )
 		return;
@@ -135,7 +135,7 @@ void LfgMgr::RemovePlayerFromLfgQueues(Player * pl)
 	m_lock.Release();
 }
 
-void LfgMgr::RemovePlayerFromLfgQueue( Player* plr, uint32 LfgDungeonId )
+void LfgMgr::RemovePlayerFromLfgQueue( PlayerPointer plr, uint32 LfgDungeonId )
 {
 	if( plr == NULL )
 		return;
@@ -161,7 +161,7 @@ void LfgMgr::UpdateLfgQueue(uint32 LfgDungeonId)
 	LfgPlayerList::iterator itr;
 	LfgPlayerList::iterator it2;
 	LfgPlayerList::iterator it3;
-	Player * plr;
+	PlayerPointer plr;
 	uint32 i;
 	//LfgMatch * pMatch;
 
@@ -259,7 +259,7 @@ void LfgMgr::UpdateLfgQueue(uint32 LfgDungeonId)
 	m_lock.Release();
 }
 
-void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
+void LfgMgr::SendLfgList( PlayerPointer plr, uint32 Dungeon )
 {
 	if( plr == NULL )
 		return;
@@ -270,7 +270,7 @@ void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
 	LfgPlayerList::iterator itr;
 	GroupMembersSet::iterator it2;
 	uint32 count = 0;
-	Player * pl;
+	PlayerPointer pl;
 	uint32 i;
 	uint64 tguid;
 	SubGroup * sgrp;
@@ -353,7 +353,7 @@ void LfgMgr::SendLfgList( Player* plr, uint32 Dungeon )
     plr->GetSession()->SendPacket(&data);
 }
 
-void LfgMgr::SetPlayerInLfmList(Player * pl, uint32 LfgDungeonId)
+void LfgMgr::SetPlayerInLfmList(PlayerPointer pl, uint32 LfgDungeonId)
 {
 	if( pl == NULL )
 		return;
@@ -369,7 +369,7 @@ void LfgMgr::SetPlayerInLfmList(Player * pl, uint32 LfgDungeonId)
 	m_lock.Release();
 }
 
-void LfgMgr::RemovePlayerFromLfmList(Player * pl, uint32 LfmDungeonId)
+void LfgMgr::RemovePlayerFromLfmList(PlayerPointer pl, uint32 LfmDungeonId)
 {
 	if( pl == NULL )
 		return;

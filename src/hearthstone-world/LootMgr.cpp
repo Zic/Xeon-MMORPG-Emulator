@@ -424,7 +424,7 @@ void LootMgr::PushLoot(StoreLootList *list,Loot * loot, bool heroic, bool disenc
 				__LootItem itm;
 				itm.item =list->items[x].item;
 				itm.iItemsCount = count;
-				itm.roll = NULL;
+				itm.roll = NULLROLL;
 				itm.passed = false;
 				itm.ffa_loot = list->items[x].ffa_loot;
 				itm.has_looted.clear();
@@ -621,7 +621,7 @@ void LootMgr::AddLoot(Loot * loot, uint32 itemid, uint32 mincount, uint32 maxcou
 		__LootItem itm;
 		itm.item = item;
 		itm.iItemsCount = count;
-		itm.roll = NULL;
+		itm.roll = NULLROLL;
 		itm.passed = false;
 		itm.ffa_loot = ffa_loot;
 		itm.has_looted.clear();
@@ -645,10 +645,14 @@ void LootMgr::AddLoot(Loot * loot, uint32 itemid, uint32 mincount, uint32 maxcou
 #define NEED 1
 #define GREED 2
 
-LootRoll::LootRoll(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, MapMgr * mgr) : EventableObject()
+LootRoll::LootRoll() : EventableObject()
+{
+}
+
+void LootRoll::Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr)
 {
 	_mgr = mgr;
-	sEventMgr.AddEvent(this, &LootRoll::Finalize, EVENT_LOOT_ROLL_FINALIZE, 60000, 1,0);
+	sEventMgr.AddEvent(lootroll_shared_from_this(), &LootRoll::Finalize, EVENT_LOOT_ROLL_FINALIZE, 60000, 1,0);
 	_groupcount = groupcount;
 	_guid = guid;
 	_slotid = slotid;
@@ -665,7 +669,13 @@ LootRoll::~LootRoll()
 
 void LootRoll::Finalize()
 {
-	sEventMgr.RemoveEvents(this);
+	if( !mLootLock.AttemptAcquire() ) // only one finalization, please. players on different maps can roll, too, so this is needed.
+	{
+		sEventMgr.RemoveEvents(shared_from_this());
+		return;
+	}
+
+	sEventMgr.RemoveEvents(shared_from_this());
 
 	// this we will have to finalize with groups types.. for now
 	// we'll just assume need before greed. person with highest roll
@@ -677,23 +687,6 @@ void LootRoll::Finalize()
 
 	WorldPacket data(34);
 
-/*
-	Player * gplr = NULL;
-	for(std::map<uint64, uint32>::iterator itr = NeedRolls.begin(); itr != NeedRolls.end(); ++itr)
-	{
-		gplr = _mgr->GetPlayer((uint32)itr->first);
-		if(gplr) break;
-	}
-	
-	if(!gplr)
-	{
-		for(std::map<uint64, uint32>::iterator itr = GreedRolls.begin(); itr != GreedRolls.end(); ++itr)
-		{
-			gplr = _mgr->GetPlayer((uint32)itr->first);
-			if(gplr) break;
-		}
-	}
-*/
 	for(std::map<uint32, uint32>::iterator itr = m_NeedRolls.begin(); itr != m_NeedRolls.end(); ++itr)
 	{
 		if(itr->second > highest)
@@ -702,14 +695,6 @@ void LootRoll::Finalize()
 			player = itr->first;
 			hightype = NEED;
 		}
-		/*
-		data.Initialize(SMSG_LOOT_ROLL);
-		data << _guid << _slotid << itr->first;
-		data << _itemid << _itemunk1 << _itemunk2;
-		data << uint8(itr->second) << uint8(NEED);
-		if(gplr && gplr->GetGroup())
-			gplr->GetGroup()->SendPacketToAll(&data);
-		*/
 	}
 
 	if(!highest)
@@ -722,14 +707,6 @@ void LootRoll::Finalize()
 				player = itr->first;
 				hightype = GREED;
 			}
-		/*
-		data.Initialize(SMSG_LOOT_ROLL);
-		data << _guid << _slotid << itr->first;
-		data << _itemid << _itemunk1 << _itemunk2;
-		data << uint8(itr->second) << uint8(GREED);
-		if(gplr && gplr->GetGroup())
-			gplr->GetGroup()->SendPacketToAll(&data);
-		*/
 		}
 	}
 
@@ -737,38 +714,42 @@ void LootRoll::Finalize()
 	uint32 guidtype = GET_TYPE_FROM_GUID(_guid);
 	if( guidtype == HIGHGUID_TYPE_UNIT )
 	{
-		Creature * pc = _mgr->GetCreature(GET_LOWGUID_PART(_guid));
+		CreaturePointer pc = _mgr->GetCreature(GET_LOWGUID_PART(_guid));
 		if(pc) pLoot = &pc->m_loot;
 	}
 	else if( guidtype == HIGHGUID_TYPE_GAMEOBJECT )
 	{
-		GameObject * go = _mgr->GetGameObject(GET_LOWGUID_PART(_guid));
+		shared_ptr<GameObject> go = _mgr->GetGameObject(GET_LOWGUID_PART(_guid));
 		if(go) pLoot = &go->m_loot;
 	}
 
 	if(!pLoot)
 	{
-		delete this;
+		// should never happen w/ shared ptrs
+		//delete this;
 		return;
 	}
 
 	if(_slotid >= pLoot->items.size())
 	{
-		delete this;
+		// also should never happen... just return.
 		return;
 	}
 
-	pLoot->items.at(_slotid).roll = NULL;
+	// set this so we're not deleted yet.
+	shared_ptr<LootRoll> pThis = pLoot->items.at(_slotid).roll;
+
+	pLoot->items.at(_slotid).roll = NULLROLL;
 
 	uint32 itemid = pLoot->items.at(_slotid).item.itemproto->ItemId;
 	uint32 amt = pLoot->items.at(_slotid).iItemsCount;
 	if(!amt)
 	{
-		delete this;
+		//delete this; we're about to be deleted regardless
 		return;
 	}
 
-	Player * _player = (player) ? _mgr->GetPlayer((uint32)player) : 0;
+	PlayerPointer _player = (player) ? _mgr->GetPlayer((uint32)player) : NULLPLR;
 	if(!player || !_player)
 	{
 		/* all passed */
@@ -788,11 +769,10 @@ void LootRoll::Finalize()
 
 		/* item can now be looted by anyone :) */
 		pLoot->items.at(_slotid).passed = true;
-		delete this;
+		//delete this; we're already deleted ffs
 		return;
 	}
 
-    pLoot->items.at(_slotid).roll = 0;
 	data.Initialize(SMSG_LOOT_ROLL_WON);
 	data << _guid << _slotid << _itemid << _itemunk1 << _itemunk2;
 	data << _player->GetGUID() << uint8(highest) << uint8(hightype);
@@ -806,23 +786,23 @@ void LootRoll::Finalize()
 	int8 error;
 	if((error = _player->GetItemInterface()->CanReceiveItem(it, 1, NULL)))
 	{
-		_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, error);
+		_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, error);
 		return;
 	}
 
-	Item * add = _player->GetItemInterface()->FindItemLessMax(itemid, amt, false);
+	ItemPointer add = _player->GetItemInterface()->FindItemLessMax(itemid, amt, false);
 
 	if (!add)
 	{
 		SlotResult slotresult = _player->GetItemInterface()->FindFreeInventorySlot(it);
 		if(!slotresult.Result)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_INVENTORY_FULL);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_INVENTORY_FULL);
 			return;
 		}
 
 		DEBUG_LOG("AutoLootItem MISC");
-		Item *item = objmgr.CreateItem( itemid, _player);
+		shared_ptr<Item>item = objmgr.CreateItem( itemid, _player);
 
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
 		if(pLoot->items.at(_slotid).iRandomProperty!=NULL)
@@ -843,7 +823,10 @@ void LootRoll::Finalize()
 			sQuestMgr.OnPlayerItemPickup(_player,item);
 		}
 		else
-			delete item;
+		{
+			item->Destructor();
+			item = NULLITEM;
+		}
 	}
 	else 
 	{	
@@ -857,7 +840,7 @@ void LootRoll::Finalize()
 	// this gets sent to all looters
 	data.Initialize(SMSG_LOOT_REMOVED);
 	data << uint8(_slotid);
-	Player * plr;
+	PlayerPointer plr;
 	for(LooterSet::iterator itr = pLoot->looters.begin(); itr != pLoot->looters.end(); ++itr)
 	{
 		if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
@@ -872,13 +855,15 @@ void LootRoll::Finalize()
 	else
 		_player->GetSession()->SendPacket(&idata);*/
 
-	delete this;
+	// delete this; so many deletes. overkill much?
 }
 
-void LootRoll::PlayerRolled(Player *player, uint8 choice)
+void LootRoll::PlayerRolled(shared_ptr<Player>player, uint8 choice)
 {
 	if(m_NeedRolls.find(player->GetLowGUID()) != m_NeedRolls.end() || m_GreedRolls.find(player->GetLowGUID()) != m_GreedRolls.end())
 		return; // dont allow cheaters
+
+	mLootLock.Acquire();
 
 	int roll = RandomUInt(99)+1;
 	// create packet
@@ -911,10 +896,14 @@ void LootRoll::PlayerRolled(Player *player, uint8 choice)
 	// check for early completion
 	if(!--_remaining)
 	{
+		mLootLock.Release(); // so we can call the other lock in a sec.
 		// kill event early
 		//sEventMgr.RemoveEvents(this);
 		Finalize();
+		return;
 	}
+
+	mLootLock.Release();
 }
 
 void LootMgr::FillItemLoot(Loot *loot, uint32 loot_id)

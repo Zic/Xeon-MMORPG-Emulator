@@ -218,7 +218,7 @@ public:
 	~QuestLogEntry();
 
 	HEARTHSTONE_INLINE Quest* GetQuest() { return m_quest; };
-	void Init(Quest* quest, Player* plr, uint32 slot);
+	void Init(Quest* quest, PlayerPointer plr, uint32 slot);
 
 	bool CanBeFinished();
 	void SubtractTime(uint32 value);
@@ -230,9 +230,9 @@ public:
 	void SetMobCount(uint32 i, uint32 count);
 	void SetPlayerSlainCount(uint32 count);
 
-	bool IsUnitAffected(Unit* target);
+	bool IsUnitAffected(UnitPointer target);
 	HEARTHSTONE_INLINE bool IsCastQuest() { return iscastquest;}
-	void AddAffectedUnit(Unit* target);
+	void AddAffectedUnit(UnitPointer target);
 	void ClearAffectedUnits();
 
 	void SetSlot(int32 i);
@@ -256,7 +256,7 @@ private:
 	bool mDirty;
 
 	Quest *m_quest;
-	Player *m_plr;
+	shared_ptr<Player>m_plr;
 	
 	uint32 m_mobcount[4];
 	uint32 m_explored_areas[4];

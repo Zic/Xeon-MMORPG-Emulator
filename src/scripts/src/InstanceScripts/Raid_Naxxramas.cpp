@@ -21,7 +21,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    CarrionSpinnerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    CarrionSpinnerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -47,19 +47,19 @@ public:
 		spells[1].attackstoptimer = 2000; // 2sec
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -75,7 +75,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -126,7 +126,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    DreadCreeperAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    DreadCreeperAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -147,19 +147,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -175,7 +175,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -227,7 +227,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    NaxxCultistAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    NaxxCultistAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -248,19 +248,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -276,7 +276,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -329,7 +329,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    NecroStalkerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    NecroStalkerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -350,19 +350,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -378,7 +378,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -428,7 +428,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    TombHorrorAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    TombHorrorAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -449,19 +449,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -477,7 +477,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -530,7 +530,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    NecroAcolyteAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    NecroAcolyteAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -557,19 +557,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -585,7 +585,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -640,7 +640,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    MaexxnaAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MaexxnaAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -679,19 +679,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -707,7 +707,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -767,7 +767,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    WidowFaerlinaAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    WidowFaerlinaAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -794,21 +794,21 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Slay them in the master's name!");
 		_unit->PlaySoundToSet(8794);
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		if(Rand(25.0f))
 		{
@@ -822,7 +822,7 @@ public:
 		}
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "The master... will avenge me!");
         _unit->PlaySoundToSet(8798);
@@ -841,7 +841,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -901,7 +901,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    AnubAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    AnubAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -932,7 +932,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		m_attackstart = true;
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
@@ -955,7 +955,7 @@ public:
 			
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
 		m_attackstart = false;
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
@@ -963,13 +963,13 @@ public:
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
         _unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Shhh... it will all be over soon.");
         _unit->PlaySoundToSet(8789);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1014,7 +1014,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1072,7 +1072,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    BileRetcherAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    BileRetcherAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -1099,19 +1099,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1127,7 +1127,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1178,7 +1178,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    PatchworkGolemAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    PatchworkGolemAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -1205,19 +1205,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1233,7 +1233,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1284,7 +1284,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    StickedSpewerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    StickedSpewerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -1311,19 +1311,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1339,7 +1339,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1390,7 +1390,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    SurgicalAssistantAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    SurgicalAssistantAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -1411,19 +1411,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1439,7 +1439,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1490,7 +1490,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    SludgeBelcherAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    SludgeBelcherAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -1517,19 +1517,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1545,7 +1545,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1596,7 +1596,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    PatchwerkAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    PatchwerkAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -1617,7 +1617,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 
@@ -1633,20 +1633,20 @@ public:
 		}
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "No more play?");
 		_unit->PlaySoundToSet(8912);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "What happened to... Patch...");
 		_unit->PlaySoundToSet(8911);
@@ -1664,7 +1664,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1716,7 +1716,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    GrobbulusAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    GrobbulusAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -1743,20 +1743,20 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		_unit->CastSpell(_unit, spells[0].info, spells[0].instant);
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1772,7 +1772,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1825,7 +1825,7 @@ public:
 	SP_AI_Spell spells[3];
 	bool m_spellcheck[3];
 
-    GluthAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    GluthAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 3;
@@ -1858,23 +1858,23 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1890,7 +1890,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -1942,7 +1942,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    InfGhoulAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    InfGhoulAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -1964,19 +1964,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2000,7 +2000,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2050,7 +2050,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    StonekinGargoyleAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    StonekinGargoyleAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -2078,19 +2078,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2114,7 +2114,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2165,7 +2165,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    EyeStalkAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    EyeStalkAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -2185,19 +2185,19 @@ public:
 		spells[0].attackstoptimer = 7000; // 1sec
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2213,7 +2213,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2265,7 +2265,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    BonyConstructAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    BonyConstructAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -2286,19 +2286,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2314,7 +2314,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2365,7 +2365,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    DeathLordAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    DeathLordAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -2386,19 +2386,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2414,7 +2414,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2465,7 +2465,7 @@ public:
 	SP_AI_Spell spells[1];
 	bool m_spellcheck[1];
 
-    DeathknightCaptainAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    DeathknightCaptainAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 1;
@@ -2486,19 +2486,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -2514,7 +2514,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2566,7 +2566,7 @@ public:
 	SP_AI_Spell spells[2];
 	bool m_spellcheck[2];
 
-    RazuviousAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    RazuviousAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 2;
@@ -2593,19 +2593,19 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		if(Rand(50.0f))
 		{
@@ -2619,7 +2619,7 @@ public:
 		}
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "An honorable... death...");
 		_unit->PlaySoundToSet(8860);
@@ -2637,7 +2637,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2691,7 +2691,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    MograineAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MograineAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -2737,7 +2737,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		m_attackstart = true;
 		if(Rand(50.0f))
@@ -2760,7 +2760,7 @@ public:
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
 		m_attackstart = false;
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
@@ -2768,7 +2768,7 @@ public:
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		if(Rand(50.0f))
 		{
@@ -2782,7 +2782,7 @@ public:
 		}
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "i am released.");
 		_unit->PlaySoundToSet(8838);
@@ -2845,7 +2845,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -2922,7 +2922,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    KorthazzAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    KorthazzAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -2968,7 +2968,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		m_attackstart = true;
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Come out and fight ye wee ninny!");
@@ -2977,7 +2977,7 @@ public:
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
 		m_attackstart = false;
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
@@ -2985,13 +2985,13 @@ public:
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "next time. bring more friends!");
 		_unit->PlaySoundToSet(8901);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "what a bloody waste this is!");
 		_unit->PlaySoundToSet(8900);
@@ -3055,7 +3055,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -3126,7 +3126,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    BlaumeuxAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    BlaumeuxAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -3172,7 +3172,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		m_attackstart = true;
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Defend yourself!");
@@ -3181,7 +3181,7 @@ public:
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
 		m_attackstart = false;
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
@@ -3189,13 +3189,13 @@ public:
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Who's next?");
 		_unit->PlaySoundToSet(8894);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Tou...che.");
 		_unit->PlaySoundToSet(8893);
@@ -3259,7 +3259,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;
@@ -3330,7 +3330,7 @@ public:
 	SP_AI_Spell spells[4];
 	bool m_spellcheck[4];
 
-    ZeliekAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    ZeliekAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		// -- Number of spells to add --
 		nrspells = 4;
@@ -3376,7 +3376,7 @@ public:
 
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		m_attackstart = true;
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Flee before its too late!");
@@ -3385,7 +3385,7 @@ public:
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
 		m_attackstart = false;
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
@@ -3393,13 +3393,13 @@ public:
         RemoveAIUpdateEvent();
     }
 
-	void OnTargetDied(Unit* mTarget)
+	void OnTargetDied(UnitPointer mTarget)
     { 
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Forgive me!");
 		_unit->PlaySoundToSet(8915);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "it is... as it should be.");
 		_unit->PlaySoundToSet(8914);
@@ -3463,7 +3463,7 @@ public:
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())
         {
 			float comulativeperc = 0;
-		    Unit *target = NULL;
+		    UnitPointer target = NULLUNIT;
 			for(int i=0;i<nrspells;i++)
 			{
 				if(!spells[i].perctrigger) continue;

@@ -102,7 +102,7 @@ World::World()
 	}
 }
 
-uint32 World::GetMaxLevel(Player * plr)
+uint32 World::GetMaxLevel(PlayerPointer plr)
 {
 	uint32 level = 60; // Classic World of Warcraft
 	if( plr->GetSession()->HasFlag(WMI_INSTANCE_XPACK_01) )
@@ -162,9 +162,6 @@ World::~World()
 
 	Log.Notice("TaxiMgr", "~TaxiMgr()");
 	delete TaxiMgr::getSingletonPtr();
-	
-	Log.Notice("BattlegroundMgr", "~BattlegroundMgr()");
-	delete CBattlegroundManager::getSingletonPtr();
 
 	Log.Notice("ChatHandler", "~ChatHandler()");
 	delete ChatHandler::getSingletonPtr();
@@ -429,7 +426,7 @@ bool World::SetInitialWorldSettings()
 	FillSpellReplacementsTable();
 	sLog.outString("");*/
 
-#define MAKE_TASK(sp, ptr) tl.AddTask(new Task(new CallbackP0<sp>(sp::getSingletonPtr(), &sp::ptr)))
+#define MAKE_TASK(sp, ptr) tl.AddTask(new Task(new NoSharedPtrCallbackP0<sp>(sp::getSingletonPtr(), &sp::ptr)))
 	// Fill the task list with jobs to do.
 	TaskList tl;
 	Storage_FillTaskList(tl);
@@ -535,7 +532,7 @@ bool World::SetInitialWorldSettings()
 		Log.Notice("World", "Backgrounding loot loading...");
 
 		// loot background loading in a lower priority thread.
-		ThreadPool.ExecuteTask(new BasicTaskExecutor(new CallbackP0<LootMgr>(LootMgr::getSingletonPtr(), &LootMgr::LoadCreatureLoot), 
+		ThreadPool.ExecuteTask(new BasicTaskExecutor(new NoSharedPtrCallbackP0<LootMgr>(LootMgr::getSingletonPtr(), &LootMgr::LoadCreatureLoot), 
 			BTE_PRIORITY_LOW));
 	}
 	else
@@ -546,7 +543,8 @@ bool World::SetInitialWorldSettings()
 
 	Channel::LoadConfSettings();
 	Log.Notice("BattlegroundManager", "Starting...");
-	new CBattlegroundManager;
+	shared_ptr<CBattlegroundManager> BattlegroundMgr = shared_ptr<CBattlegroundManager>(new CBattlegroundManager);
+	BattlegroundMgr->Init();
 
 	dw = new DayWatcherThread();
 	ThreadPool.ExecuteTask( dw );
@@ -621,7 +619,7 @@ bool World::SetInitialWorldSettings()
 		}
 	}
 
-	sEventMgr.AddEvent(this, &World::CheckForExpiredInstances, EVENT_WORLD_UPDATEAUCTIONS, 120000, 0, 0);
+	sEventMgr.AddEvent(CAST(World,shared_from_this()), &World::CheckForExpiredInstances, EVENT_WORLD_UPDATEAUCTIONS, 120000, 0, 0);
 	return true;
 }
 
@@ -679,7 +677,7 @@ void World::SendFactionMessage(WorldPacket *packet, uint8 teamId)
 {
 	m_sessionlock.AcquireReadLock();
 	SessionMap::iterator itr;
-	Player * plr;
+	PlayerPointer plr;
 	for(itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
 	{
 		plr = itr->second->GetPlayer();
@@ -1162,9 +1160,10 @@ void TaskList::waitForThreadsToExit()
 	}
 }
 
-void World::DeleteObject(Object * obj)
+void World::DeleteObject(ObjectPointer obj)
 {
-	delete obj;
+	obj->Destructor();
+	obj = NULLOBJ;
 }
 
 void World::Rehash(bool load)
@@ -1467,7 +1466,7 @@ void World::PollMailboxInsertQueue(DatabaseConnection * con)
 {
 	QueryResult * result;
 	Field * f;
-	Item * pItem;
+	ItemPointer pItem;
 	uint32 itemid;
 	uint32 stackcount;
 
@@ -1607,7 +1606,7 @@ void World::PollMailboxInsertQueue(DatabaseConnection * con)
 {
 	QueryResult * result;
 	Field * f;
-	Item * pItem;
+	ItemPointer pItem;
 	uint32 itemid;
 	uint32 stackcount;
 
@@ -1623,7 +1622,7 @@ void World::PollMailboxInsertQueue(DatabaseConnection * con)
 
 			if( itemid != 0 )
 			{
-				pItem = objmgr.CreateItem( itemid, NULL );
+				pItem = objmgr.CreateItem( itemid, NULLPLR );
 				if( pItem != NULL )
 				{
 					pItem->SetUInt32Value( ITEM_FIELD_STACK_COUNT, stackcount );
@@ -1631,14 +1630,17 @@ void World::PollMailboxInsertQueue(DatabaseConnection * con)
 				}
 			}
 			else
-				pItem = NULL;
+				pItem = NULLITEM;
 
 			Log.Notice("MailboxQueue", "Sending message to %u (item: %u)...", f[1].GetUInt32(), itemid);
 			sMailSystem.SendAutomatedMessage( 0, f[0].GetUInt64(), f[1].GetUInt64(), f[2].GetString(), f[3].GetString(), f[5].GetUInt32(),
 				0, pItem ? pItem->GetGUID() : 0, f[4].GetUInt32() );
 
 			if( pItem != NULL )
-				delete pItem;
+			{
+				pItem->Destructor();
+				pItem = NULLITEM;
+			}
 
 		} while ( result->NextRow() );
 		delete result;
@@ -1779,7 +1781,7 @@ void World::PollCharacterInsertQueue(DatabaseConnection * con)
 			inf->lastOnline = UNIXTIME;
 			inf->lastZone = 0;
 			inf->m_Group=NULL;
-			inf->m_loggedInPlayer=NULL;
+			inf->m_loggedInPlayer=NULLPLR;
 			inf->guild=NULL;
 			inf->guildRank=NULL;
 			inf->guildMember=NULL;
@@ -1972,7 +1974,7 @@ void World::UpdateShutdownStatus()
 	else
 	{
 		// shutting down?
-		sEventMgr.RemoveEvents(this, EVENT_WORLD_SHUTDOWN);
+		sEventMgr.RemoveEvents(CAST(World,shared_from_this()), EVENT_WORLD_SHUTDOWN);
 		if( m_shutdownTime )
 		{
 			SendWorldText("Server is saving and shutting down. You will be disconnected shortly.", NULL);
@@ -2007,7 +2009,7 @@ void World::QueueShutdown(uint32 delay, uint32 type)
 	m_shutdownType = type;
 
 	// add event
-	sEventMgr.AddEvent(this, &World::UpdateShutdownStatus, EVENT_WORLD_SHUTDOWN, 50, 0, 0);
+	sEventMgr.AddEvent(CAST(World,shared_from_this()), &World::UpdateShutdownStatus, EVENT_WORLD_SHUTDOWN, 50, 0, 0);
 
 	// send message
 	char buf[1000];

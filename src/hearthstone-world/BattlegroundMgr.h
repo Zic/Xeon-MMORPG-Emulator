@@ -103,7 +103,6 @@ struct BGScore
 #define AV_CONTROLED_STORMPIKE_AID_STATION_ALLIANCE  0x52D //1 -> alliance controled
 #define AV_CONTROLED_STONEHEART_GRAVE_ALLIANCE  0x516 //1 -> alliance controled
 
-/* get level grouping for player */
 static inline uint32 GetLevelGrouping(uint32 level)
 {
 	if(level < 10)
@@ -132,7 +131,7 @@ static inline uint32 GetLevelGrouping(uint32 level)
 class CBattlegroundManager : public Singleton<CBattlegroundManager>, public EventableObject
 {
 	/* Battleground Instance Map */
-	map<uint32, CBattleground*> m_instances[BATTLEGROUND_NUM_TYPES];
+	map<uint32, shared_ptr<CBattleground>> m_instances[BATTLEGROUND_NUM_TYPES];
 	Mutex m_instanceLock;
 
 	/* Max Id */
@@ -153,13 +152,14 @@ class CBattlegroundManager : public Singleton<CBattlegroundManager>, public Even
 public:
 	CBattlegroundManager();
 	~CBattlegroundManager();
+	void Init();
 
 	/* Packet Handlers */
 	void HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType);
 	void HandleArenaJoin(WorldSession * m_session, uint32 BattlegroundType, uint8 as_group, uint8 rated_match);
 
 	/* Player Logout Handler */
-	void OnPlayerLogout(Player * plr);
+	void OnPlayerLogout(PlayerPointer plr);
 
 	/* Handler On Update Event */
 	void EventQueueUpdate(bool forceStart);
@@ -168,20 +168,20 @@ public:
 	void HandleBattlegroundJoin(WorldSession * m_session, WorldPacket & pck);
 
 	/* Remove Player From All Queues */
-	void RemovePlayerFromQueues(Player * plr);
+	void RemovePlayerFromQueues(PlayerPointer plr);
 	void RemoveGroupFromQueues(Group * grp);
 
 	/* Create a battleground instance of type x */
-	CBattleground * CreateInstance(uint32 Type, uint32 LevelGroup);
+	shared_ptr<CBattleground> CreateInstance(uint32 Type, uint32 LevelGroup);
 
 	/* Can we create a new instance of type x level group y? (NO LOCK!) */
 	bool CanCreateInstance(uint32 Type, uint32 LevelGroup);
 
 	/* Deletes a battleground (called from MapMgr) */
-	void DeleteBattleground(CBattleground * bg);
+	void DeleteBattleground(shared_ptr<CBattleground> bg);
 
 	/* Build SMSG_BATTLEFIELD_STATUS */
-	//void SendBattlefieldStatus(Player * plr, uint32 Status, uint32 Type, uint32 InstanceID, uint32 Time, uint32 MapId, uint8 RatedMatch);
+	//void SendBattlefieldStatus(PlayerPointer plr, uint32 Status, uint32 Type, uint32 InstanceID, uint32 Time, uint32 MapId, uint8 RatedMatch);
 
 	/* Gets ArenaTeam info from group */
 	uint32 GetArenaGroupQInfo(Group * group, int type, uint32 *avgRating);
@@ -190,15 +190,15 @@ public:
 	int CreateArenaType(int type, Group * group1, Group * group2);
 
 	/* Add player to bg team */
-	void AddPlayerToBgTeam(CBattleground * bg, deque<Player*> *playerVec, uint32 i, uint32 j, int Team);
+	void AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j, int Team);
 
 	/* Add player to bg */
-	void AddPlayerToBg(CBattleground * bg, deque<Player*> *playerVec, uint32 i, uint32 j);
+	void AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player>> *playerVec, uint32 i, uint32 j);
 
 	/* Add a group to an arena */
-	void AddGroupToArena(CBattleground * bg, Group * group, int nteam);
+	void AddGroupToArena(shared_ptr<CBattleground> bg, Group * group, int nteam);
 
-	void SendBattlegroundQueueStatus(Player * plr, uint32 queueSlot);
+	void SendBattlegroundQueueStatus(PlayerPointer plr, uint32 queueSlot);
 
 	/* Gets the average queue time (from last 10 players) */
 	uint32 GetAverageQueueTime(uint32 BgType);
@@ -214,7 +214,7 @@ protected:
 	Group * m_groups[2];
 
 	time_t m_nextPvPUpdateTime;
-	MapMgr * m_mapMgr;
+	shared_ptr<MapMgr> m_mapMgr;
 	uint32 m_id;
 	uint32 m_type;
 	uint32 m_levelGroup;
@@ -227,7 +227,7 @@ public:
 	friend class AVNode;
 
 	/* Team->Player Map */
-	set<Player*> m_players[2];
+	set<shared_ptr<Player>> m_players[2];
 	void Lock() { m_mainLock.Acquire(); }
 	void Unlock() { m_mainLock.Release(); }
 	HEARTHSTONE_INLINE bool IsArena() { return (m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5); }
@@ -257,7 +257,7 @@ protected:
 	uint8 m_losingteam;
 
 	/* resurrect queue */
-	map<Creature*, set<uint32> > m_resurrectMap;
+	map<CreaturePointer, set<uint32> > m_resurrectMap;
 	uint32 m_lastResurrect;
 
 	bool m_isWeekend;
@@ -267,39 +267,39 @@ public:
 	void SendChatMessage(uint32 Type, uint64 Guid, const char * Format, ...);
 
 	/* Hook Functions */
-	virtual void HookOnPlayerDeath(Player * plr) = 0;
+	virtual void HookOnPlayerDeath(PlayerPointer plr) = 0;
 
 	/* Repopping - different battlegrounds have different ways of handling this */
-	virtual bool HookHandleRepop(Player * plr) = 0;
+	virtual bool HookHandleRepop(PlayerPointer plr) = 0;
 
 	/* In CTF battlegrounds mounting will cause you to lose your flag. */
-	virtual void HookOnMount(Player * plr) = 0;
+	virtual void HookOnMount(PlayerPointer plr) = 0;
 
 	/* Only used in CTF (as far as I know) */
-	virtual void HookFlagDrop(Player * plr, GameObject * obj) = 0;
-	virtual void HookFlagStand(Player * plr, GameObject * obj) = 0;
+	virtual void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj) = 0;
+	virtual void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj) = 0;
 
-	/* Used when a player kills a unit/player */
-	virtual void HookOnPlayerKill(Player * plr, Unit * pVictim) = 0;
-	virtual void HookOnHK(Player * plr) = 0;
+	/* Used when a player kills a unit/PlayerPointer */
+	virtual void HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim) = 0;
+	virtual void HookOnHK(PlayerPointer plr) = 0;
 
 	/* On Area Trigger */
-	virtual void HookOnAreaTrigger(Player * plr, uint32 id) = 0;
+	virtual void HookOnAreaTrigger(PlayerPointer plr, uint32 id) = 0;
 
 	/* On Shadow Sight */
 	virtual void HookOnShadowSight() = 0;
 
 	/* Used to generate loot for players (AV) */
-	virtual void HookGenerateLoot(Player *plr, Corpse *pCorpse) = 0;
+	virtual void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse) = 0;
 	virtual bool SupportsPlayerLoot() = 0;
 
 	/* Retreival Functions */
 	HEARTHSTONE_INLINE uint32 GetId() { return m_id; }
 	HEARTHSTONE_INLINE uint32 GetLevelGroup() { return m_levelGroup; }
-	HEARTHSTONE_INLINE MapMgr* GetMapMgr() { return m_mapMgr; }
+	HEARTHSTONE_INLINE shared_ptr<MapMgr> GetMapMgr() { return m_mapMgr; }
 
 	/* Creating a battleground requires a pre-existing map manager */
-	CBattleground(MapMgr * mgr, uint32 id, uint32 levelgroup, uint32 type);
+	CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgroup, uint32 type);
 	virtual ~CBattleground();
 
 	/* Has it ended? */
@@ -307,7 +307,7 @@ public:
 	HEARTHSTONE_INLINE bool HasStarted() { return m_started; }
 
 	/* Send the pvp log data of all players to this player. */
-	void SendPVPData(Player * plr);
+	void SendPVPData(PlayerPointer plr);
 
 	/* Get the starting position for this team. */
 	virtual LocationVector GetStartingCoords(uint32 Team) = 0;
@@ -330,20 +330,20 @@ public:
 	/* Are we full? */
 	bool HasFreeSlots(uint32 Team) {m_mainLock.Acquire(); bool res = ((m_players[Team].size() + m_pendPlayers[Team].size()) < m_playerCountPerTeam); m_mainLock.Release(); return res; }
 
-	/* Add Player */
-	void AddPlayer(Player * plr, uint32 team);
-	virtual void OnAddPlayer(Player * plr) = 0;
+	/* Add shared_ptr<Player>*/
+	void AddPlayer(PlayerPointer plr, uint32 team);
+	virtual void OnAddPlayer(PlayerPointer plr) = 0;
 
-	/* Remove Player */
-	void RemovePlayer(Player * plr, bool logout);
-	virtual void OnRemovePlayer(Player * plr) = 0;
+	/* Remove PlayerPointer */
+	void RemovePlayer(PlayerPointer plr, bool logout);
+	virtual void OnRemovePlayer(PlayerPointer plr) = 0;
 
-	/* Port Player */
-	void PortPlayer(Player * plr, bool skip_teleport = false);
+	/* Port shared_ptr<Player>*/
+	void PortPlayer(PlayerPointer plr, bool skip_teleport = false);
 	virtual void OnCreate() = 0;
 
-	/* Remove pending player */
-	void RemovePendingPlayer(Player * plr);
+	/* Remove pending shared_ptr<Player>*/
+	void RemovePendingPlayer(PlayerPointer plr);
 
 	/* Gets the number of free slots */
 	uint32 GetFreeSlots(uint32 t)
@@ -354,8 +354,8 @@ public:
 		return (uint32)s;
 	}
 
-	GameObject * SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
-	Creature * SpawnCreature(uint32 entry,float x, float y, float z, float o);
+	shared_ptr<GameObject> SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
+	CreaturePointer SpawnCreature(uint32 entry,float x, float y, float z, float o);
 	void UpdatePvPData();
 
 	HEARTHSTONE_INLINE uint32 GetStartTime() { return m_startTime; }
@@ -373,22 +373,22 @@ public:
 	void Close();
 	virtual void OnClose() {}
 
-	Creature * SpawnSpiritGuide(float x, float y, float z, float o, uint32 horde);
+	CreaturePointer SpawnSpiritGuide(float x, float y, float z, float o, uint32 horde);
 
 	HEARTHSTONE_INLINE uint32 GetLastResurrect() { return m_lastResurrect; }
-	void AddSpiritGuide(Creature * pCreature);
-	void RemoveSpiritGuide(Creature * pCreature);
-	void QueuePlayerForResurrect(Player * plr, Creature * spirit_healer);
-	void RemovePlayerFromResurrect(Player * plr, Creature * spirit_healer);
+	void AddSpiritGuide(CreaturePointer pCreature);
+	void RemoveSpiritGuide(CreaturePointer pCreature);
+	void QueuePlayerForResurrect(PlayerPointer plr, CreaturePointer spirit_healer);
+	void RemovePlayerFromResurrect(PlayerPointer plr, CreaturePointer spirit_healer);
 	void EventResurrectPlayers();
-	virtual bool CanPlayerJoin(Player * plr);
-	virtual bool CreateCorpse(Player * plr) { return true; }
-	virtual bool HookSlowLockOpen(GameObject * pGo, Player * pPlayer, Spell * pSpell) { return false; }
+	virtual bool CanPlayerJoin(PlayerPointer plr);
+	virtual bool CreateCorpse(PlayerPointer plr) { return true; }
+	virtual bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell) { return false; }
 
 	void BuildPvPUpdateDataPacket(WorldPacket * data);
 	virtual uint8 Rated() { return 0; }
-	void OnPlayerPushed(Player* plr);
-	void QueueAtNearestSpiritGuide(Player *plr, Creature *old);
+	void OnPlayerPushed(PlayerPointer plr);
+	void QueueAtNearestSpiritGuide(shared_ptr<Player>plr, CreaturePointer old);
 	void GiveHonorToTeam(uint32 team, uint32 amt);
 
 	virtual void SetIsWeekend(bool isweekend) {}

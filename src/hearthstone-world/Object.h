@@ -120,21 +120,6 @@ class Player;
 class MapCell;
 class MapMgr;
 
-/**
- * casting defines
- */
-
-#define TO_PLAYER(ptr) ((Player*)(ptr))
-#define TO_UNIT(ptr) ((Unit*)(ptr))
-#define TO_CREATURE(ptr) ((Creature*)(ptr))
-#define TO_PET(ptr) ((Pet*)(ptr))
-#define TO_CONTAINER(ptr) ((Container*)(ptr))
-#define TO_ITEM(ptr) ((Item*)(ptr))
-#define TO_OBJECT(ptr) ((Object*)(ptr))
-#define TO_GAMEOBJECT(ptr) ((GameObject*)(ptr))
-#define TO_DYNAMICOBJECT(ptr) ((DynamicObject*)(ptr))
-#define TO_CORPSE(ptr) ((Corpse*)(ptr))
-
 //====================================================================
 //  Object
 //  Base object for every item, unit, player, corpse, container, etc
@@ -142,10 +127,12 @@ class MapMgr;
 class SERVER_DECL Object : public EventableObject
 {
 public:
-	typedef std::set<Object*> InRangeSet;
+	typedef std::set<shared_ptr<Object>> InRangeSet;
 	typedef std::map<string, void*> ExtensionSet;
 
 	virtual ~Object ( );
+	virtual void Destructor();
+	virtual void Init();
 
 	virtual void Update ( uint32 time ) { }
   //! True if object exists in world
@@ -153,8 +140,8 @@ public:
 	
 	HEARTHSTONE_INLINE bool IsInWorld() { return m_mapMgr != NULL; }
 	virtual void AddToWorld();
-	virtual void AddToWorld(MapMgr * pMapMgr);
-	void PushToWorld(MapMgr*);
+	virtual void AddToWorld(shared_ptr<MapMgr> pMapMgr);
+	void PushToWorld(shared_ptr<MapMgr>);
 	virtual void OnPushToWorld() { }
 	virtual void OnPrePushToWorld() { }
 	virtual void RemoveFromWorld(bool free_guid);
@@ -180,19 +167,19 @@ public:
 	bool IsPet();
 
 	//! This includes any nested objects we have, inventory for example.
-	virtual uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, Player *target );
-	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer *buf, Player *target );
+	virtual uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
+	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer *buf, shared_ptr<Player>target );
 	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer * buf, UpdateMask * mask );
 	uint32 __fastcall BuildOutOfRangeUpdateBlock( ByteBuffer *buf );
 
 	WorldPacket* BuildFieldUpdatePacket(uint32 index,uint32 value);
-	void BuildFieldUpdatePacket(Player* Target, uint32 Index, uint32 Value);
+	void BuildFieldUpdatePacket(PlayerPointer Target, uint32 Index, uint32 Value);
 	void BuildFieldUpdatePacket(ByteBuffer * buf, uint32 Index, uint32 Value);
 
-	void DealDamage(Unit *pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras = false);
+	void DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras = false);
 	
 
-	virtual void DestroyForPlayer( Player *target ) const;
+	virtual void DestroyForPlayer( shared_ptr<Player>target ) const;
 
 	void BuildHeartBeatMsg( WorldPacket *data ) const;
 	WorldPacket * BuildTeleportAckMsg( const LocationVector & v);
@@ -223,10 +210,10 @@ public:
 	HEARTHSTONE_INLINE LocationVector * GetPositionV() { return &m_position; }
 
 	//Distance Calculation
-	float CalcDistance(Object* Ob);
+	float CalcDistance(ObjectPointer Ob);
 	float CalcDistance(float ObX, float ObY, float ObZ);
-	float CalcDistance(Object *Oa, Object *Ob);
-	float CalcDistance(Object *Oa, float ObX, float ObY, float ObZ);
+	float CalcDistance(shared_ptr<Object>Oa, shared_ptr<Object>Ob);
+	float CalcDistance(shared_ptr<Object>Oa, float ObX, float ObY, float ObZ);
 	float CalcDistance(float OaX, float OaY, float OaZ, float ObX, float ObY, float ObZ);
 
 	//! Only for MapMgr use
@@ -234,7 +221,7 @@ public:
 	//! Only for MapMgr use
 	HEARTHSTONE_INLINE void SetMapCell(MapCell* cell) { m_mapCell = cell; }
 	//! Only for MapMgr use
-	HEARTHSTONE_INLINE MapMgr* GetMapMgr() const { return m_mapMgr; }
+	HEARTHSTONE_INLINE shared_ptr<MapMgr> GetMapMgr() const { return m_mapMgr; }
 
 	HEARTHSTONE_INLINE void SetMapId(uint32 newMap) { m_mapId = newMap; }
 	void SetZoneId(uint32 newZone);
@@ -303,14 +290,14 @@ public:
 	bool HasUpdateField(uint32 index) { return m_updateMask.GetBit(index); }
 
 	//use it to check if a object is in range of another
-	bool isInRange(Object* target, float range);
+	bool isInRange(ObjectPointer target, float range);
 
 	// Use it to Check if a object is in front of another one
-	bool isInFront(Object* target);
-	bool isInBack(Object* target);
+	bool isInFront(ObjectPointer target);
+	bool isInBack(ObjectPointer target);
 	
 	// Check to see if an object is in front of a target in a specified arc (in degrees)
-	bool isInArc(Object* target , float degrees); 
+	bool isInArc(ObjectPointer target , float degrees); 
 
 	/* Calculates the angle between two Positions */
 	float calcAngle( float Position1X, float Position1Y, float Position2X, float Position2Y );
@@ -319,7 +306,7 @@ public:
 	/* converts to 360 > x > 0 */
 	float getEasyAngle( float angle );
 
-	HEARTHSTONE_INLINE const float GetDistanceSq(Object* obj)
+	HEARTHSTONE_INLINE const float GetDistanceSq(ObjectPointer obj)
 	{
 		if(obj->GetMapId() != m_mapId) return 40000.0f; //enough for out of range
 		return m_position.DistanceSq(obj->GetPosition());
@@ -340,7 +327,7 @@ public:
 		return m_position.DistanceSq(x, y, z);
 	}
 
-	HEARTHSTONE_INLINE const float GetDistance2dSq( Object* obj )
+	HEARTHSTONE_INLINE const float GetDistance2dSq( ObjectPointer obj )
 	{
 		if( obj->GetMapId() != m_mapId )
 			return 40000.0f; //enough for out of range
@@ -348,28 +335,23 @@ public:
 	}
 
 	// In-range object management, not sure if we need it
-	HEARTHSTONE_INLINE bool IsInRangeSet( Object* pObj )
+	HEARTHSTONE_INLINE bool IsInRangeSet( ObjectPointer pObj )
 	{
 		return !( m_objectsInRange.find( pObj ) == m_objectsInRange.end() );
 	}
 	
-	virtual void AddInRangeObject(Object* pObj)
+	virtual void AddInRangeObject(ObjectPointer pObj)
 	{
 		if( pObj == NULL )
 			return;
 
 		m_objectsInRange.insert( pObj );
 
-		// NOTES: Since someone will come along and try and change it.
-		// Don't reinrepret_cast has to be used static_cast will not work when we are
-		// inside the class we are casting from if we want to cast up the inheritance
-		// chain, as Object has no concept of Player.
-
 		if( pObj->GetTypeId() == TYPEID_PLAYER )
-			m_inRangePlayers.insert( reinterpret_cast< Player* >( pObj ) );
+			m_inRangePlayers.insert( TO_PLAYER(pObj) );
 	}
 
-	HEARTHSTONE_INLINE void RemoveInRangeObject( Object* pObj )
+	HEARTHSTONE_INLINE void RemoveInRangeObject( ObjectPointer pObj )
 	{
 		if( pObj == NULL )
 			return;
@@ -383,10 +365,10 @@ public:
 		return ( m_objectsInRange.size() > 0 );
 	}
 
-	virtual void OnRemoveInRangeObject( Object * pObj )
+	virtual void OnRemoveInRangeObject( ObjectPointer pObj )
 	{
 		if( pObj->GetTypeId() == TYPEID_PLAYER )
-			m_inRangePlayers.erase( reinterpret_cast< Player* >( pObj ) );
+			m_inRangePlayers.erase( TO_PLAYER(pObj) );
 	}
 
 	virtual void ClearInRangeSet()
@@ -400,7 +382,7 @@ public:
 	HEARTHSTONE_INLINE size_t GetInRangePlayersCount() { return m_inRangePlayers.size();}
 	HEARTHSTONE_INLINE InRangeSet::iterator GetInRangeSetBegin() { return m_objectsInRange.begin(); }
 	HEARTHSTONE_INLINE InRangeSet::iterator GetInRangeSetEnd() { return m_objectsInRange.end(); }
-	HEARTHSTONE_INLINE InRangeSet::iterator FindInRangeSet(Object * obj) { return m_objectsInRange.find(obj); }
+	HEARTHSTONE_INLINE InRangeSet::iterator FindInRangeSet(ObjectPointer obj) { return m_objectsInRange.find(obj); }
 
 	void RemoveInRangeObject(InRangeSet::iterator itr)
 	{ 
@@ -408,11 +390,11 @@ public:
 		m_objectsInRange.erase(itr);
 	}
 
-	HEARTHSTONE_INLINE bool RemoveIfInRange( Object * obj )
+	HEARTHSTONE_INLINE bool RemoveIfInRange( ObjectPointer obj )
 	{
 		InRangeSet::iterator itr = m_objectsInRange.find(obj);
 		if( obj->GetTypeId() == TYPEID_PLAYER )
-			m_inRangePlayers.erase( reinterpret_cast< Player* >( obj ) );
+			m_inRangePlayers.erase( TO_PLAYER(obj) );
 
 		if( itr == m_objectsInRange.end() )
 			return false;
@@ -421,23 +403,23 @@ public:
 		return true;
 	}
 
-	HEARTHSTONE_INLINE void AddInRangePlayer( Object * obj )
+	HEARTHSTONE_INLINE void AddInRangePlayer( ObjectPointer obj )
 	{
-		m_inRangePlayers.insert( reinterpret_cast< Player* >( obj ) );
+		m_inRangePlayers.insert( TO_PLAYER(obj) );
 	}
 
-	HEARTHSTONE_INLINE void RemoveInRangePlayer( Object * obj )
+	HEARTHSTONE_INLINE void RemoveInRangePlayer( ObjectPointer obj )
 	{
-		m_inRangePlayers.erase( reinterpret_cast< Player* >( obj ) );
+		m_inRangePlayers.erase( TO_PLAYER(obj) );
 	}
 
-	bool IsInRangeOppFactSet(Object* pObj) { return (m_oppFactsInRange.count(pObj) > 0); }
+	bool IsInRangeOppFactSet(ObjectPointer pObj) { return (m_oppFactsInRange.count(pObj) > 0); }
 	void UpdateOppFactionSet();
-	HEARTHSTONE_INLINE std::set<Object*>::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
-	HEARTHSTONE_INLINE std::set<Object*>::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
-	HEARTHSTONE_INLINE std::set<Player*>::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
-	HEARTHSTONE_INLINE std::set<Player*>::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
-	HEARTHSTONE_INLINE std::set<Player*> * GetInRangePlayerSet() { return &m_inRangePlayers; };
+	HEARTHSTONE_INLINE std::set<shared_ptr<Object>>::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Object>>::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player>>::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player>>::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
+	HEARTHSTONE_INLINE std::set<shared_ptr<Player>> * GetInRangePlayerSet() { return &m_inRangePlayers; };
 
 	void __fastcall SendMessageToSet(WorldPacket *data, bool self,bool myteam_only=false);
 	HEARTHSTONE_INLINE void SendMessageToSet(StackPacket * data, bool self) { OutPacketToSet(data->GetOpcode(), (uint16)data->GetSize(), data->GetBufferPointer(), self); }
@@ -461,14 +443,14 @@ public:
 	float m_base_runSpeed;
 	float m_base_walkSpeed;
 
-	void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false);
+	void SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false);
 	
 	//*****************************************************************************************
 	//* SpellLog packets just to keep the code cleaner and better to read
 	//*****************************************************************************************
-	void SendSpellLog(Object *Caster, Object *Target,uint32 Ability, uint8 SpellLogType);
-	void SendSpellNonMeleeDamageLog( Object* Caster, Unit* Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToSet );
-	void SendAttackerStateUpdate( Unit* Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate );
+	void SendSpellLog(shared_ptr<Object>Caster, shared_ptr<Object>Target,uint32 Ability, uint8 SpellLogType);
+	void SendSpellNonMeleeDamageLog( ObjectPointer Caster, UnitPointer Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToSet );
+	void SendAttackerStateUpdate( UnitPointer Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate );
 
 	//object faction
 	void _setFaction();
@@ -484,30 +466,30 @@ public:
 
 	bool Active;
 	bool CanActivate();
-	void Activate(MapMgr * mgr);
-	void Deactivate(MapMgr * mgr);
+	void Activate(shared_ptr<MapMgr> mgr);
+	void Deactivate(shared_ptr<MapMgr> mgr);
 	bool m_inQueue;
-	HEARTHSTONE_INLINE void SetMapMgr(MapMgr * mgr) { m_mapMgr = mgr; }
+	HEARTHSTONE_INLINE void SetMapMgr(shared_ptr<MapMgr> mgr) { m_mapMgr = mgr; }
 
 	void Delete()
 	{
 		if(IsInWorld())
 			RemoveFromWorld(true);
-		delete this;
+		Destructor();
 	}
 
 	void GMScriptEvent(void * function, uint32 argc, uint32 * argv, uint32 * argt);
 	HEARTHSTONE_INLINE size_t GetInRangeOppFactCount() { return m_oppFactsInRange.size(); }
 	void PlaySoundToSet(uint32 sound_entry);
-	void EventSpellHit(Spell *pSpell);
+	void EventSpellHit(SpellPointer pSpell);
 
-	bool PhasedCanInteract(Object* pObj);
+	bool PhasedCanInteract(ObjectPointer pObj);
 	bool HasPhase() { return m_phaseMode != 0; }
 	void EnablePhase(int32 phaseMode);
 	void DisablePhase(int32 phaseMode);
 	void SetPhase(int32 phase); // Don't fucking use this.
 
-	Aura * m_phaseAura;
+	shared_ptr<Aura>m_phaseAura;
 
 protected:
 	Object (  );
@@ -516,12 +498,12 @@ protected:
 	void _Create( uint32 mapid, float x, float y, float z, float ang);
 
 	//! Mark values that need updating for specified player.
-	virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
+	virtual void _SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
 	//! Mark values that player should get when he/she/it sees object for first time.
-	virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
+	virtual void _SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
 
-	void _BuildMovementUpdate( ByteBuffer *data, uint8 flags, uint32 flags2, Player* target );
-	void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask, Player* target );
+	void _BuildMovementUpdate( ByteBuffer *data, uint8 flags, uint32 flags2, PlayerPointer target );
+	void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask, PlayerPointer target );
 
 	/* Main Function called by isInFront(); */
 	bool inArc(float Position1X, float Position1Y, float FOV, float Orientation, float Position2X, float Position2Y );
@@ -544,7 +526,7 @@ protected:
 	//! Continent/map id.
 	uint32 m_mapId;
 	//! Map manager
-	MapMgr *m_mapMgr;
+	shared_ptr<MapMgr> m_mapMgr;
 	//! Current map cell
 	MapCell *m_mapCell;
 
@@ -572,9 +554,9 @@ protected:
 
 	//! Set of Objects in range.
 	//! TODO: that functionality should be moved into WorldServer.
-	std::set<Object*> m_objectsInRange;
-	std::set<Player*> m_inRangePlayers;
-	std::set<Object*> m_oppFactsInRange;
+	std::set<shared_ptr<Object>> m_objectsInRange;
+	std::set<shared_ptr<Player>> m_inRangePlayers;
+	std::set<shared_ptr<Object>> m_oppFactsInRange;
    
   
 	//! Remove object from map
@@ -624,7 +606,7 @@ public:
 	HEARTHSTONE_INLINE uint32 GetHealth() { return m_uint32Values[UNIT_FIELD_HEALTH]; }
 	HEARTHSTONE_INLINE uint32 GetMaxHealth() { return m_uint32Values[UNIT_FIELD_MAXHEALTH]; }
 
-	bool IsInLineOfSight(Object* pObj);
+	bool IsInLineOfSight(ObjectPointer pObj);
 	int32 GetSpellBaseCost(SpellEntry *sp);
 
 	/************************************************************************/

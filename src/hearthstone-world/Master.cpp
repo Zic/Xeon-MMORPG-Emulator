@@ -232,7 +232,7 @@ bool Master::Run(int argc, char ** argv)
 	//ScriptSystem->Reload();
 
 	new EventMgr;
-	new World;
+	shared_ptr<World> shWorld = shared_ptr<World>(new World); // Need this so we're not deleted.
 
 	// open cheat log file
 	Anticheat_Log = new SessionLogWriter(FormatOutputString( "logs", "cheaters", false).c_str(), false );

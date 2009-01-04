@@ -4,29 +4,29 @@
 class MidsummerRibbonPoleAI : public GameObjectAIScript
 {
 public:
-	MidsummerRibbonPoleAI(GameObject *obj) : GameObjectAIScript(obj) {}
-	void OnActivate(Player * pPlayer)
+	MidsummerRibbonPoleAI(GameObjectPointer obj) : GameObjectAIScript(obj) {}
+	void OnActivate(PlayerPointer  pPlayer)
 	{
 		SpellCastTargets ct;
-		Spell *ps;
+		SpellPointer ps;
 		SpellEntry *spe = dbcSpell.LookupEntryForced(29727);
 		if( spe == NULL )
 			return;
 
 		ct.m_unitTarget = _gameobject->GetGUID();
 		ct.m_targetMask = TARGET_FLAG_OBJECT;
-		ps = new Spell(pPlayer, spe, false, NULL);
+		ps = SpellPointer(new Spell(pPlayer, spe, false, NULLAURA));
 		ps->prepare(&ct);
 	}
 
-	static GameObjectAIScript *Create(GameObject *obj) { return new MidsummerRibbonPoleAI(obj); }
+	static GameObjectAIScript *Create(GameObjectPointer obj) { return new MidsummerRibbonPoleAI(obj); }
 };
 
-bool TestRibbonPoleChannel(uint32 i, Aura *pAura, bool apply)
+bool TestRibbonPoleChannel(uint32 i, AuraPointer pAura, bool apply)
 {
 	if(i == 0)
 	{
-		Unit *pTarget = pAura->GetTarget();
+		UnitPointer pTarget = pAura->GetTarget();
 		if( pTarget != NULL )
 		{
 			if( apply )
@@ -39,11 +39,11 @@ bool TestRibbonPoleChannel(uint32 i, Aura *pAura, bool apply)
 	return true;
 }
 
-bool TriggerRibbonDance(uint32 i, Spell *pSpell)
+bool TriggerRibbonDance(uint32 i, SpellPointer pSpell)
 {
 	if( pSpell->u_caster != NULL && i == 0 )
 	{
-		Aura * pAura = pSpell->u_caster->FindAura(29175);
+		AuraPointer pAura = pSpell->u_caster->FindAura(29175);
 		if( pAura != NULL )
 		{
 			// increase duration by 3 minutes, capping at 60 minutes

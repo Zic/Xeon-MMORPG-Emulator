@@ -60,7 +60,7 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 	std::string inviteeName;
 	recv_data >> inviteeName;
 
-	Player *plyr = objmgr.GetPlayer( inviteeName.c_str() , false);
+	shared_ptr<Player>plyr = objmgr.GetPlayer( inviteeName.c_str() , false);
 	Guild *pGuild = _player->m_playerInfo->guild;
 	
 	if(!plyr)
@@ -113,12 +113,12 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 
 void WorldSession::HandleGuildAccept(WorldPacket & recv_data)
 {
-	Player *plyr = GetPlayer();
+	shared_ptr<Player>plyr = GetPlayer();
 
 	if(!plyr)
 		return;
 
-	Player *inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
+	shared_ptr<Player>inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
 	plyr->UnSetGuildInvitersGuid();
 
 	if(!inviter)
@@ -144,12 +144,12 @@ void WorldSession::HandleGuildDecline(WorldPacket & recv_data)
 {
 	WorldPacket data;
 
-	Player *plyr = GetPlayer();
+	shared_ptr<Player>plyr = GetPlayer();
 
 	if(!plyr)
 		return;
 
-	Player *inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
+	shared_ptr<Player>inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
 	plyr->UnSetGuildInvitersGuid(); 
 
 	if(!inviter)
@@ -540,7 +540,7 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 	recv_data >> crap3 >> crap4 >> crap5 >> crap6 >> crap7 >> crap8 >> crap9 >> crap10 >> crap11
 		>> crap12 >> crap13 >> crap14 >> arena_index >> crap15;
 
-	Creature * crt = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(creature_guid));
+	CreaturePointer crt = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(creature_guid));
 	if(!crt)
 	{
 		Disconnect();
@@ -592,19 +592,19 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 		SlotResult res = _player->GetItemInterface()->FindFreeInventorySlot(ip);
 		if(res.Result == 0)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(0, 0, INV_ERR_INVENTORY_FULL);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_INVENTORY_FULL);
 			return;
 		}
 
 		error = _player->GetItemInterface()->CanReceiveItem(ip,1, NULL);
 		if(error)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(NULL,NULL,error);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM,NULLITEM,error);
 		}
 		else
 		{
 			// Create the item and charter
-			Item * i = objmgr.CreateItem(item_ids[arena_type], _player);
+			ItemPointer i = objmgr.CreateItem(item_ids[arena_type], _player);
 			Charter * c = objmgr.CreateCharter(_player->GetLowGUID(), (CharterTypes)arena_index);
 			c->GuildName = name;
 			c->ItemGuid = i->GetGUID();
@@ -616,7 +616,8 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 			if( !_player->GetItemInterface()->AddItemToFreeSlot(i) )
 			{
 				c->Destroy();
-				delete i;
+				i->Destructor();
+				i = NULLITEM;
 				return;
 			}
 
@@ -660,14 +661,14 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 		SlotResult res = _player->GetItemInterface()->FindFreeInventorySlot(ip);
 		if(res.Result == 0)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(0, 0, INV_ERR_INVENTORY_FULL);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_INVENTORY_FULL);
 			return;
 		}
 
 		error = _player->GetItemInterface()->CanReceiveItem(ItemPrototypeStorage.LookupEntry(ITEM_ENTRY_GUILD_CHARTER),1, NULL);
 		if(error)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(NULL,NULL,error);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM,NULLITEM,error);
 		}
 		else
 		{
@@ -678,7 +679,7 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 			SendPacket(&data);
 
 			// Create the item and charter
-			Item * i = objmgr.CreateItem(ITEM_ENTRY_GUILD_CHARTER, _player);
+			ItemPointer i = objmgr.CreateItem(ITEM_ENTRY_GUILD_CHARTER, _player);
 			c = objmgr.CreateCharter(_player->GetLowGUID(), CHARTER_TYPE_GUILD);
 			c->GuildName = name;
 			c->ItemGuid = i->GetGUID();
@@ -691,7 +692,8 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 			if( !_player->GetItemInterface()->AddItemToFreeSlot(i) )
 			{
 				c->Destroy();
-				delete i;
+				i->Destructor();
+				i = NULLITEM;
 				return;
 			}
 
@@ -713,7 +715,7 @@ void WorldSession::HandleCharterBuy(WorldPacket & recv_data)
 	}
 }
 
-void SendShowSignatures(Charter * c, uint64 i, Player * p)
+void SendShowSignatures(Charter * c, uint64 i, PlayerPointer p)
 {
 	WorldPacket data(SMSG_PETITION_SHOW_SIGNATURES, 100);
 	data << i;
@@ -843,7 +845,7 @@ void WorldSession::HandleCharterOffer( WorldPacket & recv_data )
 	recv_data >> shit >> item_guid >> target_guid;
 	
 	if(!_player->IsInWorld()) return;
-	Player * pTarget = _player->GetMapMgr()->GetPlayer((uint32)target_guid);
+	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer((uint32)target_guid);
 	pCharter = objmgr.GetCharterByItemGuid(item_guid);
 
 	if( pCharter == NULL )
@@ -902,7 +904,7 @@ void WorldSession::HandleCharterSign( WorldPacket & recv_data )
 	_player->m_playerInfo->charterId[c->CharterType] = c->GetID();
 	_player->SaveToDB(false);
 
-	Player * l = _player->GetMapMgr()->GetPlayer(c->GetLeader());
+	PlayerPointer l = _player->GetMapMgr()->GetPlayer(c->GetLeader());
 	if(l == 0)
 		return;
 
@@ -1241,8 +1243,8 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 	{
 		GuildBankTab * pSourceTab;
 		GuildBankTab * pDestTab;
-		Item * pSourceItem;
-		Item * pDestItem;
+		ItemPointer pSourceItem;
+		ItemPointer pDestItem;
 		uint8 dest_bank;
 		uint8 dest_bankslot;
 		uint8 source_bank;
@@ -1307,7 +1309,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		}
 		else
 		{
-			/* insert the new item */
+			/* insert the new ItemPointer */
 			CharacterDatabase.Execute("REPLACE INTO guild_bankitems VALUES(%u, %u, %u, %u)", 
 				pGuild->GetGuildId(), (uint32)pSourceTab->iTabId, (uint32)source_bankslot, pDestItem->GetLowGUID());
 		}
@@ -1320,7 +1322,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		}
 		else
 		{
-			/* insert the new item */
+			/* insert the new ItemPointer */
 			CharacterDatabase.Execute("REPLACE INTO guild_bankitems VALUES(%u, %u, %u, %u)", 
 				pGuild->GetGuildId(), (uint32)pDestTab->iTabId, (uint32)dest_bankslot, pSourceItem->GetLowGUID());
 		}
@@ -1334,9 +1336,9 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		uint8 withdraw_stack=0;
 		uint8 deposit_stack=0;
 		GuildBankTab * pTab;
-		Item * pSourceItem;
-		Item * pDestItem;
-		Item * pSourceItem2;
+		ItemPointer pSourceItem;
+		ItemPointer pDestItem;
+		ItemPointer pSourceItem2;
 
 		/* read packet */
 		recv_data >> dest_bank;
@@ -1381,7 +1383,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 
 			if(dest_bankslot==0xff)
 			{
-				_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_BAG_FULL);
+				_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_BAG_FULL);
 				return;
 			}
 		}
@@ -1393,7 +1395,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 		/* check if we're pulling an item from the bank, make sure we're not cheating. */
 		pDestItem = pTab->pSlots[dest_bankslot];
 
-		/* grab the source/destination item */
+		/* grab the source/destination ItemPointer */
 		if(source_bagslot == 1 && source_slot == 0)
 		{
 			// find a free bag slot
@@ -1406,7 +1408,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			SlotResult sr = _player->GetItemInterface()->FindFreeInventorySlot(pDestItem->GetProto());
 			if(!sr.Result)
 			{
-				_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_BAG_FULL);
+				_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_BAG_FULL);
 				return;
 			}
 
@@ -1438,7 +1440,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 
 		if( source_bagslot == 0xff && source_slot < INVENTORY_SLOT_ITEM_START || source_slot == 0xff )
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_CANT_DROP_SOULBOUND);
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_CANT_DROP_SOULBOUND);
 			return;
 		}
 
@@ -1453,7 +1455,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			// make sure its not a soulbound item
 			if(pSourceItem->IsSoulbound() || pSourceItem->GetProto()->Class == ITEM_CLASS_QUEST)
 			{
-				_player->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_CANT_DROP_SOULBOUND);
+				_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_CANT_DROP_SOULBOUND);
 				return;
 			}
 
@@ -1495,7 +1497,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			else
 			{
 				/* that slot in the bank is now empty. */
-				pTab->pSlots[dest_bankslot] = NULL;
+				pTab->pSlots[dest_bankslot] = NULLITEM;
 				CharacterDatabase.Execute("DELETE FROM guild_bankitems WHERE guildId = %u AND tabId = %u AND slotId = %u",
 					pGuild->GetGuildId(), (uint32)pTab->iTabId, (uint32)dest_bankslot);
 			}			
@@ -1507,7 +1509,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			CharacterDatabase.Execute("REPLACE INTO guild_bankitems VALUES(%u, %u, %u, %u)", 
 				pGuild->GetGuildId(), (uint32)pTab->iTabId, (uint32)dest_bankslot, pSourceItem->GetLowGUID());
 
-			/* remove the item's association with the player */
+			/* remove the item's association with the shared_ptr<Player>/
 			pSourceItem->SetOwner(NULL);
 			pSourceItem->SetUInt32Value(ITEM_FIELD_OWNER, 0);
 			pSourceItem->SaveToDB(0, 0, true, NULL);
@@ -1537,7 +1539,8 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 				if(!_player->GetItemInterface()->AddItemToFreeSlot(pDestItem))
 				{
 					//pDestItem->DeleteFromDB();
-					delete pDestItem;
+					pDestItem->Destructor();
+					pDestItem = NULLITEM;
 				}
 			}
 			else
@@ -1555,7 +1558,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 
 void WorldSession::HandleGuildBankOpenVault(WorldPacket & recv_data)
 {
-	GameObject * pObj;
+	shared_ptr<GameObject> pObj;
 	uint64 guid;
 
 	if(!_player->IsInWorld() || _player->m_playerInfo->guild==NULL)
@@ -1639,7 +1642,7 @@ void Guild::SendGuildBank(WorldSession * pClient, GuildBankTab * pTab, int8 upda
 	uint32 count=0;
 	WorldPacket data(SMSG_GUILD_BANK_LIST, 1100);
 	GuildMember * pMember = pClient->GetPlayer()->m_playerInfo->guildMember;
-	Item *pItem;
+	shared_ptr<Item>pItem;
 
 	if(pMember==NULL || !pMember->pRank->CanPerformBankCommand(GR_RIGHT_GUILD_BANK_VIEW_TAB, pTab->iTabId))
 		return;

@@ -77,7 +77,7 @@ public:
 	}
 
 	LocalizedQuest *			GetLocalizedQuest(uint32 id, uint32 language);
-	LocalizedItem *				GetLocalizedItem(uint32 id, uint32 language);
+	LocalizedItem*				GetLocalizedItem(uint32 id, uint32 language);
 	LocalizedNpcText *			GetLocalizedNpcText(uint32 id, uint32 language);
 	LocalizedCreatureName *		GetLocalizedCreatureName(uint32 id, uint32 language);
 	LocalizedGameObjectName *	GetLocalizedGameObjectName(uint32 id, uint32 language);

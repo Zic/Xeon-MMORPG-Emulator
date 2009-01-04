@@ -72,7 +72,7 @@ void WorldStateManager::UpdateWorldState(uint32 uWorldStateId, uint32 uValue)
 	// otherwise abort
 	if( itr == m_states.end() )
 	{
-		printf("!!! WARNING: We are setting world state %u to %u on map %u, but uninitialized !!!\n", uWorldStateId, uValue, m_mapMgr.GetMapId());
+		printf("!!! WARNING: We are setting world state %u to %u on map %u, but uninitialized !!!\n", uWorldStateId, uValue, m_mapMgr->GetMapId());
 		CreateWorldState(uWorldStateId, uValue);
 		itr = m_states.find(uWorldStateId);
 		if( itr == m_states.end() )
@@ -92,13 +92,13 @@ void WorldStateManager::UpdateWorldState(uint32 uWorldStateId, uint32 uValue)
 	data << uWorldStateId << uValue;
 
 	// send to the appropriate players
-	m_mapMgr.SendPacketToPlayers(itr->second.ZoneMask, itr->second.FactionMask, &data);
+	m_mapMgr->SendPacketToPlayers(itr->second.ZoneMask, itr->second.FactionMask, &data);
 
 	// release the lock
 	//m_lock.Release();
 }
 
-void WorldStateManager::SendWorldStates(Player *pPlayer)
+void WorldStateManager::SendWorldStates(shared_ptr<Player>pPlayer)
 {
 	// be threadsafe! wear a mutex!
 	//m_lock.Acquire();
@@ -108,7 +108,7 @@ void WorldStateManager::SendWorldStates(Player *pPlayer)
 	uint32 state_count = 0;
 
 	// header
-	data << m_mapMgr.GetMapId();
+	data << m_mapMgr->GetMapId();
 	//data << m_property1;
 	//data << m_property2;
 	data << pPlayer->GetZoneId();
@@ -141,7 +141,7 @@ void WorldStateManager::SendWorldStates(Player *pPlayer)
 	pPlayer->GetSession()->SendPacket(&data);	
 }
 
-void WorldStateManager::ClearWorldStates(Player *pPlayer)
+void WorldStateManager::ClearWorldStates(shared_ptr<Player>pPlayer)
 {
 	// clears the clients view of world states for this map
 	uint8 msgdata[10];
@@ -224,7 +224,7 @@ void WorldStateTemplateManager::LoadFromDB()
 	delete pResult;
 }
 
-void WorldStateTemplateManager::ApplyMapTemplate(MapMgr *pmgr)
+void WorldStateTemplateManager::ApplyMapTemplate(shared_ptr<MapMgr>pmgr)
 {
 	WorldStateTemplateList::iterator itr = m_templatesForMaps[pmgr->GetMapId()].begin();
 	WorldStateTemplateList::iterator itrend = m_templatesForMaps[pmgr->GetMapId()].end();

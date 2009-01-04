@@ -115,7 +115,7 @@ public:
 
 	void StartMailSystem();
 	MailError DeliverMessage(uint64 recipent, MailMessage* message);
-	void RemoveMessageIfDeleted(uint32 message_id, Player * plr);
+	void RemoveMessageIfDeleted(uint32 message_id, PlayerPointer plr);
 	void SaveMessageToSQL(MailMessage * message);
 	void SendAutomatedMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body, uint32 money,
 		uint32 cod, uint64 item_guid, uint32 stationary);

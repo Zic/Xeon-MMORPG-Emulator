@@ -45,9 +45,9 @@ static const uint32 g_hordeStateFields_UI[TOWER_COUNT]		= {	WORLDSTATE_ZANGARMAR
 static const uint32 g_allianceStateFields_UI[TOWER_COUNT]	= {	WORLDSTATE_ZANGARMARSH_EAST_ALLIANCE_UI,	WORLDSTATE_ZANGARMARSH_WEST_ALLIANCE_UI};
 static const uint32 g_neutralStateFields_UI[TOWER_COUNT]	= {	WORLDSTATE_ZANGARMARSH_EAST_NEUTRAL_UI,		WORLDSTATE_ZANGARMARSH_WEST_NEUTRAL_UI};
 
-void ZMSpawnBanners(MapMgr *bmgr, int32 side);
+void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side);
 
-void SetGrave(MapMgr *pmgr)
+void SetGrave(shared_ptr<MapMgr> pmgr)
 {
 	if(pmgr->GetMapId() != 530)
 		return;
@@ -91,7 +91,7 @@ void SetGrave(MapMgr *pmgr)
 	}
 }
 
-HEARTHSTONE_INLINE void UpdateTowerCountZM(MapMgr * mgr)
+HEARTHSTONE_INLINE void UpdateTowerCountZM(shared_ptr<MapMgr> mgr)
 {
 	if( ZMg_superiorTeam == 0 && ZMg_allianceTowers != TOWER_COUNT )
 	{
@@ -139,7 +139,7 @@ class ZangarmarshBannerAI : public GameObjectAIScript
 
 public:
 
-	ZangarmarshBannerAI(GameObject *go) : GameObjectAIScript(go)
+	ZangarmarshBannerAI(GameObjectPointer go) : GameObjectAIScript(go)
 	{
 		m_bannerStatus = BANNER_STATUS_NEUTRAL;
 		Status = 50;
@@ -171,13 +171,13 @@ public:
 		//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 		//   doing lookups of objects that have already been updated
 
-		set<Player*>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
-		set<Player*>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
+		set<PlayerPointer>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
+		set<PlayerPointer>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
 		map<uint32,uint32>::iterator it2, it3;
 		uint32 timeptr = (uint32)UNIXTIME;
 		bool in_range;
 		bool is_valid;
-		Player *plr;
+		PlayerPointer plr;
 		
 		for(; itr != itrend; ++itr)
 		{
@@ -443,7 +443,7 @@ public:
 class SCRIPT_DECL ZMScouts : public GossipScript
 {
 public:
-	void GossipHello(Object* pObject, Player * plr, bool AutoSend)
+	void GossipHello(ObjectPointer pObject, PlayerPointer  plr, bool AutoSend)
 	{
 		uint32 Team = plr->GetTeam();
 		if(Team > 1) Team = 1;
@@ -460,12 +460,12 @@ public:
 			Menu->SendTo(plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player * plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
     {
 		if( plr == NULL )
 			return;
 		
-		Creature * pCreature = pObject->IsCreature() ? static_cast< Creature* >( pObject ) : NULL;
+		CreaturePointer  pCreature = pObject->IsCreature() ? TO_CREATURE( pObject ) : NULLCREATURE;
 		if( pCreature == NULL )
 			return;
 
@@ -486,10 +486,10 @@ public:
 class ZMCityBannerAI : public GameObjectAIScript
 {
 public:
-	ZMCityBannerAI(GameObject* goinstance) : GameObjectAIScript(goinstance) {}
-	static GameObjectAIScript *Create(GameObject * GO) { return new ZMCityBannerAI(GO); }
+	ZMCityBannerAI(GameObjectPointer goinstance) : GameObjectAIScript(goinstance) {}
+	static GameObjectAIScript *Create(GameObjectPointer  GO) { return new ZMCityBannerAI(GO); }
 
-	void OnActivate(Player * pPlayer)
+	void OnActivate(PlayerPointer  pPlayer)
 	{
 		if( pPlayer == NULL )
 			return;
@@ -533,7 +533,7 @@ public:
 // Zone Hook
 //////////////////////////////////////////////////////////////////////////
 
-void ZMZoneHook(Player *plr, uint32 Zone, uint32 OldZone)
+void ZMZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
 	if( Zone == ZONE_ZANGARMARSH )
 	{
@@ -566,7 +566,7 @@ struct sgodata
 	uint32 is_banner;
 };
 
-void ZMSpawnBanners(MapMgr *bmgr, int32 side)
+void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side)
 {
 	// -1 = neutral
 	//  0 = alliance
@@ -586,7 +586,7 @@ void ZMSpawnBanners(MapMgr *bmgr, int32 side)
 	const sgodata *b;
 	b = &gobdata[i];
 
-	GameObject *bGo = bmgr->GetInterface()->SpawnGameObject(b->entry, b->posx, b->posy, b->posz, b->facing, false, 0, 0);
+	GameObjectPointer bGo = bmgr->GetInterface()->SpawnGameObject(b->entry, b->posx, b->posy, b->posz, b->facing, false, 0, 0);
 	if( bGo == NULL )
 		return;
 
@@ -602,7 +602,7 @@ void ZMSpawnBanners(MapMgr *bmgr, int32 side)
 	bGo->PushToWorld(bmgr);
 }
 
-void ZMSpawnObjects(MapMgr *pmgr)
+void ZMSpawnObjects(shared_ptr<MapMgr> pmgr)
 {
 	if(pmgr->GetMapId() != 530)
 		return;
@@ -621,7 +621,7 @@ void ZMSpawnObjects(MapMgr *pmgr)
 	{
 		p = &godata[i];
 
-		GameObject *pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
 		if( pGo == NULL )
 			continue;
 
@@ -643,7 +643,7 @@ void ZMSpawnObjects(MapMgr *pmgr)
 	}
 }
 
-void Tokens(Player* pPlayer, Player* pVictim)
+void Tokens(PlayerPointer pPlayer, PlayerPointer pVictim)
 {
 	if( !pPlayer->HasAura(TWIN_SPIRE_BLESSING) || pPlayer->GetTeam() == pVictim->GetTeam() )
 		return;

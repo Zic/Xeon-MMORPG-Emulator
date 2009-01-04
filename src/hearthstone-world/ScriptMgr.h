@@ -21,7 +21,7 @@
 #define SCRIPTMGR_H
 
 #define SCRIPT_MODULE void*
-#define ADD_CREATURE_FACTORY_FUNCTION(cl) static CreatureAIScript * Create(Creature * c) { return new cl(c); }
+#define ADD_CREATURE_FACTORY_FUNCTION(cl) static CreatureAIScript * Create(CreaturePointer c) { return new cl(c); }
 
 class Channel;
 class Guild;
@@ -71,32 +71,32 @@ enum ScriptTypes
 
 /* Hook typedefs */
 typedef bool(*tOnNewCharacter)(uint32 Race, uint32 Class, WorldSession * Session, const char * Name);
-typedef void(*tOnKillPlayer)(Player * pPlayer, Player * pVictim);
-typedef void(*tOCharacterCreate)(Player * pPlayer);
-typedef void(*tOnFirstEnterWorld)(Player * pPlayer);
-typedef void(*tOnEnterWorld)(Player * pPlayer);
-typedef void(*tOnGuildCreate)(Player * pLeader, Guild * pGuild);
-typedef void(*tOnGuildJoin)(Player * pPlayer, Guild * pGuild);
-typedef void(*tOnDeath)(Player * pPlayer);
-typedef bool(*tOnRepop)(Player * pPlayer);
-typedef void(*tOnEmote)(Player * pPlayer, uint32 Emote);
-typedef void(*tOnEnterCombat)(Player * pPlayer, Unit * pTarget);
-typedef bool(*tOnCastSpell)(Player * pPlayer, SpellEntry * pSpell);
+typedef void(*tOnKillPlayer)(PlayerPointer pPlayer, PlayerPointer pVictim);
+typedef void(*tOCharacterCreate)(PlayerPointer pPlayer);
+typedef void(*tOnFirstEnterWorld)(PlayerPointer pPlayer);
+typedef void(*tOnEnterWorld)(PlayerPointer pPlayer);
+typedef void(*tOnGuildCreate)(PlayerPointer pLeader, Guild * pGuild);
+typedef void(*tOnGuildJoin)(PlayerPointer pPlayer, Guild * pGuild);
+typedef void(*tOnDeath)(PlayerPointer pPlayer);
+typedef bool(*tOnRepop)(PlayerPointer pPlayer);
+typedef void(*tOnEmote)(PlayerPointer pPlayer, uint32 Emote);
+typedef void(*tOnEnterCombat)(PlayerPointer pPlayer, UnitPointer pTarget);
+typedef bool(*tOnCastSpell)(PlayerPointer pPlayer, SpellEntry * pSpell);
 typedef void(*tOnTick)();
-typedef bool(*tOnLogoutRequest)(Player * pPlayer);
-typedef void(*tOnLogout)(Player * pPlayer);
-typedef void(*tOnQuestAccept)(Player * pPlayer, Quest * pQuest);
-typedef void(*tOnZone)(Player * pPlayer, uint32 Zone, uint32 OldZone);
-typedef bool(*ItemScript)(Item * pItem, Player * pPlayer);
-typedef void(*tOnQuestCancel)(Player * pPlayer, Quest * pQuest);
-typedef void(*tOnQuestFinished)(Player * pPlayer, Quest * pQuest);
-typedef void(*tOnHonorableKill)(Player * pPlayer, Player * pKilled);
-typedef void(*tOnArenaFinish)(Player * pPlayer, uint32 type, ArenaTeam * pTeam, bool victory, bool rated);
-typedef void(*tOnContinentCreate)(MapMgr *mgr);
-typedef void(*tOnPostSpellCast)(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
-typedef void(*tOnAreaTrigger)(Player * plr, uint32 areatrigger);
-typedef void(*tOnPlayerSaveToDB)(Player* pPlayer, QueryBuffer* buf);
-typedef void(*tOnAuraRemove)(Player * pPlayer, uint32 spellID);
+typedef bool(*tOnLogoutRequest)(PlayerPointer pPlayer);
+typedef void(*tOnLogout)(PlayerPointer pPlayer);
+typedef void(*tOnQuestAccept)(PlayerPointer pPlayer, Quest * pQuest);
+typedef void(*tOnZone)(PlayerPointer pPlayer, uint32 Zone, uint32 OldZone);
+typedef bool(*ItemScript)(ItemPointer pItem, PlayerPointer pPlayer);
+typedef void(*tOnQuestCancel)(PlayerPointer pPlayer, Quest * pQuest);
+typedef void(*tOnQuestFinished)(PlayerPointer pPlayer, Quest * pQuest);
+typedef void(*tOnHonorableKill)(PlayerPointer pPlayer, PlayerPointer pKilled);
+typedef void(*tOnArenaFinish)(PlayerPointer pPlayer, uint32 type, ArenaTeam * pTeam, bool victory, bool rated);
+typedef void(*tOnContinentCreate)(shared_ptr<MapMgr>mgr);
+typedef void(*tOnPostSpellCast)(PlayerPointer pPlayer, SpellEntry * pSpell, UnitPointer pTarget);
+typedef void(*tOnAreaTrigger)(PlayerPointer plr, uint32 areatrigger);
+typedef void(*tOnPlayerSaveToDB)(PlayerPointer pPlayer, QueryBuffer* buf);
+typedef void(*tOnAuraRemove)(PlayerPointer pPlayer, uint32 spellID);
 
 class Spell;
 class Aura;
@@ -109,10 +109,10 @@ struct ItemPrototype;
 class QuestLogEntry;
 
 /* Factory Imports (from script lib) */
-typedef CreatureAIScript*(*exp_create_creature_ai)(Creature * pCreature);
-typedef GameObjectAIScript*(*exp_create_gameobject_ai)(GameObject * pGameObject);
-typedef bool(*exp_handle_dummy_spell)(uint32 i, Spell * pSpell);
-typedef bool(*exp_handle_dummy_aura)(uint32 i, Aura * pAura, bool apply);
+typedef CreatureAIScript*(*exp_create_creature_ai)(CreaturePointer pCreature);
+typedef GameObjectAIScript*(*exp_create_gameobject_ai)(shared_ptr<GameObject> pGameObject);
+typedef bool(*exp_handle_dummy_spell)(uint32 i, shared_ptr<Spell>pSpell);
+typedef bool(*exp_handle_dummy_aura)(uint32 i, shared_ptr<Aura>pAura, bool apply);
 typedef void(*exp_script_register)(ScriptMgr * mgr);
 typedef uint32(*exp_get_script_type)();
 
@@ -140,12 +140,12 @@ public:
 	void LoadScripts();
 	void UnloadScripts();
 
-	CreatureAIScript * CreateAIScriptClassForEntry(Creature* pCreature);
-	GameObjectAIScript * CreateAIScriptClassForGameObject(uint32 uEntryId, GameObject* pGameObject);
+	CreatureAIScript * CreateAIScriptClassForEntry(CreaturePointer pCreature);
+	GameObjectAIScript * CreateAIScriptClassForGameObject(uint32 uEntryId, shared_ptr<GameObject> pGameObject);
 
-	bool CallScriptedDummySpell(uint32 uSpellId, uint32 i, Spell* pSpell);
-	bool CallScriptedDummyAura( uint32 uSpellId, uint32 i, Aura* pAura, bool apply);
-	bool CallScriptedItem(Item * pItem, Player * pPlayer);
+	bool CallScriptedDummySpell(uint32 uSpellId, uint32 i, SpellPointer pSpell);
+	bool CallScriptedDummyAura( uint32 uSpellId, uint32 i, AuraPointer  pAura, bool apply);
+	bool CallScriptedItem(ItemPointer pItem, PlayerPointer pPlayer);
 
 	void register_creature_script(uint32 entry, exp_create_creature_ai callback);
 	void register_gameobject_script(uint32 entry, exp_create_gameobject_ai callback);
@@ -174,32 +174,32 @@ protected:
 class SERVER_DECL CreatureAIScript
 {
 public:
-	CreatureAIScript(Creature* creature);
+	CreatureAIScript(CreaturePointer creature);
 	virtual ~CreatureAIScript() {};
 
-	virtual void OnCombatStart(Unit* mTarget) {}
-	virtual void OnCombatStop(Unit* mTarget) {}
-	virtual void OnDamageTaken(Unit* mAttacker, float fAmount) {}
+	virtual void OnCombatStart(UnitPointer mTarget) {}
+	virtual void OnCombatStop(UnitPointer mTarget) {}
+	virtual void OnDamageTaken(UnitPointer mAttacker, float fAmount) {}
 	virtual void OnCastSpell(uint32 iSpellId) {}
-	virtual void OnTargetParried(Unit* mTarget) {}
-	virtual void OnTargetDodged(Unit* mTarget) {}
-	virtual void OnTargetBlocked(Unit* mTarget, int32 iAmount) {}
-	virtual void OnTargetCritHit(Unit* mTarget, float fAmount) {}
-	virtual void OnTargetDied(Unit* mTarget) {}
-	virtual void OnParried(Unit* mTarget) {}
-	virtual void OnDodged(Unit* mTarget) {}
-	virtual void OnBlocked(Unit* mTarget, int32 iAmount) {}
-	virtual void OnCritHit(Unit* mTarget, float fAmount) {}
-	virtual void OnHit(Unit* mTarget, float fAmount) {}
-	virtual void OnDied(Unit *mKiller) {}
-	virtual void OnAssistTargetDied(Unit* mAssistTarget) {}
-	virtual void OnFear(Unit* mFeared, uint32 iSpellId) {}
-	virtual void OnFlee(Unit* mFlee) {}
+	virtual void OnTargetParried(UnitPointer mTarget) {}
+	virtual void OnTargetDodged(UnitPointer mTarget) {}
+	virtual void OnTargetBlocked(UnitPointer mTarget, int32 iAmount) {}
+	virtual void OnTargetCritHit(UnitPointer mTarget, float fAmount) {}
+	virtual void OnTargetDied(UnitPointer mTarget) {}
+	virtual void OnParried(UnitPointer mTarget) {}
+	virtual void OnDodged(UnitPointer mTarget) {}
+	virtual void OnBlocked(UnitPointer mTarget, int32 iAmount) {}
+	virtual void OnCritHit(UnitPointer mTarget, float fAmount) {}
+	virtual void OnHit(UnitPointer mTarget, float fAmount) {}
+	virtual void OnDied(shared_ptr<Unit>mKiller) {}
+	virtual void OnAssistTargetDied(UnitPointer mAssistTarget) {}
+	virtual void OnFear(UnitPointer mFeared, uint32 iSpellId) {}
+	virtual void OnFlee(UnitPointer mFlee) {}
 	virtual void OnCallForHelp() {}
 	virtual void OnLoad() {}
 	virtual void OnReachWP(uint32 iWaypointId, bool bForwards) {}
 	virtual void AIUpdate() {}
-	virtual void OnEmote(Player * pPlayer, EmoteType Emote) {}
+	virtual void OnEmote(PlayerPointer pPlayer, EmoteType Emote) {}
 	virtual void StringFunctionCall(const char * pFunc) {}
 
 	void RegisterAIUpdateEvent(uint32 frequency);
@@ -207,22 +207,22 @@ public:
 	void RemoveAIUpdateEvent();
 
 	virtual void Destroy() {}
-	Creature* GetUnit() { return _unit; }
+	CreaturePointer GetUnit() { return _unit; }
 
 protected:
-	Creature* _unit;
+	CreaturePointer _unit;
 };
 
 class SERVER_DECL GameObjectAIScript
 {
 public:
-	GameObjectAIScript(GameObject* goinstance);
+	GameObjectAIScript(shared_ptr<GameObject> goinstance);
 	virtual ~GameObjectAIScript() {}
 
 	virtual void OnCreate() {}
 	virtual void OnSpawn() {}
 	virtual void OnDespawn() {}
-	virtual void OnActivate(Player * pPlayer) {}
+	virtual void OnActivate(PlayerPointer pPlayer) {}
 	virtual void AIUpdate() {}
 	virtual void Destroy() {}
 
@@ -231,7 +231,7 @@ public:
 
 protected:
 
-	GameObject* _gameobject;
+	shared_ptr<GameObject> _gameobject;
 };
 
 class SERVER_DECL GossipScript
@@ -240,9 +240,9 @@ public:
 	GossipScript();
 	virtual ~GossipScript() {} 
 
-	virtual void GossipHello(Object* pObject, Player* Plr, bool AutoSend);
-	virtual void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * EnteredCode);
-	virtual void GossipEnd(Object* pObject, Player* Plr);
+	virtual void GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool AutoSend);
+	virtual void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * EnteredCode);
+	virtual void GossipEnd(ObjectPointer pObject, PlayerPointer Plr);
 	virtual void Destroy();
 };
 
@@ -252,13 +252,13 @@ public:
 	QuestScript() {};
 	virtual ~QuestScript() {};
 
-	virtual void OnQuestStart(Player* mTarget, QuestLogEntry *qLogEntry) {}
-	virtual void OnQuestComplete(Player* mTarget, QuestLogEntry *qLogEntry) {}
-	virtual void OnQuestCancel(Player* mTarget) {}
-	virtual void OnGameObjectActivate(uint32 entry, Player* mTarget, QuestLogEntry *qLogEntry) {}
-	virtual void OnCreatureKill(uint32 entry, Player* mTarget, QuestLogEntry *qLogEntry) {}
-	virtual void OnExploreArea(uint32 areaId, Player* mTarget, QuestLogEntry *qLogEntry) {}
-	virtual void OnPlayerItemPickup(uint32 itemId, uint32 totalCount, Player* mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnQuestStart(PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnQuestComplete(PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnQuestCancel(PlayerPointer mTarget) {}
+	virtual void OnGameObjectActivate(uint32 entry, PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnCreatureKill(uint32 entry, PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnExploreArea(uint32 areaId, PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
+	virtual void OnPlayerItemPickup(uint32 itemId, uint32 totalCount, PlayerPointer mTarget, QuestLogEntry *qLogEntry) {}
 };
 
 class SERVER_DECL HookInterface : public Singleton<HookInterface>
@@ -267,31 +267,31 @@ public:
 	friend class ScriptMgr;
 
 	bool OnNewCharacter(uint32 Race, uint32 Class, WorldSession * Session, const char * Name);
-	void OnKillPlayer(Player * pPlayer, Player * pVictim);
-	void OnFirstEnterWorld(Player * pPlayer);
-	void OnEnterWorld(Player * pPlayer);
-	void OnGuildCreate(Player * pLeader, Guild * pGuild);
-	void OnGuildJoin(Player * pPlayer, Guild * pGuild);
-	void OnDeath(Player * pPlayer);
-	bool OnRepop(Player * pPlayer);
-	void OnEmote(Player * pPlayer, uint32 Emote);
-	void OnEnterCombat(Player * pPlayer, Unit * pTarget);
-	bool OnCastSpell(Player * pPlayer, SpellEntry * pSpell);
-	bool OnLogoutRequest(Player * pPlayer);
-	void OnLogout(Player * pPlayer);
-	void OnQuestAccept(Player * pPlayer, Quest * pQuest);
-	void OnZone(Player * pPlayer, uint32 Zone, uint32 OldZone);
-	void OnEnterWorld2(Player * pPlayer);
-	void OnCharacterCreate(Player * pPlayer);
-	void OnQuestCancelled(Player * pPlayer, Quest * pQuest);
-	void OnQuestFinished(Player * pPlayer, Quest * pQuest);
-	void OnHonorableKill(Player * pPlayer, Player * pKilled);
-	void OnArenaFinish(Player * pPlayer, uint32 type, ArenaTeam* pTeam, bool victory, bool rated);
-	void OnContinentCreate(MapMgr *pMgr);
-	void OnPostSpellCast(Player * pPlayer, SpellEntry * pSpell, Unit * pTarget);
-	void OnAreaTrigger(Player * plr, uint32 areatrigger);
-	void OnPlayerSaveToDB(Player * pPlayer, QueryBuffer* buf);
-	void OnAuraRemove(Player * pPlayer, uint32 spellID);
+	void OnKillPlayer(PlayerPointer pPlayer, PlayerPointer pVictim);
+	void OnFirstEnterWorld(PlayerPointer pPlayer);
+	void OnEnterWorld(PlayerPointer pPlayer);
+	void OnGuildCreate(PlayerPointer pLeader, Guild * pGuild);
+	void OnGuildJoin(PlayerPointer pPlayer, Guild * pGuild);
+	void OnDeath(PlayerPointer pPlayer);
+	bool OnRepop(PlayerPointer pPlayer);
+	void OnEmote(PlayerPointer pPlayer, uint32 Emote);
+	void OnEnterCombat(PlayerPointer pPlayer, UnitPointer pTarget);
+	bool OnCastSpell(PlayerPointer pPlayer, SpellEntry * pSpell);
+	bool OnLogoutRequest(PlayerPointer pPlayer);
+	void OnLogout(PlayerPointer pPlayer);
+	void OnQuestAccept(PlayerPointer pPlayer, Quest * pQuest);
+	void OnZone(PlayerPointer pPlayer, uint32 Zone, uint32 OldZone);
+	void OnEnterWorld2(PlayerPointer pPlayer);
+	void OnCharacterCreate(PlayerPointer pPlayer);
+	void OnQuestCancelled(PlayerPointer pPlayer, Quest * pQuest);
+	void OnQuestFinished(PlayerPointer pPlayer, Quest * pQuest);
+	void OnHonorableKill(PlayerPointer pPlayer, PlayerPointer pKilled);
+	void OnArenaFinish(PlayerPointer pPlayer, uint32 type, ArenaTeam* pTeam, bool victory, bool rated);
+	void OnContinentCreate(shared_ptr<MapMgr>pMgr);
+	void OnPostSpellCast(PlayerPointer pPlayer, SpellEntry * pSpell, UnitPointer pTarget);
+	void OnAreaTrigger(PlayerPointer plr, uint32 areatrigger);
+	void OnPlayerSaveToDB(PlayerPointer pPlayer, QueryBuffer* buf);
+	void OnAuraRemove(PlayerPointer pPlayer, uint32 spellID);
 };
 
 #define sScriptMgr ScriptMgr::getSingleton()

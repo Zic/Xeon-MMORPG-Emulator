@@ -45,7 +45,7 @@ static const uint32 g_allianceStateFields[3] = { WORLDSTATE_HELLFIRE_STADIUM_ALL
 static const uint32 g_neutralStateFields[3] = { WORLDSTATE_HELLFIRE_STADIUM_NEUTRAL, WORLDSTATE_HELLFIRE_OVERLOOK_NEUTRAL, WORLDSTATE_HELLFIRE_BROKENHILL_NEUTRAL };
 
 // updates clients visual counter, and adds the buffs to players if needed
-HEARTHSTONE_INLINE void UpdateTowerCount(MapMgr * mgr)
+HEARTHSTONE_INLINE void UpdateTowerCount(shared_ptr<MapMgr> mgr)
 {
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_HELLFIRE_ALLIANCE_TOWERS_CONTROLLED, g_allianceTowers);
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_HELLFIRE_HORDE_TOWERS_CONTROLLED, g_hordeTowers);
@@ -91,9 +91,9 @@ class HellfirePeninsulaBannerAI : public GameObjectAIScript
 	uint32 m_bannerStatus;
 
 public:
-	GameObject * pBanner;
+	GameObjectPointer  pBanner;
 
-	HellfirePeninsulaBannerAI(GameObject *go) : GameObjectAIScript(go)
+	HellfirePeninsulaBannerAI(GameObjectPointer go) : GameObjectAIScript(go)
 	{
 		m_bannerStatus = BANNER_STATUS_NEUTRAL;
 		Status = 50;
@@ -130,13 +130,13 @@ public:
 		//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 		//   doing lookups of objects that have already been updated
 
-		set<Player*>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
-		set<Player*>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
+		set<PlayerPointer>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
+		set<PlayerPointer>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
 		map<uint32,uint32>::iterator it2, it3;
 		uint32 timeptr = (uint32)UNIXTIME;
 		bool in_range;
 		bool is_valid;
-		Player *plr;
+		PlayerPointer plr;
 		
 		for(; itr != itrend; ++itr)
 		{
@@ -385,7 +385,7 @@ public:
 // Zone Hook
 //////////////////////////////////////////////////////////////////////////
 
-void ZoneHook(Player *plr, uint32 Zone, uint32 OldZone)
+void ZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
 	static uint32 spellids[2] = { HELLFIRE_SUPERORITY_ALLIANCE, HELLFIRE_SUPERORITY_HORDE };
 	if( Zone == ZONE_HELLFIRE_PENINSULA )
@@ -419,7 +419,7 @@ struct sgodata
 	uint32 is_banner;
 };
 
-void SpawnObjects(MapMgr *pmgr)
+void SpawnObjects(shared_ptr<MapMgr> pmgr)
 {
 	if(pmgr->GetMapId() != 530)
 		return;
@@ -445,14 +445,15 @@ void SpawnObjects(MapMgr *pmgr)
 		p = &godata[i];
 		p2 = &godata_banner[i];
 
-		GameObject *pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
 		if( pGo == NULL )
 			continue;
 
-		GameObject *pGo2 = pmgr->GetInterface()->SpawnGameObject(p2->entry, p2->posx, p2->posy, p2->posz, p2->facing, false, 0, 0);
+		GameObjectPointer pGo2 = pmgr->GetInterface()->SpawnGameObject(p2->entry, p2->posx, p2->posy, p2->posz, p2->facing, false, 0, 0);
 		if( pGo2 == NULL )
 		{
-			delete pGo;
+			pGo->Destructor();
+			pGo = NULLGOB;
 			continue;
 		}
 

@@ -45,7 +45,7 @@ bool ChatHandler::HandleBattlegroundCommand(const char* args, WorldSession *m_se
 	if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 7)
 		return false;
 
-	Player * plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return true;
 	BattlegroundManager.HandleBattlegroundListPacket(plr->GetSession(), atoi(args));
 	return true;

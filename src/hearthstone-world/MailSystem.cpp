@@ -30,10 +30,10 @@ MailError MailSystem::DeliverMessage(uint64 recipent, MailMessage* message)
 	// assign a new id
 	message->message_id = Generate_Message_Id();
 
-	Player * plr = objmgr.GetPlayer((uint32)recipent);
+	PlayerPointer plr = objmgr.GetPlayer((uint32)recipent);
 	if(plr != NULL)
 	{
-		plr->m_mailBox.AddMessage(message);
+		plr->m_mailBox->AddMessage(message);
 		if((uint32)UNIXTIME >= message->delivery_time)
 		{
 			uint32 v = 0;
@@ -108,7 +108,7 @@ bool MailMessage::AddMessageDataToPacket(WorldPacket& data)
 	uint32 j;
 	size_t pos;
 	vector<uint64>::iterator itr;
-	Item * pItem;
+	ItemPointer pItem;
 
 	// add stuff
 	if(deleted_flag)
@@ -284,10 +284,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	uint8 itemslot;
 	uint8 i;
 	uint64 itemguid;
-	vector< Item* > items;
-	vector< Item* >::iterator itr;
+	vector< ItemPointer > items;
+	vector< ItemPointer >::iterator itr;
 	string recepient;
-	Item * pItem;
+	ItemPointer pItem;
 	int8 real_item_slot;
 	//uint32 err = MAIL_OK;
 
@@ -310,7 +310,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         pItem = _player->GetItemInterface()->GetItemByGUID( itemguid );
 		real_item_slot = _player->GetItemInterface()->GetInventorySlotByGuid( itemguid );
 		if( pItem == NULL || pItem->IsSoulbound() || pItem->HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_CONJURED ) || 
-			( pItem->IsContainer() && ((Container*)pItem)->HasItems() ) || real_item_slot >= 0 && real_item_slot < INVENTORY_SLOT_ITEM_START )
+			( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems() ) || real_item_slot >= 0 && real_item_slot < INVENTORY_SLOT_ITEM_START )
 		{
 			SendMailError( MAIL_ERR_INTERNAL_ERROR );
 			return;
@@ -397,7 +397,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 				continue;		// should never be hit.
 
 			pItem->RemoveFromWorld();
-			pItem->SetOwner( NULL );
+			pItem->SetOwner( NULLPLR );
 			pItem->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
 			msg.items.push_back( pItem->GetUInt32Value(OBJECT_FIELD_GUID) );
 
@@ -407,7 +407,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 				sGMLog.writefromsession(this, "sent mail with item entry %u to %s, with gold %u.", pItem->GetEntry(), player->name, msg.money);
 			}
 
-			delete pItem;
+			pItem->Destructor();
+			pItem = NULLITEM;
 		}
 	}
 
@@ -448,7 +449,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 	uint32 message_id;
 	recv_data >> mailbox >> message_id;
 
-	MailMessage * message = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0) return;
 
 	// mark the message as read
@@ -471,7 +472,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_DELETED);
 
-	MailMessage * message = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
@@ -494,7 +495,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 	else
 	{
 		// delete the message, there are no other references to it.
-		_player->m_mailBox.DeleteMessage(message_id, true);
+		_player->m_mailBox->DeleteMessage(message_id, true);
 	}
 
 	data << uint32(MAIL_OK);
@@ -513,7 +514,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_ITEM_TAKEN);
 	
-	MailMessage * message = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0 || message->items.empty())
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
@@ -548,7 +549,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 	}
 
 	// grab the item
-	Item * item = objmgr.LoadItem( *itr );
+	ItemPointer item = objmgr.LoadItem( *itr );
 	if(item == 0)
 	{
 		// doesn't exist
@@ -566,7 +567,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 		data << uint32(MAIL_ERR_BAG_FULL);
 		SendPacket(&data);
 
-		delete item;
+		item->Destructor();
+		item = NULLITEM;
 		return;
 	}
 
@@ -579,7 +581,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 			// no free slots left!
 			data << uint32(MAIL_ERR_BAG_FULL);
 			SendPacket(&data);
-			delete item;
+			item->Destructor();
+			item = NULLITEM;
 			return;
 		}
 	}
@@ -620,7 +623,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_MONEY_TAKEN);
 
-	MailMessage * message = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0 || !message->money)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
@@ -662,7 +665,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 	WorldPacket data(SMSG_SEND_MAIL_RESULT, 12);
 	data << message_id << uint32(MAIL_RES_RETURNED_TO_SENDER);
 
-	MailMessage * msg = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * msg = _player->m_mailBox->GetMessage(message_id);
 	if(msg == 0)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
@@ -675,7 +678,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 	MailMessage message = *msg;
 
 	// remove the old message
-	_player->m_mailBox.DeleteMessage(message_id, true);
+	_player->m_mailBox->DeleteMessage(message_id, true);
 
 	// re-assign the owner/sender
 	message.player_guid = message.sender_guid;
@@ -711,7 +714,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 	data << message_id << uint32(MAIL_RES_MADE_PERMANENT);
 
 	ItemPrototype * proto = ItemPrototypeStorage.LookupEntry(8383);
-	MailMessage * message = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0 || !proto)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
@@ -729,7 +732,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 		return;
 	}
 
-	Item * pItem = objmgr.CreateItem(8383, _player);
+	ItemPointer pItem = objmgr.CreateItem(8383, _player);
 	pItem->SetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID, message_id);
 	if( _player->GetItemInterface()->AddItemToFreeSlot(pItem) )
 	{
@@ -744,7 +747,8 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 	}
 	else
 	{
-		delete pItem;
+		pItem->Destructor();
+		pItem = NULLITEM;
 	}
 }
 
@@ -755,7 +759,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data)
 
 	string body = "Internal Error";
 
-	MailMessage * msg = _player->m_mailBox.GetMessage(message_id);
+	MailMessage * msg = _player->m_mailBox->GetMessage(message_id);
 	if(msg)
 		body = msg->body;
 
@@ -798,7 +802,7 @@ void Mailbox::FillTimePacket(WorldPacket& data)
 void WorldSession::HandleMailTime(WorldPacket & recv_data)
 {
 	WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 100);
-	_player->m_mailBox.FillTimePacket(data);
+	_player->m_mailBox->FillTimePacket(data);
 	SendPacket(&data);
 }
 
@@ -813,18 +817,18 @@ void WorldSession::SendMailError(uint32 error)
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
-	WorldPacket * data = _player->m_mailBox.BuildMailboxListingPacket();
+	WorldPacket * data = _player->m_mailBox->BuildMailboxListingPacket();
 	SendPacket(data);
 	delete data;
 }
 
-void MailSystem::RemoveMessageIfDeleted(uint32 message_id, Player * plr)
+void MailSystem::RemoveMessageIfDeleted(uint32 message_id, PlayerPointer plr)
 {
-	MailMessage * msg = plr->m_mailBox.GetMessage(message_id);
+	MailMessage * msg = plr->m_mailBox->GetMessage(message_id);
 	if(msg == 0) return;
 
 	if(msg->deleted_flag)   // we've deleted from inbox
-		plr->m_mailBox.DeleteMessage(message_id, true);   // wipe the message
+		plr->m_mailBox->DeleteMessage(message_id, true);   // wipe the message
 }
 
 void MailSystem::SendAutomatedMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body,

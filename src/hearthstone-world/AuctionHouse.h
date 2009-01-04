@@ -63,7 +63,7 @@ struct Auction
 	uint32 DepositAmount;
 	
 	uint32 ExpiryTime;
-	Item * pItem;
+	ItemPointer pItem;
 
 	void DeleteFromDB();
 	void SaveToDB(uint32 AuctionHouseId);
@@ -90,16 +90,16 @@ public:
 	Auction * GetAuction(uint32 Id);
 	void QueueDeletion(Auction * auct, uint32 Reason);
 
-	void SendOwnerListPacket(Player * plr, WorldPacket * packet);
-	void SendBidListPacket(Player * plr, WorldPacket * packet);
-	void SendAuctionNotificationPacket(Player * plr, Auction * auct);
-	void SendAuctionList(Player * plr, WorldPacket * packet);
+	void SendOwnerListPacket(PlayerPointer plr, WorldPacket * packet);
+	void SendBidListPacket(PlayerPointer plr, WorldPacket * packet);
+	void SendAuctionNotificationPacket(PlayerPointer plr, Auction * auct);
+	void SendAuctionList(PlayerPointer plr, WorldPacket * packet);
 
 	void UpdateItemOwnerships(uint32 oldGuid, uint32 newGuid);
 
 private:
 	RWLock itemLock;
-	HM_NAMESPACE::hash_map<uint64, Item*> auctionedItems;
+	HM_NAMESPACE::hash_map<uint64, shared_ptr<Item>> auctionedItems;
 
 	RWLock auctionLock;
 	HM_NAMESPACE::hash_map<uint32, Auction*> auctions;

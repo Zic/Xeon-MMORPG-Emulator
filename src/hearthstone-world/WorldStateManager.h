@@ -48,7 +48,7 @@ class SERVER_DECL WorldStateManager
 	WorldStateMap m_states;
 
 	// mapmgr we are working with.
-	MapMgr& m_mapMgr;
+	shared_ptr<MapMgr> m_mapMgr;
 
 	// synchronization object
 	// shouldn't REALLY be needed, but we're paranoid..
@@ -58,7 +58,10 @@ class SERVER_DECL WorldStateManager
 public:
 
 	// constructor, not much to do though, except set mapmgr reference
-	WorldStateManager(MapMgr &mgr) : m_mapMgr(mgr) {}
+	WorldStateManager(shared_ptr<MapMgr> mgr)
+	{
+		m_mapMgr = mgr;
+	}
 
 	// bhoom! all cleaned up by C++ automatically
 	~WorldStateManager() {}
@@ -76,10 +79,10 @@ public:
 
 	// sends the current world states to a new player on the map.
 	// this should also be called upon changing zone.
-	void SendWorldStates(Player *pPlayer);
+	void SendWorldStates(shared_ptr<Player>pPlayer);
 
 	// clears world states for a player leaving the map.
-	void ClearWorldStates(Player *pPlayer);
+	void ClearWorldStates(shared_ptr<Player>pPlayer);
 
 	// loads a setting from the database.
 	static const string GetPersistantSetting(const char *szKeyName, const char *szValue);
@@ -105,7 +108,7 @@ public:
 	void LoadFromDB();
 
 	// applys a map template to a new instance
-	void ApplyMapTemplate(MapMgr *pmgr);
+	void ApplyMapTemplate(shared_ptr<MapMgr>pmgr);
 };
 
 #define sWorldStateTemplateManager WorldStateTemplateManager::getSingleton()

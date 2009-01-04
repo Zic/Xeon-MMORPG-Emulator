@@ -5,9 +5,9 @@ class SCRIPT_DECL PlaguedCritterAI : public CreatureAIScript
 {
 public:
 	ADD_CREATURE_FACTORY_FUNCTION(PlaguedCritterAI);
-	PlaguedCritterAI(Creature* pCreature) : CreatureAIScript(pCreature) {}
+	PlaguedCritterAI(CreaturePointer pCreature) : CreatureAIScript(pCreature) {}
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer mKiller)
     {
 		// You're infected now!
         mKiller->CastSpell( mKiller, 43958, true );
@@ -18,12 +18,12 @@ class SCRIPT_DECL ArgentHealerAI : public CreatureAIScript
 {
 public:
 	ADD_CREATURE_FACTORY_FUNCTION(ArgentHealerAI);
-	ArgentHealerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+	ArgentHealerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
 	{
 		RegisterAIUpdateEvent( 15000 );
 	}
 
-	void OnDied(Unit * mKiller)
+	void OnDied(UnitPointer mKiller)
 	{
 		RemoveAIUpdateEvent();
 	}
@@ -31,10 +31,10 @@ public:
 	void AIUpdate()
 	{
 		// Loop over in-range players, remove the infection, remove zombie form
-		set<Player*>::iterator itr = _unit->GetInRangePlayerSetBegin();
+		set<PlayerPointer>::iterator itr = _unit->GetInRangePlayerSetBegin();
 		for(; itr != _unit->GetInRangePlayerSetEnd(); ++itr)
 		{
-			Player * plr = (*itr);
+			PlayerPointer plr = (*itr);
 			// We've got some plagues to cure, then?
 			if( plr->HasActiveAura( 43958 ) )
 			{

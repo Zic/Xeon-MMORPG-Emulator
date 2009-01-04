@@ -4,16 +4,16 @@
 class SCRIPT_DECL InnkeeperGossip : public GossipScript
 {
 public:
-    void GossipHello(Object * pObject, Player* Plr, bool AutoSend);
-    void GossipSelectOption(Object * pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code);
-    void GossipEnd(Object * pObject, Player* Plr);
+    void GossipHello(ObjectPointer  pObject, PlayerPointer Plr, bool AutoSend);
+    void GossipSelectOption(ObjectPointer  pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code);
+    void GossipEnd(ObjectPointer  pObject, PlayerPointer Plr);
 	void Destroy()
 	{
 		delete this;
 	}
 };
 
-void InnkeeperGossip::GossipHello(Object * pObject, Player* Plr, bool AutoSend)
+void InnkeeperGossip::GossipHello(ObjectPointer  pObject, PlayerPointer Plr, bool AutoSend)
 {
     GossipMenu *Menu;
     uint32 TextID = 820;
@@ -32,9 +32,9 @@ void InnkeeperGossip::GossipHello(Object * pObject, Player* Plr, bool AutoSend)
 #define SendQuickMenu(textid) objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), textid, Plr); \
     Menu->SendTo(Plr);
 
-void InnkeeperGossip::GossipSelectOption(Object * pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+void InnkeeperGossip::GossipSelectOption(ObjectPointer  pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	Creature * pCreature = (pObject->GetTypeId()==TYPEID_UNIT)?((Creature*)pObject):NULL;
+	CreaturePointer pCreature = (pObject->GetTypeId()==TYPEID_UNIT)?TO_CREATURE(pObject):NULLCREATURE;
 	if(pCreature==NULL)
 		return;
 
@@ -56,7 +56,7 @@ void InnkeeperGossip::GossipSelectOption(Object * pObject, Player* Plr, uint32 I
     }
 }
 
-void InnkeeperGossip::GossipEnd(Object * pObject, Player* Plr)
+void InnkeeperGossip::GossipEnd(ObjectPointer  pObject, PlayerPointer Plr)
 {
     GossipScript::GossipEnd(pObject, Plr);
 }

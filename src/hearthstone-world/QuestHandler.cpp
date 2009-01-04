@@ -28,15 +28,15 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
 	uint64 guid;
 	WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
-    Object *qst_giver = NULL;
+    shared_ptr<Object>qst_giver = NULLOBJ;
 
 	recv_data >> guid;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
     if(guidtype==HIGHGUID_TYPE_UNIT)
     {
-        Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+        CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
         if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = quest_giver;
 		else
 			return;
 
@@ -48,17 +48,17 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     }
     else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		Item *quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 	}
     else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 	}
@@ -83,7 +83,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
 	recv_data >> guid;
 
-	Creature *qst_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer qst_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 
 	if (!qst_giver)
 	{
@@ -118,7 +118,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	recv_data >> guid;
 	recv_data >> quest_id;
 
-	Object *qst_giver = NULL;
+	shared_ptr<Object>qst_giver = NULLOBJ;
 
 	bool bValid = false;
 	Quest* qst = QuestStorage.LookupEntry(quest_id);
@@ -132,9 +132,9 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -143,9 +143,9 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -154,9 +154,9 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		Item *quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = true;
@@ -222,14 +222,14 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	bool hasquest = true;
 	bool bSkipLevelCheck = false;
 	Quest *qst = NULL;
-	Object *qst_giver = NULL;
+	shared_ptr<Object>qst_giver = NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -239,9 +239,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		//bValid = quest_giver->isQuestGiver();
@@ -251,9 +251,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		Item *quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = true;
@@ -264,9 +264,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	}
 	else if(guidtype==HIGHGUID_TYPE_PLAYER)
 	{
-		Player *quest_giver = _player->GetMapMgr()->GetPlayer((uint32)guid);
+		shared_ptr<Player>quest_giver = _player->GetMapMgr()->GetPlayer((uint32)guid);
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = true;
@@ -288,7 +288,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	if( _player->GetQuestLogForEntry( qst->id ) )
 		return;
 
-	if( qst_giver->GetTypeId() == TYPEID_UNIT && static_cast< Creature* >( qst_giver )->m_escorter != NULL )
+	if( qst_giver->GetTypeId() == TYPEID_UNIT && TO_CREATURE( qst_giver )->m_escorter != NULL )
 	{
 		SystemMessage("You cannot accept this quest at this time.");
 		return;
@@ -325,13 +325,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
 		if(GetPlayer()->GetItemInterface()->CalculateFreeSlots(NULL) < slots_required)
 		{
-			GetPlayer()->GetItemInterface()->BuildInventoryChangeError(NULL, NULL, INV_ERR_BAG_FULL);
+			GetPlayer()->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_BAG_FULL);
 			sQuestMgr.SendQuestFailed(FAILED_REASON_INV_FULL, qst, GetPlayer());
 			return;
 		}
 	}	
 	
-/*	if(qst_giver->GetTypeId() == TYPEID_UNIT && !ScriptSystem->OnQuestRequireEvent(qst, static_cast< Creature* >( qst_giver ), _player, QUEST_EVENT_CAN_ACCEPT))
+/*	if(qst_giver->GetTypeId() == TYPEID_UNIT && !ScriptSystem->OnQuestRequireEvent(qst, TO_CREATURE( qst_giver ), _player, QUEST_EVENT_CAN_ACCEPT))
 		return;*/
 
 	QuestLogEntry *qle = new QuestLogEntry();
@@ -343,10 +343,11 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		if(qst->receive_items[i])
 		{
-			Item *item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
+			shared_ptr<Item>item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
 			if(!GetPlayer()->GetItemInterface()->AddItemToFreeSlot(item))
 			{
-				delete item;
+				item->Destructor();
+				item = NULLITEM;
 			}
 			else
 				SendItemPushResult(item, false, true, false, true, 
@@ -357,12 +358,15 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
 	if(qst->srcitem && qst->srcitem != qst->receive_items[0])
 	{
-		Item * item = objmgr.CreateItem( qst->srcitem, _player );
+		ItemPointer item = objmgr.CreateItem( qst->srcitem, _player );
 		if(item)
 		{
 			item->SetUInt32Value(ITEM_FIELD_STACK_COUNT, qst->srcitemcount ? qst->srcitemcount : 1);
 			if(!_player->GetItemInterface()->AddItemToFreeSlot(item))
-				delete item;
+			{
+				item->Destructor();
+				item = NULLITEM;
+			}
 		}
 	}
 
@@ -380,7 +384,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	if(qst->count_required_item || qst_giver->GetTypeId() == TYPEID_GAMEOBJECT)	// gameobject quests deactivate
 		GetPlayer()->UpdateNearbyGameObjects();
 
-	//ScriptSystem->OnQuestEvent(qst, static_cast< Creature* >( qst_giver ), _player, QUEST_EVENT_ON_ACCEPT);
+	//ScriptSystem->OnQuestEvent(qst, TO_CREATURE( qst_giver ), _player, QUEST_EVENT_ON_ACCEPT);
 
 	sQuestMgr.OnQuestAccepted(_player,qst,qst_giver);
 
@@ -472,15 +476,15 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
 	bool bValid = false;
 	Quest *qst = NULL;
-	Object *qst_giver = NULL;
+	shared_ptr<Object>qst_giver = NULLOBJ;
 	uint32 status = 0;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -502,9 +506,9 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return; // oops..
 		bValid = quest_giver->isQuestGiver();
@@ -558,15 +562,15 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 
 	bool bValid = false;
 	Quest *qst = NULL;
-	Object *qst_giver = NULL;
+	ObjectPointer qst_giver = NULLOBJ;
 	uint32 status = 0;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -585,9 +589,9 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return; // oops..
 		bValid = quest_giver->isQuestGiver();
@@ -654,14 +658,14 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 
 	bool bValid = false;
 	Quest *qst = NULL;
-	Object *qst_giver = NULL;
+	shared_ptr<Object>qst_giver = NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
 	{
-		Creature *quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = quest_giver;
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -670,9 +674,9 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		GameObject *quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (Object*)quest_giver;
+			qst_giver = (shared_ptr<Object>)quest_giver;
 		else
 			return;
 		//bValid = quest_giver->isQuestGiver();
@@ -724,7 +728,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 
 	
 	sQuestMgr.OnQuestFinished(GetPlayer(), qst, qst_giver, reward_slot);
-	//if(qst_giver->GetTypeId() == TYPEID_UNIT) qst->LUA_SendEvent(static_cast< Creature* >( qst_giver ),GetPlayer(),ON_QUEST_COMPLETEQUEST);
+	//if(qst_giver->GetTypeId() == TYPEID_UNIT) qst->LUA_SendEvent(TO_CREATURE( qst_giver ),GetPlayer(),ON_QUEST_COMPLETEQUEST);
 
 	if(qst->next_quest_id)
 	{
@@ -767,7 +771,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 				GroupMembersSet::iterator itr;
 				for(itr = sgr->GetGroupMembersBegin(); itr != sgr->GetGroupMembersEnd(); ++itr)
 				{
-					Player *pPlayer = (*itr)->m_loggedInPlayer;
+					shared_ptr<Player>pPlayer = (*itr)->m_loggedInPlayer;
 					if(pPlayer && pPlayer->GetGUID() !=  pguid)
 					{
 						WorldPacket data( MSG_QUEST_PUSH_RESULT, 13 );
@@ -837,7 +841,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 
 	if(GetPlayer()->GetQuestSharer())
 	{
-		Player *pPlayer = objmgr.GetPlayer(GetPlayer()->GetQuestSharer());
+		shared_ptr<Player>pPlayer = objmgr.GetPlayer(GetPlayer()->GetQuestSharer());
 		if(pPlayer)
 		{
 			WorldPacket data(MSG_QUEST_PUSH_RESULT, 13);

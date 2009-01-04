@@ -30,7 +30,7 @@ void Channel::LoadConfSettings()
 	m_confSettingLock.Release();
 }
 
-bool Channel::HasMember(Player * pPlayer)
+bool Channel::HasMember(PlayerPointer pPlayer)
 {
 	m_lock.Acquire();
 	if( m_members.find(pPlayer) == m_members.end() )
@@ -88,7 +88,7 @@ Channel::Channel(const char * name, uint32 team, uint32 type_id, uint32 id)
 	}
 }
 
-void Channel::AttemptJoin(Player * plr, const char * password)
+void Channel::AttemptJoin(PlayerPointer plr, const char * password)
 {
 	Guard mGuard(m_lock);
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
@@ -131,7 +131,7 @@ void Channel::AttemptJoin(Player * plr, const char * password)
 	if(m_announce)
 	{
 		data << uint8(CHANNEL_NOTIFY_FLAG_JOINED) << m_name << plr->GetGUID();
-		SendToAll(&data, NULL);
+		SendToAll(&data, NULLPLR);
 	}
 	
 	data.clear();
@@ -143,7 +143,7 @@ void Channel::AttemptJoin(Player * plr, const char * password)
 	plr->GetSession()->SendPacket(&data);
 }
 
-void Channel::Part(Player * plr, bool silent)
+void Channel::Part(PlayerPointer plr, bool silent)
 {
 	m_lock.Acquire();
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
@@ -165,7 +165,7 @@ void Channel::Part(Player * plr, bool silent)
 	if(flags & CHANNEL_FLAG_OWNER)
 	{
 		// we need to find a new owner
-		SetOwner(NULL, NULL);
+		SetOwner(NULLPLR, NULLPLR);
 	}
 
 	if(plr->GetSession() && plr->GetSession()->IsLoggingOut())
@@ -205,10 +205,10 @@ void Channel::Part(Player * plr, bool silent)
 #endif
 }
 
-void Channel::SetOwner(Player * oldpl, Player * plr)
+void Channel::SetOwner(PlayerPointer oldpl, PlayerPointer plr)
 {
 	Guard mGuard(m_lock);
-	Player * pOwner = NULL;
+	PlayerPointer pOwner = NULLPLR;
 	uint32 oldflags, oldflags2;
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
 	if(oldpl != NULL)
@@ -289,7 +289,7 @@ void Channel::SetOwner(Player * oldpl, Player * plr)
 	SendToAll(&data);
 }
 
-void Channel::Invite(Player * plr, Player * new_player)
+void Channel::Invite(PlayerPointer plr, PlayerPointer new_player)
 {
 	Guard mGuard(m_lock);
 	if(m_members.find(plr) == m_members.end())
@@ -313,7 +313,7 @@ void Channel::Invite(Player * plr, Player * new_player)
 	plr->GetSession()->SendPacket(&data);
 }
 
-void Channel::Moderate(Player * plr)
+void Channel::Moderate(PlayerPointer plr)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -337,7 +337,7 @@ void Channel::Moderate(Player * plr)
 	SendToAll(&data);
 }
 
-void Channel::Say(Player * plr, const char * message, Player * for_gm_client, bool forced)
+void Channel::Say(PlayerPointer plr, const char * message, PlayerPointer for_gm_client, bool forced)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -389,21 +389,21 @@ void Channel::Say(Player * plr, const char * message, Player * for_gm_client, bo
 		SendToAll(&data);
 }
 
-void Channel::SendNotOn(Player * plr)
+void Channel::SendNotOn(PlayerPointer plr)
 {
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
 	data << uint8(CHANNEL_NOTIFY_FLAG_NOTON) << m_name;
 	plr->GetSession()->SendPacket(&data);
 }
 
-void Channel::SendAlreadyOn(Player * plr, Player* plr2)
+void Channel::SendAlreadyOn(PlayerPointer plr, PlayerPointer plr2)
 {
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
 	data << uint8(CHANNEL_NOTIFY_FLAG_ALREADY_ON) << m_name << plr2->GetGUID();
 	plr->GetSession()->SendPacket(&data);
 }
 
-void Channel::Kick(Player * plr, Player * die_player, bool ban)
+void Channel::Kick(PlayerPointer plr, PlayerPointer die_player, bool ban)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(die_player);
@@ -446,7 +446,7 @@ void Channel::Kick(Player * plr, Player * die_player, bool ban)
 	m_members.erase(itr);
 
 	if(flags & CHANNEL_FLAG_OWNER)
-		SetOwner(NULL, NULL);
+		SetOwner(NULLPLR, NULLPLR);
 
 	if(ban)
 		m_bannedMembers.insert(die_player->GetLowGUID());
@@ -456,7 +456,7 @@ void Channel::Kick(Player * plr, Player * die_player, bool ban)
 	die_player->GetSession()->SendPacket(&data);
 }
 
-void Channel::Unban(Player * plr, PlayerInfo * bplr)
+void Channel::Unban(PlayerPointer plr, PlayerInfo * bplr)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -488,7 +488,7 @@ void Channel::Unban(Player * plr, PlayerInfo * bplr)
 	m_bannedMembers.erase(it2);
 }
 
-void Channel::Voice(Player * plr, Player * v_player)
+void Channel::Voice(PlayerPointer plr, PlayerPointer v_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -521,7 +521,7 @@ void Channel::Voice(Player * plr, Player * v_player)
 	SendToAll(&data);
 }
 
-void Channel::Devoice(Player * plr, Player * v_player)
+void Channel::Devoice(PlayerPointer plr, PlayerPointer v_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -554,7 +554,7 @@ void Channel::Devoice(Player * plr, Player * v_player)
 	SendToAll(&data);
 }
 
-void Channel::Mute(Player * plr, Player * die_player)
+void Channel::Mute(PlayerPointer plr, PlayerPointer die_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -587,7 +587,7 @@ void Channel::Mute(Player * plr, Player * die_player)
 	SendToAll(&data);
 }
 
-void Channel::Unmute(Player * plr, Player * die_player)
+void Channel::Unmute(PlayerPointer plr, PlayerPointer die_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -620,7 +620,7 @@ void Channel::Unmute(Player * plr, Player * die_player)
 	SendToAll(&data);
 }
 
-void Channel::GiveModerator(Player * plr, Player * new_player)
+void Channel::GiveModerator(PlayerPointer plr, PlayerPointer new_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -653,7 +653,7 @@ void Channel::GiveModerator(Player * plr, Player * new_player)
 	SendToAll(&data);
 }
 
-void Channel::TakeModerator(Player * plr, Player * new_player)
+void Channel::TakeModerator(PlayerPointer plr, PlayerPointer new_player)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -686,7 +686,7 @@ void Channel::TakeModerator(Player * plr, Player * new_player)
 	SendToAll(&data);
 }
 
-void Channel::Announce(Player * plr)
+void Channel::Announce(PlayerPointer plr)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -710,7 +710,7 @@ void Channel::Announce(Player * plr)
 	SendToAll(&data);
 }
 
-void Channel::Password(Player * plr, const char * pass)
+void Channel::Password(PlayerPointer plr, const char * pass)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -734,7 +734,7 @@ void Channel::Password(Player * plr, const char * pass)
 	SendToAll(&data);	
 }
 
-void Channel::List(Player * plr)
+void Channel::List(PlayerPointer plr)
 {
 	Guard mGuard(m_lock);
 	WorldPacket data(SMSG_CHANNEL_LIST, 50 + (m_members.size()*9));
@@ -773,7 +773,7 @@ void Channel::List(Player * plr)
 	plr->GetSession()->SendPacket(&data);
 }
 
-void Channel::GetOwner(Player * plr)
+void Channel::GetOwner(PlayerPointer plr)
 {
 	Guard mGuard(m_lock);
 	MemberMap::iterator itr = m_members.find(plr);
@@ -824,7 +824,7 @@ void Channel::SendToAll(WorldPacket * data)
 		itr->first->GetSession()->SendPacket(data);
 }
 
-void Channel::SendToAll(WorldPacket * data, Player * plr)
+void Channel::SendToAll(WorldPacket * data, PlayerPointer plr)
 {
 	Guard guard(m_lock);
 	for(MemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr) 
@@ -834,7 +834,7 @@ void Channel::SendToAll(WorldPacket * data, Player * plr)
 	}
 }
 
-Channel * ChannelMgr::GetCreateChannel(const char *name, Player * p, uint32 type_id)
+Channel * ChannelMgr::GetCreateChannel(const char *name, PlayerPointer p, uint32 type_id)
 {
 	ChannelList::iterator itr;
 	ChannelList * cl = &Channels[0];
@@ -874,7 +874,7 @@ Channel * ChannelMgr::GetCreateChannel(const char *name, Player * p, uint32 type
 	return chn;
 }
 
-Channel * ChannelMgr::GetChannel(const char *name, Player * p)
+Channel * ChannelMgr::GetChannel(const char *name, PlayerPointer p)
 {
 	ChannelList::iterator itr;
 	ChannelList * cl = &Channels[0];

@@ -18,9 +18,9 @@
 #include "StdAfx.h"
 #include "Setup.h"
 
-bool Refocus(uint32 i, Spell * pSpell)
+bool Refocus(uint32 i, SpellPointer pSpell)
 {
-    Player * playerTarget = pSpell->GetPlayerTarget();
+    PlayerPointer  playerTarget = pSpell->GetPlayerTarget();
     if(playerTarget == 0) return true;
 
     SpellSet::const_iterator itr = playerTarget->mSpells.begin();
@@ -38,7 +38,7 @@ bool Refocus(uint32 i, Spell * pSpell)
     return true;
 }
 
-bool Readiness(uint32 i, Spell * pSpell)
+bool Readiness(uint32 i, SpellPointer pSpell)
 {
     if(!pSpell->p_caster)
 		return true;

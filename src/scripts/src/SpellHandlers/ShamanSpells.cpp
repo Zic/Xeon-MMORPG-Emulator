@@ -22,7 +22,7 @@
 /* Spell Defs                                                           */
 /************************************************************************/
 
-bool RockbiterWeapon(uint32 i, Spell* pSpell)
+bool RockbiterWeapon(uint32 i, SpellPointer pSpell)
 {
     uint32 enchantment_entry = 0;
     switch(pSpell->m_spellInfo->RankNumber)
@@ -59,7 +59,7 @@ bool RockbiterWeapon(uint32 i, Spell* pSpell)
     if(!enchantment_entry || !pSpell->p_caster)
         return true;
 
-    Item * item = pSpell->p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+    ItemPointer item = pSpell->p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
     EnchantEntry * enchant = dbcEnchant.LookupEntry(enchantment_entry);
     if(!item || !enchant)
         return true;

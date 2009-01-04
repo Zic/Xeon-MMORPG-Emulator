@@ -150,7 +150,7 @@ TaxiPathNode* TaxiPath::GetPathNode(uint32 i)
 		return m_pathNodes.find(i)->second;
 }
 
-void TaxiPath::SendMoveForTime(Player *riding, Player *to, uint32 time)
+void TaxiPath::SendMoveForTime(shared_ptr<Player>riding, shared_ptr<Player>to, uint32 time)
 {
 	if (!time)
 		return;

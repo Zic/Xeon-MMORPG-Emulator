@@ -25,8 +25,9 @@ class SERVER_DECL Vehicle : public Creature
 public:
 	Vehicle(uint64 guid);
 	~Vehicle();
+	virtual void Destructor();
 
-	void Create(CreatureProto * cp, uint32 vehicleEntry, Player * pRider = NULL);
+	void Create(CreatureProto * cp, uint32 vehicleEntry, PlayerPointer pRider = NULLPLR);
 	virtual void Update(uint32 time);
 
 	//---------------------------------------
@@ -35,23 +36,23 @@ public:
 	uint32 GetMaxPassengerCount() { return m_maxPassengers; }
 	uint32 GetPassengerCount() { return m_passengerCount; }
 
-	Player * GetControllingPlayer() { return m_controllingPlayer; }
+	PlayerPointer GetControllingPlayer() { return m_controllingPlayer; }
 	//---------------------------------------
 	// End accessors
 	//---------------------------------------
 
-	void AddPassenger(Unit * pPassenger);
+	void AddPassenger(UnitPointer pPassenger);
 	void RemovePassenger(uint32 passengerSlot);
-	bool HasPassenger(Unit * pPassenger);
+	bool HasPassenger(UnitPointer pPassenger);
 	bool IsFull() { return m_passengerCount == m_maxPassengers; }
 
 private:
-	void _AddToSlot(Unit * pPassenger, uint32 slot);
+	void _AddToSlot(UnitPointer pPassenger, uint32 slot);
 
 protected:
-	Player * m_controllingPlayer;
+	PlayerPointer m_controllingPlayer;
 
-	Unit ** m_passengers;
+	shared_ptr<Unit>* m_passengers;
 	VehicleSeatEntry * m_vehicleSeats[8];
 
 	uint32 m_passengerCount;

@@ -85,7 +85,7 @@ class Instance
 public:
 	uint32 m_instanceId;
 	uint32 m_mapId;
-	MapMgr * m_mapMgr;
+	shared_ptr<MapMgr> m_mapMgr;
 	uint32 m_creatorGuid;
 	uint32 m_creatorGroup;
 	uint32 m_difficulty;
@@ -117,24 +117,24 @@ public:
 			return m_maps[mapid];
 	}
 
-	uint32 PreTeleport(uint32 mapid, Player * plr, uint32 instanceid);
-	MapMgr * GetInstance(Object* obj);
+	uint32 PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instanceid);
+	shared_ptr<MapMgr> GetInstance(ObjectPointer obj);
 	uint32 GenerateInstanceID();
 	void BuildXMLStats(char * m_file);
 	void Load(TaskList * l);
 
 	// deletes all instances owned by this player.
-	void ResetSavedInstances(Player * plr);
+	void ResetSavedInstances(PlayerPointer plr);
 
 	// deletes all instances owned by this group
 	void OnGroupDestruction(Group * pGroup);
 
 	// player left a group, boot him out of any instances he's not supposed to be in.
-	void PlayerLeftGroup(Group * pGroup, Player * pPlayer);
+	void PlayerLeftGroup(Group * pGroup, PlayerPointer pPlayer);
 
 	// has an instance expired?
 	// can a player join?
-    HEARTHSTONE_INLINE bool PlayerOwnsInstance(Instance * pInstance, Player * pPlayer)
+    HEARTHSTONE_INLINE bool PlayerOwnsInstance(Instance * pInstance, PlayerPointer pPlayer)
 	{
 		// expired?
 		if( pInstance->m_expiration && (UNIXTIME+20) >= pInstance->m_expiration)
@@ -170,19 +170,19 @@ public:
 	void Shutdown();
 
 	// packets, w000t! we all love packets!
-	void BuildRaidSavedInstancesForPlayer(Player * plr);
-	void BuildSavedInstancesForPlayer(Player * plr);
-	MapMgr * CreateBattlegroundInstance(uint32 mapid);
+	void BuildRaidSavedInstancesForPlayer(PlayerPointer plr);
+	void BuildSavedInstancesForPlayer(PlayerPointer plr);
+	shared_ptr<MapMgr> CreateBattlegroundInstance(uint32 mapid);
 
 	// this only frees the instance pointer, not the mapmgr itself
 	void DeleteBattlegroundInstance(uint32 mapid, uint32 instanceid);
-	MapMgr* GetMapMgr(uint32 mapId);
+	shared_ptr<MapMgr> GetMapMgr(uint32 mapId);
 
 private:
 	void _LoadInstances();
 	void _CreateMap(uint32 mapid);
-	MapMgr* _CreateInstance(Instance * in);
-	MapMgr* _CreateInstance(uint32 mapid, uint32 instanceid);		// only used on main maps!
+	shared_ptr<MapMgr> _CreateInstance(Instance * in);
+	shared_ptr<MapMgr> _CreateInstance(uint32 mapid, uint32 instanceid);		// only used on main maps!
 	bool _DeleteInstance(Instance * in, bool ForcePlayersOut);
 
 	uint32 m_InstanceHigh;
@@ -190,7 +190,7 @@ private:
 	Mutex m_mapLock;
 	Map * m_maps[NUM_MAPS];
 	InstanceMap* m_instances[NUM_MAPS];
-	MapMgr * m_singleMaps[NUM_MAPS];
+	shared_ptr<MapMgr> m_singleMaps[NUM_MAPS];
 };
 
 extern SERVER_DECL InstanceMgr sInstanceMgr;

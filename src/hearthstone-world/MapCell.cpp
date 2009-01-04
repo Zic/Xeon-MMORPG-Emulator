@@ -32,7 +32,7 @@ MapCell::~MapCell()
 	RemoveObjects();
 }
 
-void MapCell::Init(uint32 x, uint32 y, uint32 mapid, MapMgr *mapmgr)
+void MapCell::Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr)
 {
 	_mapmgr = mapmgr;
 	_active = false;
@@ -44,7 +44,7 @@ void MapCell::Init(uint32 x, uint32 y, uint32 mapid, MapMgr *mapmgr)
 	_objects.clear();
 }
 
-void MapCell::AddObject(Object *obj)
+void MapCell::AddObject(shared_ptr<Object>obj)
 {
 	if(obj->IsPlayer())
 		++_playerCount;
@@ -52,7 +52,7 @@ void MapCell::AddObject(Object *obj)
 	_objects.insert(obj);
 }
 
-void MapCell::RemoveObject(Object *obj)
+void MapCell::RemoveObject(shared_ptr<Object>obj)
 {
 	if(obj->IsPlayer())
 		--_playerCount;
@@ -110,14 +110,16 @@ void MapCell::RemoveObjects()
 				if( !(*itr)->IsPet() )
 				{
 					_mapmgr->_reusable_guids_creature.push_back( (*itr)->GetUIdFromGUID() );
-					static_cast< Creature* >( *itr )->m_respawnCell=NULL;
-					delete static_cast< Creature* >( *itr );
+					TO_CREATURE( *itr )->m_respawnCell=NULL;
+					(*itr)->Destructor();
+					(*itr) = NULLOBJ;
 				}
 			}break;
 
 		case TYPEID_GAMEOBJECT: {
-			static_cast< GameObject* >( *itr )->m_respawnCell=NULL;
-			delete static_cast< GameObject* >( *itr );
+			TO_GAMEOBJECT( *itr )->m_respawnCell=NULL;
+			(*itr)->Destructor();
+			(*itr) = NULLOBJ;
 			}break;
 		}
 	}
@@ -128,7 +130,7 @@ void MapCell::RemoveObjects()
 	{
 		count++;
 
-		Object *obj = (*itr);
+		shared_ptr<Object>obj = (*itr);
 
 		itr++;
 
@@ -155,7 +157,8 @@ void MapCell::RemoveObjects()
 		if( obj->IsInWorld() )
 			obj->RemoveFromWorld( true );
 
-		delete obj;
+		obj->Destructor();
+		obj = NULLOBJ;
 	}
 
 	_playerCount = 0;
@@ -181,7 +184,7 @@ void MapCell::LoadObjects(CellSpawns * sp)
 					continue;*/
 			}
 
-			Creature * c=_mapmgr->CreateCreature((*i)->entry);
+			CreaturePointer c=_mapmgr->CreateCreature((*i)->entry);
 
 			c->SetMapId(_mapmgr->GetMapId());
 			c->SetInstanceID(_mapmgr->GetInstanceID());
@@ -191,14 +194,18 @@ void MapCell::LoadObjects(CellSpawns * sp)
 			{
 				if(!c->CanAddToWorld())
 				{
-					delete c;
+					c->Destructor();
+					c = NULLCREATURE;
 					continue;
 				}
 
 				c->PushToWorld(_mapmgr);
 			}
 			else
-				delete c;//missing proto or smth of that kind
+			{
+				c->Destructor();
+				c = NULLCREATURE;
+			}
 		}
 	}
 
@@ -206,7 +213,7 @@ void MapCell::LoadObjects(CellSpawns * sp)
 	{
 		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
 		{
-			GameObject * go=_mapmgr->CreateGameObject((*i)->entry);
+			shared_ptr<GameObject> go = _mapmgr->CreateGameObject((*i)->entry);
 			if(go->Load(*i))
 			{
 				//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
@@ -223,7 +230,10 @@ void MapCell::LoadObjects(CellSpawns * sp)
 				CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
 			}
 			else
-				delete go;//missing proto or smth of that kind
+			{
+				go->Destructor();
+				go = NULLGOB;
+			}
 		}
 	}
 }

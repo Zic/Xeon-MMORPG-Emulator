@@ -234,7 +234,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 				data = sChatHandler.FillMessageData( CHAT_MSG_SAY, lang, msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
 				SendChatPacket(data, 1, lang, this);
-				for(set<Player*>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
+				for(set<shared_ptr<Player>>::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 				{
 					(*itr)->GetSession()->SendChatPacket(data, 1, lang, this);
 				}
@@ -326,7 +326,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 		} break;
 	case CHAT_MSG_WHISPER:
 		{
-			Player *player = objmgr.GetPlayer(misc.c_str(), false);
+			shared_ptr<Player>player = objmgr.GetPlayer(misc.c_str(), false);
 			if(!player)
 			{
 				data = new WorldPacket(SMSG_CHAT_PLAYER_NOT_FOUND, misc.length() + 1);
@@ -399,7 +399,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 			Channel *chn = channelmgr.GetChannel(misc.c_str(),GetPlayer()); 
 			if(chn != NULL)
-				chn->Say(GetPlayer(),msg.c_str(), NULL, false);
+				chn->Say(GetPlayer(),msg.c_str(), NULLPLR, false);
 		} break;
 	case CHAT_MSG_AFK:
 		{
@@ -508,17 +508,17 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 		}
 	}
 
-	Unit * pUnit = _player->GetMapMgr()->GetUnit(guid);
+	UnitPointer pUnit = _player->GetMapMgr()->GetUnit(guid);
 	if(pUnit)
 	{
 		if(pUnit->IsPlayer())
 		{
-			name = static_cast< Player* >( pUnit )->GetName();
+			name = TO_PLAYER( pUnit )->GetName();
 			namelen = (uint32)strlen(name) + 1;
 		}
 		else if(pUnit->GetTypeId() == TYPEID_UNIT)
 		{
-			Creature * p = static_cast<Creature*>(pUnit);
+			CreaturePointer p = TO_CREATURE(pUnit);
 			if(p->GetCreatureName())
 			{
 				name = p->GetCreatureName()->Name;
@@ -593,7 +593,7 @@ void WorldSession::HandleReportSpamOpcode(WorldPacket & recvPacket)
 	std::string message;
 	recvPacket >> unk1 >> reportedGuid >> unk2 >> messagetype >> unk3 >> unk4 >> message;
 
-	Player * rPlayer = objmgr.GetPlayer((uint32)reportedGuid);
+	PlayerPointer rPlayer = objmgr.GetPlayer((uint32)reportedGuid);
 	if(!rPlayer)
 		return;*/
 

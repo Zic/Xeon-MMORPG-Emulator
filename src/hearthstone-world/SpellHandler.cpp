@@ -23,7 +23,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
 	CHECK_INWORLD_RETURN;
 	
-	Player* p_User = GetPlayer();
+	PlayerPointer p_User = GetPlayer();
 	DEBUG_LOG("WORLD: got use Item packet, data length = %i",recvPacket.size());
 	int8 tmp1,slot;
 	uint8 unk; // 3.0.2 added unk
@@ -33,7 +33,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	uint32 glyphIndex;
 
 	recvPacket >> tmp1 >> slot >> cn >> spellId >> item_guid >> glyphIndex >> unk;
-	Item* tmpItem = NULL;
+	ItemPointer tmpItem = NULLITEM;
 	tmpItem = p_User->GetItemInterface()->GetInventoryItem(tmp1,slot);
 	if (!tmpItem)
 		tmpItem = p_User->GetItemInterface()->GetInventoryItem(slot);
@@ -95,7 +95,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	{
 		if (p_User->CombatStatus.IsInCombat() || p_User->IsMounted())
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULL,INV_ERR_CANT_DO_IN_COMBAT);
+			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULLITEM,INV_ERR_CANT_DO_IN_COMBAT);
 			return;
 		}
 	
@@ -107,7 +107,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	{
 		if(_player->getLevel() < itemProto->RequiredLevel)
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULL,INV_ERR_ITEM_RANK_NOT_ENOUGH);
+			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULLITEM,INV_ERR_ITEM_RANK_NOT_ENOUGH);
 			return;
 		}
 	}
@@ -116,7 +116,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	{
 		if(!_player->_HasSkillLine(itemProto->RequiredSkill))
 		{
-			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULL,INV_ERR_ITEM_RANK_NOT_ENOUGH);
+			_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULLITEM,INV_ERR_ITEM_RANK_NOT_ENOUGH);
 			return;
 		}
 
@@ -124,7 +124,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 		{
 			if(_player->_GetSkillLineCurrent(itemProto->RequiredSkill, false) < itemProto->RequiredSkillRank)
 			{
-				_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULL,INV_ERR_ITEM_RANK_NOT_ENOUGH);
+				_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULLITEM,INV_ERR_ITEM_RANK_NOT_ENOUGH);
 				return;
 			}
 		}
@@ -132,7 +132,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	
 	if( itemProto->AllowableClass && !(_player->getClassMask() & itemProto->AllowableClass) || itemProto->AllowableRace && !(_player->getRaceMask() & itemProto->AllowableRace) )
 	{
-		_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULL,INV_ERR_YOU_CAN_NEVER_USE_THAT_ITEM);
+		_player->GetItemInterface()->BuildInventoryChangeError(tmpItem,NULLITEM,INV_ERR_YOU_CAN_NEVER_USE_THAT_ITEM);
 		return;
 	}		
 
@@ -174,7 +174,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 		return;
 	}
 
-	Spell *spell = new Spell(_player, spellInfo, false, NULL);
+	SpellPointer spell = shared_ptr<Spell>(new Spell(_player, spellInfo, false, NULLAURA));
 	spell->extra_cast_number=cn;
 	spell->m_glyphIndex = glyphIndex;
 	spell->i_caster = tmpItem;
@@ -219,7 +219,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 		if((spellInfo->Flags3 & FLAGS3_ACTIVATE_AUTO_SHOT) /*spellInfo->Attributes == 327698*/)	// auto shot..
 		{
 			//sLog.outString( "HandleSpellCast: Auto Shot-type spell cast (id %u, name %s)" , spellInfo->Id , spellInfo->Name );
-			Item *weapon = GetPlayer()->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
+			shared_ptr<Item>weapon = GetPlayer()->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 			if(!weapon) 
 				return;
 			uint32 spellid;
@@ -297,7 +297,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 		if( targets.m_unitTarget && GetPlayer()->GetMapMgr() && spellInfo->c_is_flags & SPELL_FLAG_IS_DAMAGING )
 		{
-			Unit * pUnit = GetPlayer()->GetMapMgr()->GetUnit( targets.m_unitTarget );
+			UnitPointer pUnit = GetPlayer()->GetMapMgr()->GetUnit( targets.m_unitTarget );
 			if( pUnit && pUnit != GetPlayer() && !isAttackable( GetPlayer(), pUnit, false ) && !pUnit->IsInRangeOppFactSet(GetPlayer()) && !pUnit->CombatStatus.DidDamageTo(GetPlayer()->GetGUID()))
 			{
 				GetPlayer()->BroadcastMessage("Faction exploit detected. You will be disconnected in 5 seconds.");
@@ -306,7 +306,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			}
 		}
 
-		Spell *spell = new Spell(GetPlayer(), spellInfo, false, NULL);
+		SpellPointer spell = shared_ptr<Spell>(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
 		spell->extra_cast_number=cn;
 		spell->prepare(&targets);
 	}
@@ -339,7 +339,7 @@ void WorldSession::HandleCancelChannellingOpcode( WorldPacket& recvPacket)
 	uint32 spellId;
 	recvPacket >> spellId;
 
-	Player *plyr = GetPlayer();
+	shared_ptr<Player>plyr = GetPlayer();
 	if(!plyr)
 		return;
 	if(plyr->m_currentSpell)
@@ -358,10 +358,10 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	uint64 guid;
 	uint32 spellid;
 	uint32 flags;
-	Unit *caster;
+	shared_ptr<Unit>caster;
 	SpellCastTargets targets;
 	SpellEntry *sp;
-	Spell * pSpell;
+	shared_ptr<Spell>pSpell;
 	list<AI_Spell*>::iterator itr;
 
 	recvPacket >> guid >> spellid >> flags;
@@ -371,7 +371,7 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
     if (spellid == 33395)
 	{
 		caster = _player->m_Summon;
-		if( caster && ((Pet*)caster)->GetAISpellForSpellId(spellid) == NULL )
+		if( caster && TO_PET(caster)->GetAISpellForSpellId(spellid) == NULL )
 			return;
 	}
 	else
@@ -395,6 +395,6 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	
 	targets.read(recvPacket, _player->GetGUID());
 
-	pSpell = new Spell(caster, sp, false, 0);
+	pSpell = shared_ptr<Spell>(new Spell(caster, sp, false, NULLAURA));
 	pSpell->prepare(&targets);
 }

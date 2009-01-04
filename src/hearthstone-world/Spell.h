@@ -1217,13 +1217,13 @@ HEARTHSTONE_INLINE bool IsHealingSpell(SpellEntry *sp)
     return false;
 }
 
-HEARTHSTONE_INLINE bool IsInrange(LocationVector & location, Object * o, float square_r)
+HEARTHSTONE_INLINE bool IsInrange(LocationVector & location, ObjectPointer o, float square_r)
 {
     float r = o->GetDistanceSq(location);
     return ( r<=square_r);
 }
 
-HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1, Object * o,float square_r)
+HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1, ObjectPointer o,float square_r)
 {
     float r = o->GetDistanceSq(x1, y1, z1);
     return ( r<=square_r);
@@ -1242,20 +1242,21 @@ HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1,float x2,float y2,
     return ( r<=square_r);
 }
    
-HEARTHSTONE_INLINE bool IsInrange(Object * o1,Object * o2,float square_r)
+HEARTHSTONE_INLINE bool IsInrange(ObjectPointer o1,ObjectPointer o2,float square_r)
 {
     return IsInrange(o1->GetPositionX(),o1->GetPositionY(),o1->GetPositionZ(),
         o2->GetPositionX(),o2->GetPositionY(),o2->GetPositionZ(),square_r);
 }
 
-HEARTHSTONE_INLINE bool TargetTypeCheck(Object *obj,uint32 ReqCreatureTypeMask)
+HEARTHSTONE_INLINE bool TargetTypeCheck(shared_ptr<Object>obj,uint32 ReqCreatureTypeMask)
 {
 	if( !ReqCreatureTypeMask )
 		return true;
 
 	if( obj->GetTypeId() == TYPEID_UNIT )
 	{
-		CreatureInfo* inf = static_cast< Creature* >( obj )->GetCreatureName();
+		CreaturePointer cr = TO_CREATURE(obj);
+		CreatureInfo* inf = cr->GetCreatureName();
 		if( inf == NULL || !( 1 << ( inf->Type - 1 ) & ReqCreatureTypeMask ) )
 			return false;
 	}
@@ -1570,12 +1571,13 @@ enum SpellDidHitResult
 };
 
 // Spell instance
-class SERVER_DECL Spell
+class SERVER_DECL Spell : public std::tr1::enable_shared_from_this<Spell>
 {
 public:
     friend class DummySpellHandler;
-    Spell( Object* Caster, SpellEntry *info, bool triggered, Aura* aur);
+    Spell( ObjectPointer Caster, SpellEntry *info, bool triggered, AuraPointer aur);
     ~Spell();
+	void Destructor();
 
     // Fills specified targets at the area of effect
     void FillSpecifiedTargetsInArea(float srcx,float srcy,float srcz,uint32 ind, uint32 specification);
@@ -1620,9 +1622,9 @@ public:
     // Removes reagents, ammo, and items/charges
     void RemoveItems();
     // Calculates the i'th effect value
-    int32 CalculateEffect(uint32, Unit *target);
+    int32 CalculateEffect(uint32, shared_ptr<Unit>target);
     // Handles Teleport function
-    void HandleTeleport(uint32 id, Unit* Target);
+    void HandleTeleport(uint32 id, UnitPointer Target);
     // Determines how much skill caster going to gain
     void DetermineSkillUp();
     // Increases cast time of the spell
@@ -1631,10 +1633,10 @@ public:
     void AddStartCooldown();
 
 
-    bool Reflect(Unit * refunit);
+    bool Reflect(UnitPointer refunit);
 
     HEARTHSTONE_INLINE uint32 getState() { return m_spellState; }
-    HEARTHSTONE_INLINE void SetUnitTarget(Unit *punit){unitTarget=punit;}
+    HEARTHSTONE_INLINE void SetUnitTarget(shared_ptr<Unit>punit){unitTarget=punit;}
 	HEARTHSTONE_INLINE SpellEntry *GetSpellProto() { return m_spellInfo; }
 
     // Send Packet functions
@@ -1645,9 +1647,9 @@ public:
     void SendInterrupted(uint8 result);
     void SendChannelUpdate(uint32 time);
     void SendChannelStart(uint32 duration);
-    void SendResurrectRequest(Player* target);
-	static void SendHealSpellOnPlayer(Object* caster, Object* target, uint32 dmg, bool critical, uint32 overheal, uint32 spellid);
-    static void SendHealManaSpellOnPlayer(Object * caster, Object * target, uint32 dmg, uint32 powertype, uint32 spellid);
+    void SendResurrectRequest(PlayerPointer target);
+	static void SendHealSpellOnPlayer(ObjectPointer caster, ObjectPointer target, uint32 dmg, bool critical, uint32 overheal, uint32 spellid);
+    static void SendHealManaSpellOnPlayer(ObjectPointer caster, ObjectPointer target, uint32 dmg, uint32 powertype, uint32 spellid);
     
 
     void HandleAddAura(uint64 guid);
@@ -1807,21 +1809,21 @@ public:
 
     void Heal(int32 amount);
 
-    GameObject*		g_caster;
-    Unit*			u_caster;
-    Item*			i_caster;
-    Player*			p_caster;
-    Object*			m_caster;
+    shared_ptr<GameObject>		g_caster;
+    shared_ptr<Unit>			u_caster;
+    shared_ptr<Item>			i_caster;
+    shared_ptr<Player>			p_caster;
+    shared_ptr<Object>			m_caster;
 
     // 15007 = resurecting sickness
 	
 	// This returns SPELL_ENTRY_Spell_Dmg_Type where 0 = SPELL_DMG_TYPE_NONE, 1 = SPELL_DMG_TYPE_MAGIC, 2 = SPELL_DMG_TYPE_MELEE, 3 = SPELL_DMG_TYPE_RANGED
 	// It should NOT be used for weapon_damage_type which needs: 0 = MELEE, 1 = OFFHAND, 2 = RANGED
 	HEARTHSTONE_INLINE uint32 GetType() { return ( m_spellInfo->Spell_Dmg_Type == SPELL_DMG_TYPE_NONE ? SPELL_DMG_TYPE_MAGIC : m_spellInfo->Spell_Dmg_Type ); }
-    HEARTHSTONE_INLINE Item* GetItemTarget() { return itemTarget; }
-    HEARTHSTONE_INLINE Unit* GetUnitTarget() { return unitTarget; }
-    HEARTHSTONE_INLINE Player* GetPlayerTarget() { return playerTarget; }
-    HEARTHSTONE_INLINE GameObject* GetGameObjectTarget() { return gameObjTarget; }
+    HEARTHSTONE_INLINE ItemPointer GetItemTarget() { return itemTarget; }
+    HEARTHSTONE_INLINE UnitPointer GetUnitTarget() { return unitTarget; }
+    HEARTHSTONE_INLINE PlayerPointer GetPlayerTarget() { return playerTarget; }
+    HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectTarget() { return gameObjTarget; }
 
     uint32 chaindamage;
     // -------------------------------------------
@@ -1956,7 +1958,7 @@ public:
 	SummonPropertiesEntry * m_summonProperties;
     
     int32 damage;
-    Aura* m_triggeredByAura;
+    AuraPointer  m_triggeredByAura;
 	signed int	forced_basepoints[3]; //some talent inherit base points from previous caster spells
 
     bool m_triggeredSpell;
@@ -1987,7 +1989,7 @@ public:
     HEARTHSTONE_INLINE bool GetSpellFailed(){return m_Spell_Failed;}
     HEARTHSTONE_INLINE void SetSpellFailed(bool failed = true){m_Spell_Failed = failed;}
 
-	Spell * m_reflectedParent;
+	shared_ptr<Spell>m_reflectedParent;
 
 	// Returns true iff spellEffect's effectNum effect affects testSpell based on EffectSpellClassMask
 	HEARTHSTONE_INLINE static bool EffectAffectsSpell(SpellEntry* spellEffect, uint32 effectNum, SpellEntry* testSpell)
@@ -2008,11 +2010,11 @@ protected:
     int32   m_timer;
     
 	// Current Targets to be used in effect handler
-    Unit*       unitTarget;
-    Item*       itemTarget;
-    GameObject* gameObjTarget;
-    Player*     playerTarget;
-    Corpse*     corpseTarget;
+    UnitPointer       unitTarget;
+    ItemPointer       itemTarget;
+    shared_ptr<GameObject> gameObjTarget;
+    PlayerPointer     playerTarget;
+    shared_ptr<Corpse>     corpseTarget;
     uint32      add_damage;
 
     uint8       cancastresult;
@@ -2037,16 +2039,16 @@ private:
 	SpellTargetList m_targetList;
 
 	// adds a target to the list, performing DidHit checks
-	void _AddTarget(const Unit *target, const uint32 effectid);
+	void _AddTarget(const shared_ptr<Unit>target, const uint32 effectid);
 
 	// adds a target to the list, negating DidHit checks
 	void _AddTargetForced(const uint64& guid, const uint32 effectid);
 
 	// didhit checker
-	uint8 _DidHit(const Unit *target);
+	uint8 _DidHit(const shared_ptr<Unit>target);
 
 	// gets the pointer of an object (optimized for spell system)
-	Object* _LookupObject(const uint64& guid);
+	ObjectPointer _LookupObject(const uint64& guid);
 
 	// sets the pointers (unitTarget, itemTarget, etc) for a given guid
 	void _SetTargets(const uint64& guid);
@@ -2059,11 +2061,11 @@ private:
 	uint32 m_missTargetCount;
 	
 	// magnet
-	Unit * m_magnetTarget;
+	UnitPointer m_magnetTarget;
 };
 
-void ApplyDiminishingReturnTimer(uint32 * Duration, Unit * Target, SpellEntry * spell);
-void UnapplyDiminishingReturnTimer(Unit * Target, SpellEntry * spell);
+void ApplyDiminishingReturnTimer(uint32 * Duration, UnitPointer Target, SpellEntry * spell);
+void UnapplyDiminishingReturnTimer(UnitPointer Target, SpellEntry * spell);
 uint32 GetDiminishingGroup(uint32 NameHash);
 
 #endif

@@ -53,9 +53,11 @@ class SERVER_DECL Corpse : public Object
 public:
 	Corpse( uint32 high, uint32 low );
 	~Corpse();
+	virtual void Init();
+	virtual void Destructor();
 
    // void Create();
-	void Create (Player *owner, uint32 mapid, float x, float y, float z, float ang );
+	void Create (shared_ptr<Player>owner, uint32 mapid, float x, float y, float z, float ang );
 
 	void SaveToDB();
 	void DeleteFromDB();

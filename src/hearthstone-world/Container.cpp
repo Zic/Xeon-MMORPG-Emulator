@@ -38,20 +38,27 @@ Container::Container(uint32 high,uint32 low) : Item()
 	random_suffix=random_prop=0;
 }
 
+void Container::Init()
+{
+	Item::Init();
+}
+
 Container::~Container( )
 {
-   for(uint32 i = 0; i < m_itemProto->ContainerSlots; i++)
+}
+
+void Container::Destructor()
+{
+	for(uint32 i = 0; i < m_itemProto->ContainerSlots; i++)
 	{
 		if(m_Slot[i] && m_Slot[i]->GetOwner() == m_owner)
 		{
-			if(m_Slot[i]->IsContainer())
-				delete ((Container*)m_Slot[i]);
-			else
-				delete m_Slot[i];
+			m_Slot[i]->Destructor();
+			m_Slot[i] = NULLITEM;
 		}
 	}
 
-	delete [] m_Slot;
+	Item::Destructor();
 }
 void Container::LoadFromDB( Field*fields )
 {
@@ -75,12 +82,12 @@ void Container::LoadFromDB( Field*fields )
 
 	SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
 
-	m_Slot = new Item*[m_itemProto->ContainerSlots];
-	memset(m_Slot, 0, sizeof(Item*)*(m_itemProto->ContainerSlots));
+	m_Slot = new shared_ptr<Item>[m_itemProto->ContainerSlots];
+	memset(m_Slot, 0, sizeof(shared_ptr<Item>)*(m_itemProto->ContainerSlots));
 
 }
 
-void Container::Create( uint32 itemid, Player *owner )
+void Container::Create( uint32 itemid, shared_ptr<Player>owner )
 {
 
 	m_itemProto = ItemPrototypeStorage.LookupEntry( itemid );
@@ -97,8 +104,8 @@ void Container::Create( uint32 itemid, Player *owner )
 	SetUInt32Value( ITEM_FIELD_STACK_COUNT, 1 );
 	SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
 
-	m_Slot = new Item*[m_itemProto->ContainerSlots];
-	memset(m_Slot, 0, sizeof(Item*)*(m_itemProto->ContainerSlots));
+	m_Slot = new shared_ptr<Item>[m_itemProto->ContainerSlots];
+	memset(m_Slot, 0, sizeof(shared_ptr<Item>)*(m_itemProto->ContainerSlots));
 
 	m_owner = owner;
 }
@@ -131,7 +138,7 @@ bool Container::HasItems()
 	return false;
 }
 
-bool Container::AddItem(int8 slot, Item *item)
+bool Container::AddItem(int8 slot, shared_ptr<Item>item)
 {
 	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
 		return false;
@@ -172,7 +179,7 @@ bool Container::AddItem(int8 slot, Item *item)
 
 void Container::SwapItems(int8 SrcSlot, int8 DstSlot)
 {
-	Item *temp;
+	shared_ptr<Item>temp;
 	if( SrcSlot < 0 || SrcSlot >= (int8)m_itemProto->ContainerSlots )
 		return;
 	
@@ -230,15 +237,15 @@ void Container::SwapItems(int8 SrcSlot, int8 DstSlot)
 	}
 }
 
-Item *Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool destroy)
+shared_ptr<Item>Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool destroy)
 {
 	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
-		return NULL;
+		return NULLITEM;
 
-	Item *pItem = m_Slot[slot];
+	shared_ptr<Item>pItem = m_Slot[slot];
 
-	if (pItem == NULL || pItem==this) return NULL;
-	m_Slot[slot] = NULL;
+	if (pItem == NULL || pItem== shared_from_this()) return NULLITEM;
+	m_Slot[slot] = NULLITEM;
 
 	if( pItem->GetOwner() == m_owner )
 	{
@@ -255,7 +262,7 @@ Item *Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool destroy)
 		}
 	}
 	else
-		pItem = NULL;
+		pItem = NULLITEM;
 
 	return pItem;
 }
@@ -265,10 +272,10 @@ bool Container::SafeFullRemoveItemFromSlot(int8 slot)
 	if (slot < 0 || (uint32)slot >= GetProto()->ContainerSlots)
 		return false;
 
-	Item *pItem = m_Slot[slot];
+	shared_ptr<Item>pItem = m_Slot[slot];
 
-	if (pItem == NULL ||pItem==this) return false;
-	m_Slot[slot] = NULL;
+	if (pItem == NULL ||pItem==shared_from_this()) return false;
+	m_Slot[slot] = NULLITEM;
 
 	SetUInt64Value(CONTAINER_FIELD_SLOT_1  + slot*2, 0 );
 	pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
@@ -278,12 +285,13 @@ bool Container::SafeFullRemoveItemFromSlot(int8 slot)
 		pItem->RemoveFromWorld();
 	}
 	pItem->DeleteFromDB();
-	delete pItem;
+	pItem->Destructor();
+	pItem = NULLITEM;
 
 	return true;
 }
 
-bool Container::AddItemToFreeSlot(Item *pItem, uint32 * r_slot)
+bool Container::AddItemToFreeSlot(shared_ptr<Item>pItem, uint32 * r_slot)
 {
 	uint32 slot;
 	for(slot = 0; slot < GetProto()->ContainerSlots; slot++)
@@ -316,7 +324,7 @@ bool Container::AddItemToFreeSlot(Item *pItem, uint32 * r_slot)
 
 void Container::SaveBagToDB(int8 slot, bool first, QueryBuffer * buf)
 {
-	((Item*)this)->SaveToDB(INVENTORY_SLOT_NOT_SET, slot, first, buf);
+	((shared_ptr<Item>)this)->SaveToDB(INVENTORY_SLOT_NOT_SET, slot, first, buf);
 
 	for(uint32 i = 0; i < m_itemProto->ContainerSlots; i++)
 	{

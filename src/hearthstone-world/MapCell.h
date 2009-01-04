@@ -36,15 +36,15 @@ public:
 	MapCell();
 	~MapCell();
 
-	typedef std::set<Object*> ObjectSet;
+	typedef std::set<shared_ptr<Object>> ObjectSet;
 
 	//Init
-	void Init(uint32 x, uint32 y, uint32 mapid, MapMgr *mapmgr);
+	void Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr);
 
 	//Object Managing
-	void AddObject(Object *obj); 
-	void RemoveObject(Object *obj);
-	bool HasObject(Object *obj) { return (_objects.find(obj) != _objects.end()); }
+	void AddObject(shared_ptr<Object>obj); 
+	void RemoveObject(shared_ptr<Object>obj);
+	bool HasObject(shared_ptr<Object>obj) { return (_objects.find(obj) != _objects.end()); }
 	bool HasPlayers() { return ((_playerCount > 0) ? true : false); }
 	HEARTHSTONE_INLINE size_t GetObjectCount() { return _objects.size(); }
 	void RemoveObjects();
@@ -83,7 +83,7 @@ private:
 	bool _unloadpending;
 
 	uint16 _playerCount;
-	MapMgr* _mapmgr;
+	shared_ptr<MapMgr> _mapmgr;
 };
 
 #endif

@@ -218,12 +218,13 @@ enum EventFlags
 	EVENT_FLAG_FIRE_ON_DELETE					= 0x4,
 };
 
+class EventableObject;
 struct SERVER_DECL TimedEvent
 {
-	TimedEvent(void* object, CallbackBase* callback, uint32 type, time_t time, uint32 repeat, uint32 flags) : 
+	TimedEvent(shared_ptr<EventableObject> object, CallbackBase* callback, uint32 type, time_t time, uint32 repeat, uint32 flags) : 
 		obj(object), cb(callback), eventType(type), eventFlag(flags), msTime(time), currTime(time), repeats(repeat), deleted(false),ref(0) {}
 		
-	void *obj;
+	shared_ptr<EventableObject> obj;
 	CallbackBase *cb;
 	uint32 eventType;
 	uint16 eventFlag;
@@ -234,7 +235,7 @@ struct SERVER_DECL TimedEvent
 	int instanceId;
 	volatile long ref;
 
-	static TimedEvent * Allocate(void* object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat);
+	static TimedEvent * Allocate(shared_ptr<EventableObject> object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat);
 
 #ifdef WIN32
 	void DecRef()
@@ -279,7 +280,7 @@ class SERVER_DECL EventMgr : public Singleton < EventMgr >
 	friend class MiniEventMgr;
 public:
 	template <class Class>
-		void AddEvent(Class *obj, void (Class::*method)(), uint32 type, uint32 time, uint32 repeats, uint32 flags)
+		void AddEvent(shared_ptr<Class> obj, void (Class::*method)(), uint32 type, uint32 time, uint32 repeats, uint32 flags)
 	{
 		// create a timed event
 		TimedEvent * event = new TimedEvent(obj, new CallbackP0<Class>(obj, method), type, time, repeats, flags);
@@ -289,7 +290,7 @@ public:
 	}
 
 	template <class Class, typename P1>
-		void AddEvent(Class *obj, void (Class::*method)(P1), P1 p1, uint32 type, uint32 time, uint32 repeats, uint32 flags)
+		void AddEvent(shared_ptr<Class> obj, void (Class::*method)(P1), P1 p1, uint32 type, uint32 time, uint32 repeats, uint32 flags)
 	{
 		// create a timed event
 		TimedEvent * event = new TimedEvent(obj, new CallbackP1<Class, P1>(obj, method, p1), type, time, repeats, flags);
@@ -299,7 +300,7 @@ public:
 	}
 
 	template <class Class, typename P1, typename P2>
-		void AddEvent(Class *obj, void (Class::*method)(P1,P2), P1 p1, P2 p2, uint32 type, uint32 time, uint32 repeats, uint32 flags)
+		void AddEvent(shared_ptr<Class> obj, void (Class::*method)(P1,P2), P1 p1, P2 p2, uint32 type, uint32 time, uint32 repeats, uint32 flags)
 	{
 		// create a timed event
 		TimedEvent * event = new TimedEvent(obj, new CallbackP2<Class, P1, P2>(obj, method, p1, p2), type, time, repeats, flags);
@@ -309,7 +310,7 @@ public:
 	}
 
 	template <class Class, typename P1, typename P2, typename P3>
-		void AddEvent(Class *obj,void (Class::*method)(P1,P2,P3), P1 p1, P2 p2, P3 p3, uint32 type, uint32 time, uint32 repeats, uint32 flags)
+		void AddEvent(shared_ptr<Class> obj,void (Class::*method)(P1,P2,P3), P1 p1, P2 p2, P3 p3, uint32 type, uint32 time, uint32 repeats, uint32 flags)
 	{
 		// create a timed event
 		TimedEvent * event = new TimedEvent(obj, new CallbackP3<Class, P1, P2, P3>(obj, method, p1, p2, p3), type, time, repeats, flags);
@@ -319,7 +320,7 @@ public:
 	}
 
 	template <class Class, typename P1, typename P2, typename P3, typename P4>
-		void AddEvent(Class *obj, void (Class::*method)(P1,P2,P3,P4), P1 p1, P2 p2, P3 p3, P4 p4, uint32 type, uint32 time, uint32 repeats, uint32 flags)
+		void AddEvent(shared_ptr<Class> obj, void (Class::*method)(P1,P2,P3,P4), P1 p1, P2 p2, P3 p3, P4 p4, uint32 type, uint32 time, uint32 repeats, uint32 flags)
 	{
 		// create a timed event
 		TimedEvent * event = new TimedEvent(obj, new CallbackP4<Class, P1, P2, P3, P4>(obj, method, p1, p2, p3, p4), type, time, repeats, flags);
@@ -328,28 +329,28 @@ public:
 		obj->event_AddEvent(event);
 	}
 
-	template <class Class> void RemoveEvents(Class *obj) { obj->event_RemoveEvents(-1); }
-	template <class Class> void RemoveEvents(Class *obj, int32 type)
+	template <class Class> void RemoveEvents(shared_ptr<Class> obj) { obj->event_RemoveEvents(-1); }
+	template <class Class> void RemoveEvents(shared_ptr<Class> obj, int32 type)
 	{
 		obj->event_RemoveEvents(type);
 	}
 
-	template <class Class> void ModifyEventTimeLeft(Class *obj, uint32 type, uint32 time,bool unconditioned=true)
+	template <class Class> void ModifyEventTimeLeft(shared_ptr<Class> obj, uint32 type, uint32 time,bool unconditioned=true)
 	{
 		obj->event_ModifyTimeLeft(type, time,unconditioned);
 	}
 
-	template <class Class> void ModifyEventTimeAndTimeLeft(Class *obj, uint32 type, uint32 time)
+	template <class Class> void ModifyEventTimeAndTimeLeft(shared_ptr<Class> obj, uint32 type, uint32 time)
 	{
 		obj->event_ModifyTimeAndTimeLeft(type, time);
 	}
 
-	template <class Class> void ModifyEventTime(Class *obj, uint32 type, uint32 time)
+	template <class Class> void ModifyEventTime(shared_ptr<Class> obj, uint32 type, uint32 time)
 	{
 		obj->event_ModifyTime(type, time);
 	}
 
-	template <class Class> bool HasEvent(Class *obj, uint32 type)
+	template <class Class> bool HasEvent(shared_ptr<Class> obj, uint32 type)
 	{
 		return obj->event_HasEvent(type);
 	}

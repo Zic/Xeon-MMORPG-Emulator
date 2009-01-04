@@ -193,7 +193,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 {
 	DEBUG_LOG("WORLD: Received MSG_CORPSE_QUERY");
 
-	Corpse *pCorpse;
+	shared_ptr<Corpse>pCorpse;
 	//WorldPacket data(MSG_CORPSE_QUERY, 21);
 	uint8 databuffer[100];
 	StackPacket data(MSG_CORPSE_QUERY, databuffer, 100);
@@ -287,7 +287,7 @@ void WorldSession::HandleItemNameQueryOpcode( WorldPacket & recv_data )
 		reply << "Unknown Item";
 	else
 	{
-		LocalizedItem * li = (language>0) ? sLocalizationMgr.GetLocalizedItem(itemid, language) : NULL;
+		LocalizedItem* li = (language>0) ? sLocalizationMgr.GetLocalizedItem(itemid, language) : NULL;
 		if(li)
 			reply << li->Name;
 		else
@@ -304,7 +304,7 @@ void WorldSession::HandleInrangeQuestgiverQuery(WorldPacket & recv_data)
 	uint8 databuffer[10000];
 	StackPacket data(SMSG_QUESTGIVER_STATUS_MULTIPLE, databuffer, 10000);
 	Object::InRangeSet::iterator itr;
-	Creature * pCreature;
+	CreaturePointer pCreature;
 	uint32 count = 0;
 	data << count;
 
@@ -315,7 +315,7 @@ void WorldSession::HandleInrangeQuestgiverQuery(WorldPacket & recv_data)
 
 	for( itr = _player->m_objectsInRange.begin(); itr != _player->m_objectsInRange.end(); ++itr )
 	{
-		pCreature = static_cast<Creature*>(*itr);
+		pCreature = TO_CREATURE(*itr);
 		if( pCreature->GetTypeId() != TYPEID_UNIT )
 			continue;
 

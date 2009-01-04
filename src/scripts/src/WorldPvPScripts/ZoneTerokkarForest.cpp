@@ -46,7 +46,7 @@ static const uint32 g_allianceStateFields[5]	= {	WORLDSTATE_TEROKKAR_TOWER1_ALLI
 static const uint32 g_neutralStateFields[5]		= {	WORLDSTATE_TEROKKAR_TOWER1_NEUTRAL,	WORLDSTATE_TEROKKAR_TOWER2_NEUTRAL,	WORLDSTATE_TEROKKAR_TOWER3_NEUTRAL,	WORLDSTATE_TEROKKAR_TOWER4_NEUTRAL,	WORLDSTATE_TEROKKAR_TOWER5_NEUTRAL };
 
 // updates clients visual counter, and adds the buffs to players if needed
-HEARTHSTONE_INLINE void UpdateTowerCount(MapMgr * mgr)
+HEARTHSTONE_INLINE void UpdateTowerCount(shared_ptr<MapMgr> mgr)
 {
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_TEROKKAR_ALLIANCE_TOWERS_CONTROLLED, TFg_allianceTowers);
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_TEROKKAR_HORDE_TOWERS_CONTROLLED, TFg_hordeTowers);
@@ -93,7 +93,7 @@ class TerokkarForestBannerAI : public GameObjectAIScript
 
 public:
 
-	TerokkarForestBannerAI(GameObject *go) : GameObjectAIScript(go)
+	TerokkarForestBannerAI(GameObjectPointer go) : GameObjectAIScript(go)
 	{
 		m_bannerStatus = BANNER_STATUS_NEUTRAL;
 		Status = 50;
@@ -140,13 +140,13 @@ public:
 		//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 		//   doing lookups of objects that have already been updated
 
-		set<Player*>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
-		set<Player*>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
+		set<PlayerPointer>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
+		set<PlayerPointer>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
 		map<uint32,uint32>::iterator it2, it3;
 		uint32 timeptr = (uint32)UNIXTIME;
 		bool in_range;
 		bool is_valid;
-		Player *plr;
+		PlayerPointer plr;
 		
 		for(; itr != itrend; ++itr)
 		{
@@ -386,7 +386,7 @@ public:
 // Zone Hook
 //////////////////////////////////////////////////////////////////////////
 
-void TFZoneHook(Player *plr, uint32 Zone, uint32 OldZone)
+void TFZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
 	if( Zone == ZONE_TEROKKAR_FOREST )
 	{
@@ -419,7 +419,7 @@ struct sgodata
 	uint32 is_banner;
 };
 
-void TFSpawnObjects(MapMgr *pmgr)
+void TFSpawnObjects(shared_ptr<MapMgr> pmgr)
 {
 	if(pmgr->GetMapId() != 530)
 		return;
@@ -439,7 +439,7 @@ void TFSpawnObjects(MapMgr *pmgr)
 	{
 		p = &godata[i];
 
-		GameObject *pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
 		if( pGo == NULL )
 			continue;
 

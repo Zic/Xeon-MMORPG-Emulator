@@ -61,13 +61,13 @@ void WorldSession::HandleTaxiQueryAvaibleNodesOpcode( WorldPacket & recv_data )
 	DEBUG_LOG( "WORLD: Received CMSG_TAXIQUERYAVAILABLENODES" );
 	uint64 guid;
 	recv_data >> guid;
-	Creature *pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature) return;
 
 	SendTaxiList(pCreature);
 }
 
-void WorldSession::SendTaxiList(Creature* pCreature)
+void WorldSession::SendTaxiList(CreaturePointer pCreature)
 {
 	uint32 curloc;
 	uint8 field;

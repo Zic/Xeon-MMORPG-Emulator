@@ -368,8 +368,8 @@ struct PlayerCreateInfo{
 
 struct DamageSplit
 {
-	Player* caster;
-	Aura*   aura;
+	PlayerPointer caster;
+	AuraPointer   aura;
 	uint32  miscVal;
 	union
 	{
@@ -545,7 +545,7 @@ struct PlayerInfo
 	int8 groupVoiceId;
 #endif
 
-	Player * m_loggedInPlayer;
+	PlayerPointer m_loggedInPlayer;
 	Guild * guild;
 	GuildRank * guildRank;
 	GuildMember * guildMember;
@@ -746,7 +746,7 @@ typedef std::map<uint32, uint64>                    SoloSpells;
 typedef std::map<SpellEntry*, pair<uint32, uint32> >StrikeSpellMap;
 typedef std::map<uint32, OnHitSpell >               StrikeSpellDmgMap;
 typedef std::map<uint32, PlayerSkill>				SkillMap;
-typedef std::set<Player**>							ReferenceSet;
+typedef std::set<shared_ptr<Player>*>							ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
 
 //#define OPTIMIZED_PLAYER_SAVING
@@ -761,6 +761,8 @@ public:
 
 	Player ( uint32 guid );
 	~Player ( );
+	virtual void Destructor();
+	virtual void Init();
 
 	HEARTHSTONE_INLINE Guild * GetGuild() { return m_playerInfo->guild; }
 	HEARTHSTONE_INLINE GuildMember * GetGuildMember() { return m_playerInfo->guildMember; }
@@ -810,7 +812,7 @@ protected:
 public:
 	void Cooldown_OnCancel(SpellEntry *pSpell);
 	void Cooldown_AddStart(SpellEntry * pSpell);
-	void Cooldown_Add(SpellEntry * pSpell, Item * pItemCaster);
+	void Cooldown_Add(SpellEntry * pSpell, ItemPointer pItemCaster);
 	void Cooldown_AddItem(ItemPrototype * pProto, uint32 x);
 	bool Cooldown_CanCast(SpellEntry * pSpell);
 	bool Cooldown_CanCast(ItemPrototype * pProto, uint32 x);
@@ -829,11 +831,11 @@ public:
 	void OnLogin();//custom stuff on player login.
 	void RemoveSpellTargets(uint32 Type);
 	void RemoveSpellIndexReferences(uint32 Type);
-	void SetSpellTargetType(uint32 Type, Unit* target);
+	void SetSpellTargetType(uint32 Type, UnitPointer target);
 	void SendMeetingStoneQueue(uint32 DungeonId, uint8 Status);
 
 	void AddToWorld();
-	void AddToWorld(MapMgr * pMapMgr);
+	void AddToWorld(shared_ptr<MapMgr> pMapMgr);
 	void RemoveFromWorld();
 	bool Create ( WorldPacket &data );
 	
@@ -1021,7 +1023,7 @@ public:
 	Standing            GetStandingRank(uint32 Faction);
 	bool                IsHostileBasedOnReputation(FactionDBC * dbc);
 	void                UpdateInrangeSetsBasedOnReputation();
-	void                Reputation_OnKilledUnit(Unit * pUnit, bool InnerLoop);
+	void                Reputation_OnKilledUnit(UnitPointer pUnit, bool InnerLoop);
 	void                Reputation_OnTalk(FactionDBC * dbc);
 	static Standing     GetReputationRankFromStanding(int32 Standing_);
 	
@@ -1067,7 +1069,7 @@ public:
 	HEARTHSTONE_INLINE int          HasBeenInvited() { return m_GroupInviter != 0; }
 	HEARTHSTONE_INLINE Group*       GetGroup() { return m_playerInfo ? m_playerInfo->m_Group : NULL; }
 	HEARTHSTONE_INLINE int8		   GetSubGroup() { return m_playerInfo->subGroup; }
-    bool                IsGroupMember(Player *plyr);
+    bool                IsGroupMember(shared_ptr<Player>plyr);
 	HEARTHSTONE_INLINE bool         IsBanned()
 	{
 		if(m_banned)
@@ -1087,7 +1089,7 @@ public:
 	void CreateResetGuardHostileFlagEvent()
 	{
 		event_RemoveEvents( EVENT_GUARD_HOSTILE );
-		sEventMgr.AddEvent(this, &Player::SetGuardHostileFlag, false, EVENT_GUARD_HOSTILE, 10000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);	
+		sEventMgr.AddEvent(TO_PLAYER(shared_from_this()), &Player::SetGuardHostileFlag, false, EVENT_GUARD_HOSTILE, 10000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);	
 	}
 
 	uint32 m_hasInRangeGuards;
@@ -1107,7 +1109,7 @@ public:
     /************************************************************************/
     /* Duel                                                                 */
     /************************************************************************/
-    void                RequestDuel(Player *pTarget);
+    void                RequestDuel(shared_ptr<Player>pTarget);
 	void                DuelBoundaryTest();
 	void                EndDuel(uint8 WinCondition);
 	void                DuelCountdown();
@@ -1116,7 +1118,7 @@ public:
 	void                SetDuelState(uint8 state) { m_duelState = state; }
 	HEARTHSTONE_INLINE uint8        GetDuelState() { return m_duelState; }
     // duel variables
-    Player*             DuelingWith;
+    PlayerPointer             DuelingWith;
 
     /************************************************************************/
     /* Trade                                                                */
@@ -1125,7 +1127,7 @@ public:
 	void         ResetTradeVariables()
 	{
 		mTradeGold = 0;
-		memset(&mTradeItems, 0, sizeof(Item*) * 8);
+		memset(&mTradeItems, 0, sizeof(shared_ptr<Item>) * 8);
 		mTradeStatus = 0;
 		mTradeTarget = 0;
 		m_tradeSequence = 2;
@@ -1134,8 +1136,8 @@ public:
     /************************************************************************/
     /* Pets                                                                 */
     /************************************************************************/
-	HEARTHSTONE_INLINE void			SetSummon(Pet *pet) { m_Summon = pet; }
-	HEARTHSTONE_INLINE Pet*			GetSummon(void) { return m_Summon; }
+	HEARTHSTONE_INLINE void			SetSummon(shared_ptr<Pet> pet) { m_Summon = pet; }
+	HEARTHSTONE_INLINE shared_ptr<Pet>			GetSummon(void) { return m_Summon; }
 	uint32						GeneratePetNumber(void);
 	void						RemovePlayerPet(uint32 pet_number);
 	HEARTHSTONE_INLINE void			AddPlayerPet(PlayerPet* pet, uint32 index) { m_Pets[index] = pet; }
@@ -1166,14 +1168,14 @@ public:
 				return itr->first;
 		return 0;
 	}
-	void						EventSummonPet(Pet *new_pet); //if we charmed or simply summoned a pet, this function should get called
+	void						EventSummonPet(shared_ptr<Pet> new_pet); //if we charmed or simply summoned a pet, this function should get called
 	void						EventDismissPet(); //if pet/charm died or whatever happned we should call this function
 
     /************************************************************************/
     /* Item Interface                                                       */
     /************************************************************************/
 	HEARTHSTONE_INLINE ItemInterface* GetItemInterface() { return m_ItemInterface; } // Player Inventory Item storage
-	HEARTHSTONE_INLINE void         ApplyItemMods(Item *item, int8 slot, bool apply,bool justdrokedown=false) {  _ApplyItemMods(item, slot, apply,justdrokedown); }
+	HEARTHSTONE_INLINE void         ApplyItemMods(ItemPointer item, int8 slot, bool apply,bool justdrokedown=false) {  _ApplyItemMods(item, slot, apply,justdrokedown); }
     // item interface variables
     ItemInterface *     m_ItemInterface;
 
@@ -1210,8 +1212,8 @@ public:
 	
 	// Talents
 	// These functions build a specific type of A9 packet
-	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, Player *target );
-	void DestroyForPlayer( Player *target ) const;
+	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
+	void DestroyForPlayer( shared_ptr<Player>target ) const;
 	void SetTalentHearthOfWildPCT(int value){hearth_of_wild_pct=value;}
 	void EventTalentHearthOfWildChange(bool apply);
 	
@@ -1235,11 +1237,11 @@ public:
     /* Death system                                                         */
     /************************************************************************/
 	void SpawnCorpseBones();
-	Corpse *CreateCorpse();
+	shared_ptr<Corpse>CreateCorpse();
 	void KillPlayer();
-	void ResurrectPlayer(Player *pResurrector);
+	void ResurrectPlayer(shared_ptr<Player>pResurrector);
 	void BuildPlayerRepop();
-	Corpse *RepopRequestedPlayer();
+	shared_ptr<Corpse>RepopRequestedPlayer();
 	
 	// silly event handler
 	void EventRepopRequestedPlayer() { RepopRequestedPlayer(); }
@@ -1360,16 +1362,16 @@ public:
 	uint32 m_SwimmingTime;
 	uint32 m_BreathDamageTimer;
 	// Visible objects
-	bool CanSee(Object* obj);
-	HEARTHSTONE_INLINE bool IsVisible(Object* pObj) { return !(m_visibleObjects.find(pObj) == m_visibleObjects.end()); }
-	void AddInRangeObject(Object* pObj);
-	void OnRemoveInRangeObject(Object* pObj);
+	bool CanSee(ObjectPointer obj);
+	HEARTHSTONE_INLINE bool IsVisible(ObjectPointer pObj) { return !(m_visibleObjects.find(pObj) == m_visibleObjects.end()); }
+	void AddInRangeObject(ObjectPointer pObj);
+	void OnRemoveInRangeObject(ObjectPointer pObj);
 	void ClearInRangeSet();
-	HEARTHSTONE_INLINE void AddVisibleObject(Object* pObj) { m_visibleObjects.insert(pObj); }
-	HEARTHSTONE_INLINE void RemoveVisibleObject(Object* pObj) { m_visibleObjects.erase(pObj); }
+	HEARTHSTONE_INLINE void AddVisibleObject(ObjectPointer pObj) { m_visibleObjects.insert(pObj); }
+	HEARTHSTONE_INLINE void RemoveVisibleObject(ObjectPointer pObj) { m_visibleObjects.erase(pObj); }
 	HEARTHSTONE_INLINE void RemoveVisibleObject(InRangeSet::iterator itr) { m_visibleObjects.erase(itr); }
-	HEARTHSTONE_INLINE InRangeSet::iterator FindVisible(Object * obj) { return m_visibleObjects.find(obj); }
-	HEARTHSTONE_INLINE void RemoveIfVisible(Object * obj)
+	HEARTHSTONE_INLINE InRangeSet::iterator FindVisible(ObjectPointer obj) { return m_visibleObjects.find(obj); }
+	HEARTHSTONE_INLINE void RemoveIfVisible(ObjectPointer obj)
 	{
 		InRangeSet::iterator itr = m_visibleObjects.find(obj);
 		if(itr == m_visibleObjects.end())
@@ -1379,7 +1381,7 @@ public:
 		PushOutOfRange(obj->GetNewGUID());
 	}
 
-	HEARTHSTONE_INLINE bool GetVisibility(Object * obj, InRangeSet::iterator *itr)
+	HEARTHSTONE_INLINE bool GetVisibility(ObjectPointer obj, InRangeSet::iterator *itr)
 	{
 		*itr = m_visibleObjects.find(obj);
 		return ((*itr) != m_visibleObjects.end());
@@ -1415,8 +1417,8 @@ public:
 	uint32 HasBGQueueSlotOfType(uint32 type);
 
 	// Battlegrounds xD
-	CBattleground * m_bg;
-	CBattleground * m_pendingBattleground[3];
+	shared_ptr<CBattleground> m_bg;
+	shared_ptr<CBattleground> m_pendingBattleground[3];
 	uint32 m_bgSlot;
 	bool m_bgRatedQueue;
 	uint32 m_bgEntryPointMap;
@@ -1437,8 +1439,8 @@ public:
 	uint32 GetBGQueueSlot();
 
 	void EventRepeatSpell();
-	void EventCastRepeatedSpell(uint32 spellid, Unit *target);
-	int32 CanShootRangedWeapon(uint32 spellid, Unit *target, bool autoshot);
+	void EventCastRepeatedSpell(uint32 spellid, shared_ptr<Unit>target);
+	int32 CanShootRangedWeapon(uint32 spellid, shared_ptr<Unit>target, bool autoshot);
 	uint32 m_AutoShotDuration;
 	uint32 m_AutoShotAttackTimer;
 	bool m_onAutoShot;
@@ -1524,7 +1526,7 @@ public:
 	uint8 cannibalizeCount;
 	int32 rageFromDamageDealt;
 	// GameObject commands
-	GameObject *m_GM_SelectedGO;
+	shared_ptr<GameObject>m_GM_SelectedGO;
 	
 #ifndef CLUSTERING
 	void _Relocate(uint32 mapid,const LocationVector & v, bool sendpending, bool force_new_world, uint32 instance_id);
@@ -1548,11 +1550,11 @@ public:
 	void Kick(uint32 delay = 0);
 	void SoftDisconnect();
 	uint32 m_KickDelay;
-	Unit * m_CurrentCharm;
-	Transporter * m_CurrentTransporter;
+	UnitPointer m_CurrentCharm;
+	shared_ptr<Transporter> m_CurrentTransporter;
 	
-	Object * GetSummonedObject () {return m_SummonedObject;};
-	void SetSummonedObject (Object * t_SummonedObject) {m_SummonedObject = t_SummonedObject;};
+	ObjectPointer GetSummonedObject () {return m_SummonedObject;};
+	void SetSummonedObject (ObjectPointer t_SummonedObject) {m_SummonedObject = t_SummonedObject;};
 	uint32 roll;
 
 	void ClearCooldownsOnLine(uint32 skill_line, uint32 called_from);
@@ -1625,7 +1627,7 @@ public:
 	uint32 m_arenaPoints;
 	bool m_honorless;
 	uint32 m_lastSeenWeather;
-	set<Object*> m_visibleFarsightObjects;
+	set<shared_ptr<Object>> m_visibleFarsightObjects;
 	void EventTeleport(uint32 mapid, float x, float y, float z);
 	void ApplyLevelInfo(LevelInfo* Info, uint32 Level);
 	void BroadcastMessage(const char* Format, ...);
@@ -1635,11 +1637,11 @@ public:
 	void RemoveSummonSpell(uint32 Entry, uint32 SpellID);
 	set<uint32>* GetSummonSpells(uint32 Entry);
 	LockedQueue<WorldPacket*> delayedPackets;
-	set<Player *> gmTargets;
+	set<shared_ptr<Player>> gmTargets;
 	uint32 m_UnderwaterMaxTime;
 	uint32 m_UnderwaterLastDmg;
-	HEARTHSTONE_INLINE void setMyCorpse(Corpse * corpse) { myCorpse = corpse; }
-	HEARTHSTONE_INLINE Corpse * getMyCorpse() { return myCorpse; }
+	HEARTHSTONE_INLINE void setMyCorpse(shared_ptr<Corpse> corpse) { myCorpse = corpse; }
+	HEARTHSTONE_INLINE shared_ptr<Corpse> getMyCorpse() { return myCorpse; }
 
 	uint32 m_resurrectHealth, m_resurrectMana;
 	uint32 resurrector;
@@ -1651,12 +1653,12 @@ public:
 	// DBC stuff
 	CharRaceEntry * myRace;
 	CharClassEntry * myClass;
-	Unit * linkTarget;
+	UnitPointer linkTarget;
 	bool stack_cheat;
 	bool triggerpass_cheat;
 	bool SafeTeleport(uint32 MapID, uint32 InstanceID, float X, float Y, float Z, float O);
 	bool SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec);
-	void SafeTeleport(MapMgr * mgr, LocationVector vec);
+	void SafeTeleport(shared_ptr<MapMgr> mgr, LocationVector vec);
 	void EjectFromInstance();
 	bool raidgrouponlysent;
 	
@@ -1696,9 +1698,9 @@ public:
 	void OnPrePushToWorld();
 	void OnWorldPortAck();
 	uint32 m_TeleportState;
-	set<Unit*> visiblityChangableSet;
+	set<shared_ptr<Unit>> visiblityChangableSet;
 	bool m_beingPushed;
-	bool CanSignCharter(Charter * charter, Player * requester);
+	bool CanSignCharter(Charter * charter, PlayerPointer requester);
 	uint32 flying_aura;
 	stringstream LoadAuras;
 	bool resend_speed;
@@ -1737,22 +1739,22 @@ public:
 	void SendAreaTriggerMessage(const char * message, ...);
         
 	// Trade Target
-	//Player *getTradeTarget() {return mTradeTarget;};
+	//shared_ptr<Player>getTradeTarget() {return mTradeTarget;};
 
-	HEARTHSTONE_INLINE Player * GetTradeTarget()
+	HEARTHSTONE_INLINE PlayerPointer GetTradeTarget()
 	{
-		if(!IsInWorld()) return 0;
+		if(!IsInWorld()) return NULLPLR;
 		return m_mapMgr->GetPlayer((uint32)mTradeTarget);
 	}
 
-	Item *getTradeItem(uint32 slot) {return mTradeItems[slot];};
+	shared_ptr<Item>getTradeItem(uint32 slot) {return mTradeItems[slot];};
         
 	// Water level related stuff (they are public because they need to be accessed fast)
 	// Nose level of the character (needed for proper breathing)
 	float m_noseLevel;
 
 	/* Mind Control */
-	void Possess(Unit * pTarget);
+	void Possess(UnitPointer pTarget);
 	void UnPossess();
 
 	/* Last Speeds */
@@ -1767,7 +1769,7 @@ public:
 
 	void RemoteRevive()
 	{
-		ResurrectPlayer(NULL);
+		ResurrectPlayer(NULLPLR);
 		SetMovement(MOVE_UNROOT, 5);
 		SetPlayerSpeed(RUN, (float)7);
 		SetPlayerSpeed(SWIM, (float)4.9);
@@ -1809,7 +1811,7 @@ public:
 	bool UnpackPlayerData(ByteBuffer & data);
 #endif
 
-	Creature * m_tempSummon;
+	CreaturePointer m_tempSummon;
 	bool m_deathVision;
 	SpellEntry * last_heal_spell;
 	LocationVector m_sentTeleportPosition;
@@ -1831,7 +1833,7 @@ public:
     /* End of SpellPacket wrapper                                           */
     /************************************************************************/
 
-	Mailbox m_mailBox;
+	Mailbox* m_mailBox;
 	bool m_waterwalk;
 	bool m_setwaterwalk;
 	bool m_setflycheat;
@@ -1856,8 +1858,8 @@ protected:
 	uint32 m_summoner;
 
 	uint32 iActivePet;
-	void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
-	void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
+	void _SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
+	void _SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
 
 	/* Update system components */
 	ByteBuffer bUpdateBuffer;
@@ -1880,7 +1882,7 @@ protected:
 	void _LoadPetSpells(QueryResult * result);
 	void _SavePet(QueryBuffer * buf);
 	void _SavePetSpells(QueryBuffer * buf);
-	void _ApplyItemMods( Item* item, int8 slot, bool apply, bool justdrokedown = false, bool skip_stat_apply = false );
+	void _ApplyItemMods( ItemPointer item, int8 slot, bool apply, bool justdrokedown = false, bool skip_stat_apply = false );
 	void _EventAttack( bool offhand );
 	void _EventExploration();
 
@@ -1890,7 +1892,7 @@ protected:
 	/************************************************************************/
 	/* Trade																*/
 	/************************************************************************/
-	Item* mTradeItems[8];
+	ItemPointer mTradeItems[8];
 	uint32 mTradeGold;
 	uint32 mTradeTarget;
 	uint32 mTradeStatus;
@@ -1909,7 +1911,7 @@ protected:
 	string      m_banreason;
 	uint32      m_AreaID;
 	AreaTable  *m_areaDBC;
-	Pet*        m_Summon;
+	shared_ptr<Pet>        m_Summon;
 	uint32      m_PetNumberMax;
 	std::map<uint32, PlayerPet*> m_Pets;
 	
@@ -1966,16 +1968,16 @@ protected:
 	// Channels
 	std::set<uint32> m_channels;
 	// Visible objects
-	std::set<Object*> m_visibleObjects;
+	std::set<shared_ptr<Object>> m_visibleObjects;
 	// Groups/Raids
 	uint32 m_GroupInviter;
 	uint8 m_StableSlotCount;
 
     // Fishing related
-	Object *m_SummonedObject;
+	shared_ptr<Object>m_SummonedObject;
 
     // other system
-	Corpse *    myCorpse;
+	shared_ptr<Corpse>    myCorpse;
 
 	uint32      m_lastHonorResetTime;
 	uint32      _fields[PLAYER_END];
@@ -2054,10 +2056,10 @@ public:
 
 	int16 m_vampiricEmbrace;
 	int16 m_vampiricTouch;
-	void VampiricSpell(uint32 dmg, Unit* pTarget);
+	void VampiricSpell(uint32 dmg, UnitPointer pTarget);
 
 	// grounding totem
-	Aura* m_magnetAura;
+	AuraPointer m_magnetAura;
 
 	// spirit of redemption
 	bool m_canCastSpellsWhileDead;
@@ -2113,7 +2115,7 @@ public:
 	static void InitializeTalentInspectSupport();
 
 	// loooooot
-	void GenerateLoot(Corpse *pCorpse);
+	void GenerateLoot(shared_ptr<Corpse>pCorpse);
 };
 
 class SkillIterator
@@ -2121,9 +2123,9 @@ class SkillIterator
 	SkillMap::iterator m_itr;
 	SkillMap::iterator m_endItr;
 	bool m_searchInProgress;
-	Player * m_target;
+	PlayerPointer m_target;
 public:
-	SkillIterator(Player* target) : m_searchInProgress(false),m_target(target) {}
+	SkillIterator(PlayerPointer target) : m_searchInProgress(false),m_target(target) {}
 	~SkillIterator() { if(m_searchInProgress) { EndSearch(); } }
 
 	void BeginSearch()
@@ -2173,12 +2175,12 @@ class CMovementCompressorThread : public ThreadContext
 {
 	bool running;
 	Mutex m_listLock;
-	set<Player*> m_players;
+	set<shared_ptr<Player>> m_players;
 public:
 	CMovementCompressorThread() { running = true; }
 
-	void AddPlayer(Player * pPlayer);
-	void RemovePlayer(Player * pPlayer);
+	void AddPlayer(PlayerPointer pPlayer);
+	void RemovePlayer(PlayerPointer pPlayer);
 
 	void OnShutdown() { running = false; }
 	bool run();

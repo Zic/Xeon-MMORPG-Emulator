@@ -41,7 +41,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -64,7 +64,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -306,7 +306,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 3016, Plr);
@@ -327,7 +327,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -499,7 +499,7 @@ public:
 
 		}
 	}
-    void GossipEnd(Object* pObject, Player* Plr)
+    void GossipEnd(ObjectPointer pObject, PlayerPointer Plr)
     {
 
     }
@@ -512,7 +512,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -527,7 +527,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-	void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+	void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -730,7 +730,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 3543, Plr);
@@ -751,7 +751,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -967,7 +967,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 4316, Plr);
@@ -984,7 +984,7 @@ public:
             Menu->SendTo(Plr);
     }
 	
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -1141,7 +1141,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 9316, Plr);
@@ -1163,7 +1163,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -1429,7 +1429,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 9316, Plr);
@@ -1448,7 +1448,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -1680,7 +1680,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -1701,7 +1701,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -1935,7 +1935,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 3543, Plr);
@@ -1954,7 +1954,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -2157,7 +2157,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 3543, Plr);
@@ -2171,7 +2171,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -2328,7 +2328,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 4037, Plr);
@@ -2342,7 +2342,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -2529,7 +2529,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -2543,7 +2543,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -2722,7 +2722,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2760, Plr);
@@ -2742,7 +2742,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -2971,7 +2971,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -2986,7 +2986,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -3174,7 +3174,7 @@ public:
 	{
 		delete this;
 	}
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -3188,7 +3188,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)
@@ -3384,7 +3384,7 @@ public:
 		delete this;
 	}
 
-    void GossipHello(Object* pObject, Player * Plr, bool AutoSend)
+    void GossipHello(ObjectPointer pObject, PlayerPointer  Plr, bool AutoSend)
     {
         GossipMenu *Menu;
         objmgr.CreateGossipMenuForPlayer(&Menu, pObject->GetGUID(), 2593, Plr);
@@ -3399,7 +3399,7 @@ public:
             Menu->SendTo(Plr);
     }
 
-    void GossipSelectOption(Object* pObject, Player* Plr, uint32 Id, uint32 IntId, const char * Code)
+    void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
     {
         GossipMenu * Menu;
         switch(IntId)

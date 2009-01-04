@@ -35,7 +35,7 @@ typedef multimap<uint32, TimedEvent*> EventMap;
 #define EVENT_REMOVAL_FLAG_ALL 0xFFFFFFFF
 #define WORLD_INSTANCE -1
 
-class SERVER_DECL EventableObject
+class SERVER_DECL EventableObject : public std::tr1::enable_shared_from_this<EventableObject>
 {
 	friend class EventMgr;
 	friend class EventableObjectHolder;
@@ -85,7 +85,8 @@ protected:
   *
   */
 
-typedef set<EventableObject*> EventableObjectSet;
+class Object;
+typedef set< ObjectPointer > EventableObjectSet;
 
 class EventableObjectHolder
 {
@@ -96,7 +97,7 @@ public:
 	void Update(uint32 time_difference);
 
 	void AddEvent(TimedEvent * ev);
-	void AddObject(EventableObject * obj);
+	void AddObject(shared_ptr<EventableObject> obj);
 
 	HEARTHSTONE_INLINE uint32 GetInstanceID() { return mInstanceId; }
 

@@ -99,14 +99,14 @@ uint32 GetAutoCastTypeForSpell(SpellEntry * ent)
 	return AUTOCAST_EVENT_NONE;
 }
 
-void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, Creature* created_from_creature, Unit *owner, SpellEntry* created_by_spell, uint32 type, uint32 expiretime)
+void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, CreaturePointer created_from_creature, shared_ptr<Unit>owner, SpellEntry* created_by_spell, uint32 type, uint32 expiretime)
 {
 	SetIsPet(true);
 
 	//std::string myname = sWorld.GenerateName();
 
 	if(!ci) return;
-	m_Owner = static_cast< Player* >(owner);
+	m_Owner = TO_PLAYER(owner);
 	m_OwnerGuid = m_Owner->GetGUID();
 	creature_info = ci;
 	myFamily = dbcCreatureFamily.LookupEntry(creature_info->Family);
@@ -197,7 +197,7 @@ void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, Creature* created_from_
 	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, owner->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 	m_PartySpellsUpdateTimer = 0;
 
-	m_PetNumber = static_cast< Player* >(owner)->GeneratePetNumber();
+	m_PetNumber = TO_PLAYER(owner)->GeneratePetNumber();
 	SetUInt32Value(UNIT_FIELD_PETNUMBER, GetUIdFromGUID());
 
 	m_ExpireTime = expiretime;
@@ -209,7 +209,7 @@ void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, Creature* created_from_
 		PlayerPet *pp = new PlayerPet;
 		pp->number = m_PetNumber;
 		pp->stablestate = STABLE_STATE_ACTIVE;
-		static_cast< Player* >(owner)->AddPlayerPet(pp, pp->number);
+		TO_PLAYER(owner)->AddPlayerPet(pp, pp->number);
 	}	
 
 	//maybe we should use speed from the template we created the creature ?
@@ -251,14 +251,35 @@ Pet::Pet(uint64 guid) : Creature(guid)
 
 Pet::~Pet()
 {
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("Pet::~Pet()\n");
+#endif
+}
+
+void Pet::Init()
+{
+	Creature::Init();
+}
+
+void Pet::Destructor()
+{
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("Pet::Destructor()\n");
+#endif
 	for(std::map<uint32, AI_Spell*>::iterator itr = m_AISpellStore.begin(); itr != m_AISpellStore.end(); ++itr)
 		delete itr->second;
+	m_AISpellStore.clear();
 
 	if(IsInWorld())
 		this->Remove(false, true, true);
 
 	if( m_Owner )
-		m_Owner->SetSummon(NULL);
+	{
+		m_Owner->SetSummon(NULLPET);
+		ClearPetOwner();
+	}
+
+	Creature::Destructor();
 }
 
 void Pet::Update(uint32 time)
@@ -389,14 +410,14 @@ void Pet::InitializeSpells()
 		if( info->Attributes & ATTRIBUTES_PASSIVE )
 		{
 			// Cast on self..
-			Spell * sp = new Spell(this, info, true, false);
+			shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(obj_shared_from_this(), info, true, NULLAURA));
 			SpellCastTargets targets(this->GetGUID());
 			sp->prepare(&targets);
 
 			continue;
 		}
 
-		AI_Spell * sp = CreateAISpell(info);
+		AI_Spell*sp = CreateAISpell(info);
 		if(itr->second == AUTOCAST_SPELL_STATE)
 			SetAutoCast(sp, true);
 		else
@@ -404,7 +425,7 @@ void Pet::InitializeSpells()
 	}
 }
 
-AI_Spell * Pet::CreateAISpell(SpellEntry * info)
+AI_Spell*Pet::CreateAISpell(SpellEntry * info)
 {
 	// Create an AI_Spell
 	map<uint32,AI_Spell*>::iterator itr = m_AISpellStore.find(info->Id);
@@ -441,7 +462,7 @@ AI_Spell * Pet::CreateAISpell(SpellEntry * info)
 	return sp;
 }
 
-void Pet::LoadFromDB(Player* owner, PlayerPet * pi)
+void Pet::LoadFromDB(PlayerPointer owner, PlayerPet * pi)
 {
 	m_Owner = owner;
 	m_OwnerGuid = m_Owner->GetGUID();
@@ -555,7 +576,7 @@ void Pet::OnPushToWorld()
 {
 	//before we initialize pet spells so we can apply spell mods on them 
 	if( m_Owner && m_Owner->IsPlayer() )
-		static_cast< Player* >( m_Owner )->EventSummonPet( this );
+		TO_PLAYER( m_Owner )->EventSummonPet( pet_shared_from_this() );
 
 	Creature::OnPushToWorld();
 }
@@ -566,13 +587,13 @@ void Pet::InitializeMe(bool first)
 	{
 		// 2 pets???!
 		m_Owner->GetSummon()->Remove(true, true, true);
-		m_Owner->SetSummon(this);
+		m_Owner->SetSummon( pet_shared_from_this() );
 	}
 	else
-		m_Owner->SetSummon(this);
+		m_Owner->SetSummon( pet_shared_from_this() );
 
 	// set up ai and shit
-	GetAIInterface()->Init(this,AITYPE_PET,MOVEMENTTYPE_NONE,m_Owner);
+	GetAIInterface()->Init(unit_shared_from_this() ,AITYPE_PET,MOVEMENTTYPE_NONE,m_Owner);
 	GetAIInterface()->SetUnitToFollow(m_Owner);
 	GetAIInterface()->SetFollowDistance(3.0f);
 
@@ -637,8 +658,8 @@ void Pet::InitializeMe(bool first)
 	if(!bExpires)
 		UpdatePetInfo(false);
 
-	sEventMgr.AddEvent(this, &Pet::HandleAutoCastEvent, uint32(AUTOCAST_EVENT_ON_SPAWN), EVENT_UNK, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-	sEventMgr.AddEvent(this, &Pet::HandleAutoCastEvent, uint32(AUTOCAST_EVENT_LEAVE_COMBAT), EVENT_UNK, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.AddEvent(pet_shared_from_this(), &Pet::HandleAutoCastEvent, uint32(AUTOCAST_EVENT_ON_SPAWN), EVENT_UNK, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.AddEvent(pet_shared_from_this(), &Pet::HandleAutoCastEvent, uint32(AUTOCAST_EVENT_LEAVE_COMBAT), EVENT_UNK, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Pet::UpdatePetInfo(bool bSetToOffline)
@@ -726,7 +747,7 @@ void Pet::Remove(bool bSafeDelete, bool bUpdate, bool bSetOffline)
 			if(!IsSummon() && !bExpires)
 				m_Owner->_SavePet(NULL);//not perfect but working
 		}
-		m_Owner->SetSummon(NULL);
+		m_Owner->SetSummon(NULLPET);
 		SendNullSpellsToOwner();
 	}
 	ClearPetOwner();
@@ -737,8 +758,8 @@ void Pet::Remove(bool bSafeDelete, bool bUpdate, bool bSetOffline)
 
 	// has to be next loop - reason because of RemoveFromWorld, iterator gets broke.
 	/*if(IsInWorld() && Active) Deactivate(m_mapMgr);*/
-	sEventMgr.RemoveEvents(this);
-	sEventMgr.AddEvent(this, &Pet::PetSafeDelete, EVENT_CREATURE_SAFE_DELETE, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.RemoveEvents(shared_from_this());
+	sEventMgr.AddEvent(pet_shared_from_this(), &Pet::PetSafeDelete, EVENT_CREATURE_SAFE_DELETE, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	m_dismissed = true;
 }
 
@@ -750,7 +771,7 @@ void Pet::PetSafeDelete()
 		RemoveFromWorld(false, false);
 	}
 
-	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((Object*)this), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
+	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((shared_ptr<Object>)this), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
 	Creature::SafeDelete();
 }
 
@@ -765,7 +786,7 @@ void Pet::DelayedRemove(bool bTime, bool bDeath)
 			Remove(true, true, true);
 	}
 	else
-		sEventMgr.AddEvent(this, &Pet::DelayedRemove, true, bDeath, EVENT_PET_DELAYED_REMOVE, PET_DELAYED_REMOVAL_TIME, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(pet_shared_from_this(), &Pet::DelayedRemove, true, bDeath, EVENT_PET_DELAYED_REMOVE, PET_DELAYED_REMOVAL_TIME, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Pet::GiveXP( uint32 xp )
@@ -862,7 +883,7 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 	{
 		if(IsInWorld())
 		{
-			Spell * spell = new Spell(this, sp, true, false);
+			shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell(obj_shared_from_this(), sp, true, NULLAURA));
 			SpellCastTargets targets(this->GetGUID());
 			spell->prepare(&targets);
 			mSpells[sp] = 0x0100;
@@ -911,7 +932,7 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 					}
 
 					// Create the AI_Spell
-					AI_Spell * asp = CreateAISpell(sp);
+					AI_Spell*asp = CreateAISpell(sp);
 
 					// apply the spell state
 					uint16 ss = GetSpellState(itr->first);
@@ -920,7 +941,7 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 						SetAutoCast(asp, true);
 
 					if(asp->autocast_type==AUTOCAST_EVENT_ON_SPAWN)
-						CastSpell(this, sp, false);
+						CastSpell(unit_shared_from_this(), sp, false);
 
 					RemoveSpell(itr->first);
 					done=true;
@@ -936,14 +957,14 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 
 			if(learning)
 			{
-				AI_Spell * asp = CreateAISpell(sp);
+				AI_Spell*asp = CreateAISpell(sp);
 				uint16 ss = (asp->autocast_type > 0) ? AUTOCAST_SPELL_STATE : DEFAULT_SPELL_STATE;
 				mSpells[sp] = ss;
 				if(ss==AUTOCAST_SPELL_STATE)
 					SetAutoCast(asp,true);
 
 				if(asp->autocast_type==AUTOCAST_EVENT_ON_SPAWN)
-					CastSpell(this, sp, false);
+					CastSpell(unit_shared_from_this(), sp, false);
 			}
 			else
 				mSpells[sp] = DEFAULT_SPELL_STATE;
@@ -965,7 +986,7 @@ void Pet::SetSpellState(SpellEntry* sp, uint16 State)
 
 	if(State == AUTOCAST_SPELL_STATE || oldstate == AUTOCAST_SPELL_STATE)
 	{
-		AI_Spell * sp2 = GetAISpellForSpellId(sp->Id);
+		AI_Spell*sp2 = GetAISpellForSpellId(sp->Id);
 		if(sp2)
 		{
 			if(State == AUTOCAST_SPELL_STATE)
@@ -1056,7 +1077,7 @@ void Pet::RemoveSpell(SpellEntry * sp)
 			if((*it)->spell == sp)
 			{
 				// woot?
-				AI_Spell * spe = *it;
+				AI_Spell*spe = *it;
 				m_aiInterface->m_spells.erase(it);
 				delete spe;
 				break;
@@ -1645,24 +1666,10 @@ bool Pet::UpdateLoyalty( char pts )
 {	
 	//updates loyalty_pts and loyalty lvl if needed
 	uint32 lvl;
-#ifdef WIN32
-	__try {
-		if( !m_Owner || Summon || m_Owner->GetMapMgr() != this->GetMapMgr() )
-			return true;
-
-		lvl = m_Owner->GetUInt32Value( PLAYER_NEXT_LEVEL_XP );
-	}
-	__except(EXCEPTION_EXECUTE_HANDLER)
-	{
-		m_Owner = NULL;
-		return true;
-	}
-#else
 	if( !m_Owner || Summon || m_Owner->GetMapMgr() != this->GetMapMgr() )
 		return true;
 
 	lvl = m_Owner->GetUInt32Value( PLAYER_NEXT_LEVEL_XP );
-#endif
 
 	uint8 curLvl = GetLoyaltyLevel();
 	uint8 newLvl = curLvl;
@@ -1692,7 +1699,7 @@ bool Pet::UpdateLoyalty( char pts )
 	return true;
 }
 
-AI_Spell * Pet::HandleAutoCastEvent()
+AI_Spell*Pet::HandleAutoCastEvent()
 {
 	if(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].size() > 1)
 	{
@@ -1726,7 +1733,7 @@ AI_Spell * Pet::HandleAutoCastEvent()
 	}
 	else if(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].size())
 	{
-		AI_Spell * sp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+		AI_Spell*sp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
 		if( sp->autocast_type == AUTOCAST_EVENT_ATTACK )
 		{
 			if( sp->cooldown && getMSTime() >= sp->cooldowntime )
@@ -1748,7 +1755,7 @@ AI_Spell * Pet::HandleAutoCastEvent()
 void Pet::HandleAutoCastEvent(uint32 Type)
 {
 	list<AI_Spell*>::iterator itr, it2;
-	AI_Spell * sp;
+	AI_Spell*sp;
 	if(!m_Owner)
 		return;
 
@@ -1801,12 +1808,12 @@ void Pet::HandleAutoCastEvent(uint32 Type)
 		else
 		{
 			//modified by Zack: Spell targetting will be generated in the castspell function now.You cannot force to target self all the time
-			CastSpell( static_cast< Unit* >( NULL ), sp->spell, false);
+			CastSpell( NULLUNIT, sp->spell, false);
 		}
 	}
 }
 
-void Pet::SetAutoCast(AI_Spell * sp, bool on)
+void Pet::SetAutoCast(AI_Spell*sp, bool on)
 {
 	if(sp->autocast_type > 0)
 	{

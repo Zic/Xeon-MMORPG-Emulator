@@ -310,7 +310,7 @@ void StatDumper::DumpStats()
 	uint32 classes[DRUID+1];
 	memset(&races[0], 0, sizeof(uint32)*(RACE_DRAENEI+1));
 	memset(&classes[0], 0, sizeof(uint32)*(RACE_DRAENEI+1));
-    std::deque<Player*> gms;
+    std::deque<PlayerPointer> gms;
     {
         // Dump server information.
 #ifdef WIN32
@@ -330,7 +330,7 @@ void StatDumper::DumpStats()
         // lock players reader
         objmgr._playerslock.AcquireReadLock();
 
-        HM_NAMESPACE::hash_map<uint32, Player*>::const_iterator itr;
+        HM_NAMESPACE::hash_map<uint32, PlayerPointer>::const_iterator itr;
         for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
         {
             if(itr->second->GetSession() && itr->second->IsInWorld())
@@ -416,7 +416,7 @@ void StatDumper::DumpStats()
 	}
 	fprintf(f, "  </statsummary>\n");
 
-    Player * plr;
+    PlayerPointer  plr;
     uint32 t = (uint32)time(NULL);
 
     char otime[100];
@@ -465,7 +465,7 @@ void StatDumper::DumpStats()
     fprintf(f, "  <sessions>\n");
         // Dump Player Information
         objmgr._playerslock.AcquireReadLock();
-        HM_NAMESPACE::hash_map<uint32, Player*>::const_iterator itr;
+        HM_NAMESPACE::hash_map<uint32, PlayerPointer>::const_iterator itr;
 
         for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
         {

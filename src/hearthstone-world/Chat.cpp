@@ -809,10 +809,10 @@ WorldPacket* ChatHandler::FillSystemMessageData(const char *message) const
 	return data;
 }
 
-Player * ChatHandler::getSelectedChar(WorldSession *m_session, bool showerror)
+PlayerPointer ChatHandler::getSelectedChar(WorldSession *m_session, bool showerror)
 {
 	uint64 guid;
-	Player *chr;
+	shared_ptr<Player>chr;
 	
 	guid = m_session->GetPlayer()->GetSelection();
 	
@@ -829,16 +829,16 @@ Player * ChatHandler::getSelectedChar(WorldSession *m_session, bool showerror)
 	{
 		if(showerror) 
 			RedSystemMessage(m_session, "This command requires that you select a player.");
-		return NULL;
+		return NULLPLR;
 	}
 
 	return chr;
 }
 
-Creature * ChatHandler::getSelectedCreature(WorldSession *m_session, bool showerror)
+CreaturePointer ChatHandler::getSelectedCreature(WorldSession *m_session, bool showerror)
 {
 	uint64 guid;
-	Creature *creature = NULL;
+	CreaturePointer creature = NULLCREATURE;
 
 	guid = m_session->GetPlayer()->GetSelection();
 	if(GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_PET)
@@ -852,7 +852,7 @@ Creature * ChatHandler::getSelectedCreature(WorldSession *m_session, bool shower
 	{
 		if(showerror) 
 			RedSystemMessage(m_session, "This command requires that you select a creature.");
-		return NULL;
+		return NULLCREATURE;
 	}
 }
 
@@ -929,7 +929,7 @@ void ChatHandler::BlueSystemMessage(WorldSession *m_session, const char *message
 	delete data;
 }
 
-void ChatHandler::RedSystemMessageToPlr(Player* plr, const char *message, ...)
+void ChatHandler::RedSystemMessageToPlr(PlayerPointer plr, const char *message, ...)
 {
 	if( !message || !plr->GetSession() ) return;
 	va_list ap;
@@ -939,7 +939,7 @@ void ChatHandler::RedSystemMessageToPlr(Player* plr, const char *message, ...)
 	RedSystemMessage(plr->GetSession(), (const char*)msg1);
 }
 
-void ChatHandler::GreenSystemMessageToPlr(Player* plr, const char *message, ...)
+void ChatHandler::GreenSystemMessageToPlr(PlayerPointer plr, const char *message, ...)
 {
 	if( !message || !plr->GetSession() ) return;
 	va_list ap;
@@ -949,7 +949,7 @@ void ChatHandler::GreenSystemMessageToPlr(Player* plr, const char *message, ...)
 	GreenSystemMessage(plr->GetSession(), (const char*)msg1);
 }
 
-void ChatHandler::BlueSystemMessageToPlr(Player* plr, const char *message, ...)
+void ChatHandler::BlueSystemMessageToPlr(PlayerPointer plr, const char *message, ...)
 {
 	if( !message || !plr->GetSession() ) return;
 	va_list ap;
@@ -959,7 +959,7 @@ void ChatHandler::BlueSystemMessageToPlr(Player* plr, const char *message, ...)
 	BlueSystemMessage(plr->GetSession(), (const char*)msg1);
 }
 
-void ChatHandler::SystemMessageToPlr(Player *plr, const char* message, ...)
+void ChatHandler::SystemMessageToPlr(shared_ptr<Player>plr, const char* message, ...)
 {
 	if( !message || !plr->GetSession() ) return;
 	va_list ap;
@@ -1007,7 +1007,7 @@ bool ChatHandler::CmdSetValueField(WorldSession *m_session, uint32 field, uint32
 		}
 	}
 
-	Player *plr = getSelectedChar(m_session, false);
+	shared_ptr<Player>plr = getSelectedChar(m_session, false);
 	if(plr)
 	{  
 		sGMLog.writefromsession(m_session, "used modify field value: %s, %u on %s", fieldname, av, plr->GetName());
@@ -1036,7 +1036,7 @@ bool ChatHandler::CmdSetValueField(WorldSession *m_session, uint32 field, uint32
 	}
 	else
 	{
-		Creature *cr = getSelectedCreature(m_session, false);
+		CreaturePointer cr = getSelectedCreature(m_session, false);
 		if(cr)
 		{
 			if(!(field < UNIT_END && fieldmax < UNIT_END)) return false;
@@ -1122,7 +1122,7 @@ bool ChatHandler::CmdSetFloatField(WorldSession *m_session, uint32 field, uint32
 		}
 	}
 
-	Player *plr = getSelectedChar(m_session, false);
+	shared_ptr<Player>plr = getSelectedChar(m_session, false);
 	if(plr)
 	{  
 		sGMLog.writefromsession(m_session, "used modify field value: %s, %f on %s", fieldname, av, plr->GetName());
@@ -1141,7 +1141,7 @@ bool ChatHandler::CmdSetFloatField(WorldSession *m_session, uint32 field, uint32
 	}
 	else
 	{
-		Creature *cr = getSelectedCreature(m_session, false);
+		CreaturePointer cr = getSelectedCreature(m_session, false);
 		if(cr)
 		{
 			if(!(field < UNIT_END && fieldmax < UNIT_END)) return false;
@@ -1170,7 +1170,7 @@ bool ChatHandler::CmdSetFloatField(WorldSession *m_session, uint32 field, uint32
 bool ChatHandler::HandleGetPosCommand(const char* args, WorldSession *m_session)
 {
 	/*if(m_session->GetPlayer()->GetSelection() == 0) return false;
-	Creature *creature = objmgr.GetCreature(m_session->GetPlayer()->GetSelection());
+	CreaturePointer creature = objmgr.GetCreature(m_session->GetPlayer()->GetSelection());
 
 	if(!creature) return false;
 	BlueSystemMessage(m_session, "Creature Position: \nX: %f\nY: %f\nZ: %f\n", creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
@@ -1186,7 +1186,7 @@ bool ChatHandler::HandleGetPosCommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleDebugRetroactiveQuestAchievements(const char *args, WorldSession *m_session)
 {
-	Player * pTarget = getSelectedChar(m_session, true );
+	PlayerPointer pTarget = getSelectedChar(m_session, true );
 	if(!pTarget) return true;
 
 	pTarget->RetroactiveCompleteQuests();

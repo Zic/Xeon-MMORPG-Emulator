@@ -39,16 +39,16 @@ class Player;
 class SERVER_DECL MapScriptInterface
 {
 public:
-	MapScriptInterface(MapMgr & mgr);
+	MapScriptInterface(shared_ptr<MapMgr> mgr);
 	~MapScriptInterface();
 
-	template<class T, uint32 TypeId> T* GetObjectNearestCoords(uint32 Entry, float x, float y, float z = 0.0f)
+	template<class T, uint32 TypeId> shared_ptr<T> GetObjectNearestCoords(uint32 Entry, float x, float y, float z = 0.0f)
 	{
-		MapCell * pCell = mapMgr.GetCell(mapMgr.GetPosX(x), mapMgr.GetPosY(y));
+		MapCell * pCell = mapMgr->GetCell(mapMgr->GetPosX(x), mapMgr->GetPosY(y));
 		if(pCell == 0)
-			return 0;
+			return CAST(T, NULLPTR);
 
-		T * ClosestObject = 0;
+		ObjectPointer ClosestObject;
 		float ClosestDist = 999999.0f;
 		float CurrentDist = 0;
         ObjectSet::const_iterator iter = pCell->Begin();
@@ -60,40 +60,40 @@ public:
 				if((Entry && (*iter)->GetEntry() == Entry) || !Entry)
 				{
 					ClosestDist = CurrentDist;
-					ClosestObject = ((T*)(*iter));
+					ClosestObject = (*iter);
 				}
 			}
 		}
 
-		return ClosestObject;
+		return CAST(T, ClosestObject);
 	}
 
-	HEARTHSTONE_INLINE GameObject* GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
 	{
 		return GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(Entry, x, y, z);
 	}
 
-	HEARTHSTONE_INLINE Creature* GetCreatureNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE CreaturePointer GetCreatureNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
 	{
 		return GetObjectNearestCoords<Creature, TYPEID_UNIT>(Entry, x, y, z);
 	}
 
-	HEARTHSTONE_INLINE Player* GetPlayerNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE PlayerPointer GetPlayerNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
 	{
 		return GetObjectNearestCoords<Player, TYPEID_PLAYER>(Entry, x, y, z);
 	}
 
 	uint32 GetPlayerCountInRadius(float x, float y, float z = 0.0f, float radius = 5.0f);
 	
-	GameObject* SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2);
-	Creature* SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2);
+	shared_ptr<GameObject> SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2);
+	CreaturePointer SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2);
 	WayPoint * CreateWaypoint();
 
-	void DeleteGameObject(GameObject *ptr);
-	void DeleteCreature(Creature* ptr);
+	void DeleteGameObject(shared_ptr<GameObject>ptr);
+	void DeleteCreature(CreaturePointer ptr);
 
 private:
-	MapMgr & mapMgr;
+	shared_ptr<MapMgr> mapMgr;
 };
 
 class SERVER_DECL StructFactory : public Singleton<StructFactory>
@@ -108,19 +108,19 @@ public:
 class SERVER_DECL InstanceScript
 {
 public:
-	InstanceScript(MapMgr *instance);
+	InstanceScript(shared_ptr<MapMgr>instance);
 	virtual ~InstanceScript() {}
 
-	virtual GameObject * GetObjectForOpenLock(Player *pCaster, Spell* pSpell, SpellEntry* pProto) { return 0; }
+	virtual shared_ptr<GameObject> GetObjectForOpenLock(PlayerPointer pCaster, SpellPointer pSpell, SpellEntry* pProto) { return NULLGOB; }
 
-	virtual void SetLockOptions(uint32 uEntryId, GameObject* pGameObject) { }
+	virtual void SetLockOptions(uint32 uEntryId, shared_ptr<GameObject> pGameObject) { }
 	virtual uint32 GetRespawnTimeForCreature(uint32 uEntryId, Creature *pCreature) { return 240000; }
 
 	virtual void Destroy() {}
 	virtual void UpdateEvent() {}
 
 protected:
-	MapMgr * _instance;
+	shared_ptr<MapMgr> _instance;
 
 };
 

@@ -32,8 +32,8 @@ bool ChatHandler::HandleWPAddCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 	AIInterface* ai = NULL;
-	Creature * pCreature = NULL;
-	Player* p = m_session->GetPlayer();
+	CreaturePointer pCreature = NULLCREATURE;
+	PlayerPointer p = m_session->GetPlayer();
 	if(p->waypointunit != NULL)
 	{
 		SystemMessage(m_session, "Using Previous Unit.");
@@ -44,7 +44,7 @@ bool ChatHandler::HandleWPAddCommand(const char* args, WorldSession *m_session)
 			return true;
 		}
 
-		pCreature = (Creature*)ai->GetUnit();
+		pCreature = TO_CREATURE(ai->GetUnit());
 		if(!pCreature)
 		{
 			SystemMessage(m_session, "Invalid Creature, please select another one.");
@@ -139,7 +139,7 @@ bool ChatHandler::HandleWPMoveTypeCommand(const char* args, WorldSession *m_sess
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a creature.");
@@ -172,7 +172,7 @@ bool ChatHandler::HandleWPShowCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a Creature.");
@@ -189,7 +189,7 @@ bool ChatHandler::HandleWPShowCommand(const char* args, WorldSession *m_session)
 	bool Backwards = (pBackwards)? ((atoi(pBackwards)>0)?true:false) : false;
 
 	AIInterface* ai = pCreature->GetAIInterface();
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 
 
 	if(pPlayer->waypointunit != ai)
@@ -238,7 +238,7 @@ bool ChatHandler::HandleWPDeleteCommand(const char* args, WorldSession *m_sessio
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -286,7 +286,7 @@ bool ChatHandler::HandleWPChangeNoCommand(const char* args, WorldSession *m_sess
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -343,7 +343,7 @@ bool ChatHandler::HandleWPFlagsCommand(const char* args, WorldSession *m_session
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -392,7 +392,7 @@ bool ChatHandler::HandleWPMoveHereCommand(const char* args, WorldSession *m_sess
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -447,7 +447,7 @@ bool ChatHandler::HandleWPWaitCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -503,7 +503,7 @@ bool ChatHandler::HandleWPEmoteCommand(const char* args, WorldSession *m_session
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -567,7 +567,7 @@ bool ChatHandler::HandleWPSkinCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -626,7 +626,7 @@ bool ChatHandler::HandleWPInfoCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 	AIInterface* ai = pPlayer->waypointunit;
 	if(!ai || !ai->GetUnit())
 	{
@@ -678,7 +678,7 @@ bool ChatHandler::HandleWPHideCommand(const char* args, WorldSession *m_session)
 		return true;
 	}
 
-	Creature * pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	CreaturePointer pCreature = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 	if(!pCreature)
 	{
 		SystemMessage(m_session, "You should select a Creature.");
@@ -692,7 +692,7 @@ bool ChatHandler::HandleWPHideCommand(const char* args, WorldSession *m_session)
 	}
 
 	AIInterface* ai = pCreature->GetAIInterface();
-	Player* pPlayer = m_session->GetPlayer();
+	PlayerPointer pPlayer = m_session->GetPlayer();
 
 
 	if(pPlayer->waypointunit == ai)
@@ -717,7 +717,7 @@ bool ChatHandler::HandleWPHideCommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_session)
 {
-	Creature * cr = 
+	CreaturePointer cr = 
 		m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!cr)
 	{
@@ -799,7 +799,7 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 
 bool ChatHandler::HandleSaveWaypoints(const char* args, WorldSession * m_session)
 {
-	Creature * cr = 
+	CreaturePointer cr = 
 		m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!cr)return false;
 	if(cr->m_spawn==NULL)
@@ -812,7 +812,7 @@ bool ChatHandler::HandleSaveWaypoints(const char* args, WorldSession * m_session
 
 bool ChatHandler::HandleDeleteWaypoints(const char* args, WorldSession * m_session)
 {
-	Creature * cr = 
+	CreaturePointer cr = 
 		m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!cr)return false;
 	if(cr->m_spawn==NULL)
@@ -840,8 +840,8 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 		return true;
 	}
 	AIInterface* ai = NULL;
-	Creature * pCreature = NULL;
-	Player* p = m_session->GetPlayer();
+	CreaturePointer pCreature = NULLCREATURE;
+	PlayerPointer p = m_session->GetPlayer();
 	if(p->waypointunit != NULL)
 	{
 		SystemMessage(m_session, "Using Previous Unit.");
@@ -852,7 +852,7 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 			return true;
 		}
 
-		pCreature = (Creature*)ai->GetUnit();
+		pCreature = TO_CREATURE(ai->GetUnit());
 		if(!pCreature)
 		{
 			SystemMessage(m_session, "Invalid Creature, please select another one.");
@@ -915,16 +915,16 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 
 bool ChatHandler::HandleNpcSelectCommand(const char * args, WorldSession * m_session)
 {
-	Creature * un = NULL;
+	CreaturePointer un = NULLCREATURE;
 	float dist = 999999.0f;
 	float dist2;
-	Player * plr = m_session->GetPlayer();
-	set<Object*>::iterator itr;
+	PlayerPointer plr = m_session->GetPlayer();
+	set<shared_ptr<Object>>::iterator itr;
 	for(itr = plr->GetInRangeSetBegin(); itr != plr->GetInRangeSetEnd(); ++itr)
 	{
 		if( (dist2 = plr->GetDistance2dSq(*itr)) < dist && (*itr)->GetTypeId() == TYPEID_UNIT )
 		{
-			un = ((Creature*)*itr);
+			un = TO_CREATURE(*itr);
 			dist = dist2;
 		}
 	}

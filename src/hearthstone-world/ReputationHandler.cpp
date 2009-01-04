@@ -419,7 +419,7 @@ void Player::UpdateInrangeSetsBasedOnReputation()
 {
 	// This function assumes that the opp faction set for player = the opp faction set for the unit.
 	InRangeSet::iterator itr;
-	Unit * pUnit;
+	UnitPointer pUnit;
 	bool rep_value;
 	bool enemy_current;
 	for( itr = m_objectsInRange.begin(); itr != m_objectsInRange.end(); ++itr )
@@ -427,7 +427,7 @@ void Player::UpdateInrangeSetsBasedOnReputation()
 		if( (*itr)->GetTypeId() != TYPEID_UNIT )
 			continue;
 
-		pUnit = static_cast< Unit* >( *itr );
+		pUnit = TO_UNIT( *itr );
 		if(pUnit->m_factionDBC == NULL || pUnit->m_factionDBC->RepListId < 0)
 			continue;
 
@@ -441,7 +441,7 @@ void Player::UpdateInrangeSetsBasedOnReputation()
 	}
 }
 
-void Player::Reputation_OnKilledUnit(Unit * pUnit, bool InnerLoop)
+void Player::Reputation_OnKilledUnit(UnitPointer pUnit, bool InnerLoop)
 {
 	// add rep for on kill
 	if(pUnit->GetTypeId() != TYPEID_UNIT || pUnit->IsPet())
@@ -457,7 +457,7 @@ void Player::Reputation_OnKilledUnit(Unit * pUnit, bool InnerLoop)
 		{
 			for(it = m_Group->GetSubGroup(i)->GetGroupMembersBegin(); it != m_Group->GetSubGroup(i)->GetGroupMembersEnd(); ++it)
 			{
-				if((*it)->m_loggedInPlayer && (*it)->m_loggedInPlayer->isInRange(this,100.0f))
+				if((*it)->m_loggedInPlayer && (*it)->m_loggedInPlayer->isInRange(plr_shared_from_this(),100.0f))
 					(*it)->m_loggedInPlayer->Reputation_OnKilledUnit(pUnit, true);
 			}
 		}
@@ -492,7 +492,7 @@ void Player::Reputation_OnKilledUnit(Unit * pUnit, bool InnerLoop)
 	}
 	else
 	{
-		if(IS_INSTANCE(GetMapId()) && objmgr.HandleInstanceReputationModifiers(this, pUnit))
+		if(IS_INSTANCE(GetMapId()) && objmgr.HandleInstanceReputationModifiers(player_shared_from_this(), pUnit))
 			return;
 
 		if(pUnit->m_factionDBC->RepListId < 0)

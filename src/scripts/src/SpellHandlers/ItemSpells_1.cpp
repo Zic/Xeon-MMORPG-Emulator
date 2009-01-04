@@ -33,7 +33,7 @@
 
 // *****************************************************************************
 
-bool GnomishTransporter(uint32 i, Spell * pSpell)
+bool GnomishTransporter(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -44,7 +44,7 @@ bool GnomishTransporter(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool NoggenFoggerElixr(uint32 i, Spell * pSpell)
+bool NoggenFoggerElixr(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -67,7 +67,7 @@ bool NoggenFoggerElixr(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool HallowsEndCandy(uint32 i, Spell * pSpell)
+bool HallowsEndCandy(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -82,7 +82,7 @@ bool HallowsEndCandy(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool DeviateFish(uint32 i, Spell * pSpell)
+bool DeviateFish(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -97,7 +97,7 @@ bool DeviateFish(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool CookedDeviateFish(uint32 i, Spell * pSpell)
+bool CookedDeviateFish(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -128,17 +128,17 @@ bool CookedDeviateFish(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool HolidayCheer(uint32 i, Spell * pSpell)
+bool HolidayCheer(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->m_caster) return true;
 
-	Unit *target;
+	UnitPointer target;
 	float dist = pSpell->GetRadius(i);
 
 	for(ObjectSet::iterator itr = pSpell->m_caster->GetInRangeSetBegin(); itr != pSpell->m_caster->GetInRangeSetEnd(); ++itr)
 	{
 		if((*itr)->IsUnit())
-			target = (Unit*)*itr;
+			target = TO_UNIT(*itr);
 		else
 			continue;
 
@@ -152,9 +152,9 @@ bool HolidayCheer(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool NetOMatic(uint32 i, Spell * pSpell)
+bool NetOMatic(uint32 i, SpellPointer pSpell)
 {
-	Unit *target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!pSpell->p_caster || !target) return true;
 
 	SpellEntry *spInfo = dbcSpell.LookupEntry(13099);
@@ -178,9 +178,9 @@ bool NetOMatic(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool BanishExile(uint32 i, Spell * pSpell)
+bool BanishExile(uint32 i, SpellPointer pSpell)
 {
-	Unit* target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!pSpell->p_caster || !target) return true;
 
 	pSpell->p_caster->SpellNonMeleeDamageLog(target, pSpell->m_spellInfo->Id, target->GetUInt32Value(UNIT_FIELD_HEALTH), true);
@@ -189,9 +189,9 @@ bool BanishExile(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool ForemansBlackjack(uint32 i, Spell *pSpell)
+bool ForemansBlackjack(uint32 i, SpellPointer pSpell)
 {
-	Unit* target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!pSpell->p_caster || !target || target->GetTypeId() != TYPEID_UNIT) return true;
 
 	// play sound and animation
@@ -204,7 +204,7 @@ bool ForemansBlackjack(uint32 i, Spell *pSpell)
 	sprintf(msg, "Ow! Ok, I'll get back to work, %s", pSpell->p_caster->GetName());
 	target->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, msg);
 
-	Creature* c_target = (Creature*)target;
+	CreaturePointer c_target = TO_CREATURE(target);
 	if(!c_target) return true;
 
 	uint32 creatureID = c_target->GetEntry();
@@ -218,7 +218,7 @@ bool ForemansBlackjack(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool NetherWraithBeacon(uint32 i, Spell *pSpell)
+bool NetherWraithBeacon(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -233,13 +233,13 @@ bool NetherWraithBeacon(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool SymbolOfLife(uint32 i, Spell *pSpell)
+bool SymbolOfLife(uint32 i, SpellPointer pSpell)
 {
 	/*  // commented out until the SpellTargetDummy (38) targeting is fixed
-	Unit* target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!pSpell->p_caster || !target || target->GetTypeId() != TYPEID_UNIT) return true;
 
-	Creature* c_target = (Creature*)target;
+	CreaturePointer c_target = (Creature*)target;
 	if(!c_target) return true;
 
 	uint32 creatureID = c_target->GetEntry();
@@ -253,7 +253,7 @@ bool SymbolOfLife(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool NighInvulnBelt(uint32 i, Spell *pSpell)
+bool NighInvulnBelt(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -269,7 +269,7 @@ bool NighInvulnBelt(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool ReindeerTransformation(uint32 i, Spell *pSpell)
+bool ReindeerTransformation(uint32 i, SpellPointer pSpell)
 {
 	if(!pSpell->p_caster) return true;
 
@@ -285,7 +285,7 @@ bool ReindeerTransformation(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool SummonCritterDummy(uint32 i, Spell *pSpell)
+bool SummonCritterDummy(uint32 i, SpellPointer pSpell)
 {
 	// the reason these spells have to be scripted is because they require a
 	// reagent to summon the critter pet, but don't require one to dismiss it
@@ -343,9 +343,9 @@ bool SummonCritterDummy(uint32 i, Spell *pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool WinterWondervolt(uint32 i, Spell * pSpell)
+bool WinterWondervolt(uint32 i, SpellPointer pSpell)
 {
-	Unit* target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 
 	if(!target || target->GetTypeId() != TYPEID_PLAYER) return true;
 
@@ -355,12 +355,12 @@ bool WinterWondervolt(uint32 i, Spell * pSpell)
 }
 
 // -----------------------------------------------------------------------------
-bool DeadlyThrowDummyEffect(uint32 i, Spell * pSpell)
+bool DeadlyThrowDummyEffect(uint32 i, SpellPointer pSpell)
 {
-	Unit* target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!target) return true;
 
-	if(pSpell->m_caster->IsPlayer() && static_cast<Player*>(pSpell->m_caster)->HasAura(32748))
+	if(pSpell->m_caster->IsPlayer() && TO_PLAYER(pSpell->m_caster)->HasAura(32748))
 		pSpell->SpellEffectInterruptCast(i);
 
 	return true;
@@ -368,9 +368,9 @@ bool DeadlyThrowDummyEffect(uint32 i, Spell * pSpell)
 
 // -----------------------------------------------------------------------------
 
-bool WinterWondervoltAura(uint32 i, Aura* pAura, bool apply)
+bool WinterWondervoltAura(uint32 i, AuraPointer pAura, bool apply)
 {
-	Unit *u_caster = pAura->GetUnitCaster();
+	UnitPointer u_caster = pAura->GetUnitCaster();
 
 	if(!u_caster || !u_caster->IsPlayer()) return true;
 

@@ -26,14 +26,16 @@ class Player;
 class LootRoll : public EventableObject
 {
 public:
-	LootRoll(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, MapMgr * mgr);
+	LootRoll();
 	~LootRoll();
-	void PlayerRolled(Player *player, uint8 choice);
+	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr);
+	void PlayerRolled(shared_ptr<Player>player, uint8 choice);
 	void Finalize();
 
 	int32 event_GetInstanceID();
 
 private:
+	Mutex mLootLock;
 	std::map<uint32, uint32> m_NeedRolls;
 	std::map<uint32, uint32> m_GreedRolls;
 	set<uint32> m_passRolls;
@@ -44,7 +46,7 @@ private:
 	uint32 _itemunk2;
 	uint32 _remaining;
 	uint64 _guid;
-	MapMgr * _mgr;
+	shared_ptr<MapMgr> _mgr;
 };
 
 typedef vector<pair<RandomProps*, float> > RandomPropertyVector;
@@ -64,7 +66,7 @@ typedef struct
 	uint32 iItemsCount;
 	RandomProps * iRandomProperty;
 	ItemRandomSuffixEntry * iRandomSuffix;
-	LootRoll *roll;
+	shared_ptr<LootRoll> roll;
 	bool passed;
 	LooterSet has_looted;
 	uint32 ffa_loot;
@@ -85,7 +87,7 @@ typedef struct
 typedef struct 
 {
 	uint32 count;
-	StoreLootItem*items;
+	StoreLootItem *items;
 }StoreLootList;
 
 struct Loot

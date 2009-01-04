@@ -28,9 +28,10 @@
 
 OpcodeHandler WorldPacketHandlers[NUM_MSG_TYPES];
 
-WorldSession::WorldSession(uint32 id, string Name, WorldSocket *sock) : _player(0), _socket(sock), _accountId(id), _accountName(Name),
+WorldSession::WorldSession(uint32 id, string Name, WorldSocket *sock) : _socket(sock), _accountId(id), _accountName(Name),
 _logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), instanceId(0)
 {
+	_player = NULLPLR;
 	m_hasDeathKnight = false;
 	m_highestLevel = 0;
 	m_asyncQuery = false;
@@ -44,7 +45,7 @@ _logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), insta
 	_updatecount = 0;
 	m_moveDelayTime=0;
 	m_clientTimeDelay =0;
-	m_loggingInPlayer=NULL;
+	m_loggingInPlayer=NULLPLR;
 	language=0;
 	m_muted = 0;
 	_side = -1;
@@ -92,7 +93,10 @@ WorldSession::~WorldSession()
 #endif
 
 	if(m_loggingInPlayer)
+	{
 		m_loggingInPlayer->SetSession(NULL);
+		m_loggingInPlayer = NULLPLR;
+	}
 
 	deleteMutex.Release();
 }
@@ -239,7 +243,7 @@ int WorldSession::Update(uint32 InstanceID)
 
 void WorldSession::LogoutPlayer(bool Save)
 {
-	Player* pPlayer = GetPlayer();
+	PlayerPointer pPlayer = GetPlayer();
 
 	if( _loggingOut )
 		return;
@@ -256,7 +260,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
 		if( _player->m_currentLoot && _player->IsInWorld() )
 		{
-			Object* obj = _player->GetMapMgr()->_GetObject( _player->m_currentLoot );
+			ObjectPointer obj = _player->GetMapMgr()->_GetObject( _player->m_currentLoot );
 			if( obj != NULL )
 				obj->m_loot.looters.erase(_player->GetLowGUID());
 		}
@@ -327,7 +331,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		if( _player->IsInWorld() )
 			_player->RemoveFromWorld();
 		
-		_player->m_playerInfo->m_loggedInPlayer = NULL;
+		_player->m_playerInfo->m_loggedInPlayer = NULLPLR;
 
 		if( _player->m_playerInfo->m_Group != NULL )
 			_player->m_playerInfo->m_Group->Update();
@@ -369,8 +373,8 @@ void WorldSession::LogoutPlayer(bool Save)
 		}
 		_player->ObjUnlock();
 
-		delete _player;
-		_player = NULL;
+		_player->Destructor();
+		_player = NULLPLR;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);
 		DEBUG_LOG( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
@@ -970,7 +974,7 @@ void WorldSession::SendChatPacket(WorldPacket * data, uint32 langpos, int32 lang
 	SendPacket(data);
 }
 
-void WorldSession::SendItemPushResult(Item * pItem, bool Created, bool Received, bool SendToSet, bool NewItem, uint8 DestBagSlot, uint32 DestSlot, uint32 AddCount)
+void WorldSession::SendItemPushResult(ItemPointer pItem, bool Created, bool Received, bool SendToSet, bool NewItem, uint8 DestBagSlot, uint32 DestSlot, uint32 AddCount)
 {
 	/*WorldPacket data(SMSG_ITEM_PUSH_RESULT, 60);
 	data << _player->GetGUID();
@@ -1047,7 +1051,7 @@ void WorldSession::HandleAchievementInspect(WorldPacket &recv_data)
 	recv_data >> guid;
 
 	uint64 rguid = guid.GetOldGuid();
-	Unit * pUnit = GetPlayer()->GetMapMgr()->GetPlayer( GUID_LOPART(rguid) );
+	UnitPointer pUnit = GetPlayer()->GetMapMgr()->GetPlayer( GUID_LOPART(rguid) );
 	if( pUnit && pUnit->IsPlayer() && TO_PLAYER(pUnit)->GetAchievementInterface()->HasAchievements() )
 	{
 		SendPacket(TO_PLAYER(pUnit)->GetAchievementInterface()->BuildAchievementData(true));

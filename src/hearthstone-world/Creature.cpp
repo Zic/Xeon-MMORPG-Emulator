@@ -64,7 +64,7 @@ Creature::Creature(uint64 guid)
 		FlatStatMod[x]=0;
 	}
 
-	totemOwner = NULL;
+	totemOwner = NULLPLR;
 	totemSlot = -1;
 
 	m_PickPocketed = false;
@@ -82,7 +82,7 @@ Creature::Creature(uint64 guid)
 	SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,1);
 	SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,1);
 	m_custom_waypoint_map = 0;
-	m_escorter = 0;
+	m_escorter = NULLPLR;
 	m_limbostate = false;
 	m_corpseEvent=false;
 	m_respawnCell=NULL;
@@ -101,13 +101,17 @@ Creature::Creature(uint64 guid)
 	m_noDeleteAfterDespawn = false;
 }
 
-
-Creature::~Creature()
+void Creature::Init()
 {
-	sEventMgr.RemoveEvents(this);
+	Unit::Init();
+}
+
+void Creature::Destructor()
+{
+	sEventMgr.RemoveEvents(shared_from_this());
 
 	if(IsTotem() && totemSlot >= 0 && totemOwner)
-		totemOwner->m_SummonSlots[totemSlot] = 0;
+		totemOwner->m_SummonSlots[totemSlot] = NULLCREATURE;
 
 	if(_myScriptClass != 0)
 		_myScriptClass->Destroy();
@@ -119,7 +123,16 @@ Creature::~Creature()
 		delete m_custom_waypoint_map;
 	}
 	if(m_respawnCell!=NULL)
-		m_respawnCell->_respawnObjects.erase(this);
+		m_respawnCell->_respawnObjects.erase(obj_shared_from_this());
+
+	Unit::Destructor();
+}
+
+Creature::~Creature()
+{
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("Creature::~Creature()\n");
+#endif
 }
 
 void Creature::Update( uint32 p_time )
@@ -128,21 +141,21 @@ void Creature::Update( uint32 p_time )
 	if(IsTotem() && isDead())
 	{
 		RemoveFromWorld(false, true);
-		delete this;
+		Destructor();
 		return;
 	}
 
 	if(m_corpseEvent)
 	{
-		sEventMgr.RemoveEvents(this);
+		sEventMgr.RemoveEvents(shared_from_this());
 		if(this->proto==NULL)
-			sEventMgr.AddEvent(this, &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		else if (this->creature_info->Rank == ELITE_WORLDBOSS)
-			sEventMgr.AddEvent(this, &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_BOSSCORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_BOSSCORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		else if ( this->creature_info->Rank == ELITE_RAREELITE || this->creature_info->Rank == ELITE_RARE)
-			sEventMgr.AddEvent(this, &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_RARECORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_RARECORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		else
-			sEventMgr.AddEvent(this, &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_CORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_CORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 
 		m_corpseEvent=false;
 	}
@@ -150,9 +163,9 @@ void Creature::Update( uint32 p_time )
 
 void Creature::SafeDelete()
 {
-	sEventMgr.RemoveEvents(this);
-	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((Object*)this), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
-	sEventMgr.AddEvent(this, &Creature::DeleteMe, EVENT_CREATURE_SAFE_DELETE, 1000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+	sEventMgr.RemoveEvents(shared_from_this());
+	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, obj_shared_from_this(), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
+	sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::DeleteMe, EVENT_CREATURE_SAFE_DELETE, 1000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Creature::DeleteMe()
@@ -160,7 +173,7 @@ void Creature::DeleteMe()
 	if(IsInWorld())
 		RemoveFromWorld(false, true);
 
-	delete this;
+	Destructor();
 }
 
 void Creature::OnRemoveCorpse()
@@ -194,7 +207,7 @@ void Creature::OnRemoveCorpse()
 	}
 }
 
-void Creature::OnRespawn(MapMgr * m)
+void Creature::OnRespawn(shared_ptr<MapMgr> m)
 {
 	DEBUG_LOG("Respawning "I64FMT"...", GetGUID());
 	SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
@@ -339,7 +352,7 @@ void Creature::SaveToFile(std::stringstream & name)
 
 void Creature::LoadScript()
 {
-	_myScriptClass = sScriptMgr.CreateAIScriptClassForEntry(this);
+	_myScriptClass = sScriptMgr.CreateAIScriptClassForEntry(TO_CREATURE(shared_from_this()));
 }
 
 void Creature::DeleteFromDB()
@@ -419,11 +432,11 @@ void Creature::setDeathState(DeathState s)
 	if(s == JUST_DIED) 
 	{
 
-		GetAIInterface()->SetUnitToFollow(NULL);
+		GetAIInterface()->SetUnitToFollow(NULLUNIT);
 		m_deathState = CORPSE;
 		m_corpseEvent=true;
 		
-		/*sEventMgr.AddEvent(this, &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, 180000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);*/
+		/*sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, 180000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);*/
 		if(m_enslaveSpell)
 			RemoveEnslave();
 
@@ -450,7 +463,7 @@ void Creature::AddToWorld()
 	Object::AddToWorld();
 }
 
-void Creature::AddToWorld(MapMgr * pMapMgr)
+void Creature::AddToWorld(shared_ptr<MapMgr> pMapMgr)
 {
 	// force set faction
 	if(m_faction == 0 || m_factionDBC == 0)
@@ -507,7 +520,7 @@ void Creature::EnslaveExpire()
 {
 	
 	m_enslaveCount++;
-	Player *caster = objmgr.GetPlayer(GetUInt32Value(UNIT_FIELD_CHARMEDBY));
+	shared_ptr<Player>caster = objmgr.GetPlayer(GetUInt32Value(UNIT_FIELD_CHARMEDBY));
 	if(caster)
 	{
 		caster->SetUInt64Value(UNIT_FIELD_CHARM, 0);
@@ -535,7 +548,7 @@ void Creature::EnslaveExpire()
 	};
 	_setFaction();
 
-	GetAIInterface()->Init(((Unit *)this), AITYPE_AGRO, MOVEMENTTYPE_NONE);
+	GetAIInterface()->Init(unit_shared_from_this(), AITYPE_AGRO, MOVEMENTTYPE_NONE);
 
 	// Update InRangeSet
 	UpdateOppFactionSet();
@@ -546,12 +559,12 @@ bool Creature::RemoveEnslave()
 	return RemoveAura(m_enslaveSpell);
 }
 
-void Creature::AddInRangeObject(Object* pObj)
+void Creature::AddInRangeObject(ObjectPointer pObj)
 {
 	Unit::AddInRangeObject(pObj);
 }
 
-void Creature::OnRemoveInRangeObject(Object* pObj)
+void Creature::OnRemoveInRangeObject(ObjectPointer pObj)
 {
 	if(totemOwner == pObj)		// player gone out of range of the totem
 	{
@@ -698,7 +711,7 @@ void Creature::ModAvItemAmount(uint32 itemid, uint32 value)
 					itr->available_amount -= value;
                 
 				if(!event_HasEvent(EVENT_ITEM_UPDATE))
-					sEventMgr.AddEvent(this, &Creature::UpdateItemAmount, itr->itemid, EVENT_ITEM_UPDATE, itr->incrtime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+					sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::UpdateItemAmount, itr->itemid, EVENT_ITEM_UPDATE, itr->incrtime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			}
 			return;
 		}
@@ -724,7 +737,7 @@ void Creature::UpdateItemAmount(uint32 itemid)
 void Creature::TotemExpire()
 {	
 	totemSlot = -1;
-	totemOwner = NULL;
+	totemOwner = NULLPLR;
 
 	if( IsInWorld() )
 		RemoveFromWorld(false, true);
@@ -737,7 +750,7 @@ void Creature::FormationLinkUp(uint32 SqlId)
 	if(!m_mapMgr)		// shouldnt happen
 		return;
 
-	Creature * creature = m_mapMgr->GetSqlIdCreature(SqlId);
+	CreaturePointer creature = m_mapMgr->GetSqlIdCreature(SqlId);
 	if(creature != 0)
 	{
 		m_aiInterface->m_formationLinkTarget = creature;
@@ -751,7 +764,7 @@ void Creature::ChannelLinkUpGO(uint32 SqlId)
 	if(!m_mapMgr)		// shouldnt happen
 		return;
 
-	GameObject * go = m_mapMgr->GetSqlIdGameObject(SqlId);
+	shared_ptr<GameObject> go = m_mapMgr->GetSqlIdGameObject(SqlId);
 	if(go != 0)
 	{
 		event_RemoveEvents(EVENT_CREATURE_CHANNEL_LINKUP);
@@ -765,7 +778,7 @@ void Creature::ChannelLinkUpCreature(uint32 SqlId)
 	if(!m_mapMgr)		// shouldnt happen
 		return;
 
-	Creature * go = m_mapMgr->GetSqlIdCreature(SqlId);
+	CreaturePointer go = m_mapMgr->GetSqlIdCreature(SqlId);
 	if(go != 0)
 	{
 		event_RemoveEvents(EVENT_CREATURE_CHANNEL_LINKUP);
@@ -1242,7 +1255,7 @@ void Creature::OnPushToWorld()
 			sp = dbcSpell.LookupEntry((*itr));
 			if(sp == 0) continue;
 
-			CastSpell(this, sp, 0);
+			CastSpell(TO_UNIT(shared_from_this()), sp, 0);
 		}
 	}
 
@@ -1257,19 +1270,19 @@ void Creature::OnPushToWorld()
 		if(m_aiInterface->m_formationLinkSqlId)
 		{
 			// add event
-			sEventMgr.AddEvent(this, &Creature::FormationLinkUp, m_aiInterface->m_formationLinkSqlId,
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::FormationLinkUp, m_aiInterface->m_formationLinkSqlId,
 				EVENT_CREATURE_FORMATION_LINKUP, 1000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			haslinkupevent = true;
 		}
 
 		if(m_spawn->channel_target_creature)
 		{
-			sEventMgr.AddEvent(this, &Creature::ChannelLinkUpCreature, m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0);	// only 5 attempts
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::ChannelLinkUpCreature, m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0);	// only 5 attempts
 		}
 		
 		if(m_spawn->channel_target_go)
 		{
-			sEventMgr.AddEvent(this, &Creature::ChannelLinkUpGO, m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0);	// only 5 attempts
+			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::ChannelLinkUpGO, m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0);	// only 5 attempts
 		}
 	}
 
@@ -1281,7 +1294,7 @@ void Creature::OnPushToWorld()
 				if (itr->max_amount == 0)
 					itr->available_amount=0;
 				else if (itr->available_amount<itr->max_amount)				
-					sEventMgr.AddEvent(this, &Creature::UpdateItemAmount, itr->itemid, EVENT_ITEM_UPDATE, VENDOR_ITEMS_UPDATE_TIME, 1,0);
+					sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::UpdateItemAmount, itr->itemid, EVENT_ITEM_UPDATE, VENDOR_ITEMS_UPDATE_TIME, 1,0);
 		}
 
 	}
@@ -1298,7 +1311,7 @@ void Creature::Despawn(uint32 delay, uint32 respawntime)
 {
 	if(delay)
 	{
-		sEventMgr.AddEvent(this, &Creature::Despawn, (uint32)0, respawntime, EVENT_CREATURE_RESPAWN, delay, 1,0);
+		sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::Despawn, (uint32)0, respawntime, EVENT_CREATURE_RESPAWN, delay, 1,0);
 		return;
 	}
 
@@ -1313,9 +1326,9 @@ void Creature::Despawn(uint32 delay, uint32 respawntime)
 			pCell = m_mapCell;
 	
 		ASSERT(pCell);
-		pCell->_respawnObjects.insert(((Object*)this));
-		sEventMgr.RemoveEvents(this);
-		sEventMgr.AddEvent(m_mapMgr, &MapMgr::EventRespawnCreature, this, pCell, EVENT_CREATURE_RESPAWN, respawntime, 1, 0);
+		pCell->_respawnObjects.insert(obj_shared_from_this());
+		sEventMgr.RemoveEvents(shared_from_this());
+		sEventMgr.AddEvent(m_mapMgr, &MapMgr::EventRespawnCreature, TO_CREATURE(shared_from_this()), pCell, EVENT_CREATURE_RESPAWN, respawntime, 1, 0);
 		Unit::RemoveFromWorld(false);
 		m_position = m_spawnLocation;
 		m_respawnCell=pCell;
@@ -1347,7 +1360,7 @@ void Creature::DestroyCustomWaypointMap()
 	}
 }
 
-void Creature::RemoveLimboState(Unit * healer)
+void Creature::RemoveLimboState(UnitPointer healer)
 {
 	if(!m_limbostate != true)
 		return;

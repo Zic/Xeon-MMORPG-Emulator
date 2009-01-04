@@ -23,7 +23,7 @@
 #define GOLD_TEAM 0
 #define GREEN_TEAM 1
 
-Arena::Arena(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side) : CBattleground(mgr, id, lgroup, t)
+Arena::Arena(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side) : CBattleground(mgr, id, lgroup, t)
 {
 	int i;
 
@@ -56,7 +56,7 @@ Arena::Arena(MapMgr * mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_pe
 	}
 	rated_match=false;
 
-	m_buffs[0] = m_buffs[1] = NULL;
+	m_buffs[0] = m_buffs[1] = NULLGOB;
 	m_playersCount[0] = m_playersCount[1] = 0;
 
 	m_playersAlive = hashmap_new();
@@ -73,7 +73,10 @@ Arena::~Arena()
 	{
 		// buffs may not be spawned, so delete them if they're not
 		if(m_buffs[i] && m_buffs[i]->IsInWorld()==false)
-			delete m_buffs[i];
+		{
+			m_buffs[i]->Destructor();
+			m_buffs[i] = NULLGOB;
+		}
 	}
 
 	if (m_playersAlive) {
@@ -89,7 +92,7 @@ Arena::~Arena()
 	}
 }
 
-void Arena::OnAddPlayer(Player * plr)
+void Arena::OnAddPlayer(PlayerPointer plr)
 {
 	plr->m_deathVision = true;
 
@@ -119,8 +122,8 @@ void Arena::OnAddPlayer(Player * plr)
 	UpdatePlayerCounts();
 
 	/* Add the green/gold team flag */
-	Aura * aura = new Aura(dbcSpell.LookupEntry(32724+plr->m_bgTeam), -1, plr, plr);
-	plr->AddAura(aura, NULL);
+	shared_ptr<Aura>aura = shared_ptr<Aura>(new Aura(dbcSpell.LookupEntry(32724+plr->m_bgTeam), -1, plr, plr));
+	plr->AddAura(aura, NULLAURA);
 	
 	/* Set FFA PvP Flag */
 	plr->SetFFAPvPFlag();
@@ -128,7 +131,7 @@ void Arena::OnAddPlayer(Player * plr)
 	hashmap_put(m_playersAlive, plr->GetLowGUID(), (any_t)1);
 }
 
-void Arena::OnRemovePlayer(Player * plr)
+void Arena::OnRemovePlayer(PlayerPointer plr)
 {
 	/* remove arena readyness buff */
 	plr->m_deathVision = false;
@@ -146,7 +149,7 @@ void Arena::OnRemovePlayer(Player * plr)
 	plr->m_bgRatedQueue = false;
 }
 
-void Arena::HookOnPlayerKill(Player * plr, Unit * pVictim)
+void Arena::HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim)
 {
 	if( !pVictim->IsPlayer() )
 		return;
@@ -155,12 +158,12 @@ void Arena::HookOnPlayerKill(Player * plr, Unit * pVictim)
 	UpdatePlayerCounts();
 }
 
-void Arena::HookOnHK(Player * plr)
+void Arena::HookOnHK(PlayerPointer plr)
 {
 	plr->m_bgScore.HonorableKills++;
 }
 
-void Arena::HookOnPlayerDeath(Player * plr)
+void Arena::HookOnPlayerDeath(PlayerPointer plr)
 {
 	ASSERT(plr != NULL);
 
@@ -173,7 +176,7 @@ void Arena::HookOnPlayerDeath(Player * plr)
 
 void Arena::OnCreate()
 {
-	GameObject * obj;
+	shared_ptr<GameObject> obj;
 	WorldStateManager &sm = m_mapMgr->GetStateManager();
 
 	switch(m_mapMgr->GetMapId())
@@ -244,7 +247,7 @@ void Arena::OnCreate()
 	}
 
 	/* push gates into world */
-	for(set<GameObject*>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 		(*itr)->PushToWorld(m_mapMgr);
 
 	
@@ -266,8 +269,8 @@ void Arena::OnStart()
 {
 	/* remove arena readyness buff */
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<Player*>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
-			Player *plr = *itr;
+		for(set<shared_ptr<Player>>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+			shared_ptr<Player>plr = *itr;
 			plr->RemoveAura(ARENA_PREPARATION);
 			hashmap_put(m_players2[i], plr->GetLowGUID(), (any_t)1);
 
@@ -286,7 +289,7 @@ void Arena::OnStart()
 	}
 
 	/* open gates */
-	for(set<GameObject*>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set<shared_ptr<GameObject>>::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -300,8 +303,8 @@ void Arena::OnStart()
 	// soundz!
 	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
 
-	sEventMgr.RemoveEvents(this, EVENT_ARENA_SHADOW_SIGHT);
-	sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::HookOnShadowSight, EVENT_ARENA_SHADOW_SIGHT, 90000, 1,0);
+	sEventMgr.RemoveEvents(shared_from_this(), EVENT_ARENA_SHADOW_SIGHT);
+	sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::HookOnShadowSight, EVENT_ARENA_SHADOW_SIGHT, 90000, 1,0);
 }
 
 void Arena::UpdatePlayerCounts()
@@ -403,17 +406,17 @@ void Arena::Finish()
 	UpdatePvPData();
 	PlaySoundToAll(m_losingteam ? SOUND_ALLIANCEWINS : SOUND_HORDEWINS);
 
-	sEventMgr.RemoveEvents(this, EVENT_BATTLEGROUND_CLOSE);
-	sEventMgr.RemoveEvents(this, EVENT_ARENA_SHADOW_SIGHT);
-	sEventMgr.AddEvent(((CBattleground*)this), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
+	sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_CLOSE);
+	sEventMgr.RemoveEvents(shared_from_this(), EVENT_ARENA_SHADOW_SIGHT);
+	sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 120000, 1,0);
 
 	for(int i = 0; i < 2; i++)
 	{
 		bool victorious = (i != m_losingteam);
-		set<Player*>::iterator itr = m_players[i].begin();
+		set<shared_ptr<Player>>::iterator itr = m_players[i].begin();
 		for(; itr != m_players[i].end(); itr++)
 		{
-			Player * plr = (Player *)(*itr);
+			PlayerPointer plr = (shared_ptr<Player>)(*itr);
 			plr->Root();
 
 			if( plr->m_bgScore.DamageDone == 0 && plr->m_bgScore.HealingDone == 0 )
@@ -476,7 +479,7 @@ LocationVector Arena::GetStartingCoords(uint32 Team)
 	return LocationVector(0,0,0,0);
 }
 
-bool Arena::HookHandleRepop(Player * plr)
+bool Arena::HookHandleRepop(PlayerPointer plr)
 {
 	// 559, 562, 572
 	/*
@@ -518,7 +521,7 @@ bool Arena::HookHandleRepop(Player * plr)
 	return true;
 }
 
-void Arena::HookOnAreaTrigger(Player * plr, uint32 id)
+void Arena::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 {
 	int32 buffslot = -1;
 

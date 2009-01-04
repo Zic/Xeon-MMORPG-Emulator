@@ -33,12 +33,12 @@
 
 // *****************************************************************************
 
-bool SealOfRighteousness(uint32 i, Aura* pAura, bool apply)
+bool SealOfRighteousness(uint32 i, AuraPointer pAura, bool apply)
 {
 	if(i != 0) return false;
 
 	uint32 applyId = 0;
-	Unit * u_caster = pAura->GetUnitCaster();
+	UnitPointer  u_caster = pAura->GetUnitCaster();
 
 	if(u_caster == 0 || !u_caster->IsPlayer()) return false;
 
@@ -101,24 +101,24 @@ bool SealOfRighteousness(uint32 i, Aura* pAura, bool apply)
 		// add spell damage!
 		uint32 max_dmg = value / 21;
 		uint32 min_dmg = value / 27;
-		((Player*)u_caster)->AddOnStrikeSpellDamage(pAura->m_spellProto->Id, min_dmg, max_dmg);
+		TO_PLAYER(u_caster)->AddOnStrikeSpellDamage(pAura->m_spellProto->Id, min_dmg, max_dmg);
 
 		// set the seal business
 		if(u_caster->GetTypeId() == TYPEID_PLAYER)
 		{
-				((Player*)u_caster)->judgespell = applyId;
-				((Player*)u_caster)->Seal = pAura->m_spellProto->Id;
+				TO_PLAYER(u_caster)->judgespell = applyId;
+				TO_PLAYER(u_caster)->Seal = pAura->m_spellProto->Id;
 		}
 		u_caster->SetFlag(UNIT_FIELD_AURASTATE, 16);
 	}
 	else
 	{
-			((Player*)u_caster)->RemoveOnStrikeSpellDamage(pAura->m_spellProto->Id);
+			TO_PLAYER(u_caster)->RemoveOnStrikeSpellDamage(pAura->m_spellProto->Id);
 			// set the seal business
 			if(u_caster->GetTypeId() == TYPEID_PLAYER)
 			{
-					((Player*)u_caster)->judgespell = 0;
-					((Player*)u_caster)->Seal = 0;
+					TO_PLAYER(u_caster)->judgespell = 0;
+					TO_PLAYER(u_caster)->Seal = 0;
 			}
 			u_caster->RemoveFlag(UNIT_FIELD_AURASTATE, 16);
 	}
@@ -128,9 +128,9 @@ bool SealOfRighteousness(uint32 i, Aura* pAura, bool apply)
 
 // -----------------------------------------------------------------------------
 
-bool HolyShock(uint32 i, Spell *pSpell)
+bool HolyShock(uint32 i, SpellPointer pSpell)
 {
-	Unit *target = pSpell->GetUnitTarget();
+	UnitPointer target = pSpell->GetUnitTarget();
 	if(!pSpell->p_caster || !target) return true;
 
 	uint32 newspell = 0;

@@ -90,7 +90,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 	TalentEntry * talentInfo = dbcTalent.LookupEntryForced(talent_id);
 	if(!talentInfo)return;
   
-	Player * player = GetPlayer();
+	PlayerPointer player = GetPlayer();
 
 	// Check if it requires another talent
 	if (talentInfo->DependsOn > 0)
@@ -226,7 +226,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 				}
 				else
 				{
-					Spell*sp=new Spell(_player,spellInfo,true,NULL);
+					shared_ptr<Spell>sp= shared_ptr<Spell>(new Spell(_player,spellInfo,true,NULLAURA));
 					SpellCastTargets tgt;
 					tgt.m_unitTarget=_player->GetGUID();
 					sp->prepare(&tgt);

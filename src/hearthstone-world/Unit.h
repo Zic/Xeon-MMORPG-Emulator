@@ -85,7 +85,7 @@ struct DamageSplitTarget
 struct AreaAura
 {
 	uint32 auraid;
-	Unit* caster;
+	UnitPointer caster;
 };
 
 typedef struct
@@ -624,7 +624,7 @@ class SERVER_DECL CombatStatusHandler
 	AttackerMap m_attackers;
 	HealedSet m_healers;
 	HealedSet m_healed;
-	Unit* m_Unit;
+	UnitPointer m_Unit;
 	bool m_lastStatus;
 	AttackTMap m_attackTargets;
 	map<uint64,uint32> DamageMap;
@@ -638,11 +638,11 @@ public:
 		m_attackTargets.clear();
 	}
 
-	Unit* GetKiller();													// Gets this unit's current killer.
+	UnitPointer GetKiller();													// Gets this unit's current killer.
 
-	void OnDamageDealt(Unit * pTarget, uint32 damage);					// this is what puts the other person in combat.
-	void WeHealed(Unit * pHealTarget);									// called when a player heals another player, regardless of combat state.
-	void RemoveAttackTarget(Unit * pTarget);							// means our DoT expired.
+	void OnDamageDealt(UnitPointer pTarget, uint32 damage);					// this is what puts the other person in combat.
+	void WeHealed(UnitPointer pHealTarget);									// called when a player heals another player, regardless of combat state.
+	void RemoveAttackTarget(UnitPointer pTarget);							// means our DoT expired.
 	void ForceRemoveAttacker(const uint64& guid);						// when target is invalid pointer
 
 	void UpdateFlag();													// detects if we have changed combat state (in/out), and applies the flag.
@@ -673,13 +673,13 @@ public:
 		return (DamageMap.find(guid) != DamageMap.end());
 	}
 
-	HEARTHSTONE_INLINE void SetUnit(Unit * p) { m_Unit = p; }
+	HEARTHSTONE_INLINE void SetUnit(UnitPointer p) { m_Unit = p; }
 	void UpdateTargets();
 
 protected:
 	bool InternalIsInCombat();											// called by UpdateFlag, do not call from anything else!
-	bool IsAttacking(Unit * pTarget);									// internal function used to determine if we are still attacking target x.
-	void RemoveHealed(Unit * pHealTarget);								// usually called only by updateflag
+	bool IsAttacking(UnitPointer pTarget);									// internal function used to determine if we are still attacking target x.
+	void RemoveHealed(UnitPointer pHealTarget);								// usually called only by updateflag
 	void ClearHealers();												// this is called on instance change.
 	void ClearAttackers();												// means we vanished, or died.
 	void ClearMyHealers();
@@ -696,6 +696,8 @@ public:
 	void CombatStatusHandler_UpdateTargets();
 
 	virtual ~Unit ( );
+	virtual void Destructor();
+	virtual void Init();
 
 	friend class AIInterface;
 	friend class Aura;
@@ -706,7 +708,7 @@ public:
 
     void setAttackTimer(int32 time, bool offhand);
 	bool isAttackReady(bool offhand);
-	bool __fastcall canReachWithAttack(Unit *pVictim);
+	bool __fastcall canReachWithAttack(shared_ptr<Unit>pVictim);
 
 	HEARTHSTONE_INLINE void SetDuelWield(bool enabled)
 	{
@@ -732,12 +734,12 @@ public:
 	HEARTHSTONE_INLINE void setGender(uint8 gender) { SetByte(UNIT_FIELD_BYTES_0,2,gender); }
 	HEARTHSTONE_INLINE uint8 getStandState() { return ((uint8)m_uint32Values[UNIT_FIELD_BYTES_1]); }
  
-	uint32 GetSpellDidHitResult( Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability );
-	void Strike( Unit* pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
+	uint32 GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability );
+	void Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
 
 	uint32 m_procCounter;
-	uint32 HandleProc(uint32 flag, Unit* Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0);
-	void HandleProcDmgShield(uint32 flag, Unit* attacker);//almost the same as handleproc :P
+	uint32 HandleProc(uint32 flag, UnitPointer Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0);
+	void HandleProcDmgShield(uint32 flag, UnitPointer attacker);//almost the same as handleproc :P
 
 	void RemoveExtraStrikeTarget(SpellEntry *spell_info);
 	void AddExtraStrikeTarget(SpellEntry *spell_info, uint32 charges);
@@ -747,17 +749,17 @@ public:
 
 	HEARTHSTONE_INLINE float GetSize() { return GetFloatValue(OBJECT_FIELD_SCALE_X) * GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS); }
 
-	void CastSpell(Unit* Target, uint32 SpellID, bool triggered);
-	void CastSpell(Unit* Target, SpellEntry* Sp, bool triggered);
+	void CastSpell(UnitPointer Target, uint32 SpellID, bool triggered);
+	void CastSpell(UnitPointer Target, SpellEntry* Sp, bool triggered);
 	void CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered);
 	void CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered);
 	void CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered);
-	void EventCastSpell(Unit * Target, SpellEntry * Sp);
+	void EventCastSpell(UnitPointer Target, SpellEntry * Sp);
 
 	bool isCasting();
 	bool IsInInstance();
-	double GetResistanceReducion(Unit *pVictim, uint32 type, float armorReducePct);
-    void CalculateResistanceReduction(Unit *pVictim,dealdamage *dmg,SpellEntry* ability, float armorreducepct) ;
+	double GetResistanceReducion(shared_ptr<Unit>pVictim, uint32 type, float armorReducePct);
+    void CalculateResistanceReduction(shared_ptr<Unit>pVictim,dealdamage *dmg,SpellEntry* ability, float armorreducepct) ;
 	void RegenerateHealth();
 	void RegeneratePower(bool isinterrupted);
 	void SendPowerUpdate();
@@ -766,12 +768,12 @@ public:
 	HEARTHSTONE_INLINE void DelayPowerRegeneration(uint32 time) { m_P_regenTimer = time; if (!m_interruptedRegenTime) m_interruptedRegenTime = 2000; }
 	void DeMorph();
 	uint32 ManaShieldAbsorb(uint32 dmg, SpellEntry* sp);
-	void smsg_AttackStart(Unit* pVictim);
-	void smsg_AttackStop(Unit* pVictim);
+	void smsg_AttackStart(UnitPointer pVictim);
+	void smsg_AttackStop(UnitPointer pVictim);
 	void smsg_AttackStop(uint64 victimGuid);
 	
 	bool IsDazed();
-	float CalculateDazeCastChance(Unit *target);
+	float CalculateDazeCastChance(shared_ptr<Unit>target);
 
 	// Stealth  
 	HEARTHSTONE_INLINE int32 GetStealthLevel() { return m_stealthLevel; }
@@ -806,14 +808,14 @@ public:
 	uint32 trigger_on_chill_chance;
 
 	void SetTriggerChill(uint32 newtrigger, uint32 new_chance);
-    void EventChill(Unit *proc_target);
+    void EventChill(shared_ptr<Unit>proc_target);
 
 	bool HasAura(uint32 spellid);
 	bool HasAuraVisual(uint32 visualid);//not spell id!!!
 	bool HasActiveAura(uint32 spelllid);
 	bool HasActiveAura(uint32 spelllid,uint64);
 	
-	void GiveGroupXP(Unit *pVictim, Player *PlayerInGroup);
+	void GiveGroupXP(shared_ptr<Unit>pVictim, shared_ptr<Player>PlayerInGroup);
 
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
@@ -829,9 +831,9 @@ public:
 	void RemoveFFAPvPFlag();
 
 	//! Add Aura to unit
-	void AddAura(Aura *aur, Aura *pParentAura);
+	void AddAura(AuraPointer aur, AuraPointer pParentAura);
 	//! Remove aura from unit
-	bool RemoveAura(Aura *aur);
+	bool RemoveAura(AuraPointer aur);
 	bool RemoveAura(uint32 spellId);
 	bool RemovePositiveAura(uint32 spellId);
 	bool RemoveNegativeAura(uint32 spellId);
@@ -857,26 +859,26 @@ public:
 	
 	void RemoveAllNegativeAuras();
 	void RemoveAllAreaAuras();
-	Aura* FindPositiveAuraByNameHash(uint32 namehash);
-	Aura* FindNegativeAuraByNameHash(uint32 namehash);
-	Aura* FindAura(uint32 spellId);
-	Aura* FindAura(uint32 spellId, uint64 guid);
+	AuraPointer FindPositiveAuraByNameHash(uint32 namehash);
+	AuraPointer FindNegativeAuraByNameHash(uint32 namehash);
+	AuraPointer FindAura(uint32 spellId);
+	AuraPointer FindAura(uint32 spellId, uint64 guid);
 	uint32 GetAuraCount(uint32 spellId);
-	bool SetAuraDuration(uint32 spellId,Unit* caster,uint32 duration);
+	bool SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration);
 	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();
 
-	void CastSpell(Spell * pSpell);
+	void CastSpell(shared_ptr<Spell>pSpell);
 	void InterruptCurrentSpell();
 
 	//caller is the caster
-	int32 GetSpellBonusDamage(Unit *pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
+	int32 GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
    
 	//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
-	Unit* CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
+	UnitPointer CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
 
 	uint32 m_addDmgOnce;
-	Creature *m_SummonSlots[7];
+	CreaturePointer m_SummonSlots[7];
 	uint32 m_ObjectSlots[4];
 	uint32 m_triggerSpell;
 	uint32 m_triggerDamage;
@@ -903,7 +905,7 @@ public:
 
 	void AddOnAuraRemoveSpell(uint32 NameHash, uint32 procSpell, uint32 procChance, bool procSelf);
 	void RemoveOnAuraRemoveSpell(uint32 NameHash);
-	void OnAuraRemove(uint32 NameHash, Unit *m_target);
+	void OnAuraRemove(uint32 NameHash, shared_ptr<Unit>m_target);
 
 	// Split Damage
 	struct DamageSplitTarget m_damageSplitTarget;
@@ -932,8 +934,8 @@ public:
 	bool setDetectRangeMod(uint64 guid, int32 amount);
 	void unsetDetectRangeMod(uint64 guid);
 	int32 getDetectRangeMod(uint64 guid);
-	void Heal(Unit* target,uint32 SpellId, uint32 amount);
-	void Energize(Unit* target,uint32 SpellId, uint32 amount, uint32 type);
+	void Heal(UnitPointer target,uint32 SpellId, uint32 amount);
+	void Energize(UnitPointer target,uint32 SpellId, uint32 amount, uint32 type);
 
 	uint32 SchoolCastPrevent[7];
 	int32 GetDamageDoneMod(uint32 school);
@@ -963,7 +965,7 @@ public:
 
 	//SM
 	int32 * SM[SPELL_MODIFIERS][2]; // 0 = flat, 1 = percent
-	void InheritSMMods(Unit *inherit_from);
+	void InheritSMMods(shared_ptr<Unit>inherit_from);
 
 	//Events
 	void Emote (EmoteType emote);
@@ -990,7 +992,7 @@ public:
 	}
 
 	void SendChatMessage(uint8 type, uint32 lang, const char *msg);
-	void SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, Player *plr);
+	void SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, shared_ptr<Player>plr);
 	void SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, const char * msg);
 	void RegisterPeriodicChatMessage(uint32 delay, uint32 msgid, std::string message, bool sendnotify);
 
@@ -1004,18 +1006,18 @@ public:
 	HEARTHSTONE_INLINE void SetIsPet(bool chck) { m_isPet = chck; }
 	
 	//In-Range
-	virtual void AddInRangeObject(Object* pObj);
-	virtual void OnRemoveInRangeObject(Object* pObj);
+	virtual void AddInRangeObject(ObjectPointer pObj);
+	virtual void OnRemoveInRangeObject(ObjectPointer pObj);
 	void ClearInRangeSet();
 
-	HEARTHSTONE_INLINE Spell * GetCurrentSpell(){return m_currentSpell;}
-	HEARTHSTONE_INLINE void SetCurrentSpell(Spell* cSpell) { m_currentSpell = cSpell; }
+	HEARTHSTONE_INLINE shared_ptr<Spell>GetCurrentSpell(){return m_currentSpell;}
+	HEARTHSTONE_INLINE void SetCurrentSpell(SpellPointer cSpell) { m_currentSpell = cSpell; }
 
 	uint32 m_CombatUpdateTimer;
 
 	HEARTHSTONE_INLINE void setcanperry(bool newstatus){can_parry=newstatus;}
 		
-	std::map<uint32,Aura*> tmpAura;
+	std::map<uint32,shared_ptr<Aura>> tmpAura;
 
 	uint32 BaseResistance[7]; //there are resistances for silence, fear, mechanics ....
 	uint32 BaseStats[5];
@@ -1078,7 +1080,7 @@ public:
 	uint32 m_stealth;
 	bool m_can_stealth;
 
-	Aura* m_auras[MAX_AURAS+MAX_PASSIVE_AURAS];   
+	AuraPointer m_auras[MAX_AURAS+MAX_PASSIVE_AURAS];   
 
 	int32 m_modlanguage;
 
@@ -1112,8 +1114,8 @@ public:
 	bool HasNegativeAura(uint32 spell_id); //just to reduce search range in some cases
 	bool IsPoisoned();
 
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, Object *caster=NULL);
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, Aura* aur, Object *caster=NULL);
+	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, ObjectPointer caster=NULLOBJ);
+	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, shared_ptr<Object>caster=NULLOBJ);
 
 	uint16 m_diminishCount[DIMINISH_GROUPS];
 	uint8  m_diminishAuraCount[DIMINISH_GROUPS];
@@ -1122,7 +1124,7 @@ public:
 
 	void SetDiminishTimer(uint32 index);
 
-	DynamicObject * dynObj;
+	shared_ptr<DynamicObject> dynObj;
 
 	uint32 AddAuraVisual(uint32 spellid, uint32 count, bool positive);
 	void SetAuraSlotLevel(uint32 slot, bool positive);
@@ -1137,7 +1139,7 @@ public:
 	SpellEntry * pLastSpell;
 	bool bProcInUse;
 	bool bInvincible;
-	Player * m_redirectSpellPackets;
+	PlayerPointer m_redirectSpellPackets;
 	void UpdateVisibility();
 
 	//! Is PVP flagged?
@@ -1147,8 +1149,8 @@ public:
 	void RemovePvPFlag();
 
 	struct {
-		int32 amt;
-		int32 max;
+		uint32 amt;
+		uint32 max;
 	} m_soulSiphon;
 
 	//solo target auras
@@ -1164,13 +1166,13 @@ public:
 	CombatStatusHandler CombatStatus;
 	bool m_temp_summon;
 
-	void CancelSpell(Spell * ptr);
+	void CancelSpell(shared_ptr<Spell>ptr);
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);
 
 	void SetPower(uint32 type, int32 value);
 
-	bool HasAurasOfNameHashWithCaster(uint32 namehash, Unit * caster);
+	bool HasAurasOfNameHashWithCaster(uint32 namehash, UnitPointer caster);
 	int8 m_hasVampiricTouch;
 	int8 m_hasVampiricEmbrace;
 	bool mAngerManagement;
@@ -1209,7 +1211,7 @@ protected:
 	//uint32 m_pet_action;
 
 	// Spell currently casting
-	Spell * m_currentSpell;
+	shared_ptr<Spell>m_currentSpell;
 
 	// AI
 	AIInterface *m_aiInterface;

@@ -460,7 +460,7 @@ void ObjectMgr::LoadExtraItemStuff()
 }
 
 #define make_task(storage, itype, storagetype, tablename, format) tl.AddTask( new Task( \
-	new CallbackP2< SQLStorage< itype, storagetype< itype > >, const char *, const char *> \
+	new NoSharedCallbackP2< SQLStorage< itype, storagetype< itype > >, const char *, const char *> \
     (&storage, &SQLStorage< itype, storagetype< itype > >::Load, tablename, format) ) )
 
 void Storage_FillTaskList(TaskList & tl)
