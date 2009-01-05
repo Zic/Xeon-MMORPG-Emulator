@@ -1780,6 +1780,8 @@ public:
 	void ResetSpeedHack();
 	void DelaySpeedHack(uint32 ms);
 
+	float m_WeaponSubClassDamagePct[21];
+
 	LocationVector m_last_group_position;
 	int32 m_rap_mod_pct;
 	void SummonRequest(uint32 Requestor, uint32 ZoneID, uint32 MapID, uint32 InstanceID, const LocationVector & Position);

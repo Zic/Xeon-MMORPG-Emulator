@@ -456,6 +456,9 @@ void Player::Init()
 		m_channels.clear();
 		m_visibleObjects.clear();
 
+	for(uint32 i = 0; i < 21; ++i)
+		m_WeaponSubClassDamagePct[i] = 1.0f;
+
 	Unit::Init();
 }
 

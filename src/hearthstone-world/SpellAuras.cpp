@@ -6088,6 +6088,16 @@ void Aura::SpellAuraModDamagePercDone(bool apply)
 				}
 			}
 		}
+		else
+		{
+			// We're modifying conditional weapon damage.
+			for( uint32 t = 0; t < 21; t++ )
+				if( m_spellProto->EquippedItemSubClass & ( ( ( uint32 )1 ) << t ) )
+				{
+					// t is a subclass we're modifying.
+					p_target->m_WeaponSubClassDamagePct[t] += val;
+				}
+		}
 	}
 	else 
 	{

@@ -465,6 +465,25 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 	float ap = 0;
 	float bonus;
 	float wspeed;
+	float appbonuspct = 1.0f;
+	ItemPointer BonusItem = NULLITEM;
+	if( pAttacker->IsPlayer() && weapon_damage_type == MELEE )
+	{
+		BonusItem = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+	}
+	else if(pAttacker->IsPlayer() && weapon_damage_type == OFFHAND )
+	{
+		BonusItem = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_OFFHAND);
+	}
+	else if(pAttacker->IsPlayer() && weapon_damage_type == RANGED )
+	{
+		BonusItem = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
+	}
+
+	if( pAttacker->IsPlayer() && BonusItem )
+	{
+		appbonuspct = TO_PLAYER(pAttacker)->m_WeaponSubClassDamagePct[ BonusItem->GetProto()->SubClass  ];
+	}
 
 	if(offset == UNIT_FIELD_MINRANGEDDAMAGE)
 	{
@@ -490,7 +509,9 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 			{
 				shared_ptr<Item>it = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 				if(it)
+				{
 					wspeed = (float)it->GetProto()->Delay;
+				}
 				else
 					wspeed = 2000;
 			}
@@ -652,7 +673,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 			}				
 		}
 
-		return FL2UINT(result);
+		return FL2UINT(result * appbonuspct);
 	}
 
 	return 0;
