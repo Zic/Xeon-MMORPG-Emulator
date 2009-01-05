@@ -616,6 +616,7 @@ ObjectPointer Aura::GetCaster()
 
 Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer target )
 {
+	m_applied = false;
 	m_dispelled = false;
 	m_resistPctChance = 0;
 	m_castInDuel = false;
@@ -830,9 +831,39 @@ void Aura::AddMod( uint32 t, int32 a, uint32 miscValue, uint32 i )
 	//ASSERT(m_modcount<=3);
 }
 
+void Aura::RemoveIfNecessary()
+{
+	if( !m_applied ) return; // already removed
+
+	if( m_spellProto->CasterAuraState && m_target && !(m_target->GetUInt32Value(UNIT_FIELD_AURASTATE) & (uint32(1) << (m_spellProto->CasterAuraState-1)) ) )
+	{
+		//printf("Removing aura due to lacking aurastate %u\n", m_spellProto->CasterAuraState);
+		ApplyModifiers(false);
+		return;
+	}
+	if( m_spellProto->CasterAuraStateNot && m_target && m_target->GetUInt32Value(UNIT_FIELD_AURASTATE) & (uint32(1) << (m_spellProto->CasterAuraStateNot-1)) ) 
+	{
+		ApplyModifiers(false);
+		return;
+	}
+}
+
 void Aura::ApplyModifiers( bool apply )
 { 
-	
+	m_applied = apply;
+	if( apply && m_spellProto->CasterAuraState && m_target && !(m_target->GetUInt32Value(UNIT_FIELD_AURASTATE) & (uint32(1) << (m_spellProto->CasterAuraState - 1) ) ) )
+	{
+		//printf("Unable to apply due to lacking aura state %u\n", m_spellProto->CasterAuraState);
+		m_applied = false;
+		return;
+	}
+	if( apply && m_spellProto->CasterAuraStateNot && m_target && m_target->GetUInt32Value(UNIT_FIELD_AURASTATE) & (uint32(1) << (m_spellProto->CasterAuraStateNot - 1) ) ) 
+	{
+		//printf("Unable to apply due to having aura state %u\n", m_spellProto->CasterAuraStateNot);
+		m_applied = false;
+		return;
+	}
+
 	for( uint32 x = 0; x < m_modcount; x++ )
 	{
 		mod = &m_modList[x];
@@ -6028,12 +6059,7 @@ void Aura::SpellAuraModDamagePercDone(bool apply)
 
 	float val = (apply) ? mod->m_amount/100.0f : -mod->m_amount/100.0f;
 
-/* Shady: Don't know what this does, but it's not good. 
-Cause this aura effects only spells by school or combination of it.
-Don't know why there is any weapon modifiers.
-
-[wtf did you do shady? 8)] - Supalosa */
-		switch (GetSpellId()) //dirty or mb not fix bug with wand specializations
+	switch (GetSpellId()) //dirty or mb not fix bug with wand specializations
 	{
 	case 6057:
 	case 6085:
@@ -6044,14 +6070,13 @@ Don't know why there is any weapon modifiers.
 	case 14528:
 		return;
 	}
+
 	if(m_target->IsPlayer())
 	{
 
 		//126 == melee,
 		//127 == evrything
 		//else - schools
-		
-		//this is somehow wrong since fixed value will be owerwritten by other values
 
 		if(GetSpellProto()->EquippedItemClass==-1)//does not depend on weapon
 		{
@@ -6060,41 +6085,10 @@ Don't know why there is any weapon modifiers.
 				if (mod->m_miscValue & (((uint32)1)<<x) )
 				{
 					m_target->ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT + x,val);
+					printf("Dmg Perc Done: %f\n", m_target->GetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT));
 				}
 			}
 		}
-		// WEAPON MODIFIER PART DISABLED BY SUPALOSA: compile errors, WeaponModifier implementation changed.
-		/*else
-		
-		//if(mod->m_miscValue&1 || mod->m_miscValue == 126)
-		{
-			if(apply)
-			{
-				WeaponModifier md;
-				md.value = (float)mod->m_amount;
-				md.wclass = GetSpellProto()->EquippedItemClass;
-				//in case i'm wrong you will still not be able to attack with consumables i guess :P :D
-				if(md.wclass==0)
-					md.wclass=-1;//shoot me if i'm wrong but i found values that are 0 and should effect all weapons
-				md.subclass = GetSpellProto()->EquippedItemSubClass;
-				TO_PLAYER( m_target )->damagedone.insert(make_pair(GetSpellId(), md));
-			}
-			else 
-			{
-				std::map<uint32,WeaponModifier>::iterator i= TO_PLAYER( m_target )->damagedone.begin();
-
-				for( ; i != TO_PLAYER( m_target )->damagedone.end() ; i++ )
-				{
-					if(( *i).first == GetSpellId() )
-					{
-						TO_PLAYER( m_target )->damagedone.erase(i);
-						break;
-					}
-				}
-				TO_PLAYER( m_target )->damagedone.erase(GetSpellId());
-			}
-		}
-		*/
 	}
 	else 
 	{
@@ -6368,12 +6362,6 @@ void Aura::SpellAuraModDamagePercTaken(bool apply)
 	else
 	{
 		val= -mod->m_amount/100.0f;
-	}
-	
-	if( m_spellProto->NameHash == SPELL_HASH_ARDENT_DEFENDER ) // Ardent Defender it only applys on 20% hp :/
-	{
-		m_target->DamageTakenPctModOnHP35 += val;
-		return;
 	}
 	
 	for(uint32 x=0;x<7;x++)

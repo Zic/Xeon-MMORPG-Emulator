@@ -3284,6 +3284,8 @@ void Player::AddToWorld(shared_ptr<MapMgr> pMapMgr)
 
 	if(m_session)
 		m_session->SetInstance(m_mapMgr->GetInstanceID());
+
+	EventHealthChangeSinceLastUpdate(); // just in case
 }
 
 void Player::OnPrePushToWorld()

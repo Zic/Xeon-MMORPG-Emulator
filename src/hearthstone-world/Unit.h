@@ -943,7 +943,7 @@ public:
 	float DamageDoneModPCT[7];
 	int32 DamageTakenMod[7];
 	float DamageTakenPctMod[7];
-	float DamageTakenPctModOnHP35;
+	//float DamageTakenPctModOnHP35; DEPRECATED, YAY!
 	float CritMeleeDamageTakenPctMod[7];
 	float CritRangedDamageTakenPctMod[7];
 	int32 RangedDamageTaken;

@@ -31,13 +31,24 @@ enum AUARA_STATE_FLAGS
     AURASTATE_FLAG_BERSERK              = 0x00000004,
     AURASTATE_FLAG_FROZEN               = 0x00000008,
     AURASTATE_FLAG_JUDGEMENT            = 0x00000010,
+	AURASTATE_FLAG_UNK1					= 0x00000020,
     AURASTATE_FLAG_PARRY                = 0x00000040,
+	AURASTATE_FLAG_UNK2					= 0x00000080,
+	AURASTATE_FLAG_UNK3					= 0x00000100,
     AURASTATE_FLAG_LASTKILLWITHHONOR    = 0x00000200,
     AURASTATE_FLAG_CRITICAL             = 0x00000400,
+	AURASTATE_FLAG_UNK4					= 0x00000800,
     AURASTATE_FLAG_HEALTH35             = 0x00001000,
     AURASTATE_FLAG_IMMOLATE             = 0x00002000,
     AURASTATE_FLAG_REJUVENATE           = 0x00004000,
     AURASTATE_FLAG_POISON               = 0x00008000,
+	AURASTATE_FLAG_ENRAGE               = 0x00010000,
+	AURASTATE_FLAG_UNK5					= 0x00020000,
+	AURASTATE_FLAG_UNK6					= 0x00040000,
+	AURASTATE_FLAG_UNK7					= 0x00080000,
+	AURASTATE_FLAG_UNK8					= 0x00100000,
+	AURASTATE_FLAG_UNK9					= 0x00200000,
+	AURASTATE_FLAG_HEALTHABOVE75		= 0x00400000,
 };
 
 enum MOD_TYPES
@@ -378,10 +389,14 @@ public:
 	void SetNegative(signed char value=1) { m_positive -= value; }
 	void SetPositive(signed char value=1) { m_positive += value; }
 
+	bool m_applied;
+
 	ObjectPointer GetCaster();
 	HEARTHSTONE_INLINE uint64 GetCasterGUID(){return m_casterGuid;}
 	UnitPointer GetUnitCaster();
 	HEARTHSTONE_INLINE UnitPointer GetTarget() { return m_target; }
+
+	void RemoveIfNecessary();
 
 	AuraPointer  StrongerThat(AuraPointer aur);
 	void ApplyModifiers(bool apply);

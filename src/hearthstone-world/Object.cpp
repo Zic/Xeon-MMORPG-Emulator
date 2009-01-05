@@ -1185,6 +1185,20 @@ void Object::SetFlag( const uint32 index, uint32 newFlag )
 			m_objectUpdated = true;
 		}
 	}
+
+	// we're modifying an aurastate, so we need to update the auras.
+	if( index == UNIT_FIELD_AURASTATE )
+	{
+		UnitPointer u = unit_shared_from_this();
+		for(uint32 i = 0; i < MAX_AURAS+MAX_POSITIVE_AURAS; ++i)
+		{
+			if( u->m_auras[i] && !u->m_auras[i]->m_applied) // try to apply
+				u->m_auras[i]->ApplyModifiers(true);
+
+			if( u->m_auras[i] && u->m_auras[i]->m_applied) // try to remove, if we lack the aurastate
+				u->m_auras[i]->RemoveIfNecessary();
+		}
+	}
 }
 
 
@@ -1206,6 +1220,20 @@ void Object::RemoveFlag( const uint32 index, uint32 oldFlag )
 		{
 			m_mapMgr->ObjectUpdated(obj_shared_from_this());
 			m_objectUpdated = true;
+		}
+	}
+
+	// we're modifying an aurastate, so we need to update the auras.
+	if( index == UNIT_FIELD_AURASTATE )
+	{
+		UnitPointer u = unit_shared_from_this();
+		for(uint32 i = 0; i < MAX_AURAS+MAX_POSITIVE_AURAS; ++i)
+		{
+			if( u->m_auras[i] && !u->m_auras[i]->m_applied) // try to apply
+				u->m_auras[i]->ApplyModifiers(true);
+
+			if( u->m_auras[i] && u->m_auras[i]->m_applied) // try to remove, if we lack the aurastate
+				u->m_auras[i]->RemoveIfNecessary();
 		}
 	}
 }
@@ -1531,10 +1559,6 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 
 		if(IsPlayer() && ! player_shared_from_this()->isInCombat())
 			sHookInterface.OnEnterCombat( player_shared_from_this(), player_shared_from_this() );*/
-
-		//the black sheep , no actually it is paladin : Ardent Defender
-		if(unit_shared_from_this()->DamageTakenPctModOnHP35 && HasFlag(UNIT_FIELD_AURASTATE , AURASTATE_FLAG_HEALTH35) )
-			damage = damage - float2int32(damage * unit_shared_from_this()->DamageTakenPctModOnHP35) / 100 ;
 			
 		if(IsPet())
 			plr = pet_shared_from_this()->GetPetOwner();

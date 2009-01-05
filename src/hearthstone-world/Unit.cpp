@@ -154,7 +154,6 @@ Unit::Unit()
 		CritMeleeDamageTakenPctMod[x]=0;
 		CritRangedDamageTakenPctMod[x]=0;
 	}
-	DamageTakenPctModOnHP35 = 1;
 	RangedDamageTaken = 0;
 
 	for(int i = 0; i < 5; i++)
@@ -5244,17 +5243,29 @@ void Unit::RemoveSoloAura(uint32 type)
 void Unit::EventHealthChangeSinceLastUpdate()
 {
 	int pct = GetHealthPct();
-	if(pct<35)
-	{
-		uint32 toset=AURASTATE_FLAG_HEALTH35;
-		if(pct<20)
-			toset |= AURASTATE_FLAG_HEALTH20;
-		else
-			RemoveFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_HEALTH20);
-		SetFlag(UNIT_FIELD_AURASTATE,toset);
-	}
-	else
-		RemoveFlag(UNIT_FIELD_AURASTATE , AURASTATE_FLAG_HEALTH35 | AURASTATE_FLAG_HEALTH20);
+
+	uint32 toSet = 0;
+	uint32 toRemove = 0;
+	if( pct <= 35 && !HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTH35) )
+		toSet |= AURASTATE_FLAG_HEALTH35;
+	else if( pct > 35 && HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTH35) )
+		toRemove |= AURASTATE_FLAG_HEALTH35;
+
+	if( pct <= 20 && !HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTH20) )
+		toSet |= AURASTATE_FLAG_HEALTH20;
+	else if(pct > 20 && HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTH20))
+		toRemove |= AURASTATE_FLAG_HEALTH20;
+
+	if( pct >= 75 && !HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTHABOVE75) )
+		toSet |= AURASTATE_FLAG_HEALTHABOVE75;
+	else if(pct < 75 && HasFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_HEALTHABOVE75))
+		toRemove |= AURASTATE_FLAG_HEALTHABOVE75;
+
+	if(toSet)
+		SetFlag(UNIT_FIELD_AURASTATE, toSet);
+
+	if(toRemove)
+		RemoveFlag(UNIT_FIELD_AURASTATE, toRemove);
 }
 
 int32 Unit::GetAP()
