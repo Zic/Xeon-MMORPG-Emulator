@@ -6242,6 +6242,18 @@ void Aura::SpellAuraDrinkNew(bool apply)
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 		EventPeriodicSpeedModify( -100 );
 
+	if( m_spellProto->NameHash == SPELL_HASH_DEATH_RUNE_MASTERY && p_target)
+	{
+		if(apply)
+		{
+			uint32 chance = 33;
+			chance *= m_spellProto->RankNumber;
+			p_target->m_deathRuneMasteryChance = m_spellProto->RankNumber == 3 ? 100 : chance;
+		}
+		else
+			p_target->m_deathRuneMasteryChance = 0;
+	}
+
 }
 
 void Aura::EventPeriodicSpeedModify(int32 mod)

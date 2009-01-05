@@ -2099,12 +2099,13 @@ public:
 	uint8 m_runemask;
 
 	void ConvertRune(uint8 index, uint8 value);
-	void ScheduleRuneRefresh(uint8 index);
+	void ScheduleRuneRefresh(uint8 index, bool forceDeathRune = false);
 
 	bool CanUseRunes(uint8 blood, uint8 frost, uint8 unholy);
-	void UseRunes(uint8 blood, uint8 frost, uint8 unholy);
+	void UseRunes(uint8 blood, uint8 frost, uint8 unholy, SpellEntry * pSpell = NULL);
 	uint8 TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy);
 
+	uint32 m_deathRuneMasteryChance;
 
 private:
 	// Stuff for "Talent Inspect"

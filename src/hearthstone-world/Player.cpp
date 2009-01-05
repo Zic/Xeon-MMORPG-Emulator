@@ -38,6 +38,7 @@ Player::Player( uint32 guid )
 	SetUInt32Value( OBJECT_FIELD_TYPE,TYPE_PLAYER|TYPE_UNIT|TYPE_OBJECT);
 	SetUInt32Value( OBJECT_FIELD_GUID,guid);
 	m_wowGuid.Init(GetGUID());
+	m_deathRuneMasteryChance = 0;
 }
 
 void Player::Init()
@@ -11335,12 +11336,13 @@ bool Player::CanUseRunes(uint8 blood, uint8 frost, uint8 unholy)
 	return false;
 }
 
-void Player::ScheduleRuneRefresh(uint8 index)
+void Player::ScheduleRuneRefresh(uint8 index, bool forceDeathRune)
 {
-	sEventMgr.AddEvent(plr_shared_from_this(), &Player::ConvertRune, (uint8)index, baseRunes[index], EVENT_PLAYER_RUNE_REGEN + index, 10000, 0, 0);
+	sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_PLAYER_RUNE_REGEN + index);
+	sEventMgr.AddEvent(plr_shared_from_this(), &Player::ConvertRune, (uint8)index, (forceDeathRune ? uint8(RUNE_TYPE_DEATH) : baseRunes[index]), EVENT_PLAYER_RUNE_REGEN + index, 10000, 0, 0);
 }
 
-void Player::UseRunes(uint8 blood, uint8 frost, uint8 unholy)
+void Player::UseRunes(uint8 blood, uint8 frost, uint8 unholy, SpellEntry* pSpell)
 {
 	uint8 death = 0;
 	for(uint8 i = 0; i < 6; ++i)
@@ -11351,20 +11353,30 @@ void Player::UseRunes(uint8 blood, uint8 frost, uint8 unholy)
 			m_runemask &= ~(1 << i);
 			m_runes[ i ] = RUNE_TYPE_RECHARGING;
 			ScheduleRuneRefresh(i);
+			continue;
 		}
 		if( m_runes[ i ] == RUNE_TYPE_FROST && frost )
 		{
 			frost--;
 			m_runemask &= ~(1 << i);
 			m_runes[ i ] = RUNE_TYPE_RECHARGING;
-			ScheduleRuneRefresh(i);
+
+			if( pSpell && pSpell->NameHash == SPELL_HASH_DEATH_STRIKE || pSpell->NameHash == SPELL_HASH_OBLITERATE && Rand(pSpell->procChance) )
+				ScheduleRuneRefresh(i, true);
+			else
+				ScheduleRuneRefresh(i);
+			continue;
 		}
 		if( m_runes[ i ] == RUNE_TYPE_UNHOLY && unholy )
 		{
 			unholy--;
 			m_runemask &= ~(1 << i);
 			m_runes[ i ] = RUNE_TYPE_RECHARGING;
-			ScheduleRuneRefresh(i);
+			if( pSpell && pSpell->NameHash == SPELL_HASH_DEATH_STRIKE || pSpell->NameHash == SPELL_HASH_OBLITERATE && Rand(pSpell->procChance) )
+				ScheduleRuneRefresh(i, true);
+			else
+				ScheduleRuneRefresh(i);
+			continue;
 		}
 
 		if( m_runes[ i ] == RUNE_TYPE_DEATH )
