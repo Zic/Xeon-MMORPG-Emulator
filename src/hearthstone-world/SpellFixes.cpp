@@ -6204,6 +6204,20 @@ void ApplyNormalFixes()
 			sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
 	}
 
+	// Death Knight spell fixes
+	//Blade Barrier
+	ranks = fill(ids, 49182, 49500, 49501, 55225, 55226);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->procChance = 100;
+		}
+	}
+
+
 	// Bone Shield
 	sp = dbcSpell.LookupEntryForced( 49222 );
 	if( sp != NULL )
@@ -6294,6 +6308,8 @@ void ApplyNormalFixes()
 		sp->proc_interval = 55000;
 		sp->procFlags = PROC_ON_CAST_SPELL;
 	}
+
+	
 
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();

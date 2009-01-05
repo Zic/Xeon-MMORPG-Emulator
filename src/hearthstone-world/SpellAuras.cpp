@@ -6085,7 +6085,6 @@ void Aura::SpellAuraModDamagePercDone(bool apply)
 				if (mod->m_miscValue & (((uint32)1)<<x) )
 				{
 					m_target->ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT + x,val);
-					printf("Dmg Perc Done: %f\n", m_target->GetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT));
 				}
 			}
 		}

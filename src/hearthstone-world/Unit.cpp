@@ -741,6 +741,22 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 
 					switch( spellId )
 					{
+						// Blade Barrier
+						case 51789:
+						{
+							if( !IsPlayer() || !CastingSpell )
+								continue;
+
+							SpellEntry * sp = dbcSpell.LookupEntryForced( CastingSpell->Id );
+							SpellRuneCostEntry * sr = dbcSpellRuneCost.LookupEntryForced( sp->runeCostID );
+							if( !sr || sr->bloodRuneCost == 0 ) // not costing blood.
+								continue;
+
+							if( plr_shared_from_this()->m_runes[0] == RUNE_TYPE_BLOOD || plr_shared_from_this()->m_runes[1] == RUNE_TYPE_BLOOD )
+								continue; // oh snap, still have blood runes, this doesn't count.
+
+						}break;
+
 						case 14189: //Seal Fate
 						case 16953: //Blood Frenzy
 						{
