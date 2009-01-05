@@ -6240,7 +6240,10 @@ void Aura::SpellAuraDrinkNew(bool apply)
 		sEventMgr.AddEvent( aura_shared_from_this(), &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
+	{
+		sEventMgr.RemoveEvents( aura_shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE ); 
 		EventPeriodicSpeedModify( -100 );
+	}
 
 	if( m_spellProto->NameHash == SPELL_HASH_DEATH_RUNE_MASTERY && p_target)
 	{
