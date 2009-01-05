@@ -2374,60 +2374,12 @@ void Spell::SpellEffectSummon(uint32 i)
 			SummonNonCombatPet(i);
 			break;
 		}
-	case SUMMON_TYPE_CREATURE_WITH_HEALTH:
-		{
-			SummonCreatureWithHealth(i);
-			break;
-		}
 	default:
 		{
 			SummonGuardian(i);
 			break;
 		}
 	}
-}
-
-void Spell::SummonCreatureWithHealth(uint32 i)
-{
-	if(!p_caster || !p_caster->IsInWorld())
-		return;
-
-	CreatureInfo * ci = CreatureNameStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
-	CreatureProto * cp = CreatureProtoStorage.LookupEntry(m_spellInfo->EffectMiscValue[i]);
-	if( !ci || !cp )
-		return;
-
-	float x, y, z;
-	if( m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION && m_targets.m_destX && m_targets.m_destY && m_targets.m_destZ )
-	{
-		x = m_targets.m_destX;
-		y = m_targets.m_destY;
-		z = m_targets.m_destZ;
-	}
-	else
-	{
-		x = u_caster->GetPositionX();
-		y = u_caster->GetPositionY();
-		z = u_caster->GetPositionZ();
-	}
-
-	// Don't think these creatures can move on their own, disabled AI and follow stuff. :P
-	CreaturePointer pCreature;
-	pCreature = p_caster->GetMapMgr()->CreateCreature(cp->Id);
-	pCreature->Load(cp, x, y, z, p_caster->GetOrientation());
-	pCreature->_setFaction();
-	pCreature->GetAIInterface()->Init(pCreature,AITYPE_PET,MOVEMENTTYPE_NONE,u_caster);
-	pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] + 1);
-	pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] + 1);
-	pCreature->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
-	pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-	pCreature->_setFaction();
-	pCreature->DisableAI();
-	if( m_summonProperties->slot < 7 )
-		u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;
-	pCreature->PushToWorld(p_caster->GetMapMgr());
-	sEventMgr.AddEvent(pCreature, &Creature::SafeDelete, EVENT_CREATURE_REMOVE_CORPSE, GetDuration(), 1, 0);
-
 }
 
 void Spell::SummonCreature(uint32 i) // Summon
@@ -2469,7 +2421,15 @@ void Spell::SummonCreature(uint32 i) // Summon
 			y = u_caster->GetPositionY();
 			z = u_caster->GetPositionZ();
 		}
-		for (int j=0; j<m_spellInfo->EffectBasePoints[i]+1; j++)
+		uint32 health = 0;
+		uint32 count = m_spellInfo->EffectBasePoints[i] + 1;
+		if( m_summonProperties->unk2 & 2 ) // one, please.
+		{
+			count = 1;
+			health = m_spellInfo->EffectBasePoints[i] + 1;
+		}
+
+		for (uint32 j=0; j<count; j++)
 		{
 			CreaturePointer pCreature;
 			float m_fallowAngle=-((float(M_PI)/2)*j);
@@ -2478,6 +2438,11 @@ void Spell::SummonCreature(uint32 i) // Summon
 
 			pCreature = p_caster->GetMapMgr()->CreateCreature(cp->Id);
 			pCreature->Load(cp, x, y, z, p_caster->GetOrientation());
+			if(health)
+			{
+				pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, health);
+				pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, health);
+			}
 			pCreature->_setFaction();
 			pCreature->GetAIInterface()->Init(pCreature,AITYPE_PET,MOVEMENTTYPE_NONE,u_caster);
 			pCreature->GetAIInterface()->SetUnitToFollow(u_caster);
@@ -3412,6 +3377,9 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 	uint32 cr_entry = m_spellInfo->EffectMiscValue[i];
 	uint32 level = u_caster->getLevel();
 	float angle_for_each_spawn = -float(M_PI) * 2 / damage;
+
+	if( m_summonProperties->unk2 & 2 || m_summonProperties->Id == 711) // it's health., or a fucked up infernal.
+		damage = 1;
 
 	for( int i = 0; i < damage; i++ )
 	{
@@ -4908,8 +4876,8 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	pTotem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
 	pTotem->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 	pTotem->SetUInt64Value(UNIT_FIELD_CREATEDBY, p_caster->GetGUID());
-	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] : 5 );
-	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] : 5);
+	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] + 1 : 5 );
+	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] + 1: 5);
 	pTotem->SetUInt32Value(UNIT_FIELD_POWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_MAXPOWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
