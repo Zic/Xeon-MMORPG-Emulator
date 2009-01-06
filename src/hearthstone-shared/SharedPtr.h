@@ -293,6 +293,6 @@ typedef shared_ptr<WorldStateTemplateManager> WorldStateTemplateManagerPointer;
 #define aura_shared_from_this() TO_AURA(shared_from_this())
 #define lootroll_shared_from_this() TO_LOOTROLL(shared_from_this())
 #define vehicle_shared_from_this() TO_VEHICLE(shared_from_this())
-#define class_shared_from_this(x) TO_(x, shared_from_this())
+#define class_shared_from_this(x) TO_PTR(x, shared_from_this())
 
 #endif
