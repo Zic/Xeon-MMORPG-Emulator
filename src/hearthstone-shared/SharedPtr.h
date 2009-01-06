@@ -16,6 +16,8 @@ class Spell;
 class Aura;
 class Item;
 class CBattleground;
+class Container;
+class Vehicle;
 
 // Typedefs for readable code
 typedef shared_ptr<Creature> CreaturePointer;
@@ -30,6 +32,8 @@ typedef shared_ptr<Spell> SpellPointer;
 typedef shared_ptr<Aura> AuraPointer;
 typedef shared_ptr<Item> ItemPointer;
 typedef shared_ptr<CBattleground> BattlegroundPointer;
+typedef shared_ptr<Container> ContainerPointer;
+typedef shared_ptr<Vehicle> VehiclePointer;
 
 
 #define CAST(x,y) std::tr1::static_pointer_cast<x>(y)
@@ -56,6 +60,7 @@ typedef shared_ptr<CBattleground> BattlegroundPointer;
 #define TO_AURA(ptr) CAST(Aura,ptr)
 #define TO_SPELL(ptr) CAST(Spell,ptr)
 #define TO_LOOTROLL(ptr) CAST(LootRoll,ptr)
+#define TO_VEHICLE(ptr) CAST(Vehicle,ptr)
 
 #define NULLPTR shared_ptr<void>()
 #define NULLGOB shared_ptr<GameObject>()
@@ -63,7 +68,6 @@ typedef shared_ptr<CBattleground> BattlegroundPointer;
 #define NULLOBJ shared_ptr<Object>()
 #define NULLGOB shared_ptr<GameObject>()
 #define NULLUNIT shared_ptr<Unit>()
-#define NULLSPELL shared_ptr<Spell>()
 #define NULLPET shared_ptr<Pet>()
 #define NULLITEM shared_ptr<Item>()
 #define NULLDYN shared_ptr<DynamicObject>()
@@ -96,5 +100,6 @@ typedef shared_ptr<CBattleground> BattlegroundPointer;
 #define spell_shared_from_this() TO_SPELL(shared_from_this())
 #define aura_shared_from_this() TO_AURA(shared_from_this())
 #define lootroll_shared_from_this() TO_LOOTROLL(shared_from_this())
+#define vehicle_shared_from_this() TO_VEHICLE(shared_from_this())
 
 #endif
