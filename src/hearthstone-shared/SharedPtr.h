@@ -190,6 +190,7 @@ typedef shared_ptr<MovementInfo> MovementInfoPointer;
 typedef shared_ptr<NewsAnnouncer> NewsAnnouncerPointer;
 typedef shared_ptr<Object> ObjectPointer;
 typedef shared_ptr<ObjectMgr> ObjectMgrPointer;
+typedef shared_ptr<Pet> PetPointer;
 typedef shared_ptr<Player> PlayerPointer;
 typedef shared_ptr<QuestLogEntry> QuestLogEntryPointer;
 typedef shared_ptr<QuestMgr> QuestMgrPointer;
