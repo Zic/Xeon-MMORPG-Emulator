@@ -4256,9 +4256,8 @@ void Aura::SpellAuraModDecreaseSpeed(bool apply)
 		map< uint32, int32 >::iterator itr = m_target->speedReductionMap.find(m_spellProto->Id);
 		if(itr != m_target->speedReductionMap.end())
 			m_target->speedReductionMap.erase(itr);
-		//m_target->m_speedModifier -= mod->m_amount;
-		//m_target->m_slowdown=NULL;
 	}
+
 	if(m_target->GetSpeedDecrease())
 		m_target->UpdateSpeed();
 
@@ -6242,7 +6241,7 @@ void Aura::SpellAuraDrinkNew(bool apply)
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
 		sEventMgr.RemoveEvents( aura_shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE ); 
-		EventPeriodicSpeedModify( -100 );
+		EventPeriodicSpeedModify( -(mod->fixed_amount[0]) ); 
 	}
 
 	if( m_spellProto->NameHash == SPELL_HASH_DEATH_RUNE_MASTERY && p_target)
@@ -6263,6 +6262,11 @@ void Aura::EventPeriodicSpeedModify(int32 mod)
 {
 	m_target->m_speedModifier += mod;
 	m_target->UpdateSpeed();
+
+	if( m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
+	{
+		this->mod->fixed_amount[0] += mod;
+	}
 }
 
 void Aura::EventPeriodicDrink(uint32 amount)

@@ -3907,8 +3907,8 @@ void Player::SetMovement(uint8 pType, uint32 flag)
 
 void Player::SetPlayerSpeed(uint8 SpeedType, float value)
 {
-	if( value < 0.5f )
-		value = 0.5f;
+	if( value < 0.1f )
+		value = 0.1f;
 
 	uint8 buf[200];
 	StackPacket data(SMSG_FORCE_RUN_SPEED_CHANGE, buf, 200);
