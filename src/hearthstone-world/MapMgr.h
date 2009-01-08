@@ -190,14 +190,14 @@ public:
 	void Init();
 	void Destructor();
 
-	void PushObject(ObjectPointerobj);
+	void PushObject(ObjectPointer obj);
 	void PushStaticObject(ObjectPointer obj);
-	void RemoveObject(ObjectPointerobj, bool free_guid);
-	void ChangeObjectLocation(ObjectPointerobj); // update inrange lists
+	void RemoveObject(ObjectPointer obj, bool free_guid);
+	void ChangeObjectLocation(ObjectPointer obj); // update inrange lists
 	void ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight);
 
 	//! Mark object as updated
-	void ObjectUpdated(ObjectPointerobj);
+	void ObjectUpdated(ObjectPointer obj);
 	void UpdateCellActivity(uint32 x, uint32 y, int radius);
 
 	// Terrain Functions
@@ -280,7 +280,7 @@ private:
 	set<ObjectPointer > _mapWideStaticObjects;
 
 	bool _CellActive(uint32 x, uint32 y);
-	void UpdateInRangeSet(ObjectPointerobj, PlayerPointer plObj, MapCell* cell);
+	void UpdateInRangeSet(ObjectPointer obj, PlayerPointer plObj, MapCell* cell);
 
 public:
 	// Distance a Player can "see" other objects and receive updates from them (!! ALREADY dist*dist !!)

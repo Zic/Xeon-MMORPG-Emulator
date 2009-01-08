@@ -212,8 +212,8 @@ public:
 	//Distance Calculation
 	float CalcDistance(ObjectPointer Ob);
 	float CalcDistance(float ObX, float ObY, float ObZ);
-	float CalcDistance(ObjectPointerOa, ObjectPointerOb);
-	float CalcDistance(ObjectPointerOa, float ObX, float ObY, float ObZ);
+	float CalcDistance(ObjectPointer Oa, ObjectPointer Ob);
+	float CalcDistance(ObjectPointer Oa, float ObX, float ObY, float ObZ);
 	float CalcDistance(float OaX, float OaY, float OaZ, float ObX, float ObY, float ObZ);
 
 	//! Only for MapMgr use
@@ -448,7 +448,7 @@ public:
 	//*****************************************************************************************
 	//* SpellLog packets just to keep the code cleaner and better to read
 	//*****************************************************************************************
-	void SendSpellLog(ObjectPointerCaster, ObjectPointerTarget,uint32 Ability, uint8 SpellLogType);
+	void SendSpellLog(ObjectPointer Caster, ObjectPointer Target,uint32 Ability, uint8 SpellLogType);
 	void SendSpellNonMeleeDamageLog( ObjectPointer Caster, UnitPointer Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToSet );
 	void SendAttackerStateUpdate( UnitPointer Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate );
 

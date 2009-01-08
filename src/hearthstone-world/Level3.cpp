@@ -2968,7 +2968,7 @@ bool ChatHandler::HandleClearBonesCommand(const char *args, WorldSession *m_sess
 	sGMLog.writefromsession(m_session, "cleared bones on map %u at %f %f %f", p->GetMapId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ());
 
 	Object::InRangeSet::iterator itr;
-	ObjectPointerobj;
+	ObjectPointer obj;
 
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); )
 	{
@@ -2989,7 +2989,7 @@ bool ChatHandler::HandleClearCorpsesCommand(const char *args, WorldSession *m_se
 	sGMLog.writefromsession(m_session, "cleared corpses on map %u at %f %f %f", p->GetMapId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ());
 
 	Object::InRangeSet::iterator itr;
-	ObjectPointerobj;
+	ObjectPointer obj;
 
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); )
 	{

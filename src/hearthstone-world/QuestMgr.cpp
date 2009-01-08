@@ -905,7 +905,7 @@ void QuestMgr::OnPlayerExploreArea(PlayerPointer plr, uint32 AreaID)
 	}
 }
 
-void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver)
+void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver)
 {
 	// Reputation reward
 	for(int z = 0; z < 2; z++)
@@ -939,7 +939,7 @@ void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPo
 		plr->ModStanding(fact, amt);
 	}
 }
-void QuestMgr::OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver)
+void QuestMgr::OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver)
 {
 	
 }
@@ -952,7 +952,7 @@ void QuestMgr::GiveQuestTitleReward(PlayerPointer plr, Quest* qst)
 	plr->SetKnownTitle(qst->reward_title, true);
 }
 
-void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver, uint32 reward_slot)
+void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver, uint32 reward_slot)
 {
     QuestLogEntry *qle = NULL;
     qle = plr->GetQuestLogForEntry(qst->id);
@@ -1509,7 +1509,7 @@ void QuestMgr::BuildQuestFailed(WorldPacket* data, uint32 questid)
 	*data << questid;
 }
 
-bool QuestMgr::OnActivateQuestGiver(ObjectPointerqst_giver, PlayerPointer plr)
+bool QuestMgr::OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr)
 {
 	if(qst_giver->GetTypeId() == TYPEID_GAMEOBJECT && !TO_GAMEOBJECT(qst_giver)->HasQuests())
 		return false;

@@ -1401,7 +1401,7 @@ void Spell::cast(bool check)
 				// timed?
 				if( m_spellInfo->speed > 0.0f && m_targets.m_unitTarget != 0 )
 				{
-					ObjectPointerpTmpTarget = _LookupObject(m_targets.m_unitTarget);
+					ObjectPointer pTmpTarget = _LookupObject(m_targets.m_unitTarget);
 					if( pTmpTarget != NULL && pTmpTarget->IsUnit() )
 					{
 						float tmpDistance = m_caster->CalcDistance(pTmpTarget);

@@ -42,9 +42,9 @@ public:
 	void Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr);
 
 	//Object Managing
-	void AddObject(ObjectPointerobj); 
-	void RemoveObject(ObjectPointerobj);
-	bool HasObject(ObjectPointerobj) { return (_objects.find(obj) != _objects.end()); }
+	void AddObject(ObjectPointer obj); 
+	void RemoveObject(ObjectPointer obj);
+	bool HasObject(ObjectPointer obj) { return (_objects.find(obj) != _objects.end()); }
 	bool HasPlayers() { return ((_playerCount > 0) ? true : false); }
 	HEARTHSTONE_INLINE size_t GetObjectCount() { return _objects.size(); }
 	void RemoveObjects();

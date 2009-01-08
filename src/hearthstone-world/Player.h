@@ -1976,7 +1976,7 @@ protected:
 	uint8 m_StableSlotCount;
 
     // Fishing related
-	ObjectPointerm_SummonedObject;
+	ObjectPointer m_SummonedObject;
 
     // other system
 	shared_ptr<Corpse>    myCorpse;

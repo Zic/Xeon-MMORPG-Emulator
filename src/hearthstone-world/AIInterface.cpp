@@ -1366,7 +1366,7 @@ UnitPointer AIInterface::FindTarget()
 	float z_diff;
 
 	std::set<ObjectPointer >::iterator itr, it2;
-	ObjectPointerpObj;
+	ObjectPointer pObj;
 	shared_ptr<Unit>pUnit;
 	float dist;
 	bool pvp=true;

@@ -5367,7 +5367,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 {	
 	Group * m_Group = m_playerInfo->m_Group;
 	if(!IsInWorld()) return;
-	ObjectPointerlootObj;
+	ObjectPointer lootObj;
 	
 	// handle items
 	if(GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_ITEM)
@@ -7983,7 +7983,7 @@ void Player::UpdatePvPArea()
 void Player::BuildFlagUpdateForNonGroupSet(uint32 index, uint32 flag)
 {
 	Group* pGroup = NULL;
-    ObjectPointercurObj;
+    ObjectPointer curObj;
     for (Object::InRangeSet::iterator iter = GetInRangeSetBegin(); iter != GetInRangeSetEnd();)
 	{
 		curObj = *iter;

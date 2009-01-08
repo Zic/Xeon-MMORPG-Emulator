@@ -28,7 +28,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
 	uint64 guid;
 	WorldPacket data(SMSG_QUESTGIVER_STATUS, 12);
-    ObjectPointerqst_giver = NULLOBJ;
+    ObjectPointer qst_giver = NULLOBJ;
 
 	recv_data >> guid;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
@@ -118,7 +118,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	recv_data >> guid;
 	recv_data >> quest_id;
 
-	ObjectPointerqst_giver = NULLOBJ;
+	ObjectPointer qst_giver = NULLOBJ;
 
 	bool bValid = false;
 	Quest* qst = QuestStorage.LookupEntry(quest_id);
@@ -222,7 +222,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	bool hasquest = true;
 	bool bSkipLevelCheck = false;
 	Quest *qst = NULL;
-	ObjectPointerqst_giver = NULLOBJ;
+	ObjectPointer qst_giver = NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)
@@ -476,7 +476,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
 	bool bValid = false;
 	Quest *qst = NULL;
-	ObjectPointerqst_giver = NULLOBJ;
+	ObjectPointer qst_giver = NULLOBJ;
 	uint32 status = 0;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
@@ -658,7 +658,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 
 	bool bValid = false;
 	Quest *qst = NULL;
-	ObjectPointerqst_giver = NULLOBJ;
+	ObjectPointer qst_giver = NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
 
 	if(guidtype==HIGHGUID_TYPE_UNIT)

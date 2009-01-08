@@ -1240,7 +1240,7 @@ void Object::RemoveFlag( const uint32 index, uint32 oldFlag )
 
 ////////////////////////////////////////////////////////////
 
-float Object::CalcDistance(ObjectPointerOb)
+float Object::CalcDistance(ObjectPointer Ob)
 {
 	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
 }
@@ -1248,11 +1248,11 @@ float Object::CalcDistance(float ObX, float ObY, float ObZ)
 {
 	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), ObX, ObY, ObZ);
 }
-float Object::CalcDistance(ObjectPointerOa, ObjectPointerOb)
+float Object::CalcDistance(ObjectPointer Oa, ObjectPointer Ob)
 {
 	return CalcDistance(Oa->GetPositionX(), Oa->GetPositionY(), Oa->GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
 }
-float Object::CalcDistance(ObjectPointerOa, float ObX, float ObY, float ObZ)
+float Object::CalcDistance(ObjectPointer Oa, float ObX, float ObY, float ObZ)
 {
 	return CalcDistance(Oa->GetPositionX(), Oa->GetPositionY(), Oa->GetPositionZ(), ObX, ObY, ObZ);
 }
@@ -2472,7 +2472,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 //* SpellLog packets just to keep the code cleaner and better to read
 //*****************************************************************************************
 
-void Object::SendSpellLog(ObjectPointerCaster, ObjectPointerTarget,uint32 Ability, uint8 SpellLogType)
+void Object::SendSpellLog(ObjectPointer Caster, ObjectPointer Target, uint32 Ability, uint8 SpellLogType)
 {
 	if ((!Caster || !Target) && Ability)
 		return;

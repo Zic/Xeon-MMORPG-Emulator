@@ -1247,7 +1247,7 @@ HEARTHSTONE_INLINE bool IsInrange(ObjectPointer o1,ObjectPointer o2,float square
         o2->GetPositionX(),o2->GetPositionY(),o2->GetPositionZ(),square_r);
 }
 
-HEARTHSTONE_INLINE bool TargetTypeCheck(ObjectPointerobj,uint32 ReqCreatureTypeMask)
+HEARTHSTONE_INLINE bool TargetTypeCheck(ObjectPointer obj,uint32 ReqCreatureTypeMask)
 {
 	if( !ReqCreatureTypeMask )
 		return true;

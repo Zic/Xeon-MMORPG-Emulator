@@ -44,7 +44,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		_player->InterruptCurrentSpell();
 
 	shared_ptr<GameObject> pGO = NULLGOB;
-	ObjectPointerpLootObj;
+	ObjectPointer pLootObj;
 	
 	// handle item loot
 	uint64 guid = _player->GetLootGUID();
@@ -187,7 +187,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 	
 	// lookup the object we will be looting
 	// TODO: Handle item guids
-	ObjectPointerpLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
+	ObjectPointer pLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
 	PlayerPointer plr;
 	if( pLootObj == NULL )
 		return;

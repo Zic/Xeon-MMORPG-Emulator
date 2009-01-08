@@ -4795,7 +4795,7 @@ bool Unit::HasAurasOfBuffType(uint32 buff_type, const uint64 &guid,uint32 skip)
 	return false;
 }
 
-AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, ObjectPointercaster)
+AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, ObjectPointer caster)
 {
 	AuraCheckResponse resp;
 
@@ -4827,7 +4827,7 @@ AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, ObjectPointerca
 	return resp;
 }
 
-AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointercaster)
+AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointer caster)
 {
 	AuraCheckResponse resp;
 

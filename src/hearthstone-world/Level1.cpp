@@ -104,7 +104,7 @@ bool ChatHandler::HandleGMOffCommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 {
-	ObjectPointerobj;
+	ObjectPointer obj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)

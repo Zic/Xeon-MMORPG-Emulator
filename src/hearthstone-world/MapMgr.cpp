@@ -159,7 +159,7 @@ MapMgr::~MapMgr()
 
 }
 
-void MapMgr::PushObject(ObjectPointerobj)
+void MapMgr::PushObject(ObjectPointer obj)
 {
 	/////////////
 	// Assertions
@@ -365,7 +365,7 @@ void MapMgr::PushObject(ObjectPointerobj)
 }
 
 
-void MapMgr::PushStaticObject(ObjectPointerobj)
+void MapMgr::PushStaticObject(ObjectPointer obj)
 {
 	_mapWideStaticObjects.insert(obj);
 
@@ -385,7 +385,7 @@ void MapMgr::PushStaticObject(ObjectPointerobj)
 	}
 }
 
-void MapMgr::RemoveObject(ObjectPointerobj, bool free_guid)
+void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 {
 	/////////////
 	// Assertions
@@ -555,7 +555,7 @@ void MapMgr::RemoveObject(ObjectPointerobj, bool free_guid)
 	}
 }
 
-void MapMgr::ChangeObjectLocation( ObjectPointerobj )
+void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 {
 	// Items and containers are of no interest for us
 	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != shared_from_this() )
@@ -796,7 +796,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointerobj )
 	}
 }
 
-void MapMgr::UpdateInRangeSet( ObjectPointerobj, PlayerPointer plObj, MapCell* cell )
+void MapMgr::UpdateInRangeSet( ObjectPointer obj, PlayerPointer plObj, MapCell* cell )
 {
 	if( cell == NULL )
 		return;
@@ -1032,7 +1032,7 @@ void MapMgr::_UpdateObjects()
 	}
 	//m_updateMutex.Release();
 
-	ObjectPointerpObj;
+	ObjectPointer pObj;
 	PlayerPointer pOwner;
 	//std::set<ObjectPointer >::iterator it_start, it_end, itr;
 	std::set<PlayerPointer  >::iterator it_start, it_end, itr;
@@ -1281,7 +1281,7 @@ bool MapMgr::_CellActive(uint32 x, uint32 y)
 	return false;
 }
 
-void MapMgr::ObjectUpdated(ObjectPointerobj)
+void MapMgr::ObjectUpdated(ObjectPointer obj)
 {
 	// set our fields to dirty
 	// stupid fucked up code in places.. i hate doing this but i've got to :<
@@ -1322,7 +1322,7 @@ void MapMgr::ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight)
 		uint32 startY = cellY > 0 ? cellY - 1 : 0;
 		uint32 posX, posY;
 		MapCell *cell;
-		ObjectPointerobj;
+		ObjectPointer obj;
 		MapCell::ObjectSet::iterator iter, iend;
 		uint32 count;
 		for (posX = startX; posX <= endX; ++posX )
@@ -1513,7 +1513,7 @@ void MapMgr::BeginInstanceExpireCountdown()
 	InactiveMoveTime = UNIXTIME + 60;
 }
 
-void MapMgr::AddObject(ObjectPointerobj)
+void MapMgr::AddObject(ObjectPointer obj)
 {
 	m_objectinsertlock.Acquire();//<<<<<<<<<<<<
 	m_objectinsertpool.insert(obj);

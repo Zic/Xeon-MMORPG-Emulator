@@ -44,7 +44,7 @@ void MapCell::Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr)
 	_objects.clear();
 }
 
-void MapCell::AddObject(ObjectPointerobj)
+void MapCell::AddObject(ObjectPointer obj)
 {
 	if(obj->IsPlayer())
 		++_playerCount;
@@ -52,7 +52,7 @@ void MapCell::AddObject(ObjectPointerobj)
 	_objects.insert(obj);
 }
 
-void MapCell::RemoveObject(ObjectPointerobj)
+void MapCell::RemoveObject(ObjectPointer obj)
 {
 	if(obj->IsPlayer())
 		--_playerCount;
@@ -130,7 +130,7 @@ void MapCell::RemoveObjects()
 	{
 		count++;
 
-		ObjectPointerobj = (*itr);
+		ObjectPointer obj = (*itr);
 
 		itr++;
 

@@ -1115,7 +1115,7 @@ public:
 	bool IsPoisoned();
 
 	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, ObjectPointer caster=NULLOBJ);
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointercaster=NULLOBJ);
+	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointer caster=NULLOBJ);
 
 	uint16 m_diminishCount[DIMINISH_GROUPS];
 	uint8  m_diminishAuraCount[DIMINISH_GROUPS];

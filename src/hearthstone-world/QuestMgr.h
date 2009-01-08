@@ -55,7 +55,7 @@ public:
 	void BuildRequestItems(WorldPacket* data, Quest* qst, ObjectPointer qst_giver, uint32 status, uint32 language);
 	void BuildQuestComplete(PlayerPointer , Quest* qst);
 	void BuildQuestList(WorldPacket* data, ObjectPointer qst_giver, PlayerPointer plr, uint32 language);
-	bool OnActivateQuestGiver(ObjectPointerqst_giver, PlayerPointer plr);
+	bool OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr);
     bool isRepeatableQuestFinished(PlayerPointer plr, Quest *qst);
 
 	void SendQuestUpdateAddKill(PlayerPointer plr, uint32 questid, uint32 entry, uint32 count, uint32 tcount, uint64 guid);
@@ -70,10 +70,10 @@ public:
 	void OnPlayerItemPickup(PlayerPointer plr, ItemPointer item);
 	void OnPlayerExploreArea(PlayerPointer plr, uint32 AreaID);
 	void OnPlayerSlain(PlayerPointer plr, PlayerPointer victim);
-	void OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver);
-	void OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver, uint32 reward_slot);
+	void OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver);
+	void OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver, uint32 reward_slot);
 
-	void GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver);
+	void GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver);
 	void GiveQuestTitleReward(PlayerPointer plr, Quest* qst);
 
 	uint32 GenerateQuestXP(PlayerPointer pl, Quest *qst);
