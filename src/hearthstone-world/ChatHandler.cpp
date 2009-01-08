@@ -94,6 +94,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 	else
 		recv_data >> msg;
 
+	if(!sHookInterface.OnChat(TO_PLAYER(_player), type, lang, msg, misc))
+		return;
+
 	// Idiots spamming giant pictures through the chat system
 	if( msg.find("|TInterface") != string::npos || msg.find("\n") != string::npos)
 	{

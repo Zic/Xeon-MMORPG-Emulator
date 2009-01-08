@@ -851,6 +851,13 @@ void HookInterface::OnZone(PlayerPointer pPlayer, uint32 Zone, uint32 OldZone)
 	OUTER_LOOP_END
 }
 
+bool HookInterface::OnChat(PlayerPointer pPlayer, uint32 Type, uint32 Lang, string Message, string Misc)
+{
+	OUTER_LOOP_BEGIN_COND(SERVER_HOOK_EVENT_ON_CHAT, tOnChat)
+		ret_val = (call)(pPlayer, Type, Lang, Message, Misc);
+	OUTER_LOOP_END_COND
+}
+
 void HookInterface::OnEnterWorld2(PlayerPointer pPlayer)
 {
 	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_ENTER_WORLD_2, tOnEnterWorld)

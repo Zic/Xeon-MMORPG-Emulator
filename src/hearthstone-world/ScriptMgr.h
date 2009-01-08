@@ -43,6 +43,7 @@ enum ServerHookEvents
 	SERVER_HOOK_EVENT_ON_LOGOUT				= 13,
 	SERVER_HOOK_EVENT_ON_QUEST_ACCEPT		= 14,
 	SERVER_HOOK_EVENT_ON_ZONE				= 15,
+	SERVER_HOOK_EVENT_ON_CHAT				= 16,
 	SERVER_HOOK_EVENT_ON_GUILD_CREATE		= 17,
 	SERVER_HOOK_EVENT_ON_ENTER_WORLD_2		= 18,
 	SERVER_HOOK_EVENT_ON_CHARACTER_CREATE	= 19,
@@ -87,6 +88,7 @@ typedef bool(*tOnLogoutRequest)(PlayerPointer pPlayer);
 typedef void(*tOnLogout)(PlayerPointer pPlayer);
 typedef void(*tOnQuestAccept)(PlayerPointer pPlayer, Quest * pQuest);
 typedef void(*tOnZone)(PlayerPointer pPlayer, uint32 Zone, uint32 OldZone);
+typedef bool(*tOnChat)(PlayerPointer pPlayer, uint32 Type, uint32 Lang, string Message, string Misc);
 typedef bool(*ItemScript)(ItemPointer pItem, PlayerPointer pPlayer);
 typedef void(*tOnQuestCancel)(PlayerPointer pPlayer, Quest * pQuest);
 typedef void(*tOnQuestFinished)(PlayerPointer pPlayer, Quest * pQuest);
@@ -281,6 +283,7 @@ public:
 	void OnLogout(PlayerPointer pPlayer);
 	void OnQuestAccept(PlayerPointer pPlayer, Quest * pQuest);
 	void OnZone(PlayerPointer pPlayer, uint32 Zone, uint32 OldZone);
+	bool OnChat(PlayerPointer pPlayer, uint32 Type, uint32 Lang, string Message, string Misc);
 	void OnEnterWorld2(PlayerPointer pPlayer);
 	void OnCharacterCreate(PlayerPointer pPlayer);
 	void OnQuestCancelled(PlayerPointer pPlayer, Quest * pQuest);
