@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -955,7 +955,7 @@ AVNode::~AVNode()
 
 }
 
-void AVNode::Assault(shared_ptr<Player>plr)
+void AVNode::Assault(PlayerPointer plr)
 {
 	// player assaulted the control point.
 	// safety check
@@ -1223,7 +1223,7 @@ void AVNode::Spawn()
 				for(set<uint32>::iterator it2 = itr->second.begin(); it2 != itr->second.end(); ++it2)
 				{
 					// repop him at a new GY
-					shared_ptr<Player>plr_tmp = m_bg->GetMapMgr()->GetPlayer(*it2);
+					PlayerPointer plr_tmp = m_bg->GetMapMgr()->GetPlayer(*it2);
 					if( plr_tmp != NULL )
 					{
 						m_bg->HookHandleRepop(plr_tmp);
@@ -1520,7 +1520,7 @@ void AlteracValley::OnCreate()
 void AlteracValley::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
 	}
@@ -1684,7 +1684,7 @@ void AlteracValley::Finish(uint32 losingTeam)
 	SpellEntry * loser_spell = dbcSpell.LookupEntry(24954);
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
 			(*itr)->Root();
 
@@ -1737,7 +1737,7 @@ const static AVLoot g_avLoot[] = {
 	{ 0, 0, 0},
 };
 
-void AlteracValley::HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse)
+void AlteracValley::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
 {
 	const AVLoot *loot_ptr = &g_avLoot[0];
 	while(loot_ptr->ItemId != 0)

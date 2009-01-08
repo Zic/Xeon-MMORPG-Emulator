@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -543,7 +543,7 @@ bool World::SetInitialWorldSettings()
 
 	Channel::LoadConfSettings();
 	Log.Notice("BattlegroundManager", "Starting...");
-	shared_ptr<CBattlegroundManager> BattlegroundMgr = shared_ptr<CBattlegroundManager>(new CBattlegroundManager);
+	BattlegroundMgrPointer BattlegroundMgr = BattlegroundMgrPointer(new CBattlegroundManager);
 	BattlegroundMgr->Init();
 
 	dw = new DayWatcherThread();

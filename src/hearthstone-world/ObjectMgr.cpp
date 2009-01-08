@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -2007,7 +2007,7 @@ WayPointMap*ObjectMgr::GetWayPointMap(uint32 spawnid)
 	else return NULL;
 }
 
-shared_ptr<Pet> ObjectMgr::CreatePet()
+PetPointer ObjectMgr::CreatePet()
 {
 	uint32 guid;
 	m_petlock.Acquire();
@@ -2015,7 +2015,7 @@ shared_ptr<Pet> ObjectMgr::CreatePet()
 	m_petlock.Release();
 
 	uint64 fullguid = ((uint64)HIGHGUID_TYPE_PET << 32) | ((uint64)guid << 24) | guid;
-	shared_ptr<Pet> pet = shared_ptr<Pet>(new Pet(fullguid));
+	PetPointer pet = PetPointer(new Pet(fullguid));
 	pet->Init();
 	return pet;
 }
@@ -2026,7 +2026,7 @@ PlayerPointer ObjectMgr::CreatePlayer()
 	m_playerguidlock.Acquire();
 	guid =++m_hiPlayerGuid;
 	m_playerguidlock.Release();
-	PlayerPointer p = shared_ptr<Player>(new Player(guid));
+	PlayerPointer p = PlayerPointer (new Player(guid));
 	p->Init();
 	return p;
 }

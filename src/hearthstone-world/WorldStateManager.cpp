@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -98,7 +98,7 @@ void WorldStateManager::UpdateWorldState(uint32 uWorldStateId, uint32 uValue)
 	//m_lock.Release();
 }
 
-void WorldStateManager::SendWorldStates(shared_ptr<Player>pPlayer)
+void WorldStateManager::SendWorldStates(PlayerPointer pPlayer)
 {
 	// be threadsafe! wear a mutex!
 	//m_lock.Acquire();
@@ -141,7 +141,7 @@ void WorldStateManager::SendWorldStates(shared_ptr<Player>pPlayer)
 	pPlayer->GetSession()->SendPacket(&data);	
 }
 
-void WorldStateManager::ClearWorldStates(shared_ptr<Player>pPlayer)
+void WorldStateManager::ClearWorldStates(PlayerPointer pPlayer)
 {
 	// clears the clients view of world states for this map
 	uint8 msgdata[10];

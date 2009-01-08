@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -171,7 +171,7 @@ public:
 	void SetRotation(float rad);
 
 	//Fishing stuff
-	void UseFishingNode(shared_ptr<Player>player);
+	void UseFishingNode(PlayerPointer player);
 	void EndFishing(PlayerPointer player,bool abort);
 	void FishHooked(PlayerPointer player);
 	
@@ -223,7 +223,7 @@ public:
 	UnitPointer m_summoner;
 	int8 bannerslot;
 	int8 bannerauraslot;
-	shared_ptr<CBattleground> m_battleground;
+	BattlegroundPointer m_battleground;
 
 	void CallScriptUpdate();
    

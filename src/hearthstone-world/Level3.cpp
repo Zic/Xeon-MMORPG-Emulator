@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -44,7 +44,7 @@ bool ChatHandler::HandleWorldPortCommand(const char* args, WorldSession *m_sessi
 bool ChatHandler::HandleClearCooldownsCommand(const char *args, WorldSession *m_session)
 {
 	uint32 guid = (uint32)m_session->GetPlayer()->GetSelection();
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	
 	if(!plr)
 	{
@@ -133,7 +133,7 @@ bool ChatHandler::HandleLearnCommand(const char* args, WorldSession *m_session)
 	if (!*args)
 		return false;
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -284,7 +284,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args, WorldSession *m_se
 
 	int flag = atoi((char*)args);
 
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	if (chr == NULL)
 	{
 		SystemMessage(m_session, "No character selected.");
@@ -619,7 +619,7 @@ bool ChatHandler::HandleIncreaseWeaponSkill(const char *args, WorldSession *m_se
 	else
 		cnt = atol(pMin);
 
-	shared_ptr<Player>pr = getSelectedChar(m_session, true);
+	PlayerPointer pr = getSelectedChar(m_session, true);
 	
 	uint32 SubClassSkill = 0;
 	if(!pr) pr = m_session->GetPlayer();
@@ -728,7 +728,7 @@ bool ChatHandler::HandleIncreaseWeaponSkill(const char *args, WorldSession *m_se
 
 bool ChatHandler::HandleResetTalentsCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = this->getSelectedChar(m_session);
+	PlayerPointer plr = this->getSelectedChar(m_session);
 	if(!plr) return true;
 
 	plr->Reset_Talents();
@@ -741,7 +741,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char* args, WorldSession *m_se
 
 bool ChatHandler::HandleResetSpellsCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = this->getSelectedChar(m_session);
+	PlayerPointer plr = this->getSelectedChar(m_session);
 	if(!plr) return true;
 
 	plr->Reset_Spells();
@@ -879,7 +879,7 @@ bool ChatHandler::HandleAccountUnmuteCommand(const char * args, WorldSession * m
 
 bool ChatHandler::HandleGetTransporterTime(const char* args, WorldSession* m_session)
 {
-	//shared_ptr<Player>plyr = m_session->GetPlayer();
+	//PlayerPointer plyr = m_session->GetPlayer();
 	CreaturePointer crt = getSelectedCreature(m_session, false);
 	if( crt == NULL )
 		return false;
@@ -906,7 +906,7 @@ bool ChatHandler::HandleGetTransporterTime(const char* args, WorldSession* m_ses
 
 bool ChatHandler::HandleRemoveAurasCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return false;
 
 	BlueSystemMessage(m_session, "Removing all auras...");
@@ -919,7 +919,7 @@ bool ChatHandler::HandleRemoveAurasCommand(const char *args, WorldSession *m_ses
 
 bool ChatHandler::HandleRemoveRessurectionSickessAuraCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return false;
 
 	BlueSystemMessage(m_session, "Removing ressurection sickness...");
@@ -929,7 +929,7 @@ bool ChatHandler::HandleRemoveRessurectionSickessAuraCommand(const char *args, W
 
 bool ChatHandler::HandleParalyzeCommand(const char* args, WorldSession *m_session)
 {
-	//shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	//PlayerPointer plr = getSelectedChar(m_session, true);
 	//if(!plr) return false;
 	shared_ptr<Unit>plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
 	if(!plr || plr->GetTypeId() != TYPEID_PLAYER)
@@ -951,7 +951,7 @@ bool ChatHandler::HandleParalyzeCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleUnParalyzeCommand(const char* args, WorldSession *m_session)
 {
-	//shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	//PlayerPointer plr = getSelectedChar(m_session, true);
 	//if(!plr) return false;
 	shared_ptr<Unit>plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
 	if(!plr || plr->GetTypeId() != TYPEID_PLAYER)
@@ -994,7 +994,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args, WorldSession* m_sess
 		return true;
 	}
 
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	if (chr == NULL) {
 	RedSystemMessage(m_session, "Unable to select character.");
 	return true;
@@ -1136,7 +1136,7 @@ bool ChatHandler::HandleFlyCommand(const char* args, WorldSession* m_session)
 {
 	WorldPacket fly(835, 13);
 	
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	
 	if(!chr)
 		chr = m_session->GetPlayer();
@@ -1153,7 +1153,7 @@ bool ChatHandler::HandleLandCommand(const char* args, WorldSession* m_session)
 {
 	WorldPacket fly(836, 13);
 	
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	
 	if(!chr)
 		chr = m_session->GetPlayer();
@@ -1516,7 +1516,7 @@ bool ChatHandler::HandlePetSpawnAIBot(const char* args, WorldSession *m_session)
 bool ChatHandler::HandleAddPetSpellCommand(const char* args, WorldSession* m_session)
 {
 	PlayerPointer plr = m_session->GetPlayer();
-	shared_ptr<Pet> pPet = plr->GetSummon();
+	PetPointer pPet = plr->GetSummon();
 	if(pPet == 0)
 	{
 		RedSystemMessage(m_session, "You have no pet.");
@@ -1539,7 +1539,7 @@ bool ChatHandler::HandleAddPetSpellCommand(const char* args, WorldSession* m_ses
 bool ChatHandler::HandleRemovePetSpellCommand(const char* args, WorldSession* m_session)
 {
 	PlayerPointer plr = m_session->GetPlayer();
-	shared_ptr<Pet> pPet = plr->GetSummon();
+	PetPointer pPet = plr->GetSummon();
 	if(pPet == 0)
 	{
 		RedSystemMessage(m_session, "You have no pet.");
@@ -1562,7 +1562,7 @@ bool ChatHandler::HandleRemovePetSpellCommand(const char* args, WorldSession* m_
 bool ChatHandler::HandleRenamePetCommand(const char* args, WorldSession* m_session)
 {
 	PlayerPointer plr = m_session->GetPlayer();
-	shared_ptr<Pet> pPet = plr->GetSummon();
+	PetPointer pPet = plr->GetSummon();
 	if(pPet == 0)
 	{
 		RedSystemMessage(m_session, "You have no pet.");
@@ -2964,11 +2964,11 @@ bool ChatHandler::HandleAddTrainerSpellCommand( const char * args, WorldSession 
 
 bool ChatHandler::HandleClearBonesCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>p = m_session->GetPlayer();
+	PlayerPointer p = m_session->GetPlayer();
 	sGMLog.writefromsession(m_session, "cleared bones on map %u at %f %f %f", p->GetMapId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ());
 
 	Object::InRangeSet::iterator itr;
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); )
 	{
@@ -2985,11 +2985,11 @@ bool ChatHandler::HandleClearBonesCommand(const char *args, WorldSession *m_sess
 
 bool ChatHandler::HandleClearCorpsesCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>p = m_session->GetPlayer();
+	PlayerPointer p = m_session->GetPlayer();
 	sGMLog.writefromsession(m_session, "cleared corpses on map %u at %f %f %f", p->GetMapId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ());
 
 	Object::InRangeSet::iterator itr;
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); )
 	{
@@ -3021,7 +3021,7 @@ bool ChatHandler::HandleMultiMuteCommand(const char *args, WorldSession *m_sessi
 
 	for(i = 2; i < real_args.size(); ++i)
 	{
-		shared_ptr<Player>pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
+		PlayerPointer pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
 		if( pPlayer == NULL )
 		{
 			SystemMessage(m_session, "Could not find player, %s.\n", real_args[i].c_str());
@@ -3051,7 +3051,7 @@ bool ChatHandler::HandleMultiKickCommand(const char *args, WorldSession *m_sessi
 
 	for(i = 1; i < real_args.size(); ++i)
 	{
-		shared_ptr<Player>pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
+		PlayerPointer pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
 		if( pPlayer == NULL )
 		{
 			SystemMessage(m_session, "Could not find player, %s.\n", real_args[i].c_str());
@@ -3083,7 +3083,7 @@ bool ChatHandler::HandleMultiBanCommand(const char *args, WorldSession *m_sessio
 
 	for(i = 2; i < real_args.size(); ++i)
 	{
-		shared_ptr<Player>pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
+		PlayerPointer pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
 		if( pPlayer == NULL )
 		{
 			SystemMessage(m_session, "Could not find player, %s.\n", real_args[i].c_str());
@@ -3119,7 +3119,7 @@ bool ChatHandler::HandleMultiAccountBanCommand(const char *args, WorldSession *m
 
 	for(i = 2; i < real_args.size(); ++i)
 	{
-		shared_ptr<Player>pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
+		PlayerPointer pPlayer = objmgr.GetPlayer(real_args[i].c_str(), false);
 		if( pPlayer == NULL )
 		{
 			SystemMessage(m_session, "Could not find player, %s.\n", real_args[i].c_str());

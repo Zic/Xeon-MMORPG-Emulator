@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -723,7 +723,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				break;
 			shared_ptr<Unit>targets[3];
 			int targets_got=0;
-			for(std::set<shared_ptr<Object> >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
+			for(std::set<ObjectPointer >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
 			{
 				i2 = itr++;
 				// don't add objects that are not units and that are dead
@@ -804,7 +804,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 					// decrement counter
 					--grp->m_prayerOfMendingCount;
 					
-					vector<shared_ptr<Player> > possible_targets;
+					vector<PlayerPointer  > possible_targets;
 					SubGroup *sg;
 					grp->Lock();
 					for(uint32 sgid = 0; sgid < grp->GetSubGroupCount(); ++sgid)
@@ -825,7 +825,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 					// pick a new target
 					if( possible_targets.size() > 0 )
 					{
-						shared_ptr<Player>tgt;
+						PlayerPointer tgt;
 						if( possible_targets.size() > 1 )
 							tgt = possible_targets[RandomUInt(possible_targets.size()-1)];
 						else
@@ -2395,7 +2395,7 @@ void Spell::SummonCreature(uint32 i) // Summon
 
 	if(m_spellInfo->EffectMiscValue[i] == 510)	// Water Elemental
 	{
-		shared_ptr<Pet> summon = objmgr.CreatePet();
+		PetPointer summon = objmgr.CreatePet();
 		summon->SetInstanceID(m_caster->GetInstanceID());
 		summon->CreateAsSummon(m_spellInfo->EffectMiscValue[i], ci, NULLCREATURE, p_caster, m_spellInfo, 1, 45000);
 		summon->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
@@ -2688,7 +2688,7 @@ void Spell::SpellEffectTriggerMissile(uint32 i) // Trigger Missile
 
 	float spellRadius = GetRadius(i);
 
-	for(std::set<shared_ptr<Object> >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for(std::set<ObjectPointer >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if(!((*itr)->IsUnit()) || !(TO_UNIT(*itr))->isAlive())
 			continue;
@@ -3245,7 +3245,7 @@ void Spell::SpellEffectLearnPetSpell(uint32 i)
 
 	if(unitTarget && unitTarget->IsPet() && p_caster)
 	{
-		shared_ptr<Pet> pPet = TO_PET( unitTarget );
+		PetPointer pPet = TO_PET( unitTarget );
 		if(pPet->IsSummon())
 			p_caster->AddSummonSpell(unitTarget->GetEntry(), m_spellInfo->EffectTriggerSpell[i]);
 		
@@ -3314,7 +3314,7 @@ void Spell::SpellEffectDualWield(uint32 i)
 	if(m_caster->GetTypeId() != TYPEID_PLAYER) 
 		return;
 
-	shared_ptr<Player>pPlayer = TO_PLAYER( m_caster );
+	PlayerPointer pPlayer = TO_PLAYER( m_caster );
 
 	if( !pPlayer->_HasSkillLine( SKILL_DUAL_WIELD ) )
 		 pPlayer->_AddSkillLine( SKILL_DUAL_WIELD, 1, 1 );
@@ -3390,7 +3390,7 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 
 void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 {
-	shared_ptr<Player>target;
+	PlayerPointer target;
 	if(m_caster->GetTypeId() != TYPEID_PLAYER)
 	{
 		// Check targets
@@ -3734,7 +3734,7 @@ void Spell::SpellEffectTameCreature(uint32 i)
 	}
 	// Remove target
 	tame->GetAIInterface()->HandleEvent(EVENT_LEAVECOMBAT, p_caster, 0);
-	shared_ptr<Pet> pPet = objmgr.CreatePet();
+	PetPointer pPet = objmgr.CreatePet();
 	pPet->SetInstanceID(p_caster->GetInstanceID());
 	pPet->CreateAsSummon(tame->GetEntry(), tame->GetCreatureName(), tame, TO_UNIT(p_caster), NULL, 2, 0);
 	//tame->SafeDelete();
@@ -3781,7 +3781,7 @@ void Spell::SpellEffectSummonPet(uint32 i) //summon - pet
 		return;
 	
 	// remove old pet
-	shared_ptr<Pet> old = TO_PLAYER(m_caster)->GetSummon();
+	PetPointer old = TO_PLAYER(m_caster)->GetSummon();
 	if(old)
 		old->Dismiss(false);		
 	
@@ -3797,7 +3797,7 @@ void Spell::SpellEffectSummonPet(uint32 i) //summon - pet
 		p_caster->RemoveAura(18792);
 		p_caster->RemoveAura(35701);
 
-		shared_ptr<Pet> summon = objmgr.CreatePet();
+		PetPointer summon = objmgr.CreatePet();
 		summon->SetInstanceID(m_caster->GetInstanceID());
 		summon->CreateAsSummon(m_spellInfo->EffectMiscValue[i], ci, NULLCREATURE, u_caster, m_spellInfo, 1, 0);
 	}
@@ -5308,7 +5308,7 @@ void Spell::SpellEffectFeedPet(uint32 i)  // Feed Pet
 	if(!itemTarget || !p_caster)
 		return;
 	
-	shared_ptr<Pet> pPet = p_caster->GetSummon();
+	PetPointer pPet = p_caster->GetSummon();
 	if(!pPet)
 		return;
 
@@ -5455,7 +5455,7 @@ void Spell::SpellEffectSummonDeadPet(uint32 i)
 {//this is pet resurrect
 	if(!p_caster) 
 		return;
-	shared_ptr<Pet> pPet = p_caster->GetSummon();
+	PetPointer pPet = p_caster->GetSummon();
 	if(pPet)
 	{
 		pPet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
@@ -5517,7 +5517,7 @@ void Spell::SpellEffectSummonDemonOld(uint32 i)
 {
 	if(!p_caster/* ||  p_caster->getClass() != WARLOCK */) //summoning a demon shouldn't be warlock only, see spells 25005, 24934, 24810 etc etc
 		return;
-	shared_ptr<Pet> pPet = p_caster->GetSummon();
+	PetPointer pPet = p_caster->GetSummon();
 	if(pPet)
 	{
 		pPet->Dismiss(false);
@@ -6028,7 +6028,7 @@ void Spell::SpellEffectDismissPet(uint32 i)
 	if(!p_caster)
 		return;
 
-	shared_ptr<Pet> pPet = p_caster->GetSummon();
+	PetPointer pPet = p_caster->GetSummon();
 	if(!pPet)
 		return;
 	pPet->Remove(true, true, true);

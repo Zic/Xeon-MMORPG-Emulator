@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -79,10 +79,10 @@ public:
 
 	// sends the current world states to a new player on the map.
 	// this should also be called upon changing zone.
-	void SendWorldStates(shared_ptr<Player>pPlayer);
+	void SendWorldStates(PlayerPointer pPlayer);
 
 	// clears world states for a player leaving the map.
-	void ClearWorldStates(shared_ptr<Player>pPlayer);
+	void ClearWorldStates(PlayerPointer pPlayer);
 
 	// loads a setting from the database.
 	static const string GetPersistantSetting(const char *szKeyName, const char *szValue);

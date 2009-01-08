@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -61,7 +61,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 		}
 		return;
 	}
-	shared_ptr<Pet> pPet = _player->GetMapMgr()->GetPet(GET_LOWGUID_PART(petGuid));
+	PetPointer pPet = _player->GetMapMgr()->GetPet(GET_LOWGUID_PART(petGuid));
 	if(!pPet || !pPet->isAlive())
 		return;
 
@@ -239,7 +239,7 @@ void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)
 	uint64 petGuid = 0;
 
 	recv_data >> reqNumber >> petGuid;
-	shared_ptr<Pet> pPet = _player->GetMapMgr()->GetPet(GET_LOWGUID_PART(petGuid));
+	PetPointer pPet = _player->GetMapMgr()->GetPet(GET_LOWGUID_PART(petGuid));
 	if(!pPet) return;
 
 	WorldPacket data(8 + pPet->GetName().size());
@@ -256,7 +256,7 @@ void WorldSession::HandleStablePet(WorldPacket & recv_data)
 	if(!_player->IsInWorld()) return;
 
 	// remove pet from world and association with player
-	shared_ptr<Pet> pPet = _player->GetSummon();
+	PetPointer pPet = _player->GetSummon();
 	if(pPet && pPet->GetUInt32Value(UNIT_CREATED_BY_SPELL) != 0) 
 		return;
 	
@@ -308,7 +308,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recv_data)
 		DEBUG_LOG("PET SYSTEM: Player "I64FMT" tried to unstable non-existant pet %d", _player->GetGUID(), petnumber);
 		return;
 	}
-	shared_ptr<Pet> pPet = _player->GetSummon();
+	PetPointer pPet = _player->GetSummon();
 	if(pPet && pPet->GetUInt32Value(UNIT_CREATED_BY_SPELL) != 0) return;
 
 	//stable current pet
@@ -397,7 +397,7 @@ void WorldSession::HandlePetSetActionOpcode(WorldPacket& recv_data)
 	if(!_player->GetSummon())
 		return;
 
-	shared_ptr<Pet> pet = _player->GetSummon();
+	PetPointer pet = _player->GetSummon();
 	SpellEntry * spe = dbcSpell.LookupEntryForced( spell );
 	if( spe == NULL )
 		return;
@@ -424,7 +424,7 @@ void WorldSession::HandlePetRename(WorldPacket & recv_data)
 		return;
 	}
 
-	shared_ptr<Pet> pet = _player->GetSummon();
+	PetPointer pet = _player->GetSummon();
 	pet->Rename(name);
 
 	// Disable pet rename.
@@ -434,7 +434,7 @@ void WorldSession::HandlePetRename(WorldPacket & recv_data)
 void WorldSession::HandlePetAbandon(WorldPacket & recv_data)
 {
 	if(!_player->IsInWorld()) return;
-	shared_ptr<Pet> pet = _player->GetSummon();
+	PetPointer pet = _player->GetSummon();
 	if(!pet) return;
 
 	pet->Dismiss(false);
@@ -447,7 +447,7 @@ void WorldSession::HandlePetUnlearn(WorldPacket & recv_data)
 	uint64 guid;
 	recv_data >> guid;
 
-	shared_ptr<Pet> pPet = _player->GetSummon();
+	PetPointer pPet = _player->GetSummon();
 	if( pPet == NULL || pPet->GetGUID() != guid )
 	{
 		sChatHandler.SystemMessage(this, "That pet is not your current pet, or you do not have a pet.");

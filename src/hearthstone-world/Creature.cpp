@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -520,7 +520,7 @@ void Creature::EnslaveExpire()
 {
 	
 	m_enslaveCount++;
-	shared_ptr<Player>caster = objmgr.GetPlayer(GetUInt32Value(UNIT_FIELD_CHARMEDBY));
+	PlayerPointer caster = objmgr.GetPlayer(GetUInt32Value(UNIT_FIELD_CHARMEDBY));
 	if(caster)
 	{
 		caster->SetUInt64Value(UNIT_FIELD_CHARM, 0);

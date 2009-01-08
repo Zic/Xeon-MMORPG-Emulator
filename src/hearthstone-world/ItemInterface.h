@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -48,7 +48,7 @@ class SERVER_DECL ItemInterface
 {
 private:
 	SlotResult result;
-	shared_ptr<Player>m_pOwner;
+	PlayerPointer m_pOwner;
 	ItemPointer m_pItems[MAX_INVENTORY_SLOT];
 	ItemPointer m_pBuyBack[MAX_BUYBACK_SLOT];
 
@@ -59,7 +59,7 @@ public:
 	ItemInterface( PlayerPointer pPlayer );
 	~ItemInterface();
 
-	shared_ptr<Player>GetOwner() { return m_pOwner; }
+	PlayerPointer GetOwner() { return m_pOwner; }
 	bool IsBagSlot(int8 slot);
 
 	uint32 m_CreateForPlayer(ByteBuffer *data);

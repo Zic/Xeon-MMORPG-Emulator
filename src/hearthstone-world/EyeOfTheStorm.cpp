@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -611,13 +611,13 @@ void EyeOfTheStorm::UpdateCPs()
 	//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 	//   doing lookups of objects that have already been updated
 
-	set<shared_ptr<Player> >::iterator itr;
-	set<shared_ptr<Player> >::iterator itrend;
+	set<PlayerPointer  >::iterator itr;
+	set<PlayerPointer  >::iterator itrend;
 	map<uint32,uint32>::iterator it2, it3;
 	uint32 timeptr = (uint32)UNIXTIME;
 	bool in_range;
 	bool is_valid;
-	shared_ptr<Player>plr;
+	PlayerPointer plr;
 	uint32 i;
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
@@ -867,7 +867,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 	{
 		m_resourceRewards[team] += 330;
 
-		for(set<shared_ptr<Player> >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
+		for(set<PlayerPointer  >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
 		{
 			PlayerPointer plr = (*itx);
 			if(!plr) continue;
@@ -893,7 +893,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				(*itr)->Root();
 
@@ -1020,7 +1020,7 @@ void EyeOfTheStorm::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
@@ -1048,7 +1048,7 @@ void EyeOfTheStorm::OnStart()
 	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
 }
 
-void EyeOfTheStorm::HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse)
+void EyeOfTheStorm::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

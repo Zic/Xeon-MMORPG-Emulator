@@ -2,7 +2,7 @@
  *
  * Spell System
  * Copyright (C) 2007 Antrix Team
- * Copyright (C) 2008 Hearthstone <http://www.hearthstone-project.com/>
+ * Copyright (C) 2008 - 2009 Hearthstone <http://www.hearthstone-project.com/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

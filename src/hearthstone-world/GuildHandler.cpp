@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -60,7 +60,7 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 	std::string inviteeName;
 	recv_data >> inviteeName;
 
-	shared_ptr<Player>plyr = objmgr.GetPlayer( inviteeName.c_str() , false);
+	PlayerPointer plyr = objmgr.GetPlayer( inviteeName.c_str() , false);
 	Guild *pGuild = _player->m_playerInfo->guild;
 	
 	if(!plyr)
@@ -113,12 +113,12 @@ void WorldSession::HandleInviteToGuild(WorldPacket & recv_data)
 
 void WorldSession::HandleGuildAccept(WorldPacket & recv_data)
 {
-	shared_ptr<Player>plyr = GetPlayer();
+	PlayerPointer plyr = GetPlayer();
 
 	if(!plyr)
 		return;
 
-	shared_ptr<Player>inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
+	PlayerPointer inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
 	plyr->UnSetGuildInvitersGuid();
 
 	if(!inviter)
@@ -144,12 +144,12 @@ void WorldSession::HandleGuildDecline(WorldPacket & recv_data)
 {
 	WorldPacket data;
 
-	shared_ptr<Player>plyr = GetPlayer();
+	PlayerPointer plyr = GetPlayer();
 
 	if(!plyr)
 		return;
 
-	shared_ptr<Player>inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
+	PlayerPointer inviter = objmgr.GetPlayer( plyr->GetGuildInvitersGuid() );
 	plyr->UnSetGuildInvitersGuid(); 
 
 	if(!inviter)
@@ -1509,7 +1509,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			CharacterDatabase.Execute("REPLACE INTO guild_bankitems VALUES(%u, %u, %u, %u)", 
 				pGuild->GetGuildId(), (uint32)pTab->iTabId, (uint32)dest_bankslot, pSourceItem->GetLowGUID());
 
-			/* remove the item's association with the shared_ptr<Player>/
+			/* remove the item's association with the PlayerPointer /
 			pSourceItem->SetOwner(NULL);
 			pSourceItem->SetUInt32Value(ITEM_FIELD_OWNER, 0);
 			pSourceItem->SaveToDB(0, 0, true, NULL);

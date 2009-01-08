@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -104,7 +104,7 @@ bool ChatHandler::HandleGMOffCommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -116,7 +116,7 @@ bool ChatHandler::HandleGPSCommand(const char* args, WorldSession *m_session)
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	AreaTable * at = dbcArea.LookupEntry(obj->GetMapMgr()->GetAreaID(obj->GetPositionX(), obj->GetPositionY()));
 	if(!at) return true;
@@ -145,7 +145,7 @@ bool ChatHandler::HandleKickCommand(const char* args, WorldSession *m_session)
 		RedSystemMessage(m_session, "No name specified.");
 		return true;
 	}
-	shared_ptr<Player>chr = objmgr.GetPlayer((const char*)pname, false);
+	PlayerPointer chr = objmgr.GetPlayer((const char*)pname, false);
 	if (chr)
 	{
 		char *reason = strtok(NULL, "\n");
@@ -197,7 +197,7 @@ bool ChatHandler::HandleAddInvItemCommand(const char *args, WorldSession *m_sess
 	if(sscanf(args, "%u %u %d", &itemid, &count, &randomprop) < 1)
 		return false;
 
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	if (chr == NULL) return true;
 	
 	ItemPrototype* it = ItemPrototypeStorage.LookupEntry(itemid);
@@ -259,7 +259,7 @@ bool ChatHandler::HandleSummonCommand(const char* args, WorldSession *m_session)
 
 	sGMLog.writefromsession(m_session, "summoned %s", args);
 
-	shared_ptr<Player>chr = objmgr.GetPlayer(args, false);
+	PlayerPointer chr = objmgr.GetPlayer(args, false);
 	if (chr)
 	{
 		// send message to user
@@ -319,7 +319,7 @@ bool ChatHandler::HandleAppearCommand(const char* args, WorldSession *m_session)
 	if(!*args)
 		return false;
 
-	shared_ptr<Player>chr = objmgr.GetPlayer(args, false);
+	PlayerPointer chr = objmgr.GetPlayer(args, false);
 	if (chr)
 	{
 		char buf[256];
@@ -363,7 +363,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args, WorldSession *m_sessi
 
 	int flag = atoi((char*)args);
 
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	if (chr == NULL) return true;
 	
 	char buf[256];
@@ -422,7 +422,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args, WorldSession *m_ses
 		return true;
 	}
 
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	if( chr == NULL )
 		return true;
 	
@@ -466,7 +466,7 @@ bool ChatHandler::HandleLearnSkillCommand(const char *args, WorldSession *m_sess
 		return false;
 	}
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return false;
 	if(plr->GetTypeId() != TYPEID_PLAYER) return false;
 	sGMLog.writefromsession(m_session, "used add skill of %u %u %u on %s", skill, min, max, plr->GetName());
@@ -497,7 +497,7 @@ bool ChatHandler::HandleModifySkillCommand(const char *args, WorldSession *m_ses
 	
 	BlueSystemMessage(m_session, "Modifying skill line %d. Advancing %d times.", skill, cnt);
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) plr = m_session->GetPlayer();
 	if(!plr) return false;
 	sGMLog.writefromsession(m_session, "used modify skill of %u %u on %s", skill, cnt,plr->GetName());
@@ -523,7 +523,7 @@ bool ChatHandler::HandleGetSkillLevelCommand(const char *args, WorldSession *m_s
 	else 
 		skill = atol(pSkill);
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return false;
 
 	if(skill > SkillNameManager->maxskill)
@@ -556,7 +556,7 @@ bool ChatHandler::HandleGetSkillLevelCommand(const char *args, WorldSession *m_s
 
 bool ChatHandler::HandleGetSkillsInfoCommand(const char *args, WorldSession *m_session)
 {
-    shared_ptr<Player>plr = getSelectedChar(m_session, true);
+    PlayerPointer plr = getSelectedChar(m_session, true);
     if(!plr) return false;
     
     uint32 nobonus = 0;
@@ -598,7 +598,7 @@ bool ChatHandler::HandleRemoveSkillCommand(const char *args, WorldSession *m_ses
 		skill = atol(pSkill);
 	BlueSystemMessage(m_session, "Removing skill line %d", skill);
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return true;
 	sGMLog.writefromsession(m_session, "used remove skill of %u on %s", skill, plr->GetName());
 	plr->_RemoveSkillLine(skill);
@@ -624,7 +624,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args, WorldSession *m_sess
 	if ( *args == 0 )
 		return false;
 
-	shared_ptr<Player>chr = getSelectedChar( m_session, true );
+	PlayerPointer chr = getSelectedChar( m_session, true );
 	if( chr == NULL ) return true;
 
 	int32 total   = atoi( (char*)args );
@@ -754,7 +754,7 @@ bool ChatHandler::HandleNpcSpawnLinkCommand(const char* args, WorldSession *m_se
 
 bool ChatHandler::HandleGuildSetLeaderCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = getSelectedChar(m_session);
+	PlayerPointer plr = getSelectedChar(m_session);
 	if( plr == NULL )
 		return true;
 

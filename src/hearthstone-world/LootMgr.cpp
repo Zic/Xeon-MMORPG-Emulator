@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -858,7 +858,7 @@ void LootRoll::Finalize()
 	// delete this; so many deletes. overkill much?
 }
 
-void LootRoll::PlayerRolled(shared_ptr<Player>player, uint8 choice)
+void LootRoll::PlayerRolled(PlayerPointer player, uint8 choice)
 {
 	if(m_NeedRolls.find(player->GetLowGUID()) != m_NeedRolls.end() || m_GreedRolls.find(player->GetLowGUID()) != m_GreedRolls.end())
 		return; // dont allow cheaters

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -237,7 +237,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 				data = sChatHandler.FillMessageData( CHAT_MSG_SAY, lang, msg.c_str(), _player->GetGUID(), _player->bGMTagOn ? 4 : 0 );
 				SendChatPacket(data, 1, lang, this);
-				for(set<shared_ptr<Player> >::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
+				for(set<PlayerPointer  >::iterator itr = _player->m_inRangePlayers.begin(); itr != _player->m_inRangePlayers.end(); ++itr)
 				{
 					(*itr)->GetSession()->SendChatPacket(data, 1, lang, this);
 				}
@@ -329,7 +329,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 		} break;
 	case CHAT_MSG_WHISPER:
 		{
-			shared_ptr<Player>player = objmgr.GetPlayer(misc.c_str(), false);
+			PlayerPointer player = objmgr.GetPlayer(misc.c_str(), false);
 			if(!player)
 			{
 				data = new WorldPacket(SMSG_CHAT_PLAYER_NOT_FOUND, misc.length() + 1);

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -91,7 +91,7 @@ public:
 	LocationVector GetStartingCoords(uint32 Team);
 	void DropFlag(PlayerPointer plr);
 
-	static shared_ptr<CBattleground> Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<ArathiBasin>(new ArathiBasin(m, i, l, t)); }
+	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<ArathiBasin>(new ArathiBasin(m, i, l, t)); }
 
 	const char * GetName() { return "Arathi Basin"; }
 	void OnStart();
@@ -106,7 +106,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 };

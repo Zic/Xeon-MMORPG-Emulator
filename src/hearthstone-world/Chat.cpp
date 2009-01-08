@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -812,7 +812,7 @@ WorldPacket* ChatHandler::FillSystemMessageData(const char *message) const
 PlayerPointer ChatHandler::getSelectedChar(WorldSession *m_session, bool showerror)
 {
 	uint64 guid;
-	shared_ptr<Player>chr;
+	PlayerPointer chr;
 	
 	guid = m_session->GetPlayer()->GetSelection();
 	
@@ -959,7 +959,7 @@ void ChatHandler::BlueSystemMessageToPlr(PlayerPointer plr, const char *message,
 	BlueSystemMessage(plr->GetSession(), (const char*)msg1);
 }
 
-void ChatHandler::SystemMessageToPlr(shared_ptr<Player>plr, const char* message, ...)
+void ChatHandler::SystemMessageToPlr(PlayerPointer plr, const char* message, ...)
 {
 	if( !message || !plr->GetSession() ) return;
 	va_list ap;
@@ -1007,7 +1007,7 @@ bool ChatHandler::CmdSetValueField(WorldSession *m_session, uint32 field, uint32
 		}
 	}
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, false);
+	PlayerPointer plr = getSelectedChar(m_session, false);
 	if(plr)
 	{  
 		sGMLog.writefromsession(m_session, "used modify field value: %s, %u on %s", fieldname, av, plr->GetName());
@@ -1122,7 +1122,7 @@ bool ChatHandler::CmdSetFloatField(WorldSession *m_session, uint32 field, uint32
 		}
 	}
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, false);
+	PlayerPointer plr = getSelectedChar(m_session, false);
 	if(plr)
 	{  
 		sGMLog.writefromsession(m_session, "used modify field value: %s, %f on %s", fieldname, av, plr->GetName());

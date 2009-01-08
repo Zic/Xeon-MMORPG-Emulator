@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1247,7 +1247,7 @@ HEARTHSTONE_INLINE bool IsInrange(ObjectPointer o1,ObjectPointer o2,float square
         o2->GetPositionX(),o2->GetPositionY(),o2->GetPositionZ(),square_r);
 }
 
-HEARTHSTONE_INLINE bool TargetTypeCheck(shared_ptr<Object>obj,uint32 ReqCreatureTypeMask)
+HEARTHSTONE_INLINE bool TargetTypeCheck(ObjectPointerobj,uint32 ReqCreatureTypeMask)
 {
 	if( !ReqCreatureTypeMask )
 		return true;
@@ -1810,8 +1810,8 @@ public:
     shared_ptr<GameObject>		g_caster;
     shared_ptr<Unit>			u_caster;
     shared_ptr<Item>			i_caster;
-    shared_ptr<Player>			p_caster;
-    shared_ptr<Object>			m_caster;
+    PlayerPointer 			p_caster;
+    ObjectPointer			m_caster;
 
     // 15007 = resurecting sickness
 	

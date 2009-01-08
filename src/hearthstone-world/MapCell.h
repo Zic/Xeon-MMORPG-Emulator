@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -36,15 +36,15 @@ public:
 	MapCell();
 	~MapCell();
 
-	typedef std::set<shared_ptr<Object> > ObjectSet;
+	typedef std::set<ObjectPointer > ObjectSet;
 
 	//Init
 	void Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr);
 
 	//Object Managing
-	void AddObject(shared_ptr<Object>obj); 
-	void RemoveObject(shared_ptr<Object>obj);
-	bool HasObject(shared_ptr<Object>obj) { return (_objects.find(obj) != _objects.end()); }
+	void AddObject(ObjectPointerobj); 
+	void RemoveObject(ObjectPointerobj);
+	bool HasObject(ObjectPointerobj) { return (_objects.find(obj) != _objects.end()); }
 	bool HasPlayers() { return ((_playerCount > 0) ? true : false); }
 	HEARTHSTONE_INLINE size_t GetObjectCount() { return _objects.size(); }
 	void RemoveObjects();

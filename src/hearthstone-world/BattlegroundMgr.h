@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -131,7 +131,7 @@ static inline uint32 GetLevelGrouping(uint32 level)
 class CBattlegroundManager : public Singleton<CBattlegroundManager>, public EventableObject
 {
 	/* Battleground Instance Map */
-	map<uint32, shared_ptr<CBattleground> > m_instances[BATTLEGROUND_NUM_TYPES];
+	map<uint32, BattlegroundPointer > m_instances[BATTLEGROUND_NUM_TYPES];
 	Mutex m_instanceLock;
 
 	/* Max Id */
@@ -172,13 +172,13 @@ public:
 	void RemoveGroupFromQueues(Group * grp);
 
 	/* Create a battleground instance of type x */
-	shared_ptr<CBattleground> CreateInstance(uint32 Type, uint32 LevelGroup);
+	BattlegroundPointer CreateInstance(uint32 Type, uint32 LevelGroup);
 
 	/* Can we create a new instance of type x level group y? (NO LOCK!) */
 	bool CanCreateInstance(uint32 Type, uint32 LevelGroup);
 
 	/* Deletes a battleground (called from MapMgr) */
-	void DeleteBattleground(shared_ptr<CBattleground> bg);
+	void DeleteBattleground(BattlegroundPointer bg);
 
 	/* Build SMSG_BATTLEFIELD_STATUS */
 	//void SendBattlefieldStatus(PlayerPointer plr, uint32 Status, uint32 Type, uint32 InstanceID, uint32 Time, uint32 MapId, uint8 RatedMatch);
@@ -190,13 +190,13 @@ public:
 	int CreateArenaType(int type, Group * group1, Group * group2);
 
 	/* Add player to bg team */
-	void AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j, int Team);
+	void AddPlayerToBgTeam(BattlegroundPointer bg, deque<PlayerPointer  > *playerVec, uint32 i, uint32 j, int Team);
 
 	/* Add player to bg */
-	void AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j);
+	void AddPlayerToBg(BattlegroundPointer bg, deque<PlayerPointer  > *playerVec, uint32 i, uint32 j);
 
 	/* Add a group to an arena */
-	void AddGroupToArena(shared_ptr<CBattleground> bg, Group * group, int nteam);
+	void AddGroupToArena(BattlegroundPointer bg, Group * group, int nteam);
 
 	void SendBattlegroundQueueStatus(PlayerPointer plr, uint32 queueSlot);
 
@@ -227,7 +227,7 @@ public:
 	friend class AVNode;
 
 	/* Team->Player Map */
-	set<shared_ptr<Player> > m_players[2];
+	set<PlayerPointer  > m_players[2];
 	void Lock() { m_mainLock.Acquire(); }
 	void Unlock() { m_mainLock.Release(); }
 	HEARTHSTONE_INLINE bool IsArena() { return (m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5); }
@@ -290,7 +290,7 @@ public:
 	virtual void HookOnShadowSight() = 0;
 
 	/* Used to generate loot for players (AV) */
-	virtual void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse) = 0;
+	virtual void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse) = 0;
 	virtual bool SupportsPlayerLoot() = 0;
 
 	/* Retreival Functions */
@@ -331,7 +331,7 @@ public:
 	/* Are we full? */
 	bool HasFreeSlots(uint32 Team) {m_mainLock.Acquire(); bool res = ((m_players[Team].size() + m_pendPlayers[Team].size()) < m_playerCountPerTeam); m_mainLock.Release(); return res; }
 
-	/* Add shared_ptr<Player>*/
+	/* Add PlayerPointer */
 	void AddPlayer(PlayerPointer plr, uint32 team);
 	virtual void OnAddPlayer(PlayerPointer plr) = 0;
 
@@ -339,11 +339,11 @@ public:
 	void RemovePlayer(PlayerPointer plr, bool logout);
 	virtual void OnRemovePlayer(PlayerPointer plr) = 0;
 
-	/* Port shared_ptr<Player>*/
+	/* Port PlayerPointer */
 	void PortPlayer(PlayerPointer plr, bool skip_teleport = false);
 	virtual void OnCreate() = 0;
 
-	/* Remove pending shared_ptr<Player>*/
+	/* Remove pending PlayerPointer */
 	void RemovePendingPlayer(PlayerPointer plr);
 
 	/* Gets the number of free slots */
@@ -389,7 +389,7 @@ public:
 	void BuildPvPUpdateDataPacket(WorldPacket * data);
 	virtual uint8 Rated() { return 0; }
 	void OnPlayerPushed(PlayerPointer plr);
-	void QueueAtNearestSpiritGuide(shared_ptr<Player>plr, CreaturePointer old);
+	void QueueAtNearestSpiritGuide(PlayerPointer plr, CreaturePointer old);
 	void GiveHonorToTeam(uint32 team, uint32 amt);
 
 	virtual void SetIsWeekend(bool isweekend) {}

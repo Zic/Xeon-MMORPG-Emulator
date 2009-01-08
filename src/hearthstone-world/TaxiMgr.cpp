@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -150,7 +150,7 @@ TaxiPathNode* TaxiPath::GetPathNode(uint32 i)
 		return m_pathNodes.find(i)->second;
 }
 
-void TaxiPath::SendMoveForTime(shared_ptr<Player>riding, shared_ptr<Player>to, uint32 time)
+void TaxiPath::SendMoveForTime(PlayerPointer riding, PlayerPointer to, uint32 time)
 {
 	if (!time)
 		return;

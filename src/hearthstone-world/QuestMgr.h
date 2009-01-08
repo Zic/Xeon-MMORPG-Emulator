@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -53,37 +53,37 @@ public:
 	void BuildOfferReward(WorldPacket* data,Quest* qst, ObjectPointer qst_giver, uint32 menutype, uint32 language, PlayerPointer plr);
 	void BuildQuestDetails(WorldPacket* data, Quest* qst, ObjectPointer qst_giver, uint32 menutype, uint32 language, PlayerPointer plr);	
 	void BuildRequestItems(WorldPacket* data, Quest* qst, ObjectPointer qst_giver, uint32 status, uint32 language);
-	void BuildQuestComplete(shared_ptr<Player>, Quest* qst);
+	void BuildQuestComplete(PlayerPointer , Quest* qst);
 	void BuildQuestList(WorldPacket* data, ObjectPointer qst_giver, PlayerPointer plr, uint32 language);
-	bool OnActivateQuestGiver(shared_ptr<Object>qst_giver, shared_ptr<Player>plr);
-    bool isRepeatableQuestFinished(shared_ptr<Player>plr, Quest *qst);
+	bool OnActivateQuestGiver(ObjectPointerqst_giver, PlayerPointer plr);
+    bool isRepeatableQuestFinished(PlayerPointer plr, Quest *qst);
 
 	void SendQuestUpdateAddKill(PlayerPointer plr, uint32 questid, uint32 entry, uint32 count, uint32 tcount, uint64 guid);
 	void BuildQuestUpdateAddItem(WorldPacket* data, uint32 itemid, uint32 count);
 	void BuildQuestUpdateComplete(WorldPacket* data, Quest* qst);
 	void BuildQuestFailed(WorldPacket* data, uint32 questid);
-	void SendPushToPartyResponse(shared_ptr<Player>plr, PlayerPointer pTarget, uint32 response);
+	void SendPushToPartyResponse(PlayerPointer plr, PlayerPointer pTarget, uint32 response);
 
-	bool OnGameObjectActivate(shared_ptr<Player>plr, shared_ptr<GameObject>go);
+	bool OnGameObjectActivate(PlayerPointer plr, shared_ptr<GameObject>go);
 	void OnPlayerKill(PlayerPointer plr, CreaturePointer victim);
 	void OnPlayerCast(PlayerPointer plr, uint32 spellid, uint64& victimguid);
 	void OnPlayerItemPickup(PlayerPointer plr, ItemPointer item);
 	void OnPlayerExploreArea(PlayerPointer plr, uint32 AreaID);
 	void OnPlayerSlain(PlayerPointer plr, PlayerPointer victim);
-	void OnQuestAccepted(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver);
-	void OnQuestFinished(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver, uint32 reward_slot);
+	void OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver);
+	void OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver, uint32 reward_slot);
 
-	void GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver);
+	void GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver);
 	void GiveQuestTitleReward(PlayerPointer plr, Quest* qst);
 
-	uint32 GenerateQuestXP(shared_ptr<Player>pl, Quest *qst);
-	uint32 GenerateRewardMoney(shared_ptr<Player>pl, Quest *qst);
+	uint32 GenerateQuestXP(PlayerPointer pl, Quest *qst);
+	uint32 GenerateRewardMoney(PlayerPointer pl, Quest *qst);
 
-	void SendQuestInvalid( INVALID_REASON reason, shared_ptr<Player>plyr);
-	void SendQuestFailed(FAILED_REASON failed, Quest *qst, shared_ptr<Player>plyr);
-	void SendQuestUpdateFailed(Quest *pQuest, shared_ptr<Player>plyr);
-	void SendQuestUpdateFailedTimer(Quest *pQuest, shared_ptr<Player>plyr);
-	void SendQuestLogFull(shared_ptr<Player>plyr);
+	void SendQuestInvalid( INVALID_REASON reason, PlayerPointer plyr);
+	void SendQuestFailed(FAILED_REASON failed, Quest *qst, PlayerPointer plyr);
+	void SendQuestUpdateFailed(Quest *pQuest, PlayerPointer plyr);
+	void SendQuestUpdateFailedTimer(Quest *pQuest, PlayerPointer plyr);
+	void SendQuestLogFull(PlayerPointer plyr);
 	
 	void LoadNPCQuests(Creature *qst_giver);
 	void LoadGOQuests(shared_ptr<GameObject>go);
@@ -94,7 +94,7 @@ public:
 	void SetGameObjectLootQuest(uint32 GO_Entry, uint32 Item_Entry);
 	HEARTHSTONE_INLINE bool IsQuestRepeatable(Quest *qst) { return (qst->is_repeatable!=0 ? true : false); }
 
-	bool CanStoreReward(shared_ptr<Player>plyr, Quest *qst, uint32 reward_slot);
+	bool CanStoreReward(PlayerPointer plyr, Quest *qst, uint32 reward_slot);
 
 	HEARTHSTONE_INLINE int32 QuestHasMob(Quest* qst, uint32 mob)
 	{

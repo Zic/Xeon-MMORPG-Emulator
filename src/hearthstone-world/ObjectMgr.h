@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -286,7 +286,7 @@ public:
 };
 
 typedef std::map<uint32, std::list<SpellEntry*>* >                  OverrideIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player> >                     PlayerStorageMap;
+typedef HM_NAMESPACE::hash_map<uint32, PlayerPointer  >                     PlayerStorageMap;
 typedef std::list<GM_Ticket*>                                       GmTicketList;
 
 #ifndef WIN32
@@ -380,7 +380,7 @@ public:
 	ItemPointer LoadItem(uint64 guid);
   
 	// Groups
-	Group * GetGroupByLeader(shared_ptr<Player>pPlayer);
+	Group * GetGroupByLeader(PlayerPointer pPlayer);
 	Group * GetGroupById(uint32 id);
 	uint32 GenerateGroupId()
 	{
@@ -442,7 +442,7 @@ public:
 	void CorpseCollectorUnload();
 	void DespawnCorpse(uint64 Guid);
 	void CorpseAddEventDespawn(shared_ptr<Corpse>pCorpse);
-	void DelinkPlayerCorpses(shared_ptr<Player>pOwner);
+	void DelinkPlayerCorpses(PlayerPointer pOwner);
 	shared_ptr<Corpse> CreateCorpse();
 	void AddCorpse(shared_ptr<Corpse>);
 	void RemoveCorpse(shared_ptr<Corpse>);
@@ -466,7 +466,7 @@ public:
 
 	std::list<ItemPrototype*>* GetListForItemSet(uint32 setid);
 
-	shared_ptr<Pet> CreatePet();
+	PetPointer CreatePet();
 	uint32 m_hiPetGuid;
 	uint32 m_hiArenaTeamId;
 	uint32 GenerateArenaTeamId()
@@ -487,7 +487,7 @@ public:
 	uint32 m_hiPlayerGuid;
 	
 	void AddPlayer(PlayerPointer p);//add it to global storage
-	void RemovePlayer(shared_ptr<Player>p);
+	void RemovePlayer(PlayerPointer p);
 
 
 	// Serialization

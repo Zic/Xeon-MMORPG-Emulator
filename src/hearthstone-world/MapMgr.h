@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -56,11 +56,11 @@ enum ObjectActiveState
 	OBJECT_STATE_ACTIVE   = 2,
 };
 
-typedef std::set<shared_ptr<Object> > ObjectSet;
-typedef std::set<shared_ptr<Object> > UpdateQueue;
-typedef std::set<shared_ptr<Player> > PUpdateQueue;
-typedef std::set<shared_ptr<Player> > PlayerSet;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Object> > StorageMap;
+typedef std::set<ObjectPointer > ObjectSet;
+typedef std::set<ObjectPointer > UpdateQueue;
+typedef std::set<PlayerPointer  > PUpdateQueue;
+typedef std::set<PlayerPointer  > PlayerSet;
+typedef HM_NAMESPACE::hash_map<uint32, ObjectPointer > StorageMap;
 typedef set<uint64> CombatProgressMap;
 typedef set<CreaturePointer> CreatureSet;
 typedef set<shared_ptr<GameObject> > GameObjectSet;
@@ -84,7 +84,7 @@ public:
 
 	Mutex m_objectinsertlock;
 	ObjectSet m_objectinsertpool;
-	void AddObject(shared_ptr<Object>);
+	void AddObject(ObjectPointer);
 
 ////////////////////////////////////////////////////////
 // Local (mapmgr) storage/generation of GameObjects
@@ -142,9 +142,9 @@ public:
 //////////////////////////////////////////////////////////
 // Local (mapmgr) storage of pets
 ///////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Pet> > PetStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, PetPointer > PetStorageMap;
 	PetStorageMap m_PetStorage;
-	__inline shared_ptr<Pet> GetPet(uint32 guid)
+	__inline PetPointer GetPet(uint32 guid)
 	{
 		PetStorageMap::iterator itr = m_PetStorage.find(guid);
 		return (itr != m_PetStorage.end()) ? itr->second : NULLPET;
@@ -155,7 +155,7 @@ public:
 ////////////////////////////////
     
     // double typedef lolz// a compile breaker..
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Player> >                     PlayerStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, PlayerPointer  >                     PlayerStorageMap;
 	PlayerStorageMap m_PlayerStorage;
 	__inline PlayerPointer GetPlayer(uint32 guid)
 	{
@@ -190,14 +190,14 @@ public:
 	void Init();
 	void Destructor();
 
-	void PushObject(shared_ptr<Object>obj);
+	void PushObject(ObjectPointerobj);
 	void PushStaticObject(ObjectPointer obj);
-	void RemoveObject(shared_ptr<Object>obj, bool free_guid);
-	void ChangeObjectLocation(shared_ptr<Object>obj); // update inrange lists
+	void RemoveObject(ObjectPointerobj, bool free_guid);
+	void ChangeObjectLocation(ObjectPointerobj); // update inrange lists
 	void ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight);
 
 	//! Mark object as updated
-	void ObjectUpdated(shared_ptr<Object>obj);
+	void ObjectUpdated(ObjectPointerobj);
 	void UpdateCellActivity(uint32 x, uint32 y, int radius);
 
 	// Terrain Functions
@@ -277,10 +277,10 @@ private:
 	//! Objects that exist on map
  
 	uint32 _mapId;
-	set<shared_ptr<Object> > _mapWideStaticObjects;
+	set<ObjectPointer > _mapWideStaticObjects;
 
 	bool _CellActive(uint32 x, uint32 y);
-	void UpdateInRangeSet(shared_ptr<Object>obj, shared_ptr<Player>plObj, MapCell* cell);
+	void UpdateInRangeSet(ObjectPointerobj, PlayerPointer plObj, MapCell* cell);
 
 public:
 	// Distance a Player can "see" other objects and receive updates from them (!! ALREADY dist*dist !!)
@@ -312,7 +312,7 @@ public:
 	GameObjectSet activeGameObjects;
 	CreatureSet activeCreatures;
 	EventableObjectHolder eventHolder;
-	shared_ptr<CBattleground> m_battleground;
+	BattlegroundPointer m_battleground;
 	set<shared_ptr<Corpse> > m_corpses;
 	CreatureSqlIdMap _sqlids_creatures;
 	GameObjectSqlIdMap _sqlids_gameobjects;

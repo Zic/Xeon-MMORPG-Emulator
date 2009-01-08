@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -35,7 +35,7 @@ public:
 	~WeatherMgr();
 
 	void LoadFromDB();
-	void SendWeather(shared_ptr<Player>plr);
+	void SendWeather(PlayerPointer plr);
 
 private:
 	std::map<uint32, shared_ptr<WeatherInfo> > m_zoneWeathers;
@@ -51,7 +51,7 @@ public:
 	void BuildUp();
 	void Update();	
 	void SendUpdate();
-	void SendUpdate(shared_ptr<Player>plr);
+	void SendUpdate(PlayerPointer plr);
 
 protected:
 	void _GenerateWeather();

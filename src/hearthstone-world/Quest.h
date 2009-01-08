@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -256,7 +256,7 @@ private:
 	bool mDirty;
 
 	Quest *m_quest;
-	shared_ptr<Player>m_plr;
+	PlayerPointer m_plr;
 	
 	uint32 m_mobcount[4];
 	uint32 m_explored_areas[4];

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -746,7 +746,7 @@ typedef std::map<uint32, uint64>                    SoloSpells;
 typedef std::map<SpellEntry*, pair<uint32, uint32> >StrikeSpellMap;
 typedef std::map<uint32, OnHitSpell >               StrikeSpellDmgMap;
 typedef std::map<uint32, PlayerSkill>				SkillMap;
-typedef std::set<shared_ptr<Player>*>							ReferenceSet;
+typedef std::set<PlayerPointer *>							ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
 
 //#define OPTIMIZED_PLAYER_SAVING
@@ -1069,7 +1069,7 @@ public:
 	HEARTHSTONE_INLINE int          HasBeenInvited() { return m_GroupInviter != 0; }
 	HEARTHSTONE_INLINE Group*       GetGroup() { return m_playerInfo ? m_playerInfo->m_Group : NULL; }
 	HEARTHSTONE_INLINE int8		   GetSubGroup() { return m_playerInfo->subGroup; }
-    bool                IsGroupMember(shared_ptr<Player>plyr);
+    bool                IsGroupMember(PlayerPointer plyr);
 	HEARTHSTONE_INLINE bool         IsBanned()
 	{
 		if(m_banned)
@@ -1109,7 +1109,7 @@ public:
     /************************************************************************/
     /* Duel                                                                 */
     /************************************************************************/
-    void                RequestDuel(shared_ptr<Player>pTarget);
+    void                RequestDuel(PlayerPointer pTarget);
 	void                DuelBoundaryTest();
 	void                EndDuel(uint8 WinCondition);
 	void                DuelCountdown();
@@ -1136,8 +1136,8 @@ public:
     /************************************************************************/
     /* Pets                                                                 */
     /************************************************************************/
-	HEARTHSTONE_INLINE void			SetSummon(shared_ptr<Pet> pet) { m_Summon = pet; }
-	HEARTHSTONE_INLINE shared_ptr<Pet>			GetSummon(void) { return m_Summon; }
+	HEARTHSTONE_INLINE void			SetSummon(PetPointer pet) { m_Summon = pet; }
+	HEARTHSTONE_INLINE PetPointer			GetSummon(void) { return m_Summon; }
 	uint32						GeneratePetNumber(void);
 	void						RemovePlayerPet(uint32 pet_number);
 	HEARTHSTONE_INLINE void			AddPlayerPet(PlayerPet* pet, uint32 index) { m_Pets[index] = pet; }
@@ -1168,7 +1168,7 @@ public:
 				return itr->first;
 		return 0;
 	}
-	void						EventSummonPet(shared_ptr<Pet> new_pet); //if we charmed or simply summoned a pet, this function should get called
+	void						EventSummonPet(PetPointer new_pet); //if we charmed or simply summoned a pet, this function should get called
 	void						EventDismissPet(); //if pet/charm died or whatever happned we should call this function
 
     /************************************************************************/
@@ -1212,8 +1212,8 @@ public:
 	
 	// Talents
 	// These functions build a specific type of A9 packet
-	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
-	void DestroyForPlayer( shared_ptr<Player>target ) const;
+	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, PlayerPointer target );
+	void DestroyForPlayer( PlayerPointer target ) const;
 	void SetTalentHearthOfWildPCT(int value){hearth_of_wild_pct=value;}
 	void EventTalentHearthOfWildChange(bool apply);
 	
@@ -1239,7 +1239,7 @@ public:
 	void SpawnCorpseBones();
 	shared_ptr<Corpse>CreateCorpse();
 	void KillPlayer();
-	void ResurrectPlayer(shared_ptr<Player>pResurrector);
+	void ResurrectPlayer(PlayerPointer pResurrector);
 	void BuildPlayerRepop();
 	shared_ptr<Corpse>RepopRequestedPlayer();
 	
@@ -1417,8 +1417,8 @@ public:
 	uint32 HasBGQueueSlotOfType(uint32 type);
 
 	// Battlegrounds xD
-	shared_ptr<CBattleground> m_bg;
-	shared_ptr<CBattleground> m_pendingBattleground[3];
+	BattlegroundPointer m_bg;
+	BattlegroundPointer m_pendingBattleground[3];
 	uint32 m_bgSlot;
 	bool m_bgRatedQueue;
 	uint32 m_bgEntryPointMap;
@@ -1627,7 +1627,7 @@ public:
 	uint32 m_arenaPoints;
 	bool m_honorless;
 	uint32 m_lastSeenWeather;
-	set<shared_ptr<Object> > m_visibleFarsightObjects;
+	set<ObjectPointer > m_visibleFarsightObjects;
 	void EventTeleport(uint32 mapid, float x, float y, float z);
 	void ApplyLevelInfo(LevelInfo* Info, uint32 Level);
 	void BroadcastMessage(const char* Format, ...);
@@ -1637,7 +1637,7 @@ public:
 	void RemoveSummonSpell(uint32 Entry, uint32 SpellID);
 	set<uint32>* GetSummonSpells(uint32 Entry);
 	LockedQueue<WorldPacket*> delayedPackets;
-	set<shared_ptr<Player> > gmTargets;
+	set<PlayerPointer  > gmTargets;
 	uint32 m_UnderwaterMaxTime;
 	uint32 m_UnderwaterLastDmg;
 	HEARTHSTONE_INLINE void setMyCorpse(shared_ptr<Corpse> corpse) { myCorpse = corpse; }
@@ -1739,7 +1739,7 @@ public:
 	void SendAreaTriggerMessage(const char * message, ...);
         
 	// Trade Target
-	//shared_ptr<Player>getTradeTarget() {return mTradeTarget;};
+	//PlayerPointer getTradeTarget() {return mTradeTarget;};
 
 	HEARTHSTONE_INLINE PlayerPointer GetTradeTarget()
 	{
@@ -1860,8 +1860,8 @@ protected:
 	uint32 m_summoner;
 
 	uint32 iActivePet;
-	void _SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
-	void _SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
+	void _SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const;
+	void _SetUpdateBits(UpdateMask *updateMask, PlayerPointer target) const;
 
 	/* Update system components */
 	ByteBuffer bUpdateBuffer;
@@ -1913,7 +1913,7 @@ protected:
 	string      m_banreason;
 	uint32      m_AreaID;
 	AreaTable  *m_areaDBC;
-	shared_ptr<Pet>        m_Summon;
+	PetPointer        m_Summon;
 	uint32      m_PetNumberMax;
 	std::map<uint32, PlayerPet*> m_Pets;
 	
@@ -1970,13 +1970,13 @@ protected:
 	// Channels
 	std::set<uint32> m_channels;
 	// Visible objects
-	std::set<shared_ptr<Object> > m_visibleObjects;
+	std::set<ObjectPointer > m_visibleObjects;
 	// Groups/Raids
 	uint32 m_GroupInviter;
 	uint8 m_StableSlotCount;
 
     // Fishing related
-	shared_ptr<Object>m_SummonedObject;
+	ObjectPointerm_SummonedObject;
 
     // other system
 	shared_ptr<Corpse>    myCorpse;
@@ -2178,7 +2178,7 @@ class CMovementCompressorThread : public ThreadContext
 {
 	bool running;
 	Mutex m_listLock;
-	set<shared_ptr<Player> > m_players;
+	set<PlayerPointer  > m_players;
 public:
 	CMovementCompressorThread() { running = true; }
 

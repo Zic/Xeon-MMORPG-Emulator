@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -491,7 +491,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 2);
-	//shared_ptr<Player>plyr = GetPlayer();
+	//PlayerPointer plyr = GetPlayer();
 
 	int8 SrcInvSlot, SrcSlot;
 

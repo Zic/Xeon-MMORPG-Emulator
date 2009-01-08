@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -59,7 +59,7 @@ public:
 	void ComputeLen();
 	void SetPosForTime(float &x, float &y, float &z, uint32 time, uint32* lastnode, uint32 mapid);
 	HEARTHSTONE_INLINE uint32 GetID() { return id; }
-	void SendMoveForTime(shared_ptr<Player>riding, shared_ptr<Player>to, uint32 time);
+	void SendMoveForTime(PlayerPointer riding, PlayerPointer to, uint32 time);
 	void AddPathNode(uint32 index, TaxiPathNode* pn) { m_pathNodes[index] = pn; }
 	HEARTHSTONE_INLINE size_t GetNodeCount() { return m_pathNodes.size(); }
 	TaxiPathNode* GetPathNode(uint32 i);

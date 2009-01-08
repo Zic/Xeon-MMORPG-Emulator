@@ -1,6 +1,6 @@
 /*
 * Aspire Hearthstone
-* Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+* Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as published by
@@ -431,7 +431,7 @@ void AchievementInterface::HandleAchievementCriteriaKillCreature(uint32 killedMo
 	}
 }
 
-void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, shared_ptr<CBattleground> bg)
+void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMapId, uint32 scoreMargin, uint32 time, BattlegroundPointer bg)
 {
 	AchievementCriteriaMap::iterator itr = objmgr.m_achievementCriteriaMap.find( ACHIEVEMENT_CRITERIA_TYPE_WIN_BG );
 	if(itr == objmgr.m_achievementCriteriaMap.end())

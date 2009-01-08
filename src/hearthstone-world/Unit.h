@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -815,7 +815,7 @@ public:
 	bool HasActiveAura(uint32 spelllid);
 	bool HasActiveAura(uint32 spelllid,uint64);
 	
-	void GiveGroupXP(shared_ptr<Unit>pVictim, shared_ptr<Player>PlayerInGroup);
+	void GiveGroupXP(shared_ptr<Unit>pVictim, PlayerPointer PlayerInGroup);
 
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
@@ -992,7 +992,7 @@ public:
 	}
 
 	void SendChatMessage(uint8 type, uint32 lang, const char *msg);
-	void SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, shared_ptr<Player>plr);
+	void SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, PlayerPointer plr);
 	void SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, const char * msg);
 	void RegisterPeriodicChatMessage(uint32 delay, uint32 msgid, std::string message, bool sendnotify);
 
@@ -1115,7 +1115,7 @@ public:
 	bool IsPoisoned();
 
 	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, ObjectPointer caster=NULLOBJ);
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, shared_ptr<Object>caster=NULLOBJ);
+	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointercaster=NULLOBJ);
 
 	uint16 m_diminishCount[DIMINISH_GROUPS];
 	uint8  m_diminishAuraCount[DIMINISH_GROUPS];

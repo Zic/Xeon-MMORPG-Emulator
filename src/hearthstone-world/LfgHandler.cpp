@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -200,7 +200,7 @@ void WorldSession::HandleLfgInviteAccept(WorldPacket & recvPacket)
 			{
 				// all players have accepted
 				Group * pGroup = new Group(true);
-				for(set<shared_ptr<Player> >::iterator itr = _player->m_lfgMatch->AcceptedPlayers.begin(); itr != _player->m_lfgMatch->AcceptedPlayers.end(); ++itr)
+				for(set<PlayerPointer  >::iterator itr = _player->m_lfgMatch->AcceptedPlayers.begin(); itr != _player->m_lfgMatch->AcceptedPlayers.end(); ++itr)
 					pGroup->AddMember((*itr)->m_playerInfo);
 
 				_player->m_lfgMatch->pGroup = pGroup;

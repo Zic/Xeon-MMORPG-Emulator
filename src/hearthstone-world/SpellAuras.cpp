@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -1153,7 +1153,7 @@ void Aura::EventRelocateRandomTarget()
 	// Ok, let's do it. :D
 	set<shared_ptr<Unit> > enemies;
 
-	set<shared_ptr<Object> >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
+	set<ObjectPointer >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
 	for(; itr != u_caster->GetInRangeOppFactsSetEnd(); ++itr)
 	{
 		if( !(*itr)->IsUnit() )
@@ -1571,7 +1571,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 					multiplyer = 60;
 			if(multiplyer)
 			{
-				shared_ptr<Player>pr=TO_PLAYER(c);
+				PlayerPointer pr=TO_PLAYER(c);
 				if(pr->GetItemInterface())
 				{
 					shared_ptr<Item>it;
@@ -2733,7 +2733,7 @@ void Aura::SpellAuraDummy(bool apply)
 	if ( TamingSpellid && ! GetTimeLeft() )
 	{
 		// Creates a 15 minute pet, if player has the quest that goes with the spell and if target corresponds to quest
-		shared_ptr<Player>p_caster = TO_PLAYER(GetUnitCaster());
+		PlayerPointer p_caster = TO_PLAYER(GetUnitCaster());
 		if( p_caster == NULL || !p_caster->IsPlayer() )
 			return;
 
@@ -2750,7 +2750,7 @@ void Aura::SpellAuraDummy(bool apply)
 					return;
 
 				tamed->GetAIInterface()->HandleEvent( EVENT_LEAVECOMBAT, p_caster, 0 );
-				shared_ptr<Pet> pPet = objmgr.CreatePet();
+				PetPointer pPet = objmgr.CreatePet();
 				pPet->SetInstanceID( p_caster->GetInstanceID() );
 				pPet->CreateAsSummon( tamed->GetEntry(), tamed->GetCreatureName(), tamed, TO_UNIT(p_caster), triggerspell, 2, 900000 );
 				pPet->CastSpell( tamed, triggerspell, false );
@@ -3135,7 +3135,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		{
 			target_threat.reserve(u_caster->GetInRangeCount()); // this helps speed
 
-			for(std::set<shared_ptr<Object> >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
+			for(std::set<ObjectPointer >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
 			{
 				if((*itr)->GetTypeId() != TYPEID_UNIT)
 					continue;
@@ -5646,7 +5646,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 //			pTarget->setDeathState(DEAD);
 
 			//now get rid of mobs agro. pTarget->CombatStatus.AttackersForgetHate() - this works only for already attacking mobs
-		    for(std::set<shared_ptr<Object> >::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
+		    for(std::set<ObjectPointer >::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
 			{
 				if((*itr)->IsUnit() && (TO_UNIT(*itr))->isAlive())
 				{
@@ -6340,7 +6340,7 @@ void Aura::SpellAuraChannelDeathItem(bool apply)
 			{
 				if(m_target->isDead())
 				{
-					shared_ptr<Player>pCaster = m_target->GetMapMgr()->GetPlayer((uint32)m_casterGuid);
+					PlayerPointer pCaster = m_target->GetMapMgr()->GetPlayer((uint32)m_casterGuid);
 					if(!pCaster)
 						return;
 					/*int32 delta=pCaster->getLevel()-m_target->getLevel();
@@ -6914,7 +6914,7 @@ void Aura::SpellAuraOverrideClassScripts(bool apply)
 	//misc value is spell to add
 	//spell familyname && grouprelation
 
-	shared_ptr<Player>plr = TO_PLAYER(GetUnitCaster());
+	PlayerPointer plr = TO_PLAYER(GetUnitCaster());
 
 	//Adding bonus to effect
 	switch(mod->m_miscValue)
@@ -8058,7 +8058,7 @@ void Aura::SpellAuraModPenetration(bool apply) // armor penetration & spell pene
 		if(!m_target->IsPlayer())
 			return;
 
-		shared_ptr<Player>plr = TO_PLAYER(m_target);
+		PlayerPointer plr = TO_PLAYER(m_target);
 		if( apply )
 		{
 			mod->realamount = m_target->getLevel();

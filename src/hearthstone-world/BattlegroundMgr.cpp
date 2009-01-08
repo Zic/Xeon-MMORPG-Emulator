@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,7 +21,7 @@
 
 
 initialiseSingleton(CBattlegroundManager);
-typedef shared_ptr<CBattleground>(*CreateBattlegroundFunc)(shared_ptr<MapMgr> mgr,uint32 iid,uint32 group, uint32 type);
+typedef BattlegroundPointer(*CreateBattlegroundFunc)(shared_ptr<MapMgr> mgr,uint32 iid,uint32 group, uint32 type);
 
 const static uint32 BGMapIds[BATTLEGROUND_NUM_TYPES] = {
 	0,		// 0
@@ -156,7 +156,7 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 
 	/* Append the battlegrounds */
 	m_instanceLock.Acquire();
-	for(map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
+	for(map<uint32, BattlegroundPointer >::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
 	{
         if( itr->second->GetLevelGroup() == LevelGroup  && !itr->second->HasEnded() )
 		{
@@ -171,7 +171,7 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 
 void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, WorldPacket & pck)
 {
-	shared_ptr<Player>plr;
+	PlayerPointer plr;
 	uint64 guid;
 	uint32 pguid;
 	uint32 lgroup;
@@ -194,7 +194,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 	{
 		/* We haven't picked the first instance. This means we've specified an instance to join. */
 		m_instanceLock.Acquire();
-		map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[bgtype].find(instance);
+		map<uint32, BattlegroundPointer >::iterator itr = m_instances[bgtype].find(instance);
 
 		if(itr == m_instances[bgtype].end())
 		{
@@ -285,7 +285,7 @@ uint32 CBattlegroundManager::GetArenaGroupQInfo(Group * group, int type, uint32 
 {
 	ArenaTeam *team;
 	ArenaTeamMember *atm;
-	shared_ptr<Player>plr;
+	PlayerPointer plr;
 	uint32 count=0;
 	uint32 rating=0;
 
@@ -320,10 +320,10 @@ uint32 CBattlegroundManager::GetArenaGroupQInfo(Group * group, int type, uint32 
 	return team->m_id;
 }
 
-void CBattlegroundManager::AddGroupToArena(shared_ptr<CBattleground> bg, Group * group, int nteam)
+void CBattlegroundManager::AddGroupToArena(BattlegroundPointer bg, Group * group, int nteam)
 {
 	ArenaTeam *team;
-	shared_ptr<Player>plr;
+	PlayerPointer plr;
 
 	if (group == NULL || group->GetLeader() == NULL) return;
 
@@ -377,7 +377,7 @@ int CBattlegroundManager::CreateArenaType(int type, Group * group1, Group * grou
 	return 0;
 }
 
-void CBattlegroundManager::AddPlayerToBg(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j)
+void CBattlegroundManager::AddPlayerToBg(BattlegroundPointer bg, deque<PlayerPointer  > *playerVec, uint32 i, uint32 j)
 {
 	PlayerPointer plr = *playerVec->begin();
 	playerVec->pop_front();
@@ -393,11 +393,11 @@ void CBattlegroundManager::AddPlayerToBg(shared_ptr<CBattleground> bg, deque<sha
 	}
 }
 
-void CBattlegroundManager::AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque<shared_ptr<Player> > *playerVec, uint32 i, uint32 j, int Team)
+void CBattlegroundManager::AddPlayerToBgTeam(BattlegroundPointer bg, deque<PlayerPointer  > *playerVec, uint32 i, uint32 j, int Team)
 {
 	if (bg->HasFreeSlots(Team))
 	{
-		shared_ptr<Player>plr = *playerVec->begin();
+		PlayerPointer plr = *playerVec->begin();
 		playerVec->pop_front();
 		plr->m_bgTeam=Team;
 		bg->AddPlayer(plr, Team);
@@ -407,13 +407,13 @@ void CBattlegroundManager::AddPlayerToBgTeam(shared_ptr<CBattleground> bg, deque
 
 void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 {
-	deque<shared_ptr<Player> > tempPlayerVec[2];
+	deque<PlayerPointer  > tempPlayerVec[2];
 	uint32 i,j,k;
 	PlayerPointer plr;
-	shared_ptr<CBattleground> bg;
+	BattlegroundPointer bg;
 	list<uint32>::iterator it3, it4;
-	//vector<shared_ptr<Player> >::iterator it6;
-	map<uint32, shared_ptr<CBattleground> >::iterator iitr;
+	//vector<PlayerPointer  >::iterator it6;
+	map<uint32, BattlegroundPointer >::iterator iitr;
 	shared_ptr<Arena>  arena;
 	int32 team;
 	m_queueLock.Acquire();
@@ -766,7 +766,7 @@ void CBattlegroundManager::RemoveGroupFromQueues(Group * grp)
 bool CBattlegroundManager::CanCreateInstance(uint32 Type, uint32 LevelGroup)
 {
 	/*uint32 lc = 0;
-	for(map<uint32, shared_ptr<CBattleground> >::iterator itr = m_instances[Type].begin(); itr != m_instances[Type].end(); ++itr)
+	for(map<uint32, BattlegroundPointer >::iterator itr = m_instances[Type].begin(); itr != m_instances[Type].end(); ++itr)
 	{
 		if(itr->second->GetLevelGroup() == LevelGroup)
 		{
@@ -872,7 +872,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 			ArenaTeam * teams[2] = {NULL,NULL};
 			for(uint32 i = 0; i < 2; ++i)
 			{
-				for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+				for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
 					teams[i] = (*itr)->m_playerInfo->arenaTeam[ ((Arena*)this)->GetArenaTeamType() ];
 					if(teams[i])
@@ -917,7 +917,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 		*data << uint32(m_players[0].size() + m_players[1].size());
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				*data << (*itr)->GetGUID();
 				bs = &(*itr)->m_bgScore;
@@ -949,7 +949,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 		uint32 fcount = BGPvPDataFieldCount[GetType()];
 		for(uint32 i = 0; i < 2; ++i)
 		{
-			for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			{
 				if( (*itr)->m_isGmInvisible ) continue;
 				*data << (*itr)->GetGUID();
@@ -1144,11 +1144,11 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 	m_mainLock.Release();
 }
 
-shared_ptr<CBattleground> CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGroup)
+BattlegroundPointer CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGroup)
 {
 	CreateBattlegroundFunc cfunc = BGCFuncs[Type];
 	shared_ptr<MapMgr> mgr = NULLMAPMGR;
-	shared_ptr<CBattleground> bg;
+	BattlegroundPointer bg;
 	bool isWeekend = false;
 	struct tm tm;
 	time_t t;
@@ -1249,7 +1249,7 @@ shared_ptr<CBattleground> CBattlegroundManager::CreateInstance(uint32 Type, uint
 	return bg;
 }
 
-void CBattlegroundManager::DeleteBattleground(shared_ptr<CBattleground> bg)
+void CBattlegroundManager::DeleteBattleground(BattlegroundPointer bg)
 {
 	uint32 i = bg->GetType();
 	uint32 j = bg->GetLevelGroup();
@@ -1340,7 +1340,7 @@ void CBattleground::DistributePacketToAll(WorldPacket * packet)
 		if( !m_players[i].size() )
 			continue;
 
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 			(*itr)->GetSession()->SendPacket(packet);
 	}
 	m_mainLock.Release();
@@ -1354,7 +1354,7 @@ void CBattleground::DistributePacketToTeam(WorldPacket * packet, uint32 Team)
 		m_mainLock.Release();
 		return;
 	}
-	for(set<shared_ptr<Player> >::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
+	for(set<PlayerPointer  >::iterator itr = m_players[Team].begin(); itr != m_players[Team].end(); ++itr)
 		(*itr)->GetSession()->SendPacket(packet);
 	m_mainLock.Release();
 }
@@ -1665,7 +1665,7 @@ void CBattleground::Close()
 	m_ended = true;
 	for(uint32 i = 0; i < 2; ++i)
 	{
-		set<shared_ptr<Player> >::iterator itr;
+		set<PlayerPointer  >::iterator itr;
 		set<uint32>::iterator it2;
 		uint32 guid;
 		PlayerPointer plr;
@@ -1848,7 +1848,7 @@ void CBattleground::EventResurrectPlayers()
 
 void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 BattlegroundType, uint8 as_group, uint8 rated_match)
 {
-	shared_ptr<Player>plr = m_session->GetPlayer();
+	PlayerPointer plr = m_session->GetPlayer();
 	uint32 pguid = plr->GetLowGUID();
 	uint32 lgroup = GetLevelGrouping(plr->getLevel());
 	if(as_group && plr->GetGroup() == NULL)
@@ -2061,7 +2061,7 @@ void CBattleground::QueueAtNearestSpiritGuide(PlayerPointer plr, CreaturePointer
 
 void CBattleground::GiveHonorToTeam(uint32 team, uint32 amt)
 {
-	for(set<shared_ptr<Player> >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
+	for(set<PlayerPointer  >::iterator itx = m_players[team].begin(); itx != m_players[team].end(); ++itx)
 	{
 		PlayerPointer plr = (*itx);
 		if(!plr) continue;

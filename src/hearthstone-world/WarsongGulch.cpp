@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -151,7 +151,7 @@ void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 		m_flagHolders[plr->GetTeam()] = 0;
 		plr->m_bgHasFlag = 0;
 
-		/* remove flag aura from shared_ptr<Player>/
+		/* remove flag aura from PlayerPointer /
 		plr->RemoveAura(23333+(plr->GetTeam() * 2));
 
 		/* capture flag points */
@@ -171,7 +171,7 @@ void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 			m_homeFlags[plr->GetTeam()]->PushToWorld(m_mapMgr);
 
 		/* give each player on that team a bonus according to flagHonorTable */
-		for(set<shared_ptr<Player> >::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_players[plr->GetTeam()].begin(); itr != m_players[plr->GetTeam()].end(); ++itr)
 		{
 			(*itr)->m_bgScore.BonusHonor += flagHonorTable[m_lgroup];
 			HonorHandler::AddHonorPointsToPlayer((*itr), flagHonorTable[m_lgroup]);
@@ -194,7 +194,7 @@ void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 			SpellEntry * loser_spell = dbcSpell.LookupEntry(24950);
 			for(uint32 i = 0; i < 2; ++i)
 			{
-				for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+				for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
 					(*itr)->Root();
 
@@ -560,7 +560,7 @@ void WarsongGulch::OnCreate()
 void WarsongGulch::OnStart()
 {
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			(*itr)->RemoveAura(BG_PREPARATION);
 		}
 	}
@@ -588,7 +588,7 @@ void WarsongGulch::OnStart()
 	m_started = true;
 }
 
-void WarsongGulch::HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse)
+void WarsongGulch::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

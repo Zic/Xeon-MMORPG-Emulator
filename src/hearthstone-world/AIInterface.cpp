@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -572,7 +572,7 @@ void AIInterface::Update(uint32 p_time)
 		{
 			if(!m_Unit->bInvincible && m_Unit->IsPet()) 
 			{
-				shared_ptr<Pet> pPet = TO_PET(m_Unit);
+				PetPointer pPet = TO_PET(m_Unit);
 	
 				if(pPet->GetPetAction() == PET_ACTION_ATTACK || pPet->GetPetState() != PET_STATE_PASSIVE)
 				{
@@ -1135,7 +1135,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 					//add pet spell after use to pet owner with some chance
 					if(m_Unit->IsPet() && m_PetOwner->IsPlayer())
 					{	
-						shared_ptr<Pet> pPet = TO_PET(m_Unit);
+						PetPointer pPet = TO_PET(m_Unit);
 						if(pPet && Rand(10))
 							pPet->AddPetSpellToOwner(spellInfo->Id);
 					}
@@ -1365,8 +1365,8 @@ UnitPointer AIInterface::FindTarget()
 	float crange;
 	float z_diff;
 
-	std::set<shared_ptr<Object> >::iterator itr, it2;
-	shared_ptr<Object>pObj;
+	std::set<ObjectPointer >::iterator itr, it2;
+	ObjectPointerpObj;
 	shared_ptr<Unit>pUnit;
 	float dist;
 	bool pvp=true;
@@ -1547,7 +1547,7 @@ bool AIInterface::FindFriends(float dist)
 	bool result = false;
 	TargetMap::iterator it;
 
-	std::set<shared_ptr<Object> >::iterator itr;
+	std::set<ObjectPointer >::iterator itr;
 	shared_ptr<Unit>pUnit;
 
 	
@@ -1801,7 +1801,7 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 	if( m_Unit->GetTypeId() == TYPEID_PLAYER )
 		TO_PLAYER(m_Unit)->GetSession()->SendPacket(&data);
 
-	for(set<shared_ptr<Player> >::iterator itr = m_Unit->GetInRangePlayerSetBegin(); itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
+	for(set<PlayerPointer  >::iterator itr = m_Unit->GetInRangePlayerSetBegin(); itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		if( (*itr)->GetPositionNC().Distance2DSq( m_Unit->GetPosition() ) >= World::m_movementCompressThresholdCreatures )
 			(*itr)->AppendMovementData( SMSG_MONSTER_MOVE, data.GetSize(), (const uint8*)data.GetBufferPointer() );
@@ -3338,7 +3338,7 @@ void AIInterface::UpdateCivilian()
 		return;
 
 	PlayerPointer target = NULLPLR;
-	std::set<shared_ptr<Player> >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
+	std::set<PlayerPointer  >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
 	for(; itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		PlayerPointer pOpp = *itr;

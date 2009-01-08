@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,7 @@
 
 bool ChatHandler::HandleDebugInFrontCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -37,7 +37,7 @@ bool ChatHandler::HandleDebugInFrontCommand(const char* args, WorldSession *m_se
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	char buf[256];
 	snprintf((char*)buf, 256, "%d", m_session->GetPlayer()->isInFront(obj));
@@ -83,19 +83,19 @@ bool ChatHandler::HandleShowReactionCommand(const char* args, WorldSession *m_se
 
 bool ChatHandler::HandleDistanceCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
 	{
-		if(!(obj = (shared_ptr<Object>)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
+		if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
 		{
 			SystemMessage(m_session, "You should select a character or a creature.");
 			return true;
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	float dist = m_session->GetPlayer()->CalcDistance(obj);
 	std::stringstream sstext;
@@ -107,10 +107,10 @@ bool ChatHandler::HandleDistanceCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleMoveInfoCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
-	if(!(obj = (shared_ptr<Object>)m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid))))
+	if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid))))
 	{
 		SystemMessage(m_session, "You should select a character or a creature.");
 		return true;
@@ -183,7 +183,7 @@ bool ChatHandler::HandleDebugSetPhase(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleAIMoveCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj = NULLOBJ;
+	ObjectPointerobj = NULLOBJ;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -320,7 +320,7 @@ bool ChatHandler::HandleAIMoveCommand(const char* args, WorldSession *m_session)
 bool ChatHandler::HandleFaceCommand(const char* args, WorldSession *m_session)
 {
 
-	shared_ptr<Object>obj = NULLOBJ;
+	ObjectPointerobj = NULLOBJ;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -372,12 +372,12 @@ bool ChatHandler::HandleFaceCommand(const char* args, WorldSession *m_session)
 bool ChatHandler::HandleAIMoveCommand(const char* args)
 {
 WorldPacket data;
-shared_ptr<Object>obj = NULL;
+ObjectPointerobj = NULL;
 
 uint64 guid = m_session->GetPlayer()->GetSelection();
 if (guid != 0)
 {
-obj = (shared_ptr<Object>)objmgr.GetCreature(guid);
+obj = (ObjectPointer)objmgr.GetCreature(guid);
 }
 
 if(obj == NULL)
@@ -422,7 +422,7 @@ float toY = m_session->GetPlayer()->GetPositionY();
 float toZ = m_session->GetPlayer()->GetPositionZ();
 float toO = m_session->GetPlayer()->GetOrientation();
 
-float distance = TO_CREATURE(obj)->CalcDistance((shared_ptr<Object>)m_session->GetPlayer());
+float distance = TO_CREATURE(obj)->CalcDistance((ObjectPointer)m_session->GetPlayer());
 uint32 moveSpeed = 0;
 if(!Run)
 {
@@ -482,7 +482,7 @@ return true;
 */
 bool ChatHandler::HandleSetBytesCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -494,7 +494,7 @@ bool ChatHandler::HandleSetBytesCommand(const char* args, WorldSession *m_sessio
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	char* pBytesIndex = strtok((char*)args, " ");
 	if (!pBytesIndex)
@@ -535,7 +535,7 @@ bool ChatHandler::HandleSetBytesCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleGetBytesCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -547,7 +547,7 @@ bool ChatHandler::HandleGetBytesCommand(const char* args, WorldSession *m_sessio
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	char* pBytesIndex = strtok((char*)args, " ");
 	if (!pBytesIndex)
@@ -578,7 +578,7 @@ bool ChatHandler::HandleGetBytesCommand(const char* args, WorldSession *m_sessio
 }
 bool ChatHandler::HandleDebugLandWalk(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	char buf[256];
 
 	if (chr == NULL) // Ignatich: what should NOT happen but just in case...
@@ -594,7 +594,7 @@ bool ChatHandler::HandleDebugLandWalk(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleDebugWaterWalk(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	char buf[256];
 
 	if (chr == NULL) // Ignatich: what should NOT happen but just in case...
@@ -610,7 +610,7 @@ bool ChatHandler::HandleDebugWaterWalk(const char* args, WorldSession *m_session
 
 bool ChatHandler::HandleDebugUnroot(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	char buf[256];
 
 	if (chr == NULL) // Ignatich: what should NOT happen but just in case...
@@ -628,7 +628,7 @@ bool ChatHandler::HandleDebugUnroot(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleDebugRoot(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	char buf[256];
 
 	if (chr == NULL) // Ignatich: what should NOT happen but just in case...
@@ -836,7 +836,7 @@ bool ChatHandler::HandleSendItemPushResult(const char* args, WorldSession* m_ses
 bool ChatHandler::HandleModifyBitCommand(const char* args, WorldSession* m_session)
 {
 
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
@@ -848,7 +848,7 @@ bool ChatHandler::HandleModifyBitCommand(const char* args, WorldSession* m_sessi
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	char* pField = strtok((char*)args, " ");
 	if (!pField)
@@ -892,19 +892,19 @@ bool ChatHandler::HandleModifyBitCommand(const char* args, WorldSession* m_sessi
 
 bool ChatHandler::HandleModifyValueCommand(const char* args,  WorldSession* m_session)
 {
-	shared_ptr<Object>obj;
+	ObjectPointerobj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
 	{
-		if(!(obj = (shared_ptr<Object>)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
+		if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
 		{
 			SystemMessage(m_session, "You should select a character or a creature.");
 			return true;
 		}
 	}
 	else
-		obj = (shared_ptr<Object>)m_session->GetPlayer();
+		obj = (ObjectPointer)m_session->GetPlayer();
 
 	char* pField = strtok((char*)args, " ");
 	if (!pField)

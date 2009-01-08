@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -135,7 +135,7 @@ void WeatherMgr::LoadFromDB()
 	delete result;
 }
 
-void WeatherMgr::SendWeather(shared_ptr<Player>plr)  //Update weather when player has changed zone (WorldSession::HandleZoneUpdateOpcode)
+void WeatherMgr::SendWeather(PlayerPointer plr)  //Update weather when player has changed zone (WorldSession::HandleZoneUpdateOpcode)
 {
 	std::map<uint32, shared_ptr<WeatherInfo> >::iterator itr;
 	itr = m_zoneWeathers.find(plr->GetZoneId());
@@ -253,7 +253,7 @@ void WeatherInfo::SendUpdate()
 	sWorld.SendZoneMessage(&data, m_zoneId, 0);
 }
 
-void WeatherInfo::SendUpdate(shared_ptr<Player>plr) //Updates weather for player's zone-change only if new zone weather differs
+void WeatherInfo::SendUpdate(PlayerPointer plr) //Updates weather for player's zone-change only if new zone weather differs
 {
 	if(plr->m_lastSeenWeather == m_currentEffect) //return if weather is same as previous zone
 		return;

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -136,7 +136,7 @@ void Object::_Create( uint32 mapid, float x, float y, float z, float ang )
 	m_lastMapUpdatePosition.ChangeCoords(x,y,z,ang);
 }
 
-uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, shared_ptr<Player>target)
+uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target)
 {
 	uint8 flags = 0;
 	uint32 flags2 = 0;
@@ -286,7 +286,7 @@ void Object::BuildFieldUpdatePacket(ByteBuffer * buf, uint32 Index, uint32 Value
 	*buf << Value;
 }
 
-uint32 Object::BuildValuesUpdateBlockForPlayer(ByteBuffer *data, shared_ptr<Player>target)
+uint32 Object::BuildValuesUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target)
 {
 	UpdateMask updateMask;
 	updateMask.SetCount( m_valuesCount );
@@ -321,7 +321,7 @@ uint32 Object::BuildValuesUpdateBlockForPlayer(ByteBuffer * buf, UpdateMask * ma
 	return 1;
 }
 
-void Object::DestroyForPlayer(shared_ptr<Player>target) const
+void Object::DestroyForPlayer(PlayerPointer target) const
 {
 	if(target->GetSession() == 0) return;
 
@@ -734,8 +734,8 @@ void Object::OutPacketToSet(uint16 Opcode, uint16 Len, const void * Data, bool s
 	if(!IsInWorld())
 		return;
 
-	std::set<shared_ptr<Player> >::iterator itr = m_inRangePlayers.begin();
-	std::set<shared_ptr<Player> >::iterator it_end = m_inRangePlayers.end();
+	std::set<PlayerPointer  >::iterator itr = m_inRangePlayers.begin();
+	std::set<PlayerPointer  >::iterator it_end = m_inRangePlayers.end();
 	int gm = ( m_objectTypeId == TYPEID_PLAYER ? player_shared_from_this()->m_isGmInvisible : 0 );
 	for(; itr != it_end; ++itr)
 	{
@@ -762,8 +762,8 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf,bool myteam_only)
 	if(!IsInWorld())
 		return;
 
-	std::set<shared_ptr<Player> >::iterator itr = m_inRangePlayers.begin();
-	std::set<shared_ptr<Player> >::iterator it_end = m_inRangePlayers.end();
+	std::set<PlayerPointer  >::iterator itr = m_inRangePlayers.begin();
+	std::set<PlayerPointer  >::iterator it_end = m_inRangePlayers.end();
 	bool gminvis = (m_objectTypeId == TYPEID_PLAYER ? player_shared_from_this()->m_isGmInvisible : false);
 	//Zehamster: Splitting into if/else allows us to avoid testing "gminvis==true" at each loop...
 	//		   saving cpu cycles. Chat messages will be sent to everybody even if player is invisible.
@@ -837,13 +837,13 @@ void Object::LoadValues(const char* data)
 	} while(pos != std::string::npos);
 }
 
-void Object::_SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const
+void Object::_SetUpdateBits(UpdateMask *updateMask, PlayerPointer target) const
 {
 	*updateMask = m_updateMask;
 }
 
 
-void Object::_SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const
+void Object::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 {
 	/*for( uint16 index = 0; index < m_valuesCount; index++ )
 	{
@@ -864,7 +864,7 @@ void Object::AddToWorld()
 	if( IsPlayer() )
 	{
 		// battleground checks
-		shared_ptr<Player>p = plr_shared_from_this();
+		PlayerPointer p = plr_shared_from_this();
 		if( p->m_bg == NULL && mapMgr->m_battleground != NULL )
 		{
 			// player hasn't been registered in the battleground, ok.
@@ -1240,7 +1240,7 @@ void Object::RemoveFlag( const uint32 index, uint32 oldFlag )
 
 ////////////////////////////////////////////////////////////
 
-float Object::CalcDistance(shared_ptr<Object>Ob)
+float Object::CalcDistance(ObjectPointerOb)
 {
 	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
 }
@@ -1248,11 +1248,11 @@ float Object::CalcDistance(float ObX, float ObY, float ObZ)
 {
 	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), ObX, ObY, ObZ);
 }
-float Object::CalcDistance(shared_ptr<Object>Oa, shared_ptr<Object>Ob)
+float Object::CalcDistance(ObjectPointerOa, ObjectPointerOb)
 {
 	return CalcDistance(Oa->GetPositionX(), Oa->GetPositionY(), Oa->GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
 }
-float Object::CalcDistance(shared_ptr<Object>Oa, float ObX, float ObY, float ObZ)
+float Object::CalcDistance(ObjectPointerOa, float ObX, float ObY, float ObZ)
 {
 	return CalcDistance(Oa->GetPositionX(), Oa->GetPositionY(), Oa->GetPositionZ(), ObX, ObY, ObZ);
 }
@@ -1596,7 +1596,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 
 	if( pVictim->IsPlayer() )
 	{
-		shared_ptr<Player>pThis = TO_PLAYER(pVictim);
+		PlayerPointer pThis = TO_PLAYER(pVictim);
 		if(pThis->cannibalize)
 		{
 			sEventMgr.RemoveEvents(pVictim, EVENT_CANNIBALIZE);
@@ -1680,7 +1680,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	{
 		if((health <= damage) && TO_PLAYER(pVictim)->DuelingWith == pet_shared_from_this()->GetPetOwner())
 		{
-			shared_ptr<Player>petOwner = pet_shared_from_this()->GetPetOwner();
+			PlayerPointer petOwner = pet_shared_from_this()->GetPetOwner();
 			if(petOwner)
 			{
 				//Player in Duel and Player Victim has lost
@@ -2472,7 +2472,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 //* SpellLog packets just to keep the code cleaner and better to read
 //*****************************************************************************************
 
-void Object::SendSpellLog(shared_ptr<Object>Caster, shared_ptr<Object>Target,uint32 Ability, uint8 SpellLogType)
+void Object::SendSpellLog(ObjectPointerCaster, ObjectPointerTarget,uint32 Ability, uint8 SpellLogType)
 {
 	if ((!Caster || !Target) && Ability)
 		return;

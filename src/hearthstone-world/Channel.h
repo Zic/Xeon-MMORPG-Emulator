@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -76,7 +76,7 @@ enum CHANNEL_NOTIFY_FLAGS
 class Channel
 {
 	Mutex m_lock;
-	typedef map<shared_ptr<Player>, uint32> MemberMap;
+	typedef map<PlayerPointer , uint32> MemberMap;
 	MemberMap m_members;
 	set<uint32> m_bannedMembers;
 public:

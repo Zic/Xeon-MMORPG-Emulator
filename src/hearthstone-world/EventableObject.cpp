@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -377,8 +377,8 @@ void EventableObjectHolder::Update(uint32 time_difference)
 			{
 				// Event expired :>
 				
-				/* remove the event from the shared_ptr<Object>/
-				/*obj = (Eventableshared_ptr<Object>)ev->obj;
+				/* remove the event from the ObjectPointer/
+				/*obj = (EventableObjectPointer)ev->obj;
 				obj->event_RemoveByPointer(ev);*/
 
 				/* remove the event from here */

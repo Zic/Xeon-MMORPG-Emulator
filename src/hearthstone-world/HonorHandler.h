@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -23,10 +23,10 @@
 class HonorHandler
 {
 public:
-	static int32 CalculateHonorPointsForKill(shared_ptr<Player>pPlayer, UnitPointer pVictim);
-	static void RecalculateHonorFields(shared_ptr<Player>pPlayer);
-	static void AddHonorPointsToPlayer(shared_ptr<Player>pPlayer, uint32 uAmount);
-	static void OnPlayerKilledUnit(shared_ptr<Player>pPlayer, UnitPointer pVictim);	
+	static int32 CalculateHonorPointsForKill(PlayerPointer pPlayer, UnitPointer pVictim);
+	static void RecalculateHonorFields(PlayerPointer pPlayer);
+	static void AddHonorPointsToPlayer(PlayerPointer pPlayer, uint32 uAmount);
+	static void OnPlayerKilledUnit(PlayerPointer pPlayer, UnitPointer pVictim);	
 };
 
 

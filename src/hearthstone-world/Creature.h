@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -460,8 +460,8 @@ public:
 	void SetEnslaveSpell(uint32 spellId) { m_enslaveSpell = spellId; }
 	bool RemoveEnslave();
 
-	HEARTHSTONE_INLINE shared_ptr<Player>GetTotemOwner() { return totemOwner; }
-	HEARTHSTONE_INLINE void SetTotemOwner(shared_ptr<Player>owner) { totemOwner = owner; }
+	HEARTHSTONE_INLINE PlayerPointer GetTotemOwner() { return totemOwner; }
+	HEARTHSTONE_INLINE void SetTotemOwner(PlayerPointer owner) { totemOwner = owner; }
 	HEARTHSTONE_INLINE uint32 GetTotemSlot() { return totemSlot; }
 	HEARTHSTONE_INLINE void SetTotemSlot(uint32 slot) { totemSlot = slot; }
 
@@ -564,7 +564,7 @@ public:
 	void ClearTag();
 
 	// tags the object by a certain player.
-	void Tag(shared_ptr<Player>plr);
+	void Tag(PlayerPointer plr);
 
 	// used by bgs
 	bool m_noDeleteAfterDespawn;

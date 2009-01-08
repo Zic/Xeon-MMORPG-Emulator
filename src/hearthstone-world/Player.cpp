@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -384,7 +384,7 @@ void Player::Init()
 		m_lastMoveType = 0;
 		m_tempSummon = NULLCREATURE;
 		m_spellcomboPoints = 0;
-		memset( &m_pendingBattleground, 0, sizeof(shared_ptr<CBattleground>) * 3);
+		memset( &m_pendingBattleground, 0, sizeof(BattlegroundPointer) * 3);
 		m_deathVision = false;
 		m_retainComboPoints = false;
 		last_heal_spell = NULL;
@@ -1805,7 +1805,7 @@ void Player::SpawnPet(uint32 pet_number)
 		m_Summon = NULLPET;
 	}
 
-	shared_ptr<Pet> pPet = objmgr.CreatePet();
+	PetPointer pPet = objmgr.CreatePet();
 	pPet->SetInstanceID(GetInstanceID());
 	pPet->LoadFromDB(plr_shared_from_this(), itr->second);
 }
@@ -1877,7 +1877,7 @@ void Player::addSpell(uint32 spell_id)
 //  Note:  Doesn't set Quest or Inventory bits
 //  updateMask - the updatemask to hold the set bits
 //===================================================================================================================
-void Player::_SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const
+void Player::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 {
 	if(target == shared_from_this())
 	{
@@ -1894,7 +1894,7 @@ void Player::_SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) co
 }
 
 
-void Player::_SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const
+void Player::_SetUpdateBits(UpdateMask *updateMask, PlayerPointer target) const
 {
 	if(target == shared_from_this())
 	{
@@ -1990,7 +1990,7 @@ void Player::InitVisibleUpdateBits()
 		Player::m_visibleUpdateMask.SetBit(i);*/
 
 	/* fuck i hate const - burlex */
-	/*if(target && target->GetGroup() == const_cast<shared_ptr<Player>>(plr_shared_from_this())->GetGroup() && const_cast<shared_ptr<Player> >(plr_shared_from_this())->GetSubGroup() == target->GetSubGroup())
+	/*if(target && target->GetGroup() == const_cast<PlayerPointer >(plr_shared_from_this())->GetGroup() && const_cast<PlayerPointer  >(plr_shared_from_this())->GetSubGroup() == target->GetSubGroup())
 	{
 	// quest fields are the same for party members
 	for(uint32 i = PLAYER_QUEST_LOG_1_01; i < PLAYER_QUEST_LOG_25_2; ++i)
@@ -1999,7 +1999,7 @@ void Player::InitVisibleUpdateBits()
 }
 
 
-void Player::DestroyForPlayer( shared_ptr<Player>target ) const
+void Player::DestroyForPlayer( PlayerPointer target ) const
 {
 	Unit::DestroyForPlayer( target );
 }
@@ -3425,7 +3425,7 @@ void Player::RemoveFromWorld()
 
 	if( m_uint32Values[UNIT_FIELD_CHARMEDBY] != 0 && IsInWorld() )
 	{
-		shared_ptr<Player>charmer = m_mapMgr->GetPlayer(m_uint32Values[UNIT_FIELD_CHARMEDBY]);
+		PlayerPointer charmer = m_mapMgr->GetPlayer(m_uint32Values[UNIT_FIELD_CHARMEDBY]);
 		if( charmer != NULL )
 			charmer->UnPossess();
 	}
@@ -4103,7 +4103,7 @@ shared_ptr<Corpse>Player::RepopRequestedPlayer()
 	return ret;
 }
 
-void Player::ResurrectPlayer(shared_ptr<Player>pResurrector)
+void Player::ResurrectPlayer(PlayerPointer pResurrector)
 {
 	sEventMgr.RemoveEvents(plr_shared_from_this(),EVENT_PLAYER_FORECED_RESURECT); //in case somebody resurected us before this event happened
 	if( m_resurrectHealth )
@@ -4419,7 +4419,7 @@ void Player::setAction(uint8 button, uint16 action, uint8 type, uint8 misc)
 }
 
 //Groupcheck
-bool Player::IsGroupMember(shared_ptr<Player>plyr)
+bool Player::IsGroupMember(PlayerPointer plyr)
 {
 	if(m_playerInfo->m_Group != NULL)
 		return m_playerInfo->m_Group->HasMember(plyr->m_playerInfo);
@@ -4973,7 +4973,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 	{
 		if(object_type == TYPEID_PLAYER)
 		{
-			shared_ptr<Player>pObj = TO_PLAYER(obj);
+			PlayerPointer pObj = TO_PLAYER(obj);
 
 			if(myCorpse && myCorpse->GetDistanceSq(obj) <= CORPSE_VIEW_DISTANCE)
 				return !pObj->m_isGmInvisible; // we can see all players within range of our corpse except invisible GMs
@@ -5028,7 +5028,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 	{			
 		case TYPEID_PLAYER:
 			{
-				shared_ptr<Player>pObj = TO_PLAYER(obj);
+				PlayerPointer pObj = TO_PLAYER(obj);
 
 				if( pObj->m_mageInvisibility )
 					return false;
@@ -5367,7 +5367,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 {	
 	Group * m_Group = m_playerInfo->m_Group;
 	if(!IsInWorld()) return;
-	shared_ptr<Object>lootObj;
+	ObjectPointerlootObj;
 	
 	// handle items
 	if(GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_ITEM)
@@ -5621,7 +5621,7 @@ void Player::SendTalentResetConfirm()
 }
 void Player::SendPetUntrainConfirm()
 {
-	shared_ptr<Pet> pPet = GetSummon();
+	PetPointer pPet = GetSummon();
 	if( pPet == NULL )
 		return;
 	WorldPacket data( SMSG_PET_UNLEARN_CONFIRM, 12 );
@@ -6677,7 +6677,7 @@ void Player::RemoveItemsFromWorld()
 	UpdateStats();
 }
 
-uint32 Player::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, shared_ptr<Player>target )
+uint32 Player::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target )
 {
 	int count = 0;
 	if(target == shared_from_this())
@@ -7379,7 +7379,7 @@ void Player::SendTradeUpdate()
 	pTarget->GetSession()->SendPacket(&data);
 }
 
-void Player::RequestDuel(shared_ptr<Player>pTarget)
+void Player::RequestDuel(PlayerPointer pTarget)
 {
 	// We Already Dueling or have already Requested a Duel
 
@@ -7983,7 +7983,7 @@ void Player::UpdatePvPArea()
 void Player::BuildFlagUpdateForNonGroupSet(uint32 index, uint32 flag)
 {
 	Group* pGroup = NULL;
-    shared_ptr<Object>curObj;
+    ObjectPointercurObj;
     for (Object::InRangeSet::iterator iter = GetInRangeSetBegin(); iter != GetInRangeSetEnd();)
 	{
 		curObj = *iter;
@@ -8907,7 +8907,7 @@ void Player::EventPortToGM(uint32 guid)
 	if( !IsInWorld() )
 		return;
 
-	shared_ptr<Player>p = objmgr.GetPlayer(guid);
+	PlayerPointer p = objmgr.GetPlayer(guid);
 	if( p == NULL )
 		return;
 
@@ -9947,7 +9947,7 @@ void Player::PartLFGChannel()
 }
 
 //if we charmed or simply summoned a pet, plr_shared_from_this() function should get called
-void Player::EventSummonPet( shared_ptr<Pet> new_pet )
+void Player::EventSummonPet( PetPointer new_pet )
 {
 	if ( !new_pet )
 		return ; //another wtf error
@@ -10006,7 +10006,7 @@ void Player::AppendMovementData(uint32 op, uint32 sz, const uint8* data)
 
 bool CMovementCompressorThread::run()
 {
-	set<shared_ptr<Player> >::iterator itr;
+	set<PlayerPointer  >::iterator itr;
 	while(running)
 	{
 		m_listLock.Acquire();

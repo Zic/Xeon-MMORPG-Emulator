@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,7 @@
 
 bool ChatHandler::HandleResetReputationCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>plr = getSelectedChar(m_session);
+	PlayerPointer plr = getSelectedChar(m_session);
 	if(!plr)
 	{
 		SystemMessage(m_session, "Select a player or yourself first.");
@@ -40,7 +40,7 @@ bool ChatHandler::HandleResetReputationCommand(const char *args, WorldSession *m
 
 bool ChatHandler::HandleInvincibleCommand(const char *args, WorldSession *m_session)
 {
-	shared_ptr<Player>chr = getSelectedChar(m_session);
+	PlayerPointer chr = getSelectedChar(m_session);
 	char msg[100];
 	if(chr)
 	{
@@ -405,7 +405,7 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleKillByPlrCommand( const char *args , WorldSession *m_session )
 {
-	shared_ptr<Player>plr = objmgr.GetPlayer(args, false);
+	PlayerPointer plr = objmgr.GetPlayer(args, false);
 	if(!plr)
 	{
 		RedSystemMessage(m_session, "Player %s is not online or does not exist.", args);
@@ -578,8 +578,8 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 {
 	shared_ptr<GameObject>GObj = NULLGOB;
 
-	std::set<shared_ptr<Object> >::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
-	std::set<shared_ptr<Object> >::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
+	std::set<ObjectPointer >::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
+	std::set<ObjectPointer >::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
 	float cDist = 9999.0f;
 	float nDist = 0.0f;
 	bool bUseNext = false;
@@ -722,7 +722,7 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 
 	shared_ptr<GameObject>go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
 	
-	shared_ptr<Player>chr = m_session->GetPlayer();
+	PlayerPointer chr = m_session->GetPlayer();
 	uint32 mapid = chr->GetMapId();
 	float x = chr->GetPositionX();
 	float y = chr->GetPositionY();
@@ -916,7 +916,7 @@ bool ChatHandler::HandleGOScale(const char* args, WorldSession* m_session)
 
 bool ChatHandler::HandleReviveStringcommand(const char* args, WorldSession* m_session)
 {
-	shared_ptr<Player>plr = objmgr.GetPlayer(args, false);
+	PlayerPointer plr = objmgr.GetPlayer(args, false);
 	if(!plr)
 	{
 		RedSystemMessage(m_session, "Could not find player %s.", args);
@@ -952,7 +952,7 @@ bool ChatHandler::HandleMountCommand(const char *args, WorldSession *m_session)
 	}
 
 	shared_ptr<Unit>m_target = NULLUNIT;
-	shared_ptr<Player>m_plyr = getSelectedChar(m_session, false);
+	PlayerPointer m_plyr = getSelectedChar(m_session, false);
 	if(m_plyr)
 		m_target = m_plyr;
 	else

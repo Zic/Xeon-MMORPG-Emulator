@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -44,7 +44,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		_player->InterruptCurrentSpell();
 
 	shared_ptr<GameObject> pGO = NULLGOB;
-	shared_ptr<Object>pLootObj;
+	ObjectPointerpLootObj;
 	
 	// handle item loot
 	uint64 guid = _player->GetLootGUID();
@@ -187,8 +187,8 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 	
 	// lookup the object we will be looting
 	// TODO: Handle item guids
-	shared_ptr<Object>pLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
-	shared_ptr<Player>plr;
+	ObjectPointerpLootObj = _player->GetMapMgr()->_GetObject(_player->GetLootGUID());
+	PlayerPointer plr;
 	if( pLootObj == NULL )
 		return;
 	
@@ -217,7 +217,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 		Group* party = _player->GetGroup();
 		pLootObj->m_loot.gold = 0;
 
-		vector<shared_ptr<Player> > targets;
+		vector<PlayerPointer  > targets;
 		targets.reserve(party->MemberCount());
 
 		GroupMembersSet::iterator itr;
@@ -243,7 +243,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 		StackPacket pkt(SMSG_LOOT_MONEY_NOTIFY, databuf, 50);
 		pkt << share;
 
-		for(vector<shared_ptr<Player> >::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+		for(vector<PlayerPointer  >::iterator itr = targets.begin(); itr != targets.end(); ++itr)
 		{
 			if(((*itr)->GetUInt32Value(PLAYER_FIELD_COINAGE) + share) >= PLAYER_MAX_GOLD)
 				continue;
@@ -646,7 +646,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 {
-	shared_ptr<Player>pPlayer = GetPlayer();
+	PlayerPointer pPlayer = GetPlayer();
 	WorldPacket data(SMSG_LOGOUT_RESPONSE, 9);
 
 	DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
@@ -707,7 +707,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 
 	DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_CANCEL Message" );
 
-	shared_ptr<Player>pPlayer = GetPlayer();
+	PlayerPointer pPlayer = GetPlayer();
 	if(!pPlayer)
 		return;
 
@@ -1138,7 +1138,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 	GameObjectInfo *goinfo= obj->GetInfo();
 	if (!goinfo) return;
 
-	shared_ptr<Player>plyr = GetPlayer();
+	PlayerPointer plyr = GetPlayer();
    
 	CALL_GO_SCRIPT_EVENT(obj, OnActivate)(_player);
 
@@ -1273,7 +1273,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				}
 				else if(goinfo->ID == 177193) // doom portal
 				{
-					shared_ptr<Player>psacrifice = NULLPLR;
+					PlayerPointer psacrifice = NULLPLR;
 					shared_ptr<Spell>spell = NULLSPELL;
 					
 					// kill the sacrifice player
@@ -1625,7 +1625,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 	if(_player->GetGroup() == NULL || _player->GetGroup()->GetLooter() != _player->m_playerInfo)
 		return;
 
-	shared_ptr<Player>player = _player->GetMapMgr()->GetPlayer((uint32)target_playerguid);
+	PlayerPointer player = _player->GetMapMgr()->GetPlayer((uint32)target_playerguid);
 	if(!player)
 		return;
 

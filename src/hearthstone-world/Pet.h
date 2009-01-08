@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -223,7 +223,7 @@ public:
 
 protected:
 	bool bHasLoyalty;
-	shared_ptr<Player>m_Owner;
+	PlayerPointer m_Owner;
 	uint32 m_PetXP;
 	PetSpellMap mSpells;
 	PlayerPet * mPi;

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -274,8 +274,8 @@ void Arena::OnStart()
 {
 	/* remove arena readyness buff */
 	for(uint32 i = 0; i < 2; ++i) {
-		for(set<shared_ptr<Player> >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
-			shared_ptr<Player>plr = *itr;
+		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
+			PlayerPointer plr = *itr;
 			plr->RemoveAura(ARENA_PREPARATION);
 			hashmap_put(m_players2[i], plr->GetLowGUID(), (any_t)1);
 
@@ -418,10 +418,10 @@ void Arena::Finish()
 	for(int i = 0; i < 2; i++)
 	{
 		bool victorious = (i != m_losingteam);
-		set<shared_ptr<Player> >::iterator itr = m_players[i].begin();
+		set<PlayerPointer  >::iterator itr = m_players[i].begin();
 		for(; itr != m_players[i].end(); itr++)
 		{
-			PlayerPointer plr = (shared_ptr<Player>)(*itr);
+			PlayerPointer plr = (PlayerPointer )(*itr);
 			plr->Root();
 
 			if( plr->m_bgScore.DamageDone == 0 && plr->m_bgScore.HealingDone == 0 )

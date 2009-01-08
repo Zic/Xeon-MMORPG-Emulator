@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -126,7 +126,7 @@ void MapMgr::Destructor()
 		}
 	}
 
-	for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 	{
 		if((*itr)->IsInWorld())
 			(*itr)->RemoveFromWorld(false);
@@ -159,7 +159,7 @@ MapMgr::~MapMgr()
 
 }
 
-void MapMgr::PushObject(shared_ptr<Object>obj)
+void MapMgr::PushObject(ObjectPointerobj)
 {
 	/////////////
 	// Assertions
@@ -262,7 +262,7 @@ void MapMgr::PushObject(shared_ptr<Object>obj)
 	MapCell::ObjectSet::iterator iter;
 
 	uint32 count;
-	shared_ptr<Player>plObj;
+	PlayerPointer plObj;
 
 	if(obj->GetTypeId() == TYPEID_PLAYER)
 		plObj = TO_PLAYER( obj );
@@ -351,7 +351,7 @@ void MapMgr::PushObject(shared_ptr<Object>obj)
 		/* Add the map wide objects */
 		if(_mapWideStaticObjects.size())
 		{
-			for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+			for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 			{
 				count = (*itr)->BuildCreateUpdateBlockForPlayer(&m_createBuffer, plObj);
 				plObj->PushCreationData(&m_createBuffer, count);
@@ -365,7 +365,7 @@ void MapMgr::PushObject(shared_ptr<Object>obj)
 }
 
 
-void MapMgr::PushStaticObject(shared_ptr<Object>obj)
+void MapMgr::PushStaticObject(ObjectPointerobj)
 {
 	_mapWideStaticObjects.insert(obj);
 
@@ -385,7 +385,7 @@ void MapMgr::PushStaticObject(shared_ptr<Object>obj)
 	}
 }
 
-void MapMgr::RemoveObject(shared_ptr<Object>obj, bool free_guid)
+void MapMgr::RemoveObject(ObjectPointerobj, bool free_guid)
 {
 	/////////////
 	// Assertions
@@ -534,7 +534,7 @@ void MapMgr::RemoveObject(shared_ptr<Object>obj, bool free_guid)
 	// Remove the session from our set if it is a player.
 	if(plObj)
 	{
-		for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+		for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 		{
 			plObj->PushOutOfRange((*itr)->GetNewGUID());
 		}
@@ -555,7 +555,7 @@ void MapMgr::RemoveObject(shared_ptr<Object>obj, bool free_guid)
 	}
 }
 
-void MapMgr::ChangeObjectLocation( shared_ptr<Object>obj )
+void MapMgr::ChangeObjectLocation( ObjectPointerobj )
 {
 	// Items and containers are of no interest for us
 	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != shared_from_this() )
@@ -796,7 +796,7 @@ void MapMgr::ChangeObjectLocation( shared_ptr<Object>obj )
 	}
 }
 
-void MapMgr::UpdateInRangeSet( shared_ptr<Object>obj, shared_ptr<Player>plObj, MapCell* cell )
+void MapMgr::UpdateInRangeSet( ObjectPointerobj, PlayerPointer plObj, MapCell* cell )
 {
 	if( cell == NULL )
 		return;
@@ -1032,10 +1032,10 @@ void MapMgr::_UpdateObjects()
 	}
 	//m_updateMutex.Release();
 
-	shared_ptr<Object>pObj;
-	shared_ptr<Player>pOwner;
-	//std::set<shared_ptr<Object> >::iterator it_start, it_end, itr;
-	std::set<shared_ptr<Player> >::iterator it_start, it_end, itr;
+	ObjectPointerpObj;
+	PlayerPointer pOwner;
+	//std::set<ObjectPointer >::iterator it_start, it_end, itr;
+	std::set<PlayerPointer  >::iterator it_start, it_end, itr;
 	PlayerPointer lplr;
 	uint32 count = 0;
 	
@@ -1109,7 +1109,7 @@ void MapMgr::_UpdateObjects()
 	//m_updateMutex.Release();
 	
 	// generate pending a9packets and send to clients.
-	shared_ptr<Player>plyr;
+	PlayerPointer plyr;
 	for(it = _processQueue.begin(); it != _processQueue.end();)
 	{
 		plyr = *it;
@@ -1281,7 +1281,7 @@ bool MapMgr::_CellActive(uint32 x, uint32 y)
 	return false;
 }
 
-void MapMgr::ObjectUpdated(shared_ptr<Object>obj)
+void MapMgr::ObjectUpdated(ObjectPointerobj)
 {
 	// set our fields to dirty
 	// stupid fucked up code in places.. i hate doing this but i've got to :<
@@ -1322,7 +1322,7 @@ void MapMgr::ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight)
 		uint32 startY = cellY > 0 ? cellY - 1 : 0;
 		uint32 posX, posY;
 		MapCell *cell;
-		shared_ptr<Object>obj;
+		ObjectPointerobj;
 		MapCell::ObjectSet::iterator iter, iend;
 		uint32 count;
 		for (posX = startX; posX <= endX; ++posX )
@@ -1386,7 +1386,7 @@ bool MapMgr::Do()
 	}
 
 	/* add static objects */
-	for(set<shared_ptr<Object> >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 		PushStaticObject(*itr);
 
 	/* load corpses */
@@ -1513,7 +1513,7 @@ void MapMgr::BeginInstanceExpireCountdown()
 	InactiveMoveTime = UNIXTIME + 60;
 }
 
-void MapMgr::AddObject(shared_ptr<Object>obj)
+void MapMgr::AddObject(ObjectPointerobj)
 {
 	m_objectinsertlock.Acquire();//<<<<<<<<<<<<
 	m_objectinsertpool.insert(obj);
@@ -1578,7 +1578,7 @@ void MapMgr::_PerformObjectDuties()
 	{
 		__creature_iterator = activeCreatures.begin();
 		CreaturePointer ptr;
-		shared_ptr<Pet> ptr2;
+		PetPointer ptr2;
 
 		for(; __creature_iterator != activeCreatures.end();)
 		{
@@ -1697,7 +1697,7 @@ void MapMgr::TeleportPlayers()
 	{
 		for(; itr !=  m_PlayerStorage.end();)
 		{
-			shared_ptr<Player>p = itr->second;
+			PlayerPointer p = itr->second;
 			++itr;
 			p->EjectFromInstance();
 		}
@@ -1706,7 +1706,7 @@ void MapMgr::TeleportPlayers()
 	{
 		for(; itr !=  m_PlayerStorage.end();)
 		{
-			shared_ptr<Player>p = itr->second;
+			PlayerPointer p = itr->second;
 			++itr;
 			if(p->GetSession())
 				p->GetSession()->LogoutPlayer(false);
@@ -1895,7 +1895,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacke
 	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 		if(p->GetSession())
 		{
@@ -1915,7 +1915,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacke
 	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 		if(p->GetSession())
 		{
@@ -1935,7 +1935,7 @@ void MapMgr::RemoveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 
 		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
@@ -1950,7 +1950,7 @@ void MapMgr::RemovePositiveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 
 		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
@@ -1969,7 +1969,7 @@ void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
 
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 
 		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
@@ -1996,7 +1996,7 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	for(; itr !=  m_PlayerStorage.end();)
 	{
-		shared_ptr<Player>p = itr->second;
+		PlayerPointer p = itr->second;
 		++itr;
 
 		if( ( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask) )

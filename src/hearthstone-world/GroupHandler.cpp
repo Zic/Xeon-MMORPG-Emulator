@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -132,7 +132,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 
-	shared_ptr<Player>player = objmgr.GetPlayer(_player->GetInviter());
+	PlayerPointer player = objmgr.GetPlayer(_player->GetInviter());
 	if ( !player )
 		return;
 	
@@ -167,7 +167,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(SMSG_GROUP_DECLINE, 100);
 
-	shared_ptr<Player>player = objmgr.GetPlayer(_player->GetInviter());
+	PlayerPointer player = objmgr.GetPlayer(_player->GetInviter());
 	if(!player) return;
 
 	data << GetPlayer()->GetName();
@@ -308,7 +308,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 	}
 	
 	// TODO: fix me burlex 
-	//shared_ptr<Player>plyr = objmgr.GetPlayer((uint32)lootMaster);
+	//PlayerPointer plyr = objmgr.GetPlayer((uint32)lootMaster);
 	//if(!plyr)return;
 	Group* pGroup = _player->GetGroup();
 	if( pGroup != NULL)
@@ -366,7 +366,7 @@ void WorldSession::HandleSetPlayerIconOpcode(WorldPacket& recv_data)
 	}
 }
 
-void WorldSession::SendPartyCommandResult(shared_ptr<Player>pPlayer, uint32 p1, std::string name, uint32 err)
+void WorldSession::SendPartyCommandResult(PlayerPointer pPlayer, uint32 p1, std::string name, uint32 err)
 {
 	if(!_player->IsInWorld()) return;
 	// if error message do not work, please sniff it and leave me a message

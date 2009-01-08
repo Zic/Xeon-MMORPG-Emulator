@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -213,7 +213,7 @@ public:
 	{
 		_socket = sock;
 	}
-	HEARTHSTONE_INLINE void SetPlayer(shared_ptr<Player>plr) { _player = plr; }
+	HEARTHSTONE_INLINE void SetPlayer(PlayerPointer plr) { _player = plr; }
 	
 	HEARTHSTONE_INLINE void SetAccountData(uint32 index, char* data, bool initial,uint32 sz)
 	{
@@ -387,7 +387,7 @@ protected:
 	void HandleLootMethodOpcode(WorldPacket& recvPacket);
 	void HandleMinimapPingOpcode(WorldPacket& recvPacket);
 	void HandleSetPlayerIconOpcode(WorldPacket& recv_data);
-	void SendPartyCommandResult(shared_ptr<Player>pPlayer, uint32 p1, std::string name, uint32 err);
+	void SendPartyCommandResult(PlayerPointer pPlayer, uint32 p1, std::string name, uint32 err);
 
 	// Raid
 	void HandleConvertGroupToRaidOpcode(WorldPacket& recvPacket);
@@ -707,7 +707,7 @@ public:
 
 private:
 	friend class Player;
-	shared_ptr<Player>_player;
+	PlayerPointer _player;
 	WorldSocket *_socket;
 		
 	/* Preallocated buffers for movement handlers */

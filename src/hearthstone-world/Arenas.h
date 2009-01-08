@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -87,7 +87,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return false; }
-	void HookGenerateLoot(shared_ptr<Player>plr, shared_ptr<Corpse>pCorpse) {}
+	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse) {}
 
 	uint32 CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome);
 };

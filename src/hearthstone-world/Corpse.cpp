@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -56,7 +56,7 @@ void Corpse::Destructor()
 }
 
 
-void Corpse::Create( shared_ptr<Player>owner, uint32 mapid, float x, float y, float z, float ang )
+void Corpse::Create( PlayerPointer owner, uint32 mapid, float x, float y, float z, float ang )
 {
 	Object::_Create( mapid, x, y, z, ang);
 

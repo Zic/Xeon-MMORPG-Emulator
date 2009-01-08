@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -339,7 +339,7 @@ void WorldSession::HandleCancelChannellingOpcode( WorldPacket& recvPacket)
 	uint32 spellId;
 	recvPacket >> spellId;
 
-	shared_ptr<Player>plyr = GetPlayer();
+	PlayerPointer plyr = GetPlayer();
 	if(!plyr)
 		return;
 	if(plyr->m_currentSpell)

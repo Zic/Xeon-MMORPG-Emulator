@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -36,15 +36,15 @@ class LfgMgr : public Singleton < LfgMgr >, EventableObject
 {
 public:	
 	
-	typedef list<shared_ptr<Player> > LfgPlayerList;
+	typedef list<PlayerPointer  > LfgPlayerList;
 
 	LfgMgr();
 	~LfgMgr();
 	
 	bool AttemptLfgJoin(PlayerPointer pl, uint32 LfgDungeonId);
-	void SetPlayerInLFGqueue(shared_ptr<Player>pl,uint32 LfgDungeonId);
+	void SetPlayerInLFGqueue(PlayerPointer pl,uint32 LfgDungeonId);
 	void SetPlayerInLfmList(PlayerPointer pl, uint32 LfgDungeonId);
-	void RemovePlayerFromLfgQueue(shared_ptr<Player>pl,uint32 LfgDungeonId);
+	void RemovePlayerFromLfgQueue(PlayerPointer pl,uint32 LfgDungeonId);
 	void RemovePlayerFromLfgQueues(PlayerPointer pl);
 	void RemovePlayerFromLfmList(PlayerPointer pl, uint32 LfmDungeonId);
 	void UpdateLfgQueue(uint32 LfgDungeonId);
@@ -65,8 +65,8 @@ protected:
 class LfgMatch
 {
 public:
-	set<shared_ptr<Player> > PendingPlayers;
-	set<shared_ptr<Player> > AcceptedPlayers;
+	set<PlayerPointer  > PendingPlayers;
+	set<PlayerPointer  > AcceptedPlayers;
 	Mutex lock;
 	uint32 DungeonId;
     Group * pGroup;

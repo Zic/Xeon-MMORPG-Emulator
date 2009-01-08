@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -85,7 +85,7 @@ bool LfgMgr::AttemptLfgJoin(PlayerPointer pl, uint32 LfgDungeonId)
 	return false;
 }
 
-void LfgMgr::SetPlayerInLFGqueue(shared_ptr<Player>pl,uint32 LfgDungeonId)
+void LfgMgr::SetPlayerInLFGqueue(PlayerPointer pl,uint32 LfgDungeonId)
 {
 	if( pl == NULL )
 		return;

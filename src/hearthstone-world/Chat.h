@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -191,7 +191,7 @@ public:
 	void RedSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
 	void GreenSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
 	void BlueSystemMessageToPlr(PlayerPointer plr, const char *message, ...);
-	void SystemMessageToPlr(shared_ptr<Player>plr, const char *message, ...);
+	void SystemMessageToPlr(PlayerPointer plr, const char *message, ...);
 	   
 protected:
 

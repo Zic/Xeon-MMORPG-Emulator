@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -92,9 +92,9 @@ struct TWayPoint {
 
 typedef std::map<uint32, TWayPoint> WaypointMap;
 typedef std::map<uint32, TWayPoint>::iterator WaypointIterator;
-typedef std::map<uint32, shared_ptr<Player> > PassengerMap;
-typedef std::map<uint32, shared_ptr<Player> >::iterator PassengerIterator;
-typedef std::map<uint32, shared_ptr<Object> > TransportNPCMap;
+typedef std::map<uint32, PlayerPointer  > PassengerMap;
+typedef std::map<uint32, PlayerPointer  >::iterator PassengerIterator;
+typedef std::map<uint32, ObjectPointer > TransportNPCMap;
 
 bool FillTransporterPathVector(uint32 PathID, TransportPath & Path);
 
@@ -114,8 +114,8 @@ public:
 
 	bool GenerateWaypoints();
 
-	HEARTHSTONE_INLINE void AddPlayer(shared_ptr<Player>pPlayer) { mPassengers[pPlayer->GetLowGUID()] = pPlayer; }
-	HEARTHSTONE_INLINE void RemovePlayer(shared_ptr<Player>pPlayer) {mPassengers.erase(pPlayer->GetLowGUID()); }
+	HEARTHSTONE_INLINE void AddPlayer(PlayerPointer pPlayer) { mPassengers[pPlayer->GetLowGUID()] = pPlayer; }
+	HEARTHSTONE_INLINE void RemovePlayer(PlayerPointer pPlayer) {mPassengers.erase(pPlayer->GetLowGUID()); }
 	HEARTHSTONE_INLINE bool HasPlayer(PlayerPointer pPlayer) { return mPassengers.find(pPlayer->GetLowGUID()) != mPassengers.end(); }
 	HEARTHSTONE_INLINE void SetPeriod(uint32 val) { m_period = val; }
 
@@ -126,7 +126,7 @@ public:
 	WaypointIterator mNextWaypoint;
 
 	void OnPushToWorld();
-	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
+	uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, PlayerPointer target );
 	void DestroyTransportNPCs(PlayerPointer target);
 	void AddNPC(uint32 Entry, float offsetX, float offsetY, float offsetZ, float offsetO);
 	CreaturePointer GetCreature(uint32 Guid);

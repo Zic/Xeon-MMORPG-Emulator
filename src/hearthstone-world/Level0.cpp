@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -150,7 +150,7 @@ bool ChatHandler::HandleStartCommand(const char* args, WorldSession *m_session)
 	std::string race;
 	uint32 raceid = 0;
 
-	shared_ptr<Player>m_plyr = getSelectedChar(m_session, false);
+	PlayerPointer m_plyr = getSelectedChar(m_session, false);
 
 	if (m_plyr && args && strlen(args) < 2)
 	{
@@ -291,7 +291,7 @@ bool ChatHandler::HandleDismountCommand(const char* args, WorldSession *m_sessio
 {
 	shared_ptr<Unit>m_target = NULLUNIT;
 
-	shared_ptr<Player>p_target = getSelectedChar(m_session, false);
+	PlayerPointer p_target = getSelectedChar(m_session, false);
 
 	if(p_target)
 		m_target = p_target;

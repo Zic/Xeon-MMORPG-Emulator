@@ -30,7 +30,7 @@ HEARTHSTONE_INLINE std::string MyConvertFloatToString(const float arg)
 	return out.str();
 }
 
-string RemoveQuestFromPlayer(shared_ptr<Player>plr, Quest *qst)
+string RemoveQuestFromPlayer(PlayerPointer plr, Quest *qst)
 {
 	std::string recout = "|cff00ff00";
 
@@ -138,7 +138,7 @@ bool ChatHandler::HandleQuestStatusCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -180,7 +180,7 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 {
 	if(!*args) return false;
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -271,7 +271,7 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();
@@ -322,7 +322,7 @@ bool ChatHandler::HandleQuestFinishCommand(const char * args, WorldSession * m_s
 				else
 				{
 					// I need some way to get the guid without targeting the creature or looking through all the spawns...
-					shared_ptr<Object>quest_giver;
+					ObjectPointerquest_giver;
 
 					for(uint32 guid=1; guid < plr->GetMapMgr()->m_CreatureArraySize; guid++)
 					{
@@ -598,7 +598,7 @@ bool ChatHandler::HandleQuestListCommand(const char * args, WorldSession * m_ses
 
 	if(quest_giver == 0)
 	{
-		shared_ptr<Player>plr = getSelectedChar(m_session, true);
+		PlayerPointer plr = getSelectedChar(m_session, true);
 		if(!plr)
 		{
 			plr = m_session->GetPlayer();
@@ -1275,7 +1275,7 @@ bool ChatHandler::HandleQuestRemoveCommand(const char * args, WorldSession * m_s
 {
 	if(!*args) return false;
 
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr)
 	{
 		plr = m_session->GetPlayer();

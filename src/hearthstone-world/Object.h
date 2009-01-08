@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -127,7 +127,7 @@ class MapMgr;
 class SERVER_DECL Object : public EventableObject
 {
 public:
-	typedef std::set< shared_ptr<Object> > InRangeSet;
+	typedef std::set< ObjectPointer > InRangeSet;
 	typedef std::map<string, void*> ExtensionSet;
 
 	virtual ~Object ( );
@@ -167,8 +167,8 @@ public:
 	bool IsPet();
 
 	//! This includes any nested objects we have, inventory for example.
-	virtual uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, shared_ptr<Player>target );
-	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer *buf, shared_ptr<Player>target );
+	virtual uint32 __fastcall BuildCreateUpdateBlockForPlayer( ByteBuffer *data, PlayerPointer target );
+	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer *buf, PlayerPointer target );
 	uint32 __fastcall BuildValuesUpdateBlockForPlayer( ByteBuffer * buf, UpdateMask * mask );
 	uint32 __fastcall BuildOutOfRangeUpdateBlock( ByteBuffer *buf );
 
@@ -179,7 +179,7 @@ public:
 	void DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras = false);
 	
 
-	virtual void DestroyForPlayer( shared_ptr<Player>target ) const;
+	virtual void DestroyForPlayer( PlayerPointer target ) const;
 
 	void BuildHeartBeatMsg( WorldPacket *data ) const;
 	WorldPacket * BuildTeleportAckMsg( const LocationVector & v);
@@ -212,8 +212,8 @@ public:
 	//Distance Calculation
 	float CalcDistance(ObjectPointer Ob);
 	float CalcDistance(float ObX, float ObY, float ObZ);
-	float CalcDistance(shared_ptr<Object>Oa, shared_ptr<Object>Ob);
-	float CalcDistance(shared_ptr<Object>Oa, float ObX, float ObY, float ObZ);
+	float CalcDistance(ObjectPointerOa, ObjectPointerOb);
+	float CalcDistance(ObjectPointerOa, float ObX, float ObY, float ObZ);
 	float CalcDistance(float OaX, float OaY, float OaZ, float ObX, float ObY, float ObZ);
 
 	//! Only for MapMgr use
@@ -415,11 +415,11 @@ public:
 
 	bool IsInRangeOppFactSet(ObjectPointer pObj) { return (m_oppFactsInRange.count(pObj) > 0); }
 	void UpdateOppFactionSet();
-	HEARTHSTONE_INLINE std::set<shared_ptr<Object> >::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Object> >::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player> >::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player> >::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
-	HEARTHSTONE_INLINE std::set<shared_ptr<Player> > * GetInRangePlayerSet() { return &m_inRangePlayers; };
+	HEARTHSTONE_INLINE std::set<ObjectPointer >::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
+	HEARTHSTONE_INLINE std::set<ObjectPointer >::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
+	HEARTHSTONE_INLINE std::set<PlayerPointer  >::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
+	HEARTHSTONE_INLINE std::set<PlayerPointer  >::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
+	HEARTHSTONE_INLINE std::set<PlayerPointer  > * GetInRangePlayerSet() { return &m_inRangePlayers; };
 
 	void __fastcall SendMessageToSet(WorldPacket *data, bool self,bool myteam_only=false);
 	HEARTHSTONE_INLINE void SendMessageToSet(StackPacket * data, bool self) { OutPacketToSet(data->GetOpcode(), (uint16)data->GetSize(), data->GetBufferPointer(), self); }
@@ -448,7 +448,7 @@ public:
 	//*****************************************************************************************
 	//* SpellLog packets just to keep the code cleaner and better to read
 	//*****************************************************************************************
-	void SendSpellLog(shared_ptr<Object>Caster, shared_ptr<Object>Target,uint32 Ability, uint8 SpellLogType);
+	void SendSpellLog(ObjectPointerCaster, ObjectPointerTarget,uint32 Ability, uint8 SpellLogType);
 	void SendSpellNonMeleeDamageLog( ObjectPointer Caster, UnitPointer Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToSet );
 	void SendAttackerStateUpdate( UnitPointer Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate );
 
@@ -498,9 +498,9 @@ protected:
 	void _Create( uint32 mapid, float x, float y, float z, float ang);
 
 	//! Mark values that need updating for specified player.
-	virtual void _SetUpdateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
+	virtual void _SetUpdateBits(UpdateMask *updateMask, PlayerPointer target) const;
 	//! Mark values that player should get when he/she/it sees object for first time.
-	virtual void _SetCreateBits(UpdateMask *updateMask, shared_ptr<Player>target) const;
+	virtual void _SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const;
 
 	void _BuildMovementUpdate( ByteBuffer *data, uint8 flags, uint32 flags2, PlayerPointer target );
 	void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask, PlayerPointer target );
@@ -554,9 +554,9 @@ protected:
 
 	//! Set of Objects in range.
 	//! TODO: that functionality should be moved into WorldServer.
-	std::set<shared_ptr<Object> > m_objectsInRange;
-	std::set<shared_ptr<Player> > m_inRangePlayers;
-	std::set<shared_ptr<Object> > m_oppFactsInRange;
+	std::set<ObjectPointer > m_objectsInRange;
+	std::set<PlayerPointer  > m_inRangePlayers;
+	std::set<ObjectPointer > m_oppFactsInRange;
    
   
 	//! Remove object from map

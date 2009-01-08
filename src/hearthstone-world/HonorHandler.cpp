@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -38,7 +38,7 @@ void WorldSession::HandleSetVisibleRankOpcode(WorldPacket& recv_data)
 	}
 }
 
-void HonorHandler::AddHonorPointsToPlayer(shared_ptr<Player>pPlayer, uint32 uAmount)
+void HonorHandler::AddHonorPointsToPlayer(PlayerPointer pPlayer, uint32 uAmount)
 {
 	pPlayer->m_honorPoints += uAmount;
 	pPlayer->m_honorToday += uAmount;
@@ -49,7 +49,7 @@ void HonorHandler::AddHonorPointsToPlayer(shared_ptr<Player>pPlayer, uint32 uAmo
 	RecalculateHonorFields(pPlayer);
 }
 
-int32 HonorHandler::CalculateHonorPointsForKill( shared_ptr<Player>pPlayer, UnitPointer pVictim )
+int32 HonorHandler::CalculateHonorPointsForKill( PlayerPointer pPlayer, UnitPointer pVictim )
 {
 	// this sucks.. ;p
 	if( pVictim == NULL )
@@ -89,7 +89,7 @@ int32 HonorHandler::CalculateHonorPointsForKill( shared_ptr<Player>pPlayer, Unit
 	return honor_points;
 }
 
-void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pVictim )
+void HonorHandler::OnPlayerKilledUnit( PlayerPointer pPlayer, UnitPointer pVictim )
 {
 	if( pVictim == NULL || pPlayer == NULL || !pVictim->IsPlayer() || !pPlayer->IsPlayer() )
 		return;
@@ -123,13 +123,13 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 		if( pPlayer->m_bg )
 		{
 			// hackfix for battlegrounds (since the gorups there are disabled, we need to do this manually)
-			vector<shared_ptr<Player> > toadd;
+			vector<PlayerPointer  > toadd;
 			uint32 t = pPlayer->m_bgTeam;
 			toadd.reserve(15);		// shouldnt have more than this
 			pPlayer->m_bg->Lock();
-			set<shared_ptr<Player> > * s = &pPlayer->m_bg->m_players[t];
+			set<PlayerPointer  > * s = &pPlayer->m_bg->m_players[t];
 
-			for(set<shared_ptr<Player> >::iterator itr = s->begin(); itr != s->end(); ++itr)
+			for(set<PlayerPointer  >::iterator itr = s->begin(); itr != s->end(); ++itr)
 			{
 				if((*itr) == pPlayer || (*itr)->isInRange(pPlayer,40.0f))
 					toadd.push_back(*itr);
@@ -138,7 +138,7 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 			if( toadd.size() > 0 )
 			{
 				uint32 pts = Points / (uint32)toadd.size();
-				for(vector<shared_ptr<Player> >::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
+				for(vector<PlayerPointer  >::iterator vtr = toadd.begin(); vtr != toadd.end(); ++vtr)
 				{
 					AddHonorPointsToPlayer(*vtr, pts);
 
@@ -165,7 +165,7 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 		else if(pPlayer->GetGroup())
         {
             Group *pGroup = pPlayer->GetGroup();
-            shared_ptr<Player>gPlayer = NULLPLR;
+            PlayerPointer gPlayer = NULLPLR;
             int32 GroupPoints;
 			pGroup->Lock();
             GroupPoints = (Points / (pGroup->MemberCount() ? pGroup->MemberCount() : 1));
@@ -251,7 +251,7 @@ void HonorHandler::OnPlayerKilledUnit( shared_ptr<Player>pPlayer, UnitPointer pV
 	}
 }
 
-void HonorHandler::RecalculateHonorFields(shared_ptr<Player>pPlayer)
+void HonorHandler::RecalculateHonorFields(PlayerPointer pPlayer)
 {
 	pPlayer->SetUInt32Value(PLAYER_FIELD_KILLS, uint16(pPlayer->m_killsToday) | ( pPlayer->m_killsYesterday << 16 ) );
 	pPlayer->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, pPlayer->m_honorToday);
@@ -264,7 +264,7 @@ void HonorHandler::RecalculateHonorFields(shared_ptr<Player>pPlayer)
 bool ChatHandler::HandleAddKillCommand(const char* args, WorldSession* m_session)
 {
 	uint32 KillAmount = args ? atol(args) : 1;
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(plr == 0)
 		return true;
 
@@ -280,7 +280,7 @@ bool ChatHandler::HandleAddKillCommand(const char* args, WorldSession* m_session
 bool ChatHandler::HandleAddHonorCommand(const char* args, WorldSession* m_session)
 {
 	uint32 HonorAmount = args ? atol(args) : 1;
-	shared_ptr<Player>plr = getSelectedChar(m_session, true);
+	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(plr == 0)
 		return true;
 

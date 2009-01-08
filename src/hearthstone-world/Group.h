@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -125,21 +125,21 @@ public:
 
 	// Leaders and Looting
 	void SetLeader(PlayerPointer pPlayer,bool silent);
-	void SetLooter(shared_ptr<Player>pPlayer, uint8 method, uint16 threshold);
+	void SetLooter(PlayerPointer pPlayer, uint8 method, uint16 threshold);
 
 	// Transferring data to clients
 	void Update();
 
 	HEARTHSTONE_INLINE void SendPacketToAll(WorldPacket *packet) { SendPacketToAllButOne(packet, NULLPLR); }
-	void SendPacketToAllButOne(WorldPacket *packet, shared_ptr<Player>pSkipTarget);
+	void SendPacketToAllButOne(WorldPacket *packet, PlayerPointer pSkipTarget);
 
 	HEARTHSTONE_INLINE void SendPacketToAll(StackPacket *packet) { SendPacketToAllButOne(packet, NULLPLR); }
-	void SendPacketToAllButOne(StackPacket *packet, shared_ptr<Player>pSkipTarget);
+	void SendPacketToAllButOne(StackPacket *packet, PlayerPointer pSkipTarget);
 
 	HEARTHSTONE_INLINE void OutPacketToAll(uint16 op, uint16 len, const void* data) { OutPacketToAllButOne(op, len, data, NULLPLR); }
-	void OutPacketToAllButOne(uint16 op, uint16 len, const void* data, shared_ptr<Player>pSkipTarget);
+	void OutPacketToAllButOne(uint16 op, uint16 len, const void* data, PlayerPointer pSkipTarget);
 
-	void SendNullUpdate(shared_ptr<Player>pPlayer);
+	void SendNullUpdate(PlayerPointer pPlayer);
 
 	// Group Combat
 	void SendPartyKillLog(ObjectPointer player, ObjectPointer Unit);
@@ -166,7 +166,7 @@ public:
 
 	void MovePlayer(PlayerInfo* info, uint8 subgroup);
 
-	bool HasMember(shared_ptr<Player>pPlayer);
+	bool HasMember(PlayerPointer pPlayer);
 	bool HasMember(PlayerInfo * info);
 	HEARTHSTONE_INLINE uint32 MemberCount(void) { return m_MemberCount; }
 	HEARTHSTONE_INLINE bool IsFull() { return ((m_GroupType == GROUP_TYPE_PARTY && m_MemberCount >= MAX_GROUP_SIZE_PARTY) || (m_GroupType == GROUP_TYPE_RAID && m_MemberCount >= MAX_GROUP_SIZE_RAID)); }

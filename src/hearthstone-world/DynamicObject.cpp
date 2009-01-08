@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -133,8 +133,8 @@ void DynamicObject::UpdateTargets()
 	{
 //		FactionRangeList::iterator itr  = m_inRangeOppFactions.begin();
 //		FactionRangeList::iterator iend = m_inRangeOppFactions.end();
-		std::set<shared_ptr<Object> >::iterator itr = GetInRangeSetBegin(),itr2;
-		std::set<shared_ptr<Object> >::iterator iend = GetInRangeSetEnd();
+		std::set<ObjectPointer >::iterator itr = GetInRangeSetBegin(),itr2;
+		std::set<ObjectPointer >::iterator iend = GetInRangeSetEnd();
 		UnitPointer target;
 		shared_ptr<Aura>pAura;
 		float radius = m_floatValues[DYNAMICOBJECT_RADIUS]*m_floatValues[DYNAMICOBJECT_RADIUS];

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -693,7 +693,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 		return;
 	}
 
-	PlayerPointer plr = shared_ptr<Player>(new Player((uint32)playerGuid));
+	PlayerPointer plr = PlayerPointer (new Player((uint32)playerGuid));
 	plr->Init();
 	plr->SetSession(this);
 	m_bIsWLevelSet = false;

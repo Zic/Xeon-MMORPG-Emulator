@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,7 +24,7 @@ uint32 QuestMgr::CalcQuestStatus(ObjectPointer quest_giver, PlayerPointer plr, Q
 	return CalcQuestStatus(quest_giver, plr, qst->qst, qst->type, false);
 }
 
-bool QuestMgr::isRepeatableQuestFinished(shared_ptr<Player>plr, Quest *qst)
+bool QuestMgr::isRepeatableQuestFinished(PlayerPointer plr, Quest *qst)
 {
     uint32 i;
 
@@ -454,7 +454,7 @@ void QuestMgr::BuildRequestItems(WorldPacket *data, Quest* qst, ObjectPointer qs
 	*data << uint32(10);
 }
 
-void QuestMgr::BuildQuestComplete(shared_ptr<Player>plr, Quest* qst)
+void QuestMgr::BuildQuestComplete(PlayerPointer plr, Quest* qst)
 {
 	uint32 xp ;
 	if(plr->getLevel() < plr->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
@@ -483,7 +483,7 @@ void QuestMgr::BuildQuestComplete(shared_ptr<Player>plr, Quest* qst)
 	plr->GetSession()->SendPacket(&data);
 }
 
-void QuestMgr::BuildQuestList(WorldPacket *data, ObjectPointer qst_giver, shared_ptr<Player>plr, uint32 language)
+void QuestMgr::BuildQuestList(WorldPacket *data, ObjectPointer qst_giver, PlayerPointer plr, uint32 language)
 {
 	uint32 status;
 	list<QuestRelation *>::iterator it;
@@ -587,7 +587,7 @@ void QuestMgr::BuildQuestUpdateComplete(WorldPacket* data, Quest* qst)
 	*data << qst->id;
 }
 
-void QuestMgr::SendPushToPartyResponse(shared_ptr<Player>plr, PlayerPointer pTarget, uint32 response)
+void QuestMgr::SendPushToPartyResponse(PlayerPointer plr, PlayerPointer pTarget, uint32 response)
 {
 	WorldPacket data(MSG_QUEST_PUSH_RESULT, 13);
 	data << pTarget->GetGUID();
@@ -596,7 +596,7 @@ void QuestMgr::SendPushToPartyResponse(shared_ptr<Player>plr, PlayerPointer pTar
 	plr->GetSession()->SendPacket(&data);
 }
 
-bool QuestMgr::OnGameObjectActivate(shared_ptr<Player>plr, shared_ptr<GameObject>go)
+bool QuestMgr::OnGameObjectActivate(PlayerPointer plr, shared_ptr<GameObject>go)
 {
 	uint32 i, j;
 	QuestLogEntry *qle;
@@ -676,7 +676,7 @@ void QuestMgr::OnPlayerKill(PlayerPointer plr, CreaturePointer victim)
 	}
 
 	// Shared kills
-	shared_ptr<Player>gplr = NULLPLR;
+	PlayerPointer gplr = NULLPLR;
 
 	if(plr->InGroup())
 	{
@@ -734,7 +734,7 @@ void QuestMgr::OnPlayerKill(PlayerPointer plr, CreaturePointer victim)
 	}
 }
 
-void QuestMgr::OnPlayerSlain(shared_ptr<Player>plr, shared_ptr<Player>victim)
+void QuestMgr::OnPlayerSlain(PlayerPointer plr, PlayerPointer victim)
 {
 	if(!plr || !victim)
 		return;
@@ -753,7 +753,7 @@ void QuestMgr::OnPlayerSlain(shared_ptr<Player>plr, shared_ptr<Player>victim)
 	}
 
 	// Shared kills
-	shared_ptr<Player>gplr = NULLPLR;
+	PlayerPointer gplr = NULLPLR;
 
 	if(plr->InGroup())
 	{
@@ -905,7 +905,7 @@ void QuestMgr::OnPlayerExploreArea(PlayerPointer plr, uint32 AreaID)
 	}
 }
 
-void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver)
+void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver)
 {
 	// Reputation reward
 	for(int z = 0; z < 2; z++)
@@ -939,7 +939,7 @@ void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, shared_p
 		plr->ModStanding(fact, amt);
 	}
 }
-void QuestMgr::OnQuestAccepted(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver)
+void QuestMgr::OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver)
 {
 	
 }
@@ -952,7 +952,7 @@ void QuestMgr::GiveQuestTitleReward(PlayerPointer plr, Quest* qst)
 	plr->SetKnownTitle(qst->reward_title, true);
 }
 
-void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, shared_ptr<Object>qst_giver, uint32 reward_slot)
+void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointerqst_giver, uint32 reward_slot)
 {
     QuestLogEntry *qle = NULL;
     qle = plr->GetQuestLogForEntry(qst->id);
@@ -1361,7 +1361,7 @@ uint32 QuestMgr::GenerateRewardMoney( PlayerPointer pl, Quest * qst )
 		return qst->reward_money;
 }
 
-uint32 QuestMgr::GenerateQuestXP(shared_ptr<Player>plr, Quest *qst)	
+uint32 QuestMgr::GenerateQuestXP(PlayerPointer plr, Quest *qst)	
 {	
 	if(qst->is_repeatable)
 		return 0;	
@@ -1415,7 +1415,7 @@ uint32 QuestMgr::GenerateQuestXP(shared_ptr<Player>plr, Quest *qst)
 	return (int)mmx;*/
 
 
-void QuestMgr::SendQuestInvalid(INVALID_REASON reason, shared_ptr<Player>plyr)
+void QuestMgr::SendQuestInvalid(INVALID_REASON reason, PlayerPointer plyr)
 {
 	if(!plyr)
 		return;
@@ -1423,7 +1423,7 @@ void QuestMgr::SendQuestInvalid(INVALID_REASON reason, shared_ptr<Player>plyr)
 	DEBUG_LOG("WORLD:Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
-void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, shared_ptr<Player>plyr)
+void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, PlayerPointer plyr)
 {
 	if(!plyr)
 		return;
@@ -1436,7 +1436,7 @@ void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, shared_ptr<Pla
 	DEBUG_LOG("WORLD:Sent SMSG_QUESTGIVER_QUEST_FAILED");
 }
 
-void QuestMgr::SendQuestUpdateFailedTimer(Quest *pQuest, shared_ptr<Player>plyr)
+void QuestMgr::SendQuestUpdateFailedTimer(Quest *pQuest, PlayerPointer plyr)
 {
 	if(!plyr)
 		return;
@@ -1445,7 +1445,7 @@ void QuestMgr::SendQuestUpdateFailedTimer(Quest *pQuest, shared_ptr<Player>plyr)
 	DEBUG_LOG("WORLD:Sent SMSG_QUESTUPDATE_FAILEDTIMER");
 }
 
-void QuestMgr::SendQuestUpdateFailed(Quest *pQuest, shared_ptr<Player>plyr)
+void QuestMgr::SendQuestUpdateFailed(Quest *pQuest, PlayerPointer plyr)
 {
 	if(!plyr)
 		return;
@@ -1454,7 +1454,7 @@ void QuestMgr::SendQuestUpdateFailed(Quest *pQuest, shared_ptr<Player>plyr)
 	DEBUG_LOG("WORLD:Sent SMSG_QUESTUPDATE_FAILED");
 }
 
-void QuestMgr::SendQuestLogFull(shared_ptr<Player>plyr)
+void QuestMgr::SendQuestLogFull(PlayerPointer plyr)
 {
 	if(!plyr)
 		return;
@@ -1509,7 +1509,7 @@ void QuestMgr::BuildQuestFailed(WorldPacket* data, uint32 questid)
 	*data << questid;
 }
 
-bool QuestMgr::OnActivateQuestGiver(shared_ptr<Object>qst_giver, shared_ptr<Player>plr)
+bool QuestMgr::OnActivateQuestGiver(ObjectPointerqst_giver, PlayerPointer plr)
 {
 	if(qst_giver->GetTypeId() == TYPEID_GAMEOBJECT && !TO_GAMEOBJECT(qst_giver)->HasQuests())
 		return false;
@@ -1649,7 +1649,7 @@ QuestMgr::~QuestMgr()
 }
 
 
-bool QuestMgr::CanStoreReward(shared_ptr<Player>plyr, Quest *qst, uint32 reward_slot)
+bool QuestMgr::CanStoreReward(PlayerPointer plyr, Quest *qst, uint32 reward_slot)
 {
     uint32 available_slots = 0;
     uint32 slotsrequired = 0;

@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -357,7 +357,7 @@ void Transporter::TransportPassengers(uint32 mapid, uint32 oldmap, float x, floa
 			it2 = itr;
 			++itr;
 
-			shared_ptr<Player>plr = objmgr.GetPlayer(it2->first);
+			PlayerPointer plr = objmgr.GetPlayer(it2->first);
 			if(!plr)
 			{
 				// remove from map
@@ -509,7 +509,7 @@ CreaturePointer Transporter::GetCreature(uint32 Guid)
 		return NULLCREATURE;
 }
 
-uint32 Transporter::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, shared_ptr<Player>target )
+uint32 Transporter::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target )
 {
 	uint32 cnt = Object::BuildCreateUpdateBlockForPlayer(data, target);
 

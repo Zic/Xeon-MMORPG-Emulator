@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -413,7 +413,7 @@ bool Unit::canReachWithAttack(shared_ptr<Unit>pVictim)
 	return ( distance <= attackreach );
 }
 
-void Unit::GiveGroupXP(shared_ptr<Unit>pVictim, shared_ptr<Player>PlayerInGroup)
+void Unit::GiveGroupXP(shared_ptr<Unit>pVictim, PlayerPointer PlayerInGroup)
 {
 	if(!PlayerInGroup) 
 		return;
@@ -427,10 +427,10 @@ void Unit::GiveGroupXP(shared_ptr<Unit>pVictim, shared_ptr<Player>PlayerInGroup)
 		return;
 
 	//Get Highest Level Player, Calc Xp and give it to each group member
-	shared_ptr<Player>pHighLvlPlayer = NULLPLR;
-	shared_ptr<Player>pGroupGuy = NULLPLR;
+	PlayerPointer pHighLvlPlayer = NULLPLR;
+	PlayerPointer pGroupGuy = NULLPLR;
 	  int active_player_count=0;
-	shared_ptr<Player>active_player_list[MAX_GROUP_SIZE_RAID];//since group is small we can afford to do this ratehr then recheck again the whole active player set
+	PlayerPointer active_player_list[MAX_GROUP_SIZE_RAID];//since group is small we can afford to do this ratehr then recheck again the whole active player set
 	int total_level=0;
 	float xp_mod = 1.0f;
 
@@ -3196,7 +3196,7 @@ else
 		TO_PLAYER( pVictim )->GetItemInterface()->ReduceItemDurability();
 		if( !this->IsPlayer() )
 		{
-			shared_ptr<Player>pr = TO_PLAYER( pVictim );
+			PlayerPointer pr = TO_PLAYER( pVictim );
 			if( Rand( pr->GetSkillUpChance( SKILL_DEFENSE ) * sWorld.getRate( RATE_SKILLCHANCE ) ) )
 			{
 				pr->_AdvanceSkillLine( SKILL_DEFENSE, float2int32( 1.0f * sWorld.getRate(RATE_SKILLRATE)));
@@ -3321,7 +3321,7 @@ else
 
 			if (ex->deleted) continue;
 
-			for(set<shared_ptr<Object> >::iterator itr = m_objectsInRange.begin(); itr != m_objectsInRange.end(); ++itr)
+			for(set<ObjectPointer >::iterator itr = m_objectsInRange.begin(); itr != m_objectsInRange.end(); ++itr)
 			{
 				if (!(*itr) || (*itr) == pVictim || !(*itr)->IsUnit())
 					continue;
@@ -4140,7 +4140,7 @@ void Unit::Emote(EmoteType emote)
 	SendMessageToSet (&data, true);
 }
 
-void Unit::SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, shared_ptr<Player>plr)
+void Unit::SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, PlayerPointer plr)
 {
 	size_t UnitNameLength = 0, MessageLength = 0;
 	CreatureInfo *ci = (m_objectTypeId == TYPEID_UNIT) ? ((Creature*)this)->creature_info : NULL;
@@ -4795,7 +4795,7 @@ bool Unit::HasAurasOfBuffType(uint32 buff_type, const uint64 &guid,uint32 skip)
 	return false;
 }
 
-AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, shared_ptr<Object>caster)
+AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, ObjectPointercaster)
 {
 	AuraCheckResponse resp;
 
@@ -4827,7 +4827,7 @@ AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, shared_ptr<Obje
 	return resp;
 }
 
-AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, shared_ptr<Object>caster)
+AuraCheckResponse Unit::AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointercaster)
 {
 	AuraCheckResponse resp;
 
@@ -5140,7 +5140,7 @@ void Unit::UpdateVisibility()
 	uint32 count;
 	bool can_see;
 	bool is_visible;
-	shared_ptr<Player>pl;
+	PlayerPointer pl;
 	ObjectPointer pObj;
 	PlayerPointer plr;
 
@@ -5201,7 +5201,7 @@ void Unit::UpdateVisibility()
 	}
 	else			// For units we can save a lot of work
 	{
-		for(set<shared_ptr<Player> >::iterator it2 = GetInRangePlayerSetBegin(); it2 != GetInRangePlayerSetEnd(); ++it2)
+		for(set<PlayerPointer  >::iterator it2 = GetInRangePlayerSetBegin(); it2 != GetInRangePlayerSetEnd(); ++it2)
 		{
 			can_see = (*it2)->CanSee(obj_shared_from_this());
 			is_visible = (*it2)->GetVisibility(obj_shared_from_this(), &itr);
@@ -5890,9 +5890,9 @@ void Creature::UpdateLootAnimation()
 	if( m_loot.HasItems() )
 	{
 		// update players with lootable flags
-		for(set<shared_ptr<Player> >::iterator itr = m_inRangePlayers.begin(); itr != m_inRangePlayers.end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_inRangePlayers.begin(); itr != m_inRangePlayers.end(); ++itr)
 		{
-			shared_ptr<Player>plr = *itr;
+			PlayerPointer plr = *itr;
 			if( ( plr->GetLowGUID() == m_taggingPlayer ) ||
 				( plr->GetGroup() != NULL && plr->GetGroup()->GetID() == m_taggingGroup ) )
 			{
@@ -5906,7 +5906,7 @@ void Creature::UpdateLootAnimation()
 	else
 	{
 		// we are still alive, probably updating tapped state
-		for(set<shared_ptr<Player> >::iterator itr = m_inRangePlayers.begin(); itr != m_inRangePlayers.end(); ++itr)
+		for(set<PlayerPointer  >::iterator itr = m_inRangePlayers.begin(); itr != m_inRangePlayers.end(); ++itr)
 		{
 			if( !m_taggingPlayer )
 			{
@@ -5959,7 +5959,7 @@ void Object::ClearLoot()
 }
 
 
-void Creature::Tag(shared_ptr<Player>plr)
+void Creature::Tag(PlayerPointer plr)
 {
 	// Tagging
 	if( m_taggingPlayer != 0 )

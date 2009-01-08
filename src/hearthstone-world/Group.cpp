@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -83,7 +83,7 @@ Group::Group(bool Assign)
 	m_voiceChannelRequested = false;
 	m_voiceChannelId = 0;
 	m_voiceMemberCount = 0;
-	memset(m_voiceMembersList, 0, sizeof(shared_ptr<Player>)*41);
+	memset(m_voiceMembersList, 0, sizeof(PlayerPointer )*41);
 #endif
 	m_prayerOfMendingCount = 0;
 	m_prayerOfMendingTarget = 0;
@@ -213,7 +213,7 @@ void Group::Update()
 	if( m_updateblock )
 		return;
 
-	shared_ptr<Player>pNewLeader = NULLPLR;
+	PlayerPointer pNewLeader = NULLPLR;
 	PlayerInfo *plrinf;
 
 	WorldPacket data( 50 + ( m_MemberCount * 20 ) );
@@ -563,7 +563,7 @@ void Group::RemovePlayer(PlayerInfo * info)
 	}
 
 	/* eek! ;P */
-	shared_ptr<Player>newPlayer = NULLPLR;
+	PlayerPointer newPlayer = NULLPLR;
 	if(m_Looter == info)
 	{
 		newPlayer = FindFirstPlayer();
@@ -614,7 +614,7 @@ void Group::ExpandToRaid()
 	m_groupLock.Release();
 }
 
-void Group::SetLooter(shared_ptr<Player>pPlayer, uint8 method, uint16 threshold)
+void Group::SetLooter(PlayerPointer pPlayer, uint8 method, uint16 threshold)
 { 
 	if( pPlayer != NULL )
 	{
@@ -626,7 +626,7 @@ void Group::SetLooter(shared_ptr<Player>pPlayer, uint8 method, uint16 threshold)
 	Update();
 }
 
-void Group::SendPacketToAllButOne(WorldPacket *packet, shared_ptr<Player>pSkipTarget)
+void Group::SendPacketToAllButOne(WorldPacket *packet, PlayerPointer pSkipTarget)
 {
 	GroupMembersSet::iterator itr;
 	uint32 i = 0;
@@ -643,7 +643,7 @@ void Group::SendPacketToAllButOne(WorldPacket *packet, shared_ptr<Player>pSkipTa
 	m_groupLock.Release();
 }
 
-void Group::SendPacketToAllButOne(StackPacket *packet, shared_ptr<Player>pSkipTarget)
+void Group::SendPacketToAllButOne(StackPacket *packet, PlayerPointer pSkipTarget)
 {
 	GroupMembersSet::iterator itr;
 	uint32 i = 0;
@@ -660,7 +660,7 @@ void Group::SendPacketToAllButOne(StackPacket *packet, shared_ptr<Player>pSkipTa
 	m_groupLock.Release();
 }
 
-void Group::OutPacketToAllButOne(uint16 op, uint16 len, const void* data, shared_ptr<Player>pSkipTarget)
+void Group::OutPacketToAllButOne(uint16 op, uint16 len, const void* data, PlayerPointer pSkipTarget)
 {
 	GroupMembersSet::iterator itr;
 	uint32 i = 0;
@@ -775,7 +775,7 @@ void Group::MovePlayer(PlayerInfo *info, uint8 subgroup)
 	m_groupLock.Release();
 }
 
-void Group::SendNullUpdate( shared_ptr<Player>pPlayer )
+void Group::SendNullUpdate( PlayerPointer pPlayer )
 {
 	// this packet is 24 bytes long.		// AS OF 2.1.0
 	uint8 buffer[24];

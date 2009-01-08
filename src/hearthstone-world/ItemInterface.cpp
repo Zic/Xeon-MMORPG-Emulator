@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,7 +24,7 @@
 #include "Player.h"
 //
 //-------------------------------------------------------------------//
-ItemInterface::ItemInterface( shared_ptr<Player>pPlayer )
+ItemInterface::ItemInterface( PlayerPointer pPlayer )
 {
 	m_pOwner = pPlayer;
 	memset(m_pItems, 0, sizeof(shared_ptr<Item>)*MAX_INVENTORY_SLOT);

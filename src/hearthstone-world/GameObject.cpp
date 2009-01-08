@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -76,7 +76,7 @@ void GameObject::Destructor()
 	uint32 guid = GetUInt32Value(OBJECT_FIELD_CREATED_BY);
 	if(guid)
 	{
-		shared_ptr<Player>plr = objmgr.GetPlayer(guid);
+		PlayerPointer plr = objmgr.GetPlayer(guid);
 		if(plr && plr->GetSummonedObject() == object_shared_from_this() )
 			plr->SetSummonedObject(NULLOBJ);
 
@@ -466,7 +466,7 @@ void GameObject::EventCloseDoor()
 	SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
 }
 
-void GameObject::UseFishingNode(shared_ptr<Player>player)
+void GameObject::UseFishingNode(PlayerPointer player)
 {
 	sEventMgr.RemoveEvents( shared_from_this() );
 	if( GetUInt32Value( GAMEOBJECT_FLAGS ) != 32 ) // Clicking on the bobber before something is hooked
@@ -625,7 +625,7 @@ void GameObject::_Expire()
 	if(IsInWorld())
 		RemoveFromWorld(true);
 
-	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((shared_ptr<Object>)this), EVENT_DELETE_TIMER, 1000, 1);
+	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((ObjectPointer)this), EVENT_DELETE_TIMER, 1000, 1);
 	//delete this; you don't get to do that.
 	Destructor();
 }

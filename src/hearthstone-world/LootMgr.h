@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -29,7 +29,7 @@ public:
 	LootRoll();
 	~LootRoll();
 	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr);
-	void PlayerRolled(shared_ptr<Player>player, uint8 choice);
+	void PlayerRolled(PlayerPointer player, uint8 choice);
 	void Finalize();
 
 	int32 event_GetInstanceID();
