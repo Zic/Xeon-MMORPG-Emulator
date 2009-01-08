@@ -152,10 +152,8 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	uint32 AccountID;
 	string GMFlags;
 	uint8 AccountFlags;
-	uint8 SessionKey[40];
 
 	recvData >> AccountID >> AccountName >> GMFlags >> AccountFlags;
-	//recvData.read(SessionKey,40);
 	printf( " >> got information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
 	//	sLog.outColor(TNORMAL, "\n");
 
