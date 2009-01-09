@@ -199,7 +199,7 @@ void WeatherInfo::_GenerateWeather()
 	SendUpdate();
 
 	sEventMgr.AddEvent(CAST(WeatherInfo,shared_from_this()), &WeatherInfo::BuildUp, EVENT_WEATHER_UPDATE, (uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2), 0,0);
-	DEBUG_LOG("WeatherMgr", "Forecast for zone:%d new type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2));
+	Log.Debug("WeatherMgr", "Forecast for zone:%d new type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2));
 }
 
 void WeatherInfo::BuildUp()
