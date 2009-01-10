@@ -2236,7 +2236,13 @@ bool AIInterface::saveWayPoints()
 		ss << wp->backwardemoteoneshot << ", ";
 		ss << wp->backwardemoteid << ", ";
 		ss << wp->forwardskinid << ", ";
-		ss << wp->backwardskinid << ")\0";
+		ss << wp->backwardskinid << ", ";
+		ss << wp->forwardStandState << ", ";
+		ss << wp->backwardStandState << ", ";
+		ss << wp->forwardSpellToCast << ", ";
+		ss << wp->backwardSpellToCast << ",'";
+		ss << wp->forwardSayText << "','";
+		ss << wp->backwardSayText << "')\0";
 		WorldDatabase.Query( ss.str().c_str() );
 	}
 	return true;

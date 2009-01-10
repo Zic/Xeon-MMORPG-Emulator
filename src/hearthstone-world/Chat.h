@@ -265,6 +265,8 @@ protected:
 	bool HandleWPMoveHereCommand(const char* args, WorldSession *m_session);
 	bool HandleWPWaitCommand(const char* args, WorldSession *m_session);
 	bool HandleWPEmoteCommand(const char* args, WorldSession *m_session);
+	bool HandleWPStandStateCommand(const char* args, WorldSession *m_session);
+	bool HandleWPSpellToCastCommand(const char* args, WorldSession *m_session);
 	bool HandleWPSkinCommand(const char* args, WorldSession *m_session);
 	bool HandleWPChangeNoCommand(const char* args, WorldSession *m_session);
 	bool HandleWPInfoCommand(const char* args, WorldSession *m_session);
@@ -272,6 +274,9 @@ protected:
 	bool HandleSaveWaypoints(const char* args, WorldSession * m_session);
 	bool HandleGenerateWaypoints(const char* args, WorldSession * m_session);
 	bool HandleDeleteWaypoints(const char* args, WorldSession * m_session);
+	bool HandleWaypointGettextCommand(const char* args, WorldSession *m_session);
+	bool HandleWaypointBackwardTextCommand(const char* args, WorldSession *m_session);
+	bool HandleWaypointForwardTextCommand(const char* args, WorldSession *m_session);
 
 	// Guild commands
 	bool HandleGuildMembersCommand(const char* args, WorldSession *m_session);

@@ -532,6 +532,12 @@ struct WayPoint
 	uint32 backwardemoteid;
 	uint32 forwardskinid;
 	uint32 backwardskinid;
+	uint32 forwardStandState;
+	uint32 backwardStandState;
+	uint32 forwardSpellToCast;
+	uint32 backwardSpellToCast;
+	const char * forwardSayText;
+	const char * backwardSayText;
 
 };
 

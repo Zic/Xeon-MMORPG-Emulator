@@ -85,6 +85,14 @@ bool ChatHandler::HandleWPAddCommand(const char* args, WorldSession *m_session)
 	uint32 ForwardEmoteOneShot = (pForwardEmoteOneShot)? atoi(pForwardEmoteOneShot) : 1;
 	char* pBackwardEmoteOneShot = strtok(NULL, " ");
 	uint32 BackwardEmoteOneShot = (pBackwardEmoteOneShot)? atoi(pBackwardEmoteOneShot) : 1;
+	char* pForwardStandState = strtok(NULL, " ");
+	uint32 ForwardStandState = (pForwardStandState)? atoi(pForwardStandState) : 0;
+	char* pBackwardStandState = strtok(NULL, " ");
+	uint32 BackwardStandState = (pBackwardStandState)? atoi(pBackwardStandState) : 0;
+	char* pForwardSpellToCast = strtok(NULL, " ");
+	uint32 ForwardSpellToCast = (pForwardSpellToCast)? atoi(pForwardSpellToCast) : 0;
+	char* pBackwardSpellToCast = strtok(NULL, " ");
+	uint32 BackwardSpellToCast = (pBackwardSpellToCast)? atoi(pBackwardSpellToCast) : 0;
 
 	WayPoint* wp = new WayPoint;
 	bool showing = ai->m_WayPointsShowing;
@@ -100,6 +108,12 @@ bool ChatHandler::HandleWPAddCommand(const char* args, WorldSession *m_session)
 	wp->backwardemoteid = BackwardEmoteId;
 	wp->forwardskinid = ForwardSkinId;
 	wp->backwardskinid = BackwardSkinId;
+	wp->forwardStandState = ForwardStandState > 8 ? 0 : ForwardStandState ;
+	wp->backwardStandState = BackwardStandState > 8 ? 0 : BackwardStandState ;
+	wp->forwardSpellToCast = ForwardSpellToCast;
+	wp->backwardSpellToCast = BackwardSpellToCast;
+	wp->forwardSayText = "";
+	wp->backwardSayText = "";
 
 	if(showing)
 		ai->hideWayPoints(p);
@@ -488,6 +502,263 @@ bool ChatHandler::HandleWPWaitCommand(const char* args, WorldSession *m_session)
 	return true;
 }
 
+bool ChatHandler::HandleWaypointGettextCommand(const char* args, WorldSession *m_session)
+{ 
+	uint64 guid = m_session->GetPlayer()->GetSelection();
+	if (guid == 0)
+	{
+		SystemMessage(m_session, "No selection.");
+		return true;
+	}
+
+	if(GET_TYPE_FROM_GUID(guid) != HIGHGUID_TYPE_WAYPOINT)
+	{
+		SystemMessage(m_session, "You should select a Waypoint.");
+		return true;
+	}
+
+	PlayerPointer pPlayer = m_session->GetPlayer();
+	AIInterface* ai = pPlayer->waypointunit;
+	if(!ai || !ai->GetUnit())
+	{
+		SystemMessage(m_session, "Invalid Creature, please select another one.");
+		return true;
+	}
+	std::stringstream ss;
+
+	uint32 wpid = GUID_LOPART(guid);
+	if((wpid > 0) && (wpid <= ai->GetWayPointsCount()))
+	{
+		WayPoint* wp = ai->getWayPoint(wpid);
+		if(wp)
+		{
+			ss << "Waypoint Number " << wp->id << ":\n";
+			ss << "Backward:\n";
+			ss << wp->backwardSayText << "\n";
+			ss << "Forward:\n";
+			ss << wp->forwardSayText << "\n";
+			SendMultilineMessage(m_session, ss.str().c_str());
+		}
+	}
+	else
+	{
+	   SystemMessage(m_session,  "Invalid Waypoint.");
+		return true;
+	}
+	return true;
+}
+
+bool ChatHandler::HandleWaypointForwardTextCommand(const char* args, WorldSession *m_session)
+{
+	uint64 guid = m_session->GetPlayer()->GetSelection();
+	if (guid == 0)
+	{
+		SystemMessage(m_session, "No selection.");
+		return true;
+	}
+
+	if(GET_TYPE_FROM_GUID(guid) != HIGHGUID_TYPE_WAYPOINT)
+	{
+		SystemMessage(m_session, "You should select a Waypoint.");
+		return true;
+	}
+
+	PlayerPointer pPlayer = m_session->GetPlayer();
+	AIInterface* ai = pPlayer->waypointunit;
+	if(!ai || !ai->GetUnit())
+	{
+		SystemMessage(m_session, "Invalid Creature, please select another one.");
+		return true;
+	}
+	std::stringstream ss;
+
+	uint32 wpid = GUID_LOPART(guid);
+	if(wpid)
+	{
+		WayPoint* wp = ai->getWayPoint(wpid);
+		if(wp)
+		{
+			char pAnnounce[1024];
+			snprintf(pAnnounce, 1024, "%s", args);
+
+			wp->forwardSayText = pAnnounce;
+			ss << "Forward SayText for Waypoint " << wpid << " is now " << string(pAnnounce);
+
+			//save wp
+			ai->saveWayPoints();
+		}
+
+		SystemMessage(m_session,  ss.str().c_str());
+	}	else
+	{
+		SystemMessage(m_session, "Invalid Waypoint.");
+		return true;
+	}
+	return true;
+}
+bool ChatHandler::HandleWaypointBackwardTextCommand(const char* args, WorldSession *m_session)
+{
+	uint64 guid = m_session->GetPlayer()->GetSelection();
+	if (guid == 0)
+	{
+		SystemMessage(m_session, "No selection.");
+		return true;
+	}
+
+	if(GET_TYPE_FROM_GUID(guid) != HIGHGUID_TYPE_WAYPOINT)
+	{
+		SystemMessage(m_session, "You should select a Waypoint.");
+		return true;
+	}
+
+	PlayerPointer pPlayer = m_session->GetPlayer();
+	AIInterface* ai = pPlayer->waypointunit;
+	if(!ai || !ai->GetUnit())
+	{
+		SystemMessage(m_session, "Invalid Creature, please select another one.");
+		return true;
+	}
+	std::stringstream ss;
+
+	uint32 wpid = GUID_LOPART(guid);
+	if(wpid)
+	{
+		WayPoint* wp = ai->getWayPoint(wpid);
+		if(wp)
+		{
+			char pAnnounce[1024];
+			snprintf(pAnnounce, 1024, "%s", args);
+
+			wp->backwardSayText = pAnnounce;
+			ss << "Backward SayText for Waypoint " << wpid << " is now " << string(pAnnounce);
+			//save wp
+			ai->saveWayPoints();
+		}
+
+		SystemMessage(m_session,  ss.str().c_str());
+	}	else
+	{
+		SystemMessage(m_session, "Invalid Waypoint.");
+		return true;
+	}
+	return true;
+}
+bool ChatHandler::HandleWPSpellToCastCommand(const char* args, WorldSession *m_session)
+{
+	uint64 guid = m_session->GetPlayer()->GetSelection();
+	if (guid == 0)
+	{
+		SystemMessage(m_session, "No selection.");
+		return true;
+	}
+
+	if(GET_TYPE_FROM_GUID(guid) != HIGHGUID_TYPE_WAYPOINT)
+	{
+		SystemMessage(m_session, "You should select a Waypoint.");
+		return true;
+	}
+
+	PlayerPointer pPlayer = m_session->GetPlayer();
+	AIInterface* ai = pPlayer->waypointunit;
+	if(!ai || !ai->GetUnit())
+	{
+		SystemMessage(m_session, "Invalid Creature, please select another one.");
+		return true;
+	}
+	std::stringstream ss;
+
+	uint32 wpid = GUID_LOPART(guid);
+	if(wpid)
+	{
+		uint32 SpellToCast = 0;
+		WayPoint* wp = ai->getWayPoint(wpid);
+		if(wp)
+		{
+			char* pBackwards = strtok((char*)args, " ");
+			uint32 Backwards = (pBackwards)? atoi(pBackwards) : 0;
+			char* pSpellToCast = strtok((char*)args, " ");
+			SpellToCast = (pSpellToCast)? atoi(pSpellToCast) : 0;
+
+			if(Backwards)
+			{
+				wp->backwardSpellToCast = SpellToCast;
+				ss << "Backward SpellToCast for Waypoint " << wpid << " is now " << SpellToCast;
+			}
+			else
+			{
+				wp->forwardSpellToCast = SpellToCast;
+				ss << "Forward SpellToCast for Waypoint " << wpid << " is now " << SpellToCast;
+			}
+			//save wp
+			ai->saveWayPoints();
+		}
+
+		SystemMessage(m_session,  ss.str().c_str());
+	}	else
+	{
+		SystemMessage(m_session, "Invalid Waypoint.");
+		return true;
+	}
+	return true;
+}
+
+bool ChatHandler::HandleWPStandStateCommand(const char* args, WorldSession *m_session)
+{
+	uint64 guid = m_session->GetPlayer()->GetSelection();
+	if (guid == 0)
+	{
+		SystemMessage(m_session, "No selection.");
+		return true;
+	}
+
+	if(GET_TYPE_FROM_GUID(guid) != HIGHGUID_TYPE_WAYPOINT)
+	{
+		SystemMessage(m_session, "You should select a Waypoint.");
+		return true;
+	}
+
+	PlayerPointer pPlayer = m_session->GetPlayer();
+	AIInterface* ai = pPlayer->waypointunit;
+	if(!ai || !ai->GetUnit())
+	{
+		SystemMessage(m_session, "Invalid Creature, please select another one.");
+		return true;
+	}
+	uint32 StandState = 0;
+	std::stringstream ss;
+
+	uint32 wpid = GUID_LOPART(guid);
+	if(wpid)
+	{
+		WayPoint* wp = ai->getWayPoint(wpid);
+		if(wp)
+		{
+			char* pBackwards = strtok((char*)args, " ");
+			uint32 Backwards = (pBackwards)? atoi(pBackwards) : 0;
+			char* pStandState = strtok(NULL, " ");
+			StandState = (pStandState)? atoi(pStandState) : 0;
+			StandState = StandState > 8 ? 0 : StandState;
+			if(Backwards)
+			{
+				wp->backwardStandState = StandState;
+				ss << "Backward StandState for Waypoint " << wpid << " is now " << StandState;
+			}
+			else
+			{
+				wp->forwardStandState = StandState;
+				ss << "Forward StandState for Waypoint " << wpid << " is now " << StandState;
+			}
+			//save wp
+			ai->saveWayPoints();
+		}
+
+		SystemMessage(m_session,  ss.str().c_str());
+	}
+	else
+		SystemMessage(m_session, "Invalid Waypoint.");
+	return true;
+}
+
 bool ChatHandler::HandleWPEmoteCommand(const char* args, WorldSession *m_session)
 {
 	uint64 guid = m_session->GetPlayer()->GetSelection();
@@ -650,14 +921,18 @@ bool ChatHandler::HandleWPInfoCommand(const char* args, WorldSession *m_session)
 				ss << " (Run)\n";
 			else
 				ss << " (Walk)\n";
-			ss << "Backwards\n";
-			ss << "   emoteid: " << wp->backwardemoteid << "\n";
-			ss << "   oneshot: " << ((wp->backwardemoteoneshot == 1)? "Yes" : "No") << "\n";
-			ss << "   skinid: " << wp->backwardskinid << "\n";
-			ss << "Forwards\n";
-			ss << "   emoteid: " << wp->forwardemoteid << "\n";
-			ss << "   oneshot: " << ((wp->forwardemoteoneshot == 1)? "Yes" : "No") << "\n";
-			ss << "   skinid: " << wp->forwardskinid << "\n";
+			ss << "Backward\n";
+			ss << "EmoteId    : " << wp->backwardemoteid << "\n";
+			ss << "OneShot    : " << ((wp->backwardemoteoneshot == 1)? "Yes" : "No") << "\n";
+			ss << "SkinId     : " << wp->backwardskinid << "\n";
+			ss << "StandState : " << wp->backwardStandState << "\n";
+			ss << "SpellToCast: " << wp->backwardSpellToCast << "\n";
+			ss << "Forward\n";
+			ss << "EmoteId    : " << wp->forwardemoteid << "\n";
+			ss << "OneShot    : " << ((wp->forwardemoteoneshot == 1)? "Yes" : "No") << "\n";
+			ss << "SkinId     : " << wp->forwardskinid << "\n";
+			ss << "StandState : " << wp->forwardStandState << "\n";
+			ss << "SpellToCast: " << wp->forwardSpellToCast << "\n";
 			SendMultilineMessage(m_session, ss.str().c_str());
 		}
 	}
@@ -884,6 +1159,14 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 	uint32 ForwardEmoteOneShot = (pForwardEmoteOneShot)? atoi(pForwardEmoteOneShot) : 1;
 	char* pBackwardEmoteOneShot = strtok(NULL, " ");
 	uint32 BackwardEmoteOneShot = (pBackwardEmoteOneShot)? atoi(pBackwardEmoteOneShot) : 1;
+	char* pForwardStandState = strtok(NULL, " ");
+	uint32 ForwardStandState = (pForwardStandState)? atoi(pForwardStandState) : 0;
+	char* pBackwardStandState = strtok(NULL, " ");
+	uint32 BackwardStandState = (pBackwardStandState)? atoi(pBackwardStandState) : 0;
+	char* pForwardSpellToCast = strtok(NULL, " ");
+	uint32 ForwardSpellToCast = (pForwardSpellToCast)? atoi(pForwardSpellToCast) : 0;
+	char* pBackwardSpellToCast = strtok(NULL, " ");
+	uint32 BackwardSpellToCast = (pBackwardSpellToCast)? atoi(pBackwardSpellToCast) : 0;
 
 	WayPoint* wp = new WayPoint;
 	bool showing = ai->m_WayPointsShowing;
@@ -899,6 +1182,12 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 	wp->backwardemoteid = BackwardEmoteId;
 	wp->forwardskinid = ForwardSkinId;
 	wp->backwardskinid = BackwardSkinId;
+	wp->forwardStandState = ForwardStandState > 8 ? 0 : ForwardStandState ;
+	wp->backwardStandState = BackwardStandState > 8 ? 0 : BackwardStandState ;
+	wp->forwardSpellToCast = ForwardSpellToCast;
+	wp->backwardSpellToCast = BackwardSpellToCast;
+	wp->forwardSayText = "";
+	wp->backwardSayText = "";
 
 	if(showing)
 		ai->hideWayPoints(p);

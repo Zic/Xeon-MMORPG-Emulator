@@ -273,6 +273,8 @@ void CommandTableStorage::Init()
 		{ "movehere",	'w', &ChatHandler::HandleWPMoveHereCommand,	"Move to this wp",				NULL, 0, 0, 0},
 		{ "flags",	   'w', &ChatHandler::HandleWPFlagsCommand,	   "Wp flags",					   NULL, 0, 0, 0},
 		{ "waittime",	'w', &ChatHandler::HandleWPWaitCommand,		"Wait time at this wp",		   NULL, 0, 0, 0},
+		{ "standstate",	'w', &ChatHandler::HandleWPStandStateCommand,	"StandState at this wp <direction><standstate0-8)",	NULL, 0, 0, 0},
+		{ "SpellToCast",'w', &ChatHandler::HandleWPSpellToCastCommand,	"Spell to cast at this wp <direction><spell_id>",	NULL, 0, 0, 0},
 		{ "emote",	   'w', &ChatHandler::HandleWPEmoteCommand,	   "Emote at this wp",			   NULL, 0, 0, 0},
 		{ "skin",		'w', &ChatHandler::HandleWPSkinCommand,		"Skin at this wp",				NULL, 0, 0, 0},
 		{ "change",	  'w', &ChatHandler::HandleWPChangeNoCommand,	"Change at this wp",			  NULL, 0, 0, 0},
@@ -282,6 +284,9 @@ void CommandTableStorage::Init()
 		{ "save",		 'w', &ChatHandler::HandleSaveWaypoints,		"Save all waypoints",			  NULL, 0, 0, 0},
 		{ "deleteall",	 'w', &ChatHandler::HandleDeleteWaypoints,	  "Delete all waypoints",			  NULL, 0, 0, 0},
 		{ "addfly", 'w', &ChatHandler::HandleWaypointAddFlyCommand, "Adds a flying waypoint", NULL, 0, 0, 0 },
+		{ "gettext",	'w', &ChatHandler::HandleWaypointGettextCommand,"Shows saytext for current waypoint.",				NULL, 0, 0, 0 },
+		{ "backwardtext",'w',&ChatHandler::HandleWaypointBackwardTextCommand,"Adds backward text to current waypoint <SayText>",	NULL, 0, 0, 0 },
+		{ "forwardtext",'w', &ChatHandler::HandleWaypointForwardTextCommand,"Adds forward text to current waypoint <SayText>",		NULL, 0, 0, 0 },
 		{ NULL,			0, NULL,									 "",							   NULL, 0, 0  }
 	};
 	dupe_command_table(waypointCommandTable, _waypointCommandTable);
