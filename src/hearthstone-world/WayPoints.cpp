@@ -100,6 +100,7 @@ bool ChatHandler::HandleWPAddCommand(const char* args, WorldSession *m_session)
 	wp->x = p->GetPositionX();
 	wp->y = p->GetPositionY();
 	wp->z = p->GetPositionZ();
+	wp->o = p->GetOrientation();
 	wp->waittime = WaitTime;
 	wp->flags = Flags;
 	wp->forwardemoteoneshot = (ForwardEmoteOneShot>0)?true:false;
@@ -424,6 +425,7 @@ bool ChatHandler::HandleWPMoveHereCommand(const char* args, WorldSession *m_sess
 			wp->x = pPlayer->GetPositionX();
 			wp->y = pPlayer->GetPositionY();
 			wp->z = pPlayer->GetPositionZ();
+			wp->o = pPlayer->GetOrientation();
 
 			//save wp
 			ai->saveWayPoints();
@@ -1048,6 +1050,7 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 		wp->x = x;
 		wp->y = y;
 		wp->z = z;
+		wp->o = 0;
 		wp->waittime = 5000;
 		wp->flags = 0;
 		wp->forwardemoteoneshot = 0;
@@ -1174,6 +1177,7 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 	wp->x = p->GetPositionX();
 	wp->y = p->GetPositionY();
 	wp->z = p->GetPositionZ();
+	wp->o = p->GetOrientation();
 	wp->waittime = WaitTime;
 	wp->flags = 768;
 	wp->forwardemoteoneshot = (ForwardEmoteOneShot>0)?true:false;

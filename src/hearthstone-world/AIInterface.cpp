@@ -2164,12 +2164,14 @@ bool AIInterface::showWayPoints(PlayerPointer pPlayer, bool Backwards)
 				uint32 DisplayID = (wp->backwardskinid == 0)? GetUnit()->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID) : wp->backwardskinid;
 				pWayPoint->SetUInt32Value(UNIT_FIELD_DISPLAYID, DisplayID);
 				pWayPoint->SetUInt32Value(UNIT_NPC_EMOTESTATE, wp->backwardemoteid);
+				pWayPoint->SetStandState(wp->backwardStandState);
 			}
 			else
 			{
 				uint32 DisplayID = (wp->forwardskinid == 0)? GetUnit()->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID) : wp->forwardskinid;
 				pWayPoint->SetUInt32Value(UNIT_FIELD_DISPLAYID, DisplayID);
 				pWayPoint->SetUInt32Value(UNIT_NPC_EMOTESTATE, wp->forwardemoteid);
+				pWayPoint->SetStandState(wp->forwardStandState);
 			}
 			pWayPoint->SetUInt32Value(UNIT_FIELD_LEVEL, wp->id);
 			pWayPoint->SetUInt32Value(UNIT_NPC_FLAGS, 0);
@@ -2253,6 +2255,7 @@ bool AIInterface::saveWayPoints()
 		ss << wp->x << ", ";
 		ss << wp->y << ", ";
 		ss << wp->z << ", ";
+		ss << wp->o << ", ";
 		ss << wp->waittime << ", ";
 		ss << wp->flags << ", ";
 		ss << wp->forwardemoteoneshot << ", ";
@@ -2365,6 +2368,12 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 									GetUnit()->SetUInt32Value(UNIT_NPC_EMOTESTATE, wp->forwardemoteid);
 								}
 							}
+							if(GetUnit()->getStandState() != wp->forwardStandState )
+								GetUnit()->SetStandState(wp->forwardStandState);
+							if (wp->forwardSpellToCast)
+								GetUnit()->CastSpell(GetUnit(),wp->forwardSpellToCast,false);
+							if (wp->forwardSayText != "")
+								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->forwardSayText );
 						}
 						else
 						{
@@ -2379,6 +2388,12 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 									GetUnit()->SetUInt32Value(UNIT_NPC_EMOTESTATE, wp->backwardemoteid);
 								}
 							}
+							if(GetUnit()->getStandState() != wp->backwardStandState )
+								GetUnit()->SetStandState(wp->backwardStandState);
+							if (wp->backwardSpellToCast)
+								GetUnit()->CastSpell(GetUnit(),wp->backwardSpellToCast,false);
+							if (wp->backwardSayText != "")
+								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->backwardSayText );
 						}
 					}
 					else
