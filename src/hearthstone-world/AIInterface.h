@@ -423,12 +423,11 @@ protected:
 	bool firstLeaveCombat;
 	UnitPointer FindTarget();
 	UnitPointer FindTargetForSpell(AI_Spell *sp);
-	UnitPointer FindHealTargetForSpell(AI_Spell *sp);
 	bool FindFriends(float dist);
 	AI_Spell *m_nextSpell;
 	UnitPointer m_nextTarget;
 	uint32 m_fleeTimer;
-	bool m_hasFled;
+	bool m_hasFleed;
 	bool m_hasCalledForHelp;
 	uint32 m_outOfCombatRange;
 
