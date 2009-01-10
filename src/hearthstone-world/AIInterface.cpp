@@ -2372,8 +2372,8 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 								GetUnit()->SetStandState(wp->forwardStandState);
 							if (wp->forwardSpellToCast)
 								GetUnit()->CastSpell(GetUnit(),wp->forwardSpellToCast,false);
-							if (wp->forwardSayText != "")
-								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->forwardSayText );
+//							if (wp->forwardSayText != "")
+//								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->forwardSayText );
 						}
 						else
 						{
@@ -2392,8 +2392,8 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 								GetUnit()->SetStandState(wp->backwardStandState);
 							if (wp->backwardSpellToCast)
 								GetUnit()->CastSpell(GetUnit(),wp->backwardSpellToCast,false);
-							if (wp->backwardSayText != "")
-								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->backwardSayText );
+//							if (wp->backwardSayText != "")
+//								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->backwardSayText );
 						}
 					}
 					else
