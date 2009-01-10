@@ -9,6 +9,6 @@ ALTER TABLE `creature_spawns` ADD COLUMN `MountedDisplayID` int(10) NOT NULL def
 
 UPDATE `creature_spawns`
 JOIN creature_proto ON creature_proto.entry = creature_spawns.entry
-SET creature_spawns.MountedDisplayID = creature_proto.mountdisplayid
+SET creature_spawns.MountedDisplayID = creature_proto.mountdisplayid;
 
 ALTER TABLE `creature_proto` DROP COLUMN  `mountdisplayid`;
