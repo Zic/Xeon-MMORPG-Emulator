@@ -1059,6 +1059,12 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 		wp->backwardemoteid = 0;
 		wp->forwardskinid = 0;
 		wp->backwardskinid = 0;
+		wp->forwardStandState = 0;
+		wp->backwardStandState = 0;
+		wp->forwardSpellToCast = 0;
+		wp->backwardSpellToCast = 0;
+		wp->forwardSayText = "";
+		wp->backwardSayText = "";
 		
 		cr->GetAIInterface()->addWayPoint(wp);
 	}
