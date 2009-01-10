@@ -1072,7 +1072,7 @@ void ObjectMgr::LoadVendors()
 				itm.extended_cost = dbcItemExtendedCost.LookupEntryForced(ec);
 				if( itm.extended_cost == NULL )
 				{
-					Log.Warning("Vendor","Item %u at vendor %u has extended cost %u which is invalid. Skipping.\n", itm.itemid, fields[0].GetUInt32(), ec);
+					Log.Warning("ObjectMgr","Item %u at vendor %u has extended cost %u which is invalid. Skipping.", itm.itemid, fields[0].GetUInt32(), ec);
 					continue;
 				}
 			}
@@ -1522,7 +1522,7 @@ void ObjectMgr::LoadTrainers()
 
 				if( ts.pCastSpell == NULL && ts.pLearnSpell == NULL )
 				{
-					Log.Warning("LoadTrainers", "Trainer %u with no invalid spells (%u/%u).", entry, CastSpellID, LearnSpellID);
+					Log.Warning("ObjectMgr", "Trainer %u skipped invalid spell (%u/%u).", entry, CastSpellID, LearnSpellID);
 					continue; //omg a bad spell !
 				}
 
