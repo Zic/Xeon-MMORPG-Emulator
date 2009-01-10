@@ -132,7 +132,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 	}
 
 	// Load AI Agents
-	QueryResult * result = WorldDatabase.Query( "SELECT Entry,Type,Chance,MaxCount,Spell,SpellType,TargetType,CoolDown,floatMisc1,Misc2 FROM ai_agents" );
+	QueryResult * result = WorldDatabase.Query( "SELECT Entry,Type+0,Chance,MaxCount,Spell,SpellType+0,TargetType+0,CoolDown,floatMisc1,Misc2 FROM ai_agents" );
 	CreatureProto * cn;
 
 	if( result != NULL )
@@ -195,13 +195,13 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						delete sp;
 						continue;
 					}
-					/*if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT ||
+					if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT ||
 						sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
 					{
-						Log.Warning("AIAgent","SpellId %u skipped in ai_agent for NPC %u, it is has a script_effect.", spellID, sp->entryId);
-						delete sp;
-						continue;
-					}*/
+						Log.Warning("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
+//						delete sp;
+//						continue;
+					}
 
 					sp->minrange = GetMinRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
 					sp->maxrange = GetMaxRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
