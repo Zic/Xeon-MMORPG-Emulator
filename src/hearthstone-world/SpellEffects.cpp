@@ -4336,8 +4336,10 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 		}
 	break;
 
-	// Judgement
+	// Judgements
 	case 20271:
+	case 53407:
+	case 53408:
 		{
 			if(!unitTarget || !p_caster) return;
 

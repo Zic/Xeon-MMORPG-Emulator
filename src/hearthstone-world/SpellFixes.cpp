@@ -2393,30 +2393,6 @@ void ApplyNormalFixes()
 		sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 	}
 
-	//paladin - Seal of Vengeance, Seal of Corruption
-	ranks = fill(ids, 31801, 53736, 0);
-	fill(proc_ids, 31803, 53742, 0);
-	for(uint32 i = 0; i < ranks; i++)
-	{
-		sp = dbcSpell.LookupEntryForced( ids[i] );
-		if( sp != NULL )
-		{
-			sp->procFlags = PROC_ON_MELEE_ATTACK;
-			sp->ProcsPerMinute = 20.0f;
-			sp->EffectTriggerSpell[0] = proc_ids[i];
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		}
-	}
-	ranks = fill(ids, 31803, 53742, 0);
-	for(uint32 i = 0; i < ranks; i++)
-	{
-		sp = dbcSpell.LookupEntryForced( ids[i] );
-		if( sp != NULL )
-		{
-			sp->Dspell_coef_override = 0.0f;
-		}
-	}
-
 	//paladin - Reckoning
 	sp = dbcSpell.LookupEntryForced( 20177 );
 	if( sp != NULL )
