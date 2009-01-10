@@ -3942,14 +3942,14 @@ exit:*/
 		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
 		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_HOLY_VENGEANCE);
 		if(c)
-			value *= 1.0f + (float(c) / 100.0f);
+			value *= 1.0f + ((c) / 100.0f);
 	}
 	else if( p_caster && m_spellInfo->Id == 53733 ) // Seal of Corruption: Judgement
 	{
 		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
 		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_BLOOD_CORRUPTION);
 		if(c)
-			value *= 1.0f + (float(c) / 100.0f);
+			value *= float2int32(1.0f + (float(c) / 100.0f));
 	}
 	else if( p_caster && m_spellInfo->Id == 53742 || m_spellInfo->Id == 31803 ) // Holy Vengeance/ Blood Corruption
 	{
