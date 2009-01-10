@@ -50,6 +50,11 @@ Unit::Unit()
 
 	// Pet
 	m_isPet = false;
+
+	//Vehicle
+	m_teleportAckCounter = 0;
+	m_inVehicleSeatId = 0xFF;
+	m_CurrentVehicle = NULLVEHICLE;
 	
 	//DK:modifiers
 	PctRegenModifier = 0;
@@ -242,6 +247,7 @@ void Unit::Init()
 void Unit::Destructor()
 {
 	Object::Destructor();
+
 
 	int i;
 
@@ -4599,14 +4605,32 @@ void Unit::UpdateSpeed()
 		}
 	}
 
-	
-
 	m_flySpeed = PLAYER_NORMAL_FLIGHT_SPEED*(1.0f + ((float)m_flyspeedModifier)/100.0f);
 
 	// Limit speed due to effects such as http://www.wowhead.com/?spell=31896 [Judgement of Justice]
 	if( m_maxSpeed && m_runSpeed > m_maxSpeed )
 	{
 		m_runSpeed = m_maxSpeed;
+	}
+
+	if(IsVehicle() && vehicle_shared_from_this()->GetControllingUnit())
+	{
+		UnitPointer pUnit = vehicle_shared_from_this()->GetControllingUnit();
+		pUnit->m_runSpeed = m_runSpeed;
+		pUnit->m_flySpeed = m_flySpeed;
+		vehicle_shared_from_this()->SetSpeed(RUN, m_runSpeed);
+		vehicle_shared_from_this()->SetSpeed(FLY, m_flySpeed);
+
+		if(pUnit->IsPlayer())
+		{
+			if(TO_PLAYER(pUnit)->m_changingMaps)
+				TO_PLAYER(pUnit)->resend_speed = true;
+			else
+			{
+				TO_PLAYER(pUnit)->SetPlayerSpeed(RUN, m_runSpeed);
+				TO_PLAYER(pUnit)->SetPlayerSpeed(FLY, m_flySpeed);
+			}
+	}
 	}
 
 	if(IsPlayer())
@@ -6273,4 +6297,14 @@ void Unit::RemoveFFAPvPFlag()
 	if(!IsFFAPvPFlagged()) return;
 
 	RemoveByteFlag(UNIT_FIELD_BYTES_2, 1, U_FIELD_BYTES_FLAG_FFA_PVP);
+}
+
+void Unit::OnPositionChange()
+{
+	if (m_CurrentVehicle != NULL && m_CurrentVehicle->GetControllingUnit() == shared_from_this() && (m_position != m_CurrentVehicle->GetPosition() || GetOrientation() != m_CurrentVehicle->GetOrientation())) //check orientation too since == operator of locationvector doesnt
+	{
+		m_CurrentVehicle->MoveVehicle(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+		sLog.outColor(TRED, "%s Moving Vehicle", __FUNCTION__);
+		sLog.outColor(TNORMAL, "\n");
+	}
 }

@@ -686,6 +686,10 @@ protected:
 	void HandleAchievementInspect(WorldPacket & recv_data);
 	void HandleRemoveGlyph(WorldPacket & recv_data);
 
+	//Vehicles
+	void HandleVehicleDismiss(WorldPacket & recv_data);
+	void HandleSpellClick( WorldPacket & recv_data );
+
 public:
 
 	void SendInventoryList(CreaturePointer pCreature);

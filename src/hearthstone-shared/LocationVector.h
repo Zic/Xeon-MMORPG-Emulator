@@ -171,6 +171,12 @@ public:
 			return false;
 	}
 
+	bool operator != (const LocationVector & eq)
+	{
+		return !(*this == eq);
+	}
+
+
 	float x;
 	float y;
 	float z;

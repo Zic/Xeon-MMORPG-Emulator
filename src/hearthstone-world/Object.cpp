@@ -72,6 +72,7 @@ Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 	m_loadedFromDB = false;
 	m_loot.gold = 0;
 	m_looted = false;
+	m_isVehicle = false;
 
 	m_objectsInRange.clear();
 	m_inRangePlayers.clear();
@@ -172,9 +173,10 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	case TYPEID_CORPSE:
 		flags = 0x58;
 		break;
-
-		// anyone else can get fucked and die!
 	}
+
+	if(GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE)
+		flags |= 0x80;
 
 	if(target == shared_from_this())
 	{
@@ -214,7 +216,7 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	// build our actual update
 	*data << updatetype;
 
-	// we shouldn't be here, under any cercumstances, unless we have a wowguid..
+	// we shouldn't be here, under any circumstances, unless we have a wowguid..
 	ASSERT(m_wowGuid.GetNewGuidLen());
 	*data << m_wowGuid;
 	
@@ -362,6 +364,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 			flags2 |= 0x200;
 		else if(m_objectTypeId==TYPEID_UNIT && creature_shared_from_this()->m_transportGuid != 0 && creature_shared_from_this()->m_transportPosition != NULL)
 			flags2 |= 0x200;
+		else if (IsUnit() && unit_shared_from_this()->m_CurrentVehicle != NULLVEHICLE)
+			flags2 |= 0x200;
 
 		if(splinebuf)
 		{
@@ -441,7 +445,33 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 
 		if(flags & 0x20 && flags2 & 0x0200)
 		{
-			if(pThis)
+			if (IsUnit() && unit_shared_from_this()->m_CurrentVehicle != NULL)
+			{
+				UnitPointer pUnit = unit_shared_from_this();
+				VehiclePointer vehicle = unit_shared_from_this()->m_CurrentVehicle;
+
+				if (pUnit->m_inVehicleSeatId != 0xFF && vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId] != NULL)
+				{
+					*data << pUnit->m_CurrentVehicle->GetGUID();
+					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetX;
+					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetY;
+					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetZ;
+					*data << float(0.0f);
+					*data << uint32(0);
+					*data << pUnit->m_inVehicleSeatId;
+				}
+				else
+				{
+					*data << uint64(0);
+					*data << float(0);
+					*data << float(0);
+					*data << float(0);
+					*data << float(0);
+					*data << uint32(0);
+					*data << uint8(0);
+				}
+			}
+			else if(pThis)
 			{
 				*data << pThis->m_TransporterGUID;
 				*data << pThis->m_TransporterX << pThis->m_TransporterY << pThis->m_TransporterZ << pThis->m_TransporterO;
@@ -514,7 +544,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 	
 	if (flags & 0x80)
 	{
-		*data << float(0) << uint32(0);
+			*data << vehicle_shared_from_this()->GetVehicleEntry() << float(0.0f); //facing adjustment
 	}
 }
 
@@ -2558,7 +2588,10 @@ void Object::Activate(shared_ptr<MapMgr> mgr)
 	switch(m_objectTypeId)
 	{
 	case TYPEID_UNIT:
-		mgr->activeCreatures.insert(creature_shared_from_this());
+		if(IsVehicle())
+			mgr->activeVehicles.insert(vehicle_shared_from_this());
+		else
+			mgr->activeCreatures.insert(creature_shared_from_this());
 		break;
 
 	case TYPEID_GAMEOBJECT:
@@ -2574,11 +2607,22 @@ void Object::Deactivate(shared_ptr<MapMgr> mgr)
 	switch(m_objectTypeId)
 	{
 	case TYPEID_UNIT:
-		// check iterator
-		if( mgr->__creature_iterator != mgr->activeCreatures.end() && (*mgr->__creature_iterator) == creature_shared_from_this() )
-			++mgr->__creature_iterator;
+		if(IsVehicle())
+		{
+			// check iterator
+			if( mgr->__vehicle_iterator != mgr->activeVehicles.end() && (*mgr->__vehicle_iterator) == vehicle_shared_from_this() )
+				++mgr->__vehicle_iterator;
 
-		mgr->activeCreatures.erase(creature_shared_from_this());
+			mgr->activeVehicles.erase(vehicle_shared_from_this());
+		}
+		else
+		{
+			// check iterator
+			if( mgr->__creature_iterator != mgr->activeCreatures.end() && (*mgr->__creature_iterator) == creature_shared_from_this() )
+				++mgr->__creature_iterator;
+
+			mgr->activeCreatures.erase(creature_shared_from_this());
+		}
 		break;
 
 	case TYPEID_GAMEOBJECT:

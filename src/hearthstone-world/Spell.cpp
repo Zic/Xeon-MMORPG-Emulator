@@ -2490,6 +2490,9 @@ void Spell::_SetTargets(const uint64& guid)
 			unitTarget = NULLUNIT;
 			switch(GET_TYPE_FROM_GUID(guid))
 			{
+			case HIGHGUID_TYPE_VEHICLE:
+				unitTarget = m_caster->GetMapMgr()->GetVehicle(GET_LOWGUID_PART(guid));
+				break;
 			case HIGHGUID_TYPE_UNIT:
 				unitTarget = m_caster->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 				break;

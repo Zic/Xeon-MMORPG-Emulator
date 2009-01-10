@@ -33,6 +33,7 @@ class GameObject;
 class Creature;
 class Player;
 class Pet;
+class Vehicle;
 class Transporter;
 class Corpse;
 class CBattleground;
@@ -62,8 +63,10 @@ typedef std::set<PlayerPointer  > PUpdateQueue;
 typedef std::set<PlayerPointer  > PlayerSet;
 typedef HM_NAMESPACE::hash_map<uint32, ObjectPointer > StorageMap;
 typedef set<uint64> CombatProgressMap;
+typedef set<VehiclePointer> VehicleSet;
 typedef set<CreaturePointer> CreatureSet;
 typedef set<shared_ptr<GameObject> > GameObjectSet;
+typedef HM_NAMESPACE::hash_map<uint32, VehiclePointer> VehicleSqlIdMap;
 typedef HM_NAMESPACE::hash_map<uint32, CreaturePointer> CreatureSqlIdMap;
 typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectSqlIdMap;
 
@@ -92,7 +95,7 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectMap;
 	GameObjectMap m_gameObjectStorage;
 	uint32 m_GOHighGuid;
-	shared_ptr<GameObject> CreateGameObject(uint32 entry);
+	GameObjectPointer CreateGameObject(uint32 entry);
 
 	HEARTHSTONE_INLINE uint32 GenerateGameobjectGuid()
 	{
@@ -107,6 +110,22 @@ public:
 			return NULLGOB;
 
 		return itr->second;
+	}
+
+/////////////////////////////////////////////////////////
+// Local (mapmgr) storage/generation of Vehicles
+/////////////////////////////////////////////
+	uint32 m_VehicleArraySize;
+	uint32 m_VehicleHighGuid;
+	HM_NAMESPACE::unordered_map<uint32,VehiclePointer> m_VehicleStorage;
+	VehiclePointer CreateVehicle(uint32 entry);
+
+	__inline VehiclePointer GetVehicle(uint32 guid)
+	{
+		if(guid > m_VehicleHighGuid)
+			return NULLVEHICLE;
+
+		return m_VehicleStorage[guid];
 	}
 
 /////////////////////////////////////////////////////////
@@ -240,6 +259,7 @@ public:
     uint32 iInstanceMode;
 
 	void UnloadCell(uint32 x,uint32 y);
+	void EventRespawnVehicle(VehiclePointer v, MapCell * p);
 	void EventRespawnCreature(CreaturePointer c, MapCell * p);
 	void EventRespawnGameObject(shared_ptr<GameObject> o, MapCell * c);
 	void SendMessageToCellPlayers(ObjectPointer obj, WorldPacket * packet, uint32 cell_radius = 2);
@@ -311,15 +331,19 @@ public:
 
 	GameObjectSet activeGameObjects;
 	CreatureSet activeCreatures;
+	VehicleSet activeVehicles;
 	EventableObjectHolder eventHolder;
 	BattlegroundPointer m_battleground;
 	set<shared_ptr<Corpse> > m_corpses;
+	VehicleSqlIdMap _sqlids_vehicles;
 	CreatureSqlIdMap _sqlids_creatures;
 	GameObjectSqlIdMap _sqlids_gameobjects;
 
+	VehiclePointer GetSqlIdVehicle(uint32 sqlid);
 	CreaturePointer GetSqlIdCreature(uint32 sqlid);
 	shared_ptr<GameObject> GetSqlIdGameObject(uint32 sqlid);
 	deque<uint32> _reusable_guids_creature;
+	deque<uint32> _reusable_guids_vehicle;
 
 	bool forced_expire;
 	bool thread_kill_only;
@@ -356,6 +380,7 @@ public:
 	PetStorageMap::iterator __pet_iterator;
 	PlayerStorageMap::iterator __player_iterator;
 
+	VehicleSet::iterator __vehicle_iterator;
 	CreatureSet::iterator __creature_iterator;
 	GameObjectSet::iterator __gameobject_iterator;
 	

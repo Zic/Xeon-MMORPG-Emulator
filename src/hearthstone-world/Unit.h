@@ -1001,7 +1001,12 @@ public:
 	HEARTHSTONE_INLINE int GetManaPct() { return (int)((GetUInt32Value(UNIT_FIELD_POWER1)+1) * 100 / (GetUInt32Value(UNIT_FIELD_MAXPOWER1)+1)); };
 		
 	uint32 GetResistance(uint32 type);	
-	
+
+	uint32 m_teleportAckCounter;
+	//Vehicle
+	uint8 m_inVehicleSeatId;
+	VehiclePointer m_CurrentVehicle;
+
 	//Pet
 	HEARTHSTONE_INLINE void SetIsPet(bool chck) { m_isPet = chck; }
 	
@@ -1181,7 +1186,10 @@ public:
 	float m_ignoreArmorPctMaceSpec;
 	float m_ignoreArmorPct;
 
-//	custom functions for scripting
+
+	void OnPositionChange();
+
+	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
 
 protected:

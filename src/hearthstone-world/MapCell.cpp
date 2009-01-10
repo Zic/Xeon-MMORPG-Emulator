@@ -107,7 +107,14 @@ void MapCell::RemoveObjects()
 		switch((*itr)->GetTypeId())
 		{
 		case TYPEID_UNIT: {
-				if( !(*itr)->IsPet() )
+				if( (*itr)->IsVehicle() )
+				{
+					_mapmgr->_reusable_guids_vehicle.push_back( (*itr)->GetUIdFromGUID() );
+					TO_VEHICLE( *itr )->m_respawnCell=NULL;
+					(*itr)->Destructor();
+					(*itr) = NULLOBJ;
+				}
+				else if( !(*itr)->IsPet() )
 				{
 					_mapmgr->_reusable_guids_creature.push_back( (*itr)->GetUIdFromGUID() );
 					TO_CREATURE( *itr )->m_respawnCell=NULL;
@@ -183,28 +190,55 @@ void MapCell::LoadObjects(CellSpawns * sp)
 /*				if((*i)->respawnNpcLink && pInstance->m_killedNpcs.find((*i)->respawnNpcLink) != pInstance->m_killedNpcs.end())
 					continue;*/
 			}
-
-			CreaturePointer c=_mapmgr->CreateCreature((*i)->entry);
-
-			c->SetMapId(_mapmgr->GetMapId());
-			c->SetInstanceID(_mapmgr->GetInstanceID());
-			c->m_loadedFromDB = true;
-
-            if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+			if((*i)->vehicle != 0)
 			{
-				if(!c->CanAddToWorld())
-				{
-					c->Destructor();
-					c = NULLCREATURE;
-					continue;
-				}
+				VehiclePointer v=_mapmgr->CreateVehicle((*i)->entry);
 
-				c->PushToWorld(_mapmgr);
+				v->SetMapId(_mapmgr->GetMapId());
+				v->SetInstanceID(_mapmgr->GetInstanceID());
+				v->m_loadedFromDB = true;
+
+				if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+				{
+					if(!v->CanAddToWorld())
+					{
+						v->Destructor();
+						v = NULLVEHICLE;
+						continue;
+					}
+
+					v->PushToWorld(_mapmgr);
+				}
+				else
+				{
+					v->Destructor();
+					v = NULLVEHICLE;
+				}
 			}
 			else
 			{
-				c->Destructor();
-				c = NULLCREATURE;
+				CreaturePointer c=_mapmgr->CreateCreature((*i)->entry);
+
+				c->SetMapId(_mapmgr->GetMapId());
+				c->SetInstanceID(_mapmgr->GetInstanceID());
+				c->m_loadedFromDB = true;
+
+				if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+				{
+					if(!c->CanAddToWorld())
+					{
+						c->Destructor();
+						c = NULLCREATURE;
+						continue;
+					}
+
+					c->PushToWorld(_mapmgr);
+				}
+				else
+				{
+					c->Destructor();
+					c = NULLCREATURE;
+				}
 			}
 		}
 	}

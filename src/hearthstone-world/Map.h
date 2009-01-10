@@ -33,7 +33,7 @@ class TerrainMgr;
 
 struct Formation;
 
-typedef struct CreatureSpawn
+typedef struct
 {
 	uint32	id;//spawn ID
 	uint32	entry;
@@ -57,9 +57,10 @@ typedef struct CreatureSpawn
 	uint16 stand_state;
 	uint32 MountedDisplayID;
 	int32 phase;
+	uint32 vehicle;
 }CreatureSpawn;
 
-typedef struct GOSpawn
+typedef struct
 {
 	uint32	id;//spawn ID
 	uint32	entry;

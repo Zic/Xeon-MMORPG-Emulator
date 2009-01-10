@@ -28,6 +28,7 @@ class Aura;
 
 enum HIGHGUID_TYPE
 {
+	HIGHGUID_TYPE_VEHICLE			= 0xF1500000,
 	HIGHGUID_TYPE_UNIT				= 0xF1300000,
 	HIGHGUID_TYPE_PET				= 0xF1400000,
 	HIGHGUID_TYPE_GAMEOBJECT		= 0xF1100000,
@@ -160,10 +161,12 @@ public:
 	HEARTHSTONE_INLINE const uint32 GetLowGUID() const { return (m_uint32Values[0]); }
 
 	// type
+	bool m_isVehicle;
 	HEARTHSTONE_INLINE const uint8& GetTypeId() const { return m_objectTypeId; }
 	HEARTHSTONE_INLINE bool IsUnit()	{ return ( m_objectTypeId == TYPEID_UNIT || m_objectTypeId == TYPEID_PLAYER ); }
 	HEARTHSTONE_INLINE bool IsPlayer() { return m_objectTypeId == TYPEID_PLAYER; }
 	HEARTHSTONE_INLINE bool IsCreature() { return m_objectTypeId == TYPEID_UNIT; }
+	HEARTHSTONE_INLINE bool IsVehicle() { return m_isVehicle; }
 	bool IsPet();
 
 	//! This includes any nested objects we have, inventory for example.

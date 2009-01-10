@@ -905,6 +905,11 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_REMOVE_GLYPH].handler = &WorldSession::HandleRemoveGlyph;
 
 	WorldPacketHandlers[CMSG_QUERY_INSPECT_ACHIEVEMENTS].handler = &WorldSession::HandleAchievementInspect;
+
+	// Vehicles
+	WorldPacketHandlers[CMSG_SPELLCLICK].handler = &WorldSession::HandleSpellClick;
+	WorldPacketHandlers[CMSG_DISMISS_CONTROLLED_VEHICLE].handler = &WorldSession::HandleVehicleDismiss;
+	WorldPacketHandlers[CMSG_REQUEST_VEHICLE_EXIT].handler = &WorldSession::HandleVehicleDismiss;
 }
 
 void SessionLogWriter::writefromsession(WorldSession* session, const char* format, ...)

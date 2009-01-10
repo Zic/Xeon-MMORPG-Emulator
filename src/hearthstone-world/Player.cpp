@@ -1010,6 +1010,16 @@ void Player::Update( uint32 p_time )
 		SetPosition(c_tposx, c_tposy, c_tposz, GetOrientation(), false);
 	}
 
+	if(m_CurrentVehicle)
+	{
+		// Update our position
+		float vposx = m_CurrentVehicle->GetPositionX();
+		float vposy = m_CurrentVehicle->GetPositionY();
+		float vposz = m_CurrentVehicle->GetPositionZ();
+		float vposo = m_CurrentVehicle->GetOrientation();
+		SetPosition(vposx, vposy, vposz, vposo, false);
+	}
+
 	// Exploration
 	if(mstime >= m_explorationTimer)
 	{
@@ -3420,7 +3430,7 @@ void Player::RemoveFromWorld()
 {
 	EndDuel( 0 );
 
-	if( m_CurrentCharm != NULL )
+	if( m_CurrentCharm && !m_CurrentVehicle )
 		UnPossess();
 
 	if( m_uint32Values[UNIT_FIELD_CHARMEDBY] != 0 && IsInWorld() )
@@ -3534,6 +3544,12 @@ void Player::RemoveFromWorld()
 		m_CurrentTransporter->RemovePlayer(plr_shared_from_this());
 		m_CurrentTransporter = NULLTRANSPORT;
 		m_TransporterGUID = 0;
+	}
+
+	if( m_CurrentVehicle )
+	{
+		m_CurrentVehicle->RemovePassenger(player_shared_from_this());
+		m_CurrentVehicle = NULLVEHICLE;
 	}
 
 	m_changingMaps = true;
@@ -4040,6 +4056,16 @@ shared_ptr<Corpse>Player::RepopRequestedPlayer()
 		m_CurrentTransporter->RemovePlayer( plr_shared_from_this() );
 		m_CurrentTransporter = NULLTRANSPORT;
 		m_TransporterGUID = 0;
+
+		ResurrectPlayer(NULLPLR);
+		RepopAtGraveyard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
+		return NULLCORPSE;
+	}
+
+	if( m_CurrentVehicle != NULL )
+	{
+		m_CurrentVehicle->RemovePassenger( plr_shared_from_this() );
+		m_CurrentVehicle = NULLVEHICLE;
 
 		ResurrectPlayer(NULLPLR);
 		RepopAtGraveyard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
@@ -5233,11 +5259,16 @@ void Player::OnRemoveInRangeObject(ObjectPointer pObj)
 	m_visibleObjects.erase(pObj);
 	Unit::OnRemoveInRangeObject(pObj);
 
-	if( pObj == m_CurrentCharm )
+	if( pObj == m_CurrentCharm)
 	{
 		UnitPointer p = m_CurrentCharm;
 
-		this->UnPossess();
+		if(pObj == m_CurrentVehicle)
+		{
+			m_CurrentVehicle->RemovePassenger(plr_shared_from_this());
+		}
+		else
+			this->UnPossess();
 		if(m_currentSpell)
 			m_currentSpell->cancel();	   // cancel the spell
 		m_CurrentCharm=NULLUNIT;

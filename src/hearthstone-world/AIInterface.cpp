@@ -315,7 +315,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					}
 				}
 
-				if(m_Unit->GetMapMgr()->GetMapInfo() && m_Unit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
+				if(m_Unit->GetMapMgr() && m_Unit->GetMapMgr()->GetMapInfo() && m_Unit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
 				{
 					if(m_Unit->GetTypeId() == TYPEID_UNIT)
 					{
@@ -455,6 +455,9 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 		case EVENT_UNITDIED:
 		{
 			if( pUnit == NULL ) return;
+
+			if( pUnit->m_CurrentVehicle )
+				pUnit->m_CurrentVehicle->RemovePassenger(pUnit);
 
 			if( TO_CREATURE( m_Unit )->has_combat_text )
 				objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ON_DIED );

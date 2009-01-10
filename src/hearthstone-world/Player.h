@@ -1551,7 +1551,7 @@ public:
 	void SoftDisconnect();
 	uint32 m_KickDelay;
 	UnitPointer m_CurrentCharm;
-	shared_ptr<Transporter> m_CurrentTransporter;
+	TransporterPointer m_CurrentTransporter;
 	
 	ObjectPointer GetSummonedObject () {return m_SummonedObject;};
 	void SetSummonedObject (ObjectPointer t_SummonedObject) {m_SummonedObject = t_SummonedObject;};

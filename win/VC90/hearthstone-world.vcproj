@@ -1232,6 +1232,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\ClassDiagram1.cd"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\hearthstone-world\EventMgr.cpp"
 			>
 		</File>

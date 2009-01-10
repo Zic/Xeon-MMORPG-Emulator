@@ -511,6 +511,7 @@ bool World::SetInitialWorldSettings()
 	Log.Notice("World", "Object size: %u bytes", sizeof(Object));
 	Log.Notice("World", "Unit size: %u bytes", sizeof(Unit) + sizeof(AIInterface));
 	Log.Notice("World", "Creature size: %u bytes", sizeof(Creature) + sizeof(AIInterface));
+	Log.Notice("World", "Vehicle size: %u bytes", sizeof(Vehicle) + sizeof(AIInterface));
 	Log.Notice("World", "Player size: %u bytes", sizeof(Player) + sizeof(ItemInterface) + 50000 + 30000 + 1000 + sizeof(AIInterface));
 	Log.Notice("World", "GameObject size: %u bytes", sizeof(GameObject));
 

@@ -25,6 +25,9 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 	if(_player->m_CurrentTransporter)
 		_player->m_CurrentTransporter->RemovePlayer(_player);
 
+	if(_player->m_CurrentVehicle)
+		_player->m_CurrentVehicle->RemovePassenger(_player);
+
 	  GetPlayer()->RepopRequestedPlayer();
 }
 

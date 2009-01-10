@@ -27,8 +27,20 @@ public:
 	~Vehicle();
 	virtual void Destructor();
 
-	void Create(CreatureProto * cp, uint32 vehicleEntry, PlayerPointer pRider = NULLPLR);
+	void Init();
+	void InitSeats(uint32 vehicleEntry, PlayerPointer pRider = NULLPLR);
 	virtual void Update(uint32 time);
+	bool Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info);
+	void Despawn(uint32 delay, uint32 respawntime);
+	void DeleteMe();
+	void SafeDelete();
+	void MoveVehicle(float x, float y, float z, float o);
+	void AddPassenger(UnitPointer pPassenger);
+	void RemovePassenger(UnitPointer pPassenger);
+	bool HasPassenger(UnitPointer pPassenger);
+	void SendSpells(uint32 entry, PlayerPointer plr);
+	void setDeathState(DeathState s);
+	void SetSpeed(uint8 SpeedType, float value);
 
 	//---------------------------------------
 	// Accessors
@@ -36,27 +48,33 @@ public:
 	uint32 GetMaxPassengerCount() { return m_maxPassengers; }
 	uint32 GetPassengerCount() { return m_passengerCount; }
 
-	PlayerPointer GetControllingPlayer() { return m_controllingPlayer; }
+	uint32 GetVehicleEntry() { return m_vehicleEntry; }
+	void SetVehicleEntry(uint32 entry) { m_vehicleEntry = entry; }
+
+	UnitPointer GetControllingUnit() { return m_controllingUnit; }
+	void SetControllingUnit(UnitPointer pUnit) { m_controllingUnit = pUnit; }
+
+	uint8 GetPassengerSlot(UnitPointer pPassenger);
 	//---------------------------------------
 	// End accessors
 	//---------------------------------------
 
-	void AddPassenger(UnitPointer pPassenger);
-	void RemovePassenger(uint32 passengerSlot);
-	bool HasPassenger(UnitPointer pPassenger);
 	bool IsFull() { return m_passengerCount == m_maxPassengers; }
 
+	VehicleSeatEntry * m_vehicleSeats[8];
+	bool Initialised;
+
 private:
-	void _AddToSlot(UnitPointer pPassenger, uint32 slot);
+	void _AddToSlot(UnitPointer pPassenger, uint8 slot);
 
 protected:
-	PlayerPointer m_controllingPlayer;
+	UnitPointer m_controllingUnit;
 
 	shared_ptr<Unit>* m_passengers;
-	VehicleSeatEntry * m_vehicleSeats[8];
 
-	uint32 m_passengerCount;
-	uint32 m_maxPassengers;
+	uint8 m_passengerCount;
+	uint8 m_maxPassengers;
+	uint32 m_vehicleEntry;
 };
 
 #endif

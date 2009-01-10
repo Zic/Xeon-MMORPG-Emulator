@@ -67,7 +67,7 @@ Map::~Map()
 				if(spawns[x][y])
 				{	
 					CellSpawns * sp=spawns[x][y];
-					for(CreatureSpawnList::iterator i = sp->CreatureSpawns.begin();i!=sp->CreatureSpawns.end();i++)
+						for(CreatureSpawnList::iterator i = sp->CreatureSpawns.begin();i!=sp->CreatureSpawns.end();i++)
 						delete (*i);
 					for(GOSpawnList::iterator it = sp->GOSpawns.begin();it!=sp->GOSpawns.end();it++)
 						delete (*it);
@@ -93,7 +93,7 @@ Map::~Map()
 bool first_table_warning = true;
 bool CheckResultLengthCreatures(QueryResult * res)
 {
-	if( res->GetFieldCount() != 21 )
+	if( res->GetFieldCount() != 22 )
 	{
 		if( first_table_warning )
 		{
@@ -192,6 +192,7 @@ void Map::LoadSpawns(bool reload)
 					cspawn->stand_state = fields[18].GetUInt16();
 					cspawn->MountedDisplayID = fields[19].GetUInt32();
 					cspawn->phase = fields[20].GetInt32();
+					cspawn->vehicle = fields[21].GetInt32();
 					spawns[cellx][celly]->CreatureSpawns.push_back(cspawn);
 					++CreatureSpawnCount;
 				}while(result->NextRow());

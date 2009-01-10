@@ -148,6 +148,7 @@ struct CreatureProto
 	float	run_speed;//most of the time mobs use this
 	float fly_speed;
 	uint32 extra_a9_flags;
+	int32 vehicle_entry;
 
 	/* AI Stuff */
 	bool m_canRangedAttack;

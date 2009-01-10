@@ -44,7 +44,9 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 	//m_CreatureStorage = (CreaturePointer*)malloc(sizeof(CreaturePointer) * m_CreatureArraySize);
 	//memset(m_CreatureStorage,0,sizeof(CreaturePointer)*m_CreatureArraySize);
 
-	m_GOHighGuid = m_CreatureHighGuid = 0;
+	m_GOHighGuid = 0;
+	m_CreatureHighGuid = 0;
+	m_VehicleHighGuid = 0;
 	m_DynamicObjectHighGuid=0; 
 	lastUnitUpdate = getMSTime();
 	lastGameobjectUpdate = getMSTime();
@@ -79,10 +81,13 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 
 	activeGameObjects.clear();
 	activeCreatures.clear();
+	activeVehicles.clear();
 	m_corpses.clear();
+	_sqlids_vehicles.clear();
 	_sqlids_creatures.clear();
 	_sqlids_gameobjects.clear();
 	_reusable_guids_creature.clear();
+	_reusable_guids_vehicle.clear();
 
 	if (sWorld.Collision && GetMapInfo()->collision)
 		SetCollision(true);
@@ -135,6 +140,7 @@ void MapMgr::Destructor()
 	}
 
 
+	//free(m_VehicleStorage);
 	//free(m_CreatureStorage);
 
 	shared_ptr<Corpse> pCorpse;
@@ -321,6 +327,15 @@ void MapMgr::PushObject(ObjectPointer obj)
 				}
 			}break;
 
+		case HIGHGUID_TYPE_VEHICLE:
+			{
+				ASSERT((obj->GetUIdFromGUID()) <= m_VehicleHighGuid);
+				m_VehicleStorage[obj->GetUIdFromGUID()] = TO_VEHICLE(obj);
+				if(TO_VEHICLE(obj)->m_spawn != NULL)
+				{
+					_sqlids_vehicles.insert(make_pair( TO_VEHICLE(obj)->m_spawn->id, TO_VEHICLE(obj) ) );
+				}
+			}break;
 		case HIGHGUID_TYPE_GAMEOBJECT:
 			{
 				m_gameObjectStorage.insert(make_pair(obj->GetUIdFromGUID(), TO_GAMEOBJECT(obj)));
@@ -371,6 +386,10 @@ void MapMgr::PushStaticObject(ObjectPointer obj)
 
 	switch(obj->GetTypeFromGUID())
 	{
+		case HIGHGUID_TYPE_VEHICLE:
+			m_VehicleStorage[obj->GetUIdFromGUID()] = TO_VEHICLE(obj);
+			break;
+
 		case HIGHGUID_TYPE_UNIT:
 			m_CreatureStorage[obj->GetUIdFromGUID()] = TO_CREATURE(obj);
 			break;
@@ -407,6 +426,17 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
  
 	switch(obj->GetTypeFromGUID())
 	{
+		case HIGHGUID_TYPE_VEHICLE:
+			ASSERT(obj->GetUIdFromGUID() <= m_VehicleHighGuid);
+			m_VehicleStorage[obj->GetUIdFromGUID()] = NULLVEHICLE;
+			if(TO_VEHICLE(obj)->m_spawn != NULL)
+			{
+				_sqlids_vehicles.erase(TO_VEHICLE(obj)->m_spawn->id);
+			}
+ 
+			if(free_guid)
+				_reusable_guids_vehicle.push_back(obj->GetUIdFromGUID());
+
 		case HIGHGUID_TYPE_UNIT:
 			ASSERT(obj->GetUIdFromGUID() <= m_CreatureHighGuid);
 			m_CreatureStorage[obj->GetUIdFromGUID()] = NULLCREATURE;
@@ -453,7 +483,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 		obj->Deactivate(CAST(MapMgr,shared_from_this()));
 
 	// That object types are not map objects. TODO: add AI groups here?
-	if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetTypeId()==10)
+	if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetTypeId()==TYPEID_UNUSED)
 	{
 		return;
 	}
@@ -503,7 +533,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 		{
 			if( (*iter)->GetTypeId() == TYPEID_PLAYER )
 			{
-				if( TO_PLAYER( *iter )->IsVisible( obj ) && TO_PLAYER( *iter )->m_TransporterGUID != obj->GetGUID() )
+				if( TO_PLAYER( *iter )->IsVisible( obj ) && TO_PLAYER( *iter )->m_TransporterGUID != obj->GetGUID())
 					TO_PLAYER( *iter )->PushOutOfRange(obj->GetNewGUID());
 			}
 			(*iter)->RemoveInRangeObject(obj);
@@ -659,7 +689,9 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 			iter2 = iter++;
 			if( curObj->IsPlayer() && obj->IsPlayer() && plObj->m_TransporterGUID && plObj->m_TransporterGUID == TO_PLAYER( curObj )->m_TransporterGUID )
 				fRange = 0.0f; // unlimited distance for people on same boat
-			else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER )
+			else if( curObj->IsPlayer() && obj->IsPlayer() && plObj->m_CurrentVehicle && plObj->m_CurrentVehicle == TO_PLAYER( curObj )->m_CurrentVehicle )
+				fRange = 0.0f; // unlimited distance for people on same vehicle
+			else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER || curObj->GetTypeFromGUID() ==  HIGHGUID_TYPE_VEHICLE)
 				fRange = 0.0f; // unlimited distance for transporters (only up to 2 cells +/- anyway.)
 			else
 				fRange = m_UpdateDistance; // normal distance
@@ -794,6 +826,12 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 				UpdateInRangeSet(obj, plObj, cell);
 		}
 	}
+
+	if(obj->IsUnit())
+	{
+		UnitPointer pobj = TO_UNIT(obj);
+		pobj->OnPositionChange();
+	}
 }
 
 void MapMgr::UpdateInRangeSet( ObjectPointer obj, PlayerPointer plObj, MapCell* cell )
@@ -819,7 +857,9 @@ void MapMgr::UpdateInRangeSet( ObjectPointer obj, PlayerPointer plObj, MapCell* 
 
 		if( curObj->IsPlayer() && obj->IsPlayer() && plObj->m_TransporterGUID && plObj->m_TransporterGUID == TO_PLAYER( curObj )->m_TransporterGUID )
 			fRange = 0.0f; // unlimited distance for people on same boat
-		else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER )
+		else if( curObj->IsPlayer() && obj->IsPlayer() && plObj->m_CurrentVehicle && plObj->m_CurrentVehicle == TO_PLAYER( curObj )->m_CurrentVehicle )
+			fRange = 0.0f; // unlimited distance for people on same vehicle
+		else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER || curObj->GetTypeFromGUID() ==  HIGHGUID_TYPE_VEHICLE)
 			fRange = 0.0f; // unlimited distance for transporters (only up to 2 cells +/- anyway.)
 		else
 			fRange = m_UpdateDistance; // normal distance
@@ -1536,6 +1576,10 @@ UnitPointer MapMgr::GetUnit(const uint64 & guid)
 	case HIGHGUID_TYPE_PET:
 		return GetPet( GET_LOWGUID_PART(guid) );
 		break;
+
+	case HIGHGUID_TYPE_VEHICLE:
+		return GetVehicle( GET_LOWGUID_PART(guid) );
+ 		break;
 	}
 
 	return NULLUNIT;
@@ -1545,6 +1589,9 @@ ObjectPointer MapMgr::_GetObject(const uint64 & guid)
 {
 	switch(GET_TYPE_FROM_GUID(guid))
 	{
+	case	HIGHGUID_TYPE_VEHICLE:
+		return GetVehicle(GET_LOWGUID_PART(guid));
+ 		break;
 	case	HIGHGUID_TYPE_GAMEOBJECT:
 		return GetGameObject(GET_LOWGUID_PART(guid));
 		break;
@@ -1579,6 +1626,7 @@ void MapMgr::_PerformObjectDuties()
 		__creature_iterator = activeCreatures.begin();
 		CreaturePointer ptr;
 		PetPointer ptr2;
+		VehiclePointer ptr3;
 
 		for(; __creature_iterator != activeCreatures.end();)
 		{
@@ -1596,6 +1644,16 @@ void MapMgr::_PerformObjectDuties()
 
 			ptr2->Update(difftime);
 		}		
+
+		__vehicle_iterator = activeVehicles.begin();
+		for(; __vehicle_iterator != activeVehicles.end();)
+ 		{
+
+			ptr3 = *__vehicle_iterator;
+ 			++__vehicle_iterator;
+ 
+ 			ptr3->Update(difftime);
+		}
 	}
 
 	// Update any events.
@@ -1730,6 +1788,17 @@ void MapMgr::UnloadCell(uint32 x,uint32 y)
 	c->Unload();
 }
 
+void MapMgr::EventRespawnVehicle(VehiclePointer v, MapCell * p)
+{
+	ObjectSet::iterator itr = p->_respawnObjects.find( v );
+	if(itr != p->_respawnObjects.end())
+	{
+		v->m_respawnCell=NULL;
+		p->_respawnObjects.erase(itr);
+		v->OnRespawn(CAST(MapMgr,shared_from_this()));
+	}
+}
+
 void MapMgr::EventRespawnCreature(CreaturePointer c, MapCell * p)
 {
 	ObjectSet::iterator itr = p->_respawnObjects.find( c );
@@ -1741,7 +1810,7 @@ void MapMgr::EventRespawnCreature(CreaturePointer c, MapCell * p)
 	}
 }
 
-void MapMgr::EventRespawnGameObject(shared_ptr<GameObject> o, MapCell * c)
+void MapMgr::EventRespawnGameObject(GameObjectPointer o, MapCell * c)
 {
 	ObjectSet::iterator itr = c->_respawnObjects.find( o);
 	if(itr != c->_respawnObjects.end())
@@ -1819,13 +1888,19 @@ void MapMgr::SendChatMessageToCellPlayers(ObjectPointer obj, WorldPacket * packe
 	}
 }
 
+VehiclePointer MapMgr::GetSqlIdVehicle(uint32 sqlid)
+{
+	VehicleSqlIdMap::iterator itr = _sqlids_vehicles.find(sqlid);
+	return (itr == _sqlids_vehicles.end()) ? NULLVEHICLE : itr->second;
+}
+
 CreaturePointer MapMgr::GetSqlIdCreature(uint32 sqlid)
 {
 	CreatureSqlIdMap::iterator itr = _sqlids_creatures.find(sqlid);
 	return (itr == _sqlids_creatures.end()) ? NULLCREATURE : itr->second;
 }
 
-shared_ptr<GameObject> MapMgr::GetSqlIdGameObject(uint32 sqlid)
+GameObjectPointer MapMgr::GetSqlIdGameObject(uint32 sqlid)
 {
 	GameObjectSqlIdMap::iterator itr = _sqlids_gameobjects.find(sqlid);
 	return (itr == _sqlids_gameobjects.end()) ? NULLGOB : itr->second;
@@ -1837,7 +1912,7 @@ void MapMgr::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 	{
 	case 4591:
 		//Only opens when the first one steps in, if 669 if you find a way, put it in :P (else was used to increase the time the door stays opened when another one steps on it)
-		shared_ptr<GameObject>door = GetInterface()->GetGameObjectNearestCoords(803.827f, 6869.38f, -38.5434f, 184212);
+		GameObjectPointer door = GetInterface()->GetGameObjectNearestCoords(803.827f, 6869.38f, -38.5434f, 184212);
 		if (door && (door->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE) == 1))
 		{
 			door->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -1850,6 +1925,27 @@ void MapMgr::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 		//}
 		break;
 	}
+}
+
+VehiclePointer MapMgr::CreateVehicle(uint32 entry)
+{
+	uint64 newguid = ( (uint64)HIGHGUID_TYPE_VEHICLE << 32 ) | ( (uint64)entry << 24 );
+	if(_reusable_guids_vehicle.size())
+	{
+		uint32 guid = _reusable_guids_vehicle.front();
+		_reusable_guids_vehicle.pop_front();
+
+		newguid |= guid;
+		VehiclePointer v = VehiclePointer(new Vehicle(newguid));
+		v->Init();
+		return v;
+	}
+
+	newguid |= ++m_VehicleHighGuid;
+	VehiclePointer v = VehiclePointer(new Vehicle(newguid));
+	v->Init();
+	m_VehicleStorage.insert( make_pair< uint32, VehiclePointer >(v->GetUIdFromGUID(), v));
+	return v;
 }
 
 CreaturePointer MapMgr::CreateCreature(uint32 entry)
@@ -1873,12 +1969,12 @@ CreaturePointer MapMgr::CreateCreature(uint32 entry)
 	return cr;
 }
 
-shared_ptr<GameObject> MapMgr::CreateGameObject(uint32 entry)
+GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 {
 	uint64 new_guid = ( (uint64)HIGHGUID_TYPE_GAMEOBJECT << 32 ) | ( (uint64)entry << 24 );
 	m_GOHighGuid &= 0x00FFFFFF;
 	new_guid |= (uint64)(++m_GOHighGuid);
-	shared_ptr<GameObject> go = shared_ptr<GameObject>(new GameObject(new_guid));
+	GameObjectPointer go = shared_ptr<GameObject>(new GameObject(new_guid));
 	go->Init();
 	return go;
 }
