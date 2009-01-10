@@ -584,7 +584,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char *args, WorldSession *m_session
 	if(!crt) return false;
 	if(crt->GetCreatureName())
 		BlueSystemMessage(m_session, "Showing creature info for %s", crt->GetCreatureName()->Name);
-	snprintf(msg,512,"GUID: %d\nFaction: %d\nNPCFlags: %d\nDisplayID: %d", (int)guid, (int)crt->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (int)crt->GetUInt32Value(UNIT_NPC_FLAGS), (int)crt->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+	snprintf(msg,512,"GUID: %d\nFaction: %d\nNPCFlags: %d\nDisplayID: %d\n Scale %f", (int)guid, (int)crt->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (int)crt->GetUInt32Value(UNIT_NPC_FLAGS), (int)crt->GetUInt32Value(UNIT_FIELD_DISPLAYID), (int)crt->proto->Scale);
 	SystemMessage(m_session, msg);
 	if(crt->m_faction)
 		GreenSystemMessage(m_session, "Combat Support: 0x%.3X", crt->m_faction->FriendlyMask);
@@ -2903,15 +2903,18 @@ bool ChatHandler::HandleFixScaleCommand(const char * args, WorldSession * m_sess
 		return true;
 
 	float sc = (float)atof(args);
+	uint32 model;
+	uint32 gender = pCreature->creature_info->GenerateModelId(&model);
+	pCreature->setGender(gender);
+
 	if(sc < 0.1f)
 	{
-		uint32 model;
-		uint32 gender = pCreature->creature_info->GenerateModelId(&model);
-		pCreature->setGender(gender);
-
-		sc = pCreature->proto->Scale ? pCreature->proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ));
-		SystemMessage(m_session, "Scale info obtained from DBCDisplayInfo now");
+		sc = GetScale( dbcCreatureDisplayInfo.LookupEntry( model ));
+		SystemMessage(m_session, "Using scale %f from DBCDisplayInfo.",sc);
 	}
+	else
+		SystemMessage(m_session, "Scale override set to %f (DBCDisplayInfo = %f).",sc,GetScale( dbcCreatureDisplayInfo.LookupEntry( model )));
+
 
 	pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, sc);
 	pCreature->proto->Scale = sc;
