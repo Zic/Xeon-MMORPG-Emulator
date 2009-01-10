@@ -6236,7 +6236,11 @@ void Aura::SpellAuraDrinkNew(bool apply)
 
 	if( apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
+		sEventMgr.RemoveEvents( m_target, EVENT_AURA_PERIODIC_TRIGGERSPELL );
+		m_target->Root();
+		mod->fixed_amount[0] = 0;
 		sEventMgr.AddEvent( aura_shared_from_this(), &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent( m_target, &Unit::UnRoot, EVENT_AURA_PERIODIC_TRIGGERSPELL, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
@@ -6258,14 +6262,14 @@ void Aura::SpellAuraDrinkNew(bool apply)
 
 }
 
-void Aura::EventPeriodicSpeedModify(int32 mod)
+void Aura::EventPeriodicSpeedModify(int32 modifier)
 {
-	m_target->m_speedModifier += mod;
+	m_target->m_speedModifier += modifier;
 	m_target->UpdateSpeed();
 
 	if( m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
-		this->mod->fixed_amount[0] += mod;
+		this->mod->fixed_amount[0] += modifier;
 	}
 }
 
