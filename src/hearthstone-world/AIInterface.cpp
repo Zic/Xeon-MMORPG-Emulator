@@ -244,6 +244,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				// restart emote
 				if(m_Unit->GetTypeId() == TYPEID_UNIT)
 				{
+					TO_CREATURE(m_Unit)->SetSheatheForAttackType(0); // sheathe yuor weapons!
+
 					if( TO_CREATURE( m_Unit )->has_combat_text )
 						objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ON_COMBAT_STOP );
 
@@ -935,6 +937,8 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 		{
 		case AGENT_MELEE:
 			{
+				if( m_Unit->GetTypeId() == TYPEID_UNIT )
+					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 1 );
 				float combatReach[2]; // Calculate Combat Reach
 				float distance = m_Unit->CalcDistance(m_nextTarget);
 
@@ -1016,6 +1020,9 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			}break;
 		case AGENT_RANGED:
 			{
+				if( m_Unit->GetTypeId() == TYPEID_UNIT )
+					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 3 );
+
 				float combatReach[2]; // Calculate Combat Reach
 				float distance = m_Unit->CalcDistance(m_nextTarget);
 
@@ -1078,6 +1085,9 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			{
 				if(!m_nextSpell || !m_nextTarget)
 					return;  // this shouldnt happen
+
+				if( m_Unit->GetTypeId() == TYPEID_UNIT )
+					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 0 );
 
 				/* stop moving so we don't interrupt the spell */
 				//this the way justly suggested

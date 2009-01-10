@@ -270,9 +270,11 @@ void Unit::Destructor()
 			itr->second->Remove();
 		}
 	}
+	tmpAura.clear();
 
 	for(std::list<ExtraStrike*>::iterator itr = m_extraStrikeTargets.begin();itr != m_extraStrikeTargets.end();itr++)
 		delete (*itr);
+	m_extraStrikeTargets.clear();
 
 	if (m_onAuraRemoveSpells)
 	{
