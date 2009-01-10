@@ -1140,7 +1140,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 						//add pet spell after use to pet owner with some chance
 						if(m_Unit->IsPet() &&  m_PetOwner && m_PetOwner->IsPlayer())
 						{	
-							Pet * pPet = static_cast<Pet*>(m_Unit);
+							PetPointer pPet = TO_PET(m_Unit);
 							if(pPet && Rand(5)) //5% change to gain spell from pet
 								pPet->AddPetSpellToOwner(spellInfo->Id);
 						}
@@ -2755,7 +2755,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 	}
 }
 
-uint8 AIInterface::CastSpell(Unit* caster, SpellEntry *spellInfo, SpellCastTargets targets)
+uint8 AIInterface::CastSpell(UnitPointer caster, SpellEntry *spellInfo, SpellCastTargets targets)
 {
 	if( m_AIType != AITYPE_PET && disable_spell )
 		return SPELL_FAILED_ERROR;

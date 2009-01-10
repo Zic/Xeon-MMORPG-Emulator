@@ -753,7 +753,7 @@ public:
 	void CastSpell(UnitPointer Target, SpellEntry* Sp, bool triggered);
 	void CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered);
 	void CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered);
-	void CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered);
+	uint8 CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered);
 	void EventCastSpell(UnitPointer Target, SpellEntry * Sp);
 
 	bool isCasting();

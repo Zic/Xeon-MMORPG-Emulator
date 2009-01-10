@@ -4709,10 +4709,14 @@ void Unit::CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered)
 
 	CastSpell(targetGuid, ent, triggered);
 }
-void Unit::CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered)
+uint8 Unit::CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered)
 {
 	if( Sp == NULL )
-		return;
+		return SPELL_FAILED_ERROR;
+
+ /*creature will not cast spells while moving, just interrupts itself all the time*/
+	if(!IsPlayer() && (IsStunned() || IsPacified() || !isAlive() || m_silenced))
+		return SPELL_FAILED_INTERRUPTED;
 
 	SpellCastTargets targets;
 	targets.m_destX = x;
@@ -4720,7 +4724,7 @@ void Unit::CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered)
 	targets.m_destZ = z;
 	targets.m_targetMask=TARGET_FLAG_DEST_LOCATION;
 	SpellPointer newSpell = shared_ptr<Spell>(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
-	newSpell->prepare(&targets);
+	return newSpell->prepare(&targets);
 }
 
 void Unit::PlaySpellVisual(uint64 target, uint32 spellVisual)
