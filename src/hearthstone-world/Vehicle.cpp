@@ -21,13 +21,14 @@
 
 Vehicle::Vehicle(uint64 guid) : Creature(guid)
 {
-	printf("Vehicle::Vehicle()\n");
+	//printf("Vehicle::Vehicle()\n");
 	m_vehicleEntry = 0;
 	m_passengerCount = 0;
 	m_maxPassengers = 0;
 	memset( m_vehicleSeats, 0, sizeof(uint32)*8 );
 	m_isVehicle = true;
 	Initialised = false;
+	m_CreatedFromSpell = false;
 }
 
 Vehicle::~Vehicle()
@@ -76,6 +77,46 @@ void Vehicle::InitSeats(uint32 vehicleEntry, PlayerPointer pRider)
 
 	if( pRider != NULLPLR)
 		AddPassenger( pRider );
+}
+
+void Vehicle::Load(CreatureProto * proto_, float x, float y, float z, float o /* = 0.0f */)
+{
+	proto = proto_;
+	if(!proto)
+		return;
+
+	if(proto->vehicle_entry != -1)
+	{
+		m_vehicleEntry = proto->vehicle_entry;
+	}
+	else
+	{
+		m_vehicleEntry = 124;
+		DEBUG_LOG("Attempted to create vehicle %u with invalid vehicle_entry, defaulting to 124, check your creature_proto table.\n", proto->Id);
+	}
+
+	m_maxPassengers = 0;
+	VehicleEntry * ve = dbcVehicle.LookupEntry( m_vehicleEntry );
+	if(!ve)
+	{
+		DEBUG_LOG("Attempted to create non-existant vehicle %u.\n", GetVehicleEntry());
+		return;
+	}
+
+	for( uint32 i = 0; i < 8; ++i )
+	{
+		if( ve->m_seatID[i] )
+		{
+			m_vehicleSeats[i] = dbcVehicleSeat.LookupEntry( ve->m_seatID[i] );
+			++m_maxPassengers;
+		}
+	}
+
+	m_passengers = (shared_ptr<Unit>*)malloc(sizeof(shared_ptr<Unit>) * m_maxPassengers);
+	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
+	Initialised = true;
+
+	Creature::Load(proto_, x, y, z, o);
 }
 
 bool Vehicle::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
@@ -322,7 +363,10 @@ void Vehicle::RemovePassenger(UnitPointer pPassenger)
 		//and respawn at spawn point.
 		//Well actually this is how blizz wanted it
 		//but they couldnt get it to work xD
-		GetAIInterface()->MoveTo(m_spawn->x, m_spawn->y, m_spawn->z, m_spawn->o);
+		if( m_spawn )
+			GetAIInterface()->MoveTo(m_spawn->x, m_spawn->y, m_spawn->z, m_spawn->o);
+		else //we're a temp spawn
+			SafeDelete();
 
 		m_controllingUnit.reset();
 		for(uint8 i = 0; i < m_maxPassengers; i++)
@@ -500,6 +544,9 @@ void Vehicle::setDeathState(DeathState s)
 	for (uint8 i=0; i<m_maxPassengers; ++i)
 		if (m_passengers[i] != NULL)
 			RemovePassenger(m_passengers[i]);
+
+	if( s == JUST_DIED && m_CreatedFromSpell)
+		SafeDelete();
 }
 
 void Vehicle::SetSpeed(uint8 SpeedType, float value)
@@ -592,6 +639,10 @@ void WorldSession::HandleSpellClick( WorldPacket & recv_data )
 		return;
 	
 	if(!pVehicle->GetMaxPassengerCount())
+		return;
+
+	// just in case.
+	if( sEventMgr.HasEvent( pVehicle, EVENT_VEHICLE_SAFE_DELETE ) )
 		return;
 
 	if(pVehicle->HasPassenger(pPlayer))

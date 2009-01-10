@@ -1388,7 +1388,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 33619:
 							{
 								//requires Power Word: Shield active
-								int power_word_id = GetAuraCountWithNameHash( SPELL_HASH_POWER_WORD__SHIELD );
+								int power_word_id = GetAuraSpellIDWithNameHash( SPELL_HASH_POWER_WORD__SHIELD );
 								if( !power_word_id )
 									continue;//this should not ocur unless we made a fuckup somewhere
 								//make a direct strike then exit rest of handler
@@ -5004,7 +5004,7 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 	}
 }
 
-int Unit::GetAuraCountWithNameHash(uint32 name_hash)
+int Unit::GetAuraSpellIDWithNameHash(uint32 name_hash)
 {
 	for(uint32 x = 0; x < MAX_AURAS; ++x)
 	{

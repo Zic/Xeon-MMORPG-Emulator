@@ -3942,23 +3942,25 @@ exit:*/
 	}
 	else if( p_caster && m_spellInfo->Id == 31804 ) // Seal of vengeance: Judgement
 	{
-		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
-		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_HOLY_VENGEANCE);
+		value += float2int32(1 + 0.22f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY) + 0.14f * u_caster->GetAP());
+		AuraPointer p = u_caster->FindAura(31803);
+		uint32 c = p ? GetUnitTarget()->m_auraStackCount[p->GetAuraSlot()] : 0;
 		if(c)
-			value *= float2int32(1.0f + (float(c) / 100.0f));
+			value += float2int32(value * 1.0f + (c / 100.0f));
 	}
-	else if( p_caster && m_spellInfo->Id == 53733 ) // Seal of Corruption: Judgement
+	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 53733 ) // Seal of Corruption: Judgement
 	{
-		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
-		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_BLOOD_CORRUPTION);
+		value += float2int32(1 + 0.22f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY) + 0.14f * u_caster->GetAP());
+		AuraPointer p = u_caster->FindAura(53742);
+		uint32 c = p ? GetUnitTarget()->m_auraStackCount[p->GetAuraSlot()] : 0;
 		if(c)
-			value *= float2int32(1.0f + (float(c) / 100.0f));
+			value = float2int32(value * 1.0f + (c / 100.0f));
 	}
-	else if( p_caster && m_spellInfo->Id == 53742 || m_spellInfo->Id == 31803 ) // Holy Vengeance/ Blood Corruption
+	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 53742 || m_spellInfo->Id == 31803 ) // Holy Vengeance/ Blood Corruption
 	{
-		float SPH = float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY));
-		float AP = float(u_caster->GetAP());
-		value = float2int32((0.014f * SPH + 0.025f * AP) * 6.0f);
+		uint32 SPH = u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY);
+		uint32 AP = u_caster->GetAP();
+		value += float2int32((0.014f * SPH + 0.025f * AP) * 6.0f);
 	}
 	else if( m_spellInfo->Id == 60103 && p_caster && i == 0) // Lava Lash
 	{   // Check if offhand is enchanted with Flametongue
@@ -4501,7 +4503,7 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
 			if(Rand((float)(*i)->chance))
 			{
 				//the god blessed special case : mage - Frost Warding = is an augmentation to frost warding
-				if((*i)->require_aura_hash && u_caster && !u_caster->GetAuraCountWithNameHash((*i)->require_aura_hash))
+				if((*i)->require_aura_hash && u_caster && !u_caster->GetAuraSpellIDWithNameHash((*i)->require_aura_hash))
                 {
 					continue;
                 }

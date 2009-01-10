@@ -5999,6 +5999,10 @@ void Aura::SpellAuraMounted(bool apply)
 		m_target->RemoveAura(id);
 	}
 
+	bool isVehicleSpell = false;
+	if( m_spellProto->Effect[1] == SPELL_EFFECT_SUMMON )
+		isVehicleSpell  = true;
+
 	if(apply)
 	{   
 		p_target->m_bgFlagIneligible++;
@@ -6015,7 +6019,7 @@ void Aura::SpellAuraMounted(bool apply)
 		m_target->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_MOUNT);
 
 		CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
-		if(ci != NULL && ci->Male_DisplayID != 0)
+		if(!isVehicleSpell && ci != NULL && ci->Male_DisplayID != 0)
 			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , ci->Male_DisplayID);
 
 		p_target->m_MountSpellId = m_spellProto->Id;
@@ -6031,7 +6035,9 @@ void Aura::SpellAuraMounted(bool apply)
 		p_target->m_bgFlagIneligible--;
 		p_target->m_MountSpellId = 0;
 		p_target->flying_aura = 0;
-		m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+
+		if( !isVehicleSpell )
+			m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
 	}
 }

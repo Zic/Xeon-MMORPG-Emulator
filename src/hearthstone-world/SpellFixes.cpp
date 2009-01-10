@@ -689,11 +689,6 @@ void ApplyNormalFixes()
 
 		for(uint32 b=0;b<3;++b)
 		{
-			if( sp->Effect[b] == SPELL_EFFECT_SUMMON && sp->EffectBasePoints[b] > 25 )
-			{
-				sp->EffectBasePoints[b] = 0;
-			}
-
 			if(sp->EffectTriggerSpell[b] != 0 && dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[b]) == NULL)
 			{
 				/* proc spell referencing non-existant spell. create a dummy spell for use w/ it. */
@@ -877,9 +872,6 @@ void ApplyNormalFixes()
 			{
 				sp->Effect[b] = SPELL_EFFECT_APPLY_AREA_AURA;
 			}
-
-			if( b > 0 && sp->Effect[b] == SPELL_EFFECT_SUMMON && sp->EffectApplyAuraName[b - 1] == SPELL_AURA_MOUNTED )
-				sp->Effect[b] = 0; // temp fix.
 		}
 
 		//stupid spell ranking problem
@@ -6190,6 +6182,17 @@ void ApplyNormalFixes()
 		{
 			sp->procFlags = PROC_ON_CAST_SPELL;
 			sp->procChance = 100;
+		}
+	}
+
+	ranks = fill(ids, 53733, 31803, 53742, 31804);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Dspell_coef_override = 0.0f;
+			sp->OTspell_coef_override = 0.0f;
 		}
 	}
 

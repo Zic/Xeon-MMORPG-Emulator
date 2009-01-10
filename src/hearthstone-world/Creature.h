@@ -103,7 +103,7 @@ struct CreatureInfo
 			max++;
 		}
 
-		uint32 r = RandomUInt(max);
+		uint32 r = RandomUInt(max ? max - 1 : 0);
 		*dest = modelchoices[r];
 
 		if( *dest == Male_DisplayID  || *dest == Male_DisplayID2 )

@@ -340,7 +340,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			}break;
 		case SPELL_HASH_INCINERATE:	// Incinerate -> Deals x-x extra damage if the target is affected by immolate
 			{
-				if( unitTarget->GetAuraCountWithNameHash( SPELL_HASH_IMMOLATE ) )
+				if( unitTarget->GetAuraSpellIDWithNameHash( SPELL_HASH_IMMOLATE ) )
 				{
 					// random extra damage
 					uint32 extra_dmg = 111 + (m_spellInfo->RankNumber * 11) + RandomUInt(m_spellInfo->RankNumber * 11);
@@ -376,10 +376,10 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			break;
 
 		case SPELL_HASH_CONFLAGRATE:
-			if (unitTarget->GetAuraCountWithNameHash(SPELL_HASH_IMMOLATE))
+			if (unitTarget->GetAuraSpellIDWithNameHash(SPELL_HASH_IMMOLATE))
 				unitTarget->RemoveAuraByNameHash(SPELL_HASH_IMMOLATE);
 			else
-			if (unitTarget->GetAuraCountWithNameHash(SPELL_HASH_SHADOWFLAME))
+			if (unitTarget->GetAuraSpellIDWithNameHash(SPELL_HASH_SHADOWFLAME))
 				unitTarget->RemoveAuraByNameHash(SPELL_HASH_SHADOWFLAME);
 			break;
 		}
@@ -1840,7 +1840,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 						unitTarget->RemoveAura( taura );
 
 						//do not remove flag if we still can cast it again
-						if( !unitTarget->GetAuraCountWithNameHash( SPELL_HASH_REJUVENATION ) )
+						if( !unitTarget->GetAuraSpellIDWithNameHash( SPELL_HASH_REJUVENATION ) )
 						{
 							unitTarget->RemoveFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_REJUVENATE );	
 							sEventMgr.RemoveEvents( unitTarget, EVENT_REJUVENATION_FLAG_EXPIRE );
@@ -3377,14 +3377,35 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 	uint32 cr_entry = m_spellInfo->EffectMiscValue[i];
 	uint32 level = u_caster->getLevel();
 	float angle_for_each_spawn = -float(M_PI) * 2 / damage;
+	
+	bool isVehicle = false;
 
 	if( m_summonProperties->unk2 & 2 || m_summonProperties->Id == 711) // it's health., or a fucked up infernal.
 		damage = 1;
 
+	if( i != 0 && m_spellInfo->Effect[i-1] == SPELL_EFFECT_APPLY_AURA && m_spellInfo->EffectApplyAuraName[i-1] == SPELL_AURA_MOUNTED )
+	{
+		damage = 1;
+		isVehicle = true;
+	}
+
 	for( int i = 0; i < damage; i++ )
 	{
 		float m_fallowAngle = angle_for_each_spawn * i;
-		u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = TO_CREATURE(u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level));
+		if( isVehicle )
+		{
+			CreatureProto * cp = CreatureProtoStorage.LookupEntry(cr_entry);
+			if(!cp) return;
+
+			VehiclePointer veh = VehiclePointer( u_caster->GetMapMgr()->CreateVehicle( cr_entry ) );
+			veh->m_CreatedFromSpell = true;
+			veh->Load( cp, u_caster->GetPositionX(), u_caster->GetPositionY(), u_caster->GetPositionZ(), u_caster->GetOrientation());
+			veh->SetInstanceID( u_caster->GetInstanceID() );
+			veh->PushToWorld( u_caster->GetMapMgr() ); // we can do this safely since we're in the mapmgr's context
+			veh->InitSeats( cp->vehicle_entry, p_caster );
+		}
+		else
+			u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = TO_CREATURE(u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level));
 	}
 }
 

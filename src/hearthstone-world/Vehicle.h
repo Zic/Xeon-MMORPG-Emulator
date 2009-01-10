@@ -31,6 +31,7 @@ public:
 	void InitSeats(uint32 vehicleEntry, PlayerPointer pRider = NULLPLR);
 	virtual void Update(uint32 time);
 	bool Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info);
+	void Load(CreatureProto * proto_, float x, float y, float z, float o = 0.0f);
 	void Despawn(uint32 delay, uint32 respawntime);
 	void DeleteMe();
 	void SafeDelete();
@@ -51,7 +52,7 @@ public:
 	uint32 GetVehicleEntry() { return m_vehicleEntry; }
 	void SetVehicleEntry(uint32 entry) { m_vehicleEntry = entry; }
 
-	UnitPointer GetControllingUnit() { return m_controllingUnit; }
+	UnitPointer GetControllingUnit() { return m_passengers[0]; }
 	void SetControllingUnit(UnitPointer pUnit) { m_controllingUnit = pUnit; }
 
 	uint8 GetPassengerSlot(UnitPointer pPassenger);
@@ -63,6 +64,7 @@ public:
 
 	VehicleSeatEntry * m_vehicleSeats[8];
 	bool Initialised;
+	bool m_CreatedFromSpell;
 
 private:
 	void _AddToSlot(UnitPointer pPassenger, uint8 slot);
