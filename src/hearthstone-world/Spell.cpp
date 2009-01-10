@@ -3935,27 +3935,27 @@ exit:*/
 	{
 		// ${$AP*0.06+$m1} damage.
 		if( u_caster != NULL )
-			value+=float2int32(u_caster->GetAP()*0.06f);
+			value+=float2int32(float(u_caster->GetAP())*0.06f);
 	}
 	else if( p_caster && m_spellInfo->Id == 31804 ) // Seal of vengeance: Judgement
 	{
-		value = (1 + 0.22f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY) + 0.14f * u_caster->GetAP());
+		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
 		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_HOLY_VENGEANCE);
 		if(c)
-			value *= 1.0f + (c / 100.0f);
+			value *= 1.0f + (float(c) / 100.0f);
 	}
 	else if( p_caster && m_spellInfo->Id == 53733 ) // Seal of Corruption: Judgement
 	{
-		value = (1 + 0.22f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY) + 0.14f * u_caster->GetAP());
+		value = float2int32(1.0f + 0.22f * float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY)) + 0.14f * float(u_caster->GetAP()));
 		uint32 c = u_caster->GetAuraCountWithNameHash(SPELL_HASH_BLOOD_CORRUPTION);
 		if(c)
-			value *= 1.0f + (c / 100.0f);
+			value *= 1.0f + (float(c) / 100.0f);
 	}
 	else if( p_caster && m_spellInfo->Id == 53742 || m_spellInfo->Id == 31803 ) // Holy Vengeance/ Blood Corruption
 	{
-		float SPH = u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY);
-		float AP = u_caster->GetAP();
-		value = (0.014f * SPH + 0.025 * AP) * 6;
+		float SPH = float(u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY));
+		float AP = float(u_caster->GetAP());
+		value = float2int32((0.014f * SPH + 0.025f * AP) * 6.0f);
 	}
 	else if( m_spellInfo->Id == 60103 && p_caster && i == 0) // Lava Lash
 	{   // Check if offhand is enchanted with Flametongue
