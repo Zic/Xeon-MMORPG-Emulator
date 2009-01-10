@@ -1456,7 +1456,6 @@ bool ChatHandler::HandlePetSpawnAIBot(const char* args, WorldSession *m_session)
 	CreatureSpawn * sp = new CreatureSpawn;
 	sp->id = 1;
 	sp->bytes = 0;
-	sp->bytes1 = 0;
 	sp->bytes2 = 0;
 	sp->displayid = pCreatureInfo->Male_DisplayID;
 	sp->emote_state = 0;

@@ -126,6 +126,8 @@ struct CreatureProto
 
 	/* AI Stuff */
 	bool m_canRangedAttack;
+	uint32 m_RangedAttackSpell;
+	uint32 m_SpellSoundid;
 	bool m_canFlee;
 	float m_fleeHealth;
 	uint32 m_fleeDuration;

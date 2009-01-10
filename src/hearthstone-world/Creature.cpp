@@ -301,7 +301,6 @@ void Creature::SaveToDB()
 		<< m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] << ","
 		<< m_uint32Values[UNIT_FIELD_FLAGS] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_0] << ","
-		<< m_uint32Values[UNIT_FIELD_BYTES_1] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_2] << ","
 		<< m_uint32Values[UNIT_NPC_EMOTESTATE] << ",0,";
 		/*<< ((this->m_spawn ? m_spawn->respawnNpcLink : uint32(0))) << ",";*/
@@ -942,8 +941,11 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	{
 		m_aiInterface->addSpellToList(*itr);
 	}
-	//m_aiInterface->m_canCallForHelp = proto->m_canCallForHelp;
-	//m_aiInterface->m_CallForHelpHealth = proto->m_callForHelpHealth;
+	m_aiInterface->m_canRangedAttack = proto->m_canRangedAttack;
+	m_aiInterface->m_RangedAttackSpell = proto->m_RangedAttackSpell;
+	m_aiInterface->m_SpellSoundid = proto->m_SpellSoundid;
+	m_aiInterface->m_canCallForHelp = proto->m_canCallForHelp;
+	m_aiInterface->m_CallForHelpHealth = proto->m_callForHelpHealth;
 	m_aiInterface->m_canFlee = proto->m_canFlee;
 	m_aiInterface->m_FleeHealth = proto->m_fleeHealth;
 	m_aiInterface->m_FleeDuration = proto->m_fleeDuration;

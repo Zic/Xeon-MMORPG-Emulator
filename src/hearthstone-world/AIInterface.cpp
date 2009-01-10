@@ -1052,31 +1052,26 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 						if(infront)
 						{
 							m_Unit->setAttackTimer(0, false);
-							SpellEntry *info = dbcSpell.LookupEntry(SPELL_RANGED_GENERAL);
+							SpellEntry *info = dbcSpell.LookupEntry(m_RangedAttackSpell);
 							if(info)
 							{
 								SpellPointer sp = SpellPointer(new Spell(m_Unit, info, false, NULLAURA));
 								SpellCastTargets targets;
 								targets.m_unitTarget = m_nextTarget->GetGUID();
 								sp->prepare(&targets);
-								//Lets make spell handle this
-								//m_Unit->Strike( m_nextTarget, ( agent == AGENT_MELEE ? MELEE : RANGED ), NULL, 0, 0, 0 );
+
+								//Did we give it a sound ID?	
+								if(m_SpellSoundid)
+									m_Unit->PlaySoundToSet(m_SpellSoundid);
 							}
 						}
 					}
 				}
-				else // Target out of Range -> Run to it
+				else // Target out of Range -> Run to/from it, depending on current distance
 				{
-					//calculate next move
-					float dist;
-
-					if(distance < combatReach[0])// Target is too near
-						dist = 9.0f;
-					else
-						dist = 20.0f;
-
 					m_moveRun = true;
-					_CalcDestinationAndMove(m_nextTarget, dist);
+					float drun = (distance < combatReach[0] ? GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH) : combatReach[1]-5.0f );
+					_CalcDestinationAndMove(m_nextTarget, drun);
 				}
 			}break;
 		case AGENT_SPELL:
@@ -1109,36 +1104,52 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 
 					SpellCastTargets targets = setSpellTargets(spellInfo, m_nextTarget);
 					uint32 targettype = m_nextSpell->spelltargetType;
+					uint8 ccr = 0;
 					switch(targettype)
 					{
-					case TTYPE_CASTER:
-					case TTYPE_SINGLETARGET:
+						case TTYPE_CASTER:
+						case TTYPE_SINGLETARGET:
 						{
-							CastSpell(m_Unit, spellInfo, targets);
+							ccr = CastSpell(m_Unit, spellInfo, targets);
 							break;
 						}
-					case TTYPE_SOURCE:
+						case TTYPE_SOURCE:
 						{
-							m_Unit->CastSpellAoF(targets.m_srcX,targets.m_srcY,targets.m_srcZ, spellInfo, true);
+							ccr = m_Unit->CastSpellAoF(targets.m_srcX,targets.m_srcY,targets.m_srcZ, spellInfo, true);
 							break;
 						}
-					case TTYPE_DESTINATION:
+						case TTYPE_DESTINATION:
 						{
-							m_Unit->CastSpellAoF(targets.m_destX,targets.m_destY,targets.m_destZ, spellInfo, true);
+							ccr = m_Unit->CastSpellAoF(targets.m_destX,targets.m_destY,targets.m_destZ, spellInfo, false);
+							break;
+						}
+						case TTYPE_OWNER:
+						{
+							if(m_Unit->IsPet() &&  m_PetOwner)
+								ccr = CastSpell(m_PetOwner, spellInfo, targets);
 							break;
 						}
 					}
-					// CastSpell(m_Unit, spellInfo, targets);
+
+					if( ccr = SPELL_CANCAST_OK )
+					{
+						//Did we give it a sound ID?	
+						if( m_nextSpell && m_nextSpell->Misc2 )
+							m_Unit->PlaySoundToSet(m_nextSpell->Misc2);
+
+						//add pet spell after use to pet owner with some chance
+						if(m_Unit->IsPet() &&  m_PetOwner && m_PetOwner->IsPlayer())
+						{	
+							Pet * pPet = static_cast<Pet*>(m_Unit);
+							if(pPet && Rand(5)) //5% change to gain spell from pet
+								pPet->AddPetSpellToOwner(spellInfo->Id);
+						}
+					}
+					else
+						Log.Debug("AIAgents","Spell failed: Result %u, NPC %u, spell %u, TargetType %u", ccr, m_Unit->GetEntry() , spellInfo->Id, targettype );
+
 					if(m_nextSpell&&m_nextSpell->cooldown)
 						m_nextSpell->cooldowntime = getMSTime() + m_nextSpell->cooldown;
-
-					//add pet spell after use to pet owner with some chance
-					if(m_Unit->IsPet() && m_PetOwner->IsPlayer())
-					{	
-						PetPointer pPet = TO_PET(m_Unit);
-						if(pPet && Rand(10))
-							pPet->AddPetSpellToOwner(spellInfo->Id);
-					}
 					m_nextSpell = NULL;
 				}
 				else // Target out of Range -> Run to it
@@ -2744,16 +2755,21 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 	}
 }
 
-void AIInterface::CastSpell(UnitPointer caster, SpellEntry *spellInfo, SpellCastTargets targets)
+uint8 AIInterface::CastSpell(Unit* caster, SpellEntry *spellInfo, SpellCastTargets targets)
 {
 	if( m_AIType != AITYPE_PET && disable_spell )
-		return;
+		return SPELL_FAILED_ERROR;
 
-	// Stop movement while casting.
+	//only stop for spells with casting time
+	uint32 delay = GetCastTime( dbcSpellCastTime.LookupEntry(spellInfo->CastingTimeIndex));
+	if( delay )
+		StopMovement( delay + 500);
+
+	// Stop AI while casting.
 	m_AIState = STATE_CASTING;
 
 	SpellPointer nspell = SpellPointer(new Spell(caster, spellInfo, false, NULLAURA));
-	nspell->prepare(&targets);
+	return nspell->prepare(&targets);
 }
 
 SpellEntry *AIInterface::getSpellEntry(uint32 spellId)

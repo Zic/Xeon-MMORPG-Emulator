@@ -252,7 +252,7 @@ public:
 	void setOutOfCombatRange(uint32 val) { m_outOfCombatRange = val; }
 
 	// Spell
-	void CastSpell(UnitPointer caster, SpellEntry *spellInfo, SpellCastTargets targets);
+	uint8 CastSpell(UnitPointer caster, SpellEntry *spellInfo, SpellCastTargets targets);
 	SpellEntry *getSpellEntry(uint32 spellId);
 	SpellCastTargets setSpellTargets(SpellEntry *spellInfo, UnitPointer target);
 	AI_Spell *getSpell();
@@ -331,6 +331,9 @@ public:
 	bool m_canFlee;
 	bool m_canCallForHelp;
 	bool m_canRangedAttack;
+	uint32 m_RangedAttackSpell;
+	uint32 m_SpellSoundid;
+
 	float m_FleeHealth;
 	uint32 m_FleeDuration;
 	float m_CallForHelpHealth;
