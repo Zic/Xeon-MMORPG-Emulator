@@ -1116,6 +1116,27 @@ struct CharClassEntry
     uint32  CinematicSequence;                              // 59 id from CinematicSequences.dbc
 };
 
+struct CreatureDisplayInfo
+{
+	uint32 ID;		//id
+	//uint32 unk2;	//ModelData column2?
+	//uint32 unk3;	//ExtraDisplayInfo column 18?
+	//uint32 unk4;
+	float Scale;
+	//uint32 unk6;
+	//char* name;	//FilenName? 
+	//uint32 unk8;
+	//uint32 unk9;
+	//uint32 unk10;
+	//uint32 unk11;
+	//uint32 unk12;
+	//uint32 unk13;
+	//uint32 unk14;
+	//uint32 unk15;
+	//uint32 unk16;
+};
+
+
 struct CreatureFamilyEntry
 {
     uint32 ID;                                              // 1
@@ -1299,6 +1320,11 @@ struct VehicleSeatEntry
 };
 
 #pragma pack(pop)
+
+HEARTHSTONE_INLINE float GetScale(CreatureDisplayInfo *Scale)
+{
+	return Scale->Scale;
+}
 
 HEARTHSTONE_INLINE float GetRadius(SpellRadius *radius)
 {
@@ -1631,6 +1657,7 @@ extern SERVER_DECL DBCStorage<DBCTaxiPathNode> dbcTaxiPathNode;
 extern SERVER_DECL DBCStorage<AuctionHouseDBC> dbcAuctionHouse;
 extern SERVER_DECL DBCStorage<TalentEntry> dbcTalent;
 extern SERVER_DECL DBCStorage<TalentTabEntry> dbcTalentTab;
+extern SERVER_DECL DBCStorage<CreatureDisplayInfo> dbcCreatureDisplayInfo;
 extern SERVER_DECL DBCStorage<CreatureSpellDataEntry> dbcCreatureSpellData;
 extern SERVER_DECL DBCStorage<CreatureFamilyEntry> dbcCreatureFamily;
 extern SERVER_DECL DBCStorage<CharClassEntry> dbcCharClass;

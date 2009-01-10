@@ -1191,7 +1191,7 @@ void Aura::EventRelocateRandomTarget()
 	float ang = pTarget->GetOrientation();
 
 	// avoid teleporting into the model on scaled models
-	const static float killingspree_distance = 1.6f * pTarget->GetFloatValue(OBJECT_FIELD_SCALE_X);
+	const static float killingspree_distance = 1.6f * GetScale( dbcCreatureDisplayInfo.LookupEntry( pTarget->GetUInt32Value(UNIT_FIELD_DISPLAYID)));
 	float new_x = pTarget->GetPositionX() - (killingspree_distance * cosf(ang));
 	float new_y = pTarget->GetPositionY() - (killingspree_distance * sinf(ang));
 	float new_z = pTarget->GetPositionZ() + 0.1f;

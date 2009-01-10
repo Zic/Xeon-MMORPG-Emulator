@@ -2902,7 +2902,12 @@ bool ChatHandler::HandleFixScaleCommand(const char * args, WorldSession * m_sess
 	float sc = (float)atof(args);
 	if(sc < 0.1f)
 	{
-		return false;
+		uint32 model;
+		uint32 gender = pCreature->creature_info->GenerateModelId(&model);
+		pCreature->setGender(gender);
+
+		sc = pCreature->proto->Scale ? pCreature->proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ));
+		SystemMessage(m_session, "Scale info obtained from DBCDisplayInfo now");
 	}
 
 	pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, sc);

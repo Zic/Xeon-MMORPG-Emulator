@@ -57,8 +57,8 @@ struct CreatureInfo
 	uint32 SpellDataID;
 	uint32 Male_DisplayID;
 	uint32 Female_DisplayID;
-	uint32 unkint1;
-	uint32 unkint2;
+	uint32 Male_DisplayID2;
+	uint32 Female_DisplayID2;
 	float unkfloat1;
 	float unkfloat2;
 	uint8  Civilian;
@@ -68,37 +68,22 @@ struct CreatureInfo
 	GossipScript * gossip_script;
 	uint32 GenerateModelId(uint32 * dest)
 	{
-		/* only M */
-        if(Male_DisplayID == Female_DisplayID)
+		uint32 models[] = { Male_DisplayID, Male_DisplayID2, Female_DisplayID, Female_DisplayID2 };
+		if(!models[0] && !models[1] && !models[2] && !models[3])
 		{
-			*dest = Male_DisplayID;
+			// All models are invalid.
+			Log.Warning("CreatureSpawn", "Creature %u has no model_id", Id);
 			return 0;
 		}
 
-		/* only M */
-		if(Male_DisplayID && !Female_DisplayID)
+		while(true)
 		{
-            *dest = Male_DisplayID;
-			return 0;
-		}
-
-		/* only F */
-		if(!Male_DisplayID && Female_DisplayID)
-		{
-			*dest = Female_DisplayID;
-			return 1;
-		}
-
-		/* make a random one */
-		if(Rand(50.0f))
-		{
-			*dest = Female_DisplayID;
-			return 1;
-		}
-		else
-		{
-			*dest = Male_DisplayID;
-			return 0;
+			uint32 res = RandomUInt(3);
+			if(models[res])
+			{
+				*dest = models[res];
+				return res < 2 ? 0 : 1;
+			}
 		}
 	}
 };

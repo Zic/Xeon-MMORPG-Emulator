@@ -1610,7 +1610,7 @@ void Spell::SpellEffectTeleportUnits( uint32 i )  // Teleport Units
 		}
 
 		// avoid teleporting into the model on scaled models
-		const static float shadowstep_distance = 1.6f * unitTarget->GetFloatValue(OBJECT_FIELD_SCALE_X);
+		const static float shadowstep_distance = 1.6f * GetScale( dbcCreatureDisplayInfo.LookupEntry( unitTarget->GetUInt32Value(UNIT_FIELD_DISPLAYID)));
 		float new_x = pTarget->GetPositionX() - (shadowstep_distance * cosf(ang));
 		float new_y = pTarget->GetPositionY() - (shadowstep_distance * sinf(ang));
 		float new_z = pTarget->GetPositionZ() + 0.1f;

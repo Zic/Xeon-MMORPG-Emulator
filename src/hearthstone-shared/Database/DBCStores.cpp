@@ -47,6 +47,7 @@ SERVER_DECL DBCStorage<DBCTaxiPathNode> dbcTaxiPathNode;
 SERVER_DECL DBCStorage<AuctionHouseDBC> dbcAuctionHouse;
 SERVER_DECL DBCStorage<TalentEntry> dbcTalent;
 SERVER_DECL DBCStorage<TalentTabEntry> dbcTalentTab;
+SERVER_DECL DBCStorage<CreatureDisplayInfo> dbcCreatureDisplayInfo;
 SERVER_DECL DBCStorage<CreatureSpellDataEntry> dbcCreatureSpellData;
 SERVER_DECL DBCStorage<CreatureFamilyEntry> dbcCreatureFamily;
 SERVER_DECL DBCStorage<CharClassEntry> dbcCharClass;
@@ -117,6 +118,7 @@ const char* factiondbcFormat = "uiuuuuxxxxiiiixxxxusxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 const char* dbctaxinodeFormat = "uufffxxxxxxxxxxxxxxxxxuu";
 const char* dbctaxipathFormat = "uuuu";
 const char* dbctaxipathnodeFormat = "uuuufffuuxx";
+const char* creaturedisplayFormat = "uxxxfxxxxxxxxxxx";
 const char* creaturespelldataFormat = "uuuuuuuuu";
 const char* charraceFormat = "uxxxxxxxuxxxxusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char* charclassFormat = "uxuxsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxuxux";
@@ -199,6 +201,7 @@ bool LoadDBCs()
 	LOAD_DBC("DBC/TaxiNodes.dbc", dbctaxinodeFormat, false, dbcTaxiNode, false);
 	LOAD_DBC("DBC/TaxiPath.dbc", dbctaxipathFormat, false, dbcTaxiPath, false);
 	LOAD_DBC("DBC/TaxiPathNode.dbc", dbctaxipathnodeFormat, false, dbcTaxiPathNode, false);
+	LOAD_DBC("DBC/CreatureDisplayInfo.dbc", creaturedisplayFormat, true, dbcCreatureDisplayInfo, true);
 	LOAD_DBC("DBC/CreatureSpellData.dbc", creaturespelldataFormat, true, dbcCreatureSpellData, false);
 	LOAD_DBC("DBC/CreatureFamily.dbc", creaturefamilyFormat, true, dbcCreatureFamily, true);
 	LOAD_DBC("DBC/ChrRaces.dbc", charraceFormat, true, dbcCharRace, true);

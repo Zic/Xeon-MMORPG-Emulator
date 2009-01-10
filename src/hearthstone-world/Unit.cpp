@@ -376,8 +376,8 @@ bool Unit::canReachWithAttack(shared_ptr<Unit>pVictim)
 	float selfreach = m_floatValues[UNIT_FIELD_COMBATREACH];
 	float targetradius = pVictim->m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
 	float selfradius = m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
-	float targetscale = pVictim->m_floatValues[OBJECT_FIELD_SCALE_X];
-	float selfscale = m_floatValues[OBJECT_FIELD_SCALE_X];
+	float targetscale = GetScale( dbcCreatureDisplayInfo.LookupEntry( pVictim->GetUInt32Value(UNIT_FIELD_DISPLAYID)));
+	float selfscale =  GetScale( dbcCreatureDisplayInfo.LookupEntry( GetUInt32Value(UNIT_FIELD_DISPLAYID)));
 
 	if( GetMapId() != pVictim->GetMapId() )
 		return false;
