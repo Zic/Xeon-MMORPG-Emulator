@@ -128,7 +128,7 @@ static inline uint32 GetLevelGrouping(uint32 level)
 #define LEVEL_GROUP_RATED_ARENA 8
 #define BG_ANTI_CHEAT 1
 
-class CBattlegroundManager : public Singleton<CBattlegroundManager>, public EventableObject
+class SERVER_DECL CBattlegroundManager : public Singleton<CBattlegroundManager>, public EventableObject
 {
 	/* Battleground Instance Map */
 	map<uint32, BattlegroundPointer > m_instances[BATTLEGROUND_NUM_TYPES];
