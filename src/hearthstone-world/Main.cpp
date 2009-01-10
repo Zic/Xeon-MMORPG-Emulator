@@ -28,6 +28,8 @@
 #include <sys/resource.h>
 #endif
 
+uint8 loglevel = DEFAULT_LOG_LEVEL;
+
 #ifndef WIN32
 int unix_main(int argc, char ** argv)
 {

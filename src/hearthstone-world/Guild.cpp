@@ -240,7 +240,7 @@ GuildRank * Guild::CreateGuildRank(const char * szRankName, uint32 iPermissions,
 				r->iTabPermissions[4].iFlags, r->iTabPermissions[4].iStacksPerDay,
 				r->iTabPermissions[5].iFlags, r->iTabPermissions[5].iStacksPerDay);
 
-			DEBUG_LOG("Guild", "Created rank %u on guild %u (%s)", i, m_guildId, szRankName);
+			Log.Debug("Guild", "Created rank %u on guild %u (%s)", i, m_guildId, szRankName);
 
 			return r;
 		}
@@ -639,7 +639,7 @@ bool Guild::LoadFromDB(Field * f)
 		delete result;
 	}
 
-	DEBUG_LOG("Guild", "Loaded guild %s, %u members.", m_guildName, m_members.size());
+	Log.Debug("Guild", "Loaded guild %s, %u members.", m_guildName, m_members.size());
 	return true;
 }
 

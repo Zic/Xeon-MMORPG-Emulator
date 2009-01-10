@@ -1695,7 +1695,7 @@ void QuestMgr::LoadExtraQuestStuff()
 
 	lootmgr.LoadLoot();
 	lootmgr.FillObjectLootMap(&loot_map);
-	printf("Creating gameobject involved quest map...\n");
+	Log.Debug("QuestMgr","Creating gameobject involved quest map...");
 
 	while(!it->AtEnd())
 	{

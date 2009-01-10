@@ -1072,7 +1072,7 @@ void ObjectMgr::LoadVendors()
 				itm.extended_cost = dbcItemExtendedCost.LookupEntryForced(ec);
 				if( itm.extended_cost == NULL )
 				{
-					printf("Item %u at vendor %u has extended cost %u which is invalid. Skipping.\n", itm.itemid, fields[0].GetUInt32(), ec);
+					Log.Warning("Vendor","Item %u at vendor %u has extended cost %u which is invalid. Skipping.\n", itm.itemid, fields[0].GetUInt32(), ec);
 					continue;
 				}
 			}
@@ -1169,7 +1169,7 @@ void ObjectMgr::LoadSpellFixes()
 			return;
 		}
 
-		sLog.outString("Loading %u spell fixes from database...",result->GetRowCount());
+		Log.Notice("ObjectMgr","%u spell fixes from database...",result->GetRowCount());
 		do
 		{
 			Field * f = result->Fetch();

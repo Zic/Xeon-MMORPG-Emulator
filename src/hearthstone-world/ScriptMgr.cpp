@@ -63,9 +63,9 @@ void ScriptMgr::LoadScripts()
 	if(!HookInterface::getSingletonPtr())
 		new HookInterface;
 
-	sLog.outString( "Loading External Script Libraries..." );
-	sLog.outString( "");
-
+	Log.Notice("ScriptMgr","Loading External Script Libraries..." );
+	int32 bcklvl = Log.log_level;
+	Log.log_level = 3;
 	string start_path = Config.MainConfig.GetStringDefault( "Script", "BinaryLocation", "script_bin" ) + "\\";
 	string search_path = start_path + "*.";
 
@@ -79,25 +79,26 @@ void ScriptMgr::LoadScripts()
 	uint32 count = 0;
 	HANDLE find_handle = FindFirstFile( search_path.c_str(), &data );
 	if(find_handle == INVALID_HANDLE_VALUE)
-		sLog.outString( "  No external scripts found! Server will continue to function with limited functionality." );
+		Log.Warning("ScriptMgr","No external scripts found! Server will continue to function with limited functionality." );
 	else
 	{
 		do
 		{
 			string full_path = start_path + data.cFileName;
 			HMODULE mod = LoadLibrary( full_path.c_str() );
-			printf( "  %s : 0x%p : ", data.cFileName, reinterpret_cast< uint32* >( mod ));
-			if(mod == 0)
-				printf("error!\n");
+			if( mod == 0 )
+				Log.Error("ScriptMgr","error loading external scripts %s : 0x%p", data.cFileName, reinterpret_cast< uint32* >( mod ));
 			else
 			{
+				Log.Notice("ScriptMgr","Loaded external scripts %s : 0x%p", data.cFileName, reinterpret_cast< uint32* >( mod ));
 				// find version import
 				exp_get_version vcall = (exp_get_version)GetProcAddress(mod, "_exp_get_version");
 				exp_script_register rcall = (exp_script_register)GetProcAddress(mod, "_exp_script_register");
 				exp_get_script_type scall = (exp_get_script_type)GetProcAddress(mod, "_exp_get_script_type");
 				if(vcall == 0 || rcall == 0 || scall == 0)
 				{
-					printf("version functions not found!\n");
+					sLog.outColor( TRED, "Could not get version info!");
+					sLog.outColor( TWHITE,"\n");						
 					FreeLibrary(mod);
 				}
 				else
@@ -108,8 +109,7 @@ void ScriptMgr::LoadScripts()
 					{
 						if( stype & SCRIPT_TYPE_SCRIPT_ENGINE )
 						{
-							printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
-							printf("delayed load.\n");
+							sLog.outString("Version:%u.%u : delayed loading.", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
 
 							ScriptingEngine se;
 							se.Handle = mod;
@@ -121,9 +121,8 @@ void ScriptMgr::LoadScripts()
 						else
 						{
 							_handles.push_back(((SCRIPT_MODULE)mod));
-							printf("v%u.%u : ", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
+							sLog.outString("Version:%u.%u", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
 							rcall(this);
-							printf("loaded.\n");						
 						}
 
 						++count;
@@ -131,7 +130,8 @@ void ScriptMgr::LoadScripts()
 					else
 					{
 						FreeLibrary(mod);
-						printf("version mismatch!\n");						
+						sLog.outColor( TRED,"Version mismatch!");						
+						sLog.outColor( TWHITE,"\n");						
 					}
 				}
 			}
@@ -139,10 +139,9 @@ void ScriptMgr::LoadScripts()
 		while(FindNextFile(find_handle, &data));
 		FindClose(find_handle);
 		sLog.outString("");
-		sLog.outString("Loaded %u external libraries.", count);
-		sLog.outString("");
+		Log.Notice("ScriptMgr","Loaded %u external libraries.", count);
 
-		sLog.outString("Loading optional scripting engines...");
+		Log.Notice("ScriptMgr","Loading optional scripting engines...");
 		for(vector<ScriptingEngine>::iterator itr = ScriptEngines.begin(); itr != ScriptEngines.end(); ++itr)
 		{
 			if( itr->Type & SCRIPT_TYPE_SCRIPT_ENGINE_LUA )
@@ -150,7 +149,7 @@ void ScriptMgr::LoadScripts()
 				// lua :O
 				if( Config.MainConfig.GetBoolDefault("ScriptBackends", "LUA", false) )
 				{
-					sLog.outString("   Initializing LUA script engine...");
+					Log.Notice("ScriptMgr","Initializing LUA script engine...");
 					itr->InitializeCall(this);
 					_handles.push_back( (SCRIPT_MODULE)itr->Handle );
 				}
@@ -163,7 +162,7 @@ void ScriptMgr::LoadScripts()
 			{
 				if( Config.MainConfig.GetBoolDefault("ScriptBackends", "AS", false) )
 				{
-					sLog.outString("   Initializing AngelScript script engine...");
+					Log.Notice("ScriptMgr","Initializing AngelScript script engine...");
 					itr->InitializeCall(this);
 					_handles.push_back( (SCRIPT_MODULE)itr->Handle );
 				}
@@ -174,11 +173,11 @@ void ScriptMgr::LoadScripts()
 			}
 			else
 			{
-				sLog.outString("  Unknown script engine type: 0x%.2X, please contact developers.", (*itr).Type );
+				Log.Error("ScriptMgr","Unknown script engine type: 0x%.2X, please contact developers.", (*itr).Type );
 				FreeLibrary( itr->Handle );
 			}
 		}
-		sLog.outString("Done loading script engines...");
+		Log.Notice("ScriptMgr","Done loading script engines...");
 	}
 #else
 	/* Loading system for *nix */

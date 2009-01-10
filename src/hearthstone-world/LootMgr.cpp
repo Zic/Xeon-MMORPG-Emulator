@@ -98,7 +98,7 @@ void LootMgr::LoadLoot()
 	//THIS MUST BE CALLED AFTER LOADING OF ITEMS
 	is_loading = true;
 	LoadLootProp();
-	printf("Loading loot...\n");
+	Log.Debug("LootMgr","Loading loot...\n");
 	//LoadLootTables("creatureloot",&CreatureLoot);
 	LoadLootTables("objectloot",&GOLoot);
 	LoadLootTables("skinningloot",&SkinningLoot);
@@ -254,7 +254,7 @@ void LootMgr::LoadLootTables(const char * szTableName,LootStore * LootTable)
 	delete dbc;*/
 	//HM_NAMESPACE::hash_map<uint32, std::vector<loot_tb> > loot_db;
 	//HM_NAMESPACE::hash_map<uint32, std::vector<loot_tb> >::iterator itr;
-	printf("Attempting to load loot from table %s...\n", szTableName);
+	Log.Debug("LootMgr","Attempting to load loot from table %s...", szTableName);
 	vector< pair< uint32, vector< tempy > > > db_cache;
 	vector< pair< uint32, vector< tempy > > >::iterator itr;
 	db_cache.reserve(10000);
@@ -358,7 +358,7 @@ void LootMgr::LoadLootTables(const char * szTableName,LootStore * LootTable)
 		}
 	}
 
-	printf("%d loot templates loaded from %s\n", db_cache.size(), szTableName);
+	Log.Notice("LootMgr","%d loot templates loaded from %s", db_cache.size(), szTableName);
  //   loot_db.clear();
 	delete result;
 }
@@ -923,7 +923,7 @@ int32 LootRoll::event_GetInstanceID()
 
 void LootMgr::FillObjectLootMap(map<uint32, vector<uint32> > *dest)
 {
-	printf("Generating object loot map...\n");
+	Log.Debug("LootMgr","Generating object loot map...");
 	QueryResult *result = WorldDatabase.Query("SELECT entryid, itemid FROM objectloot");
 	if( result != NULL )
 	{

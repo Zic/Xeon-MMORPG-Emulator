@@ -191,6 +191,7 @@ void oLog::outDebug( const char * str, ... )
 void oLog::Init()
 {
 	m_screenLogLevel = Config.MainConfig.GetIntDefault("LogLevel", "Screen", 0);
+	Log.log_level = m_screenLogLevel;
 	m_fileLogLevel = Config.MainConfig.GetIntDefault("LogLevel", "File", 0);
 	m_file = NULL;
 

@@ -155,6 +155,7 @@ bool Master::Run(int argc, char ** argv)
 	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 	Log.Line();
+	Log.log_level = 3;
 
 	if(do_version)
 		return true;
@@ -280,13 +281,13 @@ bool Master::Run(int argc, char ** argv)
 	uint32 etime;
 
 	// Start Network Subsystem
-	sLog.outString( "Starting network subsystem..." );
+	Log.Debug("Server","Starting network subsystem..." );
 	new SocketMgr;
 	new SocketGarbageCollector;
 	sSocketMgr.SpawnWorkerThreads();
 
 	LoadingTime = getMSTime() - LoadingTime;
-	sLog.outString ( "\nServer is ready for connections. Startup time: %ums\n", LoadingTime );
+	Log.Notice("Server","Ready for connections. Startup time: %ums\n", LoadingTime );
 
 	Log.Notice("RemoteConsole", "Starting...");
 	if( StartConsoleListener() )
