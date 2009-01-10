@@ -542,6 +542,9 @@ void AchievementInterface::HandleAchievementCriteriaRequiresAchievement(uint32 a
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -617,6 +620,9 @@ void AchievementInterface::HandleAchievementCriteriaLevelUp(uint32 level)
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -659,6 +665,9 @@ void AchievementInterface::HandleAchievementCriteriaOwnItem(uint32 itemId, uint3
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if( ad->completed )
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -703,6 +712,9 @@ void AchievementInterface::HandleAchievementCriteriaLootItem(uint32 itemId, uint
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -741,6 +753,9 @@ void AchievementInterface::HandleAchievementCriteriaQuestCount(uint32 questCount
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1037,6 +1052,9 @@ void AchievementInterface::HandleAchievementCriteriaExploreArea(uint32 areaId, u
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1198,6 +1216,9 @@ void AchievementInterface::HandleAchievementCriteriaCompleteQuestsInZone(uint32 
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
@@ -1240,6 +1261,9 @@ void AchievementInterface::HandleAchievementCriteriaReachSkillLevel(uint32 skill
 
 		AchievementCriteriaEntry * compareCriteria = NULL;
 		AchievementData * ad = GetAchievementDataByAchievementID(AchievementID);
+		if(ad->completed)
+			continue;
+
 		// Figure out our associative ID.
 		for(uint32 i = 0; i < pAchievementEntry->AssociatedCriteriaCount; ++i)
 		{
