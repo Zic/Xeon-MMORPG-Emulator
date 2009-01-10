@@ -292,6 +292,7 @@ void Unit::Destructor()
 	}
 
 	CombatStatus.SetUnit( NULLUNIT );
+	CombatStatus.Vanished();
 }
 
 void Unit::SetDiminishTimer(uint32 index)

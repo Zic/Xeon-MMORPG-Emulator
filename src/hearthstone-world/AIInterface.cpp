@@ -327,8 +327,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				// Remount if mounted
 				if(m_Unit->GetTypeId() == TYPEID_UNIT)
 				{
-					if( TO_CREATURE( m_Unit )->proto )
-						m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, TO_CREATURE( m_Unit )->proto->MountedDisplayID );
+					if( TO_CREATURE( m_Unit )->m_spawn )
+						m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, TO_CREATURE( m_Unit )->m_spawn->MountedDisplayID );
 				}
 			}break;
 		case EVENT_DAMAGETAKEN:

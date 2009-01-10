@@ -73,6 +73,7 @@ typedef struct GOSpawn
 	float	facing;
 	uint32	flags;
 	uint32	state;
+	uint32 MountDisplayID;
 	uint32	faction;
 //	uint32	level;
 	float scale;

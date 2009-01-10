@@ -76,15 +76,40 @@ struct CreatureInfo
 			return 0;
 		}
 
-		while(true)
+		uint32 modelchoices[4];
+		uint32 max = 0;
+
+		if( Male_DisplayID )
 		{
-			uint32 res = RandomUInt(3);
-			if(models[res])
-			{
-				*dest = models[res];
-				return res < 2 ? 0 : 1;
-			}
+			modelchoices[max] = Male_DisplayID;
+			max++;
 		}
+
+		if( Male_DisplayID2 )
+		{
+			modelchoices[max] = Male_DisplayID2;
+			max++;
+		}
+
+		if( Female_DisplayID )
+		{
+			modelchoices[max] = Female_DisplayID;
+			max++;
+		}
+
+		if( Female_DisplayID2 )
+		{
+			modelchoices[max] = Female_DisplayID2;
+			max++;
+		}
+
+		uint32 r = RandomUInt(max);
+		*dest = modelchoices[r];
+
+		if( *dest == Male_DisplayID  || *dest == Male_DisplayID2 )
+			return 0;
+
+		return 1;
 	}
 };
 
@@ -106,7 +131,7 @@ struct CreatureProto
 	uint32 RangedAttackTime;
 	float RangedMinDamage;
 	float RangedMaxDamage;
-	uint32 MountedDisplayID;
+	//uint32 MountedDisplayID;
 	uint32 Item1;
 	uint32 Item2;
 	uint32 Item3;
