@@ -1456,9 +1456,11 @@ bool ChatHandler::HandlePetSpawnAIBot(const char* args, WorldSession *m_session)
 	CreatureSpawn * sp = new CreatureSpawn;
 	sp->id = 1;
 	sp->bytes = 0;
+	sp->bytes1 = 0;
 	sp->bytes2 = 0;
 	sp->displayid = pCreatureInfo->Male_DisplayID;
 	sp->emote_state = 0;
+	sp->MountedDisplayID = 0;
 	sp->entry = pCreatureInfo->Id;
 	sp->factionid = pTemplate->Faction;
 	sp->flags = 0;
@@ -2177,10 +2179,12 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		sp->flags = 0;
 		sp->factionid = proto->Faction;
 		sp->bytes=0;
+		sp->bytes1=0;
 		sp->bytes2=0;
 		//sp->respawnNpcLink = 0;
 		sp->stand_state = 0;
 		sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
+		sp->MountedDisplayID = 0;
 		sp->phase = 1;
 
 		p->Load(sp, (uint32)NULL, NULL);

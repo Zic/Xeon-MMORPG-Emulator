@@ -33,7 +33,7 @@ class TerrainMgr;
 
 struct Formation;
 
-typedef struct
+typedef struct CreatureSpawn
 {
 	uint32	id;//spawn ID
 	uint32	entry;
@@ -47,6 +47,7 @@ typedef struct
 	uint32 factionid;
 	uint32 flags;
 	uint32 bytes;
+	uint32 bytes1;
 	uint32 bytes2;
 	uint32 emote_state;
 	//uint32 respawnNpcLink;
@@ -54,10 +55,11 @@ typedef struct
 	uint32 channel_target_go;
 	uint32 channel_target_creature;
 	uint16 stand_state;
+	uint32 MountedDisplayID;
 	int32 phase;
 }CreatureSpawn;
 
-typedef struct
+typedef struct GOSpawn
 {
 	uint32	id;//spawn ID
 	uint32	entry;

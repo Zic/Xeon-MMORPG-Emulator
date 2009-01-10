@@ -124,6 +124,7 @@ CreaturePointer MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float 
 	//sp->respawnNpcLink = 0;
 	sp->stand_state = 0;
 	sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
+	sp->MountedDisplayID = 0;
 	sp->phase = 1;
 
 	CreaturePointer p = this->mapMgr->CreateCreature(Entry);

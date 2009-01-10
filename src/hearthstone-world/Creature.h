@@ -477,6 +477,7 @@ public:
 	bool haslinkupevent;
 	WayPoint * CreateWaypointStruct();
 	uint32 original_emotestate;
+	uint32 original_MountedDisplayID;
 	CreatureProto * proto;
 	HEARTHSTONE_INLINE CreatureProto *GetProto() { return proto; }
 	CreatureSpawn * m_spawn;

@@ -216,6 +216,7 @@ void Creature::OnRespawn(shared_ptr<MapMgr> m)
 	{
 		SetUInt32Value(UNIT_NPC_FLAGS, proto->NPCFLags);
 		SetUInt32Value(UNIT_NPC_EMOTESTATE, m_spawn->emote_state);
+		SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,m_spawn->MountedDisplayID);
 	}
 
 	RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
@@ -300,6 +301,7 @@ void Creature::SaveToDB()
 		<< m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] << ","
 		<< m_uint32Values[UNIT_FIELD_FLAGS] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_0] << ","
+		<< m_uint32Values[UNIT_FIELD_BYTES_1] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_2] << ","
 		<< m_uint32Values[UNIT_NPC_EMOTESTATE] << ",0,";
 		/*<< ((this->m_spawn ? m_spawn->respawnNpcLink : uint32(0))) << ",";*/
@@ -309,8 +311,7 @@ void Creature::SaveToDB()
 	else
 		ss << "0,0,0,";
 
-	ss << uint32(GetStandState()) << ",";
-	ss << m_phaseMode << ")";
+	ss << uint32(GetStandState()) << "," << ( m_spawn ? m_spawn->MountedDisplayID : original_MountedDisplayID ) << "," << m_phaseMode << ")";
 	WorldDatabase.Execute(ss.str().c_str());
 }
 
@@ -789,70 +790,7 @@ void Creature::ChannelLinkUpCreature(uint32 SqlId)
 
 void Creature::LoadAIAgents()
 {
-	/*std::stringstream ss;
-	ss << "SELECT * FROM ai_agents where entry=" << GetUInt32Value(OBJECT_FIELD_ENTRY);
-	QueryResult *result = sDatabase.Query( ss.str().c_str() );
-
-	if( !result )
-		return;
-
-	AI_Spell *sp;
-
-	do
-	{
-		Field *fields = result->Fetch();
-
-		sp = new AI_Spell;
-		sp->entryId = fields[0].GetUInt32();
-		sp->agent = fields[1].GetUInt16();
-		sp->procChance = fields[3].GetUInt32();
-		sp->spellId = fields[5].GetUInt32();
-		sp->spellType = fields[6].GetUInt32();;
-		sp->spelltargetType = fields[7].GetUInt32();
-		sp->floatMisc1 = fields[9].GetFloat();
-		sp->Misc2 = fields[10].GetUInt32();
-		sp->minrange = GetMinRange(sSpellRange.LookupEntry(sSpellStore.LookupEntry(sp->spellId)->rangeIndex));
-		sp->maxrange = GetMaxRange(sSpellRange.LookupEntry(sSpellStore.LookupEntry(sp->spellId)->rangeIndex));
-
-		if(sp->agent == AGENT_RANGED)
-		{
-			GetAIInterface()->m_canRangedAttack = true;
-		}
-		else if(sp->agent == AGENT_FLEE)
-		{
-			GetAIInterface()->m_canFlee = true;
-			if(sp->floatMisc1)
-			{
-				GetAIInterface()->m_FleeHealth = sp->floatMisc1;
-			}
-			else
-			{
-				GetAIInterface()->m_FleeHealth = 0.2f;
-			}
-			if(sp->Misc2)
-			{
-				GetAIInterface()->m_FleeDuration = sp->Misc2;
-			}
-			else
-			{
-				GetAIInterface()->m_FleeDuration = 10000;
-			}
-		}
-		else if(sp->agent == AGENT_CALLFORHELP)
-		{
-			GetAIInterface()->m_canCallForHelp = true;
-			if(sp->floatMisc1)
-				GetAIInterface()->m_CallForHelpHealth = sp->floatMisc1;
-			else
-				GetAIInterface()->m_CallForHelpHealth = 0.2f;
-		}
-		else
-		{
-			GetAIInterface()->addSpellToList(sp);
-		}
-	} while( result->NextRow() );
-
-	delete result;*/
+//moved to ObjectStorage
 }
 
 WayPoint * Creature::CreateWaypointStruct()
@@ -877,12 +815,12 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 
 	m_phaseMode = spawn->phase;
 
+	original_emotestate = spawn->emote_state;
+	original_MountedDisplayID = spawn->MountedDisplayID;
+
 	//Set fields
 	SetUInt32Value(OBJECT_FIELD_ENTRY,proto->Id);
-
-	//SetUInt32Value(UNIT_FIELD_HEALTH, (mode ? long2int32(proto->Health * 1.5)  : proto->Health));
-	//SetUInt32Value(UNIT_FIELD_BASE_HEALTH, (mode ? long2int32(proto->Health * 1.5)  : proto->Health));
-	//SetUInt32Value(UNIT_FIELD_MAXHEALTH, (mode ? long2int32(proto->Health * 1.5)  : proto->Health));
+	
 	uint32 health = proto->MinHealth + RandomUInt(proto->MaxHealth - proto->MinHealth);
 	if(mode)
 		health = long2int32(double(health) * 1.5);
@@ -895,6 +833,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetUInt32Value(UNIT_FIELD_BASE_MANA,proto->Mana);
 
 	SetUInt32Value(UNIT_FIELD_BYTES_0, spawn->bytes);
+	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
 	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
 
 	uint32 model;
@@ -906,7 +845,8 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetFloatValue( OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))));
 	Log.Debug("Creatures","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, model, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))); 
 
-	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,proto->MountedDisplayID);
+	SetUInt32Value(UNIT_NPC_EMOTESTATE, original_emotestate);
+	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,original_MountedDisplayID);
 
     //SetUInt32Value(UNIT_FIELD_LEVEL, (mode ? proto->Level + (info ? info->lvl_mod_a : 0) : proto->Level));
 	SetUInt32Value(UNIT_FIELD_LEVEL, proto->MinLevel + (RandomUInt(proto->MaxLevel - proto->MinLevel)));
@@ -930,10 +870,9 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 
 	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, spawn->factionid);
 	SetUInt32Value(UNIT_FIELD_FLAGS, spawn->flags);
-	SetUInt32Value(UNIT_NPC_EMOTESTATE, spawn->emote_state);
 	SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, proto->BoundingRadius);
 	SetFloatValue(UNIT_FIELD_COMBATREACH, proto->CombatReach);
-	original_emotestate = spawn->emote_state;
+
 	// set position
 	m_position.ChangeCoords( spawn->x, spawn->y, spawn->z, spawn->o );
 	m_spawnLocation.ChangeCoords(spawn->x, spawn->y, spawn->z, spawn->o);
@@ -993,6 +932,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 	SetUInt32Value(UNIT_FIELD_BYTES_0, spawn->bytes);
+	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
 	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
 
 ////////////AI
@@ -1415,6 +1355,12 @@ void Creature::SetGuardWaypoints()
 		wp->forwardemoteoneshot = 0;
 		wp->backwardskinid = m_uint32Values[UNIT_FIELD_NATIVEDISPLAYID];
 		wp->forwardskinid = m_uint32Values[UNIT_FIELD_NATIVEDISPLAYID];
+		wp->forwardStandState = 0;
+		wp->backwardStandState = 0;
+		wp->forwardSpellToCast = 0;
+		wp->backwardSpellToCast = 0;
+		wp->forwardSayText = "";
+		wp->backwardSayText = "";
 		GetAIInterface()->addWayPoint(wp);
 	}
 }

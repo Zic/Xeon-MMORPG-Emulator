@@ -93,7 +93,7 @@ Map::~Map()
 bool first_table_warning = true;
 bool CheckResultLengthCreatures(QueryResult * res)
 {
-	if( res->GetFieldCount() != 20 )
+	if( res->GetFieldCount() != 21 )
 	{
 		if( first_table_warning )
 		{
@@ -112,7 +112,7 @@ bool CheckResultLengthCreatures(QueryResult * res)
 bool first_table_warningg = true;
 bool CheckResultLengthGameObject(QueryResult * res)
 {
-	if( res->GetFieldCount() != 17 )
+	if( res->GetFieldCount() != 16 )
 	{
 		if( first_table_warningg )
 		{
@@ -183,14 +183,15 @@ void Map::LoadSpawns(bool reload)
 					cspawn->factionid = fields[9].GetUInt32();
 					cspawn->flags = fields[10].GetUInt32();
 					cspawn->bytes = fields[11].GetUInt32();
-					cspawn->bytes2 = fields[12].GetUInt32();
-					cspawn->emote_state = fields[13].GetUInt32();
-					//cspawn->respawnNpcLink = fields[14].GetUInt32();
+					cspawn->bytes1 = fields[12].GetUInt32();
+					cspawn->bytes2 = fields[13].GetUInt32();
+					cspawn->emote_state = fields[14].GetUInt32();
 					cspawn->channel_spell = fields[15].GetUInt16();
 					cspawn->channel_target_go = fields[16].GetUInt32();
 					cspawn->channel_target_creature = fields[17].GetUInt32();
 					cspawn->stand_state = fields[18].GetUInt16();
-					cspawn->phase = fields[19].GetInt32();
+					cspawn->MountedDisplayID = fields[19].GetUInt32();
+					cspawn->phase = fields[20].GetInt32();
 					spawns[cellx][celly]->CreatureSpawns.push_back(cspawn);
 					++CreatureSpawnCount;
 				}while(result->NextRow());
@@ -220,14 +221,15 @@ void Map::LoadSpawns(bool reload)
 				cspawn->factionid = fields[9].GetUInt32();
 				cspawn->flags = fields[10].GetUInt32();
 				cspawn->bytes = fields[11].GetUInt32();
-				cspawn->bytes2 = fields[12].GetUInt32();
-				cspawn->emote_state = fields[13].GetUInt32();
-				//cspawn->respawnNpcLink = fields[14].GetUInt32();
-				cspawn->channel_spell=0;
-				cspawn->channel_target_creature=0;
-				cspawn->channel_target_go=0;
+				cspawn->bytes1 = fields[12].GetUInt32();
+				cspawn->bytes2 = fields[13].GetUInt32();
+				cspawn->emote_state = fields[14].GetUInt32();
+				cspawn->channel_spell = fields[15].GetUInt16();
+				cspawn->channel_target_go = fields[16].GetUInt32();
+				cspawn->channel_target_creature = fields[17].GetUInt32();
 				cspawn->stand_state = fields[18].GetUInt16();
-				cspawn->phase = 1;
+				cspawn->MountedDisplayID = fields[19].GetUInt32();
+				cspawn->phase = fields[20].GetInt32();
 				staticSpawns.CreatureSpawns.push_back(cspawn);
 				++CreatureSpawnCount;
 			}while(result->NextRow());
@@ -292,7 +294,7 @@ void Map::LoadSpawns(bool reload)
 					gspawn->flags=fields[12].GetUInt32();
 					gspawn->faction=fields[13].GetUInt32();
 					gspawn->scale = fields[14].GetFloat();
-					gspawn->phase = fields[16].GetInt32();
+					gspawn->phase = fields[15].GetInt32();
 					//gspawn->stateNpcLink = fields[15].GetUInt32();
 
 					//uint32 cellx=float2int32(((_maxX-gspawn->x)/_cellSize));
