@@ -26,6 +26,15 @@ bool ChatHandler::HandleSetBGScoreCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleStartBGCommand(const char *args, WorldSession *m_session)
 {
+	if( m_session->GetPlayer()->m_bg )
+	{
+		sEventMgr.RemoveEvents( m_session->GetPlayer()->m_bg, EVENT_BATTLEGROUND_COUNTDOWN );
+		sEventMgr.AddEvent( m_session->GetPlayer()->m_bg, &CBattleground::EventCountdown, EVENT_BATTLEGROUND_COUNTDOWN, 1, 3, 0);
+		// Start that BG!
+	}
+	else
+		m_session->SystemMessage("You must be in a battleground to use this command.");
+
 	return true;
 }
 

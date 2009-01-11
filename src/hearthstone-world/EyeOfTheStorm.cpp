@@ -280,20 +280,21 @@ void EyeOfTheStorm::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 	if( plr->GetLowGUID() != m_flagHolder )
 		return;
 
-	int32 val;
 	uint32 i;
 	uint32 towers = 0;
-	if( team == 0 )
-		val = 100;
-	else
-		val = 0;
 
-	if( m_CPStatus[tid] != val )
-		return;			// not captured by our team
+	if( m_CPStatus[tid] < 50 && team == 0 )
+		return;
+
+	if( m_CPStatus[tid] > 50 && team == 1 )
+		return;
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPStatus[i] == val)
+		if(m_CPStatus[i] < 50 && team == 1)
+			towers++;
+
+		if(m_CPStatus[i] > 50 && team == 0)
 			towers++;
 	}
 
@@ -377,6 +378,8 @@ bool EyeOfTheStorm::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer p
 	PlaySoundToAll( pPlayer->GetTeam() ? SOUND_HORDE_CAPTURE : SOUND_ALLIANCE_CAPTURE );
 	SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE + pPlayer->GetTeam(), pPlayer->GetGUID(), "$n has taken the flag!" );
 	m_flagHolder = pPlayer->GetLowGUID();
+
+	CBattleground::HookSlowLockOpen(pGo, pPlayer, pSpell);
 	return true;
 }
 
@@ -669,7 +672,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 		// handle stuff for the last tick
 		// change the flag depending on cp status
-		if( m_CPStatus[i] > 50 )
+		if( m_CPStatus[i] < 50 )
 		{
 			if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_HORDE )
 			{
@@ -694,7 +697,7 @@ void EyeOfTheStorm::UpdateCPs()
 				m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_EOTS_HORDE_BASES, m_towerCount[1] );
 			}
 		}
-		else if( m_CPStatus[i] < 50 )
+		else if( m_CPStatus[i] > 50 )
 		{
 			if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() != EOTS_BANNER_ALLIANCE )
 			{
@@ -793,7 +796,7 @@ void EyeOfTheStorm::UpdateCPs()
 			if( delta > 25 )
 				delta = 25;
 
-			m_CPStatus[i] -= delta;
+			m_CPStatus[i] += delta;
 			if( m_CPStatus[i] < 0 )
 				m_CPStatus[i] = 0;
 		}
@@ -807,7 +810,7 @@ void EyeOfTheStorm::UpdateCPs()
 				delta = 25;
 
 			
-			m_CPStatus[i] += delta;
+			m_CPStatus[i] -= delta;
 			if( m_CPStatus[i] > 100 )
 				m_CPStatus[i] = 100;
 		}
@@ -835,9 +838,9 @@ void EyeOfTheStorm::GeneratePoints()
 
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		if(m_CPStatus[i] < 50)
+		if(m_CPStatus[i] > 50)
 			towers[0]++;
-		else if(m_CPStatus[i] > 50)
+		else if(m_CPStatus[i] < 50)
 			towers[1]++;
 	}
 

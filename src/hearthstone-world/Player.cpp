@@ -7841,6 +7841,9 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 		// if we are mounted remove it
 		if( m_MountSpellId )
 			RemoveAura( m_MountSpellId );
+
+		if( m_CurrentVehicle )
+			m_CurrentVehicle->RemovePassenger(unit_shared_from_this());
 	}
 
 	// make sure player does not drown when teleporting from under water

@@ -256,6 +256,7 @@ enum MOD_TYPES
     SPELL_AURA_REGEN_MANA_STAT_PCT=219,
     SPELL_AURA_HEALING_STAT_PCT=220,
     SPELL_AURA_INCREASE_MAX_HEALTH=230,//Used by Commanding Shout
+	SPELL_AURA_VEHICLE_PASSENGER=236,
 	SPELL_AURA_MODIFY_AXE_SKILL=240,
 	SPELL_AURA_SET_PHASE=261,
 	SPELL_AURA_FROZEN_TARGET=262,
@@ -632,6 +633,7 @@ public:
 	void SpellAuraModSpellDamageDOTPct(bool apply);
 	void SpellAuraSetPhase(bool apply);
 	void SpellAuraIncreaseAPByAttribute(bool apply);
+	void SpellAuraVehiclePassenger(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 

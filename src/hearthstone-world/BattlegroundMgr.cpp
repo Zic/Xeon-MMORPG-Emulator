@@ -2069,3 +2069,15 @@ void CBattleground::GiveHonorToTeam(uint32 team, uint32 amt)
 		HonorHandler::AddHonorPointsToPlayer( plr, amt);
 	}
 }
+
+
+bool CBattleground::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+{
+	if( pPlayer->m_CurrentVehicle )
+		pPlayer->m_CurrentVehicle->RemovePassenger(pPlayer);
+
+	if( pPlayer->m_stealth )
+		pPlayer->RemoveAura( pPlayer->m_stealth );
+
+	return false;
+}

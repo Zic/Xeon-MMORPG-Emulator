@@ -1186,6 +1186,15 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			// battleground/warsong gulch flag
 			if(plyr->m_bg)
 			{
+				if( plyr->m_stealth )
+					plyr->RemoveAura( plyr->m_stealth );
+
+				if( plyr->m_MountSpellId )
+					plyr->RemoveAura( plyr->m_MountSpellId );
+
+				if( plyr->m_CurrentVehicle )
+					plyr->m_CurrentVehicle->RemovePassenger( plyr );
+
 				if(!plyr->m_bgFlagIneligible)
 					plyr->m_bg->HookFlagStand(plyr, obj);
 			}
@@ -1195,7 +1204,18 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 		{
 			// Dropped flag
 			if(plyr->m_bg)
+			{
+				if( plyr->m_stealth )
+					plyr->RemoveAura( plyr->m_stealth );
+
+				if( plyr->m_MountSpellId )
+					plyr->RemoveAura( plyr->m_MountSpellId );
+
+				if( plyr->m_CurrentVehicle )
+					plyr->m_CurrentVehicle->RemovePassenger( plyr );
+
 				plyr->m_bg->HookFlagDrop(plyr, obj);
+			}
 
 		}break;
 	case GAMEOBJECT_TYPE_QUESTGIVER:

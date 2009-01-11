@@ -256,7 +256,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
         &Aura::SpellAuraNULL,//233 // Beer Goggles
         &Aura::SpellAuraNULL,//234 Apply Aura: Reduces Silence or Interrupt effects, Item spell magic http://www.thottbot.com/s42184
 		&Aura::SpellAuraNULL,//235 33206 Instantly reduces a friendly target's threat by $44416s1%, reduces all damage taken by $s1% and increases resistance to Dispel mechanics by $s2% for $d.
-		&Aura::SpellAuraNULL,//236
+		&Aura::SpellAuraVehiclePassenger,//236
 		&Aura::SpellAuraModSpellDamageFromAP,//237 Mod Spell Damage from Attack Power
 		&Aura::SpellAuraModSpellHealingFromAP,//238 Mod Healing from Attack Power
 		&Aura::SpellAuraNULL,//239
@@ -6038,6 +6038,9 @@ void Aura::SpellAuraMounted(bool apply)
 
 	if(apply)
 	{   
+		if( isVehicleSpell ) // get rid of meeeee, I'm a useless placeholder!
+			SetDuration(1);
+
 		p_target->m_bgFlagIneligible++;
 		SetPositive();
 
@@ -6071,6 +6074,7 @@ void Aura::SpellAuraMounted(bool apply)
 
 		if( !isVehicleSpell )
 			m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+
 		//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
 	}
 }
@@ -8974,4 +8978,13 @@ void Aura::SpellAuraModSpellHealingFromAP(bool apply)
 	else
 		m_target->ModUnsigned32Value( PLAYER_FIELD_MOD_HEALING_DONE_POS, -mod->realamount );
 
+}
+
+void Aura::SpellAuraVehiclePassenger(bool apply)
+{
+	if(!apply)
+	{
+		if( m_target && m_target->m_CurrentVehicle )
+			m_target->m_CurrentVehicle->RemovePassenger(m_target);
+	}
 }

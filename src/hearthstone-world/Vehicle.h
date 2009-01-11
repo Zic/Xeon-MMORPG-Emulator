@@ -65,6 +65,7 @@ public:
 	VehicleSeatEntry * m_vehicleSeats[8];
 	bool Initialised;
 	bool m_CreatedFromSpell;
+	uint32 m_mountSpell;
 
 private:
 	void _AddToSlot(UnitPointer pPassenger, uint8 slot);

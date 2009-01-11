@@ -384,7 +384,7 @@ public:
 	void EventResurrectPlayers();
 	virtual bool CanPlayerJoin(PlayerPointer plr);
 	virtual bool CreateCorpse(PlayerPointer plr) { return true; }
-	virtual bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell) { return false; }
+	virtual bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
 
 	void BuildPvPUpdateDataPacket(WorldPacket * data);
 	virtual uint8 Rated() { return 0; }

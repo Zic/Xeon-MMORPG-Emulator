@@ -29,6 +29,7 @@ Vehicle::Vehicle(uint64 guid) : Creature(guid)
 	m_isVehicle = true;
 	Initialised = false;
 	m_CreatedFromSpell = false;
+	m_mountSpell = 0;
 }
 
 Vehicle::~Vehicle()
@@ -286,7 +287,15 @@ uint8 Vehicle::GetPassengerSlot(UnitPointer pPassenger)
 void Vehicle::RemovePassenger(UnitPointer pPassenger)
 {
 	uint8 slot = pPassenger->m_inVehicleSeatId;
+	pPassenger->m_CurrentVehicle.reset();
+	pPassenger->m_inVehicleSeatId = 0xFF;
+
 	pPassenger->RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNKNOWN_5 | UNIT_FLAG_UNKNOWN_6));
+	if( pPassenger->IsPlayer() )
+		pPassenger->RemoveAura(TO_PLAYER(pPassenger)->m_MountSpellId);
+
+	if( m_mountSpell )
+		pPassenger->RemoveAura( m_mountSpell );
 
 	WorldPacket data(MSG_MOVE_HEARTBEAT, 48);
 	data << pPassenger->GetNewGUID();
@@ -378,8 +387,6 @@ void Vehicle::RemovePassenger(UnitPointer pPassenger)
 		}
 	}
 
-	pPassenger->m_CurrentVehicle.reset();
-	pPassenger->m_inVehicleSeatId = 0xFF;
 	m_passengers[slot].reset();
 }
 
@@ -404,6 +411,9 @@ void Vehicle::_AddToSlot(UnitPointer pPassenger, uint8 slot)
 	v.y = /* pPassenger->m_TransporterY = */ m_vehicleSeats[slot]->m_attachmentOffsetY;
 	v.z = /* pPassenger->m_TransporterZ = */ m_vehicleSeats[slot]->m_attachmentOffsetZ;
 	v.o = /* pPassenger->m_TransporterO = */ 0;
+
+	if( m_mountSpell )
+		pPassenger->CastSpell( pPassenger, m_mountSpell, true );
 
 	RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SELF_RES);
 	// This is where the real magic happens
@@ -533,7 +543,9 @@ void Vehicle::MoveVehicle(float x, float y, float z, float o) //thanks andy
 	for (uint8 i=0; i<m_maxPassengers; ++i)
 	{
 		if (m_passengers[i] != NULL)
+		{
 			m_passengers[i]->SetPosition(x,y,z,o,false);
+		}
 	}
 }
 

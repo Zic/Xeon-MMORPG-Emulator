@@ -362,6 +362,12 @@ void WarsongGulch::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
 		return;
 	}
 
+	if( plr->m_CurrentVehicle )
+		plr->m_CurrentVehicle->RemovePassenger(plr);
+
+	if( plr->m_stealth )
+		plr->RemoveAura( plr->m_stealth );
+
 	if( plr->m_bgFlagIneligible )
 		return;
 

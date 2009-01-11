@@ -39,6 +39,7 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 
 	// Set up storage arrays
 	m_CreatureArraySize = map->CreatureSpawnCount;
+	m_VehicleArraySize = 0;
 
 	//m_CreatureStorage = new CreaturePointer[m_CreatureArraySize];
 	//m_CreatureStorage = (CreaturePointer*)malloc(sizeof(CreaturePointer) * m_CreatureArraySize);
@@ -436,6 +437,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
  
 			if(free_guid)
 				_reusable_guids_vehicle.push_back(obj->GetUIdFromGUID());
+		break;
 
 		case HIGHGUID_TYPE_UNIT:
 			ASSERT(obj->GetUIdFromGUID() <= m_CreatureHighGuid);
@@ -1938,12 +1940,14 @@ VehiclePointer MapMgr::CreateVehicle(uint32 entry)
 		newguid |= guid;
 		VehiclePointer v = VehiclePointer(new Vehicle(newguid));
 		v->Init();
+		ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
 		return v;
 	}
 
 	newguid |= ++m_VehicleHighGuid;
 	VehiclePointer v = VehiclePointer(new Vehicle(newguid));
 	v->Init();
+	ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
 	m_VehicleStorage.insert( make_pair< uint32, VehiclePointer >(v->GetUIdFromGUID(), v));
 	return v;
 }

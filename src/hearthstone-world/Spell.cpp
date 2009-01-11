@@ -2950,33 +2950,38 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 		}
 
+
+		for(uint8 i = 0; i < 3; ++i)
+		{
+			if( m_spellInfo->Effect[i] == SPELL_EFFECT_OPEN_LOCK && m_spellInfo->EffectMiscValue[i] == LOCKTYPE_SLOW_OPEN )
+			{
+				if( p_caster->m_MountSpellId )
+					p_caster->RemoveAura( p_caster->m_MountSpellId );
+
+				if( p_caster->m_CurrentVehicle )
+					p_caster->m_CurrentVehicle->RemovePassenger( p_caster );
+
+				if( p_caster->m_stealth )
+				{
+					p_caster->RemovePositiveAura( p_caster->m_stealth );
+					p_caster->RemoveAuraByNameHash( SPELL_HASH_VANISH );
+				}
+			}
+		}
+
 		// check if spell is allowed while we have a battleground flag
 		if(p_caster->m_bgHasFlag)
 		{
-			switch(m_spellInfo->Id)
+			if( m_spellInfo->NameHash == SPELL_HASH_STEALTH )
 			{
-				// stealth spells
-				case 1784:
-				case 1785:
-				case 1786:
-				case 1787:
-				case 5215:
-				case 6783:
-				case 9913:
-				case 1856:
-				case 1857:
-				case 26889:
-				{
 					// gg newbs
 					if(p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_WARSONG_GULCH)
 						TO_WARSONGGULCH(p_caster->m_bg)->DropFlag( p_caster );
 					else if(p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_EYE_OF_THE_STORM)
 						TO_EYEOFTHESTORM(p_caster->m_bg)->DropFlag( p_caster ); 
-					break;
-				}
 			}
 
-			if( p_caster && m_spellInfo->NameHash == SPELL_HASH_DIVINE_SHIELD || m_spellInfo->NameHash == SPELL_HASH_ICE_BLOCK)
+			if( p_caster && (m_spellInfo->NameHash == SPELL_HASH_DIVINE_SHIELD || m_spellInfo->NameHash == SPELL_HASH_ICE_BLOCK) )
 			{
 					if(p_caster->m_bg && p_caster->m_bg->GetType() == BATTLEGROUND_WARSONG_GULCH)
 						TO_WARSONGGULCH(p_caster->m_bg)->DropFlag( p_caster );

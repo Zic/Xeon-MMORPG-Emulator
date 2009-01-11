@@ -6304,7 +6304,5 @@ void Unit::OnPositionChange()
 	if (m_CurrentVehicle != NULL && m_CurrentVehicle->GetControllingUnit() == shared_from_this() && (m_position != m_CurrentVehicle->GetPosition() || GetOrientation() != m_CurrentVehicle->GetOrientation())) //check orientation too since == operator of locationvector doesnt
 	{
 		m_CurrentVehicle->MoveVehicle(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-		sLog.outColor(TRED, "%s Moving Vehicle", __FUNCTION__);
-		sLog.outColor(TNORMAL, "\n");
 	}
 }

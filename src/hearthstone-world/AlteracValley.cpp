@@ -1397,9 +1397,11 @@ bool AlteracValley::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer p
 	{
 		// TODO: anticheat here
 		m_nodes[pGo->bannerslot]->Assault(pPlayer);
+		CBattleground::HookSlowLockOpen(pGo, pPlayer, pSpell);
 		return true;
 	}
 
+	CBattleground::HookSlowLockOpen(pGo, pPlayer, pSpell);
 	return false;
 }
 

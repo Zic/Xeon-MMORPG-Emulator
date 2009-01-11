@@ -3405,9 +3405,9 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 		isVehicle = true;
 	}
 
-	for( int i = 0; i < damage; i++ )
+	for( int d = 0; d < damage; d++ )
 	{
-		float m_fallowAngle = angle_for_each_spawn * i;
+		float m_fallowAngle = angle_for_each_spawn * d;
 		if( isVehicle )
 		{
 			CreatureProto * cp = CreatureProtoStorage.LookupEntry(cr_entry);
@@ -3415,6 +3415,7 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 
 			VehiclePointer veh = VehiclePointer( u_caster->GetMapMgr()->CreateVehicle( cr_entry ) );
 			veh->m_CreatedFromSpell = true;
+			veh->m_mountSpell = m_spellInfo->EffectBasePoints[i];
 			veh->Load( cp, u_caster->GetPositionX(), u_caster->GetPositionY(), u_caster->GetPositionZ(), u_caster->GetOrientation());
 			veh->SetInstanceID( u_caster->GetInstanceID() );
 			veh->PushToWorld( u_caster->GetMapMgr() ); // we can do this safely since we're in the mapmgr's context
