@@ -2158,7 +2158,7 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		return true;
 	}
 
-	bool spVehicle = proto->vehicle_entry ? true : false;
+	bool spVehicle = proto->vehicle_entry > 0 ? true : false;
 
 	CreaturePointer p = spVehicle ? TO_CREATURE(m_session->GetPlayer()->GetMapMgr()->CreateVehicle(entry)) : m_session->GetPlayer()->GetMapMgr()->CreateCreature(entry);
 	if(spVehicle)
