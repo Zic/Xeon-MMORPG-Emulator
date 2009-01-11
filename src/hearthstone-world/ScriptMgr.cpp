@@ -79,7 +79,7 @@ void ScriptMgr::LoadScripts()
 	uint32 count = 0;
 	HANDLE find_handle = FindFirstFile( search_path.c_str(), &data );
 	if(find_handle == INVALID_HANDLE_VALUE)
-		Log.Warning("ScriptMgr","No external scripts found! Server will continue to function with limited functionality." );
+		Log.Error("ScriptMgr","No external scripts found! Server will start up with limited functionality." );
 	else
 	{
 		do
@@ -87,18 +87,19 @@ void ScriptMgr::LoadScripts()
 			string full_path = start_path + data.cFileName;
 			HMODULE mod = LoadLibrary( full_path.c_str() );
 			if( mod == 0 )
-				Log.Error("ScriptMgr","error loading external scripts %s : 0x%p", data.cFileName, reinterpret_cast< uint32* >( mod ));
+				Log.Error("ScriptMgr","Loading %s ,crc:0x%p failed!", data.cFileName, reinterpret_cast< uint32* >( mod ));
 			else
 			{
-				Log.Notice("ScriptMgr","Loaded external scripts %s : 0x%p", data.cFileName, reinterpret_cast< uint32* >( mod ));
+				std::stringstream cmsg; 
+				cmsg << "Loading " << data.cFileName << ", crc:0x" << reinterpret_cast< uint32* >( mod );
+
 				// find version import
 				exp_get_version vcall = (exp_get_version)GetProcAddress(mod, "_exp_get_version");
 				exp_script_register rcall = (exp_script_register)GetProcAddress(mod, "_exp_script_register");
 				exp_get_script_type scall = (exp_get_script_type)GetProcAddress(mod, "_exp_get_script_type");
 				if(vcall == 0 || rcall == 0 || scall == 0)
 				{
-					sLog.outColor( TRED, "Could not get version info!");
-					sLog.outColor( TWHITE,"\n");						
+					Log.Error("ScriptMgr","Loading %s failed, no version info found", data.cFileName);
 					FreeLibrary(mod);
 				}
 				else
@@ -109,7 +110,7 @@ void ScriptMgr::LoadScripts()
 					{
 						if( stype & SCRIPT_TYPE_SCRIPT_ENGINE )
 						{
-							sLog.outString("Version:%u.%u : delayed loading.", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
+							cmsg << ", Version:" << SCRIPTLIB_HIPART(version) << SCRIPTLIB_LOPART(version) << "loading delayed.";
 
 							ScriptingEngine se;
 							se.Handle = mod;
@@ -121,7 +122,7 @@ void ScriptMgr::LoadScripts()
 						else
 						{
 							_handles.push_back(((SCRIPT_MODULE)mod));
-							sLog.outString("Version:%u.%u", SCRIPTLIB_HIPART(version), SCRIPTLIB_LOPART(version));
+							cmsg << ", Version:" << SCRIPTLIB_HIPART(version) << SCRIPTLIB_LOPART(version);
 							rcall(this);
 						}
 
@@ -129,18 +130,17 @@ void ScriptMgr::LoadScripts()
 					}
 					else
 					{
+						Log.Warning("ScriptMgr","Loading %s failed,version mismatch", data.cFileName);
 						FreeLibrary(mod);
-						sLog.outColor( TRED,"Version mismatch!");						
-						sLog.outColor( TWHITE,"\n");						
 					}
 				}
+				Log.Success("ScriptMgr",cmsg.str().c_str());
 			}
 		}
 		while(FindNextFile(find_handle, &data));
 		FindClose(find_handle);
-		sLog.outString("");
 		Log.Notice("ScriptMgr","Loaded %u external libraries.", count);
-
+		sLog.outString("");
 		Log.Notice("ScriptMgr","Loading optional scripting engines...");
 		for(vector<ScriptingEngine>::iterator itr = ScriptEngines.begin(); itr != ScriptEngines.end(); ++itr)
 		{
@@ -178,6 +178,7 @@ void ScriptMgr::LoadScripts()
 			}
 		}
 		Log.Notice("ScriptMgr","Done loading script engines...");
+		sLog.outString("");
 	}
 #else
 	/* Loading system for *nix */
