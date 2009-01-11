@@ -75,7 +75,7 @@ void Vehicle::InitSeats(uint32 vehicleEntry, PlayerPointer pRider)
 	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
 	Initialised = true;
 
-	if( pRider != NULLPLR)
+	if( pRider != NULL)
 		AddPassenger( pRider );
 }
 
@@ -467,7 +467,7 @@ void Vehicle::_AddToSlot(UnitPointer pPassenger, uint8 slot)
 		data << uint8(slot);									// seat
 		// end of transport part
 		data << uint32(0);
-		SendMessageToSet(&data, false);
+		pPlayer->SendMessageToSet(&data, false);
 
 		data.Initialize(MSG_MOVE_TELEPORT_ACK);
 		data << pPlayer->GetNewGUID();
@@ -533,7 +533,7 @@ void Vehicle::MoveVehicle(float x, float y, float z, float o) //thanks andy
 	for (uint8 i=0; i<m_maxPassengers; ++i)
 	{
 		if (m_passengers[i] != NULL)
-			m_passengers[i]->SetPosition(x, y, z, o, false);
+			m_passengers[i]->SetPosition(x,y,z,o,false);
 	}
 }
 

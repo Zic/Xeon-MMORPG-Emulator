@@ -364,7 +364,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 			flags2 |= 0x200;
 		else if(m_objectTypeId==TYPEID_UNIT && creature_shared_from_this()->m_transportGuid != 0 && creature_shared_from_this()->m_transportPosition != NULL)
 			flags2 |= 0x200;
-		else if (IsUnit() && unit_shared_from_this()->m_CurrentVehicle != NULLVEHICLE)
+		else if (IsUnit() && unit_shared_from_this()->m_CurrentVehicle != NULL)
 			flags2 |= 0x200;
 
 		if(splinebuf)
