@@ -1762,7 +1762,26 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		/* victim died! */
 		if( pVictim->IsPlayer() )
 		{
+			// let's see if we have shadow of death
+			if( !pVictim->FindPositiveAuraByNameHash(SPELL_HASH_SHADOW_OF_DEATH) && TO_PLAYER( pVictim)->HasSpell( 49157 ) ) //check for shadow of death
+			{
+				SpellEntry* sorInfo = dbcSpell.LookupEntry(54223);
+				if( sorInfo != NULL )
+				{
+					SpellPointer sor = shared_ptr<Spell>(new Spell( pVictim, sorInfo, true, NULLAURA ));
+					SpellCastTargets targets;
+					targets.m_unitTarget = pVictim->GetGUID();
+					sor->prepare(&targets);
+					return;
+				}
+			}
+
 			TO_PLAYER( pVictim )->KillPlayer();
+			/* Remove all Auras */
+			pVictim->EventDeathAuraRemoval();
+			/* Set victim health to 0 */
+			pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+
 			if( IsCreature() )
 			{
 				TO_PLAYER(pVictim)->GetAchievementInterface()->HandleAchievementCriteriaKilledByCreature( creature_shared_from_this()->GetUInt32Value(OBJECT_FIELD_ENTRY) );
@@ -1776,6 +1795,10 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		{
 			pVictim->setDeathState( JUST_DIED );
 			pVictim->GetAIInterface()->HandleEvent( EVENT_LEAVECOMBAT, unit_shared_from_this(), 0);
+			/* Remove all Auras */
+			pVictim->EventDeathAuraRemoval();
+			/* Set victim health to 0 */
+			pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 		}
 
 		if( pVictim->IsPlayer() && (!IsPlayer() || pVictim == shared_from_this() ) )
@@ -1840,9 +1863,6 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				if(spl->m_spellInfo->ChannelInterruptFlags == 48140) spl->cancel();
 			}
 		}
-		
-		/* Remove all Auras */
-		pVictim->EventDeathAuraRemoval();
 
 		/* Stop victim from attacking */
 		if( this->IsUnit() )
@@ -1851,8 +1871,6 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		if( pVictim->GetTypeId() == TYPEID_PLAYER )
 			TO_PLAYER( pVictim )->EventAttackStop();
 
-		/* Set victim health to 0 */
-		pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 		if(pVictim->IsPlayer())
 		{
 			uint32 self_res_spell = TO_PLAYER( pVictim )->SoulStone;

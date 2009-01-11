@@ -210,7 +210,19 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 	if( !GetPlayer()->HasSpell(spellId) || spellInfo->Attributes & ATTRIBUTES_PASSIVE )
 	{
-		return;
+		// Some spells the player doesn't actually know, but are given to him by his current shapeshift.
+		// These spells should be allowed to be cast.
+		uint8 shapeshift = GetPlayer()->GetShapeShift();
+		SpellShapeshiftForm * ssf = dbcSpellShapeshiftForm.LookupEntryForced(shapeshift);
+		if(!ssf) return;
+
+		bool ok = false;
+		for(uint8 i = 0; i < 8; ++i)
+			if( ssf->spells[i] == spellId)
+				ok = true;
+
+		if( !ok )
+			return;
 	}
 
 	if (GetPlayer()->GetOnMeleeSpell() != spellId)

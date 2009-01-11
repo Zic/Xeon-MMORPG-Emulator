@@ -1791,6 +1791,34 @@ void Aura::SpellAuraDummy(bool apply)
 
 	switch(GetSpellId())
 	{
+		// Death Knight: Shadow of Death!
+	case 54223:
+		{
+			if( !m_target->IsPlayer() )
+				return;
+
+			if(apply)
+			{
+				TO_PLAYER(m_target)->FullHPMP();
+				TO_PLAYER(m_target)->ResurrectPlayer(NULLPLR);
+				m_target->SetUInt32Value( UNIT_FIELD_MAXPOWER1 + POWER_TYPE_ENERGY, 100 );
+				m_target->SetPowerType( POWER_TYPE_ENERGY );
+				
+			}
+			else
+			{
+				if( m_target->isAlive() )
+				{
+					m_target->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+					TO_PLAYER(m_target)->KillPlayer();
+				}
+
+				m_target->SetUInt32Value( UNIT_FIELD_MAXPOWER1 + POWER_TYPE_ENERGY, 0 );
+				m_target->SetPowerType( POWER_TYPE_RUNIC );
+			}
+			
+		}break;
+
 	case 59164: // Warlock: Haunt Heal Effect
 		{
 			if( !apply && GetUnitCaster() && GetUnitCaster()->m_lastHauntInitialDamage )
@@ -4570,6 +4598,11 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				m_target->RemoveAura(61610);
 			}
 		}break;
+	case FORM_GHOUL:
+		{
+			spellId = 0;
+			modelId = 25527;
+		}break;
 	}
 
 	if( apply )
@@ -7239,7 +7272,13 @@ void Aura::SpellAuraModIncreaseHealthPerc( bool apply )
 	SetPositive();
 	if( apply )
 	{
-		mod->fixed_amount[0] = m_target->GetModPUInt32Value( UNIT_FIELD_MAXHEALTH, mod->m_amount );
+		if( mod->m_amount < 0 )
+			mod->fixed_amount[0] = m_target->GetModPUInt32Value( UNIT_FIELD_MAXHEALTH, -mod->m_amount );
+		else
+			mod->fixed_amount[0] = m_target->GetModPUInt32Value( UNIT_FIELD_MAXHEALTH, mod->m_amount );
+
+		if( mod->m_amount < 0 )
+			mod->fixed_amount[0] = -mod->fixed_amount[0]; // oh I love hacks :D
 		m_target->ModUnsigned32Value( UNIT_FIELD_MAXHEALTH, mod->fixed_amount[0] );
 		if( m_target->IsPlayer() )
 			TO_PLAYER(m_target )->SetHealthFromSpell( TO_PLAYER( m_target )->GetHealthFromSpell() + mod->fixed_amount[0] ); 

@@ -6157,6 +6157,18 @@ void Spell::SpellEffectMegaJump(uint32 i)
 {
 	if(!u_caster) return;
 
+	if( m_targets.m_destX == 0.0f && m_targets.m_destY == 0.0f && m_targets.m_destZ == 0.0f && m_targets.m_unitTarget )
+	{
+		UnitPointer u = u_caster->GetMapMgr()->GetUnit( m_targets.m_unitTarget );
+		if( !u )
+			return; // or we'll TP to some far off land :P
+		
+		m_targets.m_destX = u->GetPositionX();
+		m_targets.m_destY = u->GetPositionY();
+		m_targets.m_destZ = u->GetPositionZ();
+		
+	}
+
 	// Time formula is derived from andy's logs, 271ms to move ~14.5 units
 	float distance = u_caster->GetDistanceSq( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ );
 	uint32 moveTime = FL2UINT((distance * 271.0f) / 212.65f);

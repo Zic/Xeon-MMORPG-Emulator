@@ -6288,7 +6288,14 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_CAST_SPELL;
 	}
 
-	
+	// shadow of death
+	sp = dbcSpell.LookupEntryForced(54223);
+	if( sp != NULL )
+	{
+		sp->Effect[2] = SPELL_EFFECT_APPLY_AURA;
+		sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
+		sp->Flags4 |= CAN_PERSIST_AND_CASTED_WHILE_DEAD;
+	}
 
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();

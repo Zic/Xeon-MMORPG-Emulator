@@ -1294,9 +1294,9 @@ public:
 	void SetDodgeFromSpell(float value) { m_dodgefromspell = value; }
 	void SetHitFromMeleeSpell(float value) { m_hitfrommeleespell = value; }
 	void SetHitFromSpell(float value) { m_hitfromspell = value; }
-	HEARTHSTONE_INLINE uint32 GetHealthFromSpell() { return m_healthfromspell; }
+	HEARTHSTONE_INLINE int32 GetHealthFromSpell() { return m_healthfromspell; }
 	HEARTHSTONE_INLINE uint32 GetManaFromSpell() { return m_manafromspell; }
-	void SetHealthFromSpell(uint32 value) { m_healthfromspell = value;}
+	void SetHealthFromSpell(int32 value) { m_healthfromspell = value;}
 	void SetManaFromSpell(uint32 value) { m_manafromspell = value;}
 	uint32 CalcTalentResetCost(uint32 resetnum);
 	void SendTalentResetConfirm();
@@ -1946,7 +1946,7 @@ protected:
 	float m_hitfromspell;
 	float m_hitfrommeleespell;
 	//stats mods
-	uint32 m_healthfromspell;
+	int32 m_healthfromspell;
 	uint32 m_manafromspell;
 	uint32 m_healthfromitems;
 	uint32 m_manafromitems;
