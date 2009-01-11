@@ -1647,7 +1647,7 @@ void Guild::SendGuildBank(WorldSession * pClient, GuildBankTab * pTab, int8 upda
 	if(pMember==NULL || !pMember->pRank->CanPerformBankCommand(GR_RIGHT_GUILD_BANK_VIEW_TAB, pTab->iTabId))
 		return;
 
-	//DEBUG_LOG("SendGuildBank", "sending tab %u to client.", pTab->iTabId);
+	//Log.Debug("SendGuildBank", "sending tab %u to client.", pTab->iTabId);
 
 	data << uint64(m_bankBalance);			// amount you have deposited
 	data << uint8(pTab->iTabId);				// unknown

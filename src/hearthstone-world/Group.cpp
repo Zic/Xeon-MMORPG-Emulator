@@ -1163,7 +1163,7 @@ void Group::CreateVoiceSession()
 
 void Group::VoiceChannelCreated(uint16 id)
 {
-	DEBUG_LOG("Group", "voicechannelcreated: id %u", (uint32)id);
+	Log.Debug("Group", "voicechannelcreated: id %u", (uint32)id);
 	m_voiceChannelId = id;
 	if( id != 0 )
 	{
@@ -1182,7 +1182,7 @@ void Group::VoiceChannelCreated(uint16 id)
 void Group::AddVoiceMember(PlayerInfo * pPlayer)
 {
 	m_groupLock.Acquire();
-	DEBUG_LOG("Group", "adding voice member %u to group %u", pPlayer->guid, GetID());
+	Log.Debug("Group", "adding voice member %u to group %u", pPlayer->guid, GetID());
 	uint32 i;
 
 	// find him an id
@@ -1240,7 +1240,7 @@ void Group::RemoveVoiceMember(PlayerInfo * pPlayer)
 	if( pPlayer->groupVoiceId <= 0 )
 		return;
 
-	DEBUG_LOG("Group", "removing voice member %u from group %u", pPlayer->guid, GetID());
+	Log.Debug("Group", "removing voice member %u from group %u", pPlayer->guid, GetID());
 
 	m_groupLock.Acquire();
 	if( m_voiceMembersList[pPlayer->groupVoiceId] == pPlayer )
@@ -1271,7 +1271,7 @@ void Group::RemoveVoiceMember(PlayerInfo * pPlayer)
 void Group::SendVoiceUpdate()
 {
 	m_groupLock.Acquire();
-	DEBUG_LOG("Group", "sendgroupupdate id %u", (uint32)m_voiceChannelId);
+	Log.Debug("Group", "sendgroupupdate id %u", (uint32)m_voiceChannelId);
 
 	//static uint8 EncryptionKey[16] = { 0x14, 0x60, 0xcf, 0xaf, 0x9e, 0xa2, 0x78, 0x38, 0xce, 0xc7, 0xaf, 0x0b, 0x3a, 0x23, 0x61, 0x44 };
 	static uint8 EncryptionKey[16] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -1361,7 +1361,7 @@ void Group::SendVoiceUpdate()
 
 void Group::VoiceSessionDropped()
 {
-	DEBUG_LOG("Group", "Voice session dropped");
+	Log.Debug("Group", "Voice session dropped");
 	m_groupLock.Acquire();
 	for(uint32 i = 0; i < 41; ++i)
 	{
@@ -1384,7 +1384,7 @@ void Group::VoiceSessionReconnected()
 
 	// try to recreate a group if one is needed
 	GroupMembersSet::iterator itr1, itr2;
-	DEBUG_LOG("Group", "Attempting to recreate voice session for group %u", GetID());
+	Log.Debug("Group", "Attempting to recreate voice session for group %u", GetID());
 
 	uint32 i = 0, j = 0;
 	SubGroup *sg1 = NULL;
