@@ -310,7 +310,8 @@ void Creature::SaveToDB()
 	else
 		ss << "0,0,0,";
 
-	ss << uint32(GetStandState()) << "," << ( m_spawn ? m_spawn->MountedDisplayID : original_MountedDisplayID ) << "," << m_phaseMode << ")";
+	ss << uint32(GetStandState()) << "," << ( m_spawn ? m_spawn->MountedDisplayID : original_MountedDisplayID ) << "," << m_phaseMode << ",";
+	ss << (IsVehicle() ? vehicle_shared_from_this()->GetVehicleEntry() : 0) << ")";
 	WorldDatabase.Execute(ss.str().c_str());
 }
 

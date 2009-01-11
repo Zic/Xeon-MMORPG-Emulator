@@ -2158,7 +2158,12 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		return true;
 	}
 
-	CreaturePointer p = m_session->GetPlayer()->GetMapMgr()->CreateCreature(entry);
+	bool spVehicle = proto->vehicle_entry ? true : false;
+
+	CreaturePointer p = spVehicle ? TO_CREATURE(m_session->GetPlayer()->GetMapMgr()->CreateVehicle(entry)) : m_session->GetPlayer()->GetMapMgr()->CreateCreature(entry);
+	if(spVehicle)
+		TO_VEHICLE(p)->InitSeats( proto->vehicle_entry );
+
 	CreatureSpawn * sp;
 	ASSERT(p);
 	if( save )
@@ -2185,6 +2190,7 @@ bool ChatHandler::HandleCreatureSpawnCommand(const char *args, WorldSession *m_s
 		sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
 		sp->MountedDisplayID = 0;
 		sp->phase = 1;
+		sp->vehicle = proto->vehicle_entry;
 
 		p->Load(sp, (uint32)NULL, NULL);
 	}
