@@ -120,6 +120,8 @@ enum MsTimeVariables
 
 #if defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
 #  define PLATFORM PLATFORM_WIN32
+#elif defined( __INTEL_COMPILER )
+#  define PLATFORM PLATFORM_INTEL
 #elif defined( __APPLE_CC__ )
 #  define PLATFORM PLATFORM_APPLE
 #else
@@ -129,9 +131,12 @@ enum MsTimeVariables
 #define COMPILER_MICROSOFT 0
 #define COMPILER_GNU	   1
 #define COMPILER_BORLAND   2
+#define COMPILER_INTEL     3
 
 #ifdef _MSC_VER
 #  define COMPILER COMPILER_MICROSOFT
+#elif defined( __INTEL_COMPILER )
+#  define COMPILER COMPILER_INTEL
 #elif defined( __BORLANDC__ )
 #  define COMPILER COMPILER_BORLAND
 #elif defined( __GNUC__ )
@@ -226,15 +231,6 @@ enum MsTimeVariables
 #include <sstream>
 #include <algorithm>
 //#include <iostream>
-#ifdef WIN32
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#else
-#include <tr1/memory>
-#include <tr1/unordered_map>
-#include <tr1/unordered_set>
-#endif
 
 #if defined (__GNUC__)
 #  define GCC_VERSION (__GNUC__ * 10000 \
@@ -263,21 +259,34 @@ enum MsTimeVariables
 #endif
 #endif
 
-#if COMPILER == COMPILER_GNU && __GNUC__ >= 3
+#if COMPILER == COMPILER_INTEL
+#include <ext/hash_map>
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 4
+#include <tr1/memory>
+#include <tr1/unordered_map>
+#include <tr1/unordered_set>
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #include <ext/hash_map>
 #include <ext/hash_set>
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && _HAS_TR1   // VC9.0 SP1 and later
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
 #else
+#include <memory>
 #include <hash_map>
 #include <hash_set>
 #endif
-
-
 
 #ifdef _STLPORT_VERSION
 #define HM_NAMESPACE std
 using std::hash_map;
 using std::hash_set;
-#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1300
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && _HAS_TR1
+#define HM_NAMESPACE tr1
+using namespace std::tr1;
+#elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER < 1500 || !_HAS_TR1)
+#  pragma error "FATAL ERROR: Your dev env sucks! Upgrade to Visual Studio 2008 SP1."
 #define HM_NAMESPACE stdext
 using stdext::hash_map;
 using stdext::hash_set;
@@ -286,11 +295,27 @@ using stdext::hash_set;
 // hacky stuff for vc++
 #define snprintf _snprintf
 #define vsnprintf _vsnprintf
-
 #elif COMPILER == COMPILER_INTEL
 #define HM_NAMESPACE std
 using std::hash_map;
 using std::hash_set;
+#elif COMPILER == COMPILER_GNU && __GNUC__ >= 4
+#define HM_NAMESPACE tr1
+using namespace std::tr1;
+/* gcc i hate you!
+#  if defined (__GNUC__)
+#	if GCC_VERSION == 41200
+		namespace tr1
+		{
+			template<> struct hash< ItemPointer > : public unary_function<ItemPointer, size_t>
+			{
+				size_t operator()(T val) const { return (size_t)(val.get()); }
+			};
+		};
+#	endif
+#  endif
+*/
+
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #define HM_NAMESPACE __gnu_cxx
 using __gnu_cxx::hash_map;
@@ -308,7 +333,6 @@ namespace __gnu_cxx
 	};
 
 };
-
 #else
 #define HM_NAMESPACE std
 using std::hash_map;
@@ -316,9 +340,7 @@ using std::hash_map;
 
 using std::tr1::shared_ptr;
 using namespace std::tr1;
-#ifndef WIN32
-#define shared_ptr std::tr1::shared_ptr
-#endif
+
 #undef HM_NAMESPACE
 #define HM_NAMESPACE tr1
 #define hash_map unordered_map

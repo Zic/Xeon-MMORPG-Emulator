@@ -239,7 +239,7 @@ bool ChatHandler::HandleItemCommand(const char* args, WorldSession *m_session)
 		sstext << "Item '" << item << "' Not Found in Database." << '\0';
 	}
 
-	sGMLog.writefromsession(m_session, "added item %u to vendor %u", pCreature->GetEntry(), item);
+	sGMLog.writefromsession(m_session, "added item %u to vendor %u", item, pCreature->GetEntry());
 	SystemMessage(m_session,  sstext.str().c_str());
 
 	return true;

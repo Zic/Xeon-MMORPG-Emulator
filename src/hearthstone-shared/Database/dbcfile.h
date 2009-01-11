@@ -21,6 +21,8 @@
 #define DBCFILE_H
 #include <cassert>
 #include <string>
+#include <string.h>
+#include <cstdlib>
 
 class DBCFile
 {

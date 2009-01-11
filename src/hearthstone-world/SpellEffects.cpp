@@ -168,7 +168,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectTeleportUnits,//SPELL_EFFECT_TELEPORT_UNITS - 140 IronForge teleport / portal only it seems
 		&Spell::SpellEffectNULL,// unknown - 141 // triggers spell, magic one,  (Mother spell) http://www.thottbot.com/s41065
 		&Spell::SpellEffectTriggerSpellWithValue,// unknown - 142 // triggers some kind of "Put spell on target" thing... (dono for sure) http://www.thottbot.com/s40872 and http://www.thottbot.com/s33076
-		&Spell::SpellEffectNULL,// unknown - 143 // Master -> deamon effecting spell, http://www.thottbot.com/s25228 and http://www.thottbot.com/s35696
+		&Spell::SpellEffectNULL, // Apply area aura- 143 // Master -> deamon effecting spell, http://www.thottbot.com/s25228 and http://www.thottbot.com/s35696
 		&Spell::SpellEffectNULL,// unknown - 144 Spectral Blast
 		&Spell::SpellEffectNULL,// unknown - 145 Black Hole Effect
 		&Spell::SpellEffectNULL,// unknown - 146  unused
@@ -179,6 +179,12 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectTriggerSpell,// 151 SPELL_EFFECT_TRIGGER_SPELL_2
 		&Spell::SpellEffectNULL,// unknown - 152
 		&Spell::SpellEffectNULL,// unknown - 153 // SPELL_EFFECT_CREATE_PET               misc value is creature entry
+		&Spell::SpellEffectNULL, //154 unused
+		&Spell::SpellEffectNULL, //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
+		&Spell::SpellEffectNULL, //156 Add Socket
+		&Spell::SpellEffectNULL, //157 create/learn random item/spell for profession
+		&Spell::SpellEffectNULL, //158 milling
+		&Spell::SpellEffectNULL //159 allow rename pet once again
 };
 
 void Spell::SpellEffectNULL(uint32 i)
