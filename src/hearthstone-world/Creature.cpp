@@ -1195,13 +1195,14 @@ void Creature::OnPushToWorld()
 	if(proto)
 	{
 		set<uint32>::iterator itr = proto->start_auras.begin();
-		SpellEntry * sp;
+		SpellEntry * sp = NULL;
 		for(; itr != proto->start_auras.end(); ++itr)
 		{
 			sp = dbcSpell.LookupEntry((*itr));
-			if(sp == 0) continue;
-
-			CastSpell(TO_UNIT(shared_from_this()), sp, 0);
+			if(sp != NULL)
+				sEventMgr.AddEvent(target, &Unit::EventCastSpell, target, sp, EVENT_AURA_UPDATE, 250, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT); 
+//			Added a 250 ms delay to allow cell to wake up; not adding the delay will mess up visual effects (like invisibiliy). This means invisibility aura from database work now.
+//			CastSpell(TO_UNIT(shared_from_this()), sp, 0);
 		}
 	}
 
