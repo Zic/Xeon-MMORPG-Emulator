@@ -958,6 +958,9 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	uint8 ccr;
 
 	chaindamage = 0;
+	if( targets->m_targetMask == 0 ) // WAT? No targets? Try to generate them.
+		GenerateTargets( targets );
+
 	m_targets = *targets;
 
 	if( !m_triggeredSpell && p_caster != NULL && p_caster->CastTimeCheat )
