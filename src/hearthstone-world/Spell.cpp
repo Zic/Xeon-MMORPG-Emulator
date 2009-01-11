@@ -1207,7 +1207,7 @@ void Spell::cast(bool check)
 		return;
 	}
 
-	DEBUG_LOG("Spell::cast %u, Unit: %u", m_spellInfo->Id, m_caster->GetLowGUID());
+	Log.Debug("Spell","Cast %u, Unit: %u", m_spellInfo->Id, m_caster->GetLowGUID());
 
 	if(check)
 		cancastresult = CanCast(true);
@@ -2525,12 +2525,12 @@ void Spell::_SetTargets(const uint64& guid)
 void Spell::HandleEffects(uint32 i)
 {   
 	damage = CalculateEffect(i,unitTarget);  
-	DEBUG_LOG( "WORLD: Spell effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
+	Log.Debug( "Spell","Handling Effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
 	
 	if( m_spellInfo->Effect[i]<TOTAL_SPELL_EFFECTS)
 		(*this.*SpellEffectsHandler[m_spellInfo->Effect[i]])(i);
 	else
-		DEBUG_LOG("SPELL: unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
+		Log.Debug("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
 }
 
 void Spell::HandleAddAura(uint64 guid)

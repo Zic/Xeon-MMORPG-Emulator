@@ -294,7 +294,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	if( ForcedPermissions != NULL )
 		GMFlags.assign(ForcedPermissions->c_str());
 
-	DEBUG_LOG( " >> got information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
+	Log.Debug( "WorldSocket","Received information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
 //	sLog.outColor(TNORMAL, "\n");
 
 	mRequestID = 0;
@@ -606,7 +606,7 @@ void WorldLog::LogPacket(uint32 len, uint16 opcode, const uint8* data, uint8 dir
 	unsigned int count;
 
 #ifdef ECHO_PACKET_LOG_TO_CONSOLE
-	sLog.outString("[%s]: %s %s (0x%03X) of %u bytes.", direction ? "SERVER" : "CLIENT", direction ? "sent" : "received",
+	Log.Debug("WorldLog","[%s]: %s %s (0x%03X) of %u bytes.", direction ? "SERVER" : "CLIENT", direction ? "sent" : "received",
 		LookupOpcodeName(opcode), opcode, len);
 #endif
 

@@ -169,11 +169,21 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,// unknown - 141 // triggers spell, magic one,  (Mother spell) http://www.thottbot.com/s41065
 		&Spell::SpellEffectTriggerSpellWithValue,// unknown - 142 // triggers some kind of "Put spell on target" thing... (dono for sure) http://www.thottbot.com/s40872 and http://www.thottbot.com/s33076
 		&Spell::SpellEffectNULL,// unknown - 143 // Master -> deamon effecting spell, http://www.thottbot.com/s25228 and http://www.thottbot.com/s35696
+		&Spell::SpellEffectNULL,// unknown - 144 Spectral Blast
+		&Spell::SpellEffectNULL,// unknown - 145 Black Hole Effect
+		&Spell::SpellEffectNULL,// unknown - 146  unused
+		&Spell::SpellEffectNULL,// unknown - 147 // Torch Tossing Training Failure
+		&Spell::SpellEffectNULL,// unknown - 148 unused
+		&Spell::SpellEffectNULL,// unknown - 149
+		&Spell::SpellEffectNULL,// unknown - 150 unused
+		&Spell::SpellEffectTriggerSpell,// 151 SPELL_EFFECT_TRIGGER_SPELL_2
+		&Spell::SpellEffectNULL,// unknown - 152
+		&Spell::SpellEffectNULL,// unknown - 153 // SPELL_EFFECT_CREATE_PET               misc value is creature entry
 };
 
 void Spell::SpellEffectNULL(uint32 i)
 {
-	DEBUG_LOG("Unhandled spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
+	Log.Debug("Spell","Unhandled spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
 }
 
 void Spell::SpellEffectInstantKill(uint32 i)

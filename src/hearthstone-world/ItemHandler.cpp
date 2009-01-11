@@ -1610,7 +1610,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket &recvPacket)
 		return;
 
 	shared_ptr<Item>item = _player->GetItemInterface()->GetInventoryItem(uslot, slot);
-	DEBUG_LOG("Received CMSG_READ_ITEM %d", slot);
+	Log.Debug("WorldSession","Received CMSG_READ_ITEM %d", slot);
 
 	if(item)
 	{
@@ -1621,7 +1621,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket &recvPacket)
 			WorldPacket data(SMSG_READ_ITEM_OK, 4);
 			data << item->GetGUID();
 			SendPacket(&data);
-			DEBUG_LOG("Sent SMSG_READ_OK %d", item->GetGUID());
+			Log.Debug("WorldSession","Sent SMSG_READ_OK %d", item->GetGUID());
 		}	
 	}
 }
@@ -1747,7 +1747,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 			}
 		}
 	}
-	DEBUG_LOG("Received CMSG_REPAIR_ITEM %d", itemguid);
+	Log.Debug("WorldSession","Received CMSG_REPAIR_ITEM %d", itemguid);
 }
 
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket) 
@@ -1756,12 +1756,12 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 	//CHECK_PACKET_SIZE(recvPacket, 12);
 	uint32 bytes,slots;
 	int32 price;
-	DEBUG_LOG("WORLD: CMSG_BUY_bytes_SLOT");
+	Log.Debug("WorldSession","Received CMSG_BUY_bytes_SLOT");
 
 	bytes = GetPlayer()->GetUInt32Value(PLAYER_BYTES_2);
 	slots =(uint8) (bytes >> 16);
 
-	DEBUG_LOG("PLAYER: Buy bytes bag slot, slot number = %d", slots);
+	Log.Debug("WorldSession","HandleBuyBankSlotOpcode: slot number = %d", slots);
 	BankSlotPrice* bsp = dbcBankSlotPrices.LookupEntry(slots+1);
 	if(!bsp) return;
 	price = (bsp != NULL ) ? bsp->Price : 99999999;
@@ -1778,7 +1778,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recvPacket, 2);
-	DEBUG_LOG("WORLD: CMSG_AUTO_BANK_ITEM");
+	Log.Debug("WorldSession","Received CMSG_AUTO_BANK_ITEM");
 
 	//WorldPacket data;
 
@@ -1790,7 +1790,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
 
 	recvPacket >> SrcInvSlot >> SrcSlot;
 
-	DEBUG_LOG("ITEM: Auto Bank, Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
+	Log.Debug("WorldSession","HandleAutoBankItemOpcode: Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
 
 	shared_ptr<Item>eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 

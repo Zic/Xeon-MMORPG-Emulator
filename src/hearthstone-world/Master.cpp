@@ -286,23 +286,20 @@ bool Master::Run(int argc, char ** argv)
 	new SocketGarbageCollector;
 	sSocketMgr.SpawnWorkerThreads();
 
-	LoadingTime = getMSTime() - LoadingTime;
-	Log.Notice("Server","Ready for connections. Startup time: %ums\n", LoadingTime );
-
-	Log.Notice("RemoteConsole", "Starting...");
 	if( StartConsoleListener() )
 	{
 #ifdef WIN32
 		ThreadPool.ExecuteTask( GetConsoleListener() );
 #endif
-		Log.Notice("RemoteConsole", "Now open.");
+		Log.Success("RemoteConsole", "Started and listening on port %i",Config.MainConfig.GetIntDefault("RemoteConsole", "Port", 8092));
 	}
 	else
-	{
-		Log.Warning("RemoteConsole", "Not enabled or failed listen.");
-	}
-	
- 
+		Log.Debug("RemoteConsole", "Not enabled or failed listen.");
+
+	sLog.outString(""); 
+	LoadingTime = getMSTime() - LoadingTime;
+	Log.Success("Server","Ready for connections. Startup time: %ums\n", LoadingTime );
+	sLog.outString(""); 
 	/* write pid file */
 	FILE * fPid = fopen( "ascent.pid", "w" );
 	if( fPid )

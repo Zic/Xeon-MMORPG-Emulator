@@ -1391,7 +1391,7 @@ void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
 	tutflag |= (1 << rInt);
 	GetPlayer()->SetTutorialInt( wInt, tutflag );
 
-	DEBUG_LOG("Received Tutorial Flag Set {%u}.", iFlag);
+	Log.Debug("WorldSession","Received Tutorial Flag Set {%u}.", iFlag);
 }
 
 void WorldSession::HandleTutorialClear( WorldPacket & recv_data )
@@ -1456,8 +1456,7 @@ void WorldSession::HandleSetActionBarTogglesOpcode(WorldPacket &recvPacket)
 {
 	uint8 cActionBarId;
 	recvPacket >> cActionBarId;
-	DEBUG_LOG("Received CMSG_SET_ACTIONBAR_TOGGLES for actionbar id %d.", cActionBarId);
-   
+	Log.Debug("WorldSession","Received CMSG_SET_ACTIONBAR_TOGGLES for actionbar id %d.", cActionBarId);
 	GetPlayer()->SetByte(PLAYER_FIELD_BYTES,2, cActionBarId);
 }
 

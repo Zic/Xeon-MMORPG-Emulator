@@ -277,7 +277,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 
 	if(plObj)
 	{
-		DEBUG_LOG("Creating player "I64FMT" for himself.", obj->GetGUID());
+		Log.Debug("MapMgr","Creating player "I64FMT" for himself.", obj->GetGUID());
 		count = plObj->BuildCreateUpdateBlockForPlayer(&m_createBuffer, plObj);
 		plObj->PushCreationData(&m_createBuffer, count);
 		m_createBuffer.clear();

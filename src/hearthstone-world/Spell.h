@@ -749,7 +749,17 @@ enum SpellEffects
     SPELL_EFFECT_UNKNOWN21,                 //    141
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE,	//    142
     SPELL_EFFECT_UNKNOWN23,                 //    143
-    TOTAL_SPELL_EFFECTS,                    //    144
+    SPELL_EFFECT_UNKNOWN24,                 //    144
+    SPELL_EFFECT_UNKNOWN25,                 //    145
+    SPELL_EFFECT_UNKNOWN26,                 //    146
+    SPELL_EFFECT_UNKNOWN27,                 //    147
+    SPELL_EFFECT_UNKNOWN28,                 //    148
+    SPELL_EFFECT_UNKNOWN29,                 //    149
+    SPELL_EFFECT_UNKNOWN30,                 //    150
+    SPELL_EFFECT_TRIGGER_SPELL_2,           //    151
+    SPELL_EFFECT_UNKNOWN32,                 //    152
+    SPELL_EFFECT_UNKNOWN33,                 //    153
+    TOTAL_SPELL_EFFECTS,                    //    154
 };
 
 // spell target system

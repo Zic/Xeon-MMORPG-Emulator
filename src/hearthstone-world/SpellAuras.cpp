@@ -699,7 +699,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	m_visualSlot = 0xFF;
 	pSpellId = 0;
 	periodic_target = 0;
-	DEBUG_LOG("Aura::Constructor %u (%s) from %u.", m_spellProto->Id, m_spellProto->Name, m_target->GetLowGUID());
+	Log.Debug("Aura","Constructor %u (%s) from %u.", m_spellProto->Id, m_spellProto->Name, m_target->GetLowGUID());
 	m_auraSlot = 0xffffffff;
 	m_interrupted = -1;
 	//fixed_amount = 0;//used only por percent values to be able to recover value correctly.No need to init this if we are not using it
@@ -867,7 +867,7 @@ void Aura::ApplyModifiers( bool apply )
 	for( uint32 x = 0; x < m_modcount; x++ )
 	{
 		mod = &m_modList[x];
-		DEBUG_LOG( "WORLD: target = %u , Spell Aura id = %u, SpellId  = %u, i = %u, apply = %s, duration = %u, damage = %d",
+		Log.Debug( "Aura","Applying Modifiers target = %u , Spell Aura id = %u, SpellId  = %u, i = %u, apply = %s, duration = %u, damage = %d",
 			m_target->GetLowGUID(),mod->m_type, m_spellProto->Id, mod->i, apply ? "true" : "false",GetDuration(),mod->m_amount); 
 
 		/*if(m_target->SchoolImmunityList[m_spellProto->School] &&
@@ -888,11 +888,11 @@ void Aura::ApplyModifiers( bool apply )
 
 		if(mod->m_type<TOTAL_SPELL_AURAS)
 		{
-			DEBUG_LOG("Known Aura id %d, value %d", (uint32)mod->m_type, (uint32)mod->m_amount );
+			Log.Debug( "Aura","Known Aura id %d, value %d", (uint32)mod->m_type, (uint32)mod->m_amount );
 			(*this.*SpellAuraHandler[mod->m_type])(apply);
 		}
 		else
-			DEBUG_LOG("Unknown Aura id %d", (uint32)mod->m_type);
+			Log.Debug( "Aura","Unknown Aura id %d", (uint32)mod->m_type);
 	}
 	
 	if(GetSpellProto()->procFlags)
@@ -953,7 +953,7 @@ void Aura::UpdateModifiers( )
 
 		if(mod->m_type<TOTAL_SPELL_AURAS)
 		{
-			DEBUG_LOG( "WORLD: Update Aura mods : target = %u , Spell Aura id = %u (%s), SpellId  = %u, i = %u, duration = %u, damage = %d",
+			Log.Debug( "Aura","Updating Aura modifiers target = %u , Spell Aura id = %u (%s), SpellId  = %u, i = %u, duration = %u, damage = %d",
 				m_target->GetLowGUID(),mod->m_type, SpellAuraNames[mod->m_type], m_spellProto->Id, mod->i, GetDuration(),mod->m_amount);
 			switch (mod->m_type)
 			{
@@ -962,7 +962,7 @@ void Aura::UpdateModifiers( )
 			}
 		}
 		else
-			sLog.outString("Unknown Aura id %d", (uint32)mod->m_type);
+			Log.Debug( "Aura","Unknown Aura id %d", (uint32)mod->m_type);
 	}
 }
 
@@ -1456,7 +1456,7 @@ void Aura::SpellAuraModBaseResistancePerc(bool apply)
 
 void Aura::SpellAuraNULL(bool apply)
 {
-	 DEBUG_LOG("Unknown Aura id %d", (uint32)mod->m_type);
+	 Log.Debug( "Aura","Unknown Aura id %d", (uint32)mod->m_type);
 }
 
 void Aura::SpellAuraBindSight(bool apply)

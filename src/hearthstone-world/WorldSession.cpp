@@ -150,13 +150,13 @@ int WorldSession::Update(uint32 InstanceID)
 		ASSERT(packet);
 
 		if(packet->GetOpcode() >= NUM_MSG_TYPES)
-			DEBUG_LOG("[Session] Received out of range packet with opcode 0x%.4X", packet->GetOpcode());
+			Log.Debug("WorldSession","Received out of range packet with opcode 0x%.4X", packet->GetOpcode());
 		else
 		{
 			Handler = &WorldPacketHandlers[packet->GetOpcode()];
 			if(Handler->status == STATUS_LOGGEDIN && !_player && Handler->handler != 0)
 			{
-				DEBUG_LOG("[Session] Received unexpected/wrong state packet with opcode %s (0x%.4X)",
+				Log.Debug("WorldSession","Received unexpected/wrong state packet with opcode %s (0x%.4X)",
 					LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
 			}
 			else
@@ -164,7 +164,7 @@ int WorldSession::Update(uint32 InstanceID)
 				// Valid Packet :>
 				if(Handler->handler == 0)
 				{
-					DEBUG_LOG("[Session] Received unhandled packet with opcode %s (0x%.4X)",
+					Log.Debug("WorldSession","Received unhandled packet with opcode %s (0x%.4X)",
 						LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
 				}
 				else
@@ -435,7 +435,7 @@ void WorldSession::LoadSecurity(std::string securitystring)
 	if(permissions[tmp.size()] != 0)
 		permissions[tmp.size()] = 0;
 
-	DEBUG_LOG("Loaded permissions for %u. (%u) : [%s]", this->GetAccountId(), permissioncount, securitystring.c_str());
+	Log.Debug("WorldSession","Loaded permissions for %u. (%u) : [%s]", this->GetAccountId(), permissioncount, securitystring.c_str());
 }
 
 void WorldSession::SetSecurity(std::string securitystring)

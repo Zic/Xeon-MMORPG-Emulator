@@ -95,7 +95,7 @@ bool AddonMgr::ShouldShowInList(std::string name)
 		ent->isNew = true;
 		ent->showinlist = true;
 
-		DEBUG_LOG("Discovered new addon %s sent by client.", name.c_str());
+		Log.Debug("AddonMgr","Discovered new addon %s sent by client.", name.c_str());
 
 		KnownAddons[ent->name] = ent;
 	}
@@ -116,7 +116,7 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 	}
 	catch (ByteBuffer::error &)
 	{
-		DEBUG_LOG("Warning: Incomplete auth session sent.");
+		Log.Debug("AddonMgr","Warning, Incomplete auth session sent.");
 		return;
 	}	
 	rsize = realsize;
@@ -128,7 +128,7 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 	if((source->size() - position) < 4 || realsize == 0)
 	{
 		// we shouldnt get here.. but just in case this will stop any crash here.
-		DEBUG_LOG("Warning: Incomplete auth session sent.");
+		Log.Debug("AddonMgr","Warning, Incomplete auth session sent.");
 		return;
 	}
 	int32 result;
@@ -136,11 +136,11 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 
 	if(result != Z_OK)
 	{
-		DEBUG_LOG("Decompression of addon section of CMSG_AUTH_SESSION failed.");
+		Log.Debug("AddonMgr","Decompression of addon section of CMSG_AUTH_SESSION failed.");
 		return;
 	}
 
-	DEBUG_LOG("Decompression of addon section of CMSG_AUTH_SESSION succeeded.");
+	Log.Debug("AddonMgr","Decompression of addon section of CMSG_AUTH_SESSION succeeded.");
 	
 	
 	uint8 Enable; // based on the parsed files from retool

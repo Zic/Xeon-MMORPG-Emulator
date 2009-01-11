@@ -33,7 +33,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 	if(!pn)
 		return;
 
-	DEBUG_LOG( "Received CMSG_NAME_QUERY for: %s", pn->name );
+	Log.Debug("WorldSession","Received CMSG_NAME_QUERY for: %s", pn->name );
 
 	uint8 databuffer[5000];
 	StackPacket data(SMSG_NAME_QUERY_RESPONSE, databuffer, 5000);
