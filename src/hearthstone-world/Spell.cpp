@@ -1479,14 +1479,14 @@ void Spell::cast(bool check)
 				}
 			}
 			// handle the rest of shit
-			if( unitTarget != NULLUNIT )
+			if( unitTarget != NULL )
 			{
 				// aura state
 				if( m_spellInfo->TargetAuraState )
 					unitTarget->RemoveFlag(UNIT_FIELD_AURASTATE, m_spellInfo->TargetAuraState);
 
 				// proc!
-				if( u_caster != NULLUNIT && u_caster->IsInWorld() )
+				if( u_caster != NULL && u_caster->IsInWorld() )
 				{
 					if(!m_triggeredSpell)
 					{

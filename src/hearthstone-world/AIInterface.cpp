@@ -836,14 +836,14 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			&& m_AIState != STATE_SCRIPTMOVE
 			&& !m_is_in_instance)
 		HandleEvent( EVENT_LEAVECOMBAT, m_Unit, 0 );
-	else if( m_nextTarget == NULLUNIT && m_AIState != STATE_FOLLOWING && m_AIState != STATE_SCRIPTMOVE )
+	else if( m_nextTarget == NULL && m_AIState != STATE_FOLLOWING && m_AIState != STATE_SCRIPTMOVE )
 	{
 		m_nextTarget = GetMostHated();
-		if( m_nextTarget == NULLUNIT )
+		if( m_nextTarget == NULL )
 			HandleEvent( EVENT_LEAVECOMBAT, m_Unit, 0 );
 	}
 
-	if( m_nextTarget != NULLUNIT && m_nextTarget->isAlive() && m_AIState != STATE_EVADE && !m_Unit->isCasting() )
+	if( m_nextTarget != NULL && m_nextTarget->isAlive() && m_AIState != STATE_EVADE && !m_Unit->isCasting() )
 	{
 		if( agent == AGENT_NULL || ( m_AIType == AITYPE_PET && !m_nextSpell ) ) // allow pets autocast
 		{
@@ -903,7 +903,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 
 				if(	distance >= combatReach[0] && distance <= combatReach[1] + DISTANCE_TO_SMALL_TO_WALK) // Target is in Range -> Attack
 				{
-					if(UnitToFollow != NULLUNIT)
+					if(UnitToFollow != NULL)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
@@ -935,7 +935,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 #ifdef ENABLE_CREATURE_DAZE
 							//now if the target is facing his back to us then we could just cast dazed on him :P
 							//as far as i know dazed is casted by most of the creatures but feel free to remove this code if you think otherwise
-							if(m_nextTarget != NULLUNIT &&
+							if(m_nextTarget != NULL &&
 								!(m_Unit->m_factionDBC->RepListId == -1 && m_Unit->m_faction->FriendlyMask==0 && m_Unit->m_faction->HostileMask==0) /* neutral creature */
 								&& m_nextTarget->IsPlayer() && !m_Unit->IsPet() && health_before_strike>m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH)
 								&& Rand(m_Unit->CalculateDazeCastChance(m_nextTarget)))
@@ -982,7 +982,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 
 				if(distance >= combatReach[1] && distance <= combatReach[2]) // Target is in Range -> Shoot!!
 				{
-					if(UnitToFollow != NULLUNIT)
+					if(UnitToFollow != NULL)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
@@ -1033,7 +1033,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			}break;
 		case AGENT_SPELL:
 			{
-				if( m_nextSpell == NULL || m_nextTarget == NULLUNIT )
+				if( m_nextSpell == NULL || m_nextTarget == NULL )
 					return;  // this shouldnt happen
 
 				Log.Debug("AiAgents","NextSpell %u by NPC %u",m_nextSpell->spell->Id, GetUnit()->GetGUID());
