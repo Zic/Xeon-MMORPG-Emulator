@@ -132,12 +132,15 @@ void MapMgr::Destructor()
 		}
 	}
 
-	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
+	ObjectPointer pObject;
+	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end();)
 	{
-		if((*itr)->IsInWorld())
-			(*itr)->RemoveFromWorld(false);
-		(*itr)->Destructor();
-		(*itr) = NULLOBJ;
+		pObject = *itr;
+		++itr;
+		if(pObject->IsInWorld())
+			pObject->RemoveFromWorld(false);
+		pObject->Destructor();
+		pObject = NULLOBJ;
 	}
 
 

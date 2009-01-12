@@ -102,29 +102,39 @@ void MapCell::RemoveObjects()
 	//uint32 ltime = getMSTime();
 
 	/* delete objects in pending respawn state */
-	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end(); ++itr)
+	ObjectPointer pObject;
+	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end();)
 	{
+		pObject = *itr;
+		++itr;
 		switch((*itr)->GetTypeId())
 		{
 		case TYPEID_UNIT: {
 				if( (*itr)->IsVehicle() )
 				{
 					_mapmgr->_reusable_guids_vehicle.push_back( (*itr)->GetUIdFromGUID() );
-					TO_VEHICLE( *itr )->m_respawnCell=NULL;
-					TO_VEHICLE( *itr )->Destructor();
+					TO_VEHICLE(pObject)->m_respawnCell=NULL;
+					TO_VEHICLE(pObject)->Destructor();
+					pObject = NULLOBJ;
 				}
 				else if( !(*itr)->IsPet() )
 				{
 					_mapmgr->_reusable_guids_creature.push_back( (*itr)->GetUIdFromGUID() );
-					TO_CREATURE( *itr )->m_respawnCell=NULL;
-					TO_CREATURE( *itr )->Destructor();
+					TO_CREATURE(pObject)->m_respawnCell=NULL;
+					TO_CREATURE(pObject)->Destructor();
+					pObject = NULLOBJ;
 				}
 			}break;
 
 		case TYPEID_GAMEOBJECT: {
-			TO_GAMEOBJECT( *itr )->m_respawnCell=NULL;
-			TO_GAMEOBJECT( *itr )->Destructor();
+			TO_GAMEOBJECT(pObject)->m_respawnCell=NULL;
+			TO_CREATURE(pObject)->Destructor();
+			pObject = NULLOBJ;
 			}break;
+		default:
+			pObject = NULLOBJ;
+			break;
+
 		}
 	}
 	_respawnObjects.clear();

@@ -166,6 +166,8 @@ hearthstone_world_SOURCES = \
     Unit.h \
     UpdateFields.h \
     UpdateMask.h \
+	Vehicle.h \
+	Vehicle.cpp \
     WarsongGulch.cpp \
     WarsongGulch.h \
     WayPoints.cpp \
