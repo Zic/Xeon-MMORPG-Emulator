@@ -278,8 +278,8 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 					//Unsupported Agent type, don't add to list
 					default:
 					{
-						sp = NULL;
 						Log.Warning("AIAgent","Skipping in-valid  entry %u for ai_type %u.", sp->entryId, sp->agent );
+						sp = NULL;
 					}break;
 				}
 				//Valid; add to list
