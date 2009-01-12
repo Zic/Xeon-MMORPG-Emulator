@@ -112,21 +112,21 @@ void MapCell::RemoveObjects()
 					_mapmgr->_reusable_guids_vehicle.push_back( (*itr)->GetUIdFromGUID() );
 					TO_VEHICLE( *itr )->m_respawnCell=NULL;
 					(*itr)->Destructor();
-					(*itr) = NULLOBJ;
+					(*itr).reset();// = NULLOBJ;
 				}
 				else if( !(*itr)->IsPet() )
 				{
 					_mapmgr->_reusable_guids_creature.push_back( (*itr)->GetUIdFromGUID() );
 					TO_CREATURE( *itr )->m_respawnCell=NULL;
 					(*itr)->Destructor();
-					(*itr) = NULLOBJ;
+					(*itr).reset();// = NULLOBJ;
 				}
 			}break;
 
 		case TYPEID_GAMEOBJECT: {
 			TO_GAMEOBJECT( *itr )->m_respawnCell=NULL;
 			(*itr)->Destructor();
-			(*itr) = NULLOBJ;
+			(*itr).reset();// = NULLOBJ;
 			}break;
 		}
 	}
