@@ -162,24 +162,26 @@ struct SpellEntry;
 struct AI_Spell
 {
 	~AI_Spell() { autocast_type=(uint32)-1; }
+
 	uint32 entryId;
 	uint16 agent;
 	uint32 procChance;
-	//int32 procCount;
-	//uint32 procCountDB;
+	uint32 procCount;
 	SpellEntry * spell;
 	uint8 spellType;
 	uint8 spelltargetType;
 	uint32 cooldown;
 	uint32 cooldowntime;
-	uint32 procCount;
-	uint32 procCounter;
 	float floatMisc1;
 	uint32 Misc2;
+
+	uint32 procCounter;
 	float minrange;
 	float maxrange;
-	uint32 autocast_type;
+	int32 autocast_type;
 	bool custom_pointer;
+
+	bool first_use;
 };
 
 bool isGuard(uint32 id);
@@ -279,7 +281,7 @@ public:
 	uint32 getMoveFlags();
 	void UpdateMove();
 	void SendCurrentMove(PlayerPointer plyr/*uint64 guid*/);
-	bool StopMovement(uint32 time);
+	void StopMovement(uint32 time);
 	uint32 getCurrentWaypoint() { return m_currentWaypoint; }
 	void changeWayPointID(uint32 oldwpid, uint32 newwpid);
 	bool addWayPoint(WayPoint* wp);
@@ -392,6 +394,7 @@ public:
 	bool waiting_for_cooldown;
 
 	uint32 next_spell_time;
+	AI_Spell * last_found_spell;
 
 	void CheckNextSpell(AI_Spell*sp)
 	{
@@ -423,11 +426,12 @@ protected:
 	bool firstLeaveCombat;
 	UnitPointer FindTarget();
 	UnitPointer FindTargetForSpell(AI_Spell *sp);
+	UnitPointer FindHealTargetForSpell(AI_Spell *sp);
 	bool FindFriends(float dist);
 	AI_Spell *m_nextSpell;
 	UnitPointer m_nextTarget;
 	uint32 m_fleeTimer;
-	bool m_hasFleed;
+	bool m_hasFled;
 	bool m_hasCalledForHelp;
 	uint32 m_outOfCombatRange;
 

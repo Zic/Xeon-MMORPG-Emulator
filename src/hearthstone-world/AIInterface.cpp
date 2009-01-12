@@ -48,7 +48,7 @@ AIInterface::AIInterface()
 	m_fleeTimer = 0;
 	m_FleeDuration = 0;
 	m_canFlee = false;
-	m_hasFleed = false;
+	m_hasFled = false;
 	m_canRangedAttack = false;
 	m_FleeHealth = m_CallForHelpHealth = 0.0f;
 	m_AIState = STATE_IDLE;
@@ -93,7 +93,9 @@ AIInterface::AIInterface()
 
 	disable_targeting = false;
 
+	last_found_spell = NULL;
 	next_spell_time = 0;
+
 	waiting_for_cooldown = false;
 	UnitToFollow_backup = NULLUNIT;
 	m_isGuard = false;
@@ -267,7 +269,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				m_moveRun = true;
 				m_aiTargets.clear();			
 				m_fleeTimer = 0;
-				m_hasFleed = false;
+				m_hasFled = false;
 				m_hasCalledForHelp = false;
 				m_nextSpell = NULL;
 				SetNextTarget(NULLUNIT);
@@ -358,7 +360,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 				m_aiTargets.clear();
 				m_fleeTimer = 0;
-				m_hasFleed = false;
+				m_hasFled = false;
 				m_hasCalledForHelp = false;
 				m_nextSpell = NULL;
 				SetNextTarget(NULLUNIT);
@@ -384,7 +386,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 				m_aiTargets.clear(); // we'll get a new target after we are unfeared
 				m_fleeTimer = 0;
-				m_hasFleed = false;
+				m_hasFled = false;
 				m_hasCalledForHelp = false;
 
 				// update speed
@@ -423,7 +425,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 				m_aiTargets.clear(); // we'll get a new target after we are unwandered
 				m_fleeTimer = 0;
-				m_hasFleed = false;
+				m_hasFled = false;
 				m_hasCalledForHelp = false;
 
 				// update speed
@@ -472,7 +474,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			UnitToFear = NULLUNIT;
 			FollowDistance = 0.0f;
 			m_fleeTimer = 0;
-			m_hasFleed = false;
+			m_hasFled = false;
 			m_hasCalledForHelp = false;
 			m_nextSpell = NULL;
 
@@ -828,98 +830,49 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 
 	uint16 agent = m_aiCurrentAgent;
 
-	// If creature is very far from spawn point return to spawnpoint
-	// If at instance dont return -- this is wrong ... instance creatures always returns to spawnpoint, dunno how do you got this ideia. 
-
 	if(	m_AIType != AITYPE_PET 
-		&& (m_outOfCombatRange && m_Unit->GetDistanceSq(m_returnX,m_returnY,m_returnZ) > m_outOfCombatRange) 
-		&& m_AIState != STATE_EVADE
-		&& m_AIState != STATE_SCRIPTMOVE
-		&& !m_is_in_instance)
-	{
+			&& (m_outOfCombatRange && m_Unit->GetDistanceSq(m_returnX,m_returnY,m_returnZ) > m_outOfCombatRange) 
+			&& m_AIState != STATE_EVADE
+			&& m_AIState != STATE_SCRIPTMOVE
+			&& !m_is_in_instance)
 		HandleEvent( EVENT_LEAVECOMBAT, m_Unit, 0 );
-	}
-	else if( m_nextTarget == NULL && m_AIState != STATE_FOLLOWING && m_AIState != STATE_SCRIPTMOVE )
+	else if( m_nextTarget == NULLUNIT && m_AIState != STATE_FOLLOWING && m_AIState != STATE_SCRIPTMOVE )
 	{
-//		SetNextTarget(FindTargetForSpell(m_nextSpell));
 		m_nextTarget = GetMostHated();
-		if( m_nextTarget == NULL )
-		{
+		if( m_nextTarget == NULLUNIT )
 			HandleEvent( EVENT_LEAVECOMBAT, m_Unit, 0 );
-		}
 	}
 
-	bool cansee;
-	if(m_nextTarget && m_nextTarget->event_GetCurrentInstanceId() == m_Unit->event_GetCurrentInstanceId())
-	{
-		if( m_Unit->GetTypeId() == TYPEID_UNIT )
-			cansee = TO_CREATURE( m_Unit )->CanSee( m_nextTarget );
-		else
-			cansee = TO_PLAYER( m_Unit )->CanSee( m_nextTarget );
-	}
-	else 
-	{
-		if( m_nextTarget )
-			m_nextTarget = NULLUNIT;			// corupt pointer
-
-		cansee = false;
-	}
-
-	if( cansee && m_nextTarget && m_nextTarget->isAlive() && m_AIState != STATE_EVADE && !m_Unit->isCasting() )
+	if( m_nextTarget != NULLUNIT && m_nextTarget->isAlive() && m_AIState != STATE_EVADE && !m_Unit->isCasting() )
 	{
 		if( agent == AGENT_NULL || ( m_AIType == AITYPE_PET && !m_nextSpell ) ) // allow pets autocast
 		{
-			if( !m_nextSpell )
-				m_nextSpell = this->getSpell();
-
-			/*
-			if(!m_nextSpell && waiting_for_cooldown)
-			{
-				// don't start running to the target for melee if we're waiting for a cooldown. 
-				return;
-			}
-			*/
-
-			if(m_canFlee && !m_hasFleed 
-				&& ((m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) / m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH)) < m_FleeHealth ))
+			if(m_canFlee && !m_hasFled && ( m_FleeHealth ? float(m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) / m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH)) < m_FleeHealth : 1))
 				agent = AGENT_FLEE;
-			else if(m_canCallForHelp 
-				&& !m_hasCalledForHelp 
-				/*&& (m_CallForHelpHealth > (m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) / (m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) > 0 ? m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) : 1)))*/)
+			else if(m_canCallForHelp && !m_hasCalledForHelp )
 				agent = AGENT_CALLFORHELP;
-			else if(m_nextSpell)
+			else //default to melee if no spells found
 			{
-				if(m_nextSpell->agent != AGENT_NULL)
-				{
+				m_nextSpell = getSpell();
+				if(m_nextSpell != NULL && m_nextSpell->agent != AGENT_NULL)
 					agent = m_nextSpell->agent;
-				}
 				else
-				{
 					agent = AGENT_MELEE;
-				}
-			}
-			else
-			{
-				agent = AGENT_MELEE;
 			}
 		}
+		//check if we can do range attacks
 		if(agent == AGENT_RANGED || agent == AGENT_MELEE)
 		{
 			if(m_canRangedAttack)
 			{
-				agent = AGENT_MELEE;
+				float dist = m_Unit->GetDistanceSq(m_nextTarget);
 				if(m_nextTarget->GetTypeId() == TYPEID_PLAYER)
 				{
-					float dist = m_Unit->GetDistanceSq(m_nextTarget);
-					if( TO_PLAYER( m_nextTarget )->m_currentMovement == MOVE_ROOT || dist >= 64.0f )
-					{
-						agent =  AGENT_RANGED;
-					}
+					if( TO_PLAYER( m_nextTarget )->m_currentMovement == MOVE_ROOT || dist >= 32.0f )
+						agent = AGENT_RANGED;
 				}
-				else if( m_nextTarget->m_canMove == false || m_Unit->GetDistanceSq(m_nextTarget) >= 64.0f )
-				{
+				else if( m_nextTarget->m_canMove == false || dist >= 32.0f )
 				   agent = AGENT_RANGED;
-				}
 			}
 			else
 			{
@@ -927,18 +880,18 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			}
 		}
 
-		if(this->disable_melee && agent == AGENT_MELEE)
+		if( disable_melee && agent == AGENT_MELEE )
 			agent = AGENT_NULL;
 		  
-		if(this->disable_ranged && agent == AGENT_RANGED)
+		if( disable_ranged && agent == AGENT_RANGED )
 			agent = AGENT_NULL;
 
-		if(this->disable_spell && agent == AGENT_SPELL)
+		if( disable_spell && agent == AGENT_SPELL )
 			agent = AGENT_NULL;
 
 		switch(agent)
 		{
-		case AGENT_MELEE:
+			case AGENT_MELEE:
 			{
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
 					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 1 );
@@ -948,24 +901,19 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				combatReach[0] = PLAYER_SIZE;
 				combatReach[1] = _CalcCombatRange(m_nextTarget, false);
 
-				if(	
-					distance >= combatReach[0] && 
-					distance <= combatReach[1] + DISTANCE_TO_SMALL_TO_WALK) // Target is in Range -> Attack
+				if(	distance >= combatReach[0] && distance <= combatReach[1] + DISTANCE_TO_SMALL_TO_WALK) // Target is in Range -> Attack
 				{
-					if(UnitToFollow != NULL)
+					if(UnitToFollow != NULLUNIT)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
-						//m_Unit->setAttackTarget(NULL);  // remove ourselves from any target that might have been followed
 					}
-					
+				
 					FollowDistance = 0.0f;
-//					m_moveRun = false;
-					//FIXME: offhand shit
 					if(m_Unit->isAttackReady(false) && !m_fleeTimer)
 					{
 						m_creatureState = ATTACKING;
-						bool infront = m_Unit->isInFront(m_nextTarget);
+						bool infront = m_Unit->isInFront(m_nextTarget);	
 
 						if(!infront) // set InFront
 						{
@@ -983,11 +931,11 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							//we require to know if strike was succesfull. If there was no dmg then target cannot be dazed by it
 							uint32 health_before_strike=m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
 #endif
-							m_Unit->Strike( m_nextTarget, ( agent == AGENT_MELEE ? MELEE : RANGED ), NULL, 0, 0, 0, false, false );
+							m_Unit->Strike( m_nextTarget, MELEE, NULL, 0, 0, 0, false, false );
 #ifdef ENABLE_CREATURE_DAZE
 							//now if the target is facing his back to us then we could just cast dazed on him :P
 							//as far as i know dazed is casted by most of the creatures but feel free to remove this code if you think otherwise
-							if(m_nextTarget &&
+							if(m_nextTarget != NULLUNIT &&
 								!(m_Unit->m_factionDBC->RepListId == -1 && m_Unit->m_faction->FriendlyMask==0 && m_Unit->m_faction->HostileMask==0) /* neutral creature */
 								&& m_nextTarget->IsPlayer() && !m_Unit->IsPet() && health_before_strike>m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH)
 								&& Rand(m_Unit->CalculateDazeCastChance(m_nextTarget)))
@@ -1005,13 +953,12 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							}
 #endif
 						}
-					}
+					}	
 				}
 				else // Target out of Range -> Run to it
 				{
-					//calculate next move
-					float dist = combatReach[1]-PLAYER_SIZE;
-
+					//Make sure target can reach us.
+					float dist = combatReach[1] - m_Unit->GetFloatValue( UNIT_FIELD_COMBATREACH ); 
 					if(dist < PLAYER_SIZE)
 						dist = PLAYER_SIZE; //unbelievable how this could happen
 					if (distance<combatReach[0])
@@ -1026,15 +973,16 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
 					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 3 );
 
-				float combatReach[2]; // Calculate Combat Reach
+				float combatReach[3]; // Used Shooting Ranges
 				float distance = m_Unit->CalcDistance(m_nextTarget);
 
-				combatReach[0] = 8.0f;
-				combatReach[1] = 30.0f;
+				combatReach[0] = GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH); //normal combat reach
+				combatReach[1] = combatReach[0] + 12.5f; // if distance <  c.r. + 12.5, run towards target, and enter melee
+				combatReach[2] = combatReach[0] + 30.0f; // if distance > c.r. + 30, close in 5 yards again, and continue shooting.
 
-				if(distance >= combatReach[0] && distance <= combatReach[1]) // Target is in Range -> Attack
+				if(distance >= combatReach[1] && distance <= combatReach[2]) // Target is in Range -> Shoot!!
 				{
-					if(UnitToFollow != NULL)
+					if(UnitToFollow != NULLUNIT)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
@@ -1042,12 +990,12 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 					}
 					
 					FollowDistance = 0.0f;
-//					m_moveRun = false;
+
 					//FIXME: offhand shit
 					if(m_Unit->isAttackReady(false) && !m_fleeTimer)
 					{
 						m_creatureState = ATTACKING;
-						bool infront = m_Unit->isInFront(m_nextTarget);
+						bool infront = m_Unit->isInFront(m_nextTarget);	
 
 						if(!infront) // set InFront
 						{
@@ -1066,8 +1014,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							if(info)
 							{
 								SpellPointer sp = SpellPointer(new Spell(m_Unit, info, false, NULLAURA));
-								SpellCastTargets targets;
-								targets.m_unitTarget = m_nextTarget->GetGUID();
+								SpellCastTargets targets(m_nextTarget->GetGUID());
 								sp->prepare(&targets);
 
 								//Did we give it a sound ID?	
@@ -1080,23 +1027,19 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				else // Target out of Range -> Run to/from it, depending on current distance
 				{
 					m_moveRun = true;
-					float drun = (distance < combatReach[0] ? GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH) : combatReach[1]-5.0f );
+					float drun = (distance < combatReach[1] ? combatReach[0] : combatReach[2]-5.0f );
 					_CalcDestinationAndMove(m_nextTarget, drun);
 				}
 			}break;
 		case AGENT_SPELL:
 			{
-				if(!m_nextSpell || !m_nextTarget)
+				if( m_nextSpell == NULL || m_nextTarget == NULLUNIT )
 					return;  // this shouldnt happen
+
+				Log.Debug("AiAgents","NextSpell %u by NPC %u",m_nextSpell->spell->Id, GetUnit()->GetGUID());
 
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
 					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 0 );
-
-				/* stop moving so we don't interrupt the spell */
-				//this the way justly suggested
-//				if(m_nextSpell->spell->CastingTimeIndex != 1)
-				//do not stop for instant spells
-				SpellCastTime *sd = dbcSpellCastTime.LookupEntry(m_nextSpell->spell->CastingTimeIndex);
 
 				float distance = m_Unit->GetDistanceSq(m_nextTarget);
 				bool los = true;
@@ -1108,15 +1051,24 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				if(los && ((distance <= (m_nextSpell->maxrange*m_nextSpell->maxrange)  && distance >= (m_nextSpell->minrange*m_nextSpell->minrange)) || m_nextSpell->maxrange == 0)) // Target is in Range -> Attack
 				{
 					SpellEntry* spellInfo = m_nextSpell->spell;
-/*					if(m_nextSpell->procCount)
-						m_nextSpell->procCount--;*/
 
-					// If in range stop moving
-					if(GetCastTime(sd) != 0)
-						StopMovement(0);
+					//If this is a healing spell, check health of self and surroundings.
+					SpellCastTargets targets;
+					if(m_nextSpell->spellType == STYPE_HEAL)
+					{
+						UnitPointer starget = FindHealTargetForSpell(m_nextSpell);
+						if(starget)
+							targets = setSpellTargets(spellInfo, starget);
+					}
+					else
+					{
+						targets = setSpellTargets(spellInfo, m_nextTarget);
+					}
 
-					SpellCastTargets targets = setSpellTargets(spellInfo, m_nextTarget);
-					uint32 targettype = m_nextSpell->spelltargetType;
+					//Let's find out on whom to cast the spell on
+					uint32 	targettype = m_nextSpell->spelltargetType;
+					targets = setSpellTargets(spellInfo, m_nextTarget);
+					targettype = m_nextSpell->spelltargetType;
 					uint8 ccr = 0;
 					switch(targettype)
 					{
@@ -1151,52 +1103,43 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							m_Unit->PlaySoundToSet(m_nextSpell->Misc2);
 
 						//add pet spell after use to pet owner with some chance
-						if(m_Unit->IsPet() &&  m_PetOwner && m_PetOwner->IsPlayer())
+						if( m_Unit->IsPet() &&  m_PetOwner && m_PetOwner->IsPlayer())
 						{	
 							PetPointer pPet = TO_PET(m_Unit);
-							if(pPet && Rand(5)) //5% change to gain spell from pet
+							if( pPet && Rand(5)) //5% change to gain spell from pet
 								pPet->AddPetSpellToOwner(spellInfo->Id);
 						}
+						//This spell won't be cast until it cooldown cleared.
+						if(m_nextSpell&&m_nextSpell->cooldown)
+							m_nextSpell->cooldowntime = getMSTime() + m_nextSpell->cooldown;
+
+						//increase procCounter if we're counting
+						if(m_nextSpell->procCount)
+							m_nextSpell->procCounter++;
 					}
 					else
 						Log.Debug("AIAgents","Spell failed: Result %u, NPC %u, spell %u, TargetType %u", ccr, m_Unit->GetEntry() , spellInfo->Id, targettype );
-
-					if(m_nextSpell&&m_nextSpell->cooldown)
-						m_nextSpell->cooldowntime = getMSTime() + m_nextSpell->cooldown;
-					m_nextSpell = NULL;
 				}
-				else // Target out of Range -> Run to it
+				else // Target out of Range/not in LOS -> Run to it
 				{
 					//calculate next move
 					m_moveRun = true;
-					if(m_nextSpell->maxrange < 5.0f)
-						_CalcDestinationAndMove(m_nextTarget, 0.0f);
-					else
-						_CalcDestinationAndMove(m_nextTarget, m_nextSpell->maxrange - 5.0f);
-					/*Destination* dst = _CalcDestination(m_nextTarget, dist);
-					MoveTo(dst->x, dst->y, dst->z,0);
-					delete dst;*/
+					_CalcDestinationAndMove( m_nextTarget, ( m_nextSpell->maxrange < 5.0f ? GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH) : m_nextSpell->maxrange - 5.0f ));
 				}
+				//Null out the agent, so we force the lookup of the next spell.
+				m_aiCurrentAgent = AGENT_NULL;
 			}break;
 		case AGENT_FLEE:
 			{
-				//float dist = 5.0f;
-
 				m_moveRun = false;
 				if(m_fleeTimer == 0)
 					m_fleeTimer = m_FleeDuration;
 
-				/*Destination* dst = _CalcDestination(m_nextTarget, dist);
-				MoveTo(dst->x, dst->y, dst->z,0);
-				delete dst;*/
 				_CalcDestinationAndMove(m_nextTarget, 5.0f);
-				if(!m_hasFleed)
+				if(!m_hasFled)
 					CALL_SCRIPT_EVENT(m_Unit, OnFlee)(m_nextTarget);
 
 				m_AIState = STATE_FLEEING;
-				//removed by Zack : somehow creature starts to attack sefl. Just making sure it is not this one
-//				m_nextTarget = m_Unit;
-//				m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, 0);
 				SetNextTarget(NULLUNIT);
 
 				WorldPacket data( SMSG_MESSAGECHAT, 100 );
@@ -1211,11 +1154,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				data << uint8(0);
 
 				m_Unit->SendMessageToSet(&data, false);
-
-				//m_Unit->SendChatMessage(CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, msg);
-				//sChatHandler.FillMessageData(&data, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, msg, m_Unit->GetGUID());			   
-			   
-				m_hasFleed = true;
+				m_hasFled = true;
 			}break;
 		case AGENT_CALLFORHELP:
 			{
@@ -1227,11 +1166,10 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 			}break;
 		}
 	}
-	else if( !m_nextTarget || m_nextTarget->GetInstanceID() != m_Unit->GetInstanceID() || !m_nextTarget->isAlive() || !cansee )
+	else if( !m_nextTarget || !m_Unit->isCasting() ||m_nextTarget->GetInstanceID() != m_Unit->GetInstanceID() || !m_nextTarget->isAlive() || !m_nextTarget->IsInWorld() )
 	{
-		SetNextTarget( NULLUNIT );
 		// no more target
-		//m_Unit->setAttackTarget(NULL);
+		SetNextTarget( NULLUNIT );
 	}
 }
 
@@ -1565,6 +1503,45 @@ UnitPointer AIInterface::FindTargetForSpell(AI_Spell *sp)
 
 	return GetMostHated();
 }
+UnitPointer AIInterface::FindHealTargetForSpell(AI_Spell *sp)
+{
+	TargetMap::iterator itr, itr2;
+
+	if(sp)
+	{
+		if(sp->spellType == STYPE_HEAL)
+		{
+			uint32 cur = m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) + 1;
+			uint32 max = m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) + 1;
+			float healthPercent = float(cur / max);
+			if(healthPercent <= sp->floatMisc1) // Heal ourselves cause we got too low HP
+			{
+				sp->spelltargetType = TTYPE_CASTER;
+				m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+				return m_Unit;
+			}
+			for(AssistTargetSet::iterator i = m_assistTargets.begin(); i != m_assistTargets.end(); ++i)
+			{
+				if(!(*i)->isAlive())
+				{
+					continue;
+				}
+				cur = (*i)->GetUInt32Value(UNIT_FIELD_HEALTH);
+				max = (*i)->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+				healthPercent = float(cur / max);
+				if(healthPercent <= sp->floatMisc1) // Heal ourselves cause we got too low HP
+				{
+					sp->spelltargetType = TTYPE_SINGLETARGET;
+					m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, (*i)->GetGUID());
+					return (*i); // heal Assist Target which has low HP
+				}
+			}
+		}
+	}
+
+	return NULLUNIT;
+}
+
 
 bool AIInterface::FindFriends(float dist)
 {
@@ -1835,35 +1812,17 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 #endif
 }
 
-bool AIInterface::StopMovement(uint32 time)
+void AIInterface::StopMovement(uint32 time)
 {
-	if( m_creatureState == STOPPED )
-	{
-		if( time > m_moveTimer )
-			m_moveTimer = time;
+	m_moveTimer = time; //set pause after stopping
+	m_creatureState = STOPPED;
 
-		return true;
-	}
-	else
-	{
-		m_moveTimer = time; //set pause after stopping
-		m_creatureState = STOPPED;
-	
-		m_destinationX = m_destinationY = m_destinationZ = 0;
-		m_nextPosX = m_nextPosY = m_nextPosZ = 0;
-		m_timeMoved = 0;
-		m_timeToMove = 0;
+	m_destinationX = m_destinationY = m_destinationZ = 0;
+	m_nextPosX = m_nextPosY = m_nextPosZ = 0;
+	m_timeMoved = 0;
+	m_timeToMove = 0;
 
-		WorldPacket data(26);
-		data.SetOpcode(SMSG_MONSTER_MOVE);
-		data << m_Unit->GetNewGUID();
-		data << m_Unit->GetPositionX() << m_Unit->GetPositionY() << m_Unit->GetPositionZ();
-		data << getMSTime();
-		data << uint8(1);   // "DontMove = 1"
-
-		m_Unit->SendMessageToSet( &data, false );
-		return true;
-	}
+	SendMoveToPacket(m_Unit->GetPositionX(), m_Unit->GetPositionY(), m_Unit->GetPositionZ(), m_Unit->GetOrientation(), 0, 0 );
 }
 
 void AIInterface::MoveTo(float x, float y, float z, float o)
@@ -2855,111 +2814,109 @@ SpellCastTargets AIInterface::setSpellTargets(SpellEntry *spellInfo, UnitPointer
 
 AI_Spell *AIInterface::getSpell()
 {
-	if(next_spell_time > (uint32)UNIXTIME)
-		return NULL;
-
-	waiting_for_cooldown = false;
-
 	// look at our spells
-	AI_Spell* sp = NULL;
-	AI_Spell* def_spell = NULL;
-	uint32 cool_time=0;
-	uint32 cool_time2;
+	AI_Spell *  sp = NULL;
+	AI_Spell *  def_spell = NULL;
+	uint32 cool_time = 0;
 	uint32 nowtime = getMSTime();
 
-	if(m_Unit->IsPet())
+	if( nowtime > next_spell_time )
 	{
-		sp = def_spell = TO_PET(m_Unit)->HandleAutoCastEvent();
-	}
-	else
-	{
-		for(list<AI_Spell*>::iterator itr = m_spells.begin(); itr != m_spells.end();)
+		if(m_Unit->IsPet())
 		{
-			sp = *itr;
-			++itr;
-			if(sp->cooldowntime && nowtime < sp->cooldowntime && sp->procChance >= 100)
+			PetPointer pPet = TO_PET(m_Unit);
+			def_spell = pPet->HandleAutoCastEvent();
+		}
+		else
+		{
+			//start searching the list for a suitable spell. 
+			for(list<AI_Spell*>::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
 			{
-				cool_time2=sp->cooldowntime-nowtime;
-				if(!cool_time || cool_time2<cool_time)
-					cool_time=cool_time2;
-
-				waiting_for_cooldown = true;
-				continue;
-			}
-
-			if(sp->procCount && sp->procCounter >= sp->procCount)
-				continue;
-
-			if(sp->agent == AGENT_SPELL)
-			{
-				if (sp->spellType == STYPE_BUFF)
+				sp = (*itr);
+			
+				// Wtf?? There should be only spells on the list
+				if(sp->agent != AGENT_SPELL)
 				{
-					// cast the buff at requested percent only if we don't have it already
-					if(sp->procChance >= 100 || Rand(sp->procChance))
-					{
-						if(!m_Unit->HasActiveAura(sp->spell->Id))
-						{
-							return sp;
-						}
-					}
+					Log.Error("AI_Agent","Agent entry %u is loaded, but not valid",sp->agent); 
+					continue;
 				}
-				else
+				//check if we arent casting the same spell twice when we have more then 1 spell in list.
+				//Size can be used safely, as only AGENT_SPELL where added to the list during loading.
+				if( last_found_spell == sp && m_spells.size() > 1 )
+					continue;
+
+				// skip when max proccount reached.	
+				if((sp->procCount && sp->procCounter >= sp->procCount ))
+					continue;
+
+				//skip when still cooling down.
+				if(sp->cooldown && sp->cooldowntime > nowtime )
+					continue;
+
+				//skip if proc change not met.
+				if(sp->procChance < 100 && !Rand(sp->procChance))
+					continue;
+
+				// Don't bother if we have this BUFF already
+				if (sp->spellType == STYPE_BUFF && m_Unit->HasActiveAura(sp->spell->Id))
+					continue;
+
+				//Skipp if health threshold isn't met (for non-healing spells; healing spells have their own checks)
+				if( sp->spellType != STYPE_HEAL && sp->floatMisc1 > 0.0f )
 				{
-					if(def_spell!=0)
+					float healthPercent = float( (m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) + 1) / ( m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) + 1 ));
+					if(healthPercent >= sp->floatMisc1)
 						continue;
-
-					// cast the spell at requested percent.
-					if(sp->procChance >= 100 || Rand(sp->procChance))
-					{
-						//focus/mana requirement
-						switch(sp->spell->powerType)
-						{
-						case POWER_TYPE_MANA:
-							if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER1) < sp->spell->manaCost)
-								continue;
-							break;
-
-						case POWER_TYPE_FOCUS:
-							if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER3) < sp->spell->manaCost)
-								continue;
-							break;
-						}
-						def_spell = sp;
-					}
 				}
+
+				//focus/mana requirement; do we have enough?
+				switch(sp->spell->powerType)
+				{
+					case POWER_TYPE_MANA:
+					{
+						if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER1) < sp->spell->manaCost)
+							continue;
+					}break;
+					case POWER_TYPE_FOCUS:
+					{
+						if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER3) < sp->spell->manaCost)
+							continue;
+					}break;
+				}
+				def_spell = sp;
+				break;
+			}
+		}
+
+		//We found a spell, lets update cooldown and return it.
+		if(def_spell != NULL)
+		{
+			last_found_spell = def_spell;
+
+			//Take at least a 1 second before checking another spell
+			//and add some randomness after fist spell, so not all NPC will the same spell at the same time.
+			if(def_spell->first_use)
+			{
+				next_spell_time = nowtime + 1000;
+				return def_spell;
+			}
+			else
+			{
+				def_spell->first_use = true;
+				next_spell_time = nowtime + RandomUInt(5000);
+				return NULL;
 			}
 		}
 	}
 
-	if(def_spell)
-	{
-		// set cooldown
-		if(def_spell->procCount)
-			def_spell->procCounter++;
-
-		if(def_spell->cooldown)
-			def_spell->cooldowntime = nowtime + def_spell->cooldown;
-
-		waiting_for_cooldown = false;
-		return def_spell;
-	}
-
-	// save some loops if waiting for cooldownz
-	if(cool_time)
-	{
-		cool_time2 = cool_time / 1000;
-		if(cool_time2)
-			next_spell_time = (uint32)UNIXTIME + cool_time2;
-	}
-	else
-		next_spell_time = (uint32)UNIXTIME + 1;
-
-	return 0;
+	//	 How come we did not find a spell? Check again next cycle!.
+	next_spell_time = nowtime + 1;
+	return NULL;
 }
 
 void AIInterface::addSpellToList(AI_Spell *sp)
 {
-	if(!sp->spell)
+	if(sp->spell == NULL)
 		return;
 
 	if(sp->procCount || sp->cooldown)
@@ -2967,9 +2924,9 @@ void AIInterface::addSpellToList(AI_Spell *sp)
 		AI_Spell*sp2 = new AI_Spell;
 		memcpy(sp2, sp, sizeof(AI_Spell));
 		sp2->procCounter=0;
-		sp2->cooldowntime=0;
+		sp2->cooldowntime = getMSTime() + sp->cooldown;
 		sp2->custom_pointer = true;
-		m_spells.push_back(sp);
+		m_spells.push_back(sp2);
 	}
 	else
 		m_spells.push_back(sp);

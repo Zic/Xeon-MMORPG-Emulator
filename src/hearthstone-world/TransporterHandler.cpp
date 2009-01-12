@@ -450,7 +450,7 @@ void ObjectMgr::LoadTransporters()
 		shared_ptr<Transporter> pTransporter = shared_ptr<Transporter>(new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry));
 		if(!pTransporter->CreateAsTransporter(entry, ""))
 		{
-			Log.Warning("ObjectMgr","Transporter %d failed creation for some reason.", entry);
+			Log.Warning("ObjectMgr","Skipped invalid transporterid %d.", entry);
 			pTransporter->Destructor();
 			pTransporter = NULLTRANSPORT;
 		}else

@@ -1130,6 +1130,9 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	{
 		m_aiInterface->addSpellToList(*itr);
 	}
+	m_aiInterface->m_canRangedAttack = proto->m_canRangedAttack;
+	m_aiInterface->m_RangedAttackSpell = proto->m_RangedAttackSpell;
+	m_aiInterface->m_SpellSoundid = proto->m_SpellSoundid;
 	m_aiInterface->m_canCallForHelp = proto->m_canCallForHelp;
 	m_aiInterface->m_CallForHelpHealth = proto->m_callForHelpHealth;
 	m_aiInterface->m_canFlee = proto->m_canFlee;

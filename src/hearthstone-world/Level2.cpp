@@ -1021,21 +1021,16 @@ bool ChatHandler::HandleAddAIAgentCommand(const char* args, WorldSession *m_sess
 		return false;
 	}
 
-	std::stringstream qry;
-	qry << "INSERT INTO ai_agents set entryId = '" << target->GetUInt32Value(OBJECT_FIELD_ENTRY) << "', AI_AGENT = '" << atoi(agent) << "', procEvent = '" << atoi(procEvent)<< "', procChance = '" << atoi(procChance)<< "', procCount = '" << atoi(procCount)<< "', spellId = '" << atoi(spellId)<< "', spellType = '" << atoi(spellType)<< "', spelltargetType = '" << atoi(spelltargetType)<< "', spellCooldown = '" << atoi(spellCooldown)<< "', floatMisc1 = '" << atof(floatMisc1)<< "', Misc2  ='" << atoi(Misc2)<< "'";
-	WorldDatabase.Execute( qry.str().c_str( ) );
-
-	AI_Spell*sp = new AI_Spell;
+	AI_Spell * sp = new AI_Spell;
 	sp->agent = atoi(agent);
 	sp->procChance = atoi(procChance);
-/*	sp->procCount = atoi(procCount);*/
+	sp->procCount = atoi(procCount);
 	sp->spell = dbcSpell.LookupEntry(atoi(spellId));
 	sp->spellType = atoi(spellType);
 	sp->spelltargetType = atoi(spelltargetType);
 	sp->floatMisc1 = (float)atof(floatMisc1);
 	sp->Misc2 = (uint32)atof(Misc2);
 	sp->cooldown = (uint32)atoi(spellCooldown);
-	sp->procCount=0;
 	sp->procCounter=0;
 	sp->cooldowntime=0;
 	sp->custom_pointer=false;
@@ -1047,12 +1042,15 @@ bool ChatHandler::HandleAddAIAgentCommand(const char* args, WorldSession *m_sess
 		target->GetAIInterface()->m_canFlee = true;
 	else if(sp->agent == AGENT_RANGED)
 		target->GetAIInterface()->m_canRangedAttack = true;
-	else
+	else if(sp->agent == AGENT_SPELL)
 		target->GetAIInterface()->addSpellToList(sp);
+
+	std::stringstream qry;
+	qry << "INSERT INTO ai_agents set entryId = '" << target->GetUInt32Value(OBJECT_FIELD_ENTRY) << "', AI_AGENT = '" << atoi(agent) << "', procChance = '" << atoi(procChance)<< "', procCount = '" << atoi(procCount)<< "', spellId = '" << atoi(spellId)<< "', spellType = '" << atoi(spellType)<< "', spelltargetType = '" << atoi(spelltargetType)<< "', spellCooldown = '" << atoi(spellCooldown)<< "', floatMisc1 = '" << atof(floatMisc1)<< "', Misc2  ='" << atoi(Misc2)<< "'";
+	WorldDatabase.Execute( qry.str().c_str( ) );
 
 	return true;
 }
-
 bool ChatHandler::HandleListAIAgentCommand(const char* args, WorldSession *m_session)
 {
 	UnitPointer target = m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));

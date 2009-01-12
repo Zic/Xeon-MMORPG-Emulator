@@ -133,15 +133,16 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 
 	// Load AI Agents
 	QueryResult * result = WorldDatabase.Query( "SELECT Entry,Type+0,Chance,MaxCount,Spell,SpellType+0,TargetType+0,CoolDown,floatMisc1,Misc2 FROM ai_agents" );
-	CreatureProto * cn;
+	CreatureProto * cn = NULL;
 
 	if( result != NULL )
 	{
-		AI_Spell *sp;
-		SpellEntry * spe;
-		uint32 entry;
-		uint32 spellID;
-		uint16 agent;
+		AI_Spell *sp = NULL;
+		SpellEntry * spe = NULL;
+		uint32 entry = 0;
+		uint32 spellID = 0;
+		uint16 agent = 0;
+		uint32 counter = 0;
 		if(Config.MainConfig.GetBoolDefault("Server", "LoadAIAgents", true))
 		{
 			do
@@ -153,13 +154,16 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				int32 tcd = fields[7].GetInt32();
 
 				cn = CreatureProtoStorage.LookupEntry(entry);
-				if(!cn) // don't load it!
+				if(  cn == NULL )
+				{
+					Log.Warning("AIAgent", "Agent skipped, NPC %u does not exist.", fields[0].GetUInt32());
 					continue;
+				}
 
 				spe = dbcSpell.LookupEntryForced(spellID);
-				if( agent == AGENT_SPELL && (spe == NULL || !cn ))
+				if(  agent == AGENT_SPELL && spe == NULL )
 				{
-					Log.Warning("AIAgent", "NPC %u or Spell %u does not exist.", fields[0].GetUInt32(), fields[4].GetUInt32());
+					Log.Warning("AIAgent", "Agent skipped, NPC %u tried to add non-existing Spell %u.", fields[0].GetUInt32(), fields[4].GetUInt32());
 					continue;
 				}
 
@@ -173,104 +177,121 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				sp->spelltargetType = fields[6].GetUInt32();
 				sp->cooldown = (tcd <0 ? 0 : tcd);
 				sp->floatMisc1 = fields[8].GetFloat();
+				sp->Misc2 = fields[9].GetUInt32();
 				sp->autocast_type=(uint32)-1;
 				sp->custom_pointer=false;
-				sp->cooldowntime=getMSTime();
 				sp->procCounter=0;
-				sp->Misc2 = fields[9].GetUInt32();
+				sp->first_use=false;
 
-				if(sp->agent == AGENT_SPELL)
+				//Set cooldowntimer
+				sp->cooldowntime=getMSTime();
+
+				switch(sp->agent)
 				{
-					if(!sp->spell)
+					case AGENT_SPELL:
 					{
-						Log.Warning("AIAgent","SpellId %u skipped in ai_agent due to non-existing spell for NPC %u.", spellID, sp->entryId);
-						delete sp;
-						continue;
-					}
-					
-					if(sp->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL || sp->spell->Effect[1] == SPELL_EFFECT_LEARN_SPELL ||
-						sp->spell->Effect[2] == SPELL_EFFECT_LEARN_SPELL)
-					{
-						Log.Warning("AIAgent","SpellId %u skipped in ai_agent for NPC %u, it is a teaching spell", spellID, sp->entryId);
-						delete sp;
-						continue;
-					}
-					if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT ||
-						sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
-					{
-						Log.Warning("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
-//						delete sp;
-//						continue;
-					}
-
-					sp->minrange = GetMinRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
-					sp->maxrange = GetMaxRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
-
-					//omg the poor darling has no clue about making ai_agents
-					if( tcd < 0) // -1
-					{
-						//now this will not be exact cooldown but maybe a bigger one to not make him spam spells to often
-						int cooldown;
-						int Dur = 0;
-						int Casttime = 0;//most of the time 0
-
-						SpellDuration *sd = dbcSpellDuration.LookupEntry(sp->spell->DurationIndex);
-
-						Dur = sp->spell->DurationIndex ? ::GetDuration(sd): 0;
-						Casttime = GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
-						cooldown = Dur + Casttime + sp->spell->RecoveryTime;
-						if(cooldown <= 0)
+						if(sp->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL || sp->spell->Effect[1] == SPELL_EFFECT_LEARN_SPELL ||
+							sp->spell->Effect[2] == SPELL_EFFECT_LEARN_SPELL)
 						{
-							Log.Warning("AIAgent","No CoolDownTime found in DBC.Cooldown for SpellId %u has now been set to 20 seconds.", spellID );
-							sp->cooldown=20000;
+							Log.Warning("AIAgent","SpellId %u skipped in ai_agent for NPC %u, it is a teaching spell", spellID, sp->entryId);
+							sp = NULL;
+							continue;
 						}
+						if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT ||
+							sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
+						{
+							Log.Warning("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
+//							sp = NULL;
+//							continue;
+						}
+
+						sp->minrange = GetMinRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
+						sp->maxrange = GetMaxRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
+
+						if( tcd < 0 ) // -1 will force dbc lookup
+						{
+							//now this will not be exact cooldown but maybe a bigger one to not make him spam spells to often
+							int cooldown = 0;
+
+							if(sp->spell->DurationIndex)
+							{
+								SpellDuration *sd = dbcSpellDuration.LookupEntry(sp->spell->DurationIndex);
+								cooldown += GetDuration(sd);
+							}
+
+							if( sp->spell->CastingTimeIndex )
+								cooldown += GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
+
+							cooldown += sp->spell->RecoveryTime;
+							if(cooldown <= 0)
+							{
+								Log.Warning("AIAgent","SpellId %u has no CoolDownTime in DBC. Forced to 20 seconds.", spellID );
+								sp->cooldown=20000;
+							}
+							else
+								sp->cooldown=cooldown;
+						}
+						if( sp->spellType == STYPE_BUFF)
+							sp->spelltargetType = TTYPE_CASTER;
+						counter += 1;
+					}break;
+	
+					case AGENT_RANGED:
+					{
+						cn->m_canRangedAttack = true;
+						cn->m_RangedAttackSpell = (spellID?spellID:15620);
+						cn->m_SpellSoundid = sp->Misc2;
+						sp = NULL;
+						counter += 1;
+					}break;
+
+					case AGENT_FLEE:
+					{
+						// % health 
+						cn->m_canFlee = true;
+						if(sp->floatMisc1)
+							cn->m_fleeHealth = sp->floatMisc1;
+						else //if left to zero, start running inmeadetely
+							cn->m_fleeHealth = 100.0f;
+
+						if(sp->Misc2)
+							cn->m_fleeDuration = sp->Misc2;
 						else
-							sp->cooldown=cooldown;
-					}
-					if( sp->spellType == STYPE_BUFF)
-						sp->spelltargetType = TTYPE_CASTER;
-				}
+							cn->m_fleeDuration = 10000;
 
-				if(sp->agent == AGENT_RANGED)
-				{
-					cn->m_canRangedAttack = true;
-					cn->m_RangedAttackSpell = (spellID?spellID:15620);
-					cn->m_SpellSoundid = sp->Misc2;
-					delete sp;
-				}
-				else if(sp->agent == AGENT_FLEE)
-				{
-					// % health 
-					cn->m_canFlee = true;
-					if(sp->floatMisc1)
-						cn->m_fleeHealth = sp->floatMisc1;
-					else //if left to zero, start running inmeadetely
-						cn->m_fleeHealth = 100.0f;
+						sp = NULL;
+						counter += 1;
+					}break;
 
-					if(sp->Misc2)
-						cn->m_fleeDuration = sp->Misc2;
-					else
-						cn->m_fleeDuration = 10000;
+					case AGENT_CALLFORHELP:
+					{
+						cn->m_canCallForHelp = true;
+						if(sp->floatMisc1)
+							cn->m_callForHelpHealth = sp->floatMisc1;
+						else
+							cn->m_callForHelpHealth = 0.2f;
 
-					delete sp;
+						sp = NULL;
+						counter += 1;
+					}break;
+
+					//Unsupported Agent type, don't add to list
+					default:
+					{
+						sp = NULL;
+						Log.Warning("AIAgent","Skipping in-valid  entry %u for ai_type %u.", sp->entryId, sp->agent );
+					}break;
 				}
-				else if(sp->agent == AGENT_CALLFORHELP)
-				{
-					cn->m_canCallForHelp = true;
-					if(sp->floatMisc1)
-						cn->m_callForHelpHealth = sp->floatMisc1;
-					else
-						cn->m_callForHelpHealth = 0.2f;
-					delete sp;
-				}
-				else
-				{
-					cn->spells.push_back(sp);
-				}
-			} while( result->NextRow() );
+				//Valid; add to list
+				if(sp != NULL)
+					cn->spells.push_back(sp);\
+				sp = NULL;
+			}while( result->NextRow() );
 		}
-
-		delete result;
+		if(counter)
+			Log.Notice("AIAgent","Loaded %u ai_agents from database",counter);
+		else
+			Log.Warning("AIAgent","No ai_agents found in database");
 	}
 }
 
