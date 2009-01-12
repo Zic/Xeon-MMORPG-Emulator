@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+# Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InstanceScripts", "projects\InstanceScripts2008.vcproj", "{EE39B48B-C598-4AAF-9EF0-199402933EE5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpellHandlers", "projects\SpellsHandlers2008.vcproj", "{58B5F00B-81D6-4A14-8142-D7B882BAD8DE}"
@@ -58,7 +58,6 @@ Global
 		{AEFCEECF-6839-4F1B-9317-70BF3EE09247}.Debug|Win32.Build.0 = Debug|Win32
 		{AEFCEECF-6839-4F1B-9317-70BF3EE09247}.Debug|x64.ActiveCfg = Debug|Win32
 		{AEFCEECF-6839-4F1B-9317-70BF3EE09247}.Release|Win32.ActiveCfg = Release|Win32
-		{AEFCEECF-6839-4F1B-9317-70BF3EE09247}.Release|Win32.Build.0 = Release|Win32
 		{AEFCEECF-6839-4F1B-9317-70BF3EE09247}.Release|x64.ActiveCfg = Release|Win32
 		{FF39B41C-C998-4AAF-9EF0-199402233EE5}.Debug|Win32.ActiveCfg = Debug|Win32
 		{FF39B41C-C998-4AAF-9EF0-199402233EE5}.Debug|Win32.Build.0 = Debug|Win32

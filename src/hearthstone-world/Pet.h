@@ -20,6 +20,8 @@
 #ifndef _PET_H
 #define _PET_H
 
+#define PET_SPELL_SPAM_COOLDOWN 2000 //applied only to spells that have no cooldown
+
 /* Taken from ItemPetFood.dbc
  * Each value is equal to a flag
  * so 1 << PET_FOOD_BREAD for example

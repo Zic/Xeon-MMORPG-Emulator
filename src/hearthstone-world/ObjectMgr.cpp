@@ -1886,12 +1886,14 @@ void ObjectMgr::LoadPetSpellCooldowns()
 
 uint32 ObjectMgr::GetPetSpellCooldown(uint32 SpellId)
 {
-	PetSpellCooldownMap::iterator itr = mPetSpellCooldowns.find( SpellId );
-	if( itr != mPetSpellCooldowns.end() )
-		return itr->second;
-
 	SpellEntry* sp = dbcSpell.LookupEntry( SpellId );
-	return sp->CategoryRecoveryTime + sp->StartRecoveryTime;
+	if(sp)
+	{
+		uint32 pscd = ( sp->CategoryRecoveryTime == 0 ? sp->RecoveryTime : sp->CategoryRecoveryTime) +  (sp->StartRecoveryCategory == 0 ? sp->StartRecoveryTime : sp->StartRecoveryCategory);
+		return pscd > PET_SPELL_SPAM_COOLDOWN ? pscd : PET_SPELL_SPAM_COOLDOWN;
+	}
+	Log.Error("ObjectMgr","GetPetSpellCooldown tried to add a non existing spell %d",SpellId);
+	return 600000;//
 }
 
 void ObjectMgr::LoadSpellOverride()

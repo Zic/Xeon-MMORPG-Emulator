@@ -448,7 +448,7 @@ AI_Spell*Pet::CreateAISpell(SpellEntry * info)
 	if(info->Effect[0] == SPELL_EFFECT_APPLY_AURA || info->Effect[0] == SPELL_EFFECT_APPLY_AREA_AURA)
 		sp->spellType = STYPE_BUFF;
 
-	if(info->EffectImplicitTargetA[0] == 24)
+	if(info->EffectImplicitTargetA[0] == EFF_TARGET_IN_FRONT_OF_CASTER)
 	{
 		float radius = ::GetRadius(dbcSpellRadius.LookupEntry(info->EffectRadiusIndex[0]));
 		sp->maxrange = radius;
@@ -1699,8 +1699,10 @@ bool Pet::UpdateLoyalty( char pts )
 	return true;
 }
 
-AI_Spell*Pet::HandleAutoCastEvent()
+AI_Spell * Pet::HandleAutoCastEvent()
 {
+	AI_Spell * sp = NULL;
+
 	if(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].size() > 1)
 	{
 		// more than one autocast spell. pick a random one.
@@ -1711,45 +1713,44 @@ AI_Spell*Pet::HandleAutoCastEvent()
 		for(; itr != m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end(), j < c; ++j, ++itr);
 		if(itr == m_autoCastSpells[AUTOCAST_EVENT_ATTACK].end())
 		{
-			if( (*m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin())->autocast_type == AUTOCAST_EVENT_ATTACK )
-				return *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+			AI_Spell * tsp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+			if( tsp->autocast_type == AUTOCAST_EVENT_ATTACK )
+				sp = tsp;
 			else
 			{
 				// bad pointers somehow end up here :S
 				m_autoCastSpells[AUTOCAST_EVENT_ATTACK].erase(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin());
-				return HandleAutoCastEvent();
+				return HandleAutoCastEvent(); //try again
 			}
 		}
 		else
 		{
-			if( (*itr)->autocast_type == AUTOCAST_EVENT_ATTACK )
-				return *itr;
+			AI_Spell * tsp = (*itr);
+			if( tsp->autocast_type == AUTOCAST_EVENT_ATTACK )
+				sp = tsp;
 			else
 			{
 				m_autoCastSpells[AUTOCAST_EVENT_ATTACK].erase(itr);
-				return HandleAutoCastEvent();
+				return HandleAutoCastEvent();//try again
 			}
 		}
 	}
 	else if(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].size())
 	{
-		AI_Spell*sp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
-		if( sp->autocast_type == AUTOCAST_EVENT_ATTACK )
-		{
-			if( sp->cooldown && getMSTime() >= sp->cooldowntime )
-				return *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
-			else
-				return NULL;
-		}
+		AI_Spell * tsp = *m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin();
+		if( tsp->autocast_type == AUTOCAST_EVENT_ATTACK )
+				sp = tsp;
 		else
 		{
 			// bad pointers somehow end up here :S
 			m_autoCastSpells[AUTOCAST_EVENT_ATTACK].erase(m_autoCastSpells[AUTOCAST_EVENT_ATTACK].begin());
-			return NULL;
+			return NULL; // we have no spell anymore, give up.
 		}
 	}
-	
-	return NULL;
+	if (sp != NULL && sp->cooldown && getMSTime() >= sp->cooldowntime )
+		return sp;
+	else
+		return NULL;
 }
 
 void Pet::HandleAutoCastEvent(uint32 Type)

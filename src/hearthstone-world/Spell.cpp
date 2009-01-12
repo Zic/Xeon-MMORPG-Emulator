@@ -1409,9 +1409,9 @@ void Spell::cast(bool check)
 					{
 						float tmpDistance = m_caster->CalcDistance(pTmpTarget);
 						float tmpTime = ( tmpDistance * 1000.0f ) / m_spellInfo->speed;
-#ifdef DEBUG
-						printf("Spell projectile: dist: %.5f, time: %.5f\n", tmpDistance, tmpTime);
-#endif
+
+						Log.Debug("Spell projectile","dist: %.5f, time: %u speed: %f\n", tmpDistance, tmpTime, m_spellInfo->speed);
+
 						if( tmpTime > 100.0f )
 						{
 							m_projectileWait = true;
@@ -1445,6 +1445,9 @@ void Spell::cast(bool check)
         // if the spell is not reflected
 		SpellTargetList::iterator itr = m_targetList.begin();
 		uint32 x;
+		bool effects_done[3];
+		effects_done[0]=effects_done[1]=effects_done[2] = false;
+
 		for(; itr != m_targetList.end(); ++itr)
 		{
 			if( itr->HitResult != SPELL_DID_HIT_SUCCESS )
@@ -1456,20 +1459,34 @@ void Spell::cast(bool check)
 			// call effect handlers
 			for( x = 0; x < 3; ++x )
 			{
-				if( m_spellInfo->Effect[x] && itr->EffectMask & (1 << x) &&
-					m_spellInfo->Effect[x] != SPELL_EFFECT_SUMMON )
-					HandleEffects(x);
-			}
+				switch (m_spellInfo->Effect[x])
+				{
+					//Don't handle effect now
+					case SPELL_EFFECT_SUMMON:
+					{
+						effects_done[x] = false;
+						continue;
+					}break;
 
+					default:
+					{
+						if(itr->EffectMask & (1 << x))
+						{
+							HandleEffects(x);
+							effects_done[x] = true;
+						}
+					}break;
+				}
+			}
 			// handle the rest of shit
-			if( unitTarget != NULL )
+			if( unitTarget != NULLUNIT )
 			{
 				// aura state
 				if( m_spellInfo->TargetAuraState )
 					unitTarget->RemoveFlag(UNIT_FIELD_AURASTATE, m_spellInfo->TargetAuraState);
 
 				// proc!
-				if( u_caster != NULL && u_caster->IsInWorld() )
+				if( u_caster != NULLUNIT && u_caster->IsInWorld() )
 				{
 					if(!m_triggeredSpell)
 					{
@@ -1480,24 +1497,28 @@ void Spell::cast(bool check)
 			}
 		}
 
-		// Kinda hacky, i'm thinking of a better solution
-		if (m_targetList.size() == 0)
-		{
-			for( x = 0; x < 3; ++x )
-			{
-				if( m_spellInfo->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL || m_spellInfo->Effect[x] == SPELL_EFFECT_MEGA_JUMP )
-				{
-					_SetTargets(m_caster->GetGUID());
-					HandleEffects(x);
-				}
-			}
-		}
+		//Handle remaining effects for which we did not find targets.
 		for( x = 0; x < 3; ++x )
 		{
-			if( m_spellInfo->Effect[x] == SPELL_EFFECT_SUMMON )
+			if(!effects_done[x])
 			{
-				_SetTargets(m_caster->GetGUID());
-				HandleEffects(x);
+				switch (m_spellInfo->Effect[x])
+				{
+					// Target ourself for these effects
+					case SPELL_EFFECT_TRIGGER_SPELL:
+					case SPELL_EFFECT_MEGA_JUMP:
+					case SPELL_EFFECT_SUMMON:
+					{
+						_SetTargets(m_caster->GetGUID());
+						HandleEffects(x);
+					}break;
+
+					// No Target required for these effects
+					case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+					{
+						HandleEffects(x);
+					}break;
+				}
 			}
 		}
 
