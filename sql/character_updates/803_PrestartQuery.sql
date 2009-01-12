@@ -14,6 +14,6 @@ CREATE TABLE `prestartqueries` (
 -- ----------------------------
 -- Records (Character database)
 -- ----------------------------
-INSERT INTO `prestartqueries` (Query,SingleShot) VALUES ('UPDATE characters SET banned=0,banReason='' WHERE banned > 100 AND banned < UNIX_TIMESTAMP();', '0');
+INSERT INTO `prestartqueries` (Query,SingleShot) VALUES ('UPDATE characters SET banned=0,banReason=\'\' WHERE banned > 100 AND banned < UNIX_TIMESTAMP();', '0');
 INSERT INTO `prestartqueries` (Query,SingleShot) VALUES ('DELETE FROM guild_logs WHERE timestamp < (UNIX_TIMESTAMP()-1209600);', '0');
 INSERT INTO `prestartqueries` (Query,SingleShot) VALUES ('DELETE FROM guild_banklogs WHERE timestamp < (UNIX_TIMESTAMP()-1209600);', '0');
