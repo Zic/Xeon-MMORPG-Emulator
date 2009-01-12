@@ -97,7 +97,7 @@ public:
 
 	HEARTHSTONE_INLINE void Time()
 	{
-		printf("%02u:%02u ", g_localTime.tm_hour, g_localTime.tm_min);
+		printf("%02u:%02u:%02u ", g_localTime.tm_hour, g_localTime.tm_min,g_localTime.tm_sec);
 	}
 
 	void Notice(const char * source, const char * format, ...)

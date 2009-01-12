@@ -303,21 +303,52 @@ bool BasicTaskExecutor::run()
 void Apply112SpellFixes();
 void ApplyNormalFixes();
 
+void PreStartQueries()
+{
+	QueryResult * result;
+	
+	result = WorldDatabase.Query("SELECT * FROM prestartqueries ORDER BY seq ASC");
+	if(result)
+	{
+		Log.Notice("DataBase","Found and executing %u prestart queries on World tables.",result->GetRowCount());
+		do
+		{
+			Field * f = result->Fetch();
+			string e_query =  f[0].GetString();
+			WorldDatabase.Execute(e_query.c_str());
+		}while(result->NextRow());
+
+		delete result;
+		WorldDatabase.Execute("DELETE FROM prestartqueries WHERE SingleShot = 1;");
+	}
+
+	result = CharacterDatabase.Query("SELECT * FROM prestartqueries ORDER BY seq ASC");
+	if(result)
+	{
+		Log.Notice("DataBase","Found and executing %u prestart queries on Character tables.",result->GetRowCount());
+		do
+		{
+			Field * f = result->Fetch();
+			string e_query =  f[0].GetString();
+			CharacterDatabase.Execute(e_query.c_str());
+		}while(result->NextRow());
+
+		delete result;
+		CharacterDatabase.Execute("DELETE FROM prestartqueries WHERE SingleShot = 1;");
+	}
+}
+
 bool World::SetInitialWorldSettings()
 {
 	Log.Line();
-	Player::InitVisibleUpdateBits();
-
-	Log.Notice("World", "Clearing old bans, setting players offline...");
+	//Perform pre-starting queries on World- and Character-DataBase
+	PreStartQueries();
 	CharacterDatabase.WaitExecute("UPDATE characters SET online = 0 WHERE online = 1");
-	CharacterDatabase.WaitExecute("UPDATE characters SET banned=0,banReason='' WHERE banned > 100 AND banned < %u", UNIXTIME);
-
-	Log.Notice("World", "Clearing old guild logs...");
-	CharacterDatabase.WaitExecute("DELETE FROM guild_logs WHERE timestamp <= %u", uint32(UNIXTIME - 1209600));			// 2 weeks
-	CharacterDatabase.WaitExecute("DELETE FROM guild_banklogs WHERE timestamp <= %u", uint32(UNIXTIME - 1209600));			// 2 weeks
 
 	Log.Notice("World", "Starting up...");  
 	Log.Line();
+
+	Player::InitVisibleUpdateBits();
 
 	m_lastTick = UNIXTIME;
 
