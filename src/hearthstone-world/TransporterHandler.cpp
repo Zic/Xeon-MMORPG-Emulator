@@ -447,7 +447,7 @@ void ObjectMgr::LoadTransporters()
 	{
 		uint32 entry = QR->Fetch()[0].GetUInt32();
 
-		shared_ptr<Transporter> pTransporter = shared_ptr<Transporter>(new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry));
+		TransporterPointer pTransporter = shared_ptr<Transporter>(new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry));
 		if(!pTransporter->CreateAsTransporter(entry, ""))
 		{
 			Log.Warning("ObjectMgr","Skipped invalid transporterid %d.", entry);

@@ -552,6 +552,7 @@ bool World::SetInitialWorldSettings()
 	objmgr.LoadTransporters();
 
 	// start mail system
+	Log.Notice("World","Starting Mail System...");
 	MailSystem::getSingleton().StartMailSystem();
 
 	Log.Notice("World", "Starting Auction System...");

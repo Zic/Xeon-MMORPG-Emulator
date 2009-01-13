@@ -150,13 +150,13 @@ int WorldSession::Update(uint32 InstanceID)
 		ASSERT(packet);
 
 		if(packet->GetOpcode() >= NUM_MSG_TYPES)
-			Log.Debug("WorldSession","Received out of range packet with opcode 0x%.4X", packet->GetOpcode());
+			Log.Error("WorldSession","Received out of range packet with opcode 0x%.4X", packet->GetOpcode());
 		else
 		{
 			Handler = &WorldPacketHandlers[packet->GetOpcode()];
 			if(Handler->status == STATUS_LOGGEDIN && !_player && Handler->handler != 0)
 			{
-				Log.Debug("WorldSession","Received unexpected/wrong state packet with opcode %s (0x%.4X)",
+				Log.Error("WorldSession","Received unexpected/wrong state packet with opcode %s (0x%.4X)",
 					LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
 			}
 			else
@@ -164,7 +164,7 @@ int WorldSession::Update(uint32 InstanceID)
 				// Valid Packet :>
 				if(Handler->handler == 0)
 				{
-					Log.Debug("WorldSession","Received unhandled packet with opcode %s (0x%.4X)",
+					Log.Error("WorldSession","Received unhandled packet with opcode %s (0x%.4X)",
 						LookupOpcodeName(packet->GetOpcode()), packet->GetOpcode());
 				}
 				else
