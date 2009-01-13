@@ -778,6 +778,7 @@ struct SpellEntry
 	bool self_cast_only;
 	bool apply_on_shapeshift_change;
 	bool always_apply;
+	uint32 auraimmune_flag;									//!!! CUSTOM, this var keeps aura effects in binary format.
 
 	bool Unique;											//!!! CUSTOM, Is this a unique effect? ex: Mortal Strike -50% healing.
 

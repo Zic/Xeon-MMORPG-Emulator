@@ -726,6 +726,7 @@ void ApplyNormalFixes()
 		sp->casttime_coef = 0;
 		sp->fixed_dddhcoef = -1;
 		sp->fixed_hotdotcoef = -1;
+		sp->auraimmune_flag = 0;
 
 		talentSpellIterator = talentSpells.find(sp->Id);
 		if(talentSpellIterator == talentSpells.end())
@@ -1647,6 +1648,38 @@ void ApplyNormalFixes()
 					break;
 				}
 			}	
+			if(sp->Effect[i] == 0)
+				continue;
+
+			//Apply aura fixes
+			if( sp->Effect[i] == SPELL_EFFECT_APPLY_AURA )
+			{
+				switch( sp->EffectApplyAuraName[i] )
+				{
+					case SPELL_AURA_MOD_CONFUSE: 
+						sp->auraimmune_flag |= AURAIMMUNE_CONFUSE;break;
+					case SPELL_AURA_MOD_CHARM: 
+						sp->auraimmune_flag |= AURAIMMUNE_CHARM;break;
+					case SPELL_AURA_MOD_FEAR: 
+						sp->auraimmune_flag |= AURAIMMUNE_FEAR;break;
+					case SPELL_AURA_MOD_STUN: 
+						sp->auraimmune_flag |= AURAIMMUNE_STUN;break;
+					case SPELL_AURA_MOD_PACIFY: 
+						sp->auraimmune_flag |= AURAIMMUNE_PACIFY;break;
+					case SPELL_AURA_MOD_ROOT: 
+						sp->auraimmune_flag |= AURAIMMUNE_ROOT;break;
+					case SPELL_AURA_MOD_SILENCE: 
+						sp->auraimmune_flag |= AURAIMMUNE_SILENCE;break;
+					case SPELL_AURA_MOD_INCREASE_SPEED: 
+						sp->auraimmune_flag |= AURAIMMUNE_INCSPEED;break;
+					case SPELL_AURA_MOD_DECREASE_SPEED: 
+						sp->auraimmune_flag |= AURAIMMUNE_DECSPEED;break;
+					case SPELL_AURA_TRANSFORM: 
+						sp->auraimmune_flag |= AURAIMMUNE_TRANSFORM;break;
+					case SPELL_AURA_MOD_TAUNT: 
+						sp->auraimmune_flag |= AURAIMMUNE_TAUNT;break;
+				}
+			}
 		}
 
 		//Special Cases

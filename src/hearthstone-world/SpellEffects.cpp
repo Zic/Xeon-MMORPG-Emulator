@@ -1663,8 +1663,7 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	//Aura Immune Flag Check
 	if ( !playerTarget )
 	{
-		CreaturePointer c = NULLCREATURE;
-		c = (CreaturePointer)( unitTarget );
+		CreaturePointer c = TO_CREATURE( unitTarget );
 		if ( c != NULL && c->proto && c->proto->auraimmune_flag )
 			if( c->proto->auraimmune_flag & m_spellInfo->auraimmune_flag )
 				return;

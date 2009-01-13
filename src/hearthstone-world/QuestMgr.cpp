@@ -91,7 +91,7 @@ uint32 QuestMgr::PlayerMeetsReqs(PlayerPointer plr, Quest* qst, bool skiplevelch
 	{
 		for(uint32 i = 0; i < qst->count_requiredquests; ++i)
 		{
-			if (qst->required_quests[i] > 0 && !( plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDaily(qst->required_quests[i])))
+			if (qst->required_quests[i] > 0 && !( plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDailyQuest(qst->required_quests[i])))
 				return QMGR_QUEST_NOT_AVAILABLE;
 		}
 	}
@@ -100,7 +100,7 @@ uint32 QuestMgr::PlayerMeetsReqs(PlayerPointer plr, Quest* qst, bool skiplevelch
 		bool check_req=false;
 		for(uint32 i = 0; i < qst->count_requiredquests; ++i)
 		{
-			if(plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDaily(qst->required_quests[i]))
+			if(plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDailyQuest(qst->required_quests[i]))
 				check_req=true;
 		}
 		if(!check_req)
