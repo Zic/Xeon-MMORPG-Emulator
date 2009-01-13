@@ -45,7 +45,7 @@ public:
         }
 
         // bind.. well attempt to.
-        int ret = bind(m_socket, (const sockaddr*)&m_address, sizeof(m_address));
+		int ret = ::bind(m_socket, (const sockaddr*)&m_address, sizeof(m_address));
         if(ret != 0)
         {
             printf("Bind unsuccessful on port %u.", (unsigned int)Port);
