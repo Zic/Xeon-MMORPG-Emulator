@@ -309,20 +309,6 @@ using std::tr1::shared_ptr;
 #define HM_NAMESPACE tr1
 #define shared_ptr std::tr1::shared_ptr
 #define hash_map unordered_map
-/* gcc i hate you!
-#  if defined (__GNUC__)
-#	if GCC_VERSION == 41200
-		namespace tr1
-		{
-			template<> struct hash< ItemPointer > : public unary_function<ItemPointer, size_t>
-			{
-				size_t operator()(T val) const { return (size_t)(val.get()); }
-			};
-		};
-#	endif
-#  endif
-*/
-
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #define HM_NAMESPACE __gnu_cxx
 using __gnu_cxx::hash_map;
@@ -343,6 +329,22 @@ namespace __gnu_cxx
 #else
 #define HM_NAMESPACE std
 using std::hash_map;
+#endif
+#if COMPILER == COMPILER_GNU && __GNUC__ >=4 && __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ == 2
+//GCC I HATE YOU!
+namespace std
+{
+	namespace tr1
+	{
+		template<> struct hash<long long unsigned int> : public std::unary_function<long long unsigned int, std::size_t>
+		{
+			std::size_t operator()(const long long unsigned int val) const
+			{
+				return static_cast<std::size_t(val);
+			}
+		};
+	}
+}
 #endif
 
 /* Use correct types for x64 platforms, too */
