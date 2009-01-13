@@ -2302,34 +2302,18 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 					else
 						b = ( ( float(critical_bonus) / 2.0f ) / 100.0f ) + 1.0f;
 
+					res	*= b;
+
 					if( pVictim->IsPlayer() )
 					{
-						dmg_reduction_pct = 2.0f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE );
-						if( dmg_reduction_pct < 100.0f )
-						{
-							dmg_reduction_pct /= 100.0f;
-							dmg_reduction_pct = 1.0f - dmg_reduction_pct;
-							b *= dmg_reduction_pct;
-							res	*= b;
-						}
-					}
-					else
-						res *= b;
-				}
+						dmg_reduction_pct = 2.2f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE );
+						if( dmg_reduction_pct > 0.33f )
+							dmg_reduction_pct = 0.33f; // 3.0.3
 
-				/*if( pVictim->IsPlayer() )
-				{
-					//res = res*(1.0f-2.0f*TO_PLAYER(pVictim)->CalcRating(PLAYER_RATING_MODIFIER_MELEE_CRIT_RESISTANCE));
-					//Resilience is a special new rating which was created to reduce the effects of critical hits against your character.
-					//It has two components; it reduces the chance you will be critically hit by x%, 
-					//and it reduces the damage dealt to you by critical hits by 2x%. x is the percentage resilience granted by a given resilience rating. 
-					//It is believed that resilience also functions against spell crits, 
-					//though it's worth noting that NPC mobs cannot get critical hits with spells.
-					float dmg_reduction_pct = 2 * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE ) / 100.0f;
-					if( dmg_reduction_pct > 1.0f )
-						dmg_reduction_pct = 1.0f; //we cannot resist more then he is criticalling us, there is no point of the critical then :P
-					res = res - res * dmg_reduction_pct;
-				}*/
+						res = res - res * dmg_reduction_pct;
+					}
+					
+				}
 
 				pVictim->Emote( EMOTE_ONESHOT_WOUNDCRITICAL );
 				aproc |= PROC_ON_SPELL_CRIT_HIT;

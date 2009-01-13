@@ -1587,16 +1587,6 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 				}
 			}
 		}
-		uint32* gr = GetSpellProto()->SpellGroupType;
-		if(gr)
-		{
-			shared_ptr<Unit>c=GetUnitCaster();
-			if(c)
-			{
-				SM_FIValue(c->SM[SMT_SPELL_VALUE_PCT][0],(int32*)&dmg,gr);
-				SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],(int32*)&dmg,gr);
-			}
-		}
 
 		if(dmg<=0)
 			return; //who would want a neagtive dmg here ?
@@ -1686,6 +1676,16 @@ void Aura::EventPeriodicDamage(uint32 amount)
 		}
 
 		uint32 ress=(uint32)res;
+		if(c && GetSpellProto())
+		{
+			uint32* gr = GetSpellProto()->SpellGroupType;
+			if(gr)
+			{
+				SM_FIValue(c->SM[SMT_SPELL_VALUE_PCT][0],(int32*)&ress,gr);
+				SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],(int32*)&ress,gr);
+				if((int32) ress < 0) ress = 0;
+			}
+		}
 		uint32 abs_dmg = m_target->AbsorbDamage(school, &ress, m_spellProto);
 		uint32 ms_abs_dmg= m_target->ManaShieldAbsorb(ress, m_spellProto);
 		if (ms_abs_dmg)

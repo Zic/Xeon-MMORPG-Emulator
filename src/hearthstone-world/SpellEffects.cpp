@@ -3886,6 +3886,15 @@ void Spell::SpellEffectPowerBurn(uint32 i) // power burn
 	if (unitTarget->GetPowerType() != POWER_TYPE_MANA)
 		return;
 
+	//Resilience reduction
+	if(unitTarget->IsPlayer())
+	{
+		float dmg_reduction_pct = 2.2f * TO_PLAYER(unitTarget)->CalcRating( PLAYER_RATING_MODIFIER_SPELL_CRIT_RESILIENCE ) / 100.0f;
+		if( dmg_reduction_pct > 0.33f )
+			dmg_reduction_pct = 0.33f; // 3.0.3
+		damage = float2int32( damage - damage * dmg_reduction_pct );
+	}
+
 	int32 mana = (int32)min( (int32)unitTarget->GetUInt32Value( UNIT_FIELD_POWER1 ), damage );
 	unitTarget->ModUnsigned32Value(UNIT_FIELD_POWER1,-mana);
 	

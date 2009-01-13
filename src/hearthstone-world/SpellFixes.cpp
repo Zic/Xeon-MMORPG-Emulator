@@ -740,10 +740,6 @@ void ApplyNormalFixes()
 		if( !sscanf( sp->Rank, "Rank %d", (unsigned int*)&rank) )
 			rank = 0;
 
-		//seal of light 
-		if( namehash == SPELL_HASH_SEAL_OF_LIGHT )			
-			sp->procChance = 45;	/* this will do */
-
 		//judgement of command
 		else if( namehash == SPELL_HASH_JUDGEMENT_OF_COMMAND )		
 			sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
@@ -1789,8 +1785,11 @@ void ApplyNormalFixes()
 			sp->spell_can_crit = false;
 
 		//Seal of Light
-		if( sp->NameHash == SPELL_HASH_SEAL_OF_LIGHT) 
+		if( sp->NameHash == SPELL_HASH_SEAL_OF_LIGHT)
+		{
 			sp->Dspell_coef_override = 0.0f;
+			sp->procChance = 45;	/* this will do */
+		}
 
 		//////////////////////////////////////////
 		// HUNTER								//
@@ -6196,6 +6195,43 @@ void ApplyNormalFixes()
 	}
 
 	// Item procs
+	// Lesser Heroism (Tenacious Earthstorm Diamond)
+	sp = dbcSpell.LookupEntryForced( 32844 );
+	if( sp != NULL ){
+		sp->procChance = 5;
+		sp->procFlags  = PROC_ON_MELEE_ATTACK;
+	}
+	// Lesser Heroism proc
+	sp = dbcSpell.LookupEntryForced( 32845 );
+	if( sp != NULL )
+	{
+		sp->Dspell_coef_override = 0.0f;
+	}
+
+	// Darkmoon Card: Heroism
+	sp = dbcSpell.LookupEntryForced( 23689 );
+	if( sp != NULL ){
+		sp->ProcsPerMinute = 2.5f;
+		sp->procFlags  = PROC_ON_MELEE_ATTACK;
+	}
+	// Lesser Heroism proc
+	sp = dbcSpell.LookupEntryForced( 23682 );
+	if( sp != NULL )
+	{
+		sp->Dspell_coef_override = 0.0f;
+	}
+	// Darkmoon Card: Maelstrom
+	sp = dbcSpell.LookupEntryForced( 23686 );
+	if( sp != NULL ){
+		sp->ProcsPerMinute = 2.5f;
+		sp->procFlags  = PROC_ON_MELEE_ATTACK;
+	}
+	// Lightning Strike proc
+	sp = dbcSpell.LookupEntryForced( 23687 );
+	if( sp != NULL )
+	{
+		sp->Dspell_coef_override = 0.0f;
+	}
 	// dragonspine trophy
 	sp = dbcSpell.LookupEntryForced(34774);
 	if( sp != NULL )

@@ -2889,10 +2889,6 @@ else
 					float dmg_bonus_pct = 100.0f;
 					if(ability && ability->SpellGroupType)
 						SM_FFValue(SM[SMT_CRITICAL_DAMAGE][1],&dmg_bonus_pct,ability->SpellGroupType);
-					
-					// resilience
-					if( pVictim->IsPlayer() )
-						dmg_bonus_pct -= 2.0f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE );
 
 					if( IsPlayer() )
 					{
@@ -2920,6 +2916,15 @@ else
 					// actual crit damage?
 					if( dmg_bonus_pct > 0 )
 						dmg.full_damage += float2int32( float(dmg.full_damage) * (dmg_bonus_pct / 100.0f));
+
+					if(pVictim->IsPlayer())
+					{
+						//Resilience is a special new rating which was created to reduce the effects of critical hits against your character.
+						float dmg_reduction_pct = 2.2f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE ) / 100.0f;
+						if( dmg_reduction_pct > 0.33f )
+							dmg_reduction_pct = 0.33f; // 3.0.3
+						dmg.full_damage = float2int32( dmg.full_damage - dmg.full_damage*dmg_reduction_pct );
+					}
 
 					//e mote
 					pVictim->Emote(EMOTE_ONESHOT_WOUNDCRITICAL);
@@ -4070,30 +4075,16 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 		{
 			plus_damage = float2int32( float( plus_damage ) * spellInfo->casttime_coef );
 			float td = float( GetDuration( dbcSpellDuration.LookupEntry( spellInfo->DurationIndex ) ));
+			//DOT-DD (Moonfire-Immolate-IceLance-Pyroblast)(Hack Fix) not sure its right
 			if( spellInfo->NameHash == SPELL_HASH_MOONFIRE || spellInfo->NameHash == SPELL_HASH_IMMOLATE || spellInfo->NameHash == SPELL_HASH_ICE_LANCE || spellInfo->NameHash == SPELL_HASH_PYROBLAST )
 				plus_damage = float2int32( float( plus_damage ) * float( 1.0f - ( ( td / 15000.0f ) / ( ( td / 15000.0f ) + dmgdoneaffectperc ) ) ) );
 		}
 	}
 
-	//------------------------------by downranking----------------------------------------------
-	//DOT-DD (Moonfire-Immolate-IceLance-Pyroblast)(Hack Fix)
-
-	float downrank1;
-	float downrank2;
-	if(spellInfo->baseLevel > 0 && spellInfo->maxLevel > 0)
-	{
-		downrank1 = 1.0f;
-		if(spellInfo->baseLevel < 20)
-		    downrank1 = 1.0f - (20.0f - float (spellInfo->baseLevel) ) * 0.0375f;
-		downrank2 = ( float(spellInfo->maxLevel + 5.0f) / float(TO_PLAYER(caster)->getLevel()) );
-		if(downrank2 >= 1 || downrank2 < 0)
-		        downrank2 = 1.0f;
-		dmgdoneaffectperc *= downrank1 * downrank2;
-	}
 //==========================================================================================
 //==============================Bonus Adding To Main Damage=================================
 //==========================================================================================
-	int32 bonus_damage = float2int32(plus_damage * dmgdoneaffectperc);
+	int32 bonus_damage = plus_damage;
 
 	//bonus_damage +=pVictim->DamageTakenMod[school]; Bad copy-past i guess :P
 	int penalty_pct=0;

@@ -899,13 +899,14 @@ void Spell::SpellTargetInFrontOfCaster2(uint32 i, uint32 j)
 	}
 }
 
-/// Spell Target Handling for type 56: Target should be infected (Aura holder) caster...
+/// Spell Target Handling for type 56: your party or raid within radius
 void Spell::SpellTarget56(uint32 i, uint32 j)
 {
-	if(!m_caster->IsInWorld())
+	SpellTargetAllPartyMembersRangeNR(i, j);
+	/*if(!m_caster->IsInWorld())
 		return;
 
-	_AddTargetForced(m_caster->GetGUID(), i);
+	_AddTargetForced(m_caster->GetGUID(), i);*/
 }
 
 /// Spell Target Handling for type 57: Targeted Party Member

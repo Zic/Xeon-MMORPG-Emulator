@@ -4295,32 +4295,8 @@ void Spell::Heal(int32 amount)
 	bool critical = false;
 	int32 critchance = 0; 
 	int32 bonus = 0;
-	float healdoneaffectperc = 1.0f;
 	if( u_caster != NULL )
 	{
-		//Downranking
-		if(p_caster && p_caster->IsPlayer() && m_spellInfo->baseLevel > 0 && m_spellInfo->maxLevel > 0)
-		{
-			float downrank1 = 1.0f;
-			if (m_spellInfo->baseLevel < 20)
-				downrank1 = 1.0f - (20.0f - float (m_spellInfo->baseLevel) ) * 0.0375f;
-			float downrank2 = ( float(m_spellInfo->maxLevel + 5.0f) / float(p_caster->getLevel()) );
-			if (downrank2 >= 1 || downrank2 < 0)
-				downrank2 = 1.0f;
-			healdoneaffectperc *= downrank1 * downrank2;
-		}
-
-		//Spells Not affected by Bonus Healing
-		if(m_spellInfo->NameHash == SPELL_HASH_SEAL_OF_LIGHT) //Seal of Light
-			healdoneaffectperc = 0.0f;
-
-		if(m_spellInfo->NameHash == SPELL_HASH_LESSER_HEROISM) //Lesser Heroism
-			healdoneaffectperc = 0.0f;
-
-		//Spells affected by Bonus Healing
-		if(m_spellInfo->NameHash == SPELL_HASH_EARTH_SHIELD) //Earth Shield
-			healdoneaffectperc = 0.3f;
-
 		//Basic bonus
 		bonus += (u_caster->HealDoneMod[m_spellInfo->School]);
 		bonus += unitTarget->HealTakenMod[m_spellInfo->School];
@@ -4364,7 +4340,7 @@ void Spell::Heal(int32 amount)
 #endif
 		}
 		
-		amount += float2int32( float( bonus ) * healdoneaffectperc ); //apply downranking on final value ?
+		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
 		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
 
