@@ -283,8 +283,11 @@ enum MsTimeVariables
 using std::hash_map;
 using std::hash_set;
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && _HAS_TR1
-#define HM_NAMESPACE tr1
 using namespace std::tr1;
+using std::tr1::shared_ptr;
+#undef HM_NAMESPACE
+#define HM_NAMESPACE tr1
+#define hash_map unordered_map
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER < 1500 || !_HAS_TR1)
 #  pragma error "FATAL ERROR: Your dev env sucks! Upgrade to Visual Studio 2008 SP1."
 #define HM_NAMESPACE stdext
@@ -300,9 +303,12 @@ using stdext::hash_set;
 using std::hash_map;
 using std::hash_set;
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 4
-#define HM_NAMESPACE tr1
 using namespace std::tr1;
+using std::tr1::shared_ptr;
+#undef HM_NAMESPACE
+#define HM_NAMESPACE tr1
 #define shared_ptr std::tr1::shared_ptr
+#define hash_map unordered_map
 /* gcc i hate you!
 #  if defined (__GNUC__)
 #	if GCC_VERSION == 41200
@@ -338,13 +344,6 @@ namespace __gnu_cxx
 #define HM_NAMESPACE std
 using std::hash_map;
 #endif
-
-using std::tr1::shared_ptr;
-using namespace std::tr1;
-
-#undef HM_NAMESPACE
-#define HM_NAMESPACE tr1
-#define hash_map unordered_map
 
 /* Use correct types for x64 platforms, too */
 #if COMPILER != COMPILER_GNU
