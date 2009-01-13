@@ -340,7 +340,7 @@ namespace std
 		{
 			std::size_t operator()(const long long unsigned int val) const
 			{
-				return static_cast<std::size_t(val);
+				return static_cast<std::size_t(val)>;
 			}
 		};
 	}
