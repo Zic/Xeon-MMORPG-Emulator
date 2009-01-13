@@ -21,8 +21,10 @@
 #define DBCFILE_H
 #include <cassert>
 #include <string>
+#ifndef WIN32
 #include <string.h>
 #include <cstdlib>
+#endif
 
 class DBCFile
 {
