@@ -302,6 +302,7 @@ using std::hash_set;
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 4
 #define HM_NAMESPACE tr1
 using namespace std::tr1;
+#define shared_ptr std::tr1::shared_ptr
 /* gcc i hate you!
 #  if defined (__GNUC__)
 #	if GCC_VERSION == 41200
