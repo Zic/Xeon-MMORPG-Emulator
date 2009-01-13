@@ -53,6 +53,8 @@ public:
 
 	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<WarsongGulch>(new WarsongGulch(m, i, l, t)); }
 
+	uint32 GetAllianceFlagHolderGUID() { return m_flagHolders[0]; }
+	uint32 GetHordeFlagHolderGUID() { return m_flagHolders[1]; }
 	const char * GetName() { return "Warsong Gulch"; }
 	void OnStart();
 

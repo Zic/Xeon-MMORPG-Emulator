@@ -194,9 +194,61 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket &recv_data)
 {
-	/* This packet doesn't appear to be used anymore... 
-	 * - Burlex
-	 */
+	// empty opcode
+	BattlegroundPointer bg = _player->m_bg;
+	if(!_player->IsInWorld() || !bg)
+		return;
+
+	uint8 buf[100];
+	StackPacket data( MSG_BATTLEGROUND_PLAYER_POSITIONS, buf, 100 );
+
+	if(bg->GetType() == BATTLEGROUND_WARSONG_GULCH)
+	{
+		uint32 count1 = 0;
+		uint32 count2 = 0;
+
+		PlayerPointer ap = objmgr.GetPlayer((CAST(WarsongGulch, bg))->GetAllianceFlagHolderGUID());
+		if(ap) ++count2;
+
+		PlayerPointer hp = objmgr.GetPlayer((CAST(WarsongGulch, bg))->GetHordeFlagHolderGUID());
+		if(hp) ++count2;
+
+		data << count1;
+		data << count2;
+		if(ap)
+		{
+			data << (uint64)ap->GetGUID();
+			data << (float)ap->GetPositionX();
+			data << (float)ap->GetPositionY();
+		}
+		if(hp)
+		{
+			data << (uint64)hp->GetGUID();
+			data << (float)hp->GetPositionX();
+			data << (float)hp->GetPositionY();
+		}
+
+		SendPacket(&data);
+	}
+	else if(bg->GetType() == BATTLEGROUND_EYE_OF_THE_STORM)
+	{
+		uint32 count1 = 0;
+		uint32 count2 = 0;
+
+		PlayerPointer ap = objmgr.GetPlayer((CAST(EyeOfTheStorm, bg))->GetFlagHolderGUID());
+		if(ap) ++count2;
+
+		data << count1;
+		data << count2;
+		if(ap)
+		{
+			data << (uint64)ap->GetGUID();
+			data << (float)ap->GetPositionX();
+			data << (float)ap->GetPositionY();
+		}
+
+		SendPacket(&data);
+	}
 }
 
 void WorldSession::HandleBattleMasterJoinOpcode(WorldPacket &recv_data)

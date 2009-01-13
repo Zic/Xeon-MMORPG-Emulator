@@ -511,7 +511,7 @@ void ArathiBasin::EventUpdateResources(uint32 Team)
 	if(current_resources >= RESOURCES_WARNING_THRESHOLD && !m_nearingVictory[Team])
 	{
 		m_nearingVictory[Team] = true;
-		SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, (uint64)0, "The %s has gathered %u resources and is nearing victory!", Team ? "Horde" : "Alliance", current_resources);
+		SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, (uint64)0, "The %s has gathered %u resources and is nearing victory!", Team ? "Horde" : "Alliance", current_resources);
 		uint32 sound = SOUND_ALLIANCE_BGALMOSTEND - Team;
 		PlaySoundToAll(sound);
 	}
@@ -734,7 +734,7 @@ void ArathiBasin::CaptureControlPoint(uint32 Id, uint32 Team)
 
 	// send the chat message/sounds out
 	PlaySoundToAll(Team ? SOUND_HORDE_SCORES : SOUND_ALLIANCE_SCORES);
-	SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
+	SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, 0, "The %s has taken the %s!", Team ? "Horde" : "Alliance", ControlPointNames[Id]);
 	
 	// update the overhead display on the clients (world states)
 	m_capturedBases[Team]++;
@@ -766,7 +766,7 @@ void ArathiBasin::AssaultControlPoint(PlayerPointer pPlayer, uint32 Id)
 #if defined(BG_ANTI_CHEAT) && !defined(_DEBUG)
 	if(!m_started)
 	{
-		SendChatMessage(CHAT_MSG_BG_EVENT_NEUTRAL, pPlayer->GetGUID(), "%s has been removed from the game for cheating.", pPlayer->GetName());
+		SendChatMessage(CHAT_MSG_BG_SYSTEM_NEUTRAL, pPlayer->GetGUID(), "%s has been removed from the game for cheating.", pPlayer->GetName());
 		pPlayer->SoftDisconnect();
 		return;
 	}
@@ -832,7 +832,7 @@ void ArathiBasin::AssaultControlPoint(PlayerPointer pPlayer, uint32 Id)
 	{
 		m_mapMgr->GetStateManager().UpdateWorldState(AssaultFields[Id][Team ? 0 : 1], 0);
 		this->event_RemoveEvents(EVENT_AB_CAPTURE_CP_1 + Id);
-		SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, pPlayer->GetGUID(), "$N has defended the %s!", ControlPointNames[Id]);
+		SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, pPlayer->GetGUID(), "$N has defended the %s!", ControlPointNames[Id]);
 		m_basesAssaultedBy[Id] = Team;
 		CaptureControlPoint( Id, Team );
 		return;
@@ -859,7 +859,7 @@ void ArathiBasin::AssaultControlPoint(PlayerPointer pPlayer, uint32 Id)
 	SpawnControlPoint(Id, Team ? AB_SPAWN_TYPE_HORDE_ASSAULT : AB_SPAWN_TYPE_ALLIANCE_ASSAULT);
 
 	// send out the chat message and sound
-	SendChatMessage(Team ? CHAT_MSG_BG_EVENT_HORDE : CHAT_MSG_BG_EVENT_ALLIANCE, pPlayer->GetGUID(), "$N claims the %s! If left unchallenged, the %s will control it in 1 minute!", ControlPointNames[Id],
+	SendChatMessage(Team ? CHAT_MSG_BG_SYSTEM_HORDE : CHAT_MSG_BG_SYSTEM_ALLIANCE, pPlayer->GetGUID(), "$N claims the %s! If left unchallenged, the %s will control it in 1 minute!", ControlPointNames[Id],
 		Team ? "Horde" : "Alliance");
 
 	// guessed

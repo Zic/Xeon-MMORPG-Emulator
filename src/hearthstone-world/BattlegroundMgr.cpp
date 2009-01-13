@@ -848,8 +848,10 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 	data->reserve(10*(m_players[0].size()+m_players[1].size())+50);
 
 	BGScore * bs;
-	if(m_type >= BATTLEGROUND_ARENA_2V2 && m_type <= BATTLEGROUND_ARENA_5V5)
+	if(IsArena())
 	{
+		// disabled until proper structure is discovered to prevent client error 132
+		/*
 		if(!m_ended)
 		{
 			return;
@@ -868,7 +870,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 		}
 		else
 		{
-			/* Grab some arena teams */
+			// Grab some arena teams
 			ArenaTeam * teams[2] = {NULL,NULL};
 			for(uint32 i = 0; i < 2; ++i)
 			{
@@ -930,7 +932,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 				*data << uint32(1);			// count of values after this
 				*data << uint32(0);			// rating change		// NOT RLY! LOL!
 			}
-		}
+		}*/
 	}
 	else
 	{
@@ -1386,7 +1388,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(PlayerPointer plr, uint32
 		data << plr->m_bg->GetType();
 		data << uint16(0x1F90);
 		data << plr->m_bg->GetMapMgr()->GetInstanceID();
-		data << uint8(plr->m_bgTeam);
+		data << uint8(plr->m_bg->IsArena() ? 1 : 0);
 		data << uint32(3);
 		data << plr->m_bg->GetMapMgr()->GetMapId();
 		data << uint32(0);
@@ -1407,7 +1409,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(PlayerPointer plr, uint32
 	uint32 Type = plr->m_bgQueueType[ queueSlot ];
 
 	// Arena queuesss
-	if( Type >= BATTLEGROUND_ARENA_2V2 && Type <= BATTLEGROUND_ARENA_5V5)
+	if( IS_ARENA(Type) )
 	{
 		data << plr->m_bgTeam;
 		switch(Type)
@@ -1427,7 +1429,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(PlayerPointer plr, uint32
 		data << uint8(0xA);
 		data << uint32(6);
 		data << uint16(0x1F90);
-		data << uint32(0);
+		data << uint32(11);
 		data << uint8(plr->m_bgRatedQueue ? 1 : 0); // Rated?
 	}
 	else
@@ -1437,7 +1439,7 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(PlayerPointer plr, uint32
 		data << Type;
 		data << uint16(0x1F90);
 		data << plr->m_bgQueueInstanceId[queueSlot];
-		data << uint8(plr->m_bgTeam);
+		data << uint8(0);
 	}
 	
 	// Im in a BG
@@ -1629,24 +1631,22 @@ void CBattleground::EventCountdown()
 	if(m_countdownStage == 1)
 	{
 		m_countdownStage = 2;
-		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "One minute until the battle for %s begins!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "One minute until the battle for %s begins!", GetName() );
 	}
 	else if(m_countdownStage == 2)
 	{
 		m_countdownStage = 3;
-		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "Thirty seconds until the battle for %s begins!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Thirty seconds until the battle for %s begins!", GetName() );
+		sEventMgr.ModifyEventTimeLeft(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 15000);
 	}
 	else if(m_countdownStage == 3)
-	if(m_countdownStage==1)
 	{
 		m_countdownStage = 4;
-		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "Fifteen seconds until the battle for %s begins!", GetName() );
-		sEventMgr.ModifyEventTime(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 15000);
-		sEventMgr.ModifyEventTimeLeft(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 15000);
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Fifteen seconds until the battle for %s begins!", GetName() );
 	}
 	else
 	{
-		SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "The battle for %s has begun!", GetName() );
+		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The battle for %s has begun!", GetName() );
 		sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN);
 		Start();
 	}

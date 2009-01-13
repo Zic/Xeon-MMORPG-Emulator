@@ -270,7 +270,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 #ifdef BG_ANTI_CHEAT
 	if(!m_started || m_ended)
 	{
-		SendChatMessage(CHAT_MSG_BG_EVENT_NEUTRAL, plr->GetGUID(), "%s has removed from the battleground for cheating.",  plr->GetName());
+		SendChatMessage(CHAT_MSG_BG_SYSTEM_NEUTRAL, plr->GetGUID(), "%s has removed from the battleground for cheating.",  plr->GetName());
 		plr->SoftDisconnect();
 		return;
 	}
@@ -313,7 +313,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 
 	plr->m_bgScore.MiscData[BG_SCORE_EOTS_FLAG_CAPTURES]++;
 	plr->m_bgHasFlag = false;
-	SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE + team, 0, msgs[team] );
+	SendChatMessage( CHAT_MSG_BG_SYSTEM_ALLIANCE + team, 0, msgs[team] );
 	if( !GivePoints( team, points[towers] ) )
 	{
 		PlaySoundToAll( plr->GetTeam() ? SOUND_HORDE_SCORES : SOUND_ALLIANCE_SCORES );
@@ -354,7 +354,7 @@ void EyeOfTheStorm::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
 
 	m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_EOTS_FLAG_NEUTRAL_DISPLAY, 0 );
 	PlaySoundToAll( 8212 );
-	SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE + plr->GetTeam(), plr->GetGUID(), "$n has taken the flag!" );
+	SendChatMessage( CHAT_MSG_BG_SYSTEM_ALLIANCE + plr->GetTeam(), plr->GetGUID(), "$n has taken the flag!" );
 	m_flagHolder = plr->GetLowGUID();
 
 	event_RemoveEvents( EVENT_EOTS_RESET_FLAG );
@@ -376,7 +376,7 @@ bool EyeOfTheStorm::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer p
 
 	m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_EOTS_FLAG_NEUTRAL_DISPLAY, 0 );
 	PlaySoundToAll( pPlayer->GetTeam() ? SOUND_HORDE_CAPTURE : SOUND_ALLIANCE_CAPTURE );
-	SendChatMessage( CHAT_MSG_BG_EVENT_ALLIANCE + pPlayer->GetTeam(), pPlayer->GetGUID(), "$n has taken the flag!" );
+	SendChatMessage( CHAT_MSG_BG_SYSTEM_ALLIANCE + pPlayer->GetTeam(), pPlayer->GetGUID(), "$n has taken the flag!" );
 	m_flagHolder = pPlayer->GetLowGUID();
 
 	CBattleground::HookSlowLockOpen(pGo, pPlayer, pSpell);
@@ -444,7 +444,7 @@ void EyeOfTheStorm::EventResetFlag()
 
 	m_mapMgr->GetStateManager().UpdateWorldState( WORLDSTATE_EOTS_FLAG_NEUTRAL_DISPLAY, 1 );
 	PlaySoundToAll( 8192 );
-	SendChatMessage( CHAT_MSG_BG_EVENT_NEUTRAL, 0, "The flag has been reset." );
+	SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The flag has been reset." );
 	m_flagHolder = 0;
 }
 
@@ -687,7 +687,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 				m_spiritGuides[i] = SpawnSpiritGuide( EOTSGraveyardLocations[i][0], EOTSGraveyardLocations[i][1], EOTSGraveyardLocations[i][2], 0, 1 );
 				AddSpiritGuide( m_spiritGuides[i] );
-				SendChatMessage(CHAT_MSG_BG_EVENT_HORDE, 0, "The Horde have captured the %s.", EOTSCPNames[i]);
+				SendChatMessage(CHAT_MSG_BG_SYSTEM_HORDE, 0, "The Horde have captured the %s.", EOTSCPNames[i]);
 
 				// set some world states
 				m_mapMgr->GetStateManager().UpdateWorldState(EOTSNeturalDisplayFields[i], 0);
@@ -712,7 +712,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 				m_spiritGuides[i] = SpawnSpiritGuide( EOTSGraveyardLocations[i][0], EOTSGraveyardLocations[i][1], EOTSGraveyardLocations[i][2], 0, 0 );
 				AddSpiritGuide( m_spiritGuides[i] );
-				SendChatMessage(CHAT_MSG_BG_EVENT_ALLIANCE, 0, "The Alliance have captured the %s.", EOTSCPNames[i]);
+				SendChatMessage(CHAT_MSG_BG_SYSTEM_ALLIANCE, 0, "The Alliance have captured the %s.", EOTSCPNames[i]);
 
 				// set some world states
 				m_mapMgr->GetStateManager().UpdateWorldState(EOTSNeturalDisplayFields[i], 0);
@@ -732,7 +732,7 @@ void EyeOfTheStorm::UpdateCPs()
 				{
 					if( m_CPBanner[i] && m_CPBanner[i]->GetEntry() == EOTS_BANNER_ALLIANCE )
 					{
-						SendChatMessage(CHAT_MSG_BG_EVENT_NEUTRAL, 0, "The Alliance have lost control of the %s.", EOTSCPNames[i]);
+						SendChatMessage(CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The Alliance have lost control of the %s.", EOTSCPNames[i]);
 						m_towerCount[0]--;
 						if( m_towerCount[0] < 0 )
 							m_towerCount[0] = 0;
@@ -741,7 +741,7 @@ void EyeOfTheStorm::UpdateCPs()
 					}
 					else
 					{
-						SendChatMessage(CHAT_MSG_BG_EVENT_NEUTRAL, 0, "The Horde have lost control of the %s.", EOTSCPNames[i]);
+						SendChatMessage(CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "The Horde have lost control of the %s.", EOTSCPNames[i]);
 						m_towerCount[1]--;
 						if( m_towerCount[1] < 0 )
 							m_towerCount[1] = 0;

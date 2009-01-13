@@ -238,11 +238,6 @@ void Apply112SpellFixes()
 	if(sp != NULL)
 		sp->procChance = 10;
 
-	// Spell 19184 Proc Chance (Entrapment Rank 1)
-	sp = dbcSpell.LookupEntryForced(19184);
-	if(sp != NULL)
-		sp->procChance = 5;
-
 	// Spell 19228 Proc Chance (Improved Wing Clip Rank 1)
 	sp = dbcSpell.LookupEntryForced(19228);
 	if(sp != NULL)
@@ -257,16 +252,6 @@ void Apply112SpellFixes()
 	sp = dbcSpell.LookupEntryForced(19233);
 	if(sp != NULL)
 		sp->procChance = 12;
-
-	// Spell 19387 Proc Chance (Entrapment Rank 2)
-	sp = dbcSpell.LookupEntryForced(19387);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 19388 Proc Chance (Entrapment Rank 3)
-	sp = dbcSpell.LookupEntryForced(19388);
-	if(sp != NULL)
-		sp->procChance = 15;
 
 	// Spell 20178 Proc Chance (Reckoning )
 	sp = dbcSpell.LookupEntryForced(20178);
@@ -1877,7 +1862,7 @@ void ApplyNormalFixes()
 			if( sp->NameHash == SPELL_HASH_ATTACK )
 				sp->Dspell_coef_override = 0.1667f;
 
-			// Mana Spring Totem - 4.5% healing coefficient
+			// Healing Stream Totem - 4.5% healing coefficient
 			if( sp->NameHash == SPELL_HASH_HEALING_STREAM_TOTEM )
 				sp->Dspell_coef_override = 0.045f;
 
@@ -2632,26 +2617,6 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 29065 );
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CRIT_HIT_VICTIM;
-
-	//Shaman - Shamanistic Focus
-	sp = dbcSpell.LookupEntryForced( 43338 );
-	if( sp != NULL )
-	{
-		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->procFlags = PROC_ON_CRIT_ATTACK;
-		sp->EffectTriggerSpell[0] = 43339;
-		sp->procChance = 100;
-		sp->maxstack = 1;
-	}
-
-	//Shaman focused
-	sp = dbcSpell.LookupEntryForced( 43339 );
-	if( sp != NULL )
-	{
-		sp->procFlags = PROC_ON_CAST_SPELL;
-		sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
-		sp->EffectMiscValue[0] = SMT_COST;
-	}
 
 	//shaman - Healing Way
 	sp = dbcSpell.LookupEntryForced( 29202 ); 

@@ -433,7 +433,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 					_type = RANGED;
 				else
 				{
-					if (m_spellInfo->Flags4 & 0x1000000)
+					if (m_spellInfo->Flags4 & FLAGS4_OFFHAND)
 						_type =  OFFHAND;
 					else
 						_type = MELEE;
@@ -2669,7 +2669,7 @@ void Spell::SpellEffectWeaponDmgPerc(uint32 i) // Weapon Percent damage
 		_type = RANGED;
 	else
 	{
-		if (m_spellInfo->Flags4 & 0x1000000)
+		if (m_spellInfo->Flags4 & FLAGS4_OFFHAND)
 			_type = OFFHAND;
 		else
 			_type = MELEE;
@@ -3869,7 +3869,7 @@ void Spell::SpellEffectWeapondamage( uint32 i ) // Weapon damage +
 		_type = RANGED;
 	else
 	{
-		if (m_spellInfo->Flags4 & 0x1000000)
+		if (m_spellInfo->Flags4 & FLAGS4_OFFHAND)
 			_type =  OFFHAND;
 		else
 			_type = MELEE;
@@ -5867,7 +5867,7 @@ void Spell::SpellEffectDummyMelee( uint32 i ) // Normalized Weapon damage +
 		_type = RANGED;
 	else
 	{
-		if (m_spellInfo->Flags4 & 0x1000000)
+		if (m_spellInfo->Flags4 & FLAGS4_OFFHAND)
 			_type =  OFFHAND;
 		else
 			_type = MELEE;

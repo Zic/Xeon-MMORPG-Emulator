@@ -483,7 +483,8 @@ enum Flags4
 	FLAGS4_BG_ONLY                      = 0x800,
 	FLAGS4_PLAYER_RANGED_SPELLS         = 0x8000,
 	CAN_PERSIST_AND_CASTED_WHILE_DEAD   = 0x100000,
-	FLAGS4_PLAYER_RANGED_WAND           = 0x400000
+	FLAGS4_PLAYER_RANGED_WAND           = 0x400000,
+	FLAGS4_OFFHAND                      = 0x1000000,
 };
 
 enum Flags5

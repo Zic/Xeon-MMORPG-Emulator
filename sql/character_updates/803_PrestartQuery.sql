@@ -10,7 +10,7 @@ CREATE TABLE `prestartqueries` (
   `SingleShot` int(1) unsigned NOT NULL default '1',
   `Seq` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`Seq`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 -- ----------------------------
 -- Records (Character database)
 -- ----------------------------

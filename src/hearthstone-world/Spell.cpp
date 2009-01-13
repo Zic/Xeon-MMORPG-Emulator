@@ -603,7 +603,7 @@ uint8 Spell::_DidHit(const shared_ptr<Unit>target)
 			_type = RANGED;
 		else
 		{
-			if (m_spellInfo->Flags4 & 0x1000000)
+			if (m_spellInfo->Flags4 & FLAGS4_OFFHAND)
 				_type =  OFFHAND;
 			else
 				_type = MELEE;
@@ -4019,7 +4019,10 @@ exit:*/
 						case 3779:
 						case 3780:
 						case 3781:
-							value = value * 125 / 100;
+							uint32 bonus = 125;
+							if(u_caster && u_caster->HasAura(55444)) // Glyph of Lava Lash
+								bonus += 10;
+							value = value * bonus / 100;
 						}	
 					}
 				}
