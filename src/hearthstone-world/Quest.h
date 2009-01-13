@@ -161,8 +161,8 @@ struct Quest
 	uint32 reward_item[4];
 	uint32 reward_itemcount[4];
 
-	uint32 reward_repfaction[2];
-	int32 reward_repvalue[2];
+	uint32 reward_repfaction[5];
+	int32 reward_repvalue[5];
 	uint32 reward_replimit;
 
 	uint32 reward_title;
@@ -182,10 +182,12 @@ struct Quest
 	uint32 required_money;
 	uint32 required_triggers[4];
 	uint32 required_quests[4];
+	uint32 required_quest_and_or;
 	uint32 receive_items[4];
 	uint32 receive_itemcount[4];
 	int is_repeatable;
 
+	//Calculated variables (not in db)
 	uint32 count_required_mob;
 	uint32 count_requiredquests;
 	uint32 count_requiredtriggers;

@@ -86,12 +86,25 @@ uint32 QuestMgr::PlayerMeetsReqs(PlayerPointer plr, Quest* qst, bool skiplevelch
 	if (plr->HasFinishedDailyQuest(qst->id))
 		return QMGR_QUEST_NOT_AVAILABLE;
 
-	for(uint32 i = 0; i < 4; ++i)
+	//Do we just need to complete one, or all quest requisitions?
+	if( !qst->required_quest_and_or )
 	{
-		if (qst->required_quests[i] > 0 && !plr->HasFinishedQuest(qst->required_quests[i]))
+		for(uint32 i = 0; i < qst->count_requiredquests; ++i)
 		{
-			return QMGR_QUEST_NOT_AVAILABLE;
+			if (qst->required_quests[i] > 0 && !( plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDaily(qst->required_quests[i])))
+				return QMGR_QUEST_NOT_AVAILABLE;
 		}
+	}
+	else
+	{
+		bool check_req=false;
+		for(uint32 i = 0; i < qst->count_requiredquests; ++i)
+		{
+			if(plr->HasFinishedQuest(qst->required_quests[i]) || plr->HasFinishedDaily(qst->required_quests[i]))
+				check_req=true;
+		}
+		if(!check_req)
+			return QMGR_QUEST_NOT_AVAILABLE;
 	}
 
 	// check quest level
@@ -908,7 +921,7 @@ void QuestMgr::OnPlayerExploreArea(PlayerPointer plr, uint32 AreaID)
 void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver)
 {
 	// Reputation reward
-	for(int z = 0; z < 2; z++)
+	for(int z = 0; z < 5; z++)
 	{
 		uint32 fact = 19;   // default to 19 if no factiondbc
 		int32 amt  = float2int32( float( GenerateQuestXP( plr, qst) ) * 0.1f );   // guess

@@ -338,7 +338,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		int32 server_delta = (int32)mstime - (int32)_player->m_lastMovementPacketTimestamp;
 		int32 client_delta = (int32)movement_info.time - (int32)_player->m_lastMoveTime;
 		int32 diff = client_delta - server_delta;
-		DEBUG_LOG("server delta: %u, client delta: %u\n", server_delta, client_delta);
+		Log.Debug("WorldSession","HandleMovementOpcodes: server delta=%u, client delta=%u", server_delta, client_delta);
 		int32 threshold = int32( World::m_CEThreshold ) + int32( _player->GetSession()->GetLatency() );
 		if( diff >= threshold )		// replace with threshold var
 		{

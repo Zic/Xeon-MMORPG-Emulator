@@ -10502,7 +10502,7 @@ void Player::_SpeedhackCheck()
 			uint32 time_diff = m_lastMoveTime - m_startMoveTime;
 			uint32 move_time = float2int32( ( distance / ( speed * 0.001f ) ) );
 			int32 difference = time_diff - move_time;
-			DEBUG_LOG("speed: %f diff: %i dist: %f move: %u tdiff: %u", speed, difference, distance, move_time, time_diff );
+			Log.Debug("Player","SpeedhackCheck: speed=%f diff=%i dist=%f move=%u tdiff=%u", speed, difference, distance, move_time, time_diff );
 			if( difference < World::m_speedHackThreshold )
 			{
 				if( m_speedhackChances != 0 )
