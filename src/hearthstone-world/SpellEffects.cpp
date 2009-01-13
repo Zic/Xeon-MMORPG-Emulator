@@ -1660,6 +1660,16 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	if(!unitTarget)
 		return;
 
+	//Aura Immune Flag Check
+	if ( !playerTarget )
+	{
+		CreaturePointer c = NULLCREATURE;
+		c = (CreaturePointer)( unitTarget );
+		if ( c != NULL && c->proto && c->proto->auraimmune_flag )
+			if( c->proto->auraimmune_flag & m_spellInfo->auraimmune_flag )
+				return;
+	}
+
 	if( unitTarget->isDead() && !(m_spellInfo->Flags4 & CAN_PERSIST_AND_CASTED_WHILE_DEAD) )
 		return;
 

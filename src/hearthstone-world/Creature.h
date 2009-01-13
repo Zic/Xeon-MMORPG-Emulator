@@ -131,7 +131,6 @@ struct CreatureProto
 	uint32 RangedAttackTime;
 	float RangedMinDamage;
 	float RangedMaxDamage;
-	//uint32 MountedDisplayID;
 	uint32 Item1;
 	uint32 Item2;
 	uint32 Item3;
@@ -148,6 +147,7 @@ struct CreatureProto
 	float	run_speed;//most of the time mobs use this
 	float fly_speed;
 	uint32 extra_a9_flags;
+	uint32	auraimmune_flag;
 	int32 vehicle_entry;
 
 	/* AI Stuff */
