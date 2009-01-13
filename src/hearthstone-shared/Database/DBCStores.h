@@ -1231,7 +1231,7 @@ struct DurabilityCostsEntry
 struct SpellShapeshiftForm
 {
     uint32 id;
-	uint32 spells[8];
+	uint32 spells[7];
 };
 
 struct VehicleEntry

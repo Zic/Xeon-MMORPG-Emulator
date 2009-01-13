@@ -155,7 +155,7 @@ const char* durabilitycostsFormat = "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char* bankslotpriceformat = "uu";
 const char* barbershopstyleFormat="nusxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxuuu";
 const char* gtfloatformat = "f";
-const char* spellshapeshiftformformat = "uuuxxxxxxxxxxxxxxxxxxxxxxxxuuuuuuuu";
+const char* spellshapeshiftformformat = "uxxxxxxxxxxxxxxxxxxxxxxxxxxxuuuuuuu";
 
 const char* vehicleseatentryFormat = "uuuffffffffffuuuuuufffffffuuufffuuuuuuuffuuuuu";
 const char* vehicleentryFormat = "uuffffuuuuuuuuffffuuuuuufffffffffffssssfufu";
