@@ -512,6 +512,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				return;
 			int32 value = m_spellInfo->EffectBasePoints[i]+1 + p_caster->GetAP() / 5;
 			int32 currentRage = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
+			if(u_caster->HasAura(58367))
+				currentRage += 100; //Your Execute ability deals damage as if you had 10 additional rage.
 			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]); 
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647 );
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
@@ -4325,6 +4327,32 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			break;
 		}
 		CreateItem(22103);
+		break;
+	case 47871:		// Demonic Healthstone
+		if (p_caster->HasSpell(18693))	// Improved Healthstone (2)
+		{
+			CreateItem(36891);
+			break;
+		}
+		if (p_caster->HasSpell(18692))	// Improved Healthstone (1)
+		{
+			CreateItem(36890);
+			break;
+		}
+		CreateItem(36889); 
+		break;
+	case 47878:		// Fel Healthstone
+		if (p_caster->HasSpell(18693))	// Improved Healthstone (2)
+		{
+			CreateItem(36894);
+			break;
+		}
+		if (p_caster->HasSpell(18692))	// Improved Healthstone (1)
+		{
+			CreateItem(36893);
+			break;
+		}
+		CreateItem(36892);
 		break;
 
 	// Holy Light
