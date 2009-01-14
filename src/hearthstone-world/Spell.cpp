@@ -2423,11 +2423,7 @@ bool Spell::TakePower()
 	int32 cost;
 	int32 currentPower = m_caster->GetUInt32Value(powerField);
 
-	//Percentage spells cost % of !!!BASE!!! mana
-	if( m_spellInfo->ManaCostPercentage)
-		cost = float2int32(float(m_caster->GetUInt32Value(powerField))* float(m_spellInfo->ManaCostPercentage/100));
-	else
-		cost = m_spellInfo->manaCost;
+	cost = m_caster->GetSpellBaseCost(m_spellInfo->Id);
 
 	if( u_caster != NULL )
 	{
