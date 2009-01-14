@@ -1,6 +1,6 @@
 /*
- * Aspire Hearthstone
- * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
+ * ascent MMORPG Server
+ * Copyright (C) 2005-2008 <http://www.ascent.com/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -35,16 +35,17 @@ typedef struct
 {
 	string Name;
 	string Address;
-	uint32 Colour;
-	uint32 Type;
-	uint32 TimeZone;
+	//uint32 Colour;
+	uint8 Icon;
+	uint8 WorldRegion;
 	float Population;
+	uint8 Lock;
 }Realm;
 
 enum RealmType
 {
 	REALMTYPE_NORMAL	= 0,
-	REALMTYPE_PVP		= 1,
+	REALMTYPE_PVP		= 3,
 	REALMTYPE_RP		= 6,
 	REALMTYPE_RPPVP		= 8,
 };

@@ -65,7 +65,9 @@ public:
   void fLogText(const char *text);
   void SetLogging(bool enabled);
   
-  void Init();
+  void Init(int32 fileLogLevel, int32 screenLogLevel);
+  void SetFileLoggingLevel(int32 level);
+  void SetScreenLoggingLevel(int32 level);
   void outColor(uint32 colorcode, const char * str, ...);
   
 #ifdef WIN32

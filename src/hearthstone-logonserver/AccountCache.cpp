@@ -22,100 +22,72 @@ initialiseSingleton(AccountMgr);
 initialiseSingleton(IPBanner);
 initialiseSingleton(InformationCore);
 
-void AccountMgr::_ReloadAccounts(bool silent, bool update)
+void AccountMgr::ReloadAccounts(bool silent)
 {
 	setBusy.Acquire();
 	if(!silent) sLog.outString("[AccountMgr] Reloading Accounts...");
 
 	// Load *all* accounts.
-	QueryResult * result;
+	QueryResult * result = sLogonSQL->Query("SELECT acct, login, password, encrypted_password, gm, flags, banned, forceLanguage, muted FROM accounts");
 	Field * field;
 	string AccountName;
+	set<string> account_list;
 	Account * acct;
-	uint8 changed;
-	bool removed = false;
-	bool load;
 
-	if (update)
-	{
-		// Prevent changes while only updating accounts,
-		// coze we gotta unflag the changed column and
-		// remove deleted accounts at the end 
-		sLogonSQL->WaitExecute("LOCK TABLES accounts WRITE");
-		result = sLogonSQL->Query("SELECT acct, login, password, gm, flags, banned, muted, changed FROM accounts where changed!=0");
-	}
-	else
-		result = sLogonSQL->Query("SELECT acct, login, password, gm, flags, banned, muted, changed FROM accounts");
 	if(result)
 	{
 		do 
 		{
 			field = result->Fetch();
-
 			AccountName = field[1].GetString();
 
 			// transform to uppercase
 			ASCENT_TOUPPER(AccountName);
 
-			load = true;
-			changed = field[7].GetUInt8();
-
-			// changed == 2, account is marked for deletion
-			if (changed == 2)
+			//Use private __GetAccount, for locks
+			acct = __GetAccount(AccountName);
+			if(acct == 0)
 			{
-				// If we're updating accounts remove it from database cache
-				if (update)
-				{
-#ifdef WIN32
-					HM_NAMESPACE::hash_map<string, Account*>::iterator itr = AccountDatabase.find(AccountName);
-#else
-					std::map<string, Account*>::iterator itr = AccountDatabase.find(AccountName);
-#endif
-
-					if(itr != AccountDatabase.end())
-					{
-						// Delete account for database cache
-						delete itr->second;
-						AccountDatabase.erase(itr);
-					}
-
-					// Flag us for deletion query
-					removed = true; 
-				}
-
-				// Don't load this acct
-				load = false;
+				// New account.
+				AddAccount(field);
+			}
+			else
+			{
+				// Update the account with possible changed details.
+				UpdateAccount(acct, field);
 			}
 
-			if (load)
-			{
-				//Use private __GetAccount, for locks
-				acct = __GetAccount(AccountName);
-				if(acct == 0)
-				{
-					// New account.
-					AddAccount(field);
-				}
-				else
-				{
-					// Update the account with possible changed details.
-					UpdateAccount(acct, field);
-				}
-			}
+			// add to our "known" list
+			account_list.insert(AccountName);
+
 		} while(result->NextRow());
 
 		delete result;
 	}
 
-	if (update)
+	// check for any purged/deleted accounts
+#ifdef WIN32
+	HM_NAMESPACE::hash_map<string, Account*>::iterator itr = AccountDatabase.begin();
+	HM_NAMESPACE::hash_map<string, Account*>::iterator it2;
+#else
+	std::map<string, Account*>::iterator itr = AccountDatabase.begin();
+	std::map<string, Account*>::iterator it2;
+#endif
+
+	for(; itr != AccountDatabase.end();)
 	{
-		// Unflag accounts marked for update
-		sLogonSQL->WaitExecute("UPDATE accounts set changed=0 WHERE changed=1");
-		// Only delete accounts on an update, for the locks
-		if (removed)
-			sLogonSQL->WaitExecute("DELETE from accounts WHERE changed=2");
-		// Unlock us!
-		sLogonSQL->WaitExecute("UNLOCK TABLES");
+		it2 = itr;
+		++itr;
+
+		if(account_list.find(it2->first) == account_list.end())
+		{
+			delete it2->second;
+			AccountDatabase.erase(it2);
+		}
+		else
+		{
+			it2->second->UsernamePtr = (std::string*)&it2->first;
+		}
 	}
 
 	if(!silent) sLog.outString("[AccountMgr] Found %u accounts.", AccountDatabase.size());
@@ -124,28 +96,18 @@ void AccountMgr::_ReloadAccounts(bool silent, bool update)
 	IPBanner::getSingleton().Reload();
 }
 
-void AccountMgr::ReloadAccounts(bool silent)
-{
-	_ReloadAccounts(silent, true);
-}
-
-void AccountMgr::LoadAccounts(bool silent)
-{
-	_ReloadAccounts(silent, false);
-}
-
 void AccountMgr::AddAccount(Field* field)
 {
 	Account * acct = new Account;
 	Sha1Hash hash;
 	string Username     = field[1].GetString();
 	string Password	    = field[2].GetString();
-	string GMFlags		= field[3].GetString();
+	string EncryptedPassword = field[3].GetString();
+	string GMFlags		= field[4].GetString();
 
 	acct->AccountId				= field[0].GetUInt32();
-	acct->AccountFlags			= field[4].GetUInt8();
-	acct->Banned				= field[5].GetUInt32();
-
+	acct->AccountFlags			= field[5].GetUInt8();
+	acct->Banned				= field[6].GetUInt32();
 	if ( (uint32)UNIXTIME > acct->Banned && acct->Banned != 0 && acct->Banned != 1) //1 = perm ban?
 	{
 		//Accounts should be unbanned once the date is past their set expiry date.
@@ -154,25 +116,55 @@ void AccountMgr::AddAccount(Field* field)
 		//printf("Account %s's ban has expired.\n",acct->UsernamePtr->c_str());
 		sLogonSQL->Execute("UPDATE accounts SET banned = 0 WHERE acct=%u",acct->AccountId);
 	}
-
 	acct->SetGMFlags(GMFlags.c_str());
 	acct->Locale[0] = 'e';
 	acct->Locale[1] = 'n';
 	acct->Locale[2] = 'U';
 	acct->Locale[3] = 'S';
-	acct->forcedLocale = false;
+	if(strcmp(field[7].GetString(), "enUS"))
+	{
+		// non-standard language forced
+		memcpy(acct->Locale, field[7].GetString(), 4);
+		acct->forcedLocale = true;
+	}
+	else
+		acct->forcedLocale = false;
 
-    acct->Muted = field[6].GetUInt32();
-
+    acct->Muted = field[8].GetUInt32();
+	if ( (uint32)UNIXTIME > acct->Muted && acct->Muted != 0 && acct->Muted != 1) //1 = perm ban?
+	{
+		//Accounts should be unbanned once the date is past their set expiry date.
+		acct->Muted= 0;
+		Log.Debug("AccountMgr","Account %s's mute has expired.",acct->UsernamePtr->c_str());
+		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
+	}
 	// Convert username/password to uppercase. this is needed ;)
 	ASCENT_TOUPPER(Username);
 	ASCENT_TOUPPER(Password);
-	acct->Username				= strdup(Username.c_str());
 	
-	// Prehash the I value.
-	hash.UpdateData((Username + ":" + Password));
-	hash.Finalize();
-	memcpy(acct->SrpHash, hash.GetDigest(), 20);
+	if( EncryptedPassword.size() > 0 )
+	{
+		// prefer encrypted passwords over nonencrypted
+		BigNumber bn;
+		bn.SetHexStr( EncryptedPassword.c_str() );
+		if( bn.GetNumBytes() != 20 )
+		{
+			Log.Debug("AccountMgr","Account `%s` has incorrect number of bytes (%u) in encrypted password! Disabling.\n", Username.c_str(), bn.GetNumBytes());
+			memset(acct->SrpHash, 0, 20);
+		}
+		else
+		{
+			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+			reverse_array(acct->SrpHash, 20);
+		}
+	}
+	else
+	{
+		// Prehash the I value.
+		hash.UpdateData((Username + ":" + Password));
+		hash.Finalize();
+		memcpy(acct->SrpHash, hash.GetDigest(), 20);
+	}
 
 	AccountDatabase[Username] = acct;
 }
@@ -183,7 +175,8 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 	Sha1Hash hash;
 	string Username     = field[1].GetString();
 	string Password	    = field[2].GetString();
-	string GMFlags		= field[3].GetString();
+	string EncryptedPassword = field[3].GetString();
+	string GMFlags		= field[4].GetString();
 
 	if(id != acct->AccountId)
 	{
@@ -195,29 +188,60 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 	}
 
 	acct->AccountId				= field[0].GetUInt32();
-	acct->AccountFlags			= field[4].GetUInt8();
-	acct->Banned				= field[5].GetUInt32();
-	if ( (uint32)UNIXTIME > acct->Banned && acct->Banned != 0 && acct->Banned != 1) //1 = perm ban?
+	acct->AccountFlags			= field[5].GetUInt8();
+	acct->Banned				= field[6].GetUInt32();
+	if ((uint32)UNIXTIME > acct->Banned && acct->Banned != 0 && acct->Banned != 1) //1 = perm ban?
 	{
 		//Accounts should be unbanned once the date is past their set expiry date.
 		acct->Banned = 0;
-		//me go boom :(
-		//printf("Account %s's ban has expired.\n",acct->UsernamePtr->c_str());
+		Log.Debug("AccountMgr","Account %s's ban has expired.",acct->UsernamePtr->c_str());
 		sLogonSQL->Execute("UPDATE accounts SET banned = 0 WHERE acct=%u",acct->AccountId);
 	}
 	acct->SetGMFlags(GMFlags.c_str());
-	acct->forcedLocale = false;
+	if(strcmp(field[7].GetString(), "enUS"))
+	{
+		// non-standard language forced
+		memcpy(acct->Locale, field[7].GetString(), 4);
+		acct->forcedLocale = true;
+	}
+	else
+		acct->forcedLocale = false;
 
-	acct->Muted = field[6].GetUInt32();
-
+	acct->Muted = field[8].GetUInt32();
+	if ((uint32)UNIXTIME > acct->Muted && acct->Muted != 0 && acct->Muted != 1) //1 = perm ban?
+	{
+		//Accounts should be unbanned once the date is past their set expiry date.
+		acct->Muted= 0;
+		sLog.outDebug("Account %s's mute has expired.",acct->UsernamePtr->c_str());
+		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
+	}
 	// Convert username/password to uppercase. this is needed ;)
 	ASCENT_TOUPPER(Username);
 	ASCENT_TOUPPER(Password);
 
-	// Prehash the I value.
-	hash.UpdateData((Username + ":" + Password));
-	hash.Finalize();
-	memcpy(acct->SrpHash, hash.GetDigest(), 20);
+	if( EncryptedPassword.size() > 0 )
+	{
+		// prefer encrypted passwords over nonencrypted
+		BigNumber bn;
+		bn.SetHexStr( EncryptedPassword.c_str() );
+		if( bn.GetNumBytes() != 20 )
+		{
+			Log.Debug("AccountMgr","Account `%s` has incorrect number of bytes in encrypted password! Disabling.\n", Username.c_str());
+			memset(acct->SrpHash, 0, 20);
+		}
+		else
+		{
+			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+			reverse_array(acct->SrpHash, 20);
+		}
+	}
+	else
+	{
+		// Prehash the I value.
+		hash.UpdateData((Username + ":" + Password));
+		hash.Finalize();
+		memcpy(acct->SrpHash, hash.GetDigest(), 20);
+	}
 }
 
 void AccountMgr::ReloadAccountsCallback()
@@ -226,248 +250,177 @@ void AccountMgr::ReloadAccountsCallback()
 }
 BAN_STATUS IPBanner::CalculateBanStatus(in_addr ip_address)
 {
-	setBusy.Acquire();
-
-	uint8 b1 = ((uint8*)&ip_address)[0];
-	uint8 b2 = ((uint8*)&ip_address)[1];
-	uint8 b3 = ((uint8*)&ip_address)[2];
-	uint8 b4 = ((uint8*)&ip_address)[3];
-
-	// loop storage array
-	set<IPBan*>::iterator itr = banList.begin();
-	uint32 expiretime;
-	bool banned = false;
-
-	for(; itr != banList.end(); ++itr)
+	Guard lguard(listBusy);
+	list<IPBan>::iterator itr;
+	list<IPBan>::iterator itr2 = banList.begin();
+	for(; itr2 != banList.end();)
 	{
-		// compare first byte
-		if((*itr)->ip.full.b1 == b1 || (*itr)->ip.full.b1 == 0xFF)
+		itr = itr2;
+		++itr2;
+
+		if( ParseCIDRBan(ip_address.s_addr, itr->Mask, itr->Bytes) )
 		{
-			// compare second byte if there was a first match
-			if((*itr)->ip.full.b2 == b2 || (*itr)->ip.full.b2 == 0xFF)
+			// ban hit
+			if( itr->Expire == 0 )
+				return BAN_STATUS_PERMANENT_BAN;
+			
+			if( (uint32)UNIXTIME >= itr->Expire )
 			{
-				// compare third byte if there was a second match
-				if((*itr)->ip.full.b3 == b3 || (*itr)->ip.full.b3 == 0xFF)
-				{
-					// compare last byte if there was a third match
-					if((*itr)->ip.full.b4 == b4 || (*itr)->ip.full.b4 == 0xFF)
-					{
-						// full IP match
-						banned = true;
-						expiretime = (*itr)->ban_expire_time;
-						break;
-					}
-				}
+				sLogonSQL->Execute("DELETE FROM ipbans WHERE expire = %u AND ip = \"%s\"", itr->Expire, sLogonSQL->EscapeString(itr->db_ip).c_str());
+				banList.erase(itr);
+			}
+			else
+			{
+				return BAN_STATUS_TIME_LEFT_ON_BAN;
 			}
 		}
 	}
 
-	//Release here because we're not touching stored stuff anymore
-	//-except in Remove, which acquires the lock itself (avoiding deadlocks :p)
-	setBusy.Release();
-
-	// calculate status
-	if(!banned)
-	{
-		DEBUG_LOG("[IPBanner] IP has no ban entry");
-		return BAN_STATUS_NOT_BANNED;
-	}
-	
-	if (expiretime == 0)
-	{
-		DEBUG_LOG("[IPBanner] IP permanently banned");
-		return BAN_STATUS_PERMANENT_BAN;
-	}
-	
-	time_t rawtime;
-	time( &rawtime );
-	if(expiretime > (uint32)rawtime)
-	{
-		// temporary ban.
-		time_t expire_time = expiretime;
-		DEBUG_LOG("[IPBanner] IP temporary banned, Expires: %s", ctime( &expire_time ));
-		return BAN_STATUS_TIME_LEFT_ON_BAN;
-	}
-	if(expiretime <= (uint32)rawtime)
-	{
-		// ban has expired. erase it from the banlist and database
-		DEBUG_LOG("[IPBanner] Expired IP temporary ban has been removed");
-		Remove(itr);
-		return BAN_STATUS_NOT_BANNED;
-	}
-
-	// shouldnt get this far, but just in case...
-	DEBUG_LOG("[IPBanner] Unknown IP ban state/duration, enforcing anyway");
-	return BAN_STATUS_PERMANENT_BAN;
-}
-
-void IPBanner::Load()
-{
-	QueryResult * result = sLogonSQL->Query("SELECT ip, expire FROM ipbans");
-	Field * fields;
-	IPBan * ban;
-	const char * ip_str;
-	if(result)
-	{
-		do 
-		{
-			ban = new IPBan;
-			fields = result->Fetch();
-
-			ip_str = fields[0].GetString();
-			unsigned int b1, b2, b3, b4;
-			if(sscanf(ip_str, "%u.%u.%u.%u", &b1, &b2, &b3, &b4) != 4)
-			{
-				delete ban;
-				continue;
-			}
-
-			ban->ip.full.b1 = b1;
-			ban->ip.full.b2 = b2;
-			ban->ip.full.b3 = b3;
-			ban->ip.full.b4 = b4;
-			ban->ban_expire_time = fields[1].GetUInt32();
-
-			banList.insert( ban );
-		}
-		while(result->NextRow());
-
-		delete result;
-	}
+	return BAN_STATUS_NOT_BANNED;
 }
 
 bool IPBanner::Add(const char * ip, uint32 dur)
 {
-	unsigned int b1, b2, b3, b4;
-	if(sscanf(ip, "%u.%u.%u.%u", &b1, &b2, &b3, &b4) != 4)
-	{
+	string sip = string(ip);
+
+	string::size_type i = sip.find("/");
+	if( i == string::npos )
 		return false;
-	}
 
-	IPBan * ban = new IPBan;
-	ban->ip.full.b1 = b1;
-	ban->ip.full.b2 = b2;
-	ban->ip.full.b3 = b3;
-	ban->ip.full.b4 = b4;
-	ban->ban_expire_time = dur;
+	string stmp = sip.substr(0, i);
+	string smask = sip.substr(i+1);
 
-	setBusy.Acquire();
-	banList.insert(ban);
-	setBusy.Release();
+	unsigned int ipraw = MakeIP(stmp.c_str());
+	unsigned int ipmask = atoi(smask.c_str());
+	if( ipraw == 0 || ipmask == 0 )
+		return false;
+
+	IPBan ipb;
+	ipb.db_ip = sip;
+	ipb.Bytes = ipmask;
+	ipb.Mask = ipraw;
+	
+	listBusy.Acquire();
+	banList.push_back(ipb);
+	listBusy.Release();
+
 	return true;
 }
 
 bool IPBanner::Remove(const char * ip)
 {
-	unsigned int b1, b2, b3, b4;
-	union {
-		unsigned char b1, b2, b3, b4;
-		uint32 asbytes;
-	} b;
-	if(sscanf(ip, "%u.%u.%u.%u", &b1, &b2, &b3, &b4) != 4)
+	listBusy.Acquire();
+	for(list<IPBan>::iterator itr = banList.begin(); itr != banList.end(); ++itr)
 	{
-		return false;
+		if( !strcmp(ip, itr->db_ip.c_str()) )
+		{
+			banList.erase(itr);
+			listBusy.Release();
+			return true;
+		}
 	}
-
-	b.b1 = b1;
-	b.b2 = b2;
-	b.b3 = b3;
-	b.b4 = b4;
-
-	setBusy.Acquire();
-	set<IPBan*>::iterator itr, itr2;
-	for(itr = banList.begin(); itr != banList.end(); )
-	{
-		itr2 = itr++;
-		if( (*itr2)->ip.asbytes == b.asbytes )
-			banList.erase(itr2);
-	}
-	setBusy.Release();
-	return true;
+	listBusy.Release();
+	return false;
 }
-
 
 void IPBanner::Reload()
 {
-	setBusy.Acquire();
+
+	listBusy.Acquire();
 	banList.clear();
-	Load();
-	setBusy.Release();
+	QueryResult * result = sLogonSQL->Query("SELECT ip, expire FROM ipbans");
+	if( result != NULL )
+	{
+		do 
+		{
+			IPBan ipb;
+			string smask= "32";
+			string ip = result->Fetch()[0].GetString();
+			string::size_type i = ip.find("/");
+			string stmp = ip.substr(0, i);
+			if( i == string::npos )
+			{
+				printf("IP ban \"%s\" netmask not specified. assuming /32 \n", ip.c_str());
+			}
+			else
+				smask = ip.substr(i+1);
+
+			unsigned int ipraw = MakeIP(stmp.c_str());
+			unsigned int ipmask = atoi(smask.c_str());
+			if( ipraw == 0 || ipmask == 0 )
+			{
+				printf("IP ban \"%s\" could not be parsed. Ignoring\n", ip.c_str());
+				continue;
+			}
+
+			ipb.Bytes = ipmask;
+			ipb.Mask = ipraw;
+			ipb.Expire = result->Fetch()[1].GetUInt32();
+			ipb.db_ip = ip;
+			banList.push_back(ipb);
+
+		} while (result->NextRow());
+		delete result;
+	}
+	listBusy.Release();
 }
 
-void IPBanner::Remove(set<IPBan*>::iterator ban)
-{
-	setBusy.Acquire();
-
-	char strIp[16] = {0};
-	snprintf(strIp, 16, "%u.%u.%u.%u", (*ban)->ip.full.b1, (*ban)->ip.full.b2, (*ban)->ip.full.b3,
-		(*ban)->ip.full.b4 );
-
-	sLogonSQL->Execute("DELETE FROM ipbans WHERE ip='%s'", strIp);
-	banList.erase(ban);
-
-	setBusy.Release();
-
-	DEBUG_LOG("[IPBanner] Removed expired IPBan for ip '%s'", strIp);
-}
-
-void InformationCore::SetRealmOffline(uint32 realm_id, LogonCommServerSocket *ss)
+Realm * InformationCore::AddRealm(uint32 realm_id, Realm * rlm)
 {
 	realmLock.Acquire();
-	map<uint32,Realm*>::iterator itr = m_realms.find( realm_id );
-	if( itr != m_realms.end() )
+	m_realms.insert( make_pair( realm_id, rlm ) );
+	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
+	realmLock.Release();
+	return rlm;
+}
+
+Realm * InformationCore::GetRealm(uint32 realm_id)
+{
+	Realm * ret = 0;
+
+	realmLock.Acquire();
+	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
+	if(itr != m_realms.end())
 	{
-		Realm * pr = itr->second;
-		if( pr->ServerSocket == ss )
-		{
-			printf("Realm: %s is now offline.\n", pr->Name.c_str());
-			pr->Colour = REALMCOLOUR_OFFLINE;
-	
-			// clear the mapping, when its re-registered it will send it again
-			pr->m_charMapLock.Acquire();
-			pr->CharacterMap.clear();
-			pr->m_charMapLock.Release();
-			pr->ServerSocket = NULL;
-		}
+		ret = itr->second;
 	}
 	realmLock.Release();
+	return ret;
 }
 
-void InformationCore::AddRealm(Realm * rlm)
+int32 InformationCore::GetRealmIdByName(string Name)
 {
-	realmLock.Acquire();
-	m_realms.insert( make_pair( rlm->Id, rlm ) );
-	realmLock.Release();
-}
-
-Realm * InformationCore::GetRealmByName(const char * realmName)
-{
-	realmLock.Acquire();
 	map<uint32, Realm*>::iterator itr = m_realms.begin();
-	for( ; itr != m_realms.end(); ++itr )
-	{
-		if( !stricmp(realmName, itr->second->Name.c_str()) )
+	for(; itr != m_realms.end(); ++itr)
+		if (itr->second->Name == Name)
 		{
-			realmLock.Release();
-			return itr->second;
+			return itr->first;
 		}
-	}
-
-	realmLock.Release();
-	return NULL;
+	return -1;
 }
 
-Realm * InformationCore::GetRealmById(uint32 id)
+void InformationCore::RemoveRealm(uint32 realm_id)
 {
 	realmLock.Acquire();
-	map<uint32, Realm*>::iterator itr = m_realms.find(id);
-	if( itr != m_realms.end() )
+	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
+	if(itr != m_realms.end())
 	{
-		realmLock.Release();
-		return itr->second;
+		m_realms.erase(itr);
+		delete itr->second;
 	}
+	realmLock.Release();
+}
 
-	return NULL;
+void InformationCore::UpdateRealmStatus(uint32 realm_id, uint8 Color)
+{
+	realmLock.Acquire();
+	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
+	if(itr != m_realms.end())
+	{
+		Log.Debug("Socket","Updating realm `%s`(id:%u) to status %u.", itr->second->Name.c_str(), realm_id, Color);
+		itr->second->Colour = Color;
+	}
+	realmLock.Release();
 }
 
 void InformationCore::SendRealms(AuthSocket * Socket)
@@ -482,16 +435,16 @@ void InformationCore::SendRealms(AuthSocket * Socket)
 	// dunno what this is..
 	data << uint32(0);
 
-	//sAuthLogonChallenge_C * client = Socket->GetChallenge();
 	data << uint16(m_realms.size());
 	
 	// loop realms :/
 	map<uint32, Realm*>::iterator itr = m_realms.begin();
+	HM_NAMESPACE::hash_map<uint32, uint8>::iterator it;
 	for(; itr != m_realms.end(); ++itr)
 	{
-		data << uint8(itr->second->Icon);
-		data << uint8(0);				   // Locked Flag
-		data << uint8(itr->second->Colour);		
+		data << itr->second->Icon;
+		data << uint8(0);		// delete when using data << itr->second->Lock;
+		data << itr->second->Colour;		
 
 		// This part is the same for all.
 		data << itr->second->Name;
@@ -499,18 +452,14 @@ void InformationCore::SendRealms(AuthSocket * Socket)
 		data << itr->second->Population;
 
 		/* Get our character count */
-		if( itr->second->Colour != REALMCOLOUR_OFFLINE )
-			data << itr->second->GetCharacterCount( Socket->GetAccountID() );
-		else
-			data << uint8(0);
-	
-		data << uint8(itr->second->TimeZone);
-		data << uint8(6);
+		it = itr->second->CharacterMap.find(Socket->GetAccountID());
+		data << uint8( (it == itr->second->CharacterMap.end()) ? 0 : it->second );
+		data << itr->second->WorldRegion;
+		data << uint8(6);    //Realm ID
 	}
-
 	realmLock.Release();
 
-	data << uint8(0x10);
+	data << uint8(0x17);
 	data << uint8(0);
 
 	// Re-calculate size.
@@ -528,8 +477,9 @@ void InformationCore::TimeoutSockets()
 	/* burlex: this is vulnerable to race conditions, adding a mutex to it. */
 	serverSocketLock.Acquire();
 
-	uint32 t = uint32(time(NULL));
 	// check the ping time
+	uint32 t = uint32(time(NULL));
+
 	set<LogonCommServerSocket*>::iterator itr, it2;
 	LogonCommServerSocket * s;
 	for(itr = m_serverSockets.begin(); itr != m_serverSockets.end();)
@@ -538,10 +488,9 @@ void InformationCore::TimeoutSockets()
 		it2 = itr;
 		++itr;
 
-		if(s->last_ping < t && ((t - s->last_ping) > 240))
+		if(!s->removed && (t - s->last_ping) > 60)
 		{
 			// ping timeout
-			printf("Closing socket due to ping timeout.\n");
 			s->removed = true;
 			set<uint32>::iterator itr = s->server_ids.begin();
 			for(; itr != s->server_ids.end(); ++itr)
@@ -549,16 +498,32 @@ void InformationCore::TimeoutSockets()
 			m_serverSockets.erase(it2);
 
 			s->Disconnect();
-			continue;
+			continue;;
 		}
-
-		// send a ping back every 20 seconds.
-		// this'll kill the socket if its inactive. meaning update times are minimal.
-		if( t >= s->next_server_ping )
-			s->SendPing();
 	}
 
 	serverSocketLock.Release();
+}
+void InformationCore::SetRealmOffline(uint32 realm_id, LogonCommServerSocket *ss)
+{
+	realmLock.Acquire();
+	map<uint32,Realm*>::iterator itr = m_realms.find( realm_id );
+	if( itr != m_realms.end() )
+	{
+		Realm * pr = itr->second;
+		if( pr->ServerSocket == ss )
+		{
+			Log.Debug("LogonServer","Realm: %s is now offline.\n", pr->Name.c_str());
+			pr->Colour = REALMCOLOUR_OFFLINE;
+	
+			// clear the mapping, when its re-registered it will send it again
+			pr->m_charMapLock.Acquire();
+			pr->CharacterMap.clear();
+			pr->m_charMapLock.Release();
+			pr->ServerSocket = NULL;
+		}
+	}
+	realmLock.Release();
 }
 
 void InformationCore::CheckServers()
@@ -575,7 +540,7 @@ void InformationCore::CheckServers()
 
 		if(!IsServerAllowed(s->GetRemoteAddress().s_addr))
 		{
-			printf("Disconnecting socket: %s due to it no longer being on an allowed IP.\n", s->GetRemoteIP().c_str());
+			Log.Debug("LogonServer","Disconnecting socket: %s due to it no longer being on an allowed IP.\n", s->GetRemoteIP().c_str());
 			s->Disconnect();
 		}
 	}

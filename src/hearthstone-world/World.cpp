@@ -1021,21 +1021,6 @@ WorldSession* World::FindSessionByName(const char * Name)//case insensetive
 	return 0;
 }
 
-void World::ShutdownClasses()
-{
-	Log.Notice("AddonMgr", "~AddonMgr()");
-	sAddonMgr.SaveToDB();
-	delete AddonMgr::getSingletonPtr();
-
-	Log.Notice("AuctionMgr", "~AuctionMgr()");
-	delete AuctionMgr::getSingletonPtr();
-	Log.Notice("LootMgr", "~LootMgr()");
-	delete LootMgr::getSingletonPtr();
-
-	Log.Notice("MailSystem", "~MailSystem()");
-	delete MailSystem::getSingletonPtr();
-}
-
 void World::GetStats(uint32 * GMCount, float * AverageLatency)
 {
 	int gm = 0;
@@ -1262,6 +1247,9 @@ void World::Rehash(bool load)
 	mQueueUpdateInterval = Config.MainConfig.GetIntDefault("Server", "QueueUpdateInterval", 5000);
 	SetKickAFKPlayerTime(Config.MainConfig.GetIntDefault("Server", "KickAFKPlayers", 0));
 	gm_skip_attunement = Config.MainConfig.GetBoolDefault("Server", "SkipAttunementsForGM", true);
+	sLog.SetScreenLoggingLevel(Config.MainConfig.GetIntDefault("LogLevel", "Screen", 1));
+	sLog.SetFileLoggingLevel(Config.MainConfig.GetIntDefault("LogLevel", "File", -1));
+
 #ifndef CLUSTERING
 	SocketRecvBufSize = Config.MainConfig.GetIntDefault("WorldSocket", "RecvBufSize", WORLDSOCKET_RECVBUF_SIZE);
 	SocketSendBufSize = Config.MainConfig.GetIntDefault("WorldSocket", "SendBufSize", WORLDSOCKET_SENDBUF_SIZE);

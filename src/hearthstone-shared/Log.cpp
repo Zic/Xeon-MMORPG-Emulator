@@ -188,11 +188,10 @@ void oLog::outDebug( const char * str, ... )
 	}
 }
 
-void oLog::Init()
+void oLog::Init(int32 fileLogLevel, int32 screenLogLevel)
 {
-	m_screenLogLevel = Config.MainConfig.GetIntDefault("LogLevel", "Screen", 0);
-	Log.log_level = m_screenLogLevel;
-	m_fileLogLevel = Config.MainConfig.GetIntDefault("LogLevel", "File", 0);
+	m_screenLogLevel = screenLogLevel;
+	m_fileLogLevel = fileLogLevel;
 	m_file = NULL;
 
 	if (m_fileLogLevel >= 0)
@@ -211,7 +210,15 @@ void oLog::Init()
 	stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #endif
 }
+void oLog::SetScreenLoggingLevel(int32 level)
+{
+	m_screenLogLevel = level;
+}
 
+void oLog::SetFileLoggingLevel(int32 level)
+{
+	m_fileLogLevel = level;
+}
 void SessionLogWriter::write(const char* format, ...)
 {
 	if(!m_file)

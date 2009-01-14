@@ -157,8 +157,15 @@ bool Master::Run(int argc, char ** argv)
 	Log.Line();
 	Log.log_level = 3;
 
-	if(do_version)
-		return true;
+	if(!do_version && !do_check_conf)
+	{
+		sLog.Init(-1, 3);
+	}
+	else
+	{
+		sLog.m_fileLogLevel = -1;
+		sLog.m_screenLogLevel = 1;
+	}
 
 	if( do_check_conf )
 	{
@@ -226,7 +233,6 @@ bool Master::Run(int argc, char ** argv)
 	}
 
 	Log.Line();
-	sLog.Init();
 	sLog.outString( "" );
 
 	//ScriptSystem = new ScriptEngine;
@@ -350,7 +356,7 @@ bool Master::Run(int argc, char ** argv)
 		if(! ((++loopcounter) % 10000) )		// 5mins
 		{
 			ThreadPool.ShowStats();
-			ThreadPool.IntegrityCheck();
+			ThreadPool.IntegrityCheck();//Checks if THREAD_RESERVE is met
 			g_bufferPool.Optimize();
 		}
 
@@ -401,6 +407,15 @@ bool Master::Run(int argc, char ** argv)
 			Sleep( 100 );
 	}
 
+
+	Log.Notice( "CharacterLoaderThread", "Exiting..." );
+	ctl->Terminate();
+	ctl = NULL;
+
+
+	sWorld.LogoutPlayers(); //(Also saves players).
+	CharacterDatabase.Execute("UPDATE characters SET online = 0");
+
 	// send a query to wake it up if its inactive
 	Log.Notice( "Database", "Clearing all pending queries..." );
 
@@ -408,12 +423,8 @@ bool Master::Run(int argc, char ** argv)
 	CharacterDatabase.EndThreads();
 	WorldDatabase.EndThreads();
 
-	Log.Notice("Rnd", "~Rnd()");
+	Log.Notice("Server", "Shutting down random generator.");
 	CleanupRandomNumberGenerators();
-
-	Log.Notice( "CharacterLoaderThread", "Exiting..." );
-	ctl->Terminate();
-	ctl = NULL;
 
 	Log.Notice( "DayWatcherThread", "Exiting..." );
 	dw->terminate();
@@ -424,7 +435,6 @@ bool Master::Run(int argc, char ** argv)
 #endif
 
 	CloseConsoleListener();
-	sWorld.SaveAllPlayers();
 
 	Log.Notice( "Network", "Shutting down network subsystem." );
 #ifdef WIN32
@@ -432,15 +442,25 @@ bool Master::Run(int argc, char ** argv)
 #endif
 	sSocketMgr.CloseAll();
 
+	Log.Notice("AddonMgr", "~AddonMgr()");
+	sAddonMgr.SaveToDB();
+	delete AddonMgr::getSingletonPtr();
+
+	Log.Notice("AuctionMgr", "~AuctionMgr()");
+	delete AuctionMgr::getSingletonPtr();
+	Log.Notice("LootMgr", "~LootMgr()");
+	delete LootMgr::getSingletonPtr();
+
+	Log.Notice("MailSystem", "~MailSystem()");
+	delete MailSystem::getSingletonPtr();
+
 	bServerShutdown = true;
 	ThreadPool.Shutdown();
 
-	sWorld.LogoutPlayers();
 	sLog.outString( "" );
 
 	delete LogonCommHandler::getSingletonPtr();
 
-	sWorld.ShutdownClasses();
 	Log.Notice( "World", "~World()" );
 	delete World::getSingletonPtr();
 

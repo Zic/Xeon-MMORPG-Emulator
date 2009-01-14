@@ -20,6 +20,9 @@
 #ifndef __ACCOUNTCACHE_H
 #define __ACCOUNTCACHE_H
 
+#include "Common.h"
+#include "../hearthstone-shared/Database/DatabaseEnv.h"
+
 enum RealmColours
 {
 	REALMCOLOUR_GREEN			= 0,
@@ -28,25 +31,15 @@ enum RealmColours
 	REALMCOLOUR_BLUE			= 3,
 };
 
-enum RealmIcons
-{
-	REALMICON_UNK_0				= 0,
-	REALMICON_UNK_1				= 1,
-	REALMICON_UNK_2				= 2,
-};
-
-#include "Common.h"
-#include "../hearthstone-shared/Database/DatabaseEnv.h"
-
 struct Account
 {
 	uint32 AccountId;
-	char * Username;
 	char * GMFlags;
 	uint8 AccountFlags;
 	uint32 Banned;
 	uint8 SrpHash[20];
 	uint8 * SessionKey;
+	string * UsernamePtr;
 	uint32 Muted;
 
 	Account()
@@ -93,14 +86,12 @@ struct Account
 
 };
 
-typedef struct 
+typedef struct IPBan
 {
-	union
-	{
-		struct ipfull { uint8 b1, b2, b3, b4; } full;
-		uint32 asbytes;
-	} ip;
-	uint32 ban_expire_time;
+	unsigned int Mask;
+	unsigned char Bytes;
+	uint32 Expire;
+	string db_ip;
 } IPBan;
 
 enum BAN_STATUS
@@ -113,17 +104,16 @@ enum BAN_STATUS
 class IPBanner : public Singleton< IPBanner >
 {
 public:
-	void Load();
 	void Reload();
-	void Remove(set<IPBan*>::iterator ban);
+
 	bool Add(const char * ip, uint32 dur);
 	bool Remove(const char * ip);
 
 	BAN_STATUS CalculateBanStatus(in_addr ip_address);
 
 protected:
-	Mutex setBusy;
-	set<IPBan*> banList;
+	Mutex listBusy;
+	list<IPBan> banList;
 };
 
 class AccountMgr : public Singleton < AccountMgr >
@@ -162,11 +152,8 @@ public:
 		return pAccount;
 	}
 
-	void _ReloadAccounts(bool silent, bool update); // helper function
-
 	void UpdateAccount(Account * acct, Field * field);
 	void ReloadAccounts(bool silent);
-	void LoadAccounts(bool silent);
 	void ReloadAccountsCallback();
 
 	HEARTHSTONE_INLINE size_t GetCount() { return AccountDatabase.size(); }
@@ -194,32 +181,19 @@ private:
 protected:
 	Mutex setBusy;
 };
-
 class LogonCommServerSocket;
-typedef struct
+typedef struct Realm
 {
-	uint32 Id;
 	string Name;
 	string Address;
-	uint32 Colour;
-	uint32 Icon;
-	uint32 TimeZone;
+	uint8 Colour;
+	uint8 Icon;
+	uint8 WorldRegion;
 	float Population;
-
+	uint8 Lock;
 	Mutex m_charMapLock;
 	HM_NAMESPACE::hash_map<uint32, uint8> CharacterMap;
 	LogonCommServerSocket *ServerSocket;
-
-	uint8 GetCharacterCount(uint32 acc)
-	{
-		uint8 r;
-		m_charMapLock.Acquire();
-		HM_NAMESPACE::hash_map<uint32, uint8>::iterator itr = CharacterMap.find( acc );
-		r = (itr == CharacterMap.end()) ? 0 : itr->second;
-		m_charMapLock.Release();
-		return r;
-	}
-
 }Realm;
 
 class AuthSocket;
@@ -251,22 +225,20 @@ public:
 	// Realm management
 	uint32 GenerateRealmID()
 	{
-		uint32 r;
-		realmLock.Acquire();
-		r = ++realmhigh;
-		realmLock.Release();
-		return r;
+		return ++realmhigh;
 	}
 
-	void		  AddRealm(Realm * rlm);
-	Realm*        GetRealmByName(const char * realmName);
-	Realm*        GetRealmById(uint32 id);
+	Realm*		  AddRealm(uint32 realm_id, Realm * rlm);
+	Realm*        GetRealm(uint32 realm_id);
+	int32		  GetRealmIdByName(string Name);
+	void		  RemoveRealm(uint32 realm_id);
+	void		  UpdateRealmStatus(uint32 realm_id, uint8 Color);
 	void		  SetRealmOffline(uint32 realm_id, LogonCommServerSocket *ss);
 
 	HEARTHSTONE_INLINE void   AddServerSocket(LogonCommServerSocket * sock) { serverSocketLock.Acquire(); m_serverSockets.insert( sock ); serverSocketLock.Release(); }
 	HEARTHSTONE_INLINE void   RemoveServerSocket(LogonCommServerSocket * sock) { serverSocketLock.Acquire(); m_serverSockets.erase( sock ); serverSocketLock.Release(); }
 
-	void		  TimeoutSockets();
+	void TimeoutSockets();
 	void CheckServers();
 };
 

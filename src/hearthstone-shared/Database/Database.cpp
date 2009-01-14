@@ -489,7 +489,7 @@ bool Database::_SendQuery(DatabaseConnection *con, const char* Sql, bool Self)
 			result = _SendQuery(con, Sql, true);
 		}
 		else
-			printf("Sql query failed due to [%s], Query: [%s]\n", mysql_error( con->conn ), Sql);
+			Log.Error("Database","Sql query failed due to [%s], Query: [%s]\n", mysql_error( con->conn ), Sql);
 	}
 
 	return (result == 0 ? true : false);

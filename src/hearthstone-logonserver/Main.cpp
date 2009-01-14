@@ -102,6 +102,7 @@ bool startdb()
 {
 	string lhostname, lusername, lpassword, ldatabase;
 	int lport = 0;
+	int ltype = 1;
 	// Configure Main Database
 
 	bool result;
@@ -112,6 +113,7 @@ bool startdb()
 	result = !result ? result : Config.MainConfig.GetString("LogonDatabase", "Hostname", &lhostname);
 	result = !result ? result : Config.MainConfig.GetString("LogonDatabase", "Name", &ldatabase);
 	result = !result ? result : Config.MainConfig.GetInt("LogonDatabase", "Port", &lport);
+	result = !result ? result : Config.MainConfig.GetInt("LogonDatabase", "Type", &ltype);
 
 	if(result == false)
 	{
@@ -119,6 +121,7 @@ bool startdb()
 		return false;
 	}
 
+	sLog.SetScreenLoggingLevel(Config.MainConfig.GetIntDefault("LogLevel", "Screen", 0));
 	sLogonSQL = Database::Create();
 
 	// Initialize it
@@ -126,7 +129,7 @@ bool startdb()
 		lpassword.c_str(), ldatabase.c_str(), Config.MainConfig.GetIntDefault("LogonDatabase", "ConnectionCount", 5),
 		16384))
 	{
-		printf("sql: Logon database initialization failed. Exiting.");
+		sLog.outError("sql: Logon database initialization failed. Exiting.");
 		return false;
 	}   
 
@@ -212,7 +215,7 @@ bool Rehash()
 			printf("IP: %s could not be parsed. Ignoring\n", itr->c_str());
 			continue;
 		}
-		
+
 		AllowedIP tmp;
 		tmp.Bytes = ipmask;
 		tmp.IP = ipraw;
@@ -291,13 +294,27 @@ void LogonServer::Run(int argc, char ** argv)
 		case 0:
 			break;
 		default:
+			sLog.m_fileLogLevel = -1;
+			sLog.m_screenLogLevel = 3;
 			printf("Usage: %s [--checkconf] [--screenloglevel <level>] [--fileloglevel <level>] [--conf <filename>] [--version]\n", argv[0]);
 			return;
 		}
 	}
 
+	// Startup banner
+	if(!do_version && !do_check_conf)
+	{
+		sLog.Init(-1, 3);
+	}
+	else
+	{
+		sLog.m_fileLogLevel = -1;
+		sLog.m_screenLogLevel = 3;
+	}
+	
 	sLog.outString(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
+
 	sLog.outString("==============================================================================");
 	sLog.outString("");
 	if(do_version)
@@ -323,21 +340,12 @@ void LogonServer::Run(int argc, char ** argv)
 	Log.Notice("System","Initializing Random Number Generators...");
 
 	Log.Notice("Config", "Loading Config Files...");
-	
-	/*if(Config.MainConfig.SetSource(config_file))
-	{
-		Log.Success("Config", ">> hearthstone-logonserver.conf", config_file);
-	}
-	else
-	{
-		Log.Error("Config", ">> hearthstone-logonserver.conf", config_file);
-		return;
-	}*/
 	if(!Rehash())
 		return;
 
 	Log.Notice("ThreadMgr", "Starting...");
-	ThreadPool.Startup();
+
+	ThreadPool.Startup(4);
    
 	if(!startdb())
 		return;
@@ -351,7 +359,7 @@ void LogonServer::Run(int argc, char ** argv)
 
 	new PatchMgr;
 	Log.Notice("AccountMgr", "Precaching accounts...");
-	sAccountMgr.LoadAccounts(true);
+	sAccountMgr.ReloadAccounts(true);
 	Log.Notice("AccountMgr", "%u accounts are loaded and ready.", sAccountMgr.GetCount());
 	Log.Line();
 
@@ -359,23 +367,18 @@ void LogonServer::Run(int argc, char ** argv)
 	// Spawn periodic function caller thread for account reload every 10mins
 	int atime = Config.MainConfig.GetIntDefault("Rates", "AccountRefresh",600);
 	atime *= 1000;
-	//SpawnPeriodicCallThread(AccountMgr, AccountMgr::getSingletonPtr(), &AccountMgr::ReloadAccountsCallback, time);
-	PeriodicFunctionCaller<AccountMgr> * pfc = new PeriodicFunctionCaller<AccountMgr>(AccountMgr::getSingletonPtr(),
-		&AccountMgr::ReloadAccountsCallback, atime);
+	PeriodicFunctionCaller<AccountMgr> * pfc = new PeriodicFunctionCaller<AccountMgr>(AccountMgr::getSingletonPtr(),&AccountMgr::ReloadAccountsCallback, atime);
 	ThreadPool.ExecuteTask(pfc);
 
 	// Load conf settings..
 	uint32 cport = Config.MainConfig.GetIntDefault("Listen", "RealmListPort", 3724);
 	uint32 sport = Config.MainConfig.GetIntDefault("Listen", "ServerPort", 8093);
-	//uint32 threadcount = Config.MainConfig.GetIntDefault("Network", "ThreadCount", 5);
-	//uint32 threaddelay = Config.MainConfig.GetIntDefault("Network", "ThreadDelay", 20);
 	string host = Config.MainConfig.GetStringDefault("Listen", "Host", "0.0.0.0");
 	string shost = Config.MainConfig.GetStringDefault("Listen", "ISHost", host.c_str());
 	min_build = Config.MainConfig.GetIntDefault("Client", "MinBuild", 6180);
 	max_build = Config.MainConfig.GetIntDefault("Client", "MaxBuild", 6999);
 	string logon_pass = Config.MainConfig.GetStringDefault("LogonServer", "RemotePassword", "r3m0t3b4d");
 	Sha1Hash hash;
-	time_t oldtime = UNIXTIME;
 	hash.UpdateData(logon_pass);
 	hash.Finalize();
 	memcpy(sql_hash, hash.GetDigest(), 20);
@@ -400,7 +403,7 @@ void LogonServer::Run(int argc, char ** argv)
 		ThreadPool.ExecuteTask(sl);
 #endif
 	// hook signals
-	sLog.outString("Hooking signals...");
+	Log.Notice("LogonServer","Hooking signals...");
 	signal(SIGINT, _OnSignal);
 	signal(SIGTERM, _OnSignal);
 	signal(SIGABRT, _OnSignal);
@@ -425,44 +428,38 @@ void LogonServer::Run(int argc, char ** argv)
 	}
 	uint32 loop_counter = 0;
 	//ThreadPool.Gobble();
-
+	Log.Notice("LogonServer","Success! Ready for connections");
 	while(mrunning && authsockcreated && intersockcreated)
 	{
-		if(!(++loop_counter % 400))	 // 20 seconds
-			CheckForDeadSockets();
 
-		if(!(loop_counter%10000))	// 5mins
-			ThreadPool.IntegrityCheck();
-
-		if(!(loop_counter%10))
+		if(!(++loop_counter%10000))	// 2mins
 		{
-			oldtime = UNIXTIME;
-			UNIXTIME = time(NULL);
-			if( UNIXTIME != oldtime )
-			{
-				g_localTime = *localtime(&UNIXTIME);
+			ThreadPool.IntegrityCheck(2); //Logonserver don't need as many threads as world-server, 2 will do
+		}
 
-				// these are all time-based, so not point running them if the clock didn't change
-				sInfoCore.TimeoutSockets();
-				sSocketGarbageCollector.Update();
-				CheckForDeadSockets();			  // Flood Protection
-			}
+		if(!(loop_counter%100))  //100 loop ~ 1seconds
+		{
+			sInfoCore.TimeoutSockets();
+			sSocketGarbageCollector.Update();
+			CheckForDeadSockets();			  // Flood Protection
+			UNIXTIME = time(NULL);
+			g_localTime = *localtime(&UNIXTIME);
 		}
 
 		PatchMgr::getSingleton().UpdateJobs();
 		Sleep(10);
 	}
 
-	sLog.outString("Shutting down...");
-        signal(SIGINT, 0);
-        signal(SIGTERM, 0);
-        signal(SIGABRT, 0);
-#ifdef _WIN32
-        signal(SIGBREAK, 0);
-#else
-        signal(SIGHUP, 0);
-#endif
+	Log.Notice("LogonServer","Shutting down...");
 
+	signal(SIGINT, 0);
+	signal(SIGTERM, 0);
+	signal(SIGABRT, 0);
+#ifdef _WIN32
+	signal(SIGBREAK, 0);
+#else
+	signal(SIGHUP, 0);
+#endif
 	pfc->kill();
 
 	cl->Close();
@@ -491,7 +488,7 @@ void LogonServer::Run(int argc, char ** argv)
 	delete SocketMgr::getSingletonPtr();
 	delete SocketGarbageCollector::getSingletonPtr();
 	delete pfc;
-	printf("Shutdown complete.\n");
+	Log.Notice("LogonServer","Shutdown complete.\n");
 }
 
 void OnCrash(bool Terminate)
@@ -502,7 +499,7 @@ void OnCrash(bool Terminate)
 void LogonServer::CheckForDeadSockets()
 {
 	_authSocketLock.Acquire();
-	time_t t = UNIXTIME;
+	time_t t = time(NULL);
 	time_t diff;
 	set<AuthSocket*>::iterator itr = _authSockets.begin();
 	set<AuthSocket*>::iterator it2;

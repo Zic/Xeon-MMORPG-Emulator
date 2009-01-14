@@ -45,6 +45,8 @@ public:
 	void HandleRegister(WorldPacket & recvData);
 	void HandlePing(WorldPacket & recvData);
 	void HandleSessionRequest(WorldPacket & recvData);
+	void HandleSQLExecute(WorldPacket & recvData);
+	void HandleReloadAccounts(WorldPacket & recvData);
 	void HandleAuthChallenge(WorldPacket & recvData);
 	void HandleMappingReply(WorldPacket & recvData);
 	void HandleUpdateMapping(WorldPacket & recvData);

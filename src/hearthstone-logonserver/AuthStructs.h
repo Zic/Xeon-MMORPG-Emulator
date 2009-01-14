@@ -38,7 +38,7 @@ typedef struct {
 	uint8   platform[4];	// 'x86'
 	uint8   os[4];		  // 'Win'
 	uint8   country[4];	 // 'enUS'
-	uint32  timezone_bias;  // -419
+	uint32  WorldRegion_bias;  // -419
 	uint32  ip;			 // client ip
 	uint8   I_len;		  // length of account name
 	uint8   I[50];		   // account name
@@ -79,7 +79,6 @@ typedef struct {
 	uint8   cmd;			// 0x01 CMD_AUTH_LOGON_PROOF
 	uint8   error;
 	uint8   M2[20];
-	uint32	unk1;
 	uint32  unk2;
 	uint16  unk203;
 } sAuthLogonProof_S;

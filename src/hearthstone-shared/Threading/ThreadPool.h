@@ -24,6 +24,8 @@
 #ifndef __THREADPOOL_H
 #define __THREADPOOL_H
 
+#define THREAD_RESERVE 8
+
 #ifdef WIN32
 
 class SERVER_DECL ThreadController
@@ -176,10 +178,10 @@ public:
 	CThreadPool();
 
 	// call every 2 minutes or so.
-	void IntegrityCheck();
+	void IntegrityCheck(uint8 ThreadCount = THREAD_RESERVE);
 
 	// call at startup
-	void Startup();
+	void Startup(uint8 ThreadCount);
 
 	// shutdown all threads
 	void Shutdown();

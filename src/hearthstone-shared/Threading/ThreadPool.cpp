@@ -38,7 +38,6 @@
 
 #endif
 
-#define THREAD_RESERVE 5
 SERVER_DECL CThreadPool ThreadPool;
 
 CThreadPool::CThreadPool()
@@ -123,10 +122,10 @@ void CThreadPool::ExecuteTask(ThreadContext * ExecutionTarget)
 	_mutex.Release();
 }
 
-void CThreadPool::Startup()
+void CThreadPool::Startup(uint8 ThreadCount)
 {
 	int i;
-	int tcount = THREAD_RESERVE;
+	int tcount = ThreadCount;
 
 	for(i=0; i < tcount; ++i)
 		StartThread(NULL);
@@ -146,7 +145,7 @@ void CThreadPool::ShowStats()
 	_mutex.Release();
 }
 
-void CThreadPool::IntegrityCheck()
+void CThreadPool::IntegrityCheck(uint8 ThreadCount)
 {
 	_mutex.Acquire();
 	int32 gobbled = _threadsEaten;
@@ -155,7 +154,7 @@ void CThreadPool::IntegrityCheck()
 	{
 		// this means we requested more threads than we had in the pool last time.
         // spawn "gobbled" + THREAD_RESERVE extra threads.
-		uint32 new_threads = abs(gobbled) + THREAD_RESERVE;
+		uint32 new_threads = abs(gobbled) + ThreadCount;
 		_threadsEaten=0;
 
 		for(uint32 i = 0; i < new_threads; ++i)
@@ -163,7 +162,7 @@ void CThreadPool::IntegrityCheck()
 
 		Log.Debug("ThreadPool", "IntegrityCheck: (gobbled < 0) Spawning %u threads.", new_threads);
 	}
-	else if(gobbled < THREAD_RESERVE)
+	else if(gobbled < ThreadCount)
 	{
         // this means while we didn't run out of threads, we were getting damn low.
 		// spawn enough threads to keep the reserve amount up.
@@ -173,11 +172,11 @@ void CThreadPool::IntegrityCheck()
 
 		Log.Debug("ThreadPool", "IntegrityCheck: (gobbled <= 5) Spawning %u threads.", new_threads);
 	}
-	else if(gobbled > THREAD_RESERVE)
+	else if(gobbled > ThreadCount)
 	{
 		// this means we had "excess" threads sitting around doing nothing.
 		// lets kill some of them off.
-		uint32 kill_count = (gobbled - THREAD_RESERVE);
+		uint32 kill_count = (gobbled - ThreadCount);
 		KillFreeThreads(kill_count);
 		_threadsEaten -= kill_count;
 		Log.Debug("ThreadPool", "IntegrityCheck: (gobbled > 5) Killing %u threads.", kill_count);
@@ -187,13 +186,6 @@ void CThreadPool::IntegrityCheck()
 		// perfect! we have the ideal number of free threads.
 		Log.Debug("ThreadPool", "IntegrityCheck: Perfect!");
 	}
-	/*if(m_freeThreads.size() < 5)
-	{
-		uint32 j = 5 - m_freeThreads.size();
-		Log.Debug("ThreadPool", "Spawning %u threads.", j);
-		for(uint32 i = 0; i < j; ++i)
-			StartThread(NULL);
-	}*/
 
 	_threadsExitedSinceLastCheck = 0;
 	_threadsRequestedSinceLastCheck = 0;

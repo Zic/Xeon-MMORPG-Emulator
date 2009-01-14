@@ -20,6 +20,8 @@
 #include "StdAfx.h"
 initialiseSingleton(LogonCommHandler);
 #ifndef CLUSTERING
+extern bool bServerShutdown;
+
 LogonCommHandler::LogonCommHandler()
 {
 	idhigh = 1;
@@ -32,9 +34,6 @@ LogonCommHandler::LogonCommHandler()
 	hash.UpdateData(logon_pass);
 	hash.Finalize();
 	memcpy(sql_passhash, hash.GetDigest(), 20);
-
-	servers.clear();
-	realms.clear();
 }
 
 LogonCommHandler::~LogonCommHandler()
@@ -64,16 +63,17 @@ void LogonCommHandler::RequestAddition(LogonCommClientSocket * Socket)
 		Realm * realm = *itr;
 		data << realm->Name;
 		data << realm->Address;
-		data << realm->Colour;
-		data << realm->Type;
-		data << realm->TimeZone;
+		data << realm->Icon;
+		data << realm->WorldRegion;
 		data << realm->Population;
+		data << realm->Lock;
 		Socket->SendPacket(&data,false);
 	}
 }
 
 class LogonCommWatcherThread : public ThreadContext
 {
+	bool running;
 #ifdef WIN32
 	HANDLE hEvent;
 #endif
@@ -84,6 +84,7 @@ public:
 #ifdef WIN32
 		hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
 #endif
+		running = true;
 	}
 
 	~LogonCommWatcherThread()
@@ -281,7 +282,7 @@ void LogonCommHandler::UpdateSockets()
 		else
 		{
 			// check retry time
-			if(t >= itr->first->RetryTime)
+			if(t >= itr->first->RetryTime && !bServerShutdown)
 			{
 				Connect(itr->first);
 			}
@@ -312,9 +313,8 @@ uint32 LogonCommHandler::ClientConnected(string AccountName, WorldSocket * Socke
 	uint32 request_id = next_request++;
 	size_t i = 0;
 	const char * acct = AccountName.c_str();
-	DEBUG_LOG ( " >> sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
-  //  sLog.outColor(TNORMAL, "\n");
-	
+	Log.Debug ( "LogonCommHandler","Sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
+
 	// Send request packet to server.
 	map<LogonServer*, LogonCommClientSocket*>::iterator itr = logons.begin();
 	if(logons.size() == 0)
@@ -335,7 +335,7 @@ uint32 LogonCommHandler::ClientConnected(string AccountName, WorldSocket * Socke
 	// strip the shitty hash from it
 	for(; acct[i] != '#' && acct[i] != '\0'; ++i )
 		data.append( &acct[i], 1 );
-	
+
 	data.append( "\0", 1 );
 	s->SendPacket(&data,false);
 
@@ -369,7 +369,7 @@ void LogonCommHandler::LoadRealmConfiguration()
 	uint32 realmcount = Config.RealmConfig.GetIntDefault("LogonServer", "RealmCount", 1);
 	if(realmcount == 0)
 	{
-		sLog.outColor(TRED, "\n   >> no realms found. this server will not be online anywhere!\n");
+		Log.Error("LogonCommHandler","No realms found. this server will not be online anywhere!");
 	}
 	else
 	{
@@ -378,37 +378,24 @@ void LogonCommHandler::LoadRealmConfiguration()
 			Realm * realm = new Realm;
 			realm->Name = Config.RealmConfig.GetStringVA("Name", "SomeRealm", "Realm%u", i);
 			realm->Address = Config.RealmConfig.GetStringVA("Address", "127.0.0.1:8129", "Realm%u", i);
-			realm->TimeZone = Config.RealmConfig.GetIntVA("TimeZone", 1, "Realm%u", i);
+			realm->WorldRegion = Config.RealmConfig.GetIntVA("WorldRegion", 1, "Realm%u", i);
 			realm->Population = Config.RealmConfig.GetFloatVA("Population", 0, "Realm%u", i);
-			string rt = Config.RealmConfig.GetStringVA("Type", "Normal", "Realm%u", i);
-			string rc = Config.RealmConfig.GetStringVA("Colour", "Green", "Realm%u", i);
+			string rt = Config.RealmConfig.GetStringVA("Icon", "Normal", "Realm%u", i);
 			uint32 type;
-			uint32 colour = 0;
 
 			// process realm type
-			if(!stricmp(rt.c_str(), "pvp"))
-				type = 4;
-			else if(!stricmp(rt.c_str(), "rp"))
-				type = 6;
-			else if(!stricmp(rt.c_str(), "rppvp"))
-				type = 8;
+			if( stricmp(rt.c_str(), "pvp")==0 )
+				type = REALMTYPE_PVP;
+			else if( stricmp(rt.c_str(), "rp")==0 )
+				type = REALMTYPE_RP;
+			else if( stricmp(rt.c_str(), "rppvp")==0 )
+				type = REALMTYPE_RPPVP;
 			else
-				type = 0;
-
-			if( !stricmp(rc.c_str(), "green") )
-				colour = 0;//green
-			else if( !stricmp(rc.c_str(), "red"))
-				colour = 1;//red
-			else if( !stricmp(rc.c_str(), "blue"))
-				colour = 3;//blue
-			else
-				colour = 0;//green
-				
+				type = REALMTYPE_NORMAL;
 
 			_realmType = type;
 
-			realm->Colour = colour;
-			realm->Type = type;
+			realm->Icon = type;
 			realms.insert(realm);
 		}
 	}

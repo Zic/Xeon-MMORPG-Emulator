@@ -377,7 +377,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		_player = NULLPLR;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);
-		DEBUG_LOG( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
+		Log.Debug( "WorldSession","Sent SMSG_LOGOUT_COMPLETE Message" );
 	}
 	_loggingOut = false;
 

@@ -518,7 +518,6 @@ public:
 
 	uint32 expansionUpdateTime;
 
-	void ShutdownClasses();
 	void DeleteObject(ObjectPointer obj);
 
 	uint32 compression_threshold;

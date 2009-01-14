@@ -37,7 +37,7 @@ typedef struct
 	string Address;
 	uint32 Colour;
 	uint32 Icon;
-	uint32 TimeZone;
+	uint32 WorldRegion;
 	float Population;
 }Realm;
 

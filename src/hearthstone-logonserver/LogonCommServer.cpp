@@ -31,7 +31,7 @@ HEARTHSTONE_INLINE static void swap32(uint32* p) { *p = ((*p >> 24 & 0xff)) | ((
 LogonCommServerSocket::LogonCommServerSocket(SOCKET fd) : Socket(fd, 65536, 524288)
 {
 	// do nothing
-	last_ping = (uint32)time(NULL);
+	last_ping = (uint32)UNIXTIME;
 	next_server_ping = last_ping + 30;
 	remaining = opcode = 0;
 	removed = true;
@@ -77,12 +77,12 @@ void LogonCommServerSocket::OnRead()
 	{
 		if(!remaining)
 		{
-			if(readBuffer.GetSize() < 6)
+			if(GetReadBuffer().GetSize() < 6)
 				return;	 // no header
 
 			// read header
-			readBuffer.Read(&opcode, 2);
-			readBuffer.Read(&remaining, 4);
+			GetReadBuffer().Read((uint8*)&opcode, 2);
+			GetReadBuffer().Read((uint8*)&remaining, 4);
 
 			if(use_crypto)
 			{
@@ -91,12 +91,16 @@ void LogonCommServerSocket::OnRead()
 				recvCrypto.Process((unsigned char*)&remaining, (unsigned char*)&remaining, 4);
 			}
 
+#ifdef USING_BIG_ENDIAN
+			opcode = swap16(opcode);
+#else
 			/* reverse byte order */
 			swap32(&remaining);
+#endif
 		}
 
 		// do we have a full packet?
-		if(readBuffer.GetSize() < remaining)
+		if(GetReadBuffer().GetSize() < remaining)
 			return;
 
 		// create the buffer
@@ -104,7 +108,7 @@ void LogonCommServerSocket::OnRead()
 		if(remaining)
 		{
 			buff.resize(remaining);
-			readBuffer.Read((uint8*)buff.contents(), remaining);
+			GetReadBuffer().Read((uint8*)buff.contents(), remaining);
 		}
 
 		if(use_crypto && remaining)
@@ -145,7 +149,7 @@ void LogonCommServerSocket::HandlePacket(WorldPacket & recvData)
 		NULL,												// RSMSG_DISCONNECT_ACCOUNT
 		&LogonCommServerSocket::HandleTestConsoleLogin,		// RCMSG_TEST_CONSOLE_LOGIN
 		NULL,												// RSMSG_CONSOLE_LOGIN_RESULT
-		&LogonCommServerSocket::HandleDatabaseModify,		// RCMSG_DATABASE_MODIFY
+		&LogonCommServerSocket::HandleDatabaseModify,		// RCMSG_MODIFY_DATABASE
 		NULL,												// RSMSG_SERVER_PING
 		&LogonCommServerSocket::HandleServerPong,			// RCMSG_SERVER_PONG
 	};
@@ -161,41 +165,48 @@ void LogonCommServerSocket::HandlePacket(WorldPacket & recvData)
 
 void LogonCommServerSocket::HandleRegister(WorldPacket & recvData)
 {
-	Realm * realm;
-	string realmName;
-	recvData >> realmName;
+	string Name;
+	int32 tmp_RealmID;
 
-	realm = sInfoCore.GetRealmByName(realmName.c_str());
-
-	// not existant -> create
-	if( realm == NULL )
+	recvData >> Name;
+	tmp_RealmID = sInfoCore.GetRealmIdByName(Name);
+	
+	if (tmp_RealmID == -1)
 	{
-		realm = new Realm();
-		realm->Id = sInfoCore.GenerateRealmID();
-		realm->Name = realmName;
-		sInfoCore.AddRealm(realm);
+		tmp_RealmID = sInfoCore.GenerateRealmID();
+		Log.Notice("LogonCommServer","Registering realm `%s` under ID %u.", Name.c_str(), tmp_RealmID);
+	}
+	else 
+	{
+		sInfoCore.RemoveRealm(tmp_RealmID);
+		int new_tmp_RealmID = sInfoCore.GenerateRealmID(); //socket timout will DC old id after a while, make sure it's not the one we restarted
+		Log.Notice("LogonCommServer","Updating realm `%s` with ID %u to new ID %u.", Name.c_str(), tmp_RealmID, new_tmp_RealmID );
+		tmp_RealmID = new_tmp_RealmID;
 	}
 
-	// update data
-	recvData >> realm->Address;
-	recvData >> realm->Colour >> realm->Icon >> realm->TimeZone >> realm->Population;
+	Realm * realm = new Realm;
 
-	sLog.outString("Updating realm `%s` ID %u.", realm->Name.c_str(), realm->Id);
+	realm->Name = Name;
+	realm->Colour = 0;
+	realm->ServerSocket = this;
+
+	recvData >> realm->Address >> realm->Icon >> realm->WorldRegion >> realm->Population >> realm->Lock;
+
+	// Add to the main realm list
+	sInfoCore.AddRealm(tmp_RealmID, realm);
 
 	// Send back response packet.
 	WorldPacket data(RSMSG_REALM_REGISTERED, 4);
 	data << uint32(0);	  // Error
-	data << realm->Id;		  // Realm ID
+	data << tmp_RealmID;		  // Realm ID
 	data << realm->Name;
 	SendPacket(&data);
-	server_ids.insert(realm->Id);
+	server_ids.insert(tmp_RealmID);
 
 	/* request character mapping for this realm */
 	data.Initialize(RSMSG_REQUEST_ACCOUNT_CHARACTER_MAPPING);
-	data << realm->Id;
+	data << tmp_RealmID;
 	SendPacket(&data);
-
-	realm->ServerSocket = this;
 }
 
 void LogonCommServerSocket::HandleSessionRequest(WorldPacket & recvData)
@@ -208,7 +219,7 @@ void LogonCommServerSocket::HandleSessionRequest(WorldPacket & recvData)
 	// get sessionkey!
 	uint32 error = 0;
 	Account * acct = sAccountMgr.GetAccount(account_name);
-	if(acct == NULL || acct->SessionKey == NULL || acct == 0)
+	if(acct == NULL || acct->SessionKey == NULL || acct == NULL )
 		error = 1;		  // Unauthorized user.
 
 	// build response packet
@@ -219,7 +230,7 @@ void LogonCommServerSocket::HandleSessionRequest(WorldPacket & recvData)
 	{
 		// Append account information.
 		data << acct->AccountId;
-		data << acct->Username;
+		data << acct->UsernamePtr->c_str();
 		if(!acct->GMFlags)
 			data << uint8(0);
 		else
@@ -247,10 +258,15 @@ void LogonCommServerSocket::SendPacket(WorldPacket * data)
 	BurstBegin();
 
 	logonpacket header;
+#ifndef USING_BIG_ENDIAN
 	header.opcode = data->GetOpcode();
 	//header.size   = ntohl((u_long)data->size());
 	header.size = (uint32)data->size();
 	swap32(&header.size);
+#else
+	header.opcode = swap16(uint16(data->GetOpcode()));
+	header.size   = data->size();
+#endif
 
 	if(use_crypto)
 		sendCrypto.Process((unsigned char*)&header, (unsigned char*)&header, 6);
@@ -269,6 +285,20 @@ void LogonCommServerSocket::SendPacket(WorldPacket * data)
 	BurstEnd();
 }
 
+void LogonCommServerSocket::HandleSQLExecute(WorldPacket & recvData)
+{
+	/*string Query;
+	recvData >> Query;
+	sLogonSQL->Execute(Query.c_str());*/
+	printf("!! WORLD SERVER IS REQUESTING US TO EXECUTE SQL. THIS IS DEPRECATED AND IS BEING IGNORED. THE SERVER WAS: %s, PLEASE UPDATE IT.\n", GetRemoteIP().c_str());
+}
+
+void LogonCommServerSocket::HandleReloadAccounts(WorldPacket & recvData)
+{
+	printf("!! WORLD SERVER IS REQUESTING US TO RELOAD ACCOUNTS. THIS IS DEPRECATED AND IS BEING IGNORED. THE SERVER WAS: %s, PLEASE UPDATE IT.\n", GetRemoteIP().c_str());
+	//sAccountMgr.ReloadAccounts(true);
+}
+
 void LogonCommServerSocket::HandleAuthChallenge(WorldPacket & recvData)
 {
 	unsigned char key[20];
@@ -279,7 +309,7 @@ void LogonCommServerSocket::HandleAuthChallenge(WorldPacket & recvData)
 	if(memcmp(key, LogonServer::getSingleton().sql_hash, 20))
 		result = 0;
 
-	sLog.outString("Authentication request from %s, result %s.", GetRemoteIP().c_str(), result ? "OK" : "FAIL");
+	Log.Notice("LogonCommServer","Authentication request from %s, result %s.", GetRemoteIP().c_str(), result ? "OK" : "FAIL");
 
 	printf("Key: ");
 	for(int i = 0; i < 20; ++i)
@@ -322,14 +352,15 @@ void LogonCommServerSocket::HandleMappingReply(WorldPacket & recvData)
 	uint32 count;
 	uint32 realm_id;
 	buf >> realm_id;
-	Realm * realm = sInfoCore.GetRealmById(realm_id);
-	if( realm == NULL )
+	Realm * realm = sInfoCore.GetRealm(realm_id);
+	if(!realm)
 		return;
 
-	realm->m_charMapLock.Acquire();
+	sInfoCore.getRealmLock().Acquire();
+
 	HM_NAMESPACE::hash_map<uint32, uint8>::iterator itr;
 	buf >> count;
-	printf("Got mapping packet for realm %u, total of %u entries.\n", (unsigned int)realm_id, (unsigned int)count);
+	Log.Notice("LogonCommServer","Got mapping packet for realm %u, total of %u entries.\n", (unsigned int)realm_id, (unsigned int)count);
 	for(uint32 i = 0; i < count; ++i)
 	{
 		buf >> account_id >> number_of_characters;
@@ -339,7 +370,8 @@ void LogonCommServerSocket::HandleMappingReply(WorldPacket & recvData)
 		else
 			realm->CharacterMap.insert( make_pair( account_id, number_of_characters ) );
 	}
-	realm->m_charMapLock.Release();
+
+	sInfoCore.getRealmLock().Release();
 }
 
 void LogonCommServerSocket::HandleUpdateMapping(WorldPacket & recvData)
@@ -349,11 +381,11 @@ void LogonCommServerSocket::HandleUpdateMapping(WorldPacket & recvData)
 	uint8 chars_to_add;
 	recvData >> realm_id;
 
-	Realm * realm = sInfoCore.GetRealmById(realm_id);
+	Realm * realm = sInfoCore.GetRealm(realm_id);
 	if(!realm)
 		return;
 	
-	realm->m_charMapLock.Acquire();
+	sInfoCore.getRealmLock().Acquire();
 	recvData >> account_id >> chars_to_add;
 
 	HM_NAMESPACE::hash_map<uint32, uint8>::iterator itr = realm->CharacterMap.find(account_id);
@@ -362,7 +394,7 @@ void LogonCommServerSocket::HandleUpdateMapping(WorldPacket & recvData)
 	else
 		realm->CharacterMap.insert( make_pair( account_id, chars_to_add ) );
 
-	realm->m_charMapLock.Release();
+	sInfoCore.getRealmLock().Release();
 }
 
 void LogonCommServerSocket::HandleTestConsoleLogin(WorldPacket & recvData)
@@ -375,7 +407,7 @@ void LogonCommServerSocket::HandleTestConsoleLogin(WorldPacket & recvData)
 	recvData >> request;
 	recvData >> accountname;
 	recvData.read(key, 20);
-	printf("testing console login: %s\n", accountname.c_str());
+	Log.Debug("LogonCommServerSocket","Testing console login: %s\n", accountname.c_str());
 
 	data << request;
 
@@ -412,7 +444,7 @@ void LogonCommServerSocket::HandleDatabaseModify(WorldPacket& recvData)
 
 	if( !IsServerAllowedMod(GetRemoteAddress().s_addr) )
 	{
-		printf("Database modify request %u denied for %s.\n", method, GetRemoteIP().c_str());
+		Log.Error("LogonCommServerSocket","Database modify request %u denied for %s.\n", method, GetRemoteIP().c_str());
 		return;
 	}
 
@@ -497,7 +529,7 @@ void LogonCommServerSocket::HandleDatabaseModify(WorldPacket& recvData)
 			recvData >> ip;
 
 			if( sIPBanner.Remove( ip.c_str() ) )
-				sLogonSQL->Execute("DELETE FROM ipbans WHERE ip = \"%s\")", sLogonSQL->EscapeString(ip).c_str());
+				sLogonSQL->Execute("DELETE FROM ipbans WHERE ip = \"%s\"", sLogonSQL->EscapeString(ip).c_str());
 
 		}break;
 
