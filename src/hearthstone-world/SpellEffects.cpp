@@ -3422,7 +3422,12 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 		if( isVehicle )
 		{
 			CreatureProto * cp = CreatureProtoStorage.LookupEntry(cr_entry);
-			if(!cp) return;
+			if(!cp) return;e"
+			if(cp->vehicle_entry < 0)
+			{
+				Log.Error("SpellEffect", "Creature %u, has invalid vehicle_entry, please check your creature_proto table", cr_entry);
+				return;
+			}
 
 			VehiclePointer veh = VehiclePointer( u_caster->GetMapMgr()->CreateVehicle( cr_entry ) );
 			veh->m_CreatedFromSpell = true;
