@@ -139,7 +139,23 @@ void MapMgr::Destructor()
 		++itr;
 		if(pObject->IsInWorld())
 			pObject->RemoveFromWorld(false);
-		pObject->Destructor();
+		
+		switch(pObject->GetTypeFromGUID())
+		{
+		case HIGHGUID_TYPE_VEHICLE:
+			TO_VEHICLE(pObject)->Destructor();
+			break;
+		case HIGHGUID_TYPE_UNIT:
+			TO_CREATURE(pObject)->Destructor();
+			break;
+
+		case HIGHGUID_TYPE_GAMEOBJECT:
+			TO_GAMEOBJECT(pObject)->Destructor();
+			break;
+		default:
+			pObject->Destructor();
+
+		}
 		pObject = NULLOBJ;
 	}
 

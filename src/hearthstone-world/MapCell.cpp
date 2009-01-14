@@ -128,10 +128,11 @@ void MapCell::RemoveObjects()
 
 		case TYPEID_GAMEOBJECT: {
 			TO_GAMEOBJECT(pObject)->m_respawnCell=NULL;
-			TO_CREATURE(pObject)->Destructor();
+			TO_GAMEOBJECT(pObject)->Destructor();
 			pObject = NULLOBJ;
 			}break;
 		default:
+			pObject->Destructor();
 			pObject = NULLOBJ;
 			break;
 
