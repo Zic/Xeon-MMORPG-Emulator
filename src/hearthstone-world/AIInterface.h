@@ -266,7 +266,7 @@ public:
 	void HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1);
 	void OnDeath(ObjectPointer pKiller);
 	void AttackReaction(shared_ptr<Unit>pUnit, uint32 damage_dealt, uint32 spellId = 0);
-	bool HealReaction(UnitPointer caster, UnitPointer victim, uint32 amount);
+	bool HealReaction(UnitPointer caster, UnitPointer victim, uint32 amount, SpellEntry * sp);
 	void Event_Summon_EE_totem(uint32 summon_duration);
 	void Event_Summon_FE_totem(uint32 summon_duration);
 

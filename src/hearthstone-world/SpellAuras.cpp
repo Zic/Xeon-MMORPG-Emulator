@@ -3187,7 +3187,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			for(std::vector<shared_ptr<Unit> >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
-				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat);
+				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
 			}
 		}
 
@@ -3260,7 +3260,7 @@ void Aura::SpellAuraModThreatGenerated(bool apply)
 		{
 			if(m_target->GetGeneratedThreatModifier() < mod->m_amount)
 			{
-				m_target->ModGeneratedThreatModifier(0);
+				m_target->ModGeneratedThreatModifier(-m_target->GetGeneratedThreatModifier());
 				m_target->ModGeneratedThreatModifier(mod->m_amount);
 			}
 		}
@@ -6714,7 +6714,7 @@ void Aura::SpellAuraModTotalThreat( bool apply )
 
 		if( m_target->GetThreatModifier() > mod->m_amount ) // replace old mod
 		{
-			m_target->ModThreatModifier( 0 );
+			m_target->ModThreatModifier( -m_target->GetThreatModifier() );
 			m_target->ModThreatModifier( mod->m_amount );
 		}
 	}

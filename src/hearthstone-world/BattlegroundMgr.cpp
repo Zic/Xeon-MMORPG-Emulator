@@ -2024,7 +2024,7 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 bool CBattleground::CanPlayerJoin(PlayerPointer plr)
 {
-	return HasFreeSlots(plr->m_bgTeam);
+	return (plr->bGMTagOn || HasFreeSlots(plr->m_bgTeam));
 }
 
 void CBattleground::QueueAtNearestSpiritGuide(PlayerPointer plr, CreaturePointer old)
