@@ -2078,6 +2078,13 @@ void ApplyNormalFixes()
 		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
 	}
 
+	//shaman - Hex
+	sp = dbcSpell.LookupEntryForced( 51514 );
+	if( sp != NULL )
+	{ // Damage caused may interrupt the effect.
+		sp->AuraInterruptFlags |= AURA_INTERRUPT_ON_UNUSED2;
+	}
+
 	// shaman - Maelstrom Weapon
 	ranks = fill(ids, 51528, 51529, 51530, 51531, 51532, 0);
 	for(uint32 i = 0; i < ranks; i++)
