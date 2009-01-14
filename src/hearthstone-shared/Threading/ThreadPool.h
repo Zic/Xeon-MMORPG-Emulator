@@ -181,7 +181,7 @@ public:
 	void IntegrityCheck(uint8 ThreadCount = THREAD_RESERVE);
 
 	// call at startup
-	void Startup(uint8 ThreadCount);
+	void Startup(uint8 ThreadCount = 8);
 
 	// shutdown all threads
 	void Shutdown();

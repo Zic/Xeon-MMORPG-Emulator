@@ -2423,7 +2423,7 @@ bool Spell::TakePower()
 	int32 cost;
 	int32 currentPower = m_caster->GetUInt32Value(powerField);
 
-	cost = m_caster->GetSpellBaseCost(m_spellInfo->Id);
+	cost = m_caster->GetSpellBaseCost(m_spellInfo);
 
 	if( u_caster != NULL )
 	{
