@@ -97,7 +97,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\bin\debug\script_bin"
+			OutputDirectory="..\..\..\bin\Release\script_bin"
 			IntermediateDirectory="2005_int_release_EventScripts"
 			ConfigurationType="2"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -159,7 +159,7 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				OptimizeForWindows98="1"
+				OptimizeForWindows98="0"
 				LinkTimeCodeGeneration="1"
 				ImportLibrary="$(OutDir)/EventScripts.lib"
 				TargetMachine="1"
