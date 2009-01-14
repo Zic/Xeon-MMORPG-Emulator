@@ -18,6 +18,6 @@ BLEED         2048
 POISON        4096
 MANALEECH     8192
 LEECH        16384 
-/*
+*/
 
 ALTER TABLE creature_proto ADD COLUMN auraimmune_flag int(11)  DEFAULT 0 NOT NULL  AFTER extra_a9_flags;

@@ -41,7 +41,7 @@ void SpellCastTargets::read( WorldPacket & data,uint64 caster )
 	data >> m_targetMask;
 	WoWGuid guid;
 
-	if( m_targetMask & (TARGET_FLAG_SELF | TARGET_FLAG_GLYPH) )
+	if( m_targetMask == TARGET_FLAG_SELF  || m_targetMask & TARGET_FLAG_GLYPH )
 	{
 		m_unitTarget = caster;
 	}
@@ -958,8 +958,11 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	uint8 ccr;
 
 	chaindamage = 0;
-	if( targets->m_targetMask == 0 ) // WAT? No targets? Try to generate them.
+	if( m_spellInfo->Id == 51514 || m_spellInfo->NameHash == SPELL_HASH_ARCANE_SHOT ) // hackfix for spells that send wrong targets - Hex, Arcane Shot
+	{
+		targets->m_unitTarget = 0;
 		GenerateTargets( targets );
+	}
 
 	m_targets = *targets;
 
@@ -1486,13 +1489,18 @@ void Spell::cast(bool check)
 					unitTarget->RemoveFlag(UNIT_FIELD_AURASTATE, m_spellInfo->TargetAuraState);
 
 				// proc!
-				if( u_caster != NULL && u_caster->IsInWorld() )
+				if(!m_triggeredSpell)
 				{
-					if(!m_triggeredSpell)
+					if( u_caster != NULL && u_caster->IsInWorld() )
 					{
-						u_caster->HandleProc(PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL, unitTarget, m_spellInfo);
-						u_caster->m_procCounter = 0; //this is required for to be able to count the depth of procs (though i have no idea where/why we use proc on proc)
+							u_caster->HandleProc(PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL, unitTarget, m_spellInfo);
+							u_caster->m_procCounter = 0; //this is required for to be able to count the depth of procs (though i have no idea where/why we use proc on proc)
 					}
+				}
+				if( unitTarget != NULL && unitTarget->IsInWorld() )
+				{
+					unitTarget->HandleProc(PROC_ON_SPELL_LAND_VICTIM, u_caster, m_spellInfo);
+					unitTarget->m_procCounter = 0; //this is required for to be able to count the depth of procs (though i have no idea where/why we use proc on proc)
 				}
 			}
 		}
@@ -4390,12 +4398,12 @@ void Spell::Heal(int32 amount)
 	} else
 		unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH, amount);
 
+	if( m_caster && unitTarget->IsPlayer() )
+	{
+		SendHealSpellOnPlayer( m_caster, unitTarget, amount, critical, overheal, pSpellId ? pSpellId : m_spellInfo->Id );
+	}
 	if( p_caster != NULL )  
 	{
-		if( unitTarget->IsPlayer() )
-		{
-			SendHealSpellOnPlayer( p_caster, TO_PLAYER( unitTarget ), amount, critical, overheal, pSpellId ? pSpellId : m_spellInfo->Id );
-		}
 		p_caster->m_bgScore.HealingDone += amount;
 		if( p_caster->m_bg != NULL )
 			p_caster->m_bg->UpdatePvPData();

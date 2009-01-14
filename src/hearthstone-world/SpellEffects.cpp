@@ -5030,36 +5030,68 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 		pTotem->EnableAI();
 		pTotem->GetAIInterface()->Init(pTotem, AITYPE_TOTEM, MOVEMENTTYPE_NONE, p_caster);
 		pTotem->GetAIInterface()->totemspell = TotemSpell;
-		uint32 timer = 3000;	// need a proper resource for this.
+		int32 totemspelltimer = 3000, totemspelltime = 3000;	// need a proper resource for this.
 
 		switch(TotemSpell->Id)
 		{
-		case 8167: //Poison Cleansing Totem
-		case 8172: //Disease Cleansing Totem
-			timer =  5000;
-			break;
+		case 51975: //Poison Cleansing Totem
+		case 52025: //Disease Cleansing Totem
+			{
+				totemspelltime =  5000;
+				totemspelltimer = 0; //First tick done immediately
+				break;
+			}
 		case 8146: //Tremor Totem
-		case 8349: //Fire Nova Totem 1
-		case 8502: //Fire Nova Totem 2
-		case 8503: //Fire Nova Totem 3
-		case 11306: //Fire Nova Totem 4
-		case 11307: //Fire Nova Totem 5
-		case 25535: //Fire Nova Totem 6
-		case 25537: //Fire Nova Totem 7
-			timer =  4000;
-			break;
+			{
+				totemspelltime = 1000;	// not sure about correctness, but spell amplitude = 1000
+				totemspelltimer = 0; //First tick done immediately
+				break;
+			}
+		default:break;
+		}
+		switch(m_spellInfo->NameHash)
+		{
+		case SPELL_HASH_STONECLAW_TOTEM:
+			{
+				totemspelltime = 30000; // Should be casted only once
+				totemspelltimer = 0; // Casted immediately
+				break;
+			}
+		case SPELL_HASH_MAGMA_TOTEM:
+		case SPELL_HASH_MANA_SPRING_TOTEM:
+		case SPELL_HASH_HEALING_STREAM_TOTEM:
+			{
+				totemspelltimer = totemspelltime = 2000;
+				break;
+			}
+		case SPELL_HASH_SEARING_TOTEM:
+			{
+				totemspelltimer = totemspelltime = 2200;
+				break;
+			}
+		case SPELL_HASH_FIRE_NOVA_TOTEM:
+			{
+				totemspelltime = totemspelltimer =  4000;
+				break;
+			}
 		default:break;
 		}
 
-		pTotem->GetAIInterface()->m_totemspelltimer = timer;
-		pTotem->GetAIInterface()->m_totemspelltime = timer;
+		pTotem->GetAIInterface()->m_totemspelltimer = totemspelltimer;
+		pTotem->GetAIInterface()->m_totemspelltime = totemspelltime;
 	}
 
 	//in case these are our elemental totems then we should set them up
 	if(m_spellInfo->Id==2062)
+	{
 		pTotem->GetAIInterface()->Event_Summon_EE_totem(GetDuration());
+		pTotem->DisableAI();
+	}
 	else if(m_spellInfo->Id==2894)
+	{
 		pTotem->GetAIInterface()->Event_Summon_FE_totem(GetDuration());
+		pTotem->DisableAI();
+	}
 
 	// Set up the deletion event. The totem needs to expire after a certain time, or upon its death.
 	sEventMgr.AddEvent(pTotem, &Creature::TotemExpire, EVENT_TOTEM_EXPIRE, GetDuration(), 1,0);

@@ -1732,6 +1732,21 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								else
 									continue;
 							}break;
+						case 52179: // Astral Shift
+							{
+								if (!CastingSpell || !spe || 
+									!(Spell::HasMechanic(CastingSpell, MECHANIC_STUNNED) ||
+									Spell::HasMechanic(CastingSpell, MECHANIC_FLEEING) || 
+									Spell::HasMechanic(CastingSpell, MECHANIC_SILENCED)))
+									continue;
+								SpellDuration *sd = dbcSpellDuration.LookupEntry(CastingSpell->DurationIndex);
+								if(!sd)
+									continue;
+								AuraPointer aura = AuraPointer(new Aura(spe, std::min(GetDuration(sd), (uint32)10000), object_shared_from_this(), unit_shared_from_this()));
+								aura->AddMod(spe->EffectApplyAuraName[0],spe->EffectBasePoints[0]+1,spe->EffectMiscValue[0],0);
+								this->AddAura(aura, NULLAURA);
+								continue;
+							}break;
 						case 51693: // Waylay
 							{
 								if(!CastingSpell || CastingSpell->NameHash != SPELL_HASH_AMBUSH)

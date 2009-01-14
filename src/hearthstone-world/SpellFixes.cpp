@@ -541,7 +541,7 @@ void GenerateNameHashesFile()
 void ApplyNormalFixes()
 {
 	//Updating spell.dbc
-	SpellEntry *sp;
+	SpellEntry *sp, *sp2;
 	uint32 ids[100], proc_ids[100], ranks;
 
 	Log.Notice("World", "Processing %u spells...", dbcSpell.GetNumRows());
@@ -2094,6 +2094,56 @@ void ApplyNormalFixes()
 	if( sp != NULL )
 		sp->procFlags = PROC_ON_CAST_SPELL;
 
+	// Astral Shift
+	sp = dbcSpell.LookupEntryForced( 52179 );
+	if( sp != NULL )
+	{
+		sp->EffectAmplitude[0] = 0;
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+		sp->EffectMiscValue[0] = 127;
+	}
+	ranks = fill(ids, 51479, 51478, 51474, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->procFlags = PROC_ON_SPELL_LAND_VICTIM;
+			sp->EffectTriggerSpell[0] = 52179;
+			sp->Effect[1] = 0;
+			sp->EffectApplyAuraName[1] = 0;
+		}
+	}
+
+	sp2 = dbcSpell.LookupEntryForced( 58780 );
+	// shaman - Poison Cleansing Totem
+	sp = dbcSpell.LookupEntryForced( 51975 );
+	if( sp != NULL && sp2 != NULL )
+	{
+		sp->EffectRadiusIndex[0] = sp2->EffectRadiusIndex[0]; //30 yards
+		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY_IN_AREA;
+	}
+	// shaman - Disease Cleansing Totem
+	sp = dbcSpell.LookupEntryForced( 52025 );
+	if( sp != NULL && sp2 != NULL )
+	{
+		sp->EffectRadiusIndex[0] = sp2->EffectRadiusIndex[0]; //30 yards
+		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY_IN_AREA;
+	}
+
+	// Fire Nova Totem visual fix
+	ranks = fill(ids, 8349, 8502, 8503, 11306, 11307, 25535, 25537, 61650, 61654, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[1] = 19823;
+		}
+	}
+
 	// Shaman Totem items fixes
 	// Totem of Survival, Totem of the Tundra
 	ranks = fill(ids, 46097, 43860, 43861, 43862, 60564, 60571, 60572, 37575, 0);
@@ -2280,9 +2330,10 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 2825 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ATTACKSPEED;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
-		sp->EffectImplicitTargetA[2] = 0;
+		sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
@@ -2292,9 +2343,10 @@ void ApplyNormalFixes()
 	sp = dbcSpell.LookupEntryForced( 32182 );
 	if( sp != NULL )
 	{
+		sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ATTACKSPEED;
 		sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
-		sp->EffectImplicitTargetA[2] = 0;
+		sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
 		sp->EffectImplicitTargetB[0] = 0;
 		sp->EffectImplicitTargetB[1] = 0;
 		sp->EffectImplicitTargetB[2] = 0;
