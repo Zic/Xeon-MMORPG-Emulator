@@ -479,8 +479,6 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			m_nextSpell = NULL;
 
 			SetNextTarget(NULLUNIT);
-			//reset ProcCount
-			//ResetProcCounts();
 		
 			//reset waypoint to 0
 			m_currentWaypoint = 0;
@@ -488,21 +486,14 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			// There isn't any need to do any attacker checks here, as
 			// they should all be taken care of in DealDamage
 
-			//removed by Zack : why do we need to go to our master if we just died ? On next spawn we will be spawned near him after all
-/*			if(m_AIType == AITYPE_PET)
-			{
-				SetUnitToFollow(m_PetOwner);
-				SetFollowDistance(3.0f);
-				HandleEvent(EVENT_FOLLOWOWNER, m_Unit, 0);
-			}*/
-
 			if(m_Unit->GetMapMgr())
 			{
 				if(m_Unit->GetTypeId() == TYPEID_UNIT && !m_Unit->IsPet())
 				{
 					if( m_Unit->GetMapMgr()->pInstance && m_Unit->GetMapMgr()->GetMapInfo()->type != INSTANCE_PVP )
 					{
-						if( TO_CREATURE(m_Unit)->m_spawn != NULL )
+						//only save creature which exist in db (don't want to save 0 values in db) 
+						if( m_Unit->m_loadedFromDB && TO_CREATURE(m_Unit)->m_spawn != NULL )
 						{
 							m_Unit->GetMapMgr()->pInstance->m_killedNpcs.insert( TO_CREATURE(m_Unit)->m_spawn->id );
 							m_Unit->GetMapMgr()->pInstance->SaveToDB();

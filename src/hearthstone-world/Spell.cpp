@@ -2380,14 +2380,13 @@ bool Spell::HasPower()
 
 bool Spell::TakePower()
 {
-	int32 powerField;
-	if( u_caster != NULL )
-	if(u_caster->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
-		return true;
-
+	// Don't use mana
 	if(p_caster && p_caster->PowerCheat)
 		return true;
+	if( u_caster != NULL && u_caster->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) )
+		return true;
 
+	int32 powerField;
 	switch(m_spellInfo->powerType)
 	{
 		case POWER_TYPE_HEALTH:	{ powerField = UNIT_FIELD_HEALTH; }break;
@@ -2395,29 +2394,41 @@ bool Spell::TakePower()
 		case POWER_TYPE_RAGE:	{ powerField = UNIT_FIELD_POWER2; }break;
 		case POWER_TYPE_FOCUS:	{ powerField = UNIT_FIELD_POWER3; }break;
 		case POWER_TYPE_ENERGY:	{ powerField = UNIT_FIELD_POWER4; }break;
-		case POWER_TYPE_RUNE:
-			{
-				if(m_spellInfo->runeCostID && p_caster)
-				{
-					SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
-					if( !p_caster->CanUseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost) )
-						return false;
-					p_caster->UseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost, m_spellInfo);
-					if(runecost->runePowerGain)
-						u_caster->SetPower(POWER_TYPE_RUNIC, runecost->runePowerGain + u_caster->GetUInt32Value(UNIT_FIELD_POWER7));
-				}
-				return true;
-			}
 		case POWER_TYPE_RUNIC:	{ powerField = UNIT_FIELD_POWER7; }break;
-		default:{
-			DEBUG_LOG("unknown power type %d", m_spellInfo->powerType);
-			// we should'nt be here to return
+		case POWER_TYPE_RUNE:
+		{
+			if(m_spellInfo->runeCostID && p_caster)
+			{
+				SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
+				if( !p_caster->CanUseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost) )
+					return false;
+
+				p_caster->UseRunes( runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost, m_spellInfo);
+				if(runecost->runePowerGain)
+					u_caster->SetPower(POWER_TYPE_RUNIC, runecost->runePowerGain + u_caster->GetUInt32Value(UNIT_FIELD_POWER7));
+			}
+			return true;
+		}break;
+		default:
+		{
+			Log.Debug("Spell","Unknown power type %u for spell %u", m_spellInfo->powerType, m_spellInfo->Id);
+			// we shouldn't be here to return
 			return false;
-				}break;
+		}break;
 	}
 
 	//FIXME: add handler for UNIT_FIELD_POWER_COST_MODIFIER
 	//UNIT_FIELD_POWER_COST_MULTIPLIER
+
+	int32 cost;
+	int32 currentPower = m_caster->GetUInt32Value(powerField);
+
+	//Percentage spells cost % of !!!BASE!!! mana
+	if( m_spellInfo->ManaCostPercentage)
+		cost = float2int32(float(m_caster->GetUInt32Value(powerField))* float(m_spellInfo->ManaCostPercentage/100));
+	else
+		cost = m_spellInfo->manaCost;
+
 	if( u_caster != NULL )
 	{
 		if( m_spellInfo->AttributesEx & ATTRIBUTESEX_DRAIN_WHOLE_MANA ) // Uses %100 mana
@@ -2425,27 +2436,18 @@ bool Spell::TakePower()
 			m_caster->SetUInt32Value(powerField, 0);
 			return true;
 		}
+		cost += u_caster->PowerCostMod[ m_usesMana ? m_spellInfo->School : 0 ];//this is not percent!
+		cost += float2int32(float(cost)* u_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER + m_spellInfo->School));
 	}
-	   
-	int32 currentPower = m_caster->GetUInt32Value(powerField);
-	int32 cost = m_caster->GetSpellBaseCost(m_spellInfo);
-	
-	if((int32)m_spellInfo->powerType==POWER_TYPE_HEALTH)
-			cost -= m_spellInfo->baseLevel;//FIX for life tap	
-	else if( u_caster != NULL )
-	{
-		if( m_spellInfo->powerType==POWER_TYPE_MANA)
-			cost += u_caster->PowerCostMod[m_spellInfo->School];//this is not percent!
-		else
-			cost += u_caster->PowerCostMod[0];
-		cost +=float2int32(cost*u_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+m_spellInfo->School));
-	}
+
+	if( powerField == UNIT_FIELD_HEALTH )
+		cost -= m_spellInfo->baseLevel;//FIX for life tap	
 
 	//apply modifiers
 	if( m_spellInfo->SpellGroupType && u_caster)
 	{
-		  SM_FIValue(u_caster->SM[SMT_COST][0],&cost,m_spellInfo->SpellGroupType);
-		  SM_PIValue(u_caster->SM[SMT_COST][1],&cost,m_spellInfo->SpellGroupType);
+		SM_FIValue(u_caster->SM[SMT_COST][0],&cost,m_spellInfo->SpellGroupType);
+		SM_PIValue(u_caster->SM[SMT_COST][1],&cost,m_spellInfo->SpellGroupType);
 	}
 
 	if (cost <=0)
@@ -2463,13 +2465,12 @@ bool Spell::TakePower()
 		{
 			if(u_caster)
 				u_caster->SetPower(m_spellInfo->powerType, currentPower - cost);
-			else
+			else // Is this needed at all Do GO's use mana? 
 				m_caster->SetUInt32Value(powerField, currentPower - cost);
 			return true;
 		}
-		else
-			return false;	 
-	} 
+	}
+	return false;
 }
 
 ObjectPointer Spell::_LookupObject(const uint64& guid)

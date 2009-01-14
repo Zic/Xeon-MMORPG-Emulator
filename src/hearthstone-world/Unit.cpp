@@ -6019,10 +6019,7 @@ void Creature::Tag(PlayerPointer plr)
 void Unit::SetPower(uint32 type, int32 value)
 {
 	uint32 maxpower = GetUInt32Value(UNIT_FIELD_MAXPOWER1 + type);
-	if(value < 0)
-		value = 0;
-	else if(value > (int32)maxpower)
-		value = maxpower;
+	value = value < 0 ? 0 : value > (int32)maxpower ? maxpower : value ; 
 	SetUInt32Value(UNIT_FIELD_POWER1 + type, value);
 	SendPowerUpdate();
 }
