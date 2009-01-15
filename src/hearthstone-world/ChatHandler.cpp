@@ -332,11 +332,18 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			PlayerPointer player = objmgr.GetPlayer(misc.c_str(), false);
 			if(!player)
 			{
-				data = new WorldPacket(SMSG_CHAT_PLAYER_NOT_FOUND, misc.length() + 1);
-				*data << misc;
-				SendPacket(data);
-				delete data;
-				break;
+				if( misc == "Console" ||  misc == "console" )
+				{
+					Log.Notice("Whisper","%s to %s: %s", _player->GetName(), misc.c_str(), msg.c_str());
+					return;
+				}
+				else
+				{
+					data = new WorldPacket(SMSG_CHAT_PLAYER_NOT_FOUND, misc.length() + 1);
+					*data << misc;
+					SendPacket(data);
+					delete data;
+				}
 			}
 
 			// Check that the player isn't a gm with his status on

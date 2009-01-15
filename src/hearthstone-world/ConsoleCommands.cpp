@@ -47,7 +47,11 @@ bool HandleInfoCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	pConsole->Write("======================================================================\r\n");
 	pConsole->Write("Server Revision: Hearthstone r%u/%s-%s-%s\r\n", BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	pConsole->Write("Server Uptime: %s\r\n", sWorld.GetUptimeString().c_str());
-	pConsole->Write("Current Players: %d (%d GMs, %d queued)\r\n", clientsNum, gm,  0);
+	pConsole->Write("Current Players: %u (%d GMs, %d queued)\r\n", clientsNum, gm,  0);
+	pConsole->Write("Alliance Online: %u\r\n",sWorld.AlliancePlayers);
+	pConsole->Write("Horde Online: %u\r\n",sWorld.HordePlayers);
+	pConsole->Write("Connection Peak: %u\r\n", sWorld.PeakSessionCount);
+	pConsole->Write("Accepted Connections: %u\r\n", sWorld.mAcceptedConnections);
 	pConsole->Write("Active Thread Count: %u\r\n", ThreadPool.GetActiveThreadCount());
 	pConsole->Write("Free Thread Count: %u\r\n", ThreadPool.GetFreeThreadCount());
 	pConsole->Write("Average Latency: %.3fms\r\n", count ?  ((float)((float)avg / (float)count)) : 0.0f);
@@ -64,9 +68,9 @@ bool HandleGMsCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	//bool first = true;
 
 	pConsole->Write("There are the following GM's online on this server: \r\n");
-	pConsole->Write("=======================================================\r\n");
-	pConsole->Write("| %16s | %20s | Latency  |\r\n" , "Name", "Permissions");
-	pConsole->Write("=======================================================\r\n");
+	pConsole->Write("======================================================\r\n");
+	pConsole->Write("| %21s | %15s | %04s  |\r\n" , "Name", "Permissions", "Latency");
+	pConsole->Write("======================================================\r\n");
 
 	PlayerStorageMap::const_iterator itr;
 	objmgr._playerslock.AcquireReadLock();
@@ -74,25 +78,25 @@ bool HandleGMsCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	{
 		if(itr->second->GetSession()->GetPermissionCount())
 		{
-			pConsole->Write("| %16s | %20s | %03u ms |\r\n" , itr->second->GetName(), itr->second->GetSession()->GetPermissions(), itr->second->GetSession()->GetLatency());
+			pConsole->Write("| %21s | %15s | %04u ms |\r\n" , itr->second->GetName(), itr->second->GetSession()->GetPermissions(), itr->second->GetSession()->GetLatency());
 		}
 	}
 	objmgr._playerslock.ReleaseReadLock();
 
-	pConsole->Write("============================================================\r\n\r\n");
+	pConsole->Write("======================================================\r\n\r\n");
 	return true;
 }
 
-void ConcatArgs(string & outstr, int argc, const char * argv[])
+
+void ConcatArgs(string & outstr, int argc, int startoffset, const char * argv[])
 {
-	for(int i = 1; i < argc; ++i)
+	for(int i = startoffset + 1; i < argc; ++i)
 	{
 		outstr += argv[i];
 		if((i+1) != (argc))
 			outstr += " ";
 	}
 }
-
 bool HandleAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[])
 {
 	char pAnnounce[1024];
@@ -100,7 +104,7 @@ bool HandleAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[]
 	if(argc < 2)
 		return false;
 
-	ConcatArgs(outstr, argc, argv);
+	ConcatArgs(outstr, argc, 0, argv);
 	snprintf(pAnnounce, 1024, "%sConsole: |r%s", MSG_COLOR_LIGHTBLUE, outstr.c_str());
 	sWorld.SendWorldText(pAnnounce); // send message
 	pConsole->Write("Message sent.\r\n");
@@ -114,7 +118,7 @@ bool HandleWAnnounceCommand(BaseConsole * pConsole, int argc, const char * argv[
 	if(argc < 2)
 		return false;
 
-	ConcatArgs(outstr, argc, argv);
+	ConcatArgs(outstr, argc, 0, argv);
 	snprintf(pAnnounce, 1024, "%sConsole: |r%s", MSG_COLOR_LIGHTBLUE, outstr.c_str());
 	sWorld.SendWorldWideScreenText(pAnnounce); // send message
 	pConsole->Write("Message sent.\r\n");
@@ -135,7 +139,8 @@ bool HandleKickCommand(BaseConsole * pConsole, int argc, const char * argv[])
 		pConsole->Write("Could not find player, %s.\r\n", argv[1]);
 		return true;
 	}
-
+	string outstr;
+	ConcatArgs(outstr, argc, 1, argv);
 	snprintf(pAnnounce, 1024, "%sConsole:|r %s was kicked from the server for: %s.", MSG_COLOR_LIGHTBLUE, pPlayer->GetName(), argv[2]);
 	pPlayer->BroadcastMessage("You were kicked by the console for: %s", argv[2]);
 	sWorld.SendWorldText(pAnnounce, NULL);
@@ -211,25 +216,24 @@ bool HandleCreateAccountCommand(BaseConsole * pConsole, int argc, const char * a
 
 	if(strlen(username) == 0 || strlen(password) == 0 || strlen(email) == 0)
 		return false;
-
-	/*string susername = CharacterDatabase.EscapeString(string(username));
-	string spassword = CharacterDatabase.EscapeString(string(password));
-	string semail = CharacterDatabase.EscapeString(string(email));
-
-	sLogonCommHandler.LogonDatabaseSQLExecute("INSERT INTO accounts (login, password, email, flags) VALUES('%s','%s','%s',%u)",susername.c_str(), spassword.c_str(),
-		semail.c_str(), flags);
-
-	pConsole->Write("Account created.\r\n");*/
 	return true;
 }
 
 bool HandleMOTDCommand(BaseConsole * pConsole, int argc, const char * argv[])
 {
 	if(argc < 2)
-		return false;
+	{
+		pConsole->Write( "The current motd is: '%s'.\r\n", sWorld.GetMotd() );
+	}else
+	{
+		char set_motd[1024];
+		string outstr;
+		ConcatArgs( outstr, argc, 0, argv );
+		snprintf( set_motd, 1024, "%s", outstr.c_str() );
 
-	sWorld.SetMotd(argv[1]);
-	pConsole->Write("MOTD has been set to '%s'.\r\n", argv[1]);
+		sWorld.SetMotd( set_motd );
+		pConsole->Write( "The motd has been set to: '%s'.\r\n", sWorld.GetMotd() );
+	}
 	return true;
 }
 
@@ -261,7 +265,7 @@ void TestConsoleLogin(string& username, string& password, uint32 requestno)
 
 bool HandleRehashCommand(BaseConsole * pConsole, int argc, const char * argv[])
 {
-	pConsole->Write("Config file re-parsed.");
+	pConsole->Write("Config file re-parsed.\n");
 	sWorld.Rehash(true);
 	return true;
 }
@@ -300,3 +304,69 @@ bool HandleSaveAllCommand(BaseConsole * pConsole, int argc, const char * argv[])
 
 	return true;
 }
+bool HandleWhisperCommand(BaseConsole * pConsole, int argc, const char * argv[])
+{
+	char pAnnounce[1024];
+	PlayerPointer pPlayer;
+	string outstr;
+
+	if(argc < 3)
+		return false;
+
+	pPlayer = objmgr.GetPlayer(argv[1]);
+
+	if( pPlayer == NULL )
+	{
+		pConsole->Write("Could not find player, %s.\r\n", argv[1]);
+		return true;
+	}
+
+	ConcatArgs(outstr, argc, 1, argv);
+	snprintf(pAnnounce, 1024, "%sConsole whisper: |r%s", MSG_COLOR_MAGENTA, outstr.c_str());
+
+	pPlayer->BroadcastMessage(pAnnounce);
+	pConsole->Write("Message sent to %s.\r\n", pPlayer->GetName());
+	return true;
+}
+bool HandleNameHashCommand(BaseConsole * pConsole, int argc, const char * argv[])
+{
+	if( !argc )
+		return false;
+	string spstring;
+		ConcatArgs(spstring, argc, 0, argv);
+	uint32 spellid = (int)atoi((char*)spstring.c_str());
+	SpellEntry * sp = dbcSpell.LookupEntryForced(spellid);
+	if ( !sp )
+	{
+		pConsole->Write( "Spell %u could not be found in spell.dbc\n", spellid );
+		return true;
+	}
+	else
+	{
+		pConsole->Write( "Name Hash for %u [%s] is 0x%X\n" ,sp->Id, sp->Name , uLong(sp->NameHash));
+		return true;
+	}
+}
+bool HandleOnlinePlayersCommand(BaseConsole * pConsole, int argc, const char * argv[])
+{
+	WorldPacket data;
+	//bool first = true;
+
+	pConsole->Write("There following players online on this server: \r\n");
+	pConsole->Write("======================================================\r\n");
+	pConsole->Write("| %21s | %15s | % 04s  |\r\n" , "Name", "Level", "Latency");
+	pConsole->Write("======================================================\r\n");
+
+	PlayerStorageMap::const_iterator itr;
+	objmgr._playerslock.AcquireReadLock();
+	for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
+	{
+		pConsole->Write("| %21s | %15u | %04u ms |\r\n" , itr->second->GetName(), itr->second->GetSession()->GetPlayer()->getLevel(), itr->second->GetSession()->GetLatency());
+	}
+	objmgr._playerslock.ReleaseReadLock();
+
+	pConsole->Write("======================================================\r\n\r\n");
+	return true;
+}
+
+
