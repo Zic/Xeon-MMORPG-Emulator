@@ -862,7 +862,7 @@ ItemPointer ItemInterface::FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBa
 					shared_ptr<Item>item2 = TO_CONTAINER(item)->GetItem(j);
 					if (item2)
 					{
-						if((item2->GetProto()->ItemId == itemid && item->wrapped_item_id==0) && (item2->GetProto()->MaxCount >= (item2->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + cnt)))
+						if((item2->GetProto()->ItemId == itemid && item2->wrapped_item_id==0) && (item2->GetProto()->MaxCount >= (item2->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + cnt)))
 						{
 							return item2;
 						}
@@ -897,7 +897,7 @@ ItemPointer ItemInterface::FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBa
 						shared_ptr<Item>item2 = TO_CONTAINER(item)->GetItem(j);
 						if (item2)
 						{
-							if((item2->GetProto()->ItemId == itemid && item->wrapped_item_id==0) && (item2->GetProto()->MaxCount >= (item2->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + cnt)))
+							if((item2->GetProto()->ItemId == itemid && item2->wrapped_item_id==0) && (item2->GetProto()->MaxCount >= (item2->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + cnt)))
 							{
 								return item2;
 							}
