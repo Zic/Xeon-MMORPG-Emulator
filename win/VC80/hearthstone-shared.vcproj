@@ -106,6 +106,85 @@
 			/>
 		</Configuration>
 		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory=".\hearthstone-shared___Win32_Debug"
+			IntermediateDirectory=".\hearthstone-shared___Win32_Debug"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+				Description="Extracting SVN revision..."
+				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;RevisionExtractor.exe&#x0D;&#x0A;"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				InlineFunctionExpansion="2"
+				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;..\..\src\hearthstone-shared;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\shared___Win32_Debug/shared.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(IntDir)/shared.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
 			Name="Release|x64"
 			OutputDirectory=".\hearthstone-shared___Win32_Release_x64"
 			IntermediateDirectory=".\hearthstone-shared___Win32_Release_x64"
@@ -163,85 +242,6 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(IntDir)/shared.lib"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory=".\hearthstone-shared___Win32_Debug"
-			IntermediateDirectory=".\hearthstone-shared___Win32_Debug"
-			ConfigurationType="4"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-				Description="Extracting SVN revision..."
-				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;RevisionExtractor.exe&#x0D;&#x0A;"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\..\src\hearthstone-shared"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\shared___Win32_Debug/shared.pch"
-				AssemblerListingLocation="$(IntDir)/"
-				ObjectFile="$(IntDir)/"
-				ProgramDataBaseFileName="$(IntDir)/"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -357,10 +357,6 @@
 			Name="Database"
 			>
 			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\CreateInterface.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\hearthstone-shared\Database\Database.cpp"
 				>
 			</File>
@@ -382,30 +378,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hearthstone-shared\Database\Field.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\MySQLDatabase.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\MySQLDatabase.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\PostgresDatabase.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\PostgresDatabase.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\SQLiteDatabase.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\Database\SQLiteDatabase.h"
 				>
 			</File>
 			<Filter
@@ -461,6 +433,10 @@
 			Name="Auth"
 			>
 			<File
+				RelativePath="..\..\src\hearthstone-shared\Auth\AuthPacketKey.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-shared\Auth\BigNumber.cpp"
 				>
 			</File>
@@ -513,6 +489,14 @@
 			Name="Network"
 			>
 			<File
+				RelativePath="..\..\src\hearthstone-shared\Network\CircularBuffer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-shared\Network\CircularBuffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-shared\Network\ListenSocketWin32.h"
 				>
 			</File>
@@ -558,10 +542,6 @@
 			>
 			<File
 				RelativePath="..\..\src\hearthstone-shared\Threading\Condition.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\CThreads.cpp"
 				>
 			</File>
 			<File
@@ -617,14 +597,6 @@
 			Name="Util"
 			>
 			<File
-				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\hearthstone-shared\ByteBuffer.h"
 				>
 			</File>
@@ -646,6 +618,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hearthstone-shared\Errors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-shared\hearthstone_getopt.h"
 				>
 			</File>
 			<File
@@ -726,11 +706,15 @@
 			</Filter>
 		</Filter>
 		<File
-			RelativePath="..\..\src\hearthstone-shared\hearthstoneConfig.h"
+			RelativePath="..\..\src\hearthstone-shared\AuthCodes.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\hearthstone-shared\AuthCodes.h"
+			RelativePath="..\..\src\hearthstone-shared\BufferPool.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-shared\BufferPool.h"
 			>
 		</File>
 		<File
@@ -739,6 +723,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-shared\FastQueue.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-shared\hearthstoneConfig.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-shared\SharedPtr.h"
 			>
 		</File>
 		<File

@@ -46,7 +46,7 @@
 				AdditionalOptions="/Zm250"
 				Optimization="0"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;&quot;..\..\src\hearthstone-shared&quot;"
+				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;..\..\src\hearthstone-shared;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -80,6 +80,103 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib libmysql.lib libeay32.lib dbghelp.lib zlib.lib pcre.lib"
 				AdditionalLibraryDirectories="..\..\extras\collision\collision_dll\Debug"
+				GenerateDebugInformation="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine=""
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory=".\..\..\bin\Release"
+			IntermediateDirectory=".\hearthstone-world___Win32_Release"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zm250"
+				Optimization="4"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="true"
+				WholeProgramOptimization="true"
+				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;&quot;..\..\src\hearthstone-shared&quot;"
+				PreprocessorDefinitions="_HAS_ITERATOR_DEBUGGING=0;WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
+				StringPooling="true"
+				MinimalRebuild="false"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				EnableFunctionLevelLinking="false"
+				EnableEnhancedInstructionSet="0"
+				FloatingPointModel="2"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile="$(IntDir)/game.pch"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib libmysql.lib libeay32.lib dbghelp.lib zlib.lib pcre.lib"
+				AdditionalLibraryDirectories="..\..\extras\collision\collision_dll\Release"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -172,103 +269,6 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib libmysql.lib libeay32.lib dbghelp.lib zlib.lib pcre.lib"
 				AdditionalLibraryDirectories="..\..\extras\collision\collision_dll\x64\Release"
-				GenerateDebugInformation="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine=""
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin\Release"
-			IntermediateDirectory=".\hearthstone-world___Win32_Release"
-			ConfigurationType="1"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			WholeProgramOptimization="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm250"
-				Optimization="4"
-				InlineFunctionExpansion="2"
-				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				OmitFramePointers="true"
-				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\..\src\hearthstone-shared"
-				PreprocessorDefinitions="_HAS_ITERATOR_DEBUGGING=0;WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS"
-				StringPooling="true"
-				MinimalRebuild="false"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				EnableFunctionLevelLinking="false"
-				EnableEnhancedInstructionSet="0"
-				FloatingPointModel="2"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="$(IntDir)/game.pch"
-				AssemblerListingLocation="$(IntDir)/"
-				ObjectFile="$(IntDir)/"
-				ProgramDataBaseFileName="$(IntDir)/"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				Detect64BitPortabilityProblems="true"
-				DebugInformationFormat="3"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib libmysql.lib libeay32.lib dbghelp.lib zlib.lib pcre.lib"
-				AdditionalLibraryDirectories="..\..\extras\collision\collision_dll\Release"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -411,7 +411,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -419,7 +419,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|x64"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -476,6 +476,14 @@
 				</File>
 			</Filter>
 		</Filter>
+		<File
+			RelativePath="..\..\src\hearthstone-world\AchievementInterface.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\AchievementInterface.h"
+			>
+		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\AddonMgr.cpp"
 			>
@@ -569,6 +577,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\hearthstone-world\ChainAggroEntity.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\ChainAggroEntity.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\hearthstone-world\Channel.cpp"
 			>
 		</File>
@@ -642,14 +658,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\Creature.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\hearthstone-world\DatabaseCleaner.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\hearthstone-world\DatabaseCleaner.h"
 			>
 		</File>
 		<File
@@ -1037,15 +1045,15 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\hearthstone-world\SpellFixes.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\hearthstone-world\SpellHandler.cpp"
 			>
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\SpellTarget.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\hearthstone-world\SpellFixes.cpp"
 			>
 		</File>
 		<File
@@ -1068,7 +1076,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Debug|x64"
+				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -1076,7 +1084,7 @@
 				/>
 			</FileConfiguration>
 			<FileConfiguration
-				Name="Release|Win32"
+				Name="Debug|x64"
 				>
 				<Tool
 					Name="VCCLCompilerTool"
@@ -1142,6 +1150,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\UpdateMask.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\Vehicle.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\Vehicle.h"
 			>
 		</File>
 		<File
@@ -1238,6 +1254,18 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\WorldSocket.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\WorldStateManager.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\WorldStateManager.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\WorldStates.h"
 			>
 		</File>
 	</Files>
