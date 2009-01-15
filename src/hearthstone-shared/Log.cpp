@@ -191,6 +191,7 @@ void oLog::outDebug( const char * str, ... )
 void oLog::Init(int32 fileLogLevel, int32 screenLogLevel)
 {
 	m_screenLogLevel = screenLogLevel;
+	Log.log_level = screenLogLevel;
 	m_fileLogLevel = fileLogLevel;
 	m_file = NULL;
 

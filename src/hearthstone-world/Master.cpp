@@ -118,8 +118,10 @@ bool Master::Run(int argc, char ** argv)
 
 	struct hearthstone_option longopts[] =
 	{
-		{ "checkconf",			hearthstone_no_argument,				&do_check_conf,			1		},
-		{ "version",			hearthstone_no_argument,				&do_version,			1		},
+		{ "checkconf",			hearthstone_no_argument,			&do_check_conf,			1		},
+		{ "screenloglevel",		hearthstone_required_argument,		&screen_log_level,		1		},
+		{ "fileloglevel",		hearthstone_required_argument,		&file_log_level,		-1		},
+		{ "version",			hearthstone_no_argument,			&do_version,			1		},
 		{ "conf",				hearthstone_required_argument,		NULL,					'c'		},
 		{ "realmconf",			hearthstone_required_argument,		NULL,					'r'		},
 		{ 0, 0, 0, 0 }
@@ -143,10 +145,18 @@ bool Master::Run(int argc, char ** argv)
 		case 0:
 			break;
 		default:
+			sLog.m_fileLogLevel = -1;
+			sLog.m_screenLogLevel = 3;
 			printf("Usage: %s [--checkconf] [--conf <filename>] [--realmconf <filename>] [--version]\n", argv[0]);
 			return true;
 		}
 	}
+	/* set new log levels if used as argument*/
+	if( screen_log_level != (int)DEF_VALUE_NOT_SET )
+		sLog.SetScreenLoggingLevel(screen_log_level);
+	
+	if( file_log_level != (int)DEF_VALUE_NOT_SET )
+		sLog.SetFileLoggingLevel(file_log_level);
 
 	// Startup banner
 	UNIXTIME = time(NULL);
@@ -155,17 +165,6 @@ bool Master::Run(int argc, char ** argv)
 	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 	Log.Line();
-	Log.log_level = 3;
-
-	if(!do_version && !do_check_conf)
-	{
-		sLog.Init(-1, 3);
-	}
-	else
-	{
-		sLog.m_fileLogLevel = -1;
-		sLog.m_screenLogLevel = 1;
-	}
 
 	if( do_check_conf )
 	{
@@ -191,7 +190,10 @@ bool Master::Run(int argc, char ** argv)
 
 	printf( "The key combination <Ctrl-C> will safely shut down the server at any time.\n" );
 	Log.Line();
-    
+
+	//use these log_level until we are fully started up.
+	sLog.Init(-1, 3);
+
 #ifndef WIN32
 	if(geteuid() == 0 || getegid() == 0)
 		Log.LargeErrorMessage( LARGERRORMESSAGE_WARNING, "You are running Ascent as root.", "This is not needed, and may be a possible security risk.", "It is advised to hit CTRL+C now and", "start as a non-privileged user.", NULL);
@@ -306,6 +308,10 @@ bool Master::Run(int argc, char ** argv)
 	LoadingTime = getMSTime() - LoadingTime;
 	Log.Success("Server","Ready for connections. Startup time: %ums\n", LoadingTime );
 	sLog.outString(""); 
+
+	//Update sLog to obey config setting
+	sLog.Init(Config.MainConfig.GetIntDefault("LogLevel", "File", -1),Config.MainConfig.GetIntDefault("LogLevel", "Screen", 1));
+
 	/* write pid file */
 	FILE * fPid = fopen( "ascent.pid", "w" );
 	if( fPid )
