@@ -861,6 +861,30 @@ bool Player::Create(WorldPacket& data )
 	{
 		setAction(itr->button, itr->action, itr->type, itr->misc);
 	}
+	// Force GM robes on GM's except 'az' status (if set to 1 in world.conf)
+	if( GetSession()->HasGMPermissions() && sWorld.gm_force_robes )
+	{
+		if( strchr(GetSession()->GetPermissions(),'az')==NULL)
+		{
+			info->items.clear();
+			CreateInfo_ItemStruct itm;
+
+			itm.protoid = 11508; //Feet
+			itm.slot = 7;
+			itm.amount = 1;
+			info->items.push_back(itm);
+
+			itm.protoid = 2586;//Chest
+			itm.slot = 4;
+			itm.amount = 1;
+			info->items.push_back(itm);
+
+			itm.protoid = 12064;//head
+			itm.slot = 0;
+			itm.amount = 1;
+			info->items.push_back(itm);
+		}
+	}
 
 	for(std::list<CreateInfo_ItemStruct>::iterator is = info->items.begin(); is!=info->items.end(); is++)
 	{

@@ -372,6 +372,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	pSession->deleteMutex.Acquire();
 	
 	// Set session properties
+	pSession->permissioncount = 0;//just to make sure it's 0
 	pSession->SetClientBuild(mClientBuild);
 	pSession->LoadSecurity(GMFlags);
 	pSession->SetAccountFlags(AccountFlags);

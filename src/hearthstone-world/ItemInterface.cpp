@@ -2564,15 +2564,40 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 	ItemPointer SrcItem = GetInventoryItem( srcslot );
 	ItemPointer DstItem = GetInventoryItem( dstslot );
 
-	DEBUG_LOG( "ItemInterface::SwapItemSlots(%u, %u);" , srcslot , dstslot );
-	//ItemPointer temp = GetInventoryItem( srcslot );
-	//if( temp )
-	//	DEBUG_LOG( "Source item: %s (inventoryType=%u, realslot=%u);" , temp->GetProto()->Name1 , temp->GetProto()->InventoryType , GetItemSlotByType( temp->GetProto()->InventoryType ) );
-	//	temp = GetInventoryItem( dstslot );
-	//if( temp )
-	//	DEBUG_LOG( "Destination: Item: %s (inventoryType=%u, realslot=%u);" , temp->GetProto()->Name1 , temp->GetProto()->InventoryType , GetItemSlotByType( temp->GetProto()->InventoryType ) );
-	//else
-	//	DEBUG_LOG( "Destination: Empty" );
+	Log.Debug( "ItemInterface","SwapItemSlots(%u, %u);" , srcslot , dstslot );
+
+	// Force GM robes on all GM's execpt 'az' status, if set in world config
+	if(m_pOwner->GetSession()->HasGMPermissions() && sWorld.gm_force_robes )
+	{
+		if( strchr(m_pOwner->GetSession()->GetPermissions(),'az')==NULL)
+		{
+			if(dstslot<23)
+			{
+				switch(dstslot)
+				{
+					case 0://head
+					{
+						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 12064 ));
+						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,12064);
+					}break;
+					case 4://chest
+					{
+						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 2586 ));
+						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,2586);
+					}break;
+					case 7://feet
+					{
+						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 11508 ));
+						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,11508);
+					}break;
+					default:
+						return;
+				}
+				AddItemToFreeSlot(SrcItem);
+				return;
+			}
+		}
+	}
 
 	if( SrcItem != NULL && DstItem != NULL && SrcItem->GetEntry()==DstItem->GetEntry() && SrcItem->GetProto()->MaxCount > 1 && SrcItem->wrapped_item_id == 0 && DstItem->wrapped_item_id == 0 )
 	{
