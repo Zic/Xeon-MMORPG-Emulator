@@ -764,7 +764,7 @@ enum SpellEffects
 	SPELL_EFFECT_UNKNOWN35,                 //    155
 	SPELL_EFFECT_UNKNOWN36,                 //    156
 	SPELL_EFFECT_UNKNOWN37,                 //    157
-	SPELL_EFFECT_UNKNOWN38,                 //    158
+	SPELL_EFFECT_MILLING,	                //    158
 	SPELL_EFFECT_UNKNOWN39,                 //    159
     TOTAL_SPELL_EFFECTS,                    //    160
 };
@@ -1780,6 +1780,7 @@ public:
     void SpellEffectApplyAura128(uint32 i);
 	void SpellEffectTriggerSpellWithValue(uint32 i);
 	void SpellEffectMegaJump(uint32 i);
+	void SpellEffectMilling(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);

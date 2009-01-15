@@ -183,7 +183,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL, //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
 		&Spell::SpellEffectNULL, //156 Add Socket
 		&Spell::SpellEffectNULL, //157 create/learn random item/spell for profession
-		&Spell::SpellEffectNULL, //158 milling
+		&Spell::SpellEffectMilling, //158 milling
 		&Spell::SpellEffectNULL //159 allow rename pet once again
 };
 
@@ -6281,5 +6281,30 @@ void Spell::SpellEffectMegaJump(uint32 i)
 	{
 		p_caster->ResetHeartbeatCoords();
 		p_caster->DelaySpeedHack(5000);
+	}
+}
+
+void Spell::SpellEffectMilling(uint32 i)
+{
+	if(!p_caster) return;
+
+	if(!itemTarget)
+	{
+		SendCastResult(SPELL_FAILED_ITEM_GONE);
+		return;
+	}
+
+	uint32 entry = itemTarget->GetEntry();
+
+	if(p_caster->GetItemInterface()->RemoveItemAmt(entry, 5))
+	{
+		p_caster->SetLootGUID(p_caster->GetGUID());
+		lootmgr.FillMillingLoot(&p_caster->m_loot, entry);
+		p_caster->SendLoot(p_caster->GetGUID(), 2);
+	}
+	else
+	{
+		SendCastResult(SPELL_FAILED_ITEM_GONE);
+		return;
 	}
 }
