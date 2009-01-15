@@ -190,29 +190,15 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer( _player->mTradeTarget );
 
 	ItemPointer pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
-	if( pTarget == NULL || pItem == 0 || TradeSlot > 6 || ( TradeSlot < 6 && pItem->IsSoulbound() ) )
+	if( pTarget == NULL || pItem == 0 || TradeSlot > 6 )
 		return;
-
-	// cheatproof
-	if( SourceBag == INVENTORY_SLOT_NOT_SET && SourceSlot < INVENTORY_SLOT_BAG_END && SourceSlot >= INVENTORY_SLOT_BAG_START )
-		return;
-
-	if( pItem->GetProto()->ContainerSlots > 0 && TO_CONTAINER(pItem)->HasItems() )
-		return;
-
-	if(TradeSlot < 6 && pItem->IsSoulbound())
-	{
-		// client is obviously cheating
-		Disconnect();
-		return;
-	}
 
 	for(uint32 i = 0; i < 8; ++i)
 	{
 		// duping little shits
 		if(_player->mTradeItems[i] == pItem || pTarget->mTradeItems[i] == pItem)
 		{
-			// cheating client
+			sCheatLog.writefromsession(this, "tried to dupe an item through trade");
 			Disconnect();
 			return;
 		}
@@ -270,11 +256,31 @@ void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 		uint32 TargetItemCount = 0;
 		PlayerPointer pTarget = plr;
 
-		// Calculate Item Count
+		// Calculate Item Count, check bags contends
 		for(uint32 Index = 0; Index < 7; ++Index)
 		{
-			if(_player->mTradeItems[Index] != 0)	++ItemCount;
-			if(pTarget->mTradeItems[Index] != 0)	++TargetItemCount;
+			if(_player->mTradeItems[Index] != 0)
+			{
+				ItemPointer pItem = _player->mTradeItems[Index];
+				if( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems())
+				{
+					sCheatLog.writefromsession(this, "%s involved in bag-trick trade.", _player->GetName());
+					_player->GetItemInterface()->BuildInventoryChangeError(	pItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
+					TradeStatus = TRADE_STATUS_CANCELLED;
+				}
+				++ItemCount;
+			}
+			if(pTarget->mTradeItems[Index] != 0)
+			{
+				ItemPointer tItem = pTarget->mTradeItems[Index];
+				if( tItem->IsContainer() && TO_CONTAINER(tItem)->HasItems() )
+				{
+					sCheatLog.writefromsession(this, "%s involved in bag-trick trade.", pTarget->GetName());
+					pTarget->GetItemInterface()->BuildInventoryChangeError(	tItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
+					TradeStatus = TRADE_STATUS_CANCELLED;
+				}
+				++TargetItemCount;
+			}
 		}
 
 		if( (_player->m_ItemInterface->CalculateFreeSlots(NULL) + ItemCount) < TargetItemCount ||
