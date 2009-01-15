@@ -189,21 +189,23 @@ uint32 getGuardId(uint32 id);
 
 
 typedef std::tr1::unordered_map<shared_ptr<Unit>, int32> TargetMap;
-namespace std
-{
-	namespace tr1
+#ifdef TRHAX
+	namespace std
 	{
-		template <>
-		class hash < UnitPointer > : public unary_function<shared_ptr<Unit>, size_t>
+		namespace tr1
 		{
-		public:
-			size_t operator()(UnitPointer __x) const
+			template <>
+			class hash < UnitPointer > : public unary_function<shared_ptr<Unit>, size_t>
 			{
-				return (size_t)__x.get();
-			}
+			public:
+				size_t operator()(UnitPointer __x) const
+				{
+					return (size_t)__x.get();
+				}
+			};
 		};
 	};
-};
+#endif
 
 typedef std::set<shared_ptr<Unit> > AssistTargetSet;
 typedef std::map<uint32, AI_Spell*> SpellMap;

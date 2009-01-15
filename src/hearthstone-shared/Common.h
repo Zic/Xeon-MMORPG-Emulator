@@ -294,6 +294,7 @@ using std::tr1::shared_ptr;
 #undef HM_NAMESPACE
 #define HM_NAMESPACE tr1
 #define hash_map unordered_map
+#define TRHAX 1
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER < 1500 || !_HAS_TR1)
 using namespace std::tr1;
 using std::tr1::shared_ptr;
@@ -316,6 +317,7 @@ using std::tr1::shared_ptr;
 #define HM_NAMESPACE tr1
 #define shared_ptr std::tr1::shared_ptr
 #define hash_map unordered_map
+#define TRHAX 1
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #define HM_NAMESPACE __gnu_cxx
 using __gnu_cxx::hash_map;
