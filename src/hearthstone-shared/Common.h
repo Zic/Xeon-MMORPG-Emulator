@@ -272,6 +272,12 @@ enum MsTimeVariables
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && !_HAS_TR1
+#pragma error "FATAL ERROR: Please install Service Pack 1"
+#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER < 1500
+#include <boost/tr1/memory.hpp>
+#include <boost/tr1/unordered_map.hpp>
+#include <boost/tr1/unordered_set.hpp>
 #else
 #include <memory>
 #include <hash_map>
@@ -289,10 +295,11 @@ using std::tr1::shared_ptr;
 #define HM_NAMESPACE tr1
 #define hash_map unordered_map
 #elif COMPILER == COMPILER_MICROSOFT && (_MSC_VER < 1500 || !_HAS_TR1)
-#  pragma error "FATAL ERROR: Your dev env sucks! Upgrade to Visual Studio 2008 SP1."
-#define HM_NAMESPACE stdext
-using stdext::hash_map;
-using stdext::hash_set;
+using namespace std::tr1;
+using std::tr1::shared_ptr;
+#undef HM_NAMESPACE
+#define HM_NAMESPACE tr1
+#define hash_map unordered_map
 #define ENABLE_SHITTY_STL_HACKS 1
 
 // hacky stuff for vc++

@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\hearthstone-shared"
+				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;&quot;..\..\src\hearthstone-shared&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -69,7 +69,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\src\hearthstone-shared"
+				AdditionalIncludeDirectories="..\..\dep\src\boost\boost\tr1\tr1;..\..\dep\src\boost;&quot;..\..\src\hearthstone-shared&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
