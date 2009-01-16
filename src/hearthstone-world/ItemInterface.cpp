@@ -2125,14 +2125,16 @@ void ItemInterface::BuyItem(ItemPrototype *item, uint32 total_amount, CreaturePo
 
 enum CanAffordItem
 {
-	CAN_AFFORD_ITEM_ERROR_NOT_FOUND				= 0,
-	CAN_AFFORD_ITEM_ERROR_SOLD_OUT				= 1,
-	CAN_AFFORD_ITEM_ERROR_NOT_ENOUGH_MONEY		= 2,
-	CAN_AFFORD_ITEM_ERROR_DOESNT_LIKE_YOU		= 4,
-	CAN_AFFORD_ITEM_ERROR_TOO_FAR_AWAY			= 5,
-	CAN_AFFORD_ITEM_ERROR_CANT_CARRY_ANY_MORE	= 8,
-	CAN_AFFORD_ITEM_ERROR_NOT_REQUIRED_RANK		= 11,
-	CAN_AFFORD_ITEM_ERROR_REPUTATION			= 12,
+	CAN_AFFORD_ITEM_ERROR_OK						= 0,
+	CAN_AFFORD_ITEM_ERROR_CURRENTLY_SOLD_OUT		= 1,
+	CAN_AFFORD_ITEM_ERROR_DONT_HAVE_ENOUGH_MONEY	= 2,
+	CAN_AFFORD_ITEM_ERROR_NOT_FOUND					= 3,
+	CAN_AFFORD_ITEM_ERROR_DOESNT_LIKE_YOU			= 4,
+	CAN_AFFORD_ITEM_ERROR_TOO_FAR_AWAY				= 5,
+	CAN_AFFORD_ITEM_ERROR_NO_MESSAGE				= 6,
+	CAN_AFFORD_ITEM_ERROR_CANT_CARRY_ANY_MORE		= 8,
+	CAN_AFFORD_ITEM_ERROR_NOT_REQUIRED_RANK			= 11,
+	CAN_AFFORD_ITEM_ERROR_REPUTATION				= 12,
 };
 
 int8 ItemInterface::CanAffordItem(ItemPrototype * item,uint32 amount, CreaturePointer pVendor, ItemExtendedCostEntry *ec)
@@ -2144,14 +2146,14 @@ int8 ItemInterface::CanAffordItem(ItemPrototype * item,uint32 amount, CreaturePo
 			if(ec->item[i])
 			{
 				if(m_pOwner->GetItemInterface()->GetItemCount(ec->item[i], false) < (ec->count[i]*amount))
-					return CAN_AFFORD_ITEM_ERROR_NOT_ENOUGH_MONEY;
+					return CAN_AFFORD_ITEM_ERROR_DONT_HAVE_ENOUGH_MONEY;
 			}
 		}
 
 		if(m_pOwner->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY) < (ec->honor*amount))
-			return CAN_AFFORD_ITEM_ERROR_NOT_ENOUGH_MONEY;
+			return CAN_AFFORD_ITEM_ERROR_DONT_HAVE_ENOUGH_MONEY;
 		if(m_pOwner->GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY ) < (ec->arena*amount))
-			return CAN_AFFORD_ITEM_ERROR_NOT_ENOUGH_MONEY;
+			return CAN_AFFORD_ITEM_ERROR_DONT_HAVE_ENOUGH_MONEY;
  		if(m_pOwner->GetMaxPersonalRating() < ec->personalrating)
 			return CAN_AFFORD_ITEM_ERROR_NOT_REQUIRED_RANK;
 	}
@@ -2161,7 +2163,7 @@ int8 ItemInterface::CanAffordItem(ItemPrototype * item,uint32 amount, CreaturePo
 		int32 price = GetBuyPriceForItem(item, amount, m_pOwner, pVendor) * amount;
 		if((int32)m_pOwner->GetUInt32Value(PLAYER_FIELD_COINAGE) < price)
 		{
-			return CAN_AFFORD_ITEM_ERROR_NOT_ENOUGH_MONEY;
+			return CAN_AFFORD_ITEM_ERROR_DONT_HAVE_ENOUGH_MONEY;
 		}
 	}
 	if(item->RequiredFaction)
