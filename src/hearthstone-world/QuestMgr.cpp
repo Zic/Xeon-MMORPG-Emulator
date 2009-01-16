@@ -1988,7 +1988,7 @@ void QuestMgr::LoadExtraQuestStuff()
 	objmgr.ProcessGameobjectQuests();
 }
 
-bool QuestMgr::SkippedKills( QuestID )
+bool QuestMgr::SkippedKills( uint32 QuestID )
 {
 	switch(QuestID)
 	{
