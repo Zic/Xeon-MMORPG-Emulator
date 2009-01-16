@@ -274,15 +274,15 @@ void GameObject::SaveToDB()
 		<< GetPositionY() << ","
 		<< GetPositionZ() << ","
 		<< GetOrientation() << ","
-		<< GetFloatValue(GAMEOBJECT_ROTATION) << ","
-		<< GetFloatValue(GAMEOBJECT_ROTATION_01) << ","
-		<< GetFloatValue(GAMEOBJECT_ROTATION_02) << ","
-		<< GetFloatValue(GAMEOBJECT_ROTATION_03) << ","
-		<< (uint32)GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE) << ","
+		<< GetUInt64Value(GAMEOBJECT_ROTATION) << ","
+		<< GetFloatValue(GAMEOBJECT_PARENTROTATION) << ","
+		<< GetFloatValue(GAMEOBJECT_PARENTROTATION_2) << ","
+		<< GetFloatValue(GAMEOBJECT_PARENTROTATION_3) << ","
+		<< ( GetByte(GAMEOBJECT_BYTES_1, 0)? 1 : 0 ) << ","
 		<< GetUInt32Value(GAMEOBJECT_FLAGS) << ","
 		<< GetUInt32Value(GAMEOBJECT_FACTION) << ","
 		<< GetFloatValue(OBJECT_FIELD_SCALE_X) << ","
-		<< "0,1)";
+		<< "0)";
 	WorldDatabase.Execute(ss.str().c_str());
 }
 

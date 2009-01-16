@@ -2206,8 +2206,8 @@ bool AIInterface::saveWayPoints()
 
 		//Save
 		ss.str("");
-		ss << "INSERT INTO creature_waypoints ";
-		ss << "(spawnid,waypointid,position_x,position_y,position_z,waittime,flags,forwardemoteoneshot,forwardemoteid,backwardemoteoneshot,backwardemoteid,forwardskinid,backwardskinid) VALUES (";
+		ss << "REPLACE INTO creature_waypoints ";
+		ss << "(spawnid,waypointid,position_x,position_y,position_z,orientation,waittime,flags,forwardemoteoneshot,forwardemoteid,backwardemoteoneshot,backwardemoteid,forwardskinid,backwardskinid,forwardStandState,backwardStandState,forwardSpellToCast,backwardSpellToCast,forwardSayText,backwardSayText) VALUES (";
 		ss << TO_CREATURE(GetUnit())->m_spawn->id << ", ";
 		ss << wp->id << ", ";
 		ss << wp->x << ", ";
