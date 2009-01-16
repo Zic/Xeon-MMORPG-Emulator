@@ -675,6 +675,10 @@ void QuestMgr::OnPlayerKill(PlayerPointer plr, CreaturePointer victim)
 						qle->GetQuest()->required_mobtype[j] == QUEST_MOB_TYPE_CREATURE &&
 						qle->m_mobcount[j] < qle->GetQuest()->required_mobcount[j] )
 					{
+						// don't update killcount for these questslogentries
+						if ( SkippedKills( qle->GetQuest()->id) )
+							return;
+
 						// add another kill.(auto-dirtys it)
 						qle->SetMobCount( j, qle->m_mobcount[j] + 1 );
 						qle->SendUpdateAddKill( j );
@@ -723,6 +727,10 @@ void QuestMgr::OnPlayerKill(PlayerPointer plr, CreaturePointer victim)
 										qle->GetQuest()->required_mobtype[j] == QUEST_MOB_TYPE_CREATURE &&
 										qle->m_mobcount[j] < qle->GetQuest()->required_mobcount[j] )
 									{
+										// don't update killcount for these questslogentries
+										if ( SkippedKills( qle->GetQuest()->id) )
+											return;
+
 										// add another kill.
 										// (auto-dirtys it)
 										qle->SetMobCount(j, qle->m_mobcount[j] + 1);
@@ -1978,4 +1986,31 @@ void QuestMgr::LoadExtraQuestStuff()
 		delete pResult;
 	}
 	objmgr.ProcessGameobjectQuests();
+}
+
+bool QuestMgr::SkippedKills( QuestID )
+{
+	switch(QuestID)
+	{
+		case 6061:
+		case 6062:
+		case 6063:
+		case 6064:
+		case 6082:
+		case 6083:
+		case 6084:
+		case 6085:
+		case 6087:
+		case 6088:
+		case 6101:
+		case 6102:
+		case 9484:
+		case 9485:
+		case 9486:
+		case 9591:
+		case 9592:
+		case 9593:
+			return true;
+	}
+	return false;
 }

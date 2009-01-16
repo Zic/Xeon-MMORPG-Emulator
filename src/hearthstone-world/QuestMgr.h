@@ -72,6 +72,7 @@ public:
 	void OnPlayerSlain(PlayerPointer plr, PlayerPointer victim);
 	void OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver);
 	void OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver, uint32 reward_slot);
+	bool SkippedKills( QuestID );
 
 	void GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver);
 	void GiveQuestTitleReward(PlayerPointer plr, Quest* qst);
