@@ -2418,6 +2418,7 @@ void ItemInterface::BuildInventoryChangeError(shared_ptr<Item>SrcItem, shared_pt
 			level = SrcItem->GetProto()->RequiredLevel;
 			data << uint32(level);
 		}
+	}
 
 	m_pOwner->GetSession()->SendPacket( &data );
 }

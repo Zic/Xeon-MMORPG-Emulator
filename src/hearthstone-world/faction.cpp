@@ -149,12 +149,8 @@ bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth)// A
 	PlayerPointer playerA = NULLPLR;
 	PlayerPointer playerB = NULLPLR;
 	
-	// Players in feign death flags can't be attacked
 	if(objA->IsPlayer())
 	{
-		if(objA->HasFlag(UNIT_FIELD_FLAGS_2, 0x00000001))
-			return false;
-
 		playerA = TO_PLAYER(objA);
 	}
 	else
@@ -167,9 +163,6 @@ bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth)// A
 
 	if(objB->IsPlayer())
 	{
-		if(objB->HasFlag(UNIT_FIELD_FLAGS_2, 0x00000001))
-			return false;
-
 		playerB = TO_PLAYER(objB);
 	}
 	else
