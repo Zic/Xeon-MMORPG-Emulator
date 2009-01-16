@@ -2410,6 +2410,14 @@ void ItemInterface::BuildInventoryChangeError(shared_ptr<Item>SrcItem, shared_pt
 	data << (SrcItem ? SrcItem->GetGUID() : uint64(0));
 	data << (DstItem ? DstItem->GetGUID() : uint64(0));
 	data << uint8(0);
+	if(Error == INV_ERR_YOU_MUST_REACH_LEVEL_N)
+	{
+		uint32 level = 0;
+		if(SrcItem)
+		{
+			level = SrcItem->GetProto()->RequiredLevel;
+			data << uint32(level);
+		}
 
 	m_pOwner->GetSession()->SendPacket( &data );
 }
