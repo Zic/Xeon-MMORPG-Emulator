@@ -23,6 +23,7 @@ Vehicle::Vehicle(uint64 guid) : Creature(guid)
 {
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Vehicle::Vehicle()\n");
+#endif
 	m_vehicleEntry = 0;
 	m_passengerCount = 0;
 	m_maxPassengers = 0;
@@ -34,7 +35,6 @@ Vehicle::Vehicle(uint64 guid) : Creature(guid)
 
 	for(uint8 i = 0; i < 8; ++i)
 		m_passengers[i] = NULLUNIT;
-#endif
 }
 
 Vehicle::~Vehicle()
