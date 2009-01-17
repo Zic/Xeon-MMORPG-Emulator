@@ -88,8 +88,10 @@ Object::~Object( )
 	if( !m_sharedPtrDestructed )
 	{
 		Log.Error("SharedPtr", "Failure to call Object Destructor method on deletion.");
+#ifdef WIN32
 		CStackWalker cw;
 		cw.ShowCallstack();
+#endif
 	}
 }
 
