@@ -705,6 +705,18 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	//fixed_amount = 0;//used only por percent values to be able to recover value correctly.No need to init this if we are not using it
 }
 
+Aura::~Aura()
+{
+	if( !m_deleted ) // we're not deleted properly
+	{
+		Log.Error("SharedPtr", "Aura deleted without being removed.");
+#ifdef WIN32
+		CStackWalker cw;
+		cw.ShowCallstack();
+#endif
+	}
+}
+
 void Aura::Remove()
 {
 	if( m_deleted )

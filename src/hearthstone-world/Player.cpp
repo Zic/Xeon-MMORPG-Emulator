@@ -8304,7 +8304,7 @@ void Player::CompleteLoading()
 		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
 			continue; //do not load auras that only exist while pet exist. We should recast these when pet is created anyway
 
-		shared_ptr<Aura>a;
+		shared_ptr<Aura> a = NULLAURA;
 		if(sp->Id == 8326 || sp->Id == 9036 || sp->Id == 20584 || sp->Id == 15007)		// death auras
 		{
 			if(!isDead())
@@ -8327,11 +8327,10 @@ void Player::CompleteLoading()
 		    }
         }
 
+		if( a )
+			AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg
 
-		this->AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg
-		//Somehow we should restore number of appearence. Right now i have no idea how :(
-//		if(count_appearence>1)
-//			this->AddAuraVisual((*i).id,count_appearence-1,a->IsPositive());
+		
 	}
 	loginauras.clear();
 

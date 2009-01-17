@@ -758,6 +758,7 @@ void Pet::Remove(bool bSafeDelete, bool bUpdate, bool bSetOffline)
 
 	// has to be next loop - reason because of RemoveFromWorld, iterator gets broke.
 	/*if(IsInWorld() && Active) Deactivate(m_mapMgr);*/
+	PetPointer pThis = pet_shared_from_this(); // EventMgr can remove the last reference left! :(
 	sEventMgr.RemoveEvents(shared_from_this());
 	sEventMgr.AddEvent(pet_shared_from_this(), &Pet::PetSafeDelete, EVENT_CREATURE_SAFE_DELETE, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	m_dismissed = true;

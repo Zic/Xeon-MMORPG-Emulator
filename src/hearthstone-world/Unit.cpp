@@ -3535,7 +3535,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		if(deleteAur)
 		{
 			sEventMgr.RemoveEvents(aur);
-			//delete aur;
+			aur->Remove();
 			return;
 		}
 	}
@@ -3573,7 +3573,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 				sLog.outString("Aura error in active aura. removing. SpellId: %u", aur->GetSpellProto()->Id);
 				// for next loop.. lets kill the fucker
 				sEventMgr.RemoveEvents(aur);
-				//delete aur;
+				aur->Remove();
 				return;
 			} 
 
@@ -3606,7 +3606,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 			sLog.outString("Aura error in passive aura. removing. SpellId: %u", aur->GetSpellProto()->Id);
 			// for next loop.. lets kill the fucker
 			sEventMgr.RemoveEvents(aur);
-			//delete aur;
+			aur->Remove();
 			return;
 		}
 	}
