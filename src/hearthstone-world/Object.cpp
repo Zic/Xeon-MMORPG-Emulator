@@ -38,7 +38,7 @@ Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 
 	m_uint32Values = 0;
 	m_objectUpdated = false;
-
+	m_sharedPtrDestructed = false;
 
 	m_valuesCount = 0;
 
@@ -84,6 +84,13 @@ Object::~Object( )
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Object::~Object()\n");
 #endif
+
+	if( !m_sharedPtrDestructed )
+	{
+		Log.Error("SharedPtr", "Failure to call Object Destructor method on deletion.");
+		CStackWalker cw;
+		cw.ShowCallstack();
+	}
 }
 
 void Object::Init()
@@ -92,6 +99,8 @@ void Object::Init()
 
 void Object::Destructor()
 {
+	m_sharedPtrDestructed = true;
+
 	if(m_objectTypeId != TYPEID_ITEM)
 		ASSERT(!m_inQueue);
 
@@ -325,9 +334,7 @@ uint32 Object::BuildValuesUpdateBlockForPlayer(ByteBuffer * buf, UpdateMask * ma
 
 void Object::DestroyForPlayer(PlayerPointer target) const
 {
-	if(target->GetSession() == 0) return;
-
-	ASSERT(target);
+	if(!target || target->GetSession() == 0) return;
 
 	WorldPacket data(SMSG_DESTROY_OBJECT, 8);
 	data << GetGUID();

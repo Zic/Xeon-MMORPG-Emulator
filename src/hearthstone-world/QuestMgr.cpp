@@ -469,7 +469,7 @@ void QuestMgr::BuildRequestItems(WorldPacket *data, Quest* qst, ObjectPointer qs
 
 void QuestMgr::BuildQuestComplete(PlayerPointer plr, Quest* qst)
 {
-	uint32 xp ;
+	uint32 xp = 0;
 	if(plr->getLevel() < plr->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
 	{
 		xp = float2int32(GenerateQuestXP(plr,qst) * sWorld.getRate(RATE_QUESTXP));

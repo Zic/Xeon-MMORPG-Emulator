@@ -73,7 +73,7 @@ private:
 protected:
 	UnitPointer m_controllingUnit;
 
-	shared_ptr<Unit>* m_passengers;
+	shared_ptr<Unit> m_passengers[8];
 
 	uint8 m_passengerCount;
 	uint8 m_maxPassengers;

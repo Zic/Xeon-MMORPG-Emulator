@@ -704,7 +704,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				SpellCastTargets targets;
 				if( itr2->procFlags & PROC_TARGET_SELF )
 					targets.m_unitTarget = GetGUID();
-				else 
+				else if( victim != NULL )
 					targets.m_unitTarget = victim->GetGUID();
 				/* hmm whats a reasonable value here */
 				if( m_procCounter > 40 )

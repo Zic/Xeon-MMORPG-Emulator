@@ -34,7 +34,9 @@ Container::Container(uint32 high,uint32 low) : Item()
 	SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );//always 1
 
 
-	memset(m_Slot, 0, 72 * sizeof(shared_ptr<Item>));
+	for(uint32 i = 0; i < 72; ++i)
+		m_Slot[i] = NULLITEM;
+
 	random_suffix=random_prop=0;
 }
 

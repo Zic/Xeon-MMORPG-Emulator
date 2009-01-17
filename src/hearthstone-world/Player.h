@@ -1128,7 +1128,9 @@ public:
 	void         ResetTradeVariables()
 	{
 		mTradeGold = 0;
-		memset(&mTradeItems, 0, sizeof(shared_ptr<Item>) * 8);
+		for(uint8 i = 0; i < 8; ++i)
+			mTradeItems[i] = NULLITEM;
+
 		mTradeStatus = 0;
 		mTradeTarget = 0;
 		m_tradeSequence = 2;

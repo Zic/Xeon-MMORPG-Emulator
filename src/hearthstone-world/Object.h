@@ -570,6 +570,8 @@ protected:
 	ExtensionSet * m_extensions;
 	void _SetExtension(const string& name, void* ptr);		// so we can set from scripts. :)
 
+	bool m_sharedPtrDestructed;
+
 public:
 
 	template<typename T>

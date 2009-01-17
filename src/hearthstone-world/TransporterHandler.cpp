@@ -430,6 +430,7 @@ void Transporter::Destructor()
 		itr->second->Destructor();
 		itr->second = NULLOBJ;
 	}
+	GameObject::Destructor();
 }
 
 void ObjectMgr::LoadTransporters()

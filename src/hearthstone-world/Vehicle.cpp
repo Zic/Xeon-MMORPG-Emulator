@@ -21,7 +21,8 @@
 
 Vehicle::Vehicle(uint64 guid) : Creature(guid)
 {
-	//printf("Vehicle::Vehicle()\n");
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("Vehicle::Vehicle()\n");
 	m_vehicleEntry = 0;
 	m_passengerCount = 0;
 	m_maxPassengers = 0;
@@ -30,19 +31,21 @@ Vehicle::Vehicle(uint64 guid) : Creature(guid)
 	Initialised = false;
 	m_CreatedFromSpell = false;
 	m_mountSpell = 0;
+
+	for(uint8 i = 0; i < 8; ++i)
+		m_passengers[i] = NULLUNIT;
+#endif
 }
 
 Vehicle::~Vehicle()
 {
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("\nVehicle::~Vehicle");
+#endif
 }
 
 void Vehicle::Destructor()
 {
-	if (m_passengers != NULL)
-	{
-		free(m_passengers);
-		m_passengers = NULL;
-	}
 	m_passengerCount = 0;
 	Creature::Destructor();
 }
@@ -72,8 +75,6 @@ void Vehicle::InitSeats(uint32 vehicleEntry, PlayerPointer pRider)
 		}
 	}
 
-	m_passengers = (shared_ptr<Unit>*)malloc(sizeof(shared_ptr<Unit>) * m_maxPassengers);
-	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
 	Initialised = true;
 
 	if( pRider != NULL)
@@ -113,8 +114,6 @@ void Vehicle::Load(CreatureProto * proto_, float x, float y, float z, float o /*
 		}
 	}
 
-	m_passengers = (shared_ptr<Unit>*)malloc(sizeof(shared_ptr<Unit>) * m_maxPassengers);
-	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
 	Initialised = true;
 
 	Creature::Load(proto_, x, y, z, o);
@@ -153,8 +152,6 @@ bool Vehicle::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 		}
 	}
 
-	m_passengers = (shared_ptr<Unit>*)malloc(sizeof(shared_ptr<Unit>) * m_maxPassengers);
-	memset( m_passengers, 0, sizeof(shared_ptr<Unit>) * m_maxPassengers);
 	Initialised = true;
 
 	return Creature::Load(spawn, mode, info);

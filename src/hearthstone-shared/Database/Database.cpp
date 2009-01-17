@@ -76,8 +76,6 @@ bool Database::Initialize(const char* Hostname, unsigned int port, const char* U
 			Log.Error("MySQLDatabase", "Connection failed due to: `%s`", mysql_error( temp ) );
 			return false;
 		}
-		
-		mysql_query( temp2, "SET SESSION query_cache_type = OFF;" );
 
 		m_connections[i].conn = temp2;
 	}
@@ -569,8 +567,6 @@ bool Database::_Reconnect(DatabaseConnection * conn)
 		mysql_close( temp );
 		return false;
 	}
-
-	mysql_query(temp, "SET SESSION query_cache_type = OFF;");
 
 	if( conn->conn != NULL )
 		mysql_close( conn->conn );
