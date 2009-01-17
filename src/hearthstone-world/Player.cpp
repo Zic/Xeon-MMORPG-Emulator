@@ -1683,9 +1683,9 @@ void Player::_SavePet(QueryBuffer * buf)
 			for(; itr != m_Summon->mSpells.end(); ++itr)
 			{
 				if(buf == NULL)
-					CharacterDatabase.Execute("INSERT INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
+					CharacterDatabase.Execute("REPLACE INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
 				else
-					buf->AddQuery("INSERT INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
+					buf->AddQuery("REPLACE INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
 			}
 		}
 	}
@@ -9501,7 +9501,7 @@ void Player::_UpdateMaxSkillCounts()
 				case SKILL_TYPE_SECONDARY:
 				case SKILL_RIDING:
 				{
-					new_max = itr->second.MaximumValue >= 350 ? 375 : itr->second.MaximumValue;
+					new_max = itr->second.MaximumValue >= 400 ? 450 : itr->second.MaximumValue;
 					if(itr->second.Skill->type == SKILL_RIDING )
 						itr->second.CurrentValue = new_max;
 				}break;
