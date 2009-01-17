@@ -149,6 +149,7 @@ struct CreatureProto
 	uint32 extra_a9_flags;
 	uint32	auraimmune_flag;
 	int32 vehicle_entry;
+	uint8 CanMove;
 
 	/* AI Stuff */
 	bool m_canRangedAttack;
@@ -270,6 +271,9 @@ public:
 	/// Creation
 	void Create ( const char* creature_name, uint32 mapid, float x, float y, float z, float ang);	
 	void CreateWayPoint ( uint32 WayPointID, uint32 mapid, float x, float y, float z, float ang);
+	bool canWalk() const { return ( proto->CanMove & LIMIT_GROUND)!= 0; }
+	bool canSwim() const { return ( proto->CanMove & LIMIT_WATER)!= 0; }
+	bool canFly()  const { return ( proto->CanMove & LIMIT_AIR)!= 0; }
 	
 
 	/// Updates

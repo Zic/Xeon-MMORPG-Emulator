@@ -42,7 +42,7 @@ void AccountMgr::ReloadAccounts(bool silent)
 			AccountName = field[1].GetString();
 
 			// transform to uppercase
-			ASCENT_TOUPPER(AccountName);
+			HEARTHSTONE_TOUPPER(AccountName);
 
 			//Use private __GetAccount, for locks
 			acct = __GetAccount(AccountName);
@@ -139,8 +139,8 @@ void AccountMgr::AddAccount(Field* field)
 		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
 	}
 	// Convert username/password to uppercase. this is needed ;)
-	ASCENT_TOUPPER(Username);
-	ASCENT_TOUPPER(Password);
+	HEARTHSTONE_TOUPPER(Username);
+	HEARTHSTONE_TOUPPER(Password);
 	
 	if( EncryptedPassword.size() > 0 )
 	{
@@ -216,8 +216,8 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
 	}
 	// Convert username/password to uppercase. this is needed ;)
-	ASCENT_TOUPPER(Username);
-	ASCENT_TOUPPER(Password);
+	HEARTHSTONE_TOUPPER(Username);
+	HEARTHSTONE_TOUPPER(Password);
 
 	if( EncryptedPassword.size() > 0 )
 	{

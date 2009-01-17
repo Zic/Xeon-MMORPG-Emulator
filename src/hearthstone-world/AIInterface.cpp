@@ -892,7 +892,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				combatReach[0] = PLAYER_SIZE;
 				combatReach[1] = _CalcCombatRange(m_nextTarget, false);
 
-				if(	distance >= combatReach[0] && distance <= combatReach[1] + DISTANCE_TO_SMALL_TO_WALK) // Target is in Range -> Attack
+				if(	distance >= combatReach[0] && distance <= combatReach[1] + 0.75f) // Target is (alomst) in Range -> Attack
 				{
 					if(UnitToFollow != NULL)
 					{
@@ -968,8 +968,9 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				float distance = m_Unit->CalcDistance(m_nextTarget);
 
 				combatReach[0] = GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH); //normal combat reach
-				combatReach[1] = combatReach[0] + 12.5f; // if distance <  c.r. + 12.5, run towards target, and enter melee
-				combatReach[2] = combatReach[0] + 30.0f; // if distance > c.r. + 30, close in 5 yards again, and continue shooting.
+				combatReach[1] = combatReach[0] + 8.0f; //  if distance <  combatReach[1], run towards target, and enter melee.
+				combatReach[2] = combatReach[0] + 30.0f; // When shooting and distance > combatReach[2], 
+				combatReach[3] = combatReach[0] + 26.0f; //        close in to combatReach[3] again, and continue shooting.
 
 				if(distance >= combatReach[1] && distance <= combatReach[2]) // Target is in Range -> Shoot!!
 				{
@@ -1018,7 +1019,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				else // Target out of Range -> Run to/from it, depending on current distance
 				{
 					m_moveRun = true;
-					float drun = (distance < combatReach[1] ? combatReach[0] : combatReach[2]-5.0f );
+					float drun = (distance < combatReach[1] ? combatReach[0] : combatReach[3] );
 					_CalcDestinationAndMove(m_nextTarget, drun);
 				}
 			}break;
@@ -1830,7 +1831,7 @@ void AIInterface::MoveTo(float x, float y, float z, float o)
 	m_sourceY = m_Unit->GetPositionY();
 	m_sourceZ = m_Unit->GetPositionZ();
 
-	if(!m_canMove || m_Unit->IsStunned())
+	if(!m_canMove || m_Unit->IsStunned()|| m_Unit->isCasting())
 	{
 		StopMovement(0); //Just Stop
 		return;
@@ -1888,52 +1889,106 @@ void AIInterface::UpdateMove()
 	//use MoveTo()
 	float distance = m_Unit->CalcDistance(m_nextPosX,m_nextPosY,m_nextPosZ);
 	
-	if(distance < DISTANCE_TO_SMALL_TO_WALK) return; //we don't want little movements here and there
 
 	m_destinationX = m_nextPosX;
 	m_destinationY = m_nextPosY;
 	m_destinationZ = m_nextPosZ;
 	
-	/*if(m_moveFly != true)
-	{
-		if(m_Unit->GetMapMgr())
-		{
-			float adt_Z = m_Unit->GetMapMgr()->GetLandHeight(m_destinationX, m_destinationY);
-			if(fabsf(adt_Z - m_destinationZ) < 3.0f)
-				m_destinationZ = adt_Z;
-		}
-	}*/
 	m_nextPosX = m_nextPosY = m_nextPosZ = 0;
 
-	uint32 moveTime;
-	if(m_moveFly)
-		moveTime = (uint32) (distance / m_flySpeed);
-	else if(m_moveRun)
-		moveTime = (uint32) (distance / m_runSpeed);
-	else moveTime = (uint32) (distance / m_walkSpeed);
+	uint32 moveTime = (m_moveFly?(uint32)(distance/m_flySpeed):(m_moveRun?(uint32)(distance/m_runSpeed):(uint32)(distance/m_walkSpeed)));
 
 	m_totalMoveTime = moveTime;
 
 	if(m_Unit->GetTypeId() == TYPEID_UNIT)
 	{
 		CreaturePointer creature = TO_CREATURE(m_Unit);
-		// check if we're returning to our respawn location. if so, reset back to default
-		// orientation
-		if(creature->GetSpawnX() == m_destinationX &&
-			creature->GetSpawnY() == m_destinationY)
+
+		float angle = 0.0f;
+		float c_reach =GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH);
+
+		//We don't want little movements here and there; 
+		float DISTANCE_TO_SMALL_TO_WALK = c_reach - 1.0f <= 0.0f ? 1.0f : c_reach - 1.0f;
+
+		// don't move if we're well within combat range; rooted can't move neither
+		if( distance < DISTANCE_TO_SMALL_TO_WALK || creature->proto->CanMove == LIMIT_ROOT )
+			return; 
+
+		// check if we're returning to our respawn location. if so, reset back to default orientation.
+		if(creature->GetSpawnX() == m_destinationX && creature->GetSpawnY() == m_destinationY)
 		{
-			float o = creature->GetSpawnO();
-			creature->SetOrientation(o);
-		} else {
+			angle = m_Unit->GetOrientation();
+			creature->SetOrientation(angle);
+		}
+		else
+		{
 			// Calculate the angle to our next position
 
 			float dx = (float)m_destinationX - m_Unit->GetPositionX();
 			float dy = (float)m_destinationY - m_Unit->GetPositionY();
 			if(dy != 0.0f)
 			{
-				float angle = atan2(dy, dx);
+				angle = atan2(dy, dx);
 				m_Unit->SetOrientation(angle);
 			}
+/*	Not to be used before we have some proper maps extracted with acurate water/landheights
+	Need some more work too I guess, lowzy water/landheigts mess it up for now.
+			// Check water/air levels when we have restricted movement.
+			if(creature->proto->CanMove != LIMIT_ANYWHERE )
+			{
+				// Use combat reach as lookahead distance
+				float c_reach_X = m_Unit->GetPositionX() + ( sin(angle) * c_reach ) ;
+				float c_reach_Y = m_Unit->GetPositionY() + ( sin(angle) * c_reach ) ;
+
+				// get the landheigt at look ahead distance
+				float lh = m_Unit->GetMapMgr()->GetLandHeight(c_reach_X, c_reach_Y);
+
+				// Only check flying when creature can't fly 
+				if( !creature->canFly() )
+				{
+					if( m_destinationZ > lh + 5.0f )
+					{
+						//Destination is not on ground anymore
+						HandleEvent(EVENT_LEAVECOMBAT, m_Unit, 0); //follow
+						Log.Debug("MOVEMENT","Can't fly, leaving combat");
+						return;
+					}
+				}
+				else
+				{
+					//EnableFlight
+					if( m_destinationZ > lh + 5.0f )
+					{
+						m_moveFly = true;
+						m_Unit->EnableFlight();
+					}
+					else
+					{
+						m_moveFly = false;
+						m_Unit->DisableFlight();
+					}
+				}
+				// Only check swimming when creature can't swim
+				if( !creature->canSwim() )
+				{
+					// get the waterlevel at look ahead distance
+					float wl = m_Unit->GetMapMgr()->GetWaterHeight(c_reach_X, c_reach_Y);
+					if(	lh < wl - (0.75f * c_reach)) //75% is nose deep?
+					{
+						if(m_moveFly)
+						{
+							m_destinationZ = wl + 2.5f;
+							Log.Debug("MOVEMENT","flying 2.5f above water");
+						}
+						else
+						{
+							Log.Debug("MOVEMENT","Can't swim, leaving combat");
+							HandleEvent(EVENT_LEAVECOMBAT, m_Unit, 0); //follow
+							return;
+						}
+					}
+				}
+			}*/
 		}
 	}
 	SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, m_Unit->GetOrientation(), moveTime, getMoveFlags());
@@ -1941,9 +1996,7 @@ void AIInterface::UpdateMove()
 	m_timeToMove = moveTime;
 	m_timeMoved = 0;
 	if(m_moveTimer == 0)
-	{
 		m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL; // update every few msecs
-	}
 
 	m_creatureState = MOVING;
 }

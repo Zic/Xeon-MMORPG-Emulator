@@ -590,13 +590,13 @@ int32 GetTimePeriodFromString(const char * str);
 std::string ConvertTimeStampToString(uint32 timestamp);
 std::string ConvertTimeStampToDataTime(uint32 timestamp);
 
-HEARTHSTONE_INLINE void ASCENT_TOLOWER(std::string& str)
+HEARTHSTONE_INLINE void HEARTHSTONE_TOLOWER(std::string& str)
 {
 	for(size_t i = 0; i < str.length(); ++i)
 		str[i] = (char)tolower(str[i]);
 };
 
-HEARTHSTONE_INLINE void ASCENT_TOUPPER(std::string& str)
+HEARTHSTONE_INLINE void HEARTHSTONE_TOUPPER(std::string& str)
 {
 	for(size_t i = 0; i < str.length(); ++i)
 		str[i] = (char)toupper(str[i]);

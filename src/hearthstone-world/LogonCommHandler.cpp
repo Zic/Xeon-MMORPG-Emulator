@@ -131,7 +131,7 @@ void LogonCommHandler::Startup()
 			string acct = result->Fetch()[0].GetString();
 			string perm = result->Fetch()[1].GetString();
 
-			ASCENT_TOUPPER(acct);
+			HEARTHSTONE_TOUPPER(acct);
             forced_permissions.insert(make_pair(acct,perm));
 
 		} while (result->NextRow());
@@ -419,8 +419,8 @@ void LogonCommHandler::TestConsoleLogon(string& username, string& password, uint
 	string newpass = password;
 	string srpstr;
 
-	ASCENT_TOUPPER(newuser);
-	ASCENT_TOUPPER(newpass);
+	HEARTHSTONE_TOUPPER(newuser);
+	HEARTHSTONE_TOUPPER(newpass);
 
 	srpstr = newuser + ":" + newpass;
 

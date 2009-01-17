@@ -325,7 +325,7 @@ void ObjectMgr::DeletePlayerInfo( uint32 guid )
 	}
 
 	string pnam = string(pl->name);
-	ASCENT_TOLOWER(pnam);
+	HEARTHSTONE_TOLOWER(pnam);
 	i2 = m_playersInfoByName.find(pnam);
 	if( i2 != m_playersInfoByName.end() && i2->second == pl )
 		m_playersInfoByName.erase( i2 );
@@ -356,7 +356,7 @@ void ObjectMgr::AddPlayerInfo(PlayerInfo *pn)
 	playernamelock.AcquireWriteLock();
 	m_playersinfo[pn->guid] =  pn ;
 	string pnam = string(pn->name);
-	ASCENT_TOLOWER(pnam);
+	HEARTHSTONE_TOLOWER(pnam);
 	m_playersInfoByName[pnam] = pn;
 	playernamelock.ReleaseWriteLock();
 }
@@ -365,13 +365,13 @@ void ObjectMgr::RenamePlayerInfo(PlayerInfo * pn, const char * oldname, const ch
 {
 	playernamelock.AcquireWriteLock();
 	string oldn = string(oldname);
-	ASCENT_TOLOWER(oldn);
+	HEARTHSTONE_TOLOWER(oldn);
 
 	PlayerNameStringIndexMap::iterator itr = m_playersInfoByName.find( oldn );
 	if( itr != m_playersInfoByName.end() && itr->second == pn )
 	{
 		string newn = string(newname);
-		ASCENT_TOLOWER(newn);
+		HEARTHSTONE_TOLOWER(newn);
 		m_playersInfoByName.erase( itr );
 		m_playersInfoByName[newn] = pn;
 	}
@@ -447,7 +447,7 @@ void ObjectMgr::LoadPlayersInfo()
 			}
 
 			string lpn=string(pn->name);
-			ASCENT_TOLOWER(lpn);
+			HEARTHSTONE_TOLOWER(lpn);
 			m_playersInfoByName[lpn] = pn;
 
 			//this is startup -> no need in lock -> don't use addplayerinfo
@@ -466,7 +466,7 @@ void ObjectMgr::LoadPlayersInfo()
 PlayerInfo* ObjectMgr::GetPlayerInfoByName(const char * name)
 {
 	string lpn=string(name);
-	ASCENT_TOLOWER(lpn);
+	HEARTHSTONE_TOLOWER(lpn);
 	PlayerNameStringIndexMap::iterator i;
 	PlayerInfo *rv = NULL;
 	playernamelock.AcquireReadLock();
@@ -880,7 +880,7 @@ PlayerPointer ObjectMgr::GetPlayer(const char* name, bool caseSensitive)
 	if(!caseSensitive)
 	{
 		std::string strName = name;
-		ASCENT_TOLOWER(strName);
+		HEARTHSTONE_TOLOWER(strName);
 		for (itr = _players.begin(); itr != _players.end(); ++itr)
 		{
 			if(!stricmp(itr->second->GetNameString()->c_str(), strName.c_str()))

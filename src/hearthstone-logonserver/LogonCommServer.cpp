@@ -458,7 +458,7 @@ void LogonCommServerSocket::HandleDatabaseModify(WorldPacket& recvData)
 			recvData >> account >> duration >> reason;
 
 			// remember we expect this in uppercase
-			ASCENT_TOUPPER(account);
+			HEARTHSTONE_TOUPPER(account);
 
 			Account * pAccount = sAccountMgr.GetAccount(account);
 			if( pAccount == NULL )
@@ -479,7 +479,7 @@ void LogonCommServerSocket::HandleDatabaseModify(WorldPacket& recvData)
 			recvData >> account >> gm;
 
 			// remember we expect this in uppercase
-			ASCENT_TOUPPER(account);
+			HEARTHSTONE_TOUPPER(account);
 
 			Account * pAccount = sAccountMgr.GetAccount(account);
 			if( pAccount == NULL )
@@ -499,7 +499,7 @@ void LogonCommServerSocket::HandleDatabaseModify(WorldPacket& recvData)
 			recvData >> account >> duration;
 
 			// remember we expect this in uppercase
-			ASCENT_TOUPPER(account);
+			HEARTHSTONE_TOUPPER(account);
 
 			Account * pAccount = sAccountMgr.GetAccount(account);
 			if( pAccount == NULL )

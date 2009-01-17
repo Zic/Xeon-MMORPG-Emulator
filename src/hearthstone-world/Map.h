@@ -60,7 +60,7 @@ typedef struct
 	uint32 vehicle;
 }CreatureSpawn;
 
-typedef struct
+typedef struct GOSpawn
 {
 	uint32	id;//spawn ID
 	uint32	entry;
@@ -76,9 +76,7 @@ typedef struct
 	uint32	state;
 	uint32 MountDisplayID;
 	uint32	faction;
-//	uint32	level;
 	float scale;
-	//uint32 stateNpcLink;
 	int32 phase;
 } GOSpawn;
 

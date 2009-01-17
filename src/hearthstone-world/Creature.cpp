@@ -996,6 +996,9 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	m_aiInterface->m_isGuard = isGuard(GetEntry());
 
 	m_aiInterface->getMoveFlags();
+	//CanMove (overrules AI)
+	if(!proto->CanMove)
+		Root();
 
 	/* creature death state */
 	if(proto->death_state == 1)
@@ -1178,6 +1181,9 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	m_aiInterface->m_isGuard = isGuard(GetEntry());
 
 	m_aiInterface->getMoveFlags();
+	//CanMove (overrules AI)
+	if(!proto->CanMove)
+		Root();
 
 	/* creature death state */
 	if(proto->death_state == 1)

@@ -22,6 +22,7 @@
 //
 
 #include "StdAfx.h"
+#include "ObjectMgr.h"
 #include <svn_revision.h>
 
 bool ChatHandler::ShowHelpForCommand(WorldSession *m_session, ChatCommand *table, const char* cmd)
@@ -147,77 +148,51 @@ bool ChatHandler::HandleCommandsCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleStartCommand(const char* args, WorldSession *m_session)
 {
-	std::string race;
-	uint32 raceid = 0;
-
 	PlayerPointer m_plyr = getSelectedChar(m_session, false);
+	uint32 raceid = m_plyr->getRace();
+	uint32 classid = m_plyr->getClass();
+	std::string argument = args;
 
-	if (m_plyr && args && strlen(args) < 2)
+	//No arguments given, get race from selected player
+	if(m_plyr && args && strlen(args) < 2)
 	{
-		raceid = m_plyr->getRace();
 		switch (raceid)
 		{
-		case 1:
-			race = "human";
-		break;
-		case 2:
-			race = "orc";
-		break;
-		case 3:
-			race = "dwarf";
-		break;
-		case 4:
-			race = "nightelf";
-		break;
-		case 5:
-			race = "undead";
-		break;
-		case 6:
-			race = "tauren";
-		break;
-		case 7:
-			race = "gnome";
-		break;
-		case 8:
-			race = "troll";
-		break;
-		case 10:
-			race = "bloodelf";
-		break;
-		case 11:
-			race = "draenei";
-		break;
-		default:
-			return false;
-		break;
+			case 1: argument = "human";		break;
+			case 2:	argument = "orc";		break;
+			case 3:	argument = "dwarf";		break;
+			case 4:	argument = "nightelf";	break;
+			case 5:	argument = "undead";	break;
+			case 6:	argument = "tauren";	break;
+			case 7: argument = "gnome";		break;
+			case 8:	argument = "troll";		break;
+			case 10:argument = "bloodelf";	break;
+			case 11:argument = "draenei";	break;
+			default:
+			{
+				RedSystemMessage(m_session, "Could not extract race from slected character.");
+				return true;
+			}
+
 		}
 	}
-	else if (m_plyr && args && strlen(args) > 2)
+	//Optional argument
+	else if(m_plyr && args && strlen(args) > 2)
 	{
-		race = args;
-		ASCENT_TOLOWER(race);
+		HEARTHSTONE_TOLOWER(argument);
 
 		// Teleport to specific race
-		if(race == "human")
-			raceid = 1;
-		else if(race == "orc")
-			raceid = 2;
-		else if(race == "dwarf")
-			raceid = 3;
-		else if(race == "nightelf")
-			raceid = 4;
-		else if(race == "undead")
-			raceid = 5;
-		else if(race == "tauren")
-			raceid = 6;
-		else if(race == "gnome")
-			raceid = 7;
-		else if(race == "troll")
-			raceid = 8;
-		else if(race == "bloodelf")
-			raceid = 10;
-		else if(race == "draenei")
-			raceid = 11;
+		if(argument == "human")				raceid = 1;
+		else if(argument == "orc")			raceid = 2;
+		else if(argument == "dwarf")		raceid = 3;
+		else if(argument == "nightelf")		raceid = 4;
+		else if(argument == "undead")		raceid = 5;
+		else if(argument == "tauren")		raceid = 6;
+		else if(argument == "gnome")		raceid = 7;
+		else if(argument == "troll")		raceid = 8;
+		else if(argument == "bloodelf")		raceid = 10;
+		else if(argument == "draenei")		raceid = 11;
+		else if(argument == "deathknight")	classid = 6;
 		else
 		{
 			RedSystemMessage(m_session, "Invalid start location! Valid locations are: human, dwarf, gnome, nightelf, draenei, orc, troll, tauren, undead, bloodelf");
@@ -225,26 +200,19 @@ bool ChatHandler::HandleStartCommand(const char* args, WorldSession *m_session)
 		}
 	}
 	else
-	{
 		return false;
-	}
 
-	// Try to find a class that works
+	//GetPlayerCreateInfo
 	PlayerCreateInfo *info = NULL;
-	for(uint32 i=1;i<11;i++)
-	{
-		 info = objmgr.GetPlayerCreateInfo(raceid, i);
-		 if(info != NULL) break;
-	}
-	
+	info = objmgr.GetPlayerCreateInfo(raceid, classid);
 	if(info == NULL)
 	{
 		RedSystemMessage(m_session, "Internal error: Could not find create info.");
-		return false;
+			return true;
 	}
 
 
-	GreenSystemMessage(m_session, "Telporting %s to %s starting location.", m_plyr->GetName(), race.c_str());
+	GreenSystemMessage(m_session, "Telporting %s to %s starting location.", m_plyr->GetName(), argument.c_str());
 
 	m_session->GetPlayer()->SafeTeleport(info->mapId, 0, LocationVector(info->positionX, info->positionY, info->positionZ));
 	return true;
