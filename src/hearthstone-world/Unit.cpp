@@ -1760,7 +1760,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 31803:
 						case 53742: // Seal of Vengeance, Seal of Corruption
 							{
-								dmg_overwrite = float2int32((0.013f * GetDamageDoneMod(SCHOOL_HOLY) + 0.025f * GetAP()) * 6);
+								dmg_overwrite = float2int32((0.013f * GetDamageDoneMod(SCHOOL_HOLY) + 0.025f * GetAP()) * 1.2f);
 							}break;
 					}
 				}

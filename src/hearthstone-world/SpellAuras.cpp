@@ -4354,30 +4354,11 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 void Aura::SpellAuraModIncreaseEnergy(bool apply)
 {
 	SetPositive();
-	uint32 powerField,maxField ;
-	uint8 powerType = m_target->GetPowerType();
 
-	if(powerType == POWER_TYPE_MANA) // Mana
-	{
-		powerField = UNIT_FIELD_POWER1;
-		maxField = UNIT_FIELD_MAXPOWER1;
-	}
-	else if(powerType == POWER_TYPE_RAGE) // Rage
-	{
-		powerField = UNIT_FIELD_POWER2;
-		maxField = UNIT_FIELD_MAXPOWER2;
-	}
-	else if(powerType == POWER_TYPE_ENERGY) // Energy
-	{
-		powerField = UNIT_FIELD_POWER4;
-		maxField = UNIT_FIELD_MAXPOWER4;
-	}
-	else // Capt: if we can not use identify the type: do nothing
-		return; 
-
+	uint32 powerField = UNIT_FIELD_POWER1 + mod->m_miscValue;
 
 	m_target->ModUnsigned32Value(powerField,apply?mod->m_amount:-mod->m_amount);
-	m_target->ModUnsigned32Value(maxField,apply?mod->m_amount:-mod->m_amount);
+	m_target->ModUnsigned32Value(powerField + 8,apply?mod->m_amount:-mod->m_amount);
 
 	if(powerField == UNIT_FIELD_POWER1 && m_target->GetTypeId() == TYPEID_PLAYER)
 	{
