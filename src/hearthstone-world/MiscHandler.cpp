@@ -21,7 +21,7 @@
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
-	DEBUG_LOG( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
+	Log.Debug( "WORLD"," Recvd CMSG_REPOP_REQUEST Message" );
 	if(_player->m_CurrentTransporter)
 		_player->m_CurrentTransporter->RemovePlayer(_player);
 
@@ -521,7 +521,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 	else
 		cname = false;
 
-	DEBUG_LOG( "WORLD: Recvd CMSG_WHO Message with %u zones and %u names", zone_count, name_count );
+	Log.Debug( "WORLD"," Recvd CMSG_WHO Message with %u zones and %u names", zone_count, name_count );
 	
 	bool gm = false;
 	uint32 team = _player->GetTeam();
@@ -652,7 +652,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 	PlayerPointer pPlayer = GetPlayer();
 	WorldPacket data(SMSG_LOGOUT_RESPONSE, 9);
 
-	DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
+	Log.Debug( "WORLD"," Recvd CMSG_LOGOUT_REQUEST Message" );
 
 	if(pPlayer)
 	{
@@ -695,7 +695,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 {
-	DEBUG_LOG( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
+	Log.Debug( "WORLD"," Recvd CMSG_PLAYER_LOGOUT Message" );
 	if(!HasGMPermissions())
 	{
 		// send "You do not have permission to use this"
@@ -708,7 +708,7 @@ void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 {
 
-	DEBUG_LOG( "WORLD: Recvd CMSG_LOGOUT_CANCEL Message" );
+	Log.Debug( "WORLD"," Recvd CMSG_LOGOUT_CANCEL Message" );
 
 	PlayerPointer pPlayer = GetPlayer();
 	if(!pPlayer)
@@ -729,7 +729,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 	//make player stand
 	pPlayer->SetStandState(STANDSTATE_STAND);
 
-	DEBUG_LOG( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
+	Log.Debug( "WORLD"," sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
@@ -784,9 +784,9 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 	recv_data >> suggestion >> contentlen >> content >> typelen >> type;
 
 	if( suggestion == 0 )
-		DEBUG_LOG( "WORLD: Received CMSG_BUG [Bug Report]" );
+		Log.Debug( "WORLD"," Received CMSG_BUG [Bug Report]" );
 	else
-		DEBUG_LOG( "WORLD: Received CMSG_BUG [Suggestion]" );
+		Log.Debug( "WORLD"," Received CMSG_BUG [Suggestion]" );
 
 	DEBUG_LOG( type.c_str( ) );
 	DEBUG_LOG( content.c_str( ) );
@@ -1013,7 +1013,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
-	DEBUG_LOG( "WORLD: Received CMSG_SET_ACTION_BUTTON" ); 
+	Log.Debug( "WORLD"," Received CMSG_SET_ACTION_BUTTON" ); 
 	uint8 button, misc, type; 
 	uint16 action; 
 	recv_data >> button >> action >> misc >> type; 
@@ -2044,7 +2044,7 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket & recv_data)
 
 void WorldSession::HandleDismountOpcode(WorldPacket& recv_data)
 {
-	DEBUG_LOG( "WORLD: Received CMSG_DISMOUNT"  );
+	Log.Debug( "WORLD"," Received CMSG_DISMOUNT"  );
 
 	if( !_player->IsInWorld() || _player->GetTaxiState())
 		return;

@@ -747,7 +747,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	ItemPrototype *itemProto = ItemPrototypeStorage.LookupEntry(itemid);
 	if(!itemProto)
 	{
-		DEBUG_LOG( "WORLD: Unknown item id 0x%.8X", itemid );
+		Log.Debug( "WORLD"," Unknown item id 0x%.8X", itemid );
 		return;
 	} 
 
@@ -870,7 +870,7 @@ void WorldSession::HandleBuyBackOpcode( WorldPacket & recv_data )
 	AddItemResult result;
 	uint8 error;
 
-	DEBUG_LOG( "WORLD: Received CMSG_BUYBACK_ITEM" );
+	Log.Debug( "WORLD"," Received CMSG_BUYBACK_ITEM" );
 
 	recv_data >> guid >> stuff;
 	stuff -= 74;
@@ -952,7 +952,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 17);
-	DEBUG_LOG( "WORLD: Received CMSG_SELL_ITEM" );
+	Log.Debug( "WORLD"," Received CMSG_SELL_ITEM" );
 	if(!GetPlayer())
 		return;
 
@@ -1049,7 +1049,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	data << vendorguid << itemguid << uint8(0); 
 	SendPacket( &data );
 
-	DEBUG_LOG( "WORLD: Sent SMSG_SELL_ITEM" );
+	Log.Debug( "WORLD"," Sent SMSG_SELL_ITEM" );
 
 	_player->SaveToDB(false);
 }
@@ -1061,7 +1061,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	CHECK_PACKET_SIZE( recv_data, 22 );
 
-	DEBUG_LOG( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
+	Log.Debug( "WORLD"," Received CMSG_BUY_ITEM_IN_SLOT" );
 
 	if( GetPlayer() == NULL )
 		return;
@@ -1245,7 +1245,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 	data << uint32(itemid) << uint32(amount);
  
 	SendPacket( &data );
-	DEBUG_LOG( "WORLD: Sent SMSG_BUY_ITEM" );
+	Log.Debug( "WORLD"," Sent SMSG_BUY_ITEM" );
 
 	_player->GetItemInterface()->BuyItem(it,amount,unit, ci.extended_cost);
 	if(ci.max_amount)
@@ -1263,7 +1263,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 14);
-	DEBUG_LOG( "WORLD: Received CMSG_BUY_ITEM" );
+	Log.Debug( "WORLD"," Received CMSG_BUY_ITEM" );
 
 	if(!GetPlayer())
 		return;
@@ -1412,7 +1412,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 		return;
 
 	CHECK_PACKET_SIZE(recv_data, 8);
-	DEBUG_LOG( "WORLD: Recvd CMSG_LIST_INVENTORY" );
+	Log.Debug( "WORLD"," Recvd CMSG_LIST_INVENTORY" );
 	uint64 guid;
 
 	recv_data >> guid;
@@ -1478,12 +1478,12 @@ void WorldSession::SendInventoryList(CreaturePointer unit)
 	const_cast<uint8*>(data.contents())[8] = (uint8)counter;	// set count
 
 	SendPacket( &data );
-	DEBUG_LOG( "WORLD: Sent SMSG_LIST_INVENTORY" );
+	Log.Debug( "WORLD"," Sent SMSG_LIST_INVENTORY" );
 }
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
 	CHECK_PACKET_SIZE(recv_data, 3);
-	DEBUG_LOG( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );
+	Log.Debug( "WORLD"," Recvd CMSG_AUTO_STORE_BAG_ITEM" );
 	
 	if(!GetPlayer())
 		return;

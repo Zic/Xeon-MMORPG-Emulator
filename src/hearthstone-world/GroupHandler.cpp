@@ -122,7 +122,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGroupCancelOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
-	DEBUG_LOG( "WORLD: got CMSG_GROUP_CANCEL." );
+	Log.Debug( "WORLD"," got CMSG_GROUP_CANCEL." );
 }
 
 ////////////////////////////////////////////////////////////////
@@ -228,7 +228,7 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////////////////////////////////
 void WorldSession::HandleGroupUninviteGuildOpcode( WorldPacket & recv_data )
 {
-	DEBUG_LOG( "WORLD: got CMSG_GROUP_UNINVITE_GUID." );
+	Log.Debug( "WORLD"," got CMSG_GROUP_UNINVITE_GUID." );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

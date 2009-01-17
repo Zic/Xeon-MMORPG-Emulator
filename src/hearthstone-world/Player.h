@@ -1548,6 +1548,7 @@ public:
 	bool bGMTagOn;
 	uint32 TrackingSpell;
 	void _EventCharmAttack();
+	void _Warn(const char *message);
 	void _Kick();
 	void _Disconnect();
 	void Kick(uint32 delay = 0);
@@ -1878,9 +1879,14 @@ protected:
 
 	void _LoadTutorials(QueryResult * result);
 	void _SaveTutorials(QueryBuffer * buf);
+
 	void _SaveInventory(bool firstsave);
+
 	void _SaveQuestLogEntry(QueryBuffer * buf);
 	void _LoadQuestLogEntry(QueryResult * result);
+
+	void _LoadSkills(QueryResult * result);
+	void _SaveSkillsToDB(QueryBuffer * buf);
 
 	void _LoadPet(QueryResult * result);
 	void _LoadPetNo();

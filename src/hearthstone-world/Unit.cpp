@@ -3438,7 +3438,7 @@ void Unit::smsg_AttackStart(UnitPointer pVictim)
 	data << GetGUID();
 	data << pVictim->GetGUID();
 	SendMessageToSet(&data, true);
-	DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
+	Log.Debug( "WORLD"," Sent SMSG_ATTACKSTART" );
 
 	// FLAGS changed so other players see attack animation
 	//	addUnitFlag(UNIT_FLAG_COMBAT);

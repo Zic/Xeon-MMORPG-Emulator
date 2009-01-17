@@ -229,7 +229,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 void WorldSession::HandlePetInfo(WorldPacket & recv_data)
 {
 	//nothing
-	DEBUG_LOG("HandlePetInfo is called");
+	Log.Debug("WorldSession","HandlePetInfo is called");
 }
 
 void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)

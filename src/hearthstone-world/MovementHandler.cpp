@@ -74,7 +74,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 		// get outta here
 		return;
 	}
-	DEBUG_LOG( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
+	Log.Debug( "WORLD"," got MSG_MOVE_WORLDPORT_ACK." );
 	
 	if(_player->m_CurrentTransporter && _player->GetMapId() != _player->m_CurrentTransporter->GetMapId())
 	{
@@ -124,7 +124,7 @@ void WorldSession::HandleMoveTeleportAckOpcode( WorldPacket & recv_data )
 			return;
 		}
 
-		DEBUG_LOG( "WORLD: got MSG_MOVE_TELEPORT_ACK." );
+		Log.Debug( "WORLD"," got MSG_MOVE_TELEPORT_ACK." );
 		GetPlayer()->SetPlayerStatus(NONE);
 		GetPlayer()->SetMovement(MOVE_UNROOT,5);
 		_player->ResetHeartbeatCoords();

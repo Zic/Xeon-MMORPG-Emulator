@@ -343,7 +343,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 		if(_player->m_auras[x] && _player->m_auras[x]->IsPositive() && _player->m_auras[x]->GetSpellId() == spellId)
 			_player->m_auras[x]->Remove();
 	}
-	DEBUG_LOG("removing aura %u",spellId);
+	Log.Debug("Aura","Removing aura %u",spellId);
 }
 
 void WorldSession::HandleCancelChannellingOpcode( WorldPacket& recvPacket)
@@ -368,7 +368,7 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode(WorldPacket& recv_data)
 void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 {
 
-	DEBUG_LOG( "WORLD: got CMSG_PET_CAST_SPELL." );
+	Log.Debug( "WORLD"," got CMSG_PET_CAST_SPELL." );
 	uint64 guid;
 	uint8 counter;
 	uint32 spellid;

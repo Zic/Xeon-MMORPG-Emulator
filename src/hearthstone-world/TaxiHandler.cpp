@@ -22,7 +22,7 @@
 void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
-	DEBUG_LOG( "WORLD: Received CMSG_TAXINODE_STATUS_QUERY" );
+	Log.Debug( "WORLD"," Received CMSG_TAXINODE_STATUS_QUERY" );
 
 	uint64 guid;
 	uint32 curloc;
@@ -51,14 +51,14 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
 	}	
 
 	SendPacket( &data );
-	DEBUG_LOG( "WORLD: Sent SMSG_TAXINODE_STATUS" );
+	Log.Debug( "WORLD"," Sent SMSG_TAXINODE_STATUS" );
 }
 
 
 void WorldSession::HandleTaxiQueryAvaibleNodesOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
-	DEBUG_LOG( "WORLD: Received CMSG_TAXIQUERYAVAILABLENODES" );
+	Log.Debug( "WORLD"," Received CMSG_TAXIQUERYAVAILABLENODES" );
 	uint64 guid;
 	recv_data >> guid;
 	CreaturePointer pCreature = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
@@ -116,13 +116,13 @@ void WorldSession::SendTaxiList(CreaturePointer pCreature)
 	}
 	SendPacket( &data );
 
-	DEBUG_LOG( "WORLD: Sent SMSG_SHOWTAXINODES" );
+	Log.Debug( "WORLD"," Sent SMSG_SHOWTAXINODES" );
 }
 
 void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
-	DEBUG_LOG( "WORLD: Received CMSG_ACTIVATETAXI" );
+	Log.Debug( "WORLD"," Received CMSG_ACTIVATETAXI" );
 
 	uint64 guid;
 	uint32 sourcenode, destinationnode;
@@ -216,7 +216,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 	// 2.There is no direct path to that direction
 	// 3 Not enough Money
 	SendPacket( &data );
-	DEBUG_LOG( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+	Log.Debug( "WORLD"," Sent SMSG_ACTIVATETAXIREPLY" );
 
 	// 0x001000 seems to make a mount visible
 	// 0x002000 seems to make you sit on the mount, and the mount move with you
@@ -242,7 +242,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 void WorldSession::HandleMultipleActivateTaxiOpcode(WorldPacket & recvPacket)
 {
 	if(!_player->IsInWorld()) return;
-	DEBUG_LOG( "WORLD: Received CMSG_ACTIVATETAXI" );
+	Log.Debug( "WORLD"," Received CMSG_ACTIVATETAXI" );
 
 	uint64 guid;
 	uint32 moocost;
@@ -355,7 +355,7 @@ void WorldSession::HandleMultipleActivateTaxiOpcode(WorldPacket & recvPacket)
 	// 2.There is no direct path to that direction
 	// 3 Not enough Money
 	SendPacket( &data );
-	DEBUG_LOG( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+	Log.Debug( "WORLD"," Sent SMSG_ACTIVATETAXIREPLY" );
 
 	// 0x001000 seems to make a mount visible
 	// 0x002000 seems to make you sit on the mount, and the mount move with you

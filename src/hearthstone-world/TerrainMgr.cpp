@@ -249,7 +249,7 @@ bool TerrainMgr::UnloadCellInformation(uint32 x, uint32 y)
 	// Free the memory.
 	delete ptr;
 
-	DEBUG_LOG("Unloaded cell information for cell [%u][%u] in %ums.", x, y, getMSTime() - Start);
+	Log.Debug("TerrainMgr","Unloaded cell information for cell [%u][%u] in %ums.", x, y, getMSTime() - Start);
 	// Success
 	return true;
 #endif

@@ -538,6 +538,7 @@ public:
 	bool flood_message;
 	bool gm_skip_attunement;
 	bool gm_force_robes;
+	bool CheckProfessions;
 
 	bool show_gm_in_who_list;
 	uint32 map_unload_time;

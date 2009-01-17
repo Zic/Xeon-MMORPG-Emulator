@@ -1591,27 +1591,27 @@ bool QuestMgr::OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr)
 		{
 			sQuestMgr.BuildQuestDetails(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);		// 1 because we have 1 quest, and we want goodbye to function
 			plr->GetSession()->SendPacket(&data);
-			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
+			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 		}
 		else if (status == QMGR_QUEST_FINISHED)
 		{
 			sQuestMgr.BuildOfferReward(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);
 			plr->GetSession()->SendPacket(&data);
 			//ss
-			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD." );
+			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_OFFER_REWARD." );
 		}
 		else if (status == QMGR_QUEST_NOT_FINISHED)
 		{
 			sQuestMgr.BuildRequestItems(&data, (*itr)->qst, qst_giver, status, plr->GetSession()->language);
 			plr->GetSession()->SendPacket(&data);
-			DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
+			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 		}
 	}
 	else 
 	{
 		sQuestMgr.BuildQuestList(&data, qst_giver ,plr, plr->GetSession()->language);
 		plr->GetSession()->SendPacket(&data);
-		DEBUG_LOG( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST." );
+		Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_LIST." );
 	}
 	return true;
 }

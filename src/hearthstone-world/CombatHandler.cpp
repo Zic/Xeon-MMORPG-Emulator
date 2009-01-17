@@ -34,7 +34,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 	}
 
 	// AttackSwing
-	DEBUG_LOG( "WORLD: Recvd CMSG_ATTACKSWING Message" );
+	Log.Debug( "WORLD"," Recvd CMSG_ATTACKSWING Message" );
 
 	if(GetPlayer()->IsPacified() || GetPlayer()->IsStunned() || GetPlayer()->IsFeared())
 		return;

@@ -420,7 +420,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	// reputation
 	_player->Reputation_OnTalk(qst_giver->m_factionDBC);
 
-	DEBUG_LOG( "WORLD: Received CMSG_GOSSIP_HELLO from %u",GUID_LOPART(guid) );
+	Log.Debug( "WORLD"," Received CMSG_GOSSIP_HELLO from %u",GUID_LOPART(guid) );
 
 	GossipScript * Script = qst_giver->GetCreatureName() ? qst_giver->GetCreatureName()->gossip_script : NULL;
 	if(!Script)
@@ -480,7 +480,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 		data.wpos(pos);
 		data << count;
 		SendPacket(&data);
-		DEBUG_LOG( "WORLD: Sent SMSG_GOSSIP_MESSAGE" );
+		Log.Debug( "WORLD"," Sent SMSG_GOSSIP_MESSAGE" );
 	}
 	else
 	{

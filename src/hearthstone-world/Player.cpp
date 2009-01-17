@@ -850,9 +850,7 @@ bool Player::Create(WorldPacket& data )
 				_AddSkillLine(se->id, ss->currentval, ss->maxval);
 		}
 	}
-	//Chances depend on stats must be in this order!
-//	UpdateStats();
-	//UpdateChances();
+	_UpdateMaxSkillCounts();
 	
 	_InitialReputation();
 
@@ -1256,7 +1254,7 @@ void Player::_EventCharmAttack()
 	//Can't find victim, stop attacking
 	if (!pVictim)
 	{
-		DEBUG_LOG( "WORLD: "I64FMT" doesn't exist.",m_curSelection);
+		Log.Debug( "WORLD"," "I64FMT" doesn't exist.",m_curSelection);
 		DEBUG_LOG("Player::Update:  No valid current selection to attack, stopping attack\n");
 		this->setHRegenTimer(5000); //prevent clicking off creature for a quick heal
 		clearStateFlag(UF_ATTACKING);
@@ -1566,6 +1564,8 @@ void Player::GiveXP(uint32 xp, const uint64 &guid, bool allowbonus)
 			GetSummon()->ApplyStatsForLevel();
 		}
 		InitGlyphsForLevel();
+
+		_UpdateMaxSkillCounts();
 
 		GetAchievementInterface()->HandleAchievementCriteriaLevelUp( getLevel() );
 	}
@@ -1884,25 +1884,33 @@ void Player::addSpell(uint32 spell_id)
 		return;
 
 	// Add the skill line for this spell if we don't already have it.
-	skilllinespell* sk = objmgr.GetSpellSkill(spell_id);
+	skilllinespell * sk = objmgr.GetSpellSkill(spell_id);
 	if(sk && !_HasSkillLine(sk->skilline))
 	{
 		skilllineentry * skill = dbcSkillLine.LookupEntry(sk->skilline);
-		uint32 max = 5 * getLevel();
-
+		SpellEntry * spell = dbcSpell.LookupEntry(spell_id);
+		uint32 max = 1;
 		switch(skill->type)
 		{
-		case SKILL_TYPE_WEAPON:
-		case SKILL_TYPE_SECONDARY:
-		case SKILL_TYPE_LANGUAGE:
-		case SKILL_TYPE_PROFESSION:
-			return;
-		}
-
-		if(skill->type==SKILL_TYPE_PROFESSION)
-			ModUnsigned32Value(PLAYER_CHARACTER_POINTS2,-1);
+			case SKILL_TYPE_PROFESSION:
+				max=75*((spell->RankNumber)+1);
+				ModUnsigned32Value( PLAYER_CHARACTER_POINTS2, -1 ); // we are learning a proffesion, so substract a point.
+				break;
+			case SKILL_TYPE_SECONDARY:
+				max=75*((spell->RankNumber)+1);
+				break;
+			case SKILL_TYPE_WEAPON:
+				max=5*getLevel();
+				break;
+			case SKILL_TYPE_CLASS:
+			case SKILL_TYPE_ARMOR:
+				if(skill->id == SKILL_LOCKPICKING || skill->id == SKILL_POISONS)
+					max=5*getLevel();
+				break;
+		};
 
 		_AddSkillLine(sk->skilline, 1, max);
+		_UpdateMaxSkillCounts();
 	}
 }
 
@@ -2085,17 +2093,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	for(uint32 i = 0; i < 64; ++i)
 		ss << m_uint32Values[PLAYER_EXPLORED_ZONES_1 + i] << ",";
 
-	ss << "','";
-
-	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end(); ++itr)
-	{
-		if(itr->first && itr->second.Skill->type != SKILL_TYPE_LANGUAGE)
-		{
-			ss << itr->first << ";"
-				<< itr->second.CurrentValue << ";"
-				<< itr->second.MaximumValue << ";";
-		}
-	}
+	ss << "','0', "; //skip saving oldstyle skills, just fill with 0
 
 	uint32 player_flags = m_uint32Values[PLAYER_FLAGS];
 	{
@@ -2118,8 +2116,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 			player_flags &= ~PLAYER_FLAG_UNKNOWN2;
 	}
 
-	ss << "', "
-	<< m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX] << ","
+	ss << m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX] << ","
 	<< m_uint32Values[PLAYER_CHOSEN_TITLE] << ","
 	<< GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES) << ","
 	<< GetUInt64Value(PLAYER__FIELD_KNOWN_TITLES1) << ","
@@ -2307,6 +2304,9 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 
 	sHookInterface.OnPlayerSaveToDB(plr_shared_from_this(), buf);
 
+	// Skills
+	_SaveSkillsToDB(buf);
+
 	// Inventory
 	 GetItemInterface()->mSaveItemsToDatabase(bNewCharacter, buf);
 
@@ -2337,6 +2337,41 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	if(buf)
 		CharacterDatabase.AddQueryBuffer(buf);
 }
+void Player::_SaveSkillsToDB(QueryBuffer * buf)
+{
+	// if we have nothing to save why save?
+	if (m_skills.size() == 0)
+		return;
+
+	if(buf == NULL)
+		CharacterDatabase.Execute("DELETE FROM playerskills WHERE Player_Guid = %u", GetLowGUID() );
+	else
+		buf->AddQuery("DELETE FROM playerskills WHERE Player_Guid = %u", GetLowGUID() );
+
+	std::stringstream ss;
+	ss << "INSERT INTO playerskills (Player_Guid, skill_id, type, currentlvl, maxlvl ) VALUES ";
+	uint32 iI = m_skills.size()-1;
+	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end() ; ++itr)
+	{
+		if(itr->first)
+		{
+			ss	<< "(" << GetLowGUID() << ","
+				<< itr->first << ","
+				<< itr->second.Skill->type << ","
+				<< itr->second.CurrentValue << ","
+				<< itr->second.MaximumValue << ")";
+			if (iI)
+				ss << ",";
+		}
+		iI -= 1;
+	}
+
+	if(buf == NULL)
+		CharacterDatabase.Execute(ss.str().c_str());
+	else
+		buf->AddQueryStr(ss.str());
+}
+
 
 void Player::_SaveQuestLogEntry(QueryBuffer * buf)
 {
@@ -2428,7 +2463,12 @@ bool Player::LoadFromDB(uint32 guid)
 	q->AddQuery("SELECT friend_guid, note FROM social_friends WHERE character_guid = %u", guid);
 	q->AddQuery("SELECT character_guid FROM social_friends WHERE friend_guid = %u", guid);
 	q->AddQuery("SELECT ignore_guid FROM social_ignores WHERE character_guid = %u", guid);
+
+	//Achievements
 	q->AddQuery("SELECT * from achievements WHERE player = %u", guid);
+
+	//skills
+	q->AddQuery("SELECT * FROM playerskills WHERE player_guid = %u AND type <> %u ORDER BY skill_id ASC, currentlvl DESC", guid,SKILL_TYPE_LANGUAGE ); //load skill, skip languages
 
 	// queue it!
 	m_uint32Values[OBJECT_FIELD_GUID] = guid;
@@ -2552,69 +2592,33 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 		Counter++;
 	}
 
-	// Process skill data.
-	Counter = 0;
-	start = (char*)get_next_field.GetString();//buff;
-	
-	// new format
-	const ItemProf * prof;
-	if(!strchr(start, ' ') && !strchr(start,';'))
+	QueryResult *checkskills = results[12].result;
+	if(checkskills)
 	{
-		/* no skills - reset to defaults */
-		for(std::list<CreateInfo_SkillStruct>::iterator ss = info->skills.begin(); ss!=info->skills.end(); ss++)
-		{
-			if(ss->skillid && ss->currentval && ss->maxval && !::GetSpellForLanguage(ss->skillid))
-				_AddSkillLine(ss->skillid, ss->currentval, ss->maxval);		
-		}
+		_LoadSkills(results[12].result);
+		field_index++;
+		Log.Debug("WorldSession","Skills loaded");
 	}
-	else
+	else 
 	{
-		char * f = strdup(start);
-		start = f;
-		if(!strchr(start,';'))
+		// old format
+		Counter = 0;
+		start = (char*)get_next_field.GetString();//buff old system;
+		const ItemProf * prof;
+		if(!strchr(start, ' ') && !strchr(start,';'))
 		{
-			/* old skill format.. :< */
-			uint32 v1,v2,v3;
-			PlayerSkill sk;
-			for(;;)
+			// no skills - reset to defaults 
+			for(std::list<CreateInfo_SkillStruct>::iterator ss = info->skills.begin(); ss!=info->skills.end(); ss++)
 			{
-				end = strchr(start, ' ');
-				if(!end)
-					break;
-
-				*end = 0;
-				v1 = atol(start);
-				start = end + 1;
-
-				end = strchr(start, ' ');
-				if(!end)
-					break;
-
-				*end = 0;
-				v2 = atol(start);
-				start = end + 1;
-
-				end = strchr(start, ' ');
-				if(!end)
-					break;
-
-				v3 = atol(start);
-				start = end + 1;
-				if(v1 & 0xffff)
-				{
-					sk.Reset(v1 & 0xffff);
-					sk.CurrentValue = v2 & 0xffff;
-					sk.MaximumValue = (v2 >> 16) & 0xffff;
-
-					if( !sk.CurrentValue )
-						sk.CurrentValue = 1;
-
-					m_skills.insert( make_pair(sk.Skill->id, sk) );
-				}
+				if(ss->skillid && ss->currentval && ss->maxval && !::GetSpellForLanguage(ss->skillid))
+					_AddSkillLine(ss->skillid, ss->currentval, ss->maxval);		
 			}
 		}
 		else
 		{
+			char * f = strdup(start);
+			start = f;
+
 			uint32 v1,v2,v3;
 			PlayerSkill sk;
 			for(;;)
@@ -2648,33 +2652,26 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 					sk.Reset(v1);
 					sk.CurrentValue = v2;
 					sk.MaximumValue = v3;
-
-					if( !sk.CurrentValue )
-						sk.CurrentValue = 1;
-
+					if (v1 == SKILL_RIDING)
+						sk.CurrentValue = sk.MaximumValue;
 					m_skills.insert(make_pair(v1, sk));
+	
+					prof = GetProficiencyBySkill(v1);
+					if(prof)
+					{
+						if(prof->itemclass==4)
+							armor_proficiency|=prof->subclass;
+						else
+							weapon_proficiency|=prof->subclass;
+					}
 				}
 			}
-		}
-		free(f);
-	}
-
-	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end(); ++itr)
-	{
-		if(itr->first == SKILL_RIDING)
-		{
-			itr->second.CurrentValue = itr->second.MaximumValue;
-		}
-
-		prof = GetProficiencyBySkill(itr->first);
-		if(prof)
-		{
-			if(prof->itemclass==4)
-				armor_proficiency|=prof->subclass;
-			else
-				weapon_proficiency|=prof->subclass;
+			free(f);
+			_UpdateMaxSkillCounts();
+			Log.Debug("Player","loaded old style skills for player %s", m_name.c_str());
 		}
 	}
+
 
 	// set the rest of the shit
 	m_uint32Values[PLAYER_FIELD_WATCHED_FACTION_INDEX]  = get_next_field.GetUInt32();
@@ -4512,6 +4509,64 @@ bool Player::HasFinishedDailyQuest(uint32 quest_id)
 {
 	return (m_finishedDailyQuests.find(quest_id) != m_finishedDailyQuests.end());
 }
+void Player::_LoadSkills(QueryResult * result)
+{	
+	int32 proff_counter = 2;
+	if(result)
+	{
+		const ItemProf * prof;
+		do 
+		{
+			PlayerSkill sk;
+			uint32 v1;
+			Field *fields = result->Fetch();
+			v1 = fields[1].GetUInt32();
+			sk.Reset(v1);
+
+			if ( sWorld.CheckProfessions && fields[2].GetUInt32() == SKILL_TYPE_PROFESSION )
+			{
+				proff_counter--;
+				if( proff_counter < 0 )
+				{
+					proff_counter = 0;
+					
+					sCheatLog.writefromsession(GetSession(),"Bug_Primary_Professions Player %s [%d] \n", GetName(), GetLowGUID());
+
+					const char * message = "You character has more then 2 primary professions.\n You have 5 minutes remaining to unlearn and relog.";
+
+					// Send warning after 2 minutes, as he might miss it if it's send inmedeately.
+					sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Warn, message, EVENT_UNIT_SENDMESSAGE, 60000, 1, 0);
+					sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Kick, EVENT_PLAYER_KICK, 360000, 1, 0 );
+				}
+
+				sk.CurrentValue = fields[3].GetUInt32();
+				sk.MaximumValue = fields[4].GetUInt32();
+				m_skills.insert(make_pair(v1,sk));
+
+				prof = GetProficiencyBySkill(v1);
+				if(prof)
+				{
+					if(prof->itemclass==4)
+						armor_proficiency|=prof->subclass;
+					else
+						weapon_proficiency|=prof->subclass;
+				}
+			}
+		} while(result->NextRow());
+	}
+	else // no result from db set up from create_info instead
+	{
+		for(std::list<CreateInfo_SkillStruct>::iterator ss = info->skills.begin(); ss!=info->skills.end(); ss++)
+		{
+			if(ss->skillid && ss->currentval && ss->maxval && !::GetSpellForLanguage(ss->skillid))
+				_AddSkillLine(ss->skillid, ss->currentval, ss->maxval);		
+		}
+	}
+	//Update , GM's can still learn more
+	SetUInt32Value( PLAYER_CHARACTER_POINTS2, ( GetSession()->HasGMPermissions()? 2 : proff_counter ) );
+	_UpdateMaxSkillCounts();
+}
+
 
 //From Mangos Project
 void Player::_LoadTutorials(QueryResult * result)
@@ -6034,7 +6089,7 @@ void Player::SendInitialLogonPackets()
 	data << (float)0.0166666669777748f;  // Normal Game Speed
 	GetSession()->SendPacket( &data );
 
-	DEBUG_LOG("WORLD: Sent initial logon packets for %s.", GetName());
+	Log.Debug("WORLD","Sent initial logon packets for %s.", GetName());
 }
 
 void Player::Reset_Spells()
@@ -6742,6 +6797,11 @@ uint32 Player::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	}
 	count += Unit::BuildCreateUpdateBlockForPlayer(data, target);
 	return count;
+}
+
+void Player::_Warn(const char *message)
+{
+	sChatHandler.RedSystemMessage(GetSession(), message);
 }
 
 void Player::Kick(uint32 delay /* = 0 */)
@@ -9272,60 +9332,60 @@ void Player::EventRemoveAndDelete()
 }
 #endif
 
-void Player::_AddSkillLine(uint32 SkillLine, uint32 Current, uint32 Max)
+void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 {
+	skilllineentry * CheckedSkill = dbcSkillLine.LookupEntry(SkillLine);
+	if (!CheckedSkill) //skill doesn't exist, exit here
+		return;
+
+	// force to be within limits
+	Curr_sk = ( Curr_sk > 375 ? 375 : ( Curr_sk <1 ? 1 : Curr_sk ) );
+	Max_sk = ( Max_sk > 375 ? 375 : Max_sk );
+
 	ItemProf * prof;
 	SkillMap::iterator itr = m_skills.find(SkillLine);
-
-	if( !Current )
-		Current = 1;
-
 	if(itr != m_skills.end())
 	{
-		if( (Current > itr->second.CurrentValue && Max >= itr->second.MaximumValue) ||
-			(Current == itr->second.CurrentValue && Max > itr->second.MaximumValue) )
+		if( (Curr_sk > itr->second.CurrentValue && Max_sk >= itr->second.MaximumValue) || (Curr_sk == itr->second.CurrentValue && Max_sk > itr->second.MaximumValue) )
 		{
-			itr->second.CurrentValue = Current;
-			itr->second.MaximumValue = Max;
-
-			if(itr->second.CurrentValue>itr->second.MaximumValue)
-				itr->second.CurrentValue=itr->second.MaximumValue;
-			_UpdateSkillFields();
+			itr->second.CurrentValue = Curr_sk;
+			itr->second.MaximumValue = Max_sk;
+			_UpdateMaxSkillCounts();
 		}
 	}
 	else
 	{
 		PlayerSkill inf;
-		inf.Skill = dbcSkillLine.LookupEntry(SkillLine);
-		inf.CurrentValue = Current;
-		inf.MaximumValue = Max;
+		inf.Skill = CheckedSkill;
+		inf.MaximumValue = Max_sk;
+		inf.CurrentValue = ( inf.Skill->id != SKILL_RIDING ? Curr_sk : Max_sk );
 		inf.BonusValue = 0;
 		m_skills.insert( make_pair( SkillLine, inf ) );
 		_UpdateSkillFields();
-
-		//Add to proficiency
-		if((prof=(ItemProf *)GetProficiencyBySkill(SkillLine)))
-		{
-			packetSMSG_SET_PROFICICENCY pr;
-			pr.ItemClass = prof->itemclass;
-            if(prof->itemclass==4)
-            {
-                armor_proficiency|=prof->subclass;
-                //SendSetProficiency(prof->itemclass,armor_proficiency);
-				pr.Profinciency = armor_proficiency;
-            }else
-            {
-                weapon_proficiency|=prof->subclass;
-                //SendSetProficiency(prof->itemclass,weapon_proficiency);
-				pr.Profinciency = weapon_proficiency;
-            }
-			m_session->OutPacket( SMSG_SET_PROFICIENCY, sizeof( packetSMSG_SET_PROFICICENCY ), &pr );
-    	}
-
-		// hackfix for poisons
-		if(SkillLine==SKILL_POISONS && !HasSpell(2842))
-			addSpell(2842);
 	}
+	//Add to proficiency
+	if((prof=(ItemProf *)GetProficiencyBySkill(SkillLine)))
+	{
+		packetSMSG_SET_PROFICICENCY pr;
+		pr.ItemClass = prof->itemclass;
+		if(prof->itemclass==4)
+		{
+				armor_proficiency|=prof->subclass;
+				//SendSetProficiency(prof->itemclass,armor_proficiency);
+				pr.Profinciency = armor_proficiency;
+		}
+		else
+		{
+				weapon_proficiency|=prof->subclass;
+				//SendSetProficiency(prof->itemclass,weapon_proficiency);
+				pr.Profinciency = weapon_proficiency;
+		}
+		m_session->OutPacket( SMSG_SET_PROFICIENCY, sizeof( packetSMSG_SET_PROFICICENCY ), &pr );
+	}
+
+	// hackfix for poisons
+	if(SkillLine==SKILL_POISONS && !HasSpell(2842))
+		addSpell(2842);
 }
 
 void Player::_UpdateSkillFields()
@@ -9351,6 +9411,7 @@ void Player::_UpdateSkillFields()
 		SetUInt32Value(f++, itr->second.BonusValue);
 
 		GetAchievementInterface()->HandleAchievementCriteriaReachSkillLevel( itr->second.Skill->id, itr->second.CurrentValue );
+
 		++itr;
 	}
 
@@ -9374,19 +9435,15 @@ void Player::_AdvanceSkillLine(uint32 SkillLine, uint32 Count /* = 1 */)
 	{
 		/* Add it */
 		_AddSkillLine(SkillLine, Count, getLevel() * 5);
+		_UpdateMaxSkillCounts();
 	}
 	else
-	{
-		/* Update it. */
-		if(itr->second.CurrentValue >= itr->second.MaximumValue)
-			return;
-
-		itr->second.CurrentValue += Count;
-		if(itr->second.CurrentValue >= itr->second.MaximumValue)
-			itr->second.CurrentValue = itr->second.MaximumValue;
+	{	
+		uint32 curr_sk = itr->second.CurrentValue;
+		itr->second.CurrentValue = min(curr_sk + Count,itr->second.MaximumValue);
+		if (itr->second.CurrentValue != curr_sk)
+			_UpdateSkillFields();
 	}
-
-	_UpdateSkillFields();
 }
 
 uint32 Player::_GetSkillLineMax(uint32 SkillLine)
@@ -9417,25 +9474,53 @@ void Player::_RemoveSkillLine(uint32 SkillLine)
 void Player::_UpdateMaxSkillCounts()
 {
 	bool dirty = false;
-	uint32 new_max = getLevel() * 5;
+	uint32 new_max;
 	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end(); ++itr)
 	{
-		if(itr->second.Skill->type != SKILL_TYPE_WEAPON &&
-			itr->second.Skill->id != SKILL_POISONS &&
-			itr->second.Skill->id != SKILL_LOCKPICKING)
+
+		if( itr->second.Skill->id == SKILL_LOCKPICKING || itr->second.Skill->id == SKILL_POISONS)
 		{
-			continue;
+			new_max = 5 * getLevel();
+		}
+		else
+		{
+			switch(itr->second.Skill->type)
+			{
+				case SKILL_TYPE_WEAPON:
+				{
+					new_max = 5 * getLevel();
+				}break;
+
+				case SKILL_TYPE_LANGUAGE:
+				{
+					new_max = 300;
+				}break;
+
+				//Check if the are any players stuck on old 350 max, if so, increase to 375.
+				//Also maxes out riding skills.
+				case SKILL_TYPE_PROFESSION:
+				case SKILL_TYPE_SECONDARY:
+				case SKILL_RIDING:
+				{
+					new_max = itr->second.MaximumValue >= 350 ? 375 : itr->second.MaximumValue;
+					if(itr->second.Skill->type == SKILL_RIDING )
+						itr->second.CurrentValue = new_max;
+				}break;
+
+				// default the rest to max = 1, so they won't mess up skill frame for player.
+				default:
+					new_max = 1;
+			}
 		}
 
-        if(itr->second.MaximumValue != new_max)
-		{
-			dirty = true;
-			itr->second.MaximumValue = new_max;
-		}
+		//Update new max, forced to be within limits
+		itr->second.MaximumValue = new_max > 375 ? 375 : new_max < 1 ? 1 : new_max;
+
+		//Check if current is below nem max, if so, set new current to new max
+		itr->second.CurrentValue = itr->second.CurrentValue > itr->second.MaximumValue ? itr->second.MaximumValue : itr->second.CurrentValue;
 	}
-
-	if(dirty)
-		_UpdateSkillFields();
+	//Always update client to prevent cached data messing up things later.
+	_UpdateSkillFields();
 }
 
 void Player::_ModifySkillBonus(uint32 SkillLine, int32 Delta)

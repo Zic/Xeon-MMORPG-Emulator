@@ -55,6 +55,7 @@ World::World()
 	AlliancePlayers = 0;
 	gm_skip_attunement = false;
 	gm_force_robes = false;
+	CheckProfessions = false;
 
 	show_gm_in_who_list = true;
 	map_unload_time=0;
@@ -1250,6 +1251,8 @@ void World::Rehash(bool load)
 	SetKickAFKPlayerTime(Config.MainConfig.GetIntDefault("Server", "KickAFKPlayers", 0));
 	gm_skip_attunement = Config.MainConfig.GetBoolDefault("Server", "SkipAttunementsForGM", true);
 	gm_force_robes = Config.MainConfig.GetBoolDefault("Server", "ForceRobesForGM", false);
+
+	CheckProfessions = Config.MainConfig.GetBoolDefault("Server", "CheckProfessions", false);
 
 #ifndef CLUSTERING
 	SocketRecvBufSize = Config.MainConfig.GetIntDefault("WorldSocket", "RecvBufSize", WORLDSOCKET_RECVBUF_SIZE);
