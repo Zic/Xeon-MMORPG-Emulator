@@ -870,6 +870,8 @@ void ApplyNormalFixes()
 				new_level = 4;
 			else if( strstr( sp->Name, "Master "))
 				new_level = 5;
+			else if( strstr( sp->Name, "Grand Master ") ) 
+				new_level = 6;
 			if(new_level!=0)
 			{
 				uint32 teachspell=0;
