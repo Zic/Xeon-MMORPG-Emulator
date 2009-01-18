@@ -6033,7 +6033,7 @@ void Aura::SpellAuraMounted(bool apply)
 	if(apply)
 	{   
 		if( isVehicleSpell ) // get rid of meeeee, I'm a useless placeholder!
-			SetDuration(1);
+			SetTimeLeft(100);
 
 		p_target->m_bgFlagIneligible++;
 		SetPositive();

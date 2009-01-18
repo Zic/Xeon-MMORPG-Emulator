@@ -1210,10 +1210,8 @@ void Creature::OnPushToWorld()
 			sp = dbcSpell.LookupEntry((*itr));
 			if(sp != NULL)
 			{
-				UnitPointer target = static_cast< UnitPointer >(this);
+				UnitPointer target = unit_shared_from_this();
 				sEventMgr.AddEvent(target, &Unit::EventCastSpell, target, sp, EVENT_AURA_APPLY, 250, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT); 
-//			Added a 250 ms delay to allow cell to wake up; not adding the delay will mess up visual effects (like invisibiliy). This means invisibility aura from database work now.
-//			CastSpell(TO_UNIT(shared_from_this()), sp, 0);
 			}
 		}
 	}
