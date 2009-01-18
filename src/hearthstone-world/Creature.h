@@ -480,8 +480,8 @@ public:
 
 	HEARTHSTONE_INLINE PlayerPointer GetTotemOwner() { return totemOwner; }
 	HEARTHSTONE_INLINE void SetTotemOwner(PlayerPointer owner) { totemOwner = owner; }
-	HEARTHSTONE_INLINE uint32 GetTotemSlot() { return totemSlot; }
-	HEARTHSTONE_INLINE void SetTotemSlot(uint32 slot) { totemSlot = slot; }
+	HEARTHSTONE_INLINE int32 GetTotemSlot() { return totemSlot; }
+	HEARTHSTONE_INLINE void SetTotemSlot(int32 slot) { totemSlot = slot; }
 
 	HEARTHSTONE_INLINE bool IsPickPocketed() { return m_PickPocketed; }
 	HEARTHSTONE_INLINE void SetPickPocketed(bool val = true) { m_PickPocketed = val; }
@@ -560,7 +560,7 @@ protected:
 	uint32 m_enslaveSpell;
 
 	PlayerPointer totemOwner;
-	uint32 totemSlot;
+	int32 totemSlot;
 
 	bool m_PickPocketed;
 	uint32 _fields[UNIT_END];
