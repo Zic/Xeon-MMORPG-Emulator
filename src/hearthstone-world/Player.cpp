@@ -4541,19 +4541,18 @@ void Player::_LoadSkills(QueryResult * result)
 					sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Warn, message, EVENT_UNIT_SENDMESSAGE, 60000, 1, 0);
 					sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Kick, EVENT_PLAYER_KICK, 360000, 1, 0 );
 				}
+			}
+			sk.CurrentValue = fields[3].GetUInt32();
+			sk.MaximumValue = fields[4].GetUInt32();
+			m_skills.insert(make_pair(v1,sk));
 
-				sk.CurrentValue = fields[3].GetUInt32();
-				sk.MaximumValue = fields[4].GetUInt32();
-				m_skills.insert(make_pair(v1,sk));
-
-				prof = GetProficiencyBySkill(v1);
-				if(prof)
-				{
-					if(prof->itemclass==4)
-						armor_proficiency|=prof->subclass;
-					else
-						weapon_proficiency|=prof->subclass;
-				}
+			prof = GetProficiencyBySkill(v1);
+			if(prof)
+			{
+				if(prof->itemclass==4)
+					armor_proficiency|=prof->subclass;
+				else
+					weapon_proficiency|=prof->subclass;
 			}
 		} while(result->NextRow());
 	}
