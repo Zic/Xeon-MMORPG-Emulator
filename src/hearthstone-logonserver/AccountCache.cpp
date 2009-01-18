@@ -135,7 +135,7 @@ void AccountMgr::AddAccount(Field* field)
 	{
 		//Accounts should be unbanned once the date is past their set expiry date.
 		acct->Muted= 0;
-		Log.Debug("AccountMgr","Account %s's mute has expired.",acct->UsernamePtr->c_str());
+		Log.Debug("AccountMgr","Account %s's mute has expired.", Username.c_str());
 		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
 	}
 	// Convert username/password to uppercase. this is needed ;)
