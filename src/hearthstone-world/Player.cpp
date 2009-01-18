@@ -905,9 +905,8 @@ void Player::EquipInit(PlayerCreateInfo *EquipInfo)
 	{
 		if ( (*is).protoid != 0)
 		{
-			shared_ptr<Item>item;
-			item=objmgr.CreateItem((*is).protoid,plr_shared_from_this());
-			if(item)
+			ItemPointer item =objmgr.CreateItem((*is).protoid,plr_shared_from_this());
+			if(item != NULL)
 			{
 				item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,(*is).amount);
 				if((*is).slot<INVENTORY_SLOT_BAG_END)
