@@ -1748,7 +1748,7 @@ bool ChatHandler::HandleCastAllCommand(const char* args, WorldSession* m_session
 		{
 			if(plr->GetMapMgr() != m_session->GetPlayer()->GetMapMgr())
 			{
-				sEventMgr.AddEvent( static_cast< UnitPointer >( plr ), &Unit::EventCastSpell, static_cast< UnitPointer >( plr ), info, EVENT_PLAYER_CHECKFORCHEATS, 100, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+				sEventMgr.AddEvent( TO_UNIT(plr), &Unit::EventCastSpell, TO_UNIT(plr), info, EVENT_PLAYER_CHECKFORCHEATS, 100, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 			}
 			else
 			{
@@ -2782,7 +2782,7 @@ bool ChatHandler::HandleDispelAllCommand(const char * args, WorldSession * m_ses
 		{
 			if(plr->GetMapMgr() != m_session->GetPlayer()->GetMapMgr())
 			{
-				sEventMgr.AddEvent( static_cast< UnitPointer >( plr ), &Unit::DispelAll, pos ? true : false, EVENT_PLAYER_CHECKFORCHEATS, 100, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+				sEventMgr.AddEvent( TO_UNIT( plr ), &Unit::DispelAll, pos ? true : false, EVENT_PLAYER_CHECKFORCHEATS, 100, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 			}
 			else
 			{

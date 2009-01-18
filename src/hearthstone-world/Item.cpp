@@ -512,7 +512,7 @@ void Item::RemoveFromWorld()
 void Item::SetOwner( PlayerPointer owner )
 { 
 	if( owner != NULL )
-		SetUInt64Value( ITEM_FIELD_OWNER, static_cast< ObjectPointer >( owner )->GetGUID() );
+		SetUInt64Value( ITEM_FIELD_OWNER, owner->GetGUID() );
 	else SetUInt64Value( ITEM_FIELD_OWNER, 0 );
 
 	m_owner = owner; 
