@@ -907,7 +907,7 @@ void Player::EquipInit(PlayerCreateInfo *EquipInfo)
 		{
 			shared_ptr<Item>item;
 			item=objmgr.CreateItem((*is).protoid,plr_shared_from_this());
-			if(item =! NULL)
+			if(item)
 			{
 				item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,(*is).amount);
 				if((*is).slot<INVENTORY_SLOT_BAG_END)
@@ -9502,6 +9502,11 @@ void Player::_UpdateMaxSkillCounts()
 
 				//Max out riding skills.
 				case SKILL_RIDING:
+				case SKILL_TYPE_PROFESSION:
+				{
+					//do nothing
+				}break;
+				case SKILL_TYPE_SECONDARY:
 				{
 					itr->second.CurrentValue = itr->second.MaximumValue;
 				}break;
