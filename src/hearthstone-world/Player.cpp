@@ -4496,7 +4496,7 @@ void Player::_LoadSkills(QueryResult * result)
 					
 					sCheatLog.writefromsession(GetSession(),"Bug_Primary_Professions Player %s [%d] \n", GetName(), GetLowGUID());
 
-					const char * message = "You character has more then 2 primary professions.\n You have 5 minutes remaining to unlearn and relog.";
+					const char * message = "Your character has more then 2 primary professions.\n You have 5 minutes remaining to unlearn and relog.";
 
 					// Send warning after 2 minutes, as he might miss it if it's send inmedeately.
 					sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Warn, message, EVENT_UNIT_SENDMESSAGE, 60000, 1, 0);
@@ -9309,10 +9309,6 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 	skilllineentry * CheckedSkill = dbcSkillLine.LookupEntry(SkillLine);
 	if (!CheckedSkill) //skill doesn't exist, exit here
 		return;
-
-	// force to be within limits
-	Max_sk = Max_sk > 450 ? 450 : Max_sk;
-	Curr_sk = Curr_sk > Max_sk ? Max_sk : Curr_sk < 1 ? 1 : Curr_sk ;
 
 	ItemProf * prof;
 	SkillMap::iterator itr = m_skills.find(SkillLine);
