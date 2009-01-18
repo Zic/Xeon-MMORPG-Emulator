@@ -290,9 +290,6 @@ AC_CONFIG_FILES([
    src/scripts/src/LUAScripting/Makefile
    src/scripts/src/InstanceScripts/Makefile
    src/scripts/src/Events/Makefile
-   extras/Makefile
-   extras/collision/Makefile
-   extras/collision/collision_dll/Makefile
 ])
 
 AC_OUTPUT
