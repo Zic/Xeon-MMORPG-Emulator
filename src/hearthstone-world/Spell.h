@@ -599,7 +599,10 @@ enum LOCKTYPES{
     LOCKTYPE_GAHZRIDIAN             =15,
     LOCKTYPE_BLASTING               =16,
     LOCKTYPE_SLOW_OPEN              =17,
-    LOCKTYPE_SLOW_CLOSE             =18
+    LOCKTYPE_SLOW_CLOSE             =18,
+	LOCKTYPE_FISHING               = 19,
+	LOCKTYPE_INSCRIPTION           = 20,
+    LOCKTYPE_OPEN_FROM_VEHICLE     = 21
 };
 
 enum SpellEffects

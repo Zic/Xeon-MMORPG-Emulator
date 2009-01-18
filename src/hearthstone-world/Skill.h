@@ -150,8 +150,20 @@
 #define SKILL_BLOOD                     770
 #define SKILL_DK_FROST                  771
 #define SKILL_UNHOLY                    772
-#define SKILL_INSCRIPTION               773
-#define SKILL_RUNEFORGING               776
+#define SKILL_INSCRIPTION				773
+#define SKILL_PET_MOTH					775
+#define SKILL_RUNEFORGING				776
+#define SKILL_MOUNTS					777
+#define SKILL_COMPANIONS				778
+#define SKILL_PET_EXOTIC_CHIMAERA		780
+#define SKILL_PET_EXOTIC_DEVILSAUR		781
+#define SKILL_PET_GHOUL					782
+#define SKILL_PET_EXOTIC_SILITHID		783
+#define SKILL_PET_EXOTIC_WORM			784
+#define SKILL_PET_WASP					785
+#define SKILL_PET_EXOTIC_RHINO			786
+#define SKILL_PET_EXOTIC_CORE_HOUND		787
+#define SKILL_PET_EXOTIC_SPIRIT_BEAST	788
 
 #define SKILL_TYPE_ATTRIBUTES           5
 #define SKILL_TYPE_WEAPON               6

@@ -3579,6 +3579,11 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		target->addSpell( 26925 );// Woven Copper Ring
 		target->addSpell( 32259 );// Rough Stone Statue
 		break;
+	case SKILL_INSCRIPTION:
+		target->addSpell( 51005 );// Milling
+		target->addSpell( 45382 );// Scroll of Stamina
+		target->addSpell( 52738 );// Ivory Ink
+
 	};
 }
 
