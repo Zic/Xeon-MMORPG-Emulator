@@ -9324,8 +9324,8 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 		return;
 
 	// force to be within limits
-	Curr_sk = ( Curr_sk > 375 ? 375 : ( Curr_sk <1 ? 1 : Curr_sk ) );
-	Max_sk = ( Max_sk > 375 ? 375 : Max_sk );
+	Max_sk = Max_sk > 450 ? 450 : Max_sk;
+	Curr_sk = Curr_sk > Max_sk ? Max_sk : Curr_sk < 1 ? 1 : Curr_sk ;
 
 	ItemProf * prof;
 	SkillMap::iterator itr = m_skills.find(SkillLine);
