@@ -1398,22 +1398,19 @@ void Player::_EventExploration()
 	else if( m_zoneId != at->AreaId )
 		ZoneUpdate(at->AreaId);
 
+	bool rest_on = false;
 	// Check for a restable area
     if(at->AreaFlags & AREA_CITY_AREA || at->AreaFlags & AREA_CITY)
 	{
 		// check faction
 		if((at->category == AREAC_ALLIANCE_TERRITORY && GetTeam() == 0) || (at->category == AREAC_HORDE_TERRITORY && GetTeam() == 1) )
 		{
-			if(!m_isResting) ApplyPlayerRestState(true);
+			rest_on = true;
 		}
         else if(at->category != AREAC_ALLIANCE_TERRITORY && at->category != AREAC_HORDE_TERRITORY)
 		{
-			if(!m_isResting) ApplyPlayerRestState(true);
+			rest_on = true;
 		}
-        else
-        {
-            if(m_isResting) ApplyPlayerRestState(false);
-        }
 	}
 	else
 	{
@@ -1425,28 +1422,35 @@ void Player::_EventExploration()
             {
                 if((at2->category == AREAC_ALLIANCE_TERRITORY && GetTeam() == 0) || (at2->category == AREAC_HORDE_TERRITORY && GetTeam() == 1) )
 		        {
-			        if(!m_isResting) ApplyPlayerRestState(true);
+					rest_on = true;
 		        }
                 else if(at2->category != AREAC_ALLIANCE_TERRITORY && at2->category != AREAC_HORDE_TERRITORY)
 		        {
-			        if(!m_isResting) ApplyPlayerRestState(true);
+					rest_on = true;
 		        }
-                else
-                {
-                    if(m_isResting) ApplyPlayerRestState(false);
-                }
             }
-			else
+		}
+	}
+
+	if (rest_on)
+	{
+		if(!m_isResting) ApplyPlayerRestState(true);
+	}
+	else
+	{
+		if(m_isResting)
+		{
+			if (GetMapMgr()->IsCollisionEnabled())
 			{
-				if(m_isResting)
+				const LocationVector & loc = GetPosition();
+				if(!CollideInterface.IsIndoor(GetMapId(), loc.x, loc.y, loc.z + 2.0f))
 					ApplyPlayerRestState(false);
 			}
-        }
-        else
-        {
-		    if(m_isResting) ApplyPlayerRestState(false);
-        }
+			else
+				ApplyPlayerRestState(false);
+		}
 	}
+
 
 	if( !(currFields & val) && !GetTaxiState() && !m_TransporterGUID)//Unexplored Area		// bur: we dont want to explore new areas when on taxi
 	{
