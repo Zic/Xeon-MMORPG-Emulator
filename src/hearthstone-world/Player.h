@@ -830,6 +830,7 @@ public:
 	bool ok_to_remove;
 	uint64 m_spellIndexTypeTargets[NUM_SPELL_TYPE_INDEX];
 	void OnLogin();//custom stuff on player login.
+	void EquipInit(PlayerCreateInfo *EquipInfo);
 	void RemoveSpellTargets(uint32 Type);
 	void RemoveSpellIndexReferences(uint32 Type);
 	void SetSpellTargetType(uint32 Type, UnitPointer target);

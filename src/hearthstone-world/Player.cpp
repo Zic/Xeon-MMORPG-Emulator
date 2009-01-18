@@ -827,7 +827,6 @@ bool Player::Create(WorldPacket& data )
 	SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, 0xEEEEEEEE);
 
 	m_StableSlotCount = 0;
-	shared_ptr<Item>item;
 
 	for(std::set<uint32>::iterator sp = info->spell_list.begin();sp!=info->spell_list.end();sp++)
 	{
@@ -856,14 +855,59 @@ bool Player::Create(WorldPacket& data )
 
 	// Add actionbars
 	for(std::list<CreateInfo_ActionBarStruct>::iterator itr = info->actionbars.begin();itr!=info->actionbars.end();++itr)
+	{
 		setAction(itr->button, itr->action, itr->type, itr->misc);
+	}
+	if( GetSession()->HasGMPermissions() && sWorld.gm_force_robes )
+	{
+		// Force GM robes on GM's except 'az' status (if set to 1 in world.conf)
+		if( strchr(GetSession()->GetPermissions(),'az')==NULL)
+		{
+			//We need to dupe this
+			PlayerCreateInfo *GMinfo = new PlayerCreateInfo;
+			memcpy(GMinfo,info, sizeof(info));
 
-	for(std::list<CreateInfo_ItemStruct>::iterator is = info->items.begin(); is!=info->items.end(); is++)
+			GMinfo->items.clear();
+			CreateInfo_ItemStruct itm;
+
+			itm.protoid = 11508; //Feet
+			itm.slot = 7;
+			itm.amount = 1;
+			GMinfo->items.push_back(itm);
+
+			itm.protoid = 2586;//Chest
+			itm.slot = 4;
+			itm.amount = 1;
+			GMinfo->items.push_back(itm);
+
+			itm.protoid = 12064;//head
+			itm.slot = 0;
+			itm.amount = 1;
+			GMinfo->items.push_back(itm);
+
+			EquipInit(GMinfo);
+		}
+	}
+	else
+		EquipInit(info);
+
+	sHookInterface.OnCharacterCreate(plr_shared_from_this());
+
+	load_health = m_uint32Values[UNIT_FIELD_HEALTH];
+	load_mana = m_uint32Values[UNIT_FIELD_POWER1];
+	return true;
+}
+
+void Player::EquipInit(PlayerCreateInfo *EquipInfo)
+{
+
+	for(std::list<CreateInfo_ItemStruct>::iterator is = EquipInfo->items.begin(); is!=EquipInfo->items.end(); is++)
 	{
 		if ( (*is).protoid != 0)
 		{
+			shared_ptr<Item>item;
 			item=objmgr.CreateItem((*is).protoid,plr_shared_from_this());
-			if(item)
+			if(item =! NULL)
 			{
 				item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,(*is).amount);
 				if((*is).slot<INVENTORY_SLOT_BAG_END)
@@ -885,15 +929,7 @@ bool Player::Create(WorldPacket& data )
 			}
 		}
 	}
-
-	sHookInterface.OnCharacterCreate(plr_shared_from_this());
-
-	load_health = m_uint32Values[UNIT_FIELD_HEALTH];
-	load_mana = m_uint32Values[UNIT_FIELD_POWER1];
-	return true;
 }
-
-
 void Player::Update( uint32 p_time )
 {
 	if(!IsInWorld())
@@ -9464,15 +9500,10 @@ void Player::_UpdateMaxSkillCounts()
 					new_max = 300;
 				}break;
 
-				//Check if the are any players stuck on old 350 max, if so, increase to 375.
-				//Also maxes out riding skills.
-				case SKILL_TYPE_PROFESSION:
-				case SKILL_TYPE_SECONDARY:
+				//Max out riding skills.
 				case SKILL_RIDING:
 				{
-					new_max = itr->second.MaximumValue >= 400 ? 450 : itr->second.MaximumValue;
-					if(itr->second.Skill->type == SKILL_RIDING )
-						itr->second.CurrentValue = new_max;
+					itr->second.CurrentValue = itr->second.MaximumValue;
 				}break;
 
 				// default the rest to max = 1, so they won't mess up skill frame for player.
@@ -9482,7 +9513,7 @@ void Player::_UpdateMaxSkillCounts()
 		}
 
 		//Update new max, forced to be within limits
-		itr->second.MaximumValue = new_max > 375 ? 375 : new_max < 1 ? 1 : new_max;
+		itr->second.MaximumValue = new_max > 450 ? 450 : new_max < 1 ? 1 : new_max;
 
 		//Check if current is below nem max, if so, set new current to new max
 		itr->second.CurrentValue = itr->second.CurrentValue > itr->second.MaximumValue ? itr->second.MaximumValue : itr->second.CurrentValue;
@@ -9636,6 +9667,7 @@ void Player::_ModifySkillMaximum(uint32 SkillLine, uint32 NewMax)
 
 	if(NewMax > itr->second.MaximumValue)
 	{
+		//Max out riding skill
 		if(SkillLine == SKILL_RIDING)
 			itr->second.CurrentValue = NewMax;
 
