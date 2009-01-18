@@ -23,47 +23,7 @@
 /* imports */
 #define NO_WMO_HEIGHT -100000.0f
 
-#ifdef WIN32
-#define COLLISION_IMPORT __declspec(dllimport)
-#else
-#define COLLISION_IMPORT 
-#endif
-
-/* The class the dll sends back. */
-class SERVER_DECL IVMapManager
-{
-public:
-	IVMapManager() {}
-
-	virtual ~IVMapManager(void) {}
-
-	virtual int loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
-
-	virtual void unloadMap(unsigned int pMapId, int x, int y) = 0;
-	virtual void unloadMap(unsigned int pMapId) = 0;
-
-	// LOS
-	virtual bool isInLineOfSight(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2) = 0;
-
-	// Height
-	virtual float getHeight(unsigned int pMapId, float x, float y, float z) = 0;
-
-	// Indoors
-	virtual bool isInDoors(unsigned int mapid, float x, float y, float z) = 0;
-
-	// Outdoors
-	virtual bool isOutDoors(unsigned int mapid, float x, float y, float z) = 0;
-
-	// Closest Point
-	virtual bool getObjectHitPos(unsigned int pMapId, float x1, float y1, float z1, float x2, float y2, float z2, float& rx, float &ry, float& rz, float pModifyDist) = 0;
-	virtual std::string getDirFileName(unsigned int pMapId, int x, int y) const =0;
-
-	/*// debugging
-	virtual void setDebugPoint(float x, float y, float z, float o);*/
-};
-
-COLLISION_IMPORT void * collision_init();
-COLLISION_IMPORT void collision_shutdown();
+extern VMAP::IVMapManager* CollisionMgr;
 
 class SERVER_DECL CCollideInterface
 {

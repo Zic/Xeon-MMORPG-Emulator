@@ -50,6 +50,9 @@
 #include "../hearthstone-shared/LocationVector.h"
 #include "../hearthstone-shared/hashmap.h"
 
+#include "../hearthstone-shared/Collision/vmap/IVMapManager.h"
+#include "../hearthstone-shared/Collision/vmap/VMapManager.h"
+
 #include <zlib.h>
 
 #include "../hearthstone-shared/Database/DatabaseEnv.h"

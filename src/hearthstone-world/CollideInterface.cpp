@@ -19,7 +19,7 @@
 
 #include "StdAfx.h"
 
-#pragma comment(lib, "collision.lib")
+//#pragma comment(lib, "collision.lib")
 #define MAX_MAP 700
 
 struct CollisionMap
@@ -30,14 +30,17 @@ struct CollisionMap
 };
 
 SERVER_DECL CCollideInterface CollideInterface;
-IVMapManager * CollisionMgr;
+VMAP::IVMapManager * CollisionMgr;
 CollisionMap *m_mapLocks[MAX_MAP];
 Mutex m_mapCreateLock;
+
+extern void* collision_init();
+extern void collision_shutdown();
 
 void CCollideInterface::Init()
 {
 	Log.Notice("CollideInterface", "Init");
-	CollisionMgr = ((IVMapManager*)collision_init());
+	CollisionMgr = ((VMAP::IVMapManager*)collision_init());
 	memset(m_mapLocks, 0, sizeof(CollisionMap*)*MAX_MAP);
 }
 
