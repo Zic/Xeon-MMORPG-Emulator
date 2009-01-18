@@ -67,6 +67,13 @@ struct ItemPage
 	char * text;
 	uint32 next_page;
 };
+
+struct ItemQuestRelation
+{
+    uint32 item_id;
+	uint32 quest_id;
+	uint32 itemcount;
+};
 #pragma pack(pop)
 
 struct SpellReplacement
@@ -525,6 +532,7 @@ public:
 
 	void LoadExtraItemStuff();
 	void LoadExtraCreatureProtoStuff();
+	void LoadProfessionDiscoveries();
 	void CreateGossipMenuForPlayer(GossipMenu** Location, uint64 Guid, uint32 TextID, PlayerPointer Plr); 
 
 	LevelInfo * GetLevelInfo(uint32 Race, uint32 Class, uint32 Level);

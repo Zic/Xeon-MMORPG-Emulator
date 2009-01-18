@@ -1306,6 +1306,63 @@ QuestRelationList* QuestMgr::GetCreatureQuestList(uint32 entryid)
 	return (itr == olist.end()) ? 0 : itr->second;
 }
 
+QuestAssociationList* QuestMgr::GetQuestAssociationListForItemId (uint32 itemId)
+{
+	HM_NAMESPACE::hash_map<uint32, QuestAssociationList* > &associationList = GetQuestAssociationList();
+	HM_NAMESPACE::hash_map<uint32, QuestAssociationList* >::iterator itr = associationList.find( itemId );
+	return (itr != associationList.end()) ? itr->second : 0;
+}
+
+void QuestMgr::AddItemQuestAssociation( uint32 itemId, Quest *qst, uint8 item_count)
+{
+	HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* > &associationList = GetQuestAssociationList();
+	std::list<QuestAssociation *>* tempList;
+	QuestAssociation *ptr = NULL;
+	
+	// look for the item in the associationList
+	if (associationList.find( itemId ) == associationList.end() )
+	{
+		// not found. Create a new entry and QuestAssociationList
+		tempList = new std::list<QuestAssociation *>;
+
+		associationList.insert(HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* >::value_type(itemId, tempList));
+	}
+	else
+	{
+		// item found, now we'll search through its QuestAssociationList
+		tempList = associationList.find( itemId )->second;
+	}
+	
+	// look through this item's QuestAssociationList for a matching quest entry
+	list<QuestAssociation *>::iterator it;
+	for (it = tempList->begin(); it != tempList->end(); ++it)
+	{
+		if ((*it)->qst == qst)
+		{
+			// matching quest found
+			ptr = (*it);
+			break;
+		}
+	}
+
+	// did we find a matching quest?
+	if (ptr == NULL)
+	{
+		// nope, create a new QuestAssociation for this item and quest
+		ptr = new QuestAssociation;
+		ptr->qst = qst;
+		ptr->item_count = item_count;
+
+		tempList->push_back( ptr );
+	}
+	else
+	{
+		// yep, update the QuestAssociation with the new item_count information 
+		ptr->item_count = item_count;
+		sLog.outDebug( "WARNING: Duplicate entries found in item_quest_association, updating item #%d with new item_count: %d.", itemId, item_count );
+	}
+}
+
 template <class T> void QuestMgr::_AddQuest(uint32 entryid, Quest *qst, uint8 type)
 {
 	HM_NAMESPACE::hash_map<uint32, list<QuestRelation *>* > &olist = _GetList<T>();
@@ -1621,6 +1678,8 @@ QuestMgr::~QuestMgr()
 	HM_NAMESPACE::hash_map<uint32, Quest*>::iterator itr1;
 	HM_NAMESPACE::hash_map<uint32, list<QuestRelation *>* >::iterator itr2;
 	list<QuestRelation*>::iterator itr3;
+	HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* >::iterator itr4;
+	std::list<QuestAssociation*>::iterator itr5;
 
 	// clear relations
 	for(itr2 = m_obj_quests.begin(); itr2 != m_obj_quests.end(); ++itr2)
@@ -1667,6 +1726,21 @@ QuestMgr::~QuestMgr()
 		delete itr2->second;
 	}
 	m_itm_quests.clear(); 
+
+	for(itr4 = m_quest_associations.begin(); itr4 != m_quest_associations.end(); ++itr4)
+	{
+		if(!itr4->second)
+			continue;
+
+		itr5 = itr4->second->begin();
+		for(; itr5 != itr4->second->end(); ++itr5)
+		{
+			delete (*itr5);
+		}
+		itr4->second->clear();
+		delete itr4->second;
+	}
+	m_quest_associations.clear();
 }
 
 
@@ -1809,10 +1883,8 @@ void QuestMgr::LoadExtraQuestStuff()
 		}
 
 		for(int i = 0; i < 6; ++i)
-		{
 			if(qst->reward_choiceitem[i])
 				qst->count_reward_choiceitem++;
-		}
 
 		if(!it->Inc())
 			break;
@@ -1826,62 +1898,12 @@ void QuestMgr::LoadExtraQuestStuff()
 		if( inf == NULL )
 			continue;
 
-		// make sure its not a locked gameobject (these are for professions!)
-		/*if( inf->Type == GAMEOBJECT_TYPE_CHEST && inf->SpellFocus != 0 )
-		{
-			Lock *lck = dbcLock.LookupEntryForced(inf->SpellFocus);
-			if( lck != NULL )
-			{
-				bool do_cancel = false;
-				for(int zz = 0; zz < 5; ++zz) 
-				{
-					if( lck->lockmisc[zz] == LOCKTYPE_PICKLOCK || lck->lockmisc[zz] == LOCKTYPE_BLASTING || lck->lockmisc[zz] == LOCKTYPE_MINING ||
-						lck->lockmisc[zz] == LOCKTYPE_HERBALISM || lck->lockmisc[zz] == LOCKTYPE_DISARM_TRAP )
-					{
-						LootStore::iterator itr = lootmgr.GOLoot.find(inf->ID);
-						bool has_other = false;
-						bool has_quest = true;
-						if( itr != lootmgr.GOLoot.end() )
-						{
-							for(uint32 xx = 0; xx < itr->second.count; ++xx )
-							{
-								if( itr->second.items[xx].item.itemproto->Class != 12 )
-								{
-									has_other = true;
-									break;
-								}
-								else
-									has_quest = true;
-							}
-						}
-
-						if( !has_other && has_quest )
-						{
-							// lawl
-							printf("\n");
-						}
-						else
-						{
-							do_cancel = true;
-							break;
-						}
-					}
-				}
-
-				if( do_cancel )
-					continue;
-			}
-		}*/
-
 		inf->InvolvedQuestIds = new uint32[itr->second.size()];
 		set<uint32>::iterator vtr = itr->second.begin();
 		uint32 j = 0;
 
 		for(;vtr != itr->second.end(); ++vtr, ++j)
-		{
-			//printf("GameObject %s is involved in quest %u\n", inf->Name, *vtr);
 			inf->InvolvedQuestIds[j] = *vtr;
-		}
 
 		inf->InvolvedQuestCount = (uint32)itr->second.size();
 	}
@@ -1903,19 +1925,16 @@ void QuestMgr::LoadExtraQuestStuff()
 
 			qst = QuestStorage.LookupEntry(quest);
 			if(!qst)
-			{
-				//printf("Tried to add starter to npc %d for non-existant quest %d.\n", creature, quest);
-			}
+				Log.Warning("QuestMgr","Tried to add starter to npc %d for non-existant quest %d.", creature, quest);
 			else 
-			{
 				_AddQuest<Creature>(creature, qst, 1);  // 1 = starter
-			}
 		} while(pResult->NextRow());
 		delete pResult;
+		Log.Notice("QuestMgr","Marked %u creatures as quest starter", total);
 	}
 
 	pResult = WorldDatabase.Query("SELECT * FROM creature_quest_finisher");
-	pos = 0;
+	pos = total = 0;
 	if(pResult)
 	{
 		total = pResult->GetRowCount();
@@ -1927,19 +1946,16 @@ void QuestMgr::LoadExtraQuestStuff()
 
 			qst = QuestStorage.LookupEntry(quest);
 			if(!qst)
-			{
-				//printf("Tried to add finisher to npc %d for non-existant quest %d.\n", creature, quest);
-			} 
+				Log.Warning("QuestMgr","Tried to add finisher to npc %d for non-existant quest %d.", creature, quest);
 			else 
-			{
 				_AddQuest<Creature>(creature, qst, 2);  // 1 = starter
-			}
 		} while(pResult->NextRow());
 		delete pResult;
+		Log.Notice("QuestMgr","Marked %u creatures as quest finisher", total);
 	}
 
 	pResult = WorldDatabase.Query("SELECT * FROM gameobject_quest_starter");
-	pos = 0;
+	pos = total = 0;
 	if(pResult)
 	{
 		total = pResult->GetRowCount();
@@ -1951,19 +1967,16 @@ void QuestMgr::LoadExtraQuestStuff()
 
 			qst = QuestStorage.LookupEntry(quest);
 			if(!qst)
-			{
-				//printf("Tried to add starter to go %d for non-existant quest %d.\n", creature, quest);
-			} 
+				Log.Warning("QuestMgr","Tried to add starter to go %d for non-existant quest %d.\n", creature, quest);
 			else
-			{
 				_AddQuest<GameObject>(creature, qst, 1);  // 1 = starter
-			}
 		} while(pResult->NextRow());
 		delete pResult;
+		Log.Notice("QuestMgr","Marked %u gameobjects as quest starter", total);
 	}
 
 	pResult = WorldDatabase.Query("SELECT * FROM gameobject_quest_finisher");
-	pos = 0;
+	pos = total = 0;
 	if(pResult)
 	{
 		total = pResult->GetRowCount();
@@ -1975,16 +1988,40 @@ void QuestMgr::LoadExtraQuestStuff()
 
 			qst = QuestStorage.LookupEntry(quest);
 			if(!qst)
-			{
-				//printf("Tried to add finisher to go %d for non-existant quest %d.\n", creature, quest);
-			} 
+				Log.Warning("QuestMgr","Tried to add finisher to go %d for non-existant quest %d.\n", creature, quest);
 			else 
-			{
 				_AddQuest<GameObject>(creature, qst, 2);  // 2 = finish
-			}
 		} while(pResult->NextRow());
 		delete pResult;
+		Log.Notice("QuestMgr","Marked %u gameobjects as quest finisher", total);
 	}
+
+	//load item quest associations
+	pResult = WorldDatabase.Query("SELECT * FROM item_quest_association");
+	pos = total = 0;
+	if( pResult != NULL)
+	{
+		uint32 item = 0;
+		uint8 item_count = 0;
+		total = pResult->GetRowCount();
+		do 
+		{
+			Field *data = pResult->Fetch();
+			item = data[0].GetUInt32();
+			quest = data[1].GetUInt32();
+			item_count = data[2].GetUInt8();
+
+			qst = QuestStorage.LookupEntry(quest);
+			if(!qst)
+				Log.Warning("QuestMgr","Tried to add association to item %d for non-existant quest %d.\n", item, quest);
+			else 
+				AddItemQuestAssociation( item, qst, item_count );
+		} while( pResult->NextRow() );
+		delete pResult;
+		Log.Notice("QuestMgr","Loaded %u item-quest associations", total);
+	}
+
+	//Proccess the stuff
 	objmgr.ProcessGameobjectQuests();
 }
 

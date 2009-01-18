@@ -40,7 +40,7 @@ public:
 		int ret = ::bind(m_socket, (const sockaddr*)&m_address, sizeof(m_address));
 		if(ret != 0)
 		{
-			printf("Bind unsuccessful on port %u.", Port);
+			Log.Debug("ListenSocket","Bind unsuccessful on port %u.", Port);
 			return;
 		}
 
