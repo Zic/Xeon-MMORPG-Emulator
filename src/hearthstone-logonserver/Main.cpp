@@ -38,6 +38,7 @@
 Database * sLogonSQL;
 initialiseSingleton(LogonServer);
 bool mrunning = true;
+bool m_encryptedPasswords;
 Mutex _authSocketLock;
 set<AuthSocket*> _authSockets;
 #ifdef WIN32
@@ -184,6 +185,8 @@ bool Rehash()
 		printf("Config file could not be rehashed.\n");
 		return false;
 	}
+
+	m_encryptedPasswords = Config.MainConfig.GetBoolDefault("LogonServer", "UseEncryptedPasswords", false);
 
 	// re-set the allowed server IP's
 	string ips = Config.MainConfig.GetStringDefault("LogonServer", "AllowedIPs", "");

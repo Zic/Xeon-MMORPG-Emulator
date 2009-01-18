@@ -23,6 +23,7 @@ extern bool mrunning;
 class AuthSocket;
 extern set<AuthSocket*> _authSockets;
 extern Mutex _authSocketLock;
+extern bool m_encryptedPasswords;
 
 struct AllowedIP
 {
