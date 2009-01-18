@@ -40,7 +40,9 @@ Unit::Unit()
 	m_meleespell = 0;
 	m_meleespell_cn = 0;
 	m_addDmgOnce = 0;
-	memset(m_SummonSlots, 0, sizeof(CreaturePointer) * 7);
+	for(uint8 i = 0; i < 7; ++i)
+		m_SummonSlots[i] = NULLCREATURE;
+	
 	m_ObjectSlots[0] = 0;
 	m_ObjectSlots[1] = 0;
 	m_ObjectSlots[2] = 0;
@@ -171,7 +173,9 @@ Unit::Unit()
 
 	m_threatModifyer = 0;
 	m_generatedThreatModifyer = 0;
-	memset(m_auras, 0, (MAX_AURAS+MAX_PASSIVE_AURAS)*sizeof(shared_ptr<Aura>));
+	for(uint32 i = 0; i < MAX_AURAS+MAX_PASSIVE_AURAS; ++i)
+		m_auras[i] = NULLAURA;
+	
 	
 	// diminishing return stuff
 	memset(m_diminishAuraCount, 0, DIMINISH_GROUPS);
@@ -214,6 +218,7 @@ Unit::Unit()
 	trigger_on_chill = 0;
 	trigger_on_chill_chance = 100;
 
+	memset(&m_damageSplitTarget, 0, sizeof(DamageSplitTarget));
 	m_damageSplitTarget.active = 0;
 
 	m_extrastriketarget = 0;
@@ -3543,7 +3548,11 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 	////////////////////////////////////////////////////////
 
 	if( aur->m_auraSlot != 0xffffffff )
-		m_auras[aur->m_auraSlot] = NULLAURA;
+	{
+		if( m_auras[aur->m_auraSlot] )
+			m_auras[aur->m_auraSlot]->Remove();
+		//m_auras[aur->m_auraSlot] = NULLAURA;
+	}
 	
 	aur->m_auraSlot=255;
 	aur->ApplyModifiers(true);
@@ -4901,10 +4910,23 @@ void Unit::OnPushToWorld()
 
 void Unit::RemoveFromWorld(bool free_guid)
 {
+	if( m_CurrentVehicle )
+		m_CurrentVehicle->RemovePassenger( unit_shared_from_this() );
+
 	CombatStatus.OnRemoveFromWorld();
 
-	if(dynObj != 0)
+	if(dynObj)
 		dynObj->Remove();
+
+	for(uint32 x=0;x<7;++x)
+	{
+		if(m_SummonSlots[x] && m_SummonSlots[x]->IsTotem() )
+			m_SummonSlots[x]->TotemExpire();
+		else if( m_SummonSlots[x] )
+			m_SummonSlots[x]->SafeDelete();
+
+		m_SummonSlots[x] = NULLCREATURE;
+	}
 
 	for(uint32 i = 0; i < 4; ++i)
 	{

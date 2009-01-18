@@ -1086,6 +1086,10 @@ void AchievementInterface::HandleAchievementCriteriaHonorableKill()
 	{
 		AchievementCriteriaEntry * ace = (*citr);
 		uint32 AchievementID = ace->referredAchievement;
+		uint32 ReqKills = ace->honorable_kill.killCount;
+
+		if( pPlayer->m_killsLifetime < ReqKills )
+			continue;
 
 		AchievementEntry * pAchievementEntry = dbcAchievement.LookupEntryForced(AchievementID);
 		if(!pAchievementEntry) continue;

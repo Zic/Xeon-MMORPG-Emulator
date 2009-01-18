@@ -627,6 +627,7 @@ class SERVER_DECL CombatStatusHandler
 	UnitPointer m_Unit;
 	bool m_lastStatus;
 	AttackTMap m_attackTargets;
+	uint32 condom[16]; // wear protection, damagemap! don't get access violated!
 	map<uint64,uint32> DamageMap;
 
 public:
@@ -636,6 +637,7 @@ public:
 		m_healers.clear();
 		m_healed.clear();
 		m_attackTargets.clear();
+		DamageMap.clear();
 	}
 
 	UnitPointer GetKiller();													// Gets this unit's current killer.

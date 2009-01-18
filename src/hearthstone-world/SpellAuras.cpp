@@ -723,13 +723,14 @@ void Aura::Remove()
 		return;
 
 	m_deleted = true;
+
+	// prevent ourselves from deleting and going feeefee on us.
+	AuraPointer pThis = aura_shared_from_this();
+
 	sEventMgr.RemoveEvents( shared_from_this() );
 
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		RemoveAuraVisual();
-
-	// prevent ourselves from deleting and going feeefee on us.
-	AuraPointer pThis = aura_shared_from_this();
 
 	if( m_target->m_auras[m_auraSlot] == shared_from_this() )
 		m_target->m_auras[m_auraSlot] = NULLAURA;

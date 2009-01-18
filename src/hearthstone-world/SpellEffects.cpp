@@ -4912,7 +4912,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 		p_caster->m_SummonSlots[slot] = pTotem;
 
 	pTotem->SetTotemOwner(p_caster);
-	pTotem->SetTotemSlot(slot);
+	pTotem->SetTotemSlot( int32(slot) );
 
 	float landh;
 	if (p_caster->GetMapMgr() && p_caster->GetMapMgr()->IsCollisionEnabled())

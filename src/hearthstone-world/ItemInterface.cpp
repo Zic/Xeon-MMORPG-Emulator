@@ -27,8 +27,6 @@
 ItemInterface::ItemInterface( PlayerPointer pPlayer )
 {
 	m_pOwner = pPlayer;
-	memset(m_pItems, 0, sizeof(shared_ptr<Item>)*MAX_INVENTORY_SLOT);
-	memset(m_pBuyBack, 0, sizeof(shared_ptr<Item>)*MAX_BUYBACK_SLOT);
 
 	for(uint8 i = 0; i < MAX_INVENTORY_SLOT; ++i )
 	{

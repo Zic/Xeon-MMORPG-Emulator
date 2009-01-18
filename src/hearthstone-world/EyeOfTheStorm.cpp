@@ -952,7 +952,6 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 				}
 			}
 		}
-		m_losingteam = team;
 		UpdatePvPData();
 		m_mainLock.Release();
 		return true;

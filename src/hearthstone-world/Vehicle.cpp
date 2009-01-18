@@ -47,6 +47,9 @@ Vehicle::~Vehicle()
 void Vehicle::Destructor()
 {
 	m_passengerCount = 0;
+	if( IsInWorld() )
+		RemoveFromWorld(false, true);
+
 	Creature::Destructor();
 }
 
@@ -242,6 +245,8 @@ void Vehicle::SafeDelete()
 
 void Vehicle::DeleteMe()
 {
+	VehiclePointer pThis = vehicle_shared_from_this();
+
 	if(IsInWorld())
 		RemoveFromWorld(false, true);
 
@@ -283,6 +288,8 @@ uint8 Vehicle::GetPassengerSlot(UnitPointer pPassenger)
 
 void Vehicle::RemovePassenger(UnitPointer pPassenger)
 {
+	VehiclePointer pThis = vehicle_shared_from_this();
+
 	uint8 slot = pPassenger->m_inVehicleSeatId;
 	pPassenger->m_CurrentVehicle.reset();
 	pPassenger->m_inVehicleSeatId = 0xFF;

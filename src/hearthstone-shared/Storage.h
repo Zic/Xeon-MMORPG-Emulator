@@ -170,6 +170,7 @@ public:
 
 #ifndef STORAGE_ALLOCATION_POOLS
 		_array[Entry] = new T;
+		memset(_array[Entry], 0, sizeof(T));
 #else
 		_array[Entry] = _pool.Get();
 #endif
