@@ -646,7 +646,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		_player->m_cheatEngineChances = 2;
 	}
 
-#if defined(_DEBUG) && defined(COLLISION)
+#if defined(_DEBUG)
 	//CollideInterface.setDebugPoint(movement_info.x, movement_info.y, movement_info.z, movement_info.orientation);
 #endif
 }
