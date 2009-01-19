@@ -2824,8 +2824,8 @@ else
 				dmg.full_damage += float2int32( ( inital_dmg * (1 + pVictim->ModDamageTakenByMechPCT[MECHANIC_BLEEDING]) ) - inital_dmg );
 
 			//pet happiness state dmg modifier
-			if( IsPet() && !((Pet*)this)->IsSummon() )
-				dmg.full_damage = ( dmg.full_damage <= 0 ) ? 0 : float2int32( dmg.full_damage * ((Pet*)this)->GetHappinessDmgMod() );
+			if( IsPet() && !pet_shared_from_this()->IsSummon() )
+				dmg.full_damage = ( dmg.full_damage <= 0 ) ? 0 : float2int32( dmg.full_damage * pet_shared_from_this()->GetHappinessDmgMod() );
 
 			if(dmg.full_damage < 0)
 				dmg.full_damage = 0;

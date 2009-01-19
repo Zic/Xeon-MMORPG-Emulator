@@ -1610,7 +1610,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		if( pVictim != shared_from_this() )
 		{
 			// Set our attack target to the victim.
-			((Unit*)this)->CombatStatus.OnDamageDealt( pVictim, damage );
+			unit_shared_from_this()->CombatStatus.OnDamageDealt( pVictim, damage );
 		}
 	}
 
@@ -1918,10 +1918,10 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		if( this->IsUnit() )
 		{
 			CALL_SCRIPT_EVENT( obj_shared_from_this(), OnTargetDied )( pVictim );
-			((Unit*)this)->smsg_AttackStop( pVictim );
+			unit_shared_from_this()->smsg_AttackStop( pVictim );
 		
 			/* Tell Unit that it's target has Died */
-			((Unit*)this)->addStateFlag( UF_TARGET_DIED );
+			unit_shared_from_this()->addStateFlag( UF_TARGET_DIED );
 
 			// We will no longer be attacking this target, as it's dead.
 			//unit_shared_from_this()->setAttackTarget(NULL);
@@ -2074,7 +2074,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 						if( petOwner->InGroup() )
 						{
 							//Calc Group XP
-							((Unit*)( this ))->GiveGroupXP( pVictim, petOwner );
+							unit_shared_from_this()->GiveGroupXP( pVictim, petOwner );
 							//TODO: pet xp if player in group
 						}
 						else
@@ -2154,7 +2154,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 			// Send AI Reaction UNIT vs UNIT
 			if( GetTypeId() ==TYPEID_UNIT )
 			{
-				((Unit*)this)->GetAIInterface()->AttackReaction( pVictim, damage, spellId );
+				unit_shared_from_this()->GetAIInterface()->AttackReaction( pVictim, damage, spellId );
 			}
 			
 			// Send AI Victim Reaction
@@ -2426,7 +2426,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 	{
 		// we still have to tell the combat status handler we did damage so we're put in combat
 		if( IsUnit() )
-			((Unit*)this)->CombatStatus.OnDamageDealt(pVictim, 1);
+			unit_shared_from_this()->CombatStatus.OnDamageDealt(pVictim, 1);
 	}
 	
 	if( this->IsUnit() && allowProc && spellInfo->Id != 25501 )
@@ -2472,7 +2472,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 	}
 	if( school == SHADOW_DAMAGE )
 	{
-		if( IsPlayer() && ((Unit*)this)->isAlive() && plr_shared_from_this()->getClass() == PRIEST )
+		if( IsPlayer() && unit_shared_from_this()->isAlive() && plr_shared_from_this()->getClass() == PRIEST )
 			plr_shared_from_this()->VampiricSpell(float2int32(res), pVictim);
 
 		if( pVictim->isAlive() && this->IsUnit() )
@@ -2586,7 +2586,7 @@ bool Object::CanActivate()
 
 	case TYPEID_GAMEOBJECT:
 		{
-			if(((GameObject*)this)->HasAI() && GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != GAMEOBJECT_TYPE_TRAP)
+			if(gob_shared_from_this()->HasAI() && GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != GAMEOBJECT_TYPE_TRAP)
 				return true;
 		}break;
 	}
