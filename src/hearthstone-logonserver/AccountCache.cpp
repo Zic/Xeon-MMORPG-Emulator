@@ -421,8 +421,8 @@ void InformationCore::RemoveRealm(uint32 realm_id)
 	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
 	if(itr != m_realms.end())
 	{
-		m_realms.erase(itr);
 		delete itr->second;
+		m_realms.erase(itr);
 	}
 	realmLock.Release();
 }
