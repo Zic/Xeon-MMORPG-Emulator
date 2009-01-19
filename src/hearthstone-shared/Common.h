@@ -356,6 +356,17 @@ namespace std
 }
 #endif
 
+namespace std
+{
+	namespace tr1
+	{
+		template<typename T> struct hash<shared_ptr<T>>
+		{
+			size_t operator()(shared_ptr<T> const &__x) const { return (size_t)__x.get(); }
+		};
+	}
+}
+
 /* Use correct types for x64 platforms, too */
 #if COMPILER != COMPILER_GNU
 typedef signed __int64 int64;

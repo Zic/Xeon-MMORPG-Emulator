@@ -57,15 +57,15 @@ enum ObjectActiveState
 	OBJECT_STATE_ACTIVE   = 2,
 };
 
-typedef std::set<ObjectPointer > ObjectSet;
-typedef std::set<ObjectPointer > UpdateQueue;
-typedef std::set<PlayerPointer  > PUpdateQueue;
-typedef std::set<PlayerPointer  > PlayerSet;
+typedef unordered_set<ObjectPointer > ObjectSet;
+typedef unordered_set<ObjectPointer > UpdateQueue;
+typedef unordered_set<PlayerPointer  > PUpdateQueue;
+typedef unordered_set<PlayerPointer  > PlayerSet;
 typedef HM_NAMESPACE::hash_map<uint32, ObjectPointer > StorageMap;
-typedef set<uint64> CombatProgressMap;
-typedef set<VehiclePointer> VehicleSet;
-typedef set<CreaturePointer> CreatureSet;
-typedef set<shared_ptr<GameObject> > GameObjectSet;
+typedef unordered_set<uint64> CombatProgressMap;
+typedef unordered_set<VehiclePointer> VehicleSet;
+typedef unordered_set<CreaturePointer> CreatureSet;
+typedef unordered_set<shared_ptr<GameObject> > GameObjectSet;
 typedef HM_NAMESPACE::hash_map<uint32, VehiclePointer> VehicleSqlIdMap;
 typedef HM_NAMESPACE::hash_map<uint32, CreaturePointer> CreatureSqlIdMap;
 typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectSqlIdMap;

@@ -741,7 +741,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				break;
 			shared_ptr<Unit>targets[3];
 			int targets_got=0;
-			for(std::set<ObjectPointer >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
+			for(unordered_set<ObjectPointer >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
 			{
 				i2 = itr++;
 				// don't add objects that are not units and that are dead
@@ -2715,7 +2715,7 @@ void Spell::SpellEffectTriggerMissile(uint32 i) // Trigger Missile
 
 	float spellRadius = GetRadius(i);
 
-	for(std::set<ObjectPointer >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
+	for(unordered_set<ObjectPointer >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
 	{
 		if(!((*itr)->IsUnit()) || !(TO_UNIT(*itr))->isAlive())
 			continue;

@@ -55,7 +55,7 @@
 #define DEFAULT_QUEST_XP_RATE 1
 #define DEFAULT_SAVE_RATE 300000	// 5mins
 
-class Master : public Singleton<Master>
+class SERVER_DECL Master : public Singleton<Master>
 {
 public:
 	Master();

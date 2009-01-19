@@ -1633,7 +1633,7 @@ public:
 	uint32 m_arenaPoints;
 	bool m_honorless;
 	uint32 m_lastSeenWeather;
-	set<ObjectPointer > m_visibleFarsightObjects;
+	unordered_set<ObjectPointer > m_visibleFarsightObjects;
 	void EventTeleport(uint32 mapid, float x, float y, float z);
 	void ApplyLevelInfo(LevelInfo* Info, uint32 Level);
 	void BroadcastMessage(const char* Format, ...);
@@ -1981,7 +1981,7 @@ protected:
 	// Channels
 	std::set<uint32> m_channels;
 	// Visible objects
-	std::set<ObjectPointer > m_visibleObjects;
+	unordered_set<ObjectPointer > m_visibleObjects;
 	// Groups/Raids
 	uint32 m_GroupInviter;
 	uint8 m_StableSlotCount;

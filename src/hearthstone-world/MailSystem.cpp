@@ -167,6 +167,8 @@ bool MailMessage::AddMessageDataToPacket(WorldPacket& data)
 			data << uint32( 0 );
 			data << uint32( 0 );
 			data << uint32( 0 );
+
+			pItem->Destructor();
 		}
 
 		data.put< uint8 >( pos, i );

@@ -1168,7 +1168,7 @@ void Aura::EventRelocateRandomTarget()
 	// Ok, let's do it. :D
 	set<shared_ptr<Unit> > enemies;
 
-	set<ObjectPointer >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
+	unordered_set<ObjectPointer >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
 	for(; itr != u_caster->GetInRangeOppFactsSetEnd(); ++itr)
 	{
 		if( !(*itr)->IsUnit() )
@@ -3178,7 +3178,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		{
 			target_threat.reserve(u_caster->GetInRangeCount()); // this helps speed
 
-			for(std::set<ObjectPointer >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
+			for(unordered_set<ObjectPointer >::iterator itr = u_caster->GetInRangeSetBegin(); itr != u_caster->GetInRangeSetEnd(); ++itr)
 			{
 				if((*itr)->GetTypeId() != TYPEID_UNIT)
 					continue;
@@ -5677,7 +5677,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 //			pTarget->setDeathState(DEAD);
 
 			//now get rid of mobs agro. pTarget->CombatStatus.AttackersForgetHate() - this works only for already attacking mobs
-		    for(std::set<ObjectPointer >::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
+		    for(unordered_set<ObjectPointer >::iterator itr = pTarget->GetInRangeSetBegin(); itr != pTarget->GetInRangeSetEnd(); itr++ )
 			{
 				if((*itr)->IsUnit() && (TO_UNIT(*itr))->isAlive())
 				{

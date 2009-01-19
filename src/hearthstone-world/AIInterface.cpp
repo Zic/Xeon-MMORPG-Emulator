@@ -964,7 +964,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
 					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 3 );
 
-				float combatReach[3]; // Used Shooting Ranges
+				float combatReach[4]; // Used Shooting Ranges
 				float distance = m_Unit->CalcDistance(m_nextTarget);
 
 				combatReach[0] = GetUnit()->GetFloatValue(UNIT_FIELD_COMBATREACH); //normal combat reach
@@ -1327,7 +1327,7 @@ UnitPointer AIInterface::FindTarget()
 	float crange;
 	float z_diff;
 
-	std::set<ObjectPointer >::iterator itr, it2;
+	unordered_set<ObjectPointer >::iterator itr, it2;
 	ObjectPointer pObj;
 	shared_ptr<Unit>pUnit;
 	float dist;
@@ -1548,7 +1548,7 @@ bool AIInterface::FindFriends(float dist)
 	bool result = false;
 	TargetMap::iterator it;
 
-	std::set<ObjectPointer >::iterator itr;
+	unordered_set<ObjectPointer >::iterator itr;
 	shared_ptr<Unit>pUnit;
 
 	
@@ -3405,7 +3405,7 @@ void AIInterface::UpdateCivilian()
 		return;
 
 	PlayerPointer target = NULLPLR;
-	std::set<PlayerPointer  >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
+	unordered_set<PlayerPointer  >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
 	for(; itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		PlayerPointer pOpp = *itr;

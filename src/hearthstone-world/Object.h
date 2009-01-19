@@ -128,7 +128,7 @@ class MapMgr;
 class SERVER_DECL Object : public EventableObject
 {
 public:
-	typedef std::set< ObjectPointer > InRangeSet;
+	typedef unordered_set< ObjectPointer > InRangeSet;
 	typedef std::map<string, void*> ExtensionSet;
 
 	virtual ~Object ( );
@@ -418,11 +418,11 @@ public:
 
 	bool IsInRangeOppFactSet(ObjectPointer pObj) { return (m_oppFactsInRange.count(pObj) > 0); }
 	void UpdateOppFactionSet();
-	HEARTHSTONE_INLINE std::set<ObjectPointer >::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
-	HEARTHSTONE_INLINE std::set<ObjectPointer >::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
-	HEARTHSTONE_INLINE std::set<PlayerPointer  >::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
-	HEARTHSTONE_INLINE std::set<PlayerPointer  >::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
-	HEARTHSTONE_INLINE std::set<PlayerPointer  > * GetInRangePlayerSet() { return &m_inRangePlayers; };
+	HEARTHSTONE_INLINE unordered_set<ObjectPointer >::iterator GetInRangeOppFactsSetBegin() { return m_oppFactsInRange.begin(); }
+	HEARTHSTONE_INLINE unordered_set<ObjectPointer >::iterator GetInRangeOppFactsSetEnd() { return m_oppFactsInRange.end(); }
+	HEARTHSTONE_INLINE unordered_set<PlayerPointer  >::iterator GetInRangePlayerSetBegin() { return m_inRangePlayers.begin(); }
+	HEARTHSTONE_INLINE unordered_set<PlayerPointer  >::iterator GetInRangePlayerSetEnd() { return m_inRangePlayers.end(); }
+	HEARTHSTONE_INLINE unordered_set<PlayerPointer  > * GetInRangePlayerSet() { return &m_inRangePlayers; };
 
 	void __fastcall SendMessageToSet(WorldPacket *data, bool self,bool myteam_only=false);
 	HEARTHSTONE_INLINE void SendMessageToSet(StackPacket * data, bool self) { OutPacketToSet(data->GetOpcode(), (uint16)data->GetSize(), data->GetBufferPointer(), self); }
@@ -557,9 +557,9 @@ protected:
 
 	//! Set of Objects in range.
 	//! TODO: that functionality should be moved into WorldServer.
-	std::set<ObjectPointer > m_objectsInRange;
-	std::set<PlayerPointer  > m_inRangePlayers;
-	std::set<ObjectPointer > m_oppFactsInRange;
+	unordered_set<ObjectPointer > m_objectsInRange;
+	unordered_set<PlayerPointer  > m_inRangePlayers;
+	unordered_set<ObjectPointer > m_oppFactsInRange;
    
   
 	//! Remove object from map

@@ -1096,7 +1096,7 @@ void MapMgr::_UpdateObjects()
 	ObjectPointer pObj;
 	PlayerPointer pOwner;
 	//std::set<ObjectPointer >::iterator it_start, it_end, itr;
-	std::set<PlayerPointer  >::iterator it_start, it_end, itr;
+	unordered_set<PlayerPointer  >::iterator it_start, it_end, itr;
 	PlayerPointer lplr;
 	uint32 count = 0;
 	

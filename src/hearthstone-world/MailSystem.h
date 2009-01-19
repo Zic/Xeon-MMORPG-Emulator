@@ -109,7 +109,7 @@ public:
 };
 
 
-class MailSystem : public Singleton<MailSystem>, public EventableObject
+class SERVER_DECL MailSystem : public Singleton<MailSystem>, public EventableObject
 {
 public:
 

@@ -578,8 +578,8 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 {
 	shared_ptr<GameObject>GObj = NULLGOB;
 
-	std::set<ObjectPointer >::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
-	std::set<ObjectPointer >::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
+	unordered_set<ObjectPointer >::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
+	unordered_set<ObjectPointer >::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
 	float cDist = 9999.0f;
 	float nDist = 0.0f;
 	bool bUseNext = false;

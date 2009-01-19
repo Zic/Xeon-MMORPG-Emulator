@@ -36,7 +36,7 @@ public:
 	MapCell();
 	~MapCell();
 
-	typedef std::set<ObjectPointer > ObjectSet;
+	typedef unordered_set<ObjectPointer > ObjectSet;
 
 	//Init
 	void Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr);
