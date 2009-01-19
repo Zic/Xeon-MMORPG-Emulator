@@ -2034,10 +2034,22 @@ void Player::InitVisibleUpdateBits()
 	for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=4)
 		Player::m_visibleUpdateMask.SetBit(i);
 
-	for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
+	for(uint16 i = 0; i < EQUIPMENT_SLOT_END; ++i)
 	{
-		Player::m_visibleUpdateMask.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*18))); // visual items for other players
-		Player::m_visibleUpdateMask.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0+1 + (i*18))); // visual items for other players
+		uint32 offset = i * PLAYER_VISIBLE_ITEM_LENGTH;
+
+		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + 0 + offset);
+		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_0 + 0 + offset);
+
+		// enchants
+		for(uint8 j = 0; j < 12; ++j)
+		{
+			Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_0 + 1 + j + offset);
+		}
+
+		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + offset);
+		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_SEED + offset);
+		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_PAD + offset);
 	}
 
 	Player::m_visibleUpdateMask.SetBit(PLAYER_CHOSEN_TITLE);
@@ -5011,7 +5023,7 @@ void Player::EventPlayerRest()
 	uint32 diff = (uint32)UNIXTIME - m_lastRestUpdate;
 	m_lastRestUpdate = (uint32)UNIXTIME;
 	uint32 RestXP = CalculateRestXP((uint32)diff);
-	DEBUG_LOG("REST: Adding %d rest XP for %.0f seconds of rest time", RestXP, diff);
+	DEBUG_LOG("REST: Adding %d rest XP for %d seconds of rest time", RestXP, diff);
 	AddRestXP(RestXP);
 }
 

@@ -1797,7 +1797,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 		}
 		else
 		{
-			int32 reduce=m_spellInfo->EffectDieSides[i]+1;
+			int32 reduce = (int32)(m_spellInfo->dmg_multiplier[i] * 100.0f);
 			if(m_spellInfo->SpellGroupType && u_caster)
 			{
 				SM_FIValue(u_caster->SM[SMT_JUMP_REDUCE][1],&reduce,m_spellInfo->SpellGroupType);

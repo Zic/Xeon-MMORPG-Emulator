@@ -1508,9 +1508,12 @@ void WorldSession::HandleAcknowledgementOpcodes( WorldPacket & recv_data )
 	case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:
 	case CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK:
 	case CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK:
-		_player->ResetHeartbeatCoords();
-		_player->DelaySpeedHack( 5000 );			// give the client a chance to fall/catch up
-		_player->m_speedChangeInProgress = false;
+	if(_player->m_speedChangeInProgress)
+		{
+			_player->ResetHeartbeatCoords();
+			_player->DelaySpeedHack( 5000 );			// give the client a chance to fall/catch up
+			_player->m_speedChangeInProgress = false;
+		}
 		break;
 	}
 

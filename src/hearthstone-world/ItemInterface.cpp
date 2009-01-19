@@ -337,7 +337,7 @@ AddItemResult ItemInterface::m_AddItem(shared_ptr<Item>item, int8 ContainerSlot,
 
 	if ( slot < EQUIPMENT_SLOT_END && ContainerSlot == INVENTORY_SLOT_NOT_SET )
 	{
-		int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 18);
+		int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * PLAYER_VISIBLE_ITEM_LENGTH);
 		if( VisibleBase > PLAYER_VISIBLE_ITEM_19_0 )
 		{
 			printf("Slot warning: slot: %d\n", slot);
@@ -353,7 +353,8 @@ AddItemResult ItemInterface::m_AddItem(shared_ptr<Item>item, int8 ContainerSlot,
 			m_pOwner->SetUInt32Value( VisibleBase + 5, item->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 12 ) );
 			m_pOwner->SetUInt32Value( VisibleBase + 6, item->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 15 ) );
 			m_pOwner->SetUInt32Value( VisibleBase + 7, item->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 18 ) );
-			m_pOwner->SetUInt32Value( VisibleBase + 8, item->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
+			m_pOwner->SetUInt32Value( VisibleBase + 12, item->GetUInt32Value( ITEM_FIELD_PROPERTY_SEED ) );
+			m_pOwner->SetUInt32Value( VisibleBase + 13, item->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
 		}
 	}
 
@@ -415,8 +416,8 @@ shared_ptr<Item>ItemInterface::SafeRemoveAndRetreiveItemFromSlot(int8 ContainerS
 			if ( slot < EQUIPMENT_SLOT_END )
 			{
 				m_pOwner->ApplyItemMods( pItem, slot, false );
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 18);
-				for (int i = VisibleBase; i < VisibleBase + 19; ++i)
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * PLAYER_VISIBLE_ITEM_LENGTH);
+				for (int i = VisibleBase; i < VisibleBase + PLAYER_VISIBLE_ITEM_LENGTH - 1; ++i)
 				{
 					m_pOwner->SetUInt32Value(i, 0);
 				}
@@ -670,8 +671,8 @@ bool ItemInterface::SafeFullRemoveItemFromSlot(int8 ContainerSlot, int8 slot)
 			if ( slot < EQUIPMENT_SLOT_END )
 			{
 				m_pOwner->ApplyItemMods(pItem, slot, false );
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 18);
-				for (int i = VisibleBase; i < VisibleBase + 19; ++i)
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * PLAYER_VISIBLE_ITEM_LENGTH);
+				for (int i = VisibleBase; i < VisibleBase + PLAYER_VISIBLE_ITEM_LENGTH - 1; ++i)
 				{
 					m_pOwner->SetUInt32Value(i, 0);
 				}
@@ -2737,7 +2738,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 			// Bags aren't considered "visible".
 			if( srcslot < EQUIPMENT_SLOT_END )
 			{
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (srcslot * 18);
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (srcslot * PLAYER_VISIBLE_ITEM_LENGTH);
 				m_pOwner->SetUInt32Value( VisibleBase, m_pItems[(int)srcslot]->GetEntry() );
 				m_pOwner->SetUInt32Value( VisibleBase + 1, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 2, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 3 ) );
@@ -2746,7 +2747,8 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 				m_pOwner->SetUInt32Value( VisibleBase + 5, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 12 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 6, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 15 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 7, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 18 ) );
-				m_pOwner->SetUInt32Value( VisibleBase + 8, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
+				m_pOwner->SetUInt32Value( VisibleBase + 12, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_PROPERTY_SEED ) );
+				m_pOwner->SetUInt32Value( VisibleBase + 13, m_pItems[(int)srcslot]->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
 			}
 
 			// handle bind on equip
@@ -2764,7 +2766,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 			// Bags aren't considered "visible".
 			if( srcslot < EQUIPMENT_SLOT_END )
 			{
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (srcslot * 18);
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (srcslot * PLAYER_VISIBLE_ITEM_LENGTH);
 				m_pOwner->SetUInt32Value( VisibleBase, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 1, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 2, 0 );
@@ -2773,7 +2775,8 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 				m_pOwner->SetUInt32Value( VisibleBase + 5, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 6, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 7, 0 );
-				m_pOwner->SetUInt32Value( VisibleBase + 8, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 12, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 13, 0 );
 			}
 		}
 	}  
@@ -2785,7 +2788,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 			// Bags aren't considered "visible".
 			if( dstslot < EQUIPMENT_SLOT_END )
 			{
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (dstslot * 18);
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (dstslot * PLAYER_VISIBLE_ITEM_LENGTH);
 				m_pOwner->SetUInt32Value( VisibleBase, m_pItems[(int)dstslot]->GetEntry() );
 				m_pOwner->SetUInt32Value( VisibleBase + 1, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 2, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 3 ) );
@@ -2794,7 +2797,8 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 				m_pOwner->SetUInt32Value( VisibleBase + 5, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 12 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 6, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 15 ) );
 				m_pOwner->SetUInt32Value( VisibleBase + 7, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + 18 ) );
-				m_pOwner->SetUInt32Value( VisibleBase + 8, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
+				m_pOwner->SetUInt32Value( VisibleBase + 12, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_PROPERTY_SEED ) );
+				m_pOwner->SetUInt32Value( VisibleBase + 13, m_pItems[(int)dstslot]->GetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID ) );
 			}
 
 			// handle bind on equip
@@ -2808,7 +2812,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 			// bags aren't considered visible
 			if( dstslot < EQUIPMENT_SLOT_END )
 			{
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (dstslot * 18);
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (dstslot * PLAYER_VISIBLE_ITEM_LENGTH);
 				m_pOwner->SetUInt32Value( VisibleBase, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 1, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 2, 0 );
@@ -2818,6 +2822,8 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 				m_pOwner->SetUInt32Value( VisibleBase + 6, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 7, 0 );
 				m_pOwner->SetUInt32Value( VisibleBase + 8, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 12, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 13, 0 );
 			}
 		}
 	}
