@@ -34,13 +34,13 @@ VMAP::IVMapManager * CollisionMgr;
 CollisionMap *m_mapLocks[MAX_MAP];
 Mutex m_mapCreateLock;
 
-extern void* collision_init();
-extern void collision_shutdown();
+//extern void* collision_init();
+//extern void collision_shutdown();
 
 void CCollideInterface::Init()
 {
 	Log.Notice("CollideInterface", "Init");
-	CollisionMgr = ((VMAP::IVMapManager*)collision_init());
+	CollisionMgr = ((VMAP::IVMapManager*)new VMAP::VMapManager);
 	memset(m_mapLocks, 0, sizeof(CollisionMap*)*MAX_MAP);
 }
 

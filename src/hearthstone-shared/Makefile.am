@@ -83,5 +83,37 @@ libshared_a_SOURCES = \
     Network/SocketMgrPoll.h \
     Network/SocketMgrPoll.cpp \
     Network/SocketOpsPoll.cpp \
-    Network/SocketPoll.cpp 
+    Network/SocketPoll.cpp \
+    Collision/vmap/AABSPTree.h \
+    Collision/vmap/BaseModel.cpp \
+    Collision/vmap/BaseModel.h \
+    Collision/vmap/CoordModelMapping.cpp \
+    Collision/vmap/CoordModelMapping.h \
+    Collision/vmap/IVMapManager.h \
+    Collision/vmap/ManagedModelContainer.cpp \
+    Collision/vmap/ManagedModelContainer.h \
+    Collision/vmap/ModelContainer.cpp \
+    Collision/vmap/ModelContainer.h \
+    Collision/vmap/NodeValueAccess.h \
+    Collision/vmap/RayIntersectionIterator.h \
+    Collision/vmap/ShortBox.h \
+    Collision/vmap/ShortVector.h \
+    Collision/vmap/SubModel.cpp \
+    Collision/vmap/SubModel.h \
+    Collision/vmap/TileAssembler.cpp \
+    Collision/vmap/TileAssembler.h \
+    Collision/vmap/TreeNode.cpp \
+    Collision/vmap/TreeNode.h \
+    Collision/vmap/VMapManager.cpp \
+    Collision/vmap/VMapManager.h \
+    Collision/g3dlite/AABox.cpp \
+    Collision/g3dlite/Box.cpp \
+    Collision/g3dlite/Crypto.cpp \
+    Collision/g3dlite/Matrix3.cpp \
+    Collision/g3dlite/Plane.cpp \
+    Collision/g3dlite/System.cpp \
+    Collision/g3dlite/Triangle.cpp \
+    Collision/g3dlite/Vector3.cpp \
+    Collision/g3dlite/Vector4.cpp \
+    Collision/g3dlite/format.cpp
     

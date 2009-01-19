@@ -198,9 +198,8 @@ hearthstone_world_SOURCES = \
     ConsoleCommands.h \
     ConsoleListener.cpp
 
-hearthstone_world_LDADD = -lshared -lz -lpcre -lcollision
+hearthstone_world_LDADD = -lshared -lz -lpcre
 
 hearthstone_world_LDFLAGS = -L$(srcdir)/../hearthstone-shared \
-               -L$(srcdir)/../../extras/collision/collision_dll \
                -L/usr/lib \
                @LIB_EXPORT@
