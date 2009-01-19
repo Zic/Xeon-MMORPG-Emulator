@@ -3539,8 +3539,9 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 
 		if(deleteAur)
 		{
+			aur->m_deleted = true;
 			sEventMgr.RemoveEvents(aur);
-			aur->Remove();
+			//aur->Remove(); // don't seem to need to remove as it hasn't been applied yet
 			return;
 		}
 	}
@@ -3580,8 +3581,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 			if(aur->m_auraSlot == 255)
 			{
 				sLog.outString("Aura error in active aura. removing. SpellId: %u", aur->GetSpellProto()->Id);
-				// for next loop.. lets kill the fucker
-				sEventMgr.RemoveEvents(aur);
 				aur->Remove();
 				return;
 			} 
@@ -3613,8 +3612,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		if(aur->m_auraSlot==255)
 		{
 			sLog.outString("Aura error in passive aura. removing. SpellId: %u", aur->GetSpellProto()->Id);
-			// for next loop.. lets kill the fucker
-			sEventMgr.RemoveEvents(aur);
 			aur->Remove();
 			return;
 		}
@@ -5438,7 +5435,7 @@ UnitPointer Unit::CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,
 		p->SetUInt32Value(UNIT_FIELD_MAXHEALTH,p->GetUInt32Value(UNIT_FIELD_MAXHEALTH)+28+30*lvl);
 		p->SetUInt32Value(UNIT_FIELD_HEALTH,p->GetUInt32Value(UNIT_FIELD_HEALTH)+28+30*lvl);
 		/* LEVEL */
-		p->ModUnsigned32Value(UNIT_FIELD_LEVEL, lvl);
+		p->SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
 	}
 
 	p->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, GetGUID());

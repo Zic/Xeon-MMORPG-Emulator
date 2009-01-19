@@ -12,6 +12,6 @@ CREATE TABLE `item_quest_association` (
   `item` int(11) NOT NULL DEFAULT '0',
   `quest` int(11) NOT NULL DEFAULT '0',
   `item_count` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`item`,`quest`),
+  PRIMARY KEY (`item`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Quest System';
 

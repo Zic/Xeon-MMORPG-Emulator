@@ -270,7 +270,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//247
 		&Aura::SpellAuraNULL,//248
 		&Aura::SpellAuraNULL,//249
-		&Aura::SpellAuraNULL,//250
+		&Aura::SpellAuraModIncreaseHealth,//250 Add Health http://www.wowhead.com/?spell=44055
 		&Aura::SpellAuraNULL,//251
 		&Aura::SpellAuraNULL,//252
 		&Aura::SpellAuraNULL,//253
@@ -863,6 +863,8 @@ void Aura::RemoveIfNecessary()
 
 void Aura::ApplyModifiers( bool apply )
 { 
+	if(!m_applied && !apply)	// Don't want to unapply modifiers if they haven't been applied
+		return;
 	m_applied = apply;
 	if( apply && m_spellProto->CasterAuraState && m_target && !(m_target->GetUInt32Value(UNIT_FIELD_AURASTATE) & (uint32(1) << (m_spellProto->CasterAuraState - 1) ) ) )
 	{
@@ -4348,9 +4350,6 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 
 	if(m_target->IsPlayer())
 	{
-		//maybe we should not adjust hitpoints too but only maximum health
-		TO_PLAYER( m_target )->SetHealthFromSpell(TO_PLAYER( m_target )->GetHealthFromSpell() + amt);
-		TO_PLAYER( m_target )->UpdateStats();
 		if(apply)
 			m_target->ModUnsigned32Value(UNIT_FIELD_HEALTH,amt);
 		else
@@ -4359,6 +4358,8 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 				m_target->ModUnsigned32Value(UNIT_FIELD_HEALTH,amt);
 			else m_target->SetUInt32Value(UNIT_FIELD_HEALTH,1); //do not kill player but do strip him good
 		}
+		TO_PLAYER( m_target )->SetHealthFromSpell(TO_PLAYER( m_target )->GetHealthFromSpell() + amt);
+		TO_PLAYER( m_target )->UpdateStats();
 	}
 	else
 		m_target->ModUnsigned32Value(UNIT_FIELD_MAXHEALTH, amt);
@@ -5157,10 +5158,13 @@ void Aura::EventPeriodicLeech(uint32 amount)
 	//deal damage before we add healing bonus to damage
 	m_target->DealDamage(m_target, Amount, 0, 0, GetSpellProto()->Id,true);
 
-	float coef = m_spellProto->EffectMultipleValue[0]; // how much health is restored per damage dealt
-	SM_FFValue(m_caster->SM[SMT_MULTIPLE_VALUE][0], &coef, m_spellProto->SpellGroupType);
-	SM_PFValue(m_caster->SM[SMT_MULTIPLE_VALUE][1], &coef, m_spellProto->SpellGroupType);
-	Amount = float2int32((float)Amount * coef);
+	if(m_spellProto)
+	{
+		float coef = m_spellProto->EffectMultipleValue[0]; // how much health is restored per damage dealt
+		SM_FFValue(m_caster->SM[SMT_MULTIPLE_VALUE][0], &coef, m_spellProto->SpellGroupType);
+		SM_PFValue(m_caster->SM[SMT_MULTIPLE_VALUE][1], &coef, m_spellProto->SpellGroupType);
+		Amount = float2int32((float)Amount * coef);
+	}
 
 	uint32 newHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + Amount ;
 	uint32 mh = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -6791,11 +6795,19 @@ void Aura::SpellAuraAddPctMod( bool apply )
 		DEBUG_LOG( "Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n", modifier, GetSpellId() );
 		return;
 	}
+	
 
 	if(modifier == SMT_ATTACK_POWER_AND_DMG_BONUS)
 		modifier = SMT_DAMAGE_DONE;
 
 	SendModifierLog(&m_target->SM[modifier][1], val, AffectedGroups, modifier, true);
+	if(m_spellProto->Id == 16246)
+	{
+		if(apply)
+			DEBUG_LOG( "APPLIED! value %d\n", m_target->SM[modifier][1][1]);
+		else
+			DEBUG_LOG( "REMOVED! value %d\n", m_target->SM[modifier][1][1]);
+	}
 }
 
 

@@ -347,6 +347,7 @@ void Player::Init()
 		flying_aura = 0;
 		resend_speed = false;
 		rename_pending = false;
+		titanGrip = false;
 		iInstanceType		   = 0;
 		memset(reputationByListId, 0, sizeof(FactionReputation*) * 128);
 
@@ -6134,7 +6135,7 @@ void Player::Reset_Spells()
 
 void Player::ResetTitansGrip()
 {
-	if(HasSpell(46917) || !GetItemInterface())
+	if(titanGrip || !GetItemInterface())
 		return;
 
 	ItemPointer mainhand = GetItemInterface()->GetInventoryItem(INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_MAINHAND);
@@ -6214,7 +6215,10 @@ void Player::Reset_Talents()
 	}
 
 	if( getClass() == WARRIOR )
+	{	
+		titanGrip = false;
 		ResetTitansGrip();
+	}
 }
 
 void Player::Reset_ToLevel1()

@@ -180,7 +180,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,// unknown - 152
 		&Spell::SpellEffectNULL,// unknown - 153 // SPELL_EFFECT_CREATE_PET               misc value is creature entry
 		&Spell::SpellEffectNULL, //154 unused
-		&Spell::SpellEffectNULL, //155 SPELL_EFFECT_TITAN_GRIP Allows you to equip two-handed axes, maces and swords in one hand, but you attack $49152s1% slower than normal.
+		&Spell::SpellEffectTitanGrip,// Titan's Grip - 155
 		&Spell::SpellEffectNULL, //156 Add Socket
 		&Spell::SpellEffectNULL, //157 create/learn random item/spell for profession
 		&Spell::SpellEffectMilling, //158 milling
@@ -6312,4 +6312,11 @@ void Spell::SpellEffectMilling(uint32 i)
 		SendCastResult(SPELL_FAILED_ITEM_GONE);
 		return;
 	}
+}
+
+void Spell::SpellEffectTitanGrip(uint32 i)
+{
+	if (!playerTarget)
+		return;
+	playerTarget->titanGrip = true;
 }

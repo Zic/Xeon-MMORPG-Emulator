@@ -1793,24 +1793,15 @@ int8 ItemInterface::CanEquipItemInSlot(int8 DstInvSlot, int8 slot, ItemPrototype
 	case EQUIPMENT_SLOT_MAINHAND:
 		{
 			if(type == INVTYPE_WEAPON || type == INVTYPE_WEAPONMAINHAND ||
-				(type == INVTYPE_2HWEAPON && (!GetInventoryItem(EQUIPMENT_SLOT_OFFHAND) || skip_2h_check)))
+				(type == INVTYPE_2HWEAPON && (!GetInventoryItem(EQUIPMENT_SLOT_OFFHAND) || skip_2h_check || m_pOwner->titanGrip)))
 				return 0;
 			else
 				return INV_ERR_ITEM_DOESNT_GO_TO_SLOT;
 		}
 	case EQUIPMENT_SLOT_OFFHAND:
 		{
-			bool titansGrip = false;
-			if( GetOwner()->HasSpell(46917) ) // Titan's Grip
-			{
-				skip_2h_check = true;
-				titansGrip = true;
-			}
-
-			if( type == INVTYPE_2HWEAPON && titansGrip )
-			{
-				return 0;
-			}
+			if(m_pOwner->titanGrip && (type == INVTYPE_2HWEAPON || type == INVTYPE_SHIELD))
+				return 0;	// Titan's Grip
 
 			if(type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND)
 			{
@@ -2272,7 +2263,12 @@ int8 ItemInterface::GetItemSlotByType(uint32 type)
 		}
 	case INVTYPE_2HWEAPON:
 		{
-			return EQUIPMENT_SLOT_MAINHAND;
+			if (!GetInventoryItem(EQUIPMENT_SLOT_MAINHAND) || !m_pOwner->titanGrip)
+				return EQUIPMENT_SLOT_MAINHAND;
+			else if(!GetInventoryItem(EQUIPMENT_SLOT_OFFHAND))
+				return EQUIPMENT_SLOT_OFFHAND;
+			else
+				return EQUIPMENT_SLOT_MAINHAND;
 		}
 	case INVTYPE_TABARD:
 		{

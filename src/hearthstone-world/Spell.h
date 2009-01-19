@@ -1784,6 +1784,7 @@ public:
 	void SpellEffectTriggerSpellWithValue(uint32 i);
 	void SpellEffectMegaJump(uint32 i);
 	void SpellEffectMilling(uint32 i);
+	void SpellEffectTitanGrip(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);

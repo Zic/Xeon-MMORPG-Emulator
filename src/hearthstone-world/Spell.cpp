@@ -4522,7 +4522,7 @@ void Spell::DetermineSkillUp(uint32 skillid)
 
 bool Spell::Reflect(shared_ptr<Unit>refunit)
 {
-	SpellEntry * refspell = NULL;
+	uint32 refspellid = 0;
 
 	if( m_reflectedParent != NULL )
 		return false;
@@ -4535,7 +4535,7 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
     }
 	for(std::list<struct ReflectSpellSchool*>::iterator i = refunit->m_reflectSpellSchool.begin();i != refunit->m_reflectSpellSchool.end();i++)
 	{
-		if((*i)->school == -1 || (*i)->school == (int32)m_spellInfo->School)
+		if(((*i)->school == -1 && m_spellInfo->School) || (*i)->school == (int32)m_spellInfo->School)
 		{
 			if(Rand((float)(*i)->chance))
 			{
@@ -4544,14 +4544,15 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
                 {
 					continue;
                 }
-				refspell = m_spellInfo;
+				refspellid = (*i)->spellId;
 			}
 		}
 	}
 
-	if(!refspell || m_caster == refunit) return false;
+	if(!refspellid || m_caster == refunit) return false;
+	refunit->RemoveAura(refspellid);
 
-	SpellPointer spell = shared_ptr<Spell>(new Spell(refunit, refspell, true, NULLAURA));
+	SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, m_spellInfo, true, NULLAURA));
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
 	spell->m_reflectedParent = spell_shared_from_this();

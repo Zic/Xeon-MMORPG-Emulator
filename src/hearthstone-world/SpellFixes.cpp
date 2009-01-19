@@ -1932,8 +1932,8 @@ void ApplyNormalFixes()
 				sp->EffectImplicitTargetB[1] = 0;
 			}
 
-			// Flurry and Unleashed Rage
-			if(sp->NameHash == SPELL_HASH_FLURRY || sp->NameHash == SPELL_HASH_UNLEASHED_RAGE)
+			// Unleashed Rage
+			if(sp->NameHash == SPELL_HASH_UNLEASHED_RAGE)
 				sp->procFlags = PROC_ON_CRIT_ATTACK;
 
 			// Healing Stream
@@ -1959,11 +1959,6 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_HYPOTHERMIA )
 			sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
 
-		// Winter's chill
-		sp = dbcSpell.LookupEntryForced(12579);
-		if( sp != NULL )
-			sp->c_is_flags |= SPELL_FLAG_CANNOT_PROC_ON_SELF;
-
 
 		//////////////////////////////////////////
 		// WARLOCK								//
@@ -1981,7 +1976,6 @@ void ApplyNormalFixes()
 		//////////////////////////////////////////
 		// OTHER								//
 		//////////////////////////////////////////
-
 	}
 
 	//Settings for special cases
@@ -2062,10 +2056,16 @@ void ApplyNormalFixes()
 	if( parentsp != NULL && triggersp != NULL )
 		triggersp->EffectBasePoints[0] = parentsp->EffectBasePoints[0];
 
-	/// Elemental Focus
+	// Elemental Focus
 	sp = dbcSpell.LookupEntryForced( 16164 );
 	if( sp != NULL && sp->Id == 16164 )
 		sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+	sp = dbcSpell.LookupEntryForced( 16246 );
+	if( sp != NULL )
+	{
+		sp->procFlags = PROC_ON_CAST_SPELL;
+		sp->procCharges++; // first charge gets lost when it gets procced
+	}
 
 	// Flametongue Weapon - 10% spd coefficient
 	sp = dbcSpell.LookupEntryForced( 29469 );
@@ -2150,6 +2150,28 @@ void ApplyNormalFixes()
 		{
 			sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
 			sp->EffectTriggerSpell[1] = 19823;
+		}
+	}
+
+	// Flurry
+	ranks = fill(ids, 12319,12971,12972,12973,12974,16256,16281,16282,16283,16284, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_CRIT_ATTACK;
+		}
+	}
+	// Flurry proc
+	ranks = fill(ids, 12966,12967,12968,12969,12970,16257,16277,16278,16279,16280, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->procFlags = PROC_ON_MELEE_ATTACK;
+			sp->procCharges++; // first charge gets lost when it gets procced
 		}
 	}
 
@@ -3621,6 +3643,11 @@ void ApplyNormalFixes()
 		sp->procFlags = PROC_ON_GAIN_EXPIERIENCE | PROC_TARGET_SELF;
 	}
 
+	// Winter's chill
+	sp = dbcSpell.LookupEntryForced(12579);
+	if( sp != NULL )
+		sp->c_is_flags |= SPELL_FLAG_CANNOT_PROC_ON_SELF;
+
 	// Mage - Invisibility 
 	sp = dbcSpell.LookupEntryForced( 66 );
 	if( sp != NULL )
@@ -3816,12 +3843,13 @@ void ApplyNormalFixes()
 		sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
 	}
 
+	// Nature's Grace
 	sp = dbcSpell.LookupEntryForced( 16886 );
 	if( sp != NULL )
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->procChance = 100;
-		sp->procCharges = 2; // i know.. hacky.. but first charge gets lost when it gets procced
+		sp->procCharges++; // first charge gets lost when it gets procced
 	}
 
 	//druid - Blood Frenzy
@@ -5032,6 +5060,39 @@ void ApplyNormalFixes()
 	{
 		sp->procFlags = PROC_ON_CAST_SPELL;
 		sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+	}
+
+	// warrior - Spell Reflection
+	sp = dbcSpell.LookupEntryForced( 23920 );
+	if( sp != NULL )
+		sp->procFlags = PROC_NULL; // No need to proc
+
+	// warrior - Titan's Grip
+	sp2 = dbcSpell.LookupEntryForced( 49152 );	// move this aura into main spell
+	sp = dbcSpell.LookupEntryForced( 46917 );	// main spell
+	if( sp != NULL )
+	{
+		sp->Effect[1] = sp2->Effect[0];
+		sp->EffectApplyAuraName[1] = sp2->EffectApplyAuraName[0];
+		sp->EffectMiscValue[1] = sp2->EffectMiscValue[0];
+		sp->EffectSpellClassMask[1][0] = sp2->EffectSpellClassMask[0][0];
+		sp->EffectSpellClassMask[1][1] = sp2->EffectSpellClassMask[0][1];
+		sp->EffectSpellClassMask[1][2] = sp2->EffectSpellClassMask[0][2];
+		sp->EffectBasePoints[1] = sp2->EffectBasePoints[0];
+		sp->EffectDieSides[1] = sp2->EffectDieSides[0];
+		sp->EffectBaseDice[1] = sp2->EffectBaseDice[0] ;
+	}
+
+	// Charge - Changing from dummy for the power regen
+	ranks = fill(ids, 100, 6178, 11578, 0);
+	for(uint32 i = 0; i < ranks; i++)
+	{
+		sp = dbcSpell.LookupEntryForced( ids[i] );
+		if( sp != NULL )
+		{
+			sp->Effect[1] = SPELL_EFFECT_ENERGIZE;
+			sp->EffectMiscValue[1] = 1;
+		}
 	}
 
 	//warrior - Rampage
