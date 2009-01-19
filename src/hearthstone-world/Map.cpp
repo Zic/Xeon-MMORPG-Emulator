@@ -166,18 +166,6 @@ void Map::LoadSpawns(bool reload)
 					cspawn->y = fields[4].GetFloat();
 					cspawn->z = fields[5].GetFloat();
 					cspawn->o = fields[6].GetFloat();
-					/*uint32 cellx=float2int32(((_maxX-cspawn->x)/_cellSize));
-					uint32 celly=float2int32(((_maxY-cspawn->y)/_cellSize));*/
-					uint32 cellx=CellHandler<MapMgr>::GetPosX(cspawn->x);
-					uint32 celly=CellHandler<MapMgr>::GetPosY(cspawn->y);
-					if(spawns[cellx]==NULL)
-					{
-						spawns[cellx]=new CellSpawns*[_sizeY];
-						memset(spawns[cellx],0,sizeof(CellSpawns*)*_sizeY);
-					}
-
-					if(!spawns[cellx][celly])
-						spawns[cellx][celly]=new CellSpawns;
 					cspawn->movetype = fields[7].GetUInt8();
 					cspawn->displayid = fields[8].GetUInt32();
 					cspawn->factionid = fields[9].GetUInt32();
@@ -193,8 +181,23 @@ void Map::LoadSpawns(bool reload)
 					cspawn->MountedDisplayID = fields[19].GetUInt32();
 					cspawn->phase = fields[20].GetInt32();
 					cspawn->vehicle = fields[21].GetInt32();
+
+					uint32 cellx=CellHandler<MapMgr>::GetPosX(cspawn->x);
+					uint32 celly=CellHandler<MapMgr>::GetPosY(cspawn->y);
+
+					if(spawns[cellx]==NULL)
+					{
+						spawns[cellx]=new CellSpawns*[_sizeY];
+						memset(spawns[cellx],0,sizeof(CellSpawns*)*_sizeY);
+					}
+
+					if(!spawns[cellx][celly])
+						spawns[cellx][celly]=new CellSpawns;
+
 					spawns[cellx][celly]->CreatureSpawns.push_back(cspawn);
+
 					++CreatureSpawnCount;
+
 				}while(result->NextRow());
 			}
 
