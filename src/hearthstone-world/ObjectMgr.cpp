@@ -1661,7 +1661,7 @@ void ObjectMgr::GenerateLevelUpInfo()
 				else if(Level <= 40) \
 				{\
 					BaseMana = uint32(BaseMana / 1.7f); \
-					BaseHP = uint32(BaseMana / 1.7f); \
+					BaseHP = uint32(BaseHP / 1.7f); \
 				}\
 				else if(Level <= 70) \
 				{\
