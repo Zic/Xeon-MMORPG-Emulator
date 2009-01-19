@@ -1347,6 +1347,7 @@ void Guild::DepositMoney(WorldSession * pClient, uint32 uAmount)
 
 void Guild::WithdrawMoney(WorldSession * pClient, uint32 uAmount)
 {
+	PlayerInfo * pPlayer = pClient->GetPlayer()->m_playerInfo;
 	GuildMember * pMember = pClient->GetPlayer()->m_playerInfo->guildMember;
 	if(pMember==NULL)
 		return;
@@ -1361,7 +1362,7 @@ void Guild::WithdrawMoney(WorldSession * pClient, uint32 uAmount)
 	}
 
 	// sanity checks (execpt for guildmasters)
-	if( pMember->guildRank->iId!=0)
+	if( pPlayer->guildRank->iId !=0 )
 	{
 		if(pMember->pRank->iGoldLimitPerDay > 0 && pMember->CalculateAvailableAmount() < uAmount )
 		{
