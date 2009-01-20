@@ -154,6 +154,8 @@ hearthstone_world_SOURCES = \
     Stats.cpp \
     StdAfx.cpp \
     StdAfx.h \
+    StrandOfTheAncients.cpp \
+    StrandOfTheAncients.h \
     TaxiHandler.cpp \
     TaxiMgr.cpp \
     TaxiMgr.h \

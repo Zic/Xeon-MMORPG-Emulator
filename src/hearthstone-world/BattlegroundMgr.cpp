@@ -32,17 +32,21 @@ const static uint32 BGMapIds[BATTLEGROUND_NUM_TYPES] = {
 	0,		// 3v3
 	0,		// 5v5
 	566,	// EOTS
+	0,
+	607,	// SOTA
 };
 
 const static CreateBattlegroundFunc BGCFuncs[BATTLEGROUND_NUM_TYPES] = {
-	NULL,						// 0
-	&AlteracValley::Create,		// AV
-	&WarsongGulch::Create,		// WSG
-	&ArathiBasin::Create,		// AB
-	NULL,						// 2v2
-	NULL,						// 3v3
-	NULL,						// 5v5
-	&EyeOfTheStorm::Create,		// EOTS
+	NULL,							// 0
+	&AlteracValley::Create,			// AV
+	&WarsongGulch::Create,			// WSG
+	&ArathiBasin::Create,			// AB
+	NULL,							// 2v2
+	NULL,							// 3v3
+	NULL,							// 5v5
+	&EyeOfTheStorm::Create,			// EOTS
+	NULL,
+	&StrandOfTheAncients::Create,	// SOTA
 };
 
 const static uint32 BGMinimumPlayers[BATTLEGROUND_NUM_TYPES] = {
@@ -54,17 +58,21 @@ const static uint32 BGMinimumPlayers[BATTLEGROUND_NUM_TYPES] = {
 	6,							// 3v3
 	10,							// 5v5
 	7,							// EOTS
+	0,							// 
+	15,							// SOTA
 };
 
 const static uint32 BGPvPDataFieldCount[BATTLEGROUND_NUM_TYPES] = {
 	0,							// NONE
 	5,							// AV
 	2,							// WSG
-	2,							// WSG
+	2,							// AB
 	0,							// 2v2
 	0,							// 3v3
 	0,							// 5v5
 	1,							// EOTS
+	0,							// 
+	0,							// SOTA
 };
 
 CBattlegroundManager::CBattlegroundManager() : EventableObject()
@@ -1160,8 +1168,8 @@ BattlegroundPointer CBattlegroundManager::CreateInstance(uint32 Type, uint32 Lev
 	if(Type == BATTLEGROUND_ARENA_2V2 || Type == BATTLEGROUND_ARENA_3V3 || Type == BATTLEGROUND_ARENA_5V5)
 	{
 		/* arenas follow a different procedure. */
-		static const uint32 arena_map_ids[3] = { 559, 562, 572 };
-		uint32 mapid = arena_map_ids[RandomUInt(2)];
+		static const uint32 arena_map_ids[5] = { 559, 562, 572, 617, 618 };
+		uint32 mapid = arena_map_ids[RandomUInt(4)];
 		uint32 players_per_side;
 		mgr = sInstanceMgr.CreateBattlegroundInstance(mapid);
 		if(mgr == NULL)
@@ -1227,6 +1235,7 @@ BattlegroundPointer CBattlegroundManager::CreateInstance(uint32 Type, uint32 Lev
 		case BATTLEGROUND_ARATHI_BASIN: n = 1; break;
 		case BATTLEGROUND_EYE_OF_THE_STORM: n = 2; break;
 		case BATTLEGROUND_ALTERAC_VALLEY: n = 3; break;
+		case BATTLEGROUND_STRAND_OF_THE_ANCIENTS: n = 4; break;
 		default: n = 0; break;
 	}
 	if (((tm.tm_yday / 7) % 4) == n)

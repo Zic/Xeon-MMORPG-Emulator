@@ -187,68 +187,131 @@ void Arena::OnCreate()
 	switch(m_mapMgr->GetMapId())
 	{
 		/* loraedeon */
-	case 572: {
-		obj = SpawnGameObject(185917, 1278.647705f, 1730.556641f, 31.605574f, 1.68f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+	case 572:
+		{
+			obj = SpawnGameObject(185917, 1278.647705f, 1730.556641f, 31.605574f, 1.68f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		obj = SpawnGameObject(185918, 1293.560791f, 1601.937988f, 31.605574f, 4.86f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+			obj = SpawnGameObject(185918, 1293.560791f, 1601.937988f, 31.605574f, 4.86f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_LORDAERON_GREEN_PLAYER_COUNT;
-		m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_LORDAERON_GOLD_PLAYER_COUNT;
-		sm.CreateWorldState(WORLDSTATE_ARENA_LORDAERON_SCORE_SHOW, 1);
-		
-	  }break;
+			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_LORDAERON_GREEN_PLAYER_COUNT;
+			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_LORDAERON_GOLD_PLAYER_COUNT;
+			sm.CreateWorldState(WORLDSTATE_ARENA_LORDAERON_SCORE_SHOW, 1);
+		}break;
 
 		/* blades edge arena */
-	case 562: {
-		obj = SpawnGameObject(183972, 6177.707520f, 227.348145f, 3.604374f, -2.260201f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		obj->PushToWorld(m_mapMgr);
+	case 562:
+		{
+			obj = SpawnGameObject(183972, 6177.707520f, 227.348145f, 3.604374f, -2.260201f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->PushToWorld(m_mapMgr);
 
-		obj = SpawnGameObject(183973, 6189.546387f, 241.709854f, 3.101481f, 0.881392f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+			obj = SpawnGameObject(183973, 6189.546387f, 241.709854f, 3.101481f, 0.881392f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		obj = SpawnGameObject(183970, 6299.115723f, 296.549438f, 3.308032f, 0.881392f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		obj->PushToWorld(m_mapMgr);
+			obj = SpawnGameObject(183970, 6299.115723f, 296.549438f, 3.308032f, 0.881392f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->PushToWorld(m_mapMgr);
 
-		obj = SpawnGameObject(183971, 6287.276855f, 282.187714f, 3.810925f, -2.260201f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+			obj = SpawnGameObject(183971, 6287.276855f, 282.187714f, 3.810925f, -2.260201f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_BLADESEDGE_GREEN_PLAYER_COUNT;
-		m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_BLADESEDGE_GOLD_PLAYER_COUNT;
-		sm.CreateWorldState(WORLDSTATE_ARENA_BLADESEDGE_SCORE_SHOW, 1);
-
-			  }break;
+			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_BLADESEDGE_GREEN_PLAYER_COUNT;
+			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_BLADESEDGE_GOLD_PLAYER_COUNT;
+			sm.CreateWorldState(WORLDSTATE_ARENA_BLADESEDGE_SCORE_SHOW, 1);
+		}break;
 
 		/* nagrand arena */
-	case 559: {
-		obj = SpawnGameObject(183979, 4090.064453f, 2858.437744f, 10.236313f, 0.492805f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		obj->PushToWorld(m_mapMgr);
+	case 559:
+		{
+			obj = SpawnGameObject(183979, 4090.064453f, 2858.437744f, 10.236313f, 0.492805f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->PushToWorld(m_mapMgr);
 
-		obj = SpawnGameObject(183980, 4081.178955f, 2874.970459f, 12.391714f, 0.492805f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+			obj = SpawnGameObject(183980, 4081.178955f, 2874.970459f, 12.391714f, 0.492805f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		obj = SpawnGameObject(183977, 4023.709473f, 2981.776611f, 10.701169f, -2.648788f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		obj->PushToWorld(m_mapMgr);
+			obj = SpawnGameObject(183977, 4023.709473f, 2981.776611f, 10.701169f, -2.648788f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->PushToWorld(m_mapMgr);
 
-		obj = SpawnGameObject(183978, 4031.854248f, 2966.833496f, 12.646200f, -2.648788f, 32, 1375, 1.0f);
-		obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		m_gates.insert(obj);
+			obj = SpawnGameObject(183978, 4031.854248f, 2966.833496f, 12.646200f, -2.648788f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-		m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_NAGRAND_GREEN_PLAYER_COUNT;
-		m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_NAGRAND_GOLD_PLAYER_COUNT;
-		sm.CreateWorldState(WORLDSTATE_ARENA_NAGRAND_SCORE_SHOW, 1);
+			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_NAGRAND_GREEN_PLAYER_COUNT;
+			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_NAGRAND_GOLD_PLAYER_COUNT;
+			sm.CreateWorldState(WORLDSTATE_ARENA_NAGRAND_SCORE_SHOW, 1);
+		}break;
+		/* Dalaran Sewers */
+	case 617:
+		{
+			obj = SpawnGameObject(192643, 1256.33996582031f, 770.06201171875f, 20.5f, 0.0f, 32, 1375, 2.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
 
-			  }break;
+			obj = SpawnGameObject(192642, 1327.2099609375f, 813.239990234375f, 20.5f, 0.0f, 32, 1375, 2.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
+
+			// not rly blizzlike, should be spawn later, not on create, but who cares, will fix it later
+			obj = SpawnGameObject(191877, 1291.974487f, 791.844666f, 9.339742f, 3.116816f, 32, 1375, 1.0f);
+			obj->PushToWorld(m_mapMgr);
+
+			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_WOTLK_GREEN_PLAYER_COUNT;
+			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_WOTLK_GOLD_PLAYER_COUNT;
+			sm.CreateWorldState(WORLDSTATE_ARENA_WOTLK_SCORE_SHOW, 1);
+		}break;
+		/* The Ring of Valor */
+	case 618:
+		{
+			/*TODO:
+			 * - fix these elevators, i ran out of ideas, lost few hours...
+			 * - spawn rest of those stupid gameobj, im too lazy to get their coords
+			 * - that moving things shouldn't move all the time...
+			 */
+
+			//elevators
+			obj = SpawnGameObject(194030, 763.93f, -295.0f, 26.0f/*0.0f*/, 0.0f, 40, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
+			obj->PushToWorld(m_mapMgr);
+
+			obj = SpawnGameObject(194031, 763.93f, -274.0f, 26.0f/*0.0f*/, 0.0f, 40, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
+			obj->PushToWorld(m_mapMgr);
+		
+			//moving 'things'
+			obj = SpawnGameObject(193458, 763.630f, -261.783f, 26.0f, 0.0f, 40, 1375, 1.0f);
+			obj->PushToWorld(m_mapMgr);
+
+			obj = SpawnGameObject(193459, 763.761f, -306.230f, 26.0f, 0.0f, 40, 1375, 1.0f);
+			obj->PushToWorld(m_mapMgr);
+
+			obj = SpawnGameObject(193460, 802.313f, -284.349f, 24.6f, 0.0f, 40, 1375, 1.0f);
+			obj->PushToWorld(m_mapMgr);
+
+			obj = SpawnGameObject(193461, 723.522f, -284.428f, 24.6f, 0.0f, 40, 1375, 1.0f);
+			obj->PushToWorld(m_mapMgr);
+
+			//gates
+			obj = SpawnGameObject(192392, 763.93f, -295.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
+
+			obj = SpawnGameObject(192391, 763.93f, -274.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			m_gates.insert(obj);
+
+			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_WOTLK_GREEN_PLAYER_COUNT;
+			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_WOTLK_GOLD_PLAYER_COUNT;
+			sm.CreateWorldState(WORLDSTATE_ARENA_WOTLK_SCORE_SHOW, 1);
+		}break;
 	}
 
 	/* push gates into world */
@@ -479,6 +542,23 @@ LocationVector Arena::GetStartingCoords(uint32 Team)
 			else
 				return LocationVector(4085.861328f, 2866.750488f, 12.417445f);
 		}break;
+		/* Dalaran Sewers */
+	case 617:
+		{
+			if(Team)
+				return LocationVector(1235.88f, 771.08f, 15.5f);
+			else
+				return LocationVector(1347.43f, 813.0f, 15.5f);
+		}break;
+		/* The Ring of Valor */
+	case 618:
+		{
+			//temp workaround
+			if(Team)
+				return LocationVector(763.56f, -274.0f, 28.27f/*3.55f*/);
+			else
+				return LocationVector(763.93f, -295.01f, 28.27f/*3.55f*/);
+		}break;
 	}
 
 	return LocationVector(0,0,0,0);
@@ -519,6 +599,14 @@ bool Arena::HookHandleRepop(PlayerPointer plr)
 		/* nagrand arena */
 	case 559: {
 			dest.ChangeCoords(4057.042725f, 2918.686523f, 13.051933f);
+		}break;
+		/* Dalaran Sewers */
+	case 617: {
+			dest.ChangeCoords(1292.51f, 792.05f, 9.34f);
+		}break;
+		/* The Ring of Valor */
+	case 618: {
+			dest.ChangeCoords(762.91f, -284.28f, 28.28f);
 		}break;
 	}
 

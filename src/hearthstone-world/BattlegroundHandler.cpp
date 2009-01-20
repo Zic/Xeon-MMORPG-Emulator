@@ -124,6 +124,12 @@ int32 GetBattlegroundTypeFromCreature(CreaturePointer pCreature)
 	if( string(pCreature->GetCreatureInfo()->SubName).find("Arena") != string::npos )
 		return BATTLEGROUND_ARENA_2V2;
 
+	if( string(pCreature->GetCreatureInfo()->SubName).find("Strand of the Ancients") != string::npos )
+		return BATTLEGROUND_STRAND_OF_THE_ANCIENTS;
+
+	if( string(pCreature->GetCreatureInfo()->Name).find("Strand of the Ancients") != string::npos )
+		return BATTLEGROUND_STRAND_OF_THE_ANCIENTS;
+
 	return -1;
 }
 

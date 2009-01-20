@@ -31,6 +31,7 @@ class Vehicle;
 class WarsongGulch;
 class WeatherInfo;
 class World;
+class StrandOfTheAncients;
 
 // Typedefs for readable code
 typedef shared_ptr<CBattleground> BattlegroundPointer;
@@ -82,6 +83,7 @@ typedef shared_ptr<World> WorldPointer;
 #define TO_ALTERACVALLEY(ptr) CAST(AlteracValley,ptr)
 #define TO_EYEOFTHESTORM(ptr) CAST(EyeOfTheStorm,ptr)
 #define TO_WARSONGGULCH(ptr) CAST(WarsongGulch,ptr)
+#define TO_SOTA(ptr) CAST(StrandOfTheAncients,ptr)
 #define TO_ARENA(ptr) CAST(Arena,ptr)
 #define TO_ARATHIBASIN(ptr) CAST(ArathiBasin,ptr)
 #define TO_TRANSPORT(ptr) CAST(Transporter,ptr)

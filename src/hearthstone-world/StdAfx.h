@@ -164,6 +164,7 @@
 #include "Vehicle.h"
 #include "AchievementInterface.h"
 #include "ChainAggroEntity.h"
+#include "StrandOfTheAncients.h"
 
 #ifdef CLUSTERING
 	#include "WorkerServerClient.h"

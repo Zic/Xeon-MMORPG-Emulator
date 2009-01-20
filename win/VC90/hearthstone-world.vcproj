@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="hearthstone-world"
 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
 	RootNamespace="game"
@@ -532,6 +532,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\hearthstone-world\EyeOfTheStorm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-world\StrandOfTheAncients.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-world\StrandOfTheAncients.h"
 				>
 			</File>
 			<File
