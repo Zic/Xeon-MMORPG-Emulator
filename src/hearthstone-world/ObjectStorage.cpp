@@ -20,7 +20,15 @@
 #include "StdAfx.h"
 
 /** Table formats converted to strings
- */
+b = bool
+c = uint8
+h = uint16
+u = uint32
+i = int32
+f = float
+s = string
+x = skip
+*/
 const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gCreatureNameFormat						= "usssuuuuuuuuuuffcc";
 const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";

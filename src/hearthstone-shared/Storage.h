@@ -594,27 +594,9 @@ public:
 		{
             switch(*p)
 			{
-			case 'u':	// Unsigned integer
-				*(uint32*)&structpointer[offset] = f->GetUInt32();
-				offset += sizeof(uint32);
-				break;
-
-			case 'i':	// Signed integer
-				*(int32*)&structpointer[offset] = f->GetInt32();
-				offset += sizeof(uint64);
-				break;
-
-			case 's':	// Null-terminated string
-				*(char**)&structpointer[offset] = strdup(f->GetString());
-				offset += sizeof(char*);
-				break;
-
-			case 'x':	// Skip
-				break;
-
-			case 'f':	// Float
-				*(float*)&structpointer[offset] = f->GetFloat();
-				offset += sizeof(float);
+			case 'b':	// Boolean
+				*(bool*)&structpointer[offset] = f->GetBool();
+				offset += sizeof(bool);
 				break;
 
 			case 'c':	// Char
@@ -625,6 +607,29 @@ public:
 			case 'h':	// Short
 				*(uint16*)&structpointer[offset] = f->GetUInt16();
 				offset += sizeof(uint16);
+				break;
+
+			case 'u':	// Unsigned integer
+				*(uint32*)&structpointer[offset] = f->GetUInt32();
+				offset += sizeof(uint32);
+				break;
+
+			case 'i':	// Signed integer
+				*(int32*)&structpointer[offset] = f->GetInt32();
+				offset += sizeof(int32);
+				break;
+
+			case 'f':	// Float
+				*(float*)&structpointer[offset] = f->GetFloat();
+				offset += sizeof(float);
+				break;
+
+			case 's':	// Null-terminated string
+				*(char**)&structpointer[offset] = strdup(f->GetString());
+				offset += sizeof(char*);
+				break;
+
+			case 'x':	// Skip
 				break;
 
 			default:	// unknown
