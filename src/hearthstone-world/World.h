@@ -225,7 +225,7 @@ struct MapInfo
 	uint32 heroic_key_2;
 	float update_distance;
 	uint32 checkpoint_id;
-	uint32 collision;
+	uint8 collision;
 
 	bool HasFlag(uint32 flag)
 	{

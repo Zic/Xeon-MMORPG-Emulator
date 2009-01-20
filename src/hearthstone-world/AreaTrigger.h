@@ -36,7 +36,7 @@ enum AreaTriggerType
 typedef struct AreaTrigger
 {
 	uint32 AreaTriggerID;
-	uint32 Type;
+	uint8 Type;
 	uint32 Mapid;
 	uint32 PendingScreen;
 	char * Name;

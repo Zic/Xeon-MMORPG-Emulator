@@ -61,8 +61,8 @@ struct CreatureInfo
 	uint32 Female_DisplayID2;
 	float unkfloat1;
 	float unkfloat2;
-	uint32  Civilian;
-	uint32  Leader;
+	uint8  Civilian;
+	uint8  Leader;
 
 	std::string lowercase_name;
 	GossipScript * gossip_script;
@@ -149,7 +149,7 @@ struct CreatureProto
 	uint32 extra_a9_flags;
 	uint32	auraimmune_flag;
 	int32 vehicle_entry;
-	uint32 CanMove;
+	uint8 CanMove;
 
 	/* AI Stuff */
 	bool m_canRangedAttack;
