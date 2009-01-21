@@ -747,7 +747,7 @@ typedef std::map<uint32, uint64>                    SoloSpells;
 typedef std::map<SpellEntry*, pair<uint32, uint32> >StrikeSpellMap;
 typedef std::map<uint32, OnHitSpell >               StrikeSpellDmgMap;
 typedef std::map<uint32, PlayerSkill>				SkillMap;
-typedef std::set<PlayerPointer *>							ReferenceSet;
+typedef std::set<PlayerPointer *>					ReferenceSet;
 typedef std::map<uint32, PlayerCooldown>			PlayerCooldownMap;
 
 //#define OPTIMIZED_PLAYER_SAVING

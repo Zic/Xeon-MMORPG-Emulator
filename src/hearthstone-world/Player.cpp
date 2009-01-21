@@ -9539,15 +9539,12 @@ void Player::_UpdateMaxSkillCounts()
 					new_max = 300;
 				}break;
 
-				//Max out riding skills.
-				case SKILL_RIDING:
 				case SKILL_TYPE_PROFESSION:
-				{
-					//do nothing
-				}break;
 				case SKILL_TYPE_SECONDARY:
 				{
-					itr->second.CurrentValue = itr->second.MaximumValue;
+					new_max = itr->second.MaximumValue;
+					if(itr->second.Skill->id == SKILL_RIDING)
+						itr->second.CurrentValue = new_max;
 				}break;
 
 				// default the rest to max = 1, so they won't mess up skill frame for player.
@@ -9560,7 +9557,7 @@ void Player::_UpdateMaxSkillCounts()
 		itr->second.MaximumValue = new_max > 450 ? 450 : new_max < 1 ? 1 : new_max;
 
 		//Check if current is below nem max, if so, set new current to new max
-		itr->second.CurrentValue = itr->second.CurrentValue > itr->second.MaximumValue ? itr->second.MaximumValue : itr->second.CurrentValue;
+		itr->second.CurrentValue = itr->second.CurrentValue > new_max ? new_max : itr->second.CurrentValue;
 	}
 	//Always update client to prevent cached data messing up things later.
 	_UpdateSkillFields();

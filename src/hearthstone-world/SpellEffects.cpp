@@ -5829,12 +5829,7 @@ void Spell::SpellEffectSkill(uint32 i)
 	if(!p_caster)
 		return;
 
-	//uint32 skillid=m_spellInfo->EffectMiscValue[i];
-	//if(skillid==SKILL_FISHING)return;
-
-	uint32 val = damage * 75;
-	if( val > 350 )
-		val = 350;
+	uint32 val = damage * 75 > 450 ? 450 :damage * 75;
 
 	if( p_caster->_GetSkillLineMax(m_spellInfo->EffectMiscValue[i]) >= val )
 		return;

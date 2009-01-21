@@ -993,6 +993,22 @@ void ApplyNormalFixes()
 
 			if( sp->Effect[z] == SPELL_EFFECT_ENERGIZE )
 				sp->c_is_flags |= SPELL_FLAG_IS_HEALING_MANA_SPELL;
+
+			if( sp->Effect[z] == SPELL_EFFECT_SKILL && sp->EffectMiscValue[z] == SKILL_RIDING )
+			{
+				if( strstr( sp->Name, "Apprentice "))
+					rank = 1;
+				else if( strstr( sp->Name, "Journeyman "))
+					rank = 2;
+				else if( strstr( sp->Name, "Expert "))
+					rank = 3;
+				else if( strstr( sp->Name, "Artisan "))
+					rank = 4;
+				else if( strstr( sp->Name, "Master "))
+					rank = 5;
+				else if( strstr( sp->Name, "Grand Master ") ) 
+					rank = 6;
+			}
 		}
 
 		// set extra properties
