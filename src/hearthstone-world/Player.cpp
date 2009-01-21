@@ -344,7 +344,7 @@ void Player::Init()
 		tutorialsDirty = true;
 		m_TeleportState = 1;
 		m_beingPushed = false;
-		flying_aura = 0;
+		m_FlyingAura = 0;
 		resend_speed = false;
 		rename_pending = false;
 		titanGrip = false;
@@ -1078,20 +1078,20 @@ void Player::Update( uint32 p_time )
 
 	if (GetMapMgr() && GetMapMgr()->IsCollisionEnabled())
 	{
-		if(m_MountSpellId != 0)
+		if(IsMounted())
 		{
 			if( mstime >= m_mountCheckTimer )
 			{
-				//if( CollideInterface.IsIndoor( m_mapId, m_position ) )
-				if( CollideInterface.IsIndoor( m_mapId, m_position.x, m_position.y, m_position.z ) )
+				// Qiraj battletanks work everywhere on map 531
+				if ( m_mapId == 531 && ( m_MountSpellId == 25953 || m_MountSpellId == 26054 || m_MountSpellId == 26055 || m_MountSpellId == 26056 ) )
+					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
+				else if( CollideInterface.IsIndoor( m_mapId, m_position.x, m_position.y, m_position.z ) )
 				{
-					RemoveAura( m_MountSpellId );
-					m_MountSpellId = 0;
+					TO_UNIT(shared_from_this())->Dismount();
+					SetPlayerSpeed(RUN, m_runSpeed);
 				}
 				else
-				{
 					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
-				}
 			}
 		}
 	}
@@ -1329,8 +1329,11 @@ void Player::_EventCharmAttack()
 void Player::EventAttackStart()
 {
 	m_attacking = true;
-	if(m_MountSpellId)
-        RemoveAura(m_MountSpellId);
+	if( IsMounted() )
+	{
+		TO_UNIT(shared_from_this())->Dismount();
+		SetPlayerSpeed(RUN, m_runSpeed);
+	}
 }
 
 void Player::EventAttackStop()
@@ -6376,8 +6379,12 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 
 	m_taxiMapChangeNode = 0;
 
-	if(this->m_MountSpellId)
-		RemoveAura(m_MountSpellId);
+	if( IsMounted() )
+	{
+		TO_UNIT(shared_from_this())->Dismount();
+		SetPlayerSpeed(RUN, m_runSpeed);
+	}
+
 	//also remove morph spells
 	if(GetUInt32Value(UNIT_FIELD_DISPLAYID)!=GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID))
 	{
@@ -7459,10 +7466,10 @@ void Player::ZoneUpdate(uint32 ZoneId)
 			}
 		}
 		// flying auras
-		if( flying_aura != 0 && !(at->AreaFlags & AREA_FLYING_PERMITTED) )
+		if( m_FlyingAura != 0 && !(at->AreaFlags & AREA_FLYING_PERMITTED) )
 		{
 			// remove flying buff
-			RemoveAura(flying_aura);
+			RemoveAura(m_FlyingAura);
 		}
 	}
 
@@ -7748,9 +7755,9 @@ void Player::StopMirrorTimer(uint32 Type)
 	m_session->OutPacket(SMSG_STOP_MIRROR_TIMER, 4, &Type);
 }
 
-void Player::EventTeleport(uint32 mapid, float x, float y, float z)
+void Player::EventTeleport(uint32 mapid, float x, float y, float z, float o=0.0f)
 {
-	SafeTeleport(mapid, 0, LocationVector(x, y, z));
+	SafeTeleport(mapid, 0, LocationVector(x, y, z, o));
 }
 
 void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
@@ -7961,10 +7968,20 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 	if (m_UnderwaterState & UNDERWATERSTATE_UNDERWATER)
 		m_UnderwaterState &= ~UNDERWATERSTATE_UNDERWATER;
 
-	if(flying_aura && MapID != 530)
+	if(MapID != 530 && MapID != 571 )
 	{
-		RemoveAura(flying_aura);
-		flying_aura = 0;
+		if( m_FlyingAura )
+		{
+			TO_UNIT(shared_from_this())->Dismount();
+			SetPlayerSpeed(RUN, m_runSpeed);
+		}
+		else if( GetShapeShift() == FORM_FLIGHT )//Remove flight form from druids when leaving 530 or 571
+		{
+			RemoveShapeShiftSpell(m_ShapeShifted);
+			TO_UNIT(shared_from_this())->Dismount();
+			SetPlayerSpeed(RUN, m_runSpeed);
+		}
+
 	}
 
 	// Lookup map info
@@ -9364,6 +9381,10 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 	if (!CheckedSkill) //skill doesn't exist, exit here
 		return;
 
+	// force to be within limits
+	Max_sk = Max_sk > 450 ? 450 : Max_sk;
+	Curr_sk = Curr_sk > Max_sk ? Max_sk : Curr_sk < 1 ? 1 : Curr_sk ;
+
 	ItemProf * prof;
 	SkillMap::iterator itr = m_skills.find(SkillLine);
 	if(itr != m_skills.end())
@@ -10602,8 +10623,8 @@ void Player::_SpeedhackCheck()
 		}
 
 		// simplified; just take the fastest speed. less chance of fuckups too
-		float speed = ( flying_aura ) ? m_flySpeed : m_runSpeed;
-		if( flying_aura )
+		float speed = ( m_FlyingAura ) ? m_flySpeed : m_runSpeed;
+		if( m_FlyingAura )
 		{
 			if( m_runSpeed > m_flySpeed )
 				speed = m_runSpeed;
@@ -11124,7 +11145,7 @@ void Player::_FlyhackCheck()
 		return;
 
 	// Something's afoot!
-	EventTeleport(GetMapId(), GetPositionX(), GetPositionY(), height); // Return us to valid coordinates for the next logon.
+	EventTeleport(GetMapId(), GetPositionX(), GetPositionY(), height, 0.0f); // Return us to valid coordinates for the next logon.
 	GetSession()->Disconnect();
 }
 
@@ -11135,7 +11156,7 @@ bool Player::IsFlyHackEligible()
 	if(GetSession()->HasGMPermissions())
 		return false;
 
-	if(!GetMapMgr() || flying_aura || IsStunned() || IsPacified() || IsFeared() || GetTaxiState() || m_TransporterGUID != 0) // Stunned, rooted, riding a flying machine, whatever
+	if(!GetMapMgr() || m_FlyingAura || IsStunned() || IsPacified() || IsFeared() || GetTaxiState() || m_TransporterGUID != 0) // Stunned, rooted, riding a flying machine, whatever
 		return false;
 
 	if(GetMapId() == 369) return false; // Deeprun Tram

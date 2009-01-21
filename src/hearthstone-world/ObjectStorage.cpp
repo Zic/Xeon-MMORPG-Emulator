@@ -42,7 +42,7 @@ const char * gGraveyardFormat							= "uffffuuuux";
 const char * gTeleportCoordFormat						= "uxufffx";
 const char * gPvPAreaFormat								= "ush";
 const char * gFishingFormat								= "uuu";
-const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufuc";
+const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
 const char * gZoneGuardsFormat							= "uuu";
 const char * gAchievementRewardFormat					= "uuuu";
 

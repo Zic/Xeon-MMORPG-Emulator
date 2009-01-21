@@ -168,7 +168,7 @@ bool ChatHandler::HandleWPMoveTypeCommand(const char* args, WorldSession *m_sess
 	}
 
 	char sql[512];
-	snprintf(sql, 512, "UPDATE creature_spawns SET movetype = '%u' WHERE id = '%u'", (unsigned int)option, (unsigned int)pCreature->m_spawn->id);
+	snprintf(sql, 512, "UPDATE creature_spawns SET movetype = '%u' WHERE id = '%u'", (unsigned int)option, (unsigned int)pCreature-> GetSQL_id());
 	WorldDatabase.Execute( sql );
 
 	pCreature->GetAIInterface()->setMoveType(option);
@@ -234,7 +234,7 @@ bool ChatHandler::HandleWPShowCommand(const char* args, WorldSession *m_session)
 			ai->showWayPoints(m_session->GetPlayer(),Backwards);
 	}
 
-	SystemMessage(m_session, "Showing waypoints for creature %u", pCreature->m_spawn->id);
+	SystemMessage(m_session, "Showing waypoints for creature %u", pCreature->GetSQL_id());
 	return true;
 }
 
@@ -986,7 +986,7 @@ bool ChatHandler::HandleWPHideCommand(const char* args, WorldSession *m_session)
 	}
 
 	std::stringstream ss;
-	ss << "Hiding Waypoints for " << pCreature->m_spawn->id;
+	ss << "Hiding Waypoints for " << pCreature->GetSQL_id();
 	SystemMessage(m_session, ss.str().c_str());
 
 	return true;
@@ -1016,6 +1016,11 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 		SystemMessage(m_session, "You are already showing waypoints, hide them first.");
 		return true;
 	}
+	if(!cr->GetSQL_id())
+	{
+		SystemMessage(m_session, "This creature did not get a valid spawn_id.");
+		return true;
+	}
 
 	char* pR = strtok((char*)args, " ");
 	if(!pR)
@@ -1023,6 +1028,7 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 		SystemMessage(m_session, "Randomly generate wps params: range count");
 		return true;
 	}
+
 	int r = atoi(pR);
 	char *pC=strtok(NULL, " ");
 	if(!pC)
@@ -1073,7 +1079,7 @@ bool ChatHandler::HandleGenerateWaypoints(const char* args, WorldSession * m_ses
 	{
 		cr->m_spawn->movetype = 1;
 		cr->GetAIInterface()->m_moveType = 1;
-		WorldDatabase.Execute("UPDATE creature_spawns SET movetype = 1 WHERE id = %u", cr->m_spawn->id);
+		WorldDatabase.Execute("UPDATE creature_spawns SET movetype = 1 WHERE id = %u", cr->GetSQL_id());
 	}
 	m_session->GetPlayer()->waypointunit = cr->GetAIInterface();
 	cr->GetAIInterface()->showWayPoints(m_session->GetPlayer(),cr->GetAIInterface()->m_WayPointsShowBackwards);
@@ -1086,7 +1092,7 @@ bool ChatHandler::HandleSaveWaypoints(const char* args, WorldSession * m_session
 	CreaturePointer cr = 
 		m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!cr)return false;
-	if(cr->m_spawn==NULL)
+	if(!cr->GetSQL_id())
 		return false;
 	
 	cr->GetAIInterface()->saveWayPoints();
@@ -1099,7 +1105,7 @@ bool ChatHandler::HandleDeleteWaypoints(const char* args, WorldSession * m_sessi
 	CreaturePointer cr = 
 		m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(m_session->GetPlayer()->GetSelection()));
 	if(!cr)return false;
-	if(cr->m_spawn==NULL)
+	if(!cr->GetSQL_id())
 		return false;
 
 	if(cr->GetAIInterface()->m_WayPointsShowing)
@@ -1108,10 +1114,10 @@ bool ChatHandler::HandleDeleteWaypoints(const char* args, WorldSession * m_sessi
 		return true;
 	}
 	
-	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid=%u",cr->m_spawn->id);
+	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid=%u",cr->GetSQL_id());
 
 	cr->GetAIInterface()->deleteWaypoints();
-	SystemMessage(m_session, "Deleted waypoints for %u", cr->m_spawn->id);
+	SystemMessage(m_session, "Deleted waypoints for %u", cr->GetSQL_id());
 	return true;
 }
 

@@ -225,7 +225,7 @@ struct MapInfo
 	uint32 heroic_key_2;
 	float update_distance;
 	uint32 checkpoint_id;
-	uint8 collision;
+	bool collision;
 
 	bool HasFlag(uint32 flag)
 	{
@@ -501,6 +501,7 @@ public:
 	void SaveAllPlayers();
 
 	string MapPath;
+	string vMapPath;
 	bool UnloadMapFiles;
 	bool BreathingEnabled;
 	bool SpeedhackProtection;
@@ -550,6 +551,12 @@ public:
 	bool no_antihack_on_gm;
 
 	bool free_arena_teams;
+
+	//Enable/Disable specific battlegrounds/arenas
+	bool av_disabled;
+	bool wsg_disabled;
+	bool eots_disabled;
+	bool ab_disabled;
 
 	void CharacterEnumProc(QueryResultVector& results, uint32 AccountId);
 	void LoadAccountDataProc(QueryResultVector& results, uint32 AccountId);

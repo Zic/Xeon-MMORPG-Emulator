@@ -5236,8 +5236,8 @@ void Aura::SpellAuraTransform(bool apply)
 	if(ci)
 		displayId = ci->Male_DisplayID;
 
-	if(p_target && p_target->m_MountSpellId)
-		m_target->RemoveAura(p_target->m_MountSpellId);
+	if( p_target && p_target->IsMounted() )
+		m_target->Dismount();
 	
    // SetPositive();
 	switch( GetSpellProto()->Id )
@@ -6023,6 +6023,10 @@ void Aura::SpellAuraMounted(bool apply)
 {
 	if(!p_target) return;
 
+	//Remove any previous mount if we had one
+	if(p_target->IsMounted())
+		m_target->Dismount();
+
 	if(m_target->IsStealth())
 	{
 		uint32 id = m_target->m_stealth;
@@ -6030,9 +6034,7 @@ void Aura::SpellAuraMounted(bool apply)
 		m_target->RemoveAura(id);
 	}
 
-	bool isVehicleSpell = false;
-	if( m_spellProto->Effect[1] == SPELL_EFFECT_SUMMON )
-		isVehicleSpell  = true;
+	bool isVehicleSpell  = m_spellProto->Effect[1] == SPELL_EFFECT_SUMMON ? true : false;
 
 	if(apply)
 	{   
@@ -6047,9 +6049,6 @@ void Aura::SpellAuraMounted(bool apply)
 		if(p_target->m_bg)
 			p_target->m_bg->HookOnMount(p_target);
 
-		if(p_target->m_MountSpellId)
-			m_target->RemoveAura(p_target->m_MountSpellId);
-
 		m_target->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_MOUNT);
 
 		CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
@@ -6057,7 +6056,7 @@ void Aura::SpellAuraMounted(bool apply)
 			m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , ci->Male_DisplayID);
 
 		p_target->m_MountSpellId = m_spellProto->Id;
-		p_target->flying_aura = 0;
+		p_target->m_FlyingAura = 0;
 		
 		//m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
 
@@ -6068,7 +6067,7 @@ void Aura::SpellAuraMounted(bool apply)
 	{
 		p_target->m_bgFlagIneligible--;
 		p_target->m_MountSpellId = 0;
-		p_target->flying_aura = 0;
+		p_target->m_FlyingAura = 0;
 
 		if( !isVehicleSpell )
 			m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -8449,7 +8448,7 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		m_target->UpdateSpeed();
 		if(m_target->IsPlayer())
 		{
-			TO_PLAYER( m_target )->flying_aura = m_spellProto->Id;
+			TO_PLAYER( m_target )->m_FlyingAura = m_spellProto->Id;
 		}
 		m_target->MechanicsDispels[MECHANIC_POLYMORPHED]++; // Players flying on flying mounts are immune to polymorph.
 	}
@@ -8460,7 +8459,7 @@ void Aura::SpellAuraEnableFlight(bool apply)
 		m_target->UpdateSpeed();
 		if(m_target->IsPlayer())
 		{
-			TO_PLAYER( m_target )->flying_aura = 0;
+			TO_PLAYER( m_target )->m_FlyingAura = 0;
 		}
 		m_target->MechanicsDispels[MECHANIC_POLYMORPHED]--;
 	}
@@ -8476,7 +8475,7 @@ void Aura::SpellAuraEnableFlightWithUnmountedSpeed(bool apply)
 		m_target->UpdateSpeed();
 		if(m_target->IsPlayer())
 		{
-			TO_PLAYER( m_target )->flying_aura = m_spellProto->Id;
+			TO_PLAYER( m_target )->m_FlyingAura = m_spellProto->Id;
 		}
 	}
 	else
@@ -8486,7 +8485,7 @@ void Aura::SpellAuraEnableFlightWithUnmountedSpeed(bool apply)
 		m_target->UpdateSpeed();
 		if(m_target->IsPlayer())
 		{
-			TO_PLAYER( m_target )->flying_aura = 0;
+			TO_PLAYER( m_target )->m_FlyingAura = 0;
 		}
 	}
 }

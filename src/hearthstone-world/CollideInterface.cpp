@@ -83,7 +83,7 @@ void CCollideInterface::ActivateTile(uint32 mapId, uint32 tileX, uint32 tileY)
 	// acquire write lock
 	m_mapLocks[mapId]->m_lock.AcquireWriteLock();
 	if( m_mapLocks[mapId]->m_tileLoadCount[tileX][tileY] == 0 )
-		CollisionMgr->loadMap("vmaps", mapId, tileY, tileX);
+		CollisionMgr->loadMap(sWorld.vMapPath.c_str(), mapId, tileY, tileX);
 
 	// increment count
 	m_mapLocks[mapId]->m_tileLoadCount[tileX][tileY]++;

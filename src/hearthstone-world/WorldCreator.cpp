@@ -596,7 +596,7 @@ void Instance::LoadFromDB(Field * fields)
 	{
 		*p = 0;
 		uint32 val = atol(q);
-		if( val != 0 )
+		if( val )
 			m_killedNpcs.insert(val);
 
 		q = p+1;
@@ -844,11 +844,15 @@ void InstanceMgr::BuildRaidSavedInstancesForPlayer(PlayerPointer plr)
 void Instance::SaveToDB()
 {
 	// don't save non-raid instances.
-	if(m_isBattleground)
+	if(m_mapInfo->type == INSTANCE_NONRAID || m_isBattleground)
+		return;
+
+	// don't save instance if nothing is killed yet
+	if (m_killedNpcs.size()==0)
 		return;
 
 	std::stringstream ss;
-	set<uint32>::iterator itr;
+	unordered_set<uint32>::iterator itr;
 
 	ss << "REPLACE INTO instances VALUES("
 		<< m_instanceId << ","

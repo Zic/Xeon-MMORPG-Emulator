@@ -99,6 +99,8 @@ Creature::Creature(uint64 guid)
 	m_taggingPlayer = m_taggingGroup = 0;
 	m_lootMethod = -1;
 	m_noDeleteAfterDespawn = false;
+
+	spawnid=0;
 }
 
 void Creature::Init()
@@ -284,12 +286,12 @@ void Creature::GenerateLoot()
 
 void Creature::SaveToDB()
 {
-	if( m_spawn == NULL )
-		return;
+	if(!spawnid)
+		spawnid = objmgr.GenerateCreatureSpawnID();
 	 
 	std::stringstream ss;
 	ss << "REPLACE INTO creature_spawns VALUES("
-		<< m_spawn->id << ","
+		<< spawnid << ","
 		<< GetEntry() << ","
 		<< GetMapId() << ","
 		<< m_position.x << ","
@@ -301,6 +303,7 @@ void Creature::SaveToDB()
 		<< m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] << ","
 		<< m_uint32Values[UNIT_FIELD_FLAGS] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_0] << ","
+		<< m_uint32Values[UNIT_FIELD_BYTES_1] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_2] << ","
 		<< m_uint32Values[UNIT_NPC_EMOTESTATE] << ",0,";
 		/*<< ((this->m_spawn ? m_spawn->respawnNpcLink : uint32(0))) << ",";*/
@@ -361,8 +364,8 @@ void Creature::DeleteFromDB()
 	if( m_spawn == NULL )
 		return;
 
-	WorldDatabase.Execute("DELETE FROM creature_spawns WHERE id=%u", m_spawn->id);
-	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid=%u", m_spawn->id);
+	WorldDatabase.Execute("DELETE FROM creature_spawns WHERE id=%u",  GetSQL_id());
+	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid=%u",  GetSQL_id());
 }
 
 
@@ -808,7 +811,9 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	creature_info = CreatureNameStorage.LookupEntry(spawn->entry);
 	if(!creature_info)
 		return false;
-	
+
+	spawnid = spawn->id;
+
 	m_walkSpeed = m_base_walkSpeed = proto->walk_speed; //set speeds
 	m_runSpeed = m_base_runSpeed = proto->run_speed; //set speeds
 	m_flySpeed = proto->fly_speed;

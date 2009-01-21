@@ -142,7 +142,13 @@ bool ChatHandler::HandleRecallDelCommand(const char* args, WorldSession *m_sessi
 
 bool ChatHandler::HandleRecallListCommand(const char* args, WorldSession *m_session)
 {
-	QueryResult *result = WorldDatabase.Query( "SELECT id,name FROM recall ORDER BY name" );
+	QueryResult *result;
+	if( args == NULL )
+		result = WorldDatabase.Query( "SELECT id,name FROM recall ORDER BY name" );
+	else
+		result = WorldDatabase.Query( "SELECT id,name FROM recall WHERE name LIKE '%s%s' ORDER BY name",args,"%" );
+
+
 	if(!result)
 		return false;
 	std::string recout;

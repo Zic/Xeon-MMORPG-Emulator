@@ -33,7 +33,7 @@ class TerrainMgr;
 
 struct Formation;
 
-typedef struct
+typedef struct CreatureSpawn
 {
 	uint32	id;//spawn ID
 	uint32	entry;

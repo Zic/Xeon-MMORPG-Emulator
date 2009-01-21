@@ -1190,7 +1190,7 @@ public:
 
 
 	void OnPositionChange();
-
+	void Dismount();
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
 

@@ -401,45 +401,44 @@ void CommandTableStorage::Init()
 
 	static ChatCommand accountCommandTable[] =
 	{
-		{ "ban",	  'a', &ChatHandler::HandleAccountBannedCommand,   "Ban account. .account ban name timeperiod", NULL, 0, 0, 0 },
-		{ "unban",	  'z', &ChatHandler::HandleAccountUnbanCommand,		"Unbans account x.", NULL, 0, 0, 0 },
-		{ "level",	  'z', &ChatHandler::HandleAccountLevelCommand,    "Sets gm level on account. Pass it username and 0,1,2,3,az, etc.", NULL, 0, 0, 0 },
-		{ "mute",	  'a', &ChatHandler::HandleAccountMuteCommand,		"Mutes account for <timeperiod>.", NULL, 0, 0, 0 },
-		{ "unmute",	  'a', &ChatHandler::HandleAccountUnmuteCommand,	"Unmutes account <x>", NULL, 0, 0, 0 },
-
-		{ NULL, 0, NULL, "", NULL, 0, 0, 0},
+		{ "ban",	'a', &ChatHandler::HandleAccountBannedCommand,	"Ban account. .account ban name timeperiod",		NULL, 0, 0, 0 },
+		{ "unban",	'z', &ChatHandler::HandleAccountUnbanCommand,	"Unbans account x.",								NULL, 0, 0, 0 },
+		{ "level",	'z', &ChatHandler::HandleAccountLevelCommand,	"Sets gm level on account. <username><gm_lvl>.",	NULL, 0, 0, 0 },
+		{ "mute",	'a', &ChatHandler::HandleAccountMuteCommand,	"Mutes account for <timeperiod>.",					NULL, 0, 0, 0 },
+		{ "unmute",	'a', &ChatHandler::HandleAccountUnmuteCommand,	"Unmutes account <x>",								NULL, 0, 0, 0 },
+		{ NULL,		  0, NULL,										"",													NULL, 0, 0, 0},
 	};
 	dupe_command_table(accountCommandTable, _accountCommandTable);
 
 	static ChatCommand honorCommandTable[] =
 	{
-		{ "addpoints",   'm', &ChatHandler::HandleAddHonorCommand,	  "Adds x amount of honor points/currency",NULL,0,0,0},
-		{ "addkills",	 'm', &ChatHandler::HandleAddKillCommand,	   "Adds x amount of honor kills", NULL, 0, 0, 0 },
-		{ "globaldailyupdate", 'm', &ChatHandler::HandleGlobalHonorDailyMaintenanceCommand, "Daily honor field moves", NULL, 0, 0, 0},
-		{ "singledailyupdate", 'm', &ChatHandler::HandleNextDayCommand, "Daily honor field moves for selected player only", NULL,0,0,0},
-		{ "pvpcredit", 'm', &ChatHandler::HandlePVPCreditCommand, "Sends PVP credit packet, with specified rank and points", NULL,0,0,0},
-		{ NULL,0,NULL,"",NULL,0,0,0},
+		{ "addpoints",			'm', &ChatHandler::HandleAddHonorCommand,						"Adds x amount of honor points/currency",					NULL,0,0,0},
+		{ "addkills",			'm', &ChatHandler::HandleAddKillCommand,						"Adds x amount of honor kills",								NULL, 0, 0, 0 },
+		{ "globaldailyupdate",	'm', &ChatHandler::HandleGlobalHonorDailyMaintenanceCommand,	"Daily honor field moves",									NULL, 0, 0, 0},
+		{ "singledailyupdate",	'm', &ChatHandler::HandleNextDayCommand,						"Daily honor field moves for selected player only",			NULL,0,0,0},
+		{ "pvpcredit",			'm', &ChatHandler::HandlePVPCreditCommand,						"Sends PVP credit packet, with specified rank and points",	NULL,0,0,0},
+		{ NULL,					  0, NULL,														"",															NULL,0,0,0},
 	};
 	dupe_command_table(honorCommandTable, _honorCommandTable);
 
 	static ChatCommand petCommandTable[] = 
 	{
-		{ "createpet",'m',&ChatHandler::HandleCreatePetCommand, "Creates a pet with <entry>.", NULL, 0, 0, 0 },
-		{ "renamepet",'m',&ChatHandler::HandleRenamePetCommand, "Renames a pet to <name>.", NULL, 0, 0, 0 },
-		{ "addspell",'m',&ChatHandler::HandleAddPetSpellCommand, "Teaches pet <spell>.", NULL, 0, 0, 0 },
-		{ "removespell",'m',&ChatHandler::HandleRemovePetSpellCommand, "Removes pet spell <spell>.", NULL, 0, 0, 0 },
-		{ NULL,0,NULL,"",NULL,0,0,0},
+		{ "createpet",		'm', &ChatHandler::HandleCreatePetCommand,		"Creates a pet with <entry>.",	NULL, 0, 0, 0 },
+		{ "renamepet",		'm', &ChatHandler::HandleRenamePetCommand,		"Renames a pet to <name>.",		NULL, 0, 0, 0 },
+		{ "addspell",		'm', &ChatHandler::HandleAddPetSpellCommand,	"Teaches pet <spell>.",			NULL, 0, 0, 0 },
+		{ "removespell",	'm', &ChatHandler::HandleRemovePetSpellCommand,	"Removes pet spell <spell>.",	NULL, 0, 0, 0 },
+		{ NULL,				  0, NULL,										"",								NULL,0,0,0},
 	};
 	dupe_command_table(petCommandTable, _petCommandTable);
 
 	static ChatCommand recallCommandTable[] =
 	{
-		{ "list",		'q', &ChatHandler::HandleRecallListCommand,	   "List recall locations",		  NULL, 0, 0, 0},
-		{ "port",		'q', &ChatHandler::HandleRecallGoCommand,		 "Port to recalled location",	  NULL, 0, 0, 0},
-		{ "add",		 'q', &ChatHandler::HandleRecallAddCommand,		"Add recall location",			NULL, 0, 0, 0},
-		{ "del",		 'q', &ChatHandler::HandleRecallDelCommand,		"Remove a recall location",	   NULL, 0, 0, 0},
-		{ "portplayer", 'm', &ChatHandler::HandleRecallPortPlayerCommand, "recall ports player", NULL, 0, 0, 0 },
-		{ NULL,		   0,  NULL,										"",							   NULL, 0, 0, 0},
+		{ "list",		'q', &ChatHandler::HandleRecallListCommand,			"List recall locations [filter].",	NULL, 0, 0, 0},
+		{ "port",		'q', &ChatHandler::HandleRecallGoCommand,			"Port to recalled location",		NULL, 0, 0, 0},
+		{ "add",		'q', &ChatHandler::HandleRecallAddCommand,			"Add recall location",				NULL, 0, 0, 0},
+		{ "del",		'q', &ChatHandler::HandleRecallDelCommand,			"Remove a recall location",			NULL, 0, 0, 0},
+		{ "portplayer",	'm', &ChatHandler::HandleRecallPortPlayerCommand,	"recall ports player",				NULL, 0, 0, 0 },
+		{ NULL,			  0, NULL,											"",									NULL, 0, 0, 0},
 	};
 	dupe_command_table(recallCommandTable, _recallCommandTable);
 
@@ -451,7 +450,7 @@ void CommandTableStorage::Init()
 		{ "delboth",   '2', &ChatHandler::HandleQuestDelBothCommand,	"Delete quest <id> from the targeted NPC as start & finish",	NULL, 0, 0, 0},
 		{ "delfinish", '2', &ChatHandler::HandleQuestDelFinishCommand,	"Delete quest <id> from the targeted NPC as finisher",	NULL, 0, 0, 0},
 		{ "delstart",  '2', &ChatHandler::HandleQuestDelStartCommand,	"Delete quest <id> from the targeted NPC as starter",	NULL, 0, 0, 0},
-		{ "complete",  '2', &ChatHandler::HandleQuestFinishCommand,	    "Complete/Finish quest <id>",							NULL, 0, 0, 0},
+		{ "complete",  '2', &ChatHandler::HandleQuestFinishCommand,		"Complete/Finish quest <id>",							NULL, 0, 0, 0},
 		{ "finisher",  '2', &ChatHandler::HandleQuestFinisherCommand,	"Lookup quest finisher for quest <id>",					NULL, 0, 0, 0},
 		{ "item",	   '2', &ChatHandler::HandleQuestItemCommand,		"Lookup itemid necessary for quest <id>",				NULL, 0, 0, 0},
 		{ "list",	   '2', &ChatHandler::HandleQuestListCommand,		"Lists the quests for the npc <id>",					NULL, 0, 0, 0},

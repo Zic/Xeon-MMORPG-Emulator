@@ -207,7 +207,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				m_moveRun = true; //run to the target
 
 				// dismount if mounted
-				m_Unit->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
+				m_Unit->Dismount();
 
 				if(m_AIState != STATE_ATTACKING)
 					StopMovement(0);
@@ -495,7 +495,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 						//only save creature which exist in db (don't want to save 0 values in db) 
 						if( m_Unit->m_loadedFromDB && TO_CREATURE(m_Unit)->m_spawn != NULL )
 						{
-							m_Unit->GetMapMgr()->pInstance->m_killedNpcs.insert( TO_CREATURE(m_Unit)->m_spawn->id );
+							m_Unit->GetMapMgr()->pInstance->m_killedNpcs.insert( TO_CREATURE(m_Unit)->GetSQL_id() );
 							m_Unit->GetMapMgr()->pInstance->SaveToDB();
 						}
 					}
@@ -2245,7 +2245,7 @@ bool AIInterface::saveWayPoints()
 	if(GetUnit()->GetTypeId() != TYPEID_UNIT ||
 		TO_CREATURE(GetUnit())->m_spawn == NULL ) return false;
 
-	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid = %u", TO_CREATURE(GetUnit())->m_spawn->id);
+	WorldDatabase.Execute("DELETE FROM creature_waypoints WHERE spawnid = %u", TO_CREATURE(GetUnit())->GetSQL_id());
 	WayPointMap::const_iterator itr;
 	WayPoint* wp = NULL;
 	std::stringstream ss;
@@ -2261,7 +2261,7 @@ bool AIInterface::saveWayPoints()
 		ss.str("");
 		ss << "REPLACE INTO creature_waypoints ";
 		ss << "(spawnid,waypointid,position_x,position_y,position_z,orientation,waittime,flags,forwardemoteoneshot,forwardemoteid,backwardemoteoneshot,backwardemoteid,forwardskinid,backwardskinid,forwardStandState,backwardStandState,forwardSpellToCast,backwardSpellToCast,forwardSayText,backwardSayText) VALUES (";
-		ss << TO_CREATURE(GetUnit())->m_spawn->id << ", ";
+		ss << TO_CREATURE(GetUnit())->GetSQL_id() << ", ";
 		ss << wp->id << ", ";
 		ss << wp->x << ", ";
 		ss << wp->y << ", ";

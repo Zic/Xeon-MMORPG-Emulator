@@ -23,7 +23,7 @@
 #define snprintf _snprintf
 #endif
 
-#define MAX_MAPS 600
+#define MAX_MAPS 700
 
 namespace VMAP
 {
@@ -31,25 +31,27 @@ namespace VMAP
 	{
 		switch( mapid )
 		{
-		case 509:
-		case 469:
-		case 189:
-		case 30:
-		case 37:
-		case 33:
-		case 533:
-		case 209:
-		case 309:
-		case 560:
-		case 534:
-		case 532:
-		case 543:
-		case 568:
-		case 564:
-		case 0:
-		case 1:
-		case 530:
-			return true;
+			case 509:	// Ruins of Ahn'Qiraj
+			case 469:	// Blackwing Lair
+			case 189:	// Scarlet Monastery
+			case 30:	// Alterac Valley
+			case 37:	// Azshara Crater
+			case 33:	// Shadowfang Keep
+			case 533:	// Naxxramas
+			case 209:	// Zul'Farrak
+			case 309:	// Zul'Gurub
+			case 560:	// Coilfang: The Steamvault
+			case 534:	// The Battle for Mount Hyjal
+			case 532:	// Karazhan
+			case 543:	// Hellfire Citadel: Ramparts
+			case 568:	// Zul'Aman
+			case 564:	// Black Temple
+			case 0:		// Eastern Kingdoms
+			case 1:		// Kalimdor
+			case 530:	// Outland
+			case 571:	// Northrend
+			case 609:	// Ebon Hold
+				return true;
 			break;
 
 		default:

@@ -343,7 +343,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 				m_CreatureStorage[obj->GetUIdFromGUID()] = TO_CREATURE(obj);
 				if(TO_CREATURE(obj)->m_spawn != NULL)
 				{
-					_sqlids_creatures.insert(make_pair( TO_CREATURE(obj)->m_spawn->id, TO_CREATURE(obj) ) );
+					_sqlids_creatures.insert(make_pair( TO_CREATURE(obj)-> GetSQL_id(), TO_CREATURE(obj) ) );
 				}
 			}break;
 
@@ -463,7 +463,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 			m_CreatureStorage[obj->GetUIdFromGUID()] = NULLCREATURE;
 			if(TO_CREATURE(obj)->m_spawn != NULL)
 			{
-				_sqlids_creatures.erase(TO_CREATURE(obj)->m_spawn->id);
+				_sqlids_creatures.erase(TO_CREATURE(obj)->GetSQL_id());
 			}
 
 			if(free_guid)

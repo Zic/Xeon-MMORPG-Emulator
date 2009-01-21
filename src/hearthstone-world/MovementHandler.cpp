@@ -199,8 +199,8 @@ void _HandleBreathing(MovementInfo &movement_info, PlayerPointer _player, WorldS
 	if( movement_info.flags & MOVEFLAG_SWIMMING && !( _player->m_UnderwaterState & UNDERWATERSTATE_SWIMMING ) )
 	{
 		// dismount if mounted
-		if( _player->m_MountSpellId )
-			_player->RemoveAura( _player->m_MountSpellId );
+		if(_player->IsMounted())
+			TO_UNIT(_player)->Dismount();
 
 		// get water level only if it was not set before
 		if( !pSession->m_bIsWLevelSet )
@@ -545,7 +545,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			{
 				/* just walked into a transport */
 				if(_player->IsMounted())
-					_player->RemoveAura(_player->m_MountSpellId);
+					TO_UNIT(_player)->Dismount();
 
 				// vehicles, meh
 				if( _player->m_CurrentVehicle )

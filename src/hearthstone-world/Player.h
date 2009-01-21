@@ -1543,10 +1543,10 @@ public:
 	
 	uint32 m_ShapeShifted;
 	uint32 m_MountSpellId;
-    
+
 	HEARTHSTONE_INLINE bool IsMounted() {return (m_MountSpellId!=0 ? true : false); }
 	
-    bool bHasBindDialogOpen;
+	bool bHasBindDialogOpen;
 	bool bGMTagOn;
 	uint32 TrackingSpell;
 	void _EventCharmAttack();
@@ -1634,7 +1634,11 @@ public:
 	bool m_honorless;
 	uint32 m_lastSeenWeather;
 	unordered_set<ObjectPointer > m_visibleFarsightObjects;
-	void EventTeleport(uint32 mapid, float x, float y, float z);
+	void EventTeleport(uint32 mapid, float x, float y, float z, float o);
+	void EventTeleport(uint32 mapid, float x, float y, float z)
+	{
+		EventTeleport(mapid, x, y, z, 0.0f);
+	}
 	void ApplyLevelInfo(LevelInfo* Info, uint32 Level);
 	void BroadcastMessage(const char* Format, ...);
 	map<uint32, set<uint32> > SummonSpells;
@@ -1707,7 +1711,7 @@ public:
 	set<shared_ptr<Unit> > visiblityChangableSet;
 	bool m_beingPushed;
 	bool CanSignCharter(Charter * charter, PlayerPointer requester);
-	uint32 flying_aura;
+	uint32 m_FlyingAura;
 	stringstream LoadAuras;
 	bool resend_speed;
 	bool rename_pending;

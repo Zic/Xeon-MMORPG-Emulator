@@ -6328,3 +6328,23 @@ void Unit::OnPositionChange()
 		m_CurrentVehicle->MoveVehicle(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 	}
 }
+void Unit::Dismount()
+{			
+	if(IsPlayer())
+	{
+		PlayerPointer cavalier = plr_shared_from_this();
+		if( cavalier->m_MountSpellId )
+		{
+			RemoveAura( cavalier->m_MountSpellId );
+			cavalier->m_MountSpellId = 0;
+		}
+		if( cavalier->m_FlyingAura )
+		{
+			RemoveAura( cavalier->m_FlyingAura );
+			cavalier->m_FlyingAura = 0;
+		}
+	}
+	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
+	RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI );
+	RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_LOCK_PLAYER );
+}

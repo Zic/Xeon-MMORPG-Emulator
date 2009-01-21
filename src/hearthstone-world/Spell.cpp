@@ -2818,6 +2818,10 @@ uint8 Spell::CanCast(bool tolerate)
 		{
 			if (m_spellInfo->MechanicsType == MECHANIC_MOUNTED)
 			{
+				// Qiraj battletanks work everywhere on map 531
+				if ( p_caster->GetMapId() == 531 && ( m_spellInfo->Id == 25953 || m_spellInfo->Id == 26054 || m_spellInfo->Id == 26055 || m_spellInfo->Id == 26056 ) )
+					return SPELL_CANCAST_OK;
+
 				if (CollideInterface.IsIndoor( p_caster->GetMapId(), p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() ))
 					return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 			}

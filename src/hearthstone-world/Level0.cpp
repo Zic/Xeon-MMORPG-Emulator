@@ -271,25 +271,16 @@ bool ChatHandler::HandleDismountCommand(const char* args, WorldSession *m_sessio
 	}
 
 	if(!m_target)
-	{
 		RedSystemMessage(m_session, "No target found.");
-		return true;
-	}
-
-	if(m_target->GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID) == 0)
-	{
+	else if( !m_target->GetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID) )
 		RedSystemMessage(m_session, "Target is not mounted.");
-		return true;
+	else 
+	{
+		m_target->Dismount();
+		BlueSystemMessage(m_session, "Unit has been dismounted.");
 	}
-
-	if(p_target && p_target->m_MountSpellId)
-		p_target->RemoveAura(p_target->m_MountSpellId);
-
-	m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , 0);
-	//m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI);
-
-	BlueSystemMessage(m_session, "Now unmounted.");
 	return true;
+
 }
 
 

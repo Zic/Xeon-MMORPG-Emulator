@@ -149,7 +149,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 	{
 	case ATTYPE_INSTANCE:
 		{
-			if(GetPlayer()->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
+			if(_player->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
 				uint32 reason = CheckTriggerPrerequsites(pAreaTrigger, this, _player, WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid));
 				if(reason != AREA_TRIGGER_FAILURE_OK)
@@ -197,8 +197,11 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 					return;
 				}
 
-				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
-				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
+				if( _player->IsMounted())
+					TO_UNIT(_player)->Dismount();
+
+				_player->SaveEntryPoint(pAreaTrigger->Mapid);
+				_player->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
 			}
 		}break;
 	case ATTYPE_QUESTTRIGGER:
@@ -207,15 +210,22 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 		}break;
 	case ATTYPE_INN:
 		{
+			if( _player->IsMounted())
+				TO_UNIT(_player)->Dismount();
+
 			// Inn
-			if (!GetPlayer()->m_isResting) GetPlayer()->ApplyPlayerRestState(true);
+			if (!_player->m_isResting) 
+				_player->ApplyPlayerRestState(true);
 		}break;
 	case ATTYPE_TELEPORT:
 		{
-			if(GetPlayer()->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
+			if( _player->GetPlayerStatus() != TRANSFER_PENDING) //only ports if player is out of pendings
 			{
-				GetPlayer()->SaveEntryPoint(pAreaTrigger->Mapid);
-				GetPlayer()->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
+				if( _player->IsMounted() )
+					TO_UNIT(_player)->Dismount();
+
+				_player->SaveEntryPoint(pAreaTrigger->Mapid);
+				_player->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));
 			}
 		}break;
 	default:break;

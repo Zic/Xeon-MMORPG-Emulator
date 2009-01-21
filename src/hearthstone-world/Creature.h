@@ -280,6 +280,7 @@ public:
 	virtual void Update( uint32 time );
 
 	HEARTHSTONE_INLINE CreatureInfo* GetCreatureInfo() { return creature_info; }
+	HEARTHSTONE_INLINE uint32 GetSQL_id() { return spawnid; };
 
 	/// Creature inventory
 	HEARTHSTONE_INLINE uint32 GetItemIdBySlot(uint32 slot) { return m_SellItems->at(slot).itemid; }
@@ -509,6 +510,7 @@ public:
 	void ChannelLinkUpCreature(uint32 SqlId);
 	bool haslinkupevent;
 	WayPoint * CreateWaypointStruct();
+	uint32 spawnid;
 	uint32 original_emotestate;
 	uint32 original_MountedDisplayID;
 	CreatureProto * proto;

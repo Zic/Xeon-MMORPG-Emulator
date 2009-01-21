@@ -5576,7 +5576,7 @@ void Spell::SpellEffectDispelMechanic(uint32 i)
 	}
 
 	if( playerTarget && m_spellInfo->NameHash == SPELL_HASH_DAZED && playerTarget->IsMounted() )
-		playerTarget->RemoveAura(playerTarget->m_MountSpellId);
+		TO_UNIT(playerTarget)->Dismount();
 }
 
 void Spell::SpellEffectSummonDeadPet(uint32 i)

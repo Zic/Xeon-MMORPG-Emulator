@@ -600,7 +600,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char *args, WorldSession *m_session
 	GreenSystemMessage(m_session, "Damage min/max: %f/%f", crt->GetFloatValue(UNIT_FIELD_MINDAMAGE),crt->GetFloatValue(UNIT_FIELD_MAXDAMAGE));
 	
 	ColorSystemMessage(m_session, MSG_COLOR_RED, "Entry ID: %d", crt->GetUInt32Value(OBJECT_FIELD_ENTRY));
-	ColorSystemMessage(m_session, MSG_COLOR_RED, "SQL Entry ID: %d", crt->m_spawn ? crt->m_spawn->id : 0);
+	ColorSystemMessage(m_session, MSG_COLOR_RED, "SQL Entry ID: %d", crt->GetSQL_id());
 	// show byte
 	std::stringstream sstext;
 	uint32 theBytes = crt->GetUInt32Value(UNIT_FIELD_BYTES_0);
@@ -1841,12 +1841,12 @@ bool ChatHandler::HandleFormationLink2Command(const char* args, WorldSession * m
 	slave->GetAIInterface()->m_formationFollowDistance = dist;
 	slave->GetAIInterface()->m_formationFollowAngle = ang;
 	slave->GetAIInterface()->m_formationLinkTarget = TO_CREATURE( m_session->GetPlayer()->linkTarget );
-	slave->GetAIInterface()->m_formationLinkSqlId = slave->GetAIInterface()->m_formationLinkTarget->m_spawn->id;
+	slave->GetAIInterface()->m_formationLinkSqlId = slave->GetAIInterface()->m_formationLinkTarget->GetSQL_id();
 	slave->GetAIInterface()->SetUnitToFollowAngle(ang);
 	
 	// add to db
 	WorldDatabase.Execute("INSERT INTO creature_formations VALUES(%u, %u, '%f', '%f')", 
-		slave->m_spawn->id, slave->GetAIInterface()->m_formationLinkSqlId, ang, dist);
+		slave->GetSQL_id(), slave->GetAIInterface()->m_formationLinkSqlId, ang, dist);
 
 	BlueSystemMessage(m_session, "%s linked up to %s with a distance of %f at %f radians.", slave->GetCreatureName()->Name, 
 		TO_CREATURE( m_session->GetPlayer()->linkTarget )->GetCreatureName()->Name, dist, ang );
@@ -1874,7 +1874,7 @@ bool ChatHandler::HandleFormationClearCommand(const char* args, WorldSession * m
 	c->GetAIInterface()->m_formationFollowDistance = 0.0f;
 	c->GetAIInterface()->SetUnitToFollow(NULLUNIT);
 	
-	WorldDatabase.Execute("DELETE FROM creature_formations WHERE spawn_id=%u", c->m_spawn->id);
+	WorldDatabase.Execute("DELETE FROM creature_formations WHERE spawn_id=%u", c->GetSQL_id());
 	return true;
 }
 

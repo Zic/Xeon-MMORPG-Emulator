@@ -89,7 +89,7 @@ public:
 	uint32 m_creatorGuid;
 	uint32 m_creatorGroup;
 	uint32 m_difficulty;
-    set<uint32> m_killedNpcs;
+	unordered_set<uint32> m_killedNpcs;
 	time_t m_creation;
 	time_t m_expiration;
 	MapInfo * m_mapInfo;
