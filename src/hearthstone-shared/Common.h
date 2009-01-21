@@ -360,7 +360,7 @@ namespace std
 {
 	namespace tr1
 	{
-		template<typename T> struct hash<shared_ptr<T>>
+		template<typename T> struct hash<shared_ptr<T> >
 		{
 			size_t operator()(shared_ptr<T> const &__x) const { return (size_t)__x.get(); }
 		};
