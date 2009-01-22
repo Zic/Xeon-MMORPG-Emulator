@@ -180,7 +180,7 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 		uint8 unk;
 		uint8 unk1;
 		uint8 unk2;
-		uint8 unk3;
+		uint32 unk3;
 		for(uint32 i = 0; i < addons; ++i)
 		{
 			unpacked >> name;
@@ -194,25 +194,24 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 			returnpacket << unk1;
 			if (unk1)
 			{
-				if(crc != 0x4C1C776D);
+				if(crc != 0x4C1C776D)
 				{
 					returnpacket << uint8(1);
 					returnpacket.append(PublicKey,264);
 				}
 				else
-					returnpacket << uint8(0)
+					returnpacket << uint8(0);
 
 				returnpacket << uint32(0);
 			}
 			
-			unk3 = (Enable ? 0 : 1);
-			returnpacket << unk3;
-			if (unk3)
+			unk2 = (Enable ? 0 : 1);
+			returnpacket << unk2;
+			if (unk2)
 				returnpacket << uint8(0);
 		}
 
-		uint32 unk4;
-		unpacked >> unk4; //Added in 3.0.8
+		unpacked >> unk3; //Added in 3.0.8
 	}
 	m_session->SendPacket(&returnpacket);
 }
