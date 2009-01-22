@@ -303,7 +303,6 @@ bool BasicTaskExecutor::run()
 	return true;
 }
 
-void Apply112SpellFixes();
 void ApplyNormalFixes();
 
 void PreStartQueries()
@@ -479,7 +478,6 @@ bool World::SetInitialWorldSettings()
 
 	tl.wait();
 
-	Apply112SpellFixes();
 	ApplyNormalFixes();
 
 	MAKE_TASK(ObjectMgr, LoadAchievements);

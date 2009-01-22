@@ -45,253 +45,206 @@ void CreateDummySpell(uint32 id)
 	sWorld.dummyspells.push_back(sp);
 }
 
-void Apply112SpellFixes()
+void Apply112SpellFixes(SpellEntry * sp)
 {
-	SpellEntry * sp;
-	// Spell 1455 Proc Chance (Life Tap Rank 2)
-	sp = dbcSpell.LookupEntryForced(1455);
 	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 1456 Proc Chance (Life Tap Rank 3)
-	sp = dbcSpell.LookupEntryForced(1456);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 3391 Proc Chance (Thrash )
-	sp = dbcSpell.LookupEntryForced(3391);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 8182 Proc Chance (Frost Resistance Rank 1)
-	sp = dbcSpell.LookupEntryForced(8182);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 8185 Proc Chance (Fire Resistance Rank 1)
-	sp = dbcSpell.LookupEntryForced(8185);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 10476 Proc Chance (Frost Resistance Rank 2)
-	sp = dbcSpell.LookupEntryForced(10476);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 10477 Proc Chance (Frost Resistance Rank 3)
-	sp = dbcSpell.LookupEntryForced(10477);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 10534 Proc Chance (Fire Resistance Rank 2)
-	sp = dbcSpell.LookupEntryForced(10534);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 10535 Proc Chance (Fire Resistance Rank 3)
-	sp = dbcSpell.LookupEntryForced(10535);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 11687 Proc Chance (Life Tap Rank 4)
-	sp = dbcSpell.LookupEntryForced(11687);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 11688 Proc Chance (Life Tap Rank 5)
-	sp = dbcSpell.LookupEntryForced(11688);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 11689 Proc Chance (Life Tap Rank 6)
-	sp = dbcSpell.LookupEntryForced(11689);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 12284 Proc Chance (Mace Specialization Rank 1)
-	sp = dbcSpell.LookupEntryForced(12284);
-	if(sp != NULL)
-		sp->procChance = 1;
-
-	// Spell 12292 Proc Chance (Death Wish )
-	sp = dbcSpell.LookupEntryForced(12292);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 12322 Proc Chance (Unbridled Wrath Rank 1)
-	sp = dbcSpell.LookupEntryForced(12322);
-	if(sp != NULL)
-		sp->procChance = 8;
-
-	// Spell 12701 Proc Chance (Mace Specialization Rank 2)
-	sp = dbcSpell.LookupEntryForced(12701);
-	if(sp != NULL)
-		sp->procChance = 2;
-
-	// Spell 12702 Proc Chance (Mace Specialization Rank 3)
-	sp = dbcSpell.LookupEntryForced(12702);
-	if(sp != NULL)
-		sp->procChance = 3;
-
-	// Spell 12703 Proc Chance (Mace Specialization Rank 4)
-	sp = dbcSpell.LookupEntryForced(12703);
-	if(sp != NULL)
-		sp->procChance = 4;
-
-	// Spell 12704 Proc Chance (Mace Specialization Rank 5)
-	sp = dbcSpell.LookupEntryForced(12704);
-	if(sp != NULL)
-		sp->procChance = 6;
-
-	// Spell 12999 Proc Chance (Unbridled Wrath Rank 2)
-	sp = dbcSpell.LookupEntryForced(12999);
-	if(sp != NULL)
-		sp->procChance = 16;
-
-	// Spell 13000 Proc Chance (Unbridled Wrath Rank 3)
-	sp = dbcSpell.LookupEntryForced(13000);
-	if(sp != NULL)
-		sp->procChance = 24;
-
-	// Spell 13001 Proc Chance (Unbridled Wrath Rank 4)
-	sp = dbcSpell.LookupEntryForced(13001);
-	if(sp != NULL)
-		sp->procChance = 32;
-
-	// Spell 13002 Proc Chance (Unbridled Wrath Rank 5)
-	sp = dbcSpell.LookupEntryForced(13002);
-	if(sp != NULL)
-		sp->procChance = 40;
-
-	// Spell 14076 Proc Chance (Dirty Tricks Rank 1)
-	sp = dbcSpell.LookupEntryForced(14076);
-	if(sp != NULL)
-		sp->procChance = 30;
-
-	// Spell 14094 Proc Chance (Dirty Tricks Rank 2)
-	sp = dbcSpell.LookupEntryForced(14094);
-	if(sp != NULL)
-		sp->procChance = 60;
-
-	// Spell 15494 Proc Chance (Fury of Forgewright )
-	sp = dbcSpell.LookupEntryForced(15494);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 15600 Proc Chance (Hand of Justice )
-	sp = dbcSpell.LookupEntryForced(15600);
-	if(sp != NULL)
-		sp->procChance = 2;
-
-	// Spell 15601 Proc Chance (Hand of Justice )
-	sp = dbcSpell.LookupEntryForced(15601);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 15642 Proc Chance (Ironfoe )
-	sp = dbcSpell.LookupEntryForced(15642);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16459 Proc Chance (Sword Specialization )
-	sp = dbcSpell.LookupEntryForced(16459);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16843 Proc Chance (Crimson Fury )
-	sp = dbcSpell.LookupEntryForced(16843);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 16850 Proc Chance (Celestial Focus Rank 1)
-	sp = dbcSpell.LookupEntryForced(16850);
-	if(sp != NULL)
-		sp->procChance = 3;
-
-	// Spell 16923 Proc Chance (Celestial Focus Rank 2)
-	sp = dbcSpell.LookupEntryForced(16923);
-	if(sp != NULL)
-		sp->procChance = 6;
-
-	// Spell 16924 Proc Chance (Celestial Focus Rank 3)
-	sp = dbcSpell.LookupEntryForced(16924);
-	if(sp != NULL)
-		sp->procChance = 9;
-
-	// Spell 18797 Proc Chance (Flurry Axe )
-	sp = dbcSpell.LookupEntryForced(18797);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 18803 Proc Chance (Focus )
-	sp = dbcSpell.LookupEntryForced(18803);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 19105 Proc Chance (MHTest01 Effect )
-	sp = dbcSpell.LookupEntryForced(19105);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 19109 Proc Chance (MHTest02 Effect )
-	sp = dbcSpell.LookupEntryForced(19109);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 19228 Proc Chance (Improved Wing Clip Rank 1)
-	sp = dbcSpell.LookupEntryForced(19228);
-	if(sp != NULL)
-		sp->procChance = 4;
-
-	// Spell 19232 Proc Chance (Improved Wing Clip Rank 2)
-	sp = dbcSpell.LookupEntryForced(19232);
-	if(sp != NULL)
-		sp->procChance = 8;
-
-	// Spell 19233 Proc Chance (Improved Wing Clip Rank 3)
-	sp = dbcSpell.LookupEntryForced(19233);
-	if(sp != NULL)
-		sp->procChance = 12;
-
-	// Spell 20178 Proc Chance (Reckoning )
-	sp = dbcSpell.LookupEntryForced(20178);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 21919 Proc Chance (Thrash )
-	sp = dbcSpell.LookupEntryForced(21919);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 23158 Proc Chance (Concussive Shot Cooldown Reduction )
-	sp = dbcSpell.LookupEntryForced(23158);
-	if(sp != NULL)
-		sp->procChance = 4;
-
-	// Spell 26022 Proc Chance (Pursuit of Justice Rank 1)
-	sp = dbcSpell.LookupEntryForced(26022);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 26023 Proc Chance (Pursuit of Justice Rank 2)
-	sp = dbcSpell.LookupEntryForced(26023);
-	if(sp != NULL)
-		sp->procChance = 100;
-
-	// Spell 27035 Proc Chance (Sword Specialization (OLD) )
-	sp = dbcSpell.LookupEntryForced(27035);
-	if(sp != NULL)
-		sp->procChance = 10;
-
-	// Spell 27521 Proc Chance (Mana Restore )
-	sp = dbcSpell.LookupEntryForced(27521);
-	if(sp != NULL)
-		sp->procChance = 2;
-
-	// Spell 27867 Proc Chance (Freeze )
-	sp = dbcSpell.LookupEntryForced(27867);
-	if(sp != NULL)
-		sp->procChance = 2;
+	{
+		// Spell 1455 Proc Chance (Life Tap Rank 2)
+		if(sp->Id == 1455)
+			sp->procChance = 100;
+	
+		// Spell 1456 Proc Chance (Life Tap Rank 3)
+		if(sp->Id == 1456)
+			sp->procChance = 100;
+	
+		// Spell 3391 Proc Chance (Thrash )
+		if(sp->Id == 3391)
+			sp->procChance = 10;
+	
+		// Spell 8182 Proc Chance (Frost Resistance Rank 1)
+		if(sp->Id == 8182)
+			sp->procChance = 100;
+	
+		// Spell 8185 Proc Chance (Fire Resistance Rank 1)
+		if(sp->Id == 8185)
+			sp->procChance = 100;
+	
+		// Spell 10476 Proc Chance (Frost Resistance Rank 2)
+		if(sp->Id == 10476)
+			sp->procChance = 100;
+	
+		// Spell 10477 Proc Chance (Frost Resistance Rank 3)
+		if(sp->Id == 10477)
+			sp->procChance = 100;
+	
+		// Spell 10534 Proc Chance (Fire Resistance Rank 2)
+		if(sp->Id == 10534)
+			sp->procChance = 100;
+	
+		// Spell 10535 Proc Chance (Fire Resistance Rank 3)
+		if(sp->Id == 10535)
+			sp->procChance = 100;
+	
+		// Spell 11687 Proc Chance (Life Tap Rank 4)
+		if(sp->Id == 11687)
+			sp->procChance = 100;
+	
+		// Spell 11688 Proc Chance (Life Tap Rank 5)
+		if(sp->Id == 11688)
+			sp->procChance = 100;
+	
+		// Spell 11689 Proc Chance (Life Tap Rank 6)
+		if(sp->Id == 11689)
+			sp->procChance = 100;
+	
+		// Spell 12284 Proc Chance (Mace Specialization Rank 1)
+		if(sp->Id == 12284)
+			sp->procChance = 1;
+	
+		// Spell 12292 Proc Chance (Death Wish )
+		if(sp->Id == 12292)
+			sp->procChance = 100;
+	
+		// Spell 12322 Proc Chance (Unbridled Wrath Rank 1)
+		if(sp->Id == 12322)
+			sp->procChance = 8;
+	
+		// Spell 12701 Proc Chance (Mace Specialization Rank 2)
+		if(sp->Id == 12701)
+			sp->procChance = 2;
+	
+		// Spell 12702 Proc Chance (Mace Specialization Rank 3)
+		if(sp->Id == 12702)
+			sp->procChance = 3;
+	
+		// Spell 12703 Proc Chance (Mace Specialization Rank 4)
+		if(sp->Id == 12703)
+			sp->procChance = 4;
+	
+		// Spell 12704 Proc Chance (Mace Specialization Rank 5)
+		if(sp->Id == 12704)
+			sp->procChance = 6;
+	
+		// Spell 12999 Proc Chance (Unbridled Wrath Rank 2)
+		if(sp->Id == 12999)
+			sp->procChance = 16;
+	
+		// Spell 13000 Proc Chance (Unbridled Wrath Rank 3)
+		if(sp->Id == 13000)
+			sp->procChance = 24;
+	
+		// Spell 13001 Proc Chance (Unbridled Wrath Rank 4)
+		if(sp->Id == 13001)
+			sp->procChance = 32;
+	
+		// Spell 13002 Proc Chance (Unbridled Wrath Rank 5)
+		if(sp->Id == 13002)
+			sp->procChance = 40;
+	
+		// Spell 14076 Proc Chance (Dirty Tricks Rank 1)
+		if(sp->Id == 14076)
+			sp->procChance = 30;
+	
+		// Spell 14094 Proc Chance (Dirty Tricks Rank 2)
+		if(sp->Id == 14094)
+			sp->procChance = 60;
+	
+		// Spell 15494 Proc Chance (Fury of Forgewright )
+		if(sp->Id == 15494)
+			sp->procChance = 10;
+	
+		// Spell 15600 Proc Chance (Hand of Justice )
+		if(sp->Id == 15600)
+			sp->procChance = 2;
+	
+		// Spell 15601 Proc Chance (Hand of Justice )
+		if(sp->Id == 15601)
+			sp->procChance = 10;
+	
+		// Spell 15642 Proc Chance (Ironfoe )
+		if(sp->Id == 15642)
+			sp->procChance = 10;
+	
+		// Spell 16459 Proc Chance (Sword Specialization )
+		if(sp->Id == 16459)
+			sp->procChance = 10;
+	
+		// Spell 16843 Proc Chance (Crimson Fury )
+		if(sp->Id == 16843)
+			sp->procChance = 10;
+	
+		// Spell 16850 Proc Chance (Celestial Focus Rank 1)
+		if(sp->Id == 16850)
+			sp->procChance = 3;
+	
+		// Spell 16923 Proc Chance (Celestial Focus Rank 2)
+		if(sp->Id == 16923)
+			sp->procChance = 6;
+	
+		// Spell 16924 Proc Chance (Celestial Focus Rank 3)
+		if(sp->Id == 16924)
+			sp->procChance = 9;
+	
+		// Spell 18797 Proc Chance (Flurry Axe )
+		if(sp->Id == 18797)
+			sp->procChance = 10;
+	
+		// Spell 18803 Proc Chance (Focus )
+		if(sp->Id == 18803)
+			sp->procChance = 100;
+	
+		// Spell 19105 Proc Chance (MHTest01 Effect )
+		if(sp->Id == 19105)
+			sp->procChance = 10;
+	
+		// Spell 19109 Proc Chance (MHTest02 Effect )
+		if(sp->Id == 19109)
+			sp->procChance = 10;
+	
+		// Spell 19228 Proc Chance (Improved Wing Clip Rank 1)
+		if(sp->Id == 19228)
+			sp->procChance = 4;
+	
+		// Spell 19232 Proc Chance (Improved Wing Clip Rank 2)
+		if(sp->Id == 19232)
+			sp->procChance = 8;
+	
+		// Spell 19233 Proc Chance (Improved Wing Clip Rank 3)
+		if(sp->Id == 19233)
+			sp->procChance = 12;
+	
+		// Spell 20178 Proc Chance (Reckoning )
+		if(sp->Id == 20178)
+			sp->procChance = 10;
+	
+		// Spell 21919 Proc Chance (Thrash )
+		if(sp->Id == 21919)
+			sp->procChance = 10;
+	
+		// Spell 23158 Proc Chance (Concussive Shot Cooldown Reduction )
+		if(sp->Id == 23158)
+			sp->procChance = 4;
+	
+		// Spell 26022 Proc Chance (Pursuit of Justice Rank 1)
+		if(sp->Id == 26022)
+			sp->procChance = 100;
+	
+		// Spell 26023 Proc Chance (Pursuit of Justice Rank 2)
+		if(sp->Id == 26023)
+			sp->procChance = 100;
+	
+		// Spell 27035 Proc Chance (Sword Specialization (OLD) )
+		if(sp->Id == 27035)
+			sp->procChance = 10;
+	
+		// Spell 27521 Proc Chance (Mana Restore )
+		if(sp->Id == 27521)
+			sp->procChance = 2;
+	
+		// Spell 27867 Proc Chance (Freeze )
+		if(sp->Id == 27867)
+			sp->procChance = 2;
+	}
 }
 
 void DumpSpellsSQL()
@@ -545,8 +498,6 @@ void ApplyNormalFixes()
 	uint32 ids[100], proc_ids[100], ranks;
 
 	Log.Notice("World", "Processing %u spells...", dbcSpell.GetNumRows());
-	Apply112SpellFixes();
-
 	uint32 cnt = (uint32)dbcSpell.GetNumRows();
 	uint32 effect;
 
@@ -1559,6 +1510,8 @@ void ApplyNormalFixes()
 		{
 			sp->c_is_flags |= SPELL_FLAG_IS_REQUIRECOOLDOWNUPDATE;
 		}
+		//Apply 112 afterwards;as we want to override NormalFixes
+		Apply112SpellFixes(sp);
 	}
 
 
