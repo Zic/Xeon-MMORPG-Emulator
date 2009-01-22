@@ -163,7 +163,7 @@ void AuthSocket::HandleChallenge()
 	// Null-terminate the account string
 	if(m_challenge.I_len >= 0x50) { Disconnect(); return; }
 	m_challenge.I[m_challenge.I_len] = 0;
-	string AccountName = (char*)&m_challenge.I;
+	AccountName = (char*)&m_challenge.I;
 	string::size_type i = AccountName.rfind("#");
 	if( i != string::npos )
 	{
@@ -373,7 +373,8 @@ void AuthSocket::HandleProof()
 	m_authenticated = true;
 
 	// Don't update when IP banned, but update anyway if it's an account ban
-	sLogonSQL->Execute("UPDATE accounts SET lastlogin=NOW(), lastip='%s' WHERE acct=%u;", GetRemoteIP().c_str(), m_account->AccountId);
+	const char* m_sessionkey_hex = m_sessionkey.AsHexStr();
+	sLogonSQL->Execute("UPDATE accounts SET lastlogin=NOW(), SessionKey = '%s', lastip='%s' WHERE acct=%u;", m_sessionkey_hex, GetRemoteIP().c_str(), m_account->AccountId);
 }
 
 void AuthSocket::SendChallengeError(uint8 Error)
@@ -503,7 +504,7 @@ void AuthSocket::HandleReconnectChallenge()
 	// Check the rest of the packet is complete.
 	uint8 * ReceiveBuffer = (uint8*)GetReadBuffer().GetBufferStart();
 	uint16 full_size = *(uint16*)&ReceiveBuffer[2];
-	Log.Debug("AuthChallenge","got header, body is 0x%02X bytes", full_size);
+	Log.Debug("ReconnectChallenge","got header, body is 0x%02X bytes", full_size);
 
 	if(GetReadBuffer().GetSize() < (uint32)full_size+4)
 		return;
@@ -515,7 +516,7 @@ void AuthSocket::HandleReconnectChallenge()
 		return;
 	}
 
-	Log.Debug("AuthChallenge","got full packet.");
+	Log.Debug("ReconnectChallenge","got full packet.");
 
 	memcpy(&m_challenge, ReceiveBuffer, full_size + 4);
 	GetReadBuffer().Read(&m_challenge, full_size + 4);
@@ -555,13 +556,13 @@ void AuthSocket::HandleReconnectChallenge()
 	m_challenge.I[m_challenge.I_len] = 0;
 
 	// Look up the account information
-	string AccountName = (char*)&m_challenge.I;
-	Log.Notice("AuthChallenge","Account Name: \"%s\"", AccountName.c_str());
+	AccountName = (char*)&m_challenge.I;
+	Log.Notice("ReconnectChallenge","Account Name: \"%s\"", AccountName.c_str());
 
 	m_account = AccountMgr::getSingleton().GetAccount(AccountName);
 	if(m_account == 0)
 	{
-		Log.Debug("AuthChallenge","Invalid account.");
+		Log.Debug("ReconnectChallenge","Invalid account.");
 
 		// Non-existant account
 		SendChallengeError(CE_NO_ACCOUNT);
@@ -573,17 +574,17 @@ void AuthSocket::HandleReconnectChallenge()
 	if(m_account->Banned == 1)
 	{
 		SendChallengeError(CE_ACCOUNT_CLOSED);
-		Log.Notice("AuthChallenge","Account banned state = %u", m_account->Banned);
+		Log.Notice("ReconnectChallenge","Account banned state = %u", m_account->Banned);
 		return;
 	}
 	else if(m_account->Banned > 0)
 	{
 		SendChallengeError(CE_ACCOUNT_FREEZED);
-		Log.Notice("AuthChallenge","Account banned state = %u", m_account->Banned);
+		Log.Notice("ReconnectChallenge","Account banned state = %u", m_account->Banned);
 		return;
 	}
 	else
-		Log.Debug("AuthChallenge","Account banned state = %u", m_account->Banned);
+		Log.Debug("ReconnectChallenge","Account banned state = %u", m_account->Banned);
 
 	if(!m_account->SessionKey)
 	{
@@ -591,21 +592,17 @@ void AuthSocket::HandleReconnectChallenge()
 		return;
 	}
 
-	/** burlex: this is pure speculation, I really have no idea what this does :p
-	 * just guessed the md5 because it was 16 byte blocks.
+	/** Mangos figured this out, thanks for the structure.
 	 */
 
-	MD5_CTX ctx;
-	MD5_Init(&ctx);
-	MD5_Update(&ctx, m_account->SessionKey, 40);
-	uint8 buffer[20];
-	MD5_Final(buffer, &ctx);
-	ByteBuffer buf;
-	buf << uint16(2);
-	buf.append(buffer, 20);
-	buf << uint64(0);
-	buf << uint64(0);
-	Send(buf.contents(), 34);
+    ///- Sending response
+    ByteBuffer pkt;
+    pkt << (uint8)  0x02;	//ReconnectChallenge
+    pkt << (uint8)  0x00;
+    rs.SetRand(16*8);
+    pkt.append(rs.AsByteBuffer());	// 16 bytes random
+    pkt << (uint64) 0x00 << (uint64) 0x00;	// 16 bytes zeros
+    Send(pkt.contents(), pkt.size());
 }
 
 void AuthSocket::HandleReconnectProof()
@@ -613,31 +610,54 @@ void AuthSocket::HandleReconnectProof()
 	if( m_account == NULL )
 		return;
 
-	/*
-	printf("Len: %u\n", this->GetReadBufferSize());
-	ByteBuffer buf(58);
-	buf.resize(58);
-	Read(58, const_cast<uint8*>(buf.contents()));
-	buf.hexlike();*/
-
-	// Don't update when IP banned, but update anyway if it's an account ban
-	//sLogonSQL->Execute("UPDATE accounts SET lastlogin=NOW(), lastip='%s' WHERE acct=%u;", GetRemoteIP().c_str(), m_account->AccountId);
-	GetReadBuffer().Remove(GetWriteBuffer().GetSize());
-
-	if(!m_account->SessionKey)
+	// Load sessionkey from account database.
+	QueryResult * result = sLogonSQL->Query ("SELECT SessionKey FROM accounts WHERE login = '%s'", AccountName.c_str());
+	if(result)
 	{
-		uint8 buffer[4];
-		buffer[0] = 3;
-		buffer[1] = 0;
-		buffer[2] = 1;
-		buffer[3] = 0;
-		Send(buffer, 4);
+		Field * field = result->Fetch();
+		K.SetHexStr(field[0].GetString ());
+	    delete result;
 	}
 	else
 	{
-		uint32 x = 3;
-		Send((const uint8*)&x, 4);
+	    // Disconnect if the sessionkey invalid or not found
+		Log.Debug("AuthReConnectProof","No matching SessionKey found while user %s tried to login.", AccountName.c_str());
+		Disconnect();
+		return;
 	}
+
+	if(GetReadBuffer().GetSize() < sizeof(sAuthLogonProofKey_C))
+		return;
+
+	sAuthLogonProofKey_C lp;
+	GetReadBuffer().Read(&lp, sizeof(sAuthLogonProofKey_C));
+
+	BigNumber A;
+	A.SetBinary(lp.R1, 16);
+
+	Sha1Hash sha;
+	sha.Initialize();
+	sha.UpdateData(AccountName);
+	sha.UpdateBigNumbers(&A, &rs, &K, 0);
+	sha.Finalize();
+
+	if (!memcmp(sha.GetDigest(), lp.R2, SHA_DIGEST_LENGTH))
+	{
+		///- Sending response
+		ByteBuffer pkt;
+		pkt << (uint8)  0x03;	//ReconnectProof
+		pkt << (uint8)  0x00;
+		pkt << (uint16) 0x00;	// 2 bytes zeros
+		Send(pkt.contents(), pkt.size());
+
+		// we're authenticated now :)
+		m_authenticated = true;
+
+		Log.Debug("AuthReConnectProof","Authentication Success.");
+	}
+	else
+		Log.Debug("AuthReConnectProof","Authentication Failed.");
+
 }
 
 void AuthSocket::HandleTransferAccept()

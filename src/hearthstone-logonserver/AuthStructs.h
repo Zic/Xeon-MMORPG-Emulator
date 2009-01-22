@@ -69,10 +69,11 @@ typedef struct {
 } sAuthLogonProof_C;
 
 typedef struct {
-	uint16  unk1;
-	uint32  unk2;
-	uint8   unk3[4];
-	uint16  unk4[20];	   // sha1(A,g,?)
+    uint8   cmd;
+    uint8   R1[16];
+    uint8   R2[20];
+    uint8   R3[20];
+    uint8   number_of_keys;
 }  sAuthLogonProofKey_C;
 
 typedef struct {

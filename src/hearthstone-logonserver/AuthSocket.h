@@ -71,12 +71,14 @@ protected:
 	sAuthLogonChallenge_C m_challenge;
 	Account * m_account;
 	bool m_authenticated;
+	std::string AccountName;
 
 	//////////////////////////////////////////////////
 	// Authentication BigNumbers
 	/////////////////////////
 	BigNumber N, s, g, v;
 	BigNumber b, B;
+	BigNumber K;
 	BigNumber rs;
 
 	//////////////////////////////////////////////////
