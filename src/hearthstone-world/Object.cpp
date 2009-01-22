@@ -61,6 +61,7 @@ Object::Object() : m_position(0,0,0,0), m_spawnLocation(0,0,0,0)
 
 	mSemaphoreTeleport = false;
 
+	dynObj = NULLDYN;
 
 	m_faction = NULL;
 	m_factionDBC = NULL;
@@ -975,6 +976,8 @@ void Object::RemoveFromWorld(bool free_guid)
 {
 	// clear loot
 	ClearLoot();
+	if(dynObj != 0)
+		dynObj->Remove();
 
 	ASSERT(m_mapMgr);
 	shared_ptr<MapMgr> m = m_mapMgr;

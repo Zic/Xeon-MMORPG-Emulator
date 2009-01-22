@@ -21,7 +21,6 @@
 #define __UNIT_H
 
 class AIInterface;
-class DynamicObject;
 
 #define MAX_AURAS 56 // 40 buff slots, 16 debuff slots.
 #define MAX_POSITIVE_AURAS 40 // ?
@@ -1130,8 +1129,6 @@ public:
 	bool   m_diminishActive;
 
 	void SetDiminishTimer(uint32 index);
-
-	shared_ptr<DynamicObject> dynObj;
 
 	uint32 AddAuraVisual(uint32 spellid, uint32 count, bool positive);
 	void SetAuraSlotLevel(uint32 slot, bool positive);

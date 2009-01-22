@@ -183,7 +183,6 @@ Unit::Unit()
 	memset(m_diminishTimer, 0, DIMINISH_GROUPS*sizeof(uint16));
 	memset(m_auraStackCount, 0, MAX_AURAS);
 	m_diminishActive = false;
-	dynObj = NULLDYN;
 	pLastSpell = 0;
 	m_flyspeedModifier = 0;
 	bInvincible = false;
@@ -4911,9 +4910,6 @@ void Unit::RemoveFromWorld(bool free_guid)
 		m_CurrentVehicle->RemovePassenger( unit_shared_from_this() );
 
 	CombatStatus.OnRemoveFromWorld();
-
-	if(dynObj)
-		dynObj->Remove();
 
 	for(uint32 x=0;x<7;++x)
 	{

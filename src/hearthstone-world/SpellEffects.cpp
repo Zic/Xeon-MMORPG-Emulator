@@ -2265,26 +2265,23 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	//it can'be on unit or self or item or object
 	//uncomment it if i'm wrong
 	//We are thinking in general so it might be useful later DK
-	
-	// grep: this is a hack!
-	// our shitty dynobj system doesnt support GO casters, so we gotta
-	// kinda have 2 summoners for traps that apply AA.
 	shared_ptr<DynamicObject> dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
 	 
-	if(g_caster && g_caster->m_summoner)
+	if(g_caster && g_caster->IsInWorld() && g_caster->m_summoner)
 	{
-		UnitPointer caster = g_caster->m_summoner;
-		if( unitTarget == NULL )
+		if (g_caster->GetByte(GAMEOBJECT_BYTES_1, 1) == GAMEOBJECT_TYPE_TRAP && g_caster->m_summoner->dynObj != NULL)
+			g_caster->m_summoner->dynObj->SetAliveDuration(1);
+		
+		if(!unitTarget)
 		{
-			dynObj->Create(caster, spell_shared_from_this(), g_caster->GetPositionX(), g_caster->GetPositionY(), 
+			dynObj->Create(g_caster, shared_from_this(), g_caster->GetPositionX(), g_caster->GetPositionY(), 
 				g_caster->GetPositionZ(), dur, r);
 		}
 		else
 		{
-			dynObj->Create(caster, spell_shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(),
+			dynObj->Create(g_caster, shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(),
 				unitTarget->GetPositionZ(), dur, r);
 		}
-
 		m_AreaAura = true;
 		return;
 	}

@@ -25,6 +25,7 @@
 class Unit;
 class Spell;
 class Aura;
+class DynamicObject;
 
 enum HIGHGUID_TYPE
 {
@@ -454,6 +455,9 @@ public:
 	void SendSpellLog(ObjectPointer Caster, ObjectPointer Target,uint32 Ability, uint8 SpellLogType);
 	void SendSpellNonMeleeDamageLog( ObjectPointer Caster, UnitPointer Target, uint32 SpellID, uint32 Damage, uint8 School, uint32 AbsorbedDamage, uint32 ResistedDamage, bool PhysicalDamage, uint32 BlockedDamage, bool CriticalHit, bool bToSet );
 	void SendAttackerStateUpdate( UnitPointer Target, dealdamage *dmg, uint32 realdamage, uint32 abs, uint32 blocked_damage, uint32 hit_status, uint32 vstate );
+
+	//Dynamic objects
+	DynamicObjectPointer dynObj;
 
 	//object faction
 	void _setFaction();

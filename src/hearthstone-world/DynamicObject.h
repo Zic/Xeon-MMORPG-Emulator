@@ -22,8 +22,8 @@
 
 struct SpellEntry;
 
-typedef set<shared_ptr<Unit> >  DynamicObjectList;
-typedef set<shared_ptr<Unit> >  FactionRangeList;
+typedef unordered_set<UnitPointer >  DynamicObjectList;
+typedef unordered_set<UnitPointer >  FactionRangeList;
 
 class SERVER_DECL DynamicObject : public Object
 {
@@ -33,23 +33,29 @@ public:
 	virtual void Destructor();
 	virtual void Init();
 
-	void Create(UnitPointer caster, shared_ptr<Spell>pSpell, float x, float y, float z, uint32 duration, float radius);
+	void Create(ObjectPointer caster, SpellPointer pSpell, float x, float y, float z, uint32 duration, float radius);
 	void UpdateTargets();
 
 	void AddInRangeObject(ObjectPointer pObj);
 	void OnRemoveInRangeObject(ObjectPointer pObj);
 	void Remove();
 
+	//Accessors
+	void SetAliveDuration(uint32 dur){m_aliveDuration = dur;};
+
 protected:
 	
 	SpellEntry * m_spellProto;
 	UnitPointer u_caster;
 	PlayerPointer p_caster;
+	ObjectPointer m_caster;
+	GameObjectPointer g_caster;
 	SpellPointer m_parentSpell;
 	DynamicObjectList targets;
 	
 	uint32 m_aliveDuration;
 	uint32 _fields[DYNAMICOBJECT_END];
+	FactionRangeList  m_inRangeOppFactions;
 };
 
 #endif

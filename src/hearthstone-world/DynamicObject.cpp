@@ -38,6 +38,8 @@ DynamicObject::DynamicObject(uint32 high, uint32 low)
 	u_caster = NULLUNIT;
 	m_spellProto = 0;
 	p_caster = NULLPLR;
+	m_caster = NULLOBJ;
+	g_caster = NULLGOB;
 }
 
 DynamicObject::~DynamicObject()
@@ -63,20 +65,40 @@ void DynamicObject::Destructor()
 		target->RemoveAura(m_spellProto->Id);
 	}
 
-	if(u_caster->dynObj == shared_from_this() )
-		u_caster->dynObj = NULLDYN;
+	if(m_caster && m_caster->dynObj == dyn_shared_from_this() )
+		m_caster->dynObj = NULLDYN;
 
 	Object::Destructor();
 }
 
-void DynamicObject::Create(UnitPointer caster, shared_ptr<Spell>pSpell, float x, float y, float z, uint32 duration, float radius)
+void DynamicObject::Create(ObjectPointer caster, SpellPointer pSpell, float x, float y, float z, uint32 duration, float radius)
 {
 	Object::_Create(caster->GetMapId(),x, y, z, 0);
 	if(pSpell->g_caster)
 	{
 		m_parentSpell = pSpell;
 	}
-	p_caster = pSpell->p_caster;
+	m_caster = caster;
+	switch(caster->GetTypeId())
+	{
+	case TYPEID_GAMEOBJECT:
+		{
+			p_caster = pSpell->p_caster;
+			u_caster = pSpell->u_caster;
+			if(!u_caster && p_caster)
+				u_caster = TO_UNIT(p_caster);
+			g_caster = TO_GAMEOBJECT(caster);
+		}break;
+	case TYPEID_UNIT:
+		{
+			u_caster = TO_UNIT(caster);
+		}break;
+	case TYPEID_PLAYER:
+		{
+			p_caster = TO_PLAYER(caster);
+			u_caster = TO_UNIT(caster);
+		}break;
+	}
 
 	m_spellProto = pSpell->m_spellInfo;
 	SetUInt64Value(DYNAMICOBJECT_CASTER, caster->GetGUID());
@@ -89,9 +111,9 @@ void DynamicObject::Create(UnitPointer caster, shared_ptr<Spell>pSpell, float x,
 	m_floatValues[DYNAMICOBJECT_POS_X]  = x;
 	m_floatValues[DYNAMICOBJECT_POS_Y]  = y;
 	m_floatValues[DYNAMICOBJECT_POS_Z]  = z;
+	m_uint32Values[DYNAMICOBJECT_CASTTIME] = (uint32)UNIXTIME;
 
 	m_aliveDuration = duration;
-	u_caster = caster;
 	m_faction = caster->m_faction;
 	m_factionDBC = caster->m_factionDBC;
 	if(caster->dynObj != 0)
@@ -113,13 +135,27 @@ void DynamicObject::Create(UnitPointer caster, shared_ptr<Spell>pSpell, float x,
 
 void DynamicObject::AddInRangeObject( ObjectPointer pObj )
 {
+	if( pObj->IsUnit() )
+	{
+		bool attackable;
+		if( p_caster != NULL)
+			attackable = isAttackable( m_caster, pObj );
+		else
+			attackable = isAttackable( dyn_shared_from_this(), pObj );
+		
+		if( attackable )
+			m_inRangeOppFactions.insert( TO_UNIT( pObj ) );
+	}
 	Object::AddInRangeObject( pObj );
 }
 
 void DynamicObject::OnRemoveInRangeObject( ObjectPointer pObj )
 {
 	if( pObj->IsUnit() )
+	{
+		m_inRangeOppFactions.erase( TO_UNIT( pObj ) );
 		targets.erase( TO_UNIT(pObj) );
+	}
 
 	Object::OnRemoveInRangeObject( pObj );
 }
