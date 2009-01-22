@@ -24,7 +24,11 @@ extern "C" SCRIPT_DECL void _exp_script_register(ScriptMgr* mgr)
 }
 
 template<typename T> const char * GetTClassName() { return "UNKNOWN"; }
-
+template<>
+const char * GetTClassName<Item>()
+{
+	return "Item";
+}
 template<>
 const char * GetTClassName<Unit>()
 {
@@ -48,6 +52,16 @@ struct RegType
 /************************************************************************/
 /* SCRIPT FUNCTION TABLES                                               */
 /************************************************************************/
+RegType<Item> ItemMethods[] = {
+    // Item Gossip functions
+    { "GossipCreateMenu", &luaItem_GossipCreateMenu },
+	{ "GossipMenuAddItem", &luaItem_GossipMenuAddItem },
+	{ "GossipSendMenu", &luaItem_GossipSendMenu },
+	{ "GossipComplete", &luaItem_GossipComplete },
+	{ "GossipSendPOI", &luaItem_GossipSendPOI },
+	{ NULL, NULL },
+};
+
 RegType<Unit> UnitMethods[] = {
 	{ "GossipCreateMenu", &luaUnit_GossipCreateMenu },
 	{ "GossipMenuAddItem", &luaUnit_GossipMenuAddItem },
@@ -264,12 +278,27 @@ RegType<Unit> UnitMethods[] = {
 
 
 RegType<GameObject> GOMethods[] = {
+	{ "GetX", &luaGameObject_GetX },
+	{ "GetY", &luaGameObject_GetY },
+	{ "GetZ", &luaGameObject_GetZ },
+	{ "GetO", &luaGameObject_GetO },
+	{ "PlaySoundToSet", &luaGameObject_PlaySoundToSet },
+ 	{ "GetName", &luaGameObject_GetName },
+    // GameObject gossip functions
+    { "GossipCreateMenu", &luaGameObject_GossipCreateMenu },
+	{ "GossipMenuAddItem", &luaGameObject_GossipMenuAddItem }, 
+	{ "GossipSendMenu", &luaGameObject_GossipSendMenu },
+	{ "GossipComplete", &luaGameObject_GossipComplete },
+	{ "GossipSendPOI", &luaGameObject_GossipSendPOI },
 	{ "GetName", &luaGameObject_GetName },
 	{ "Teleport" , &luaGameObject_Teleport },
 	{ NULL, NULL },
 };
 
 template<typename T> RegType<T>* GetMethodTable() { return NULL; }
+template<>
+RegType<Item>* GetMethodTable<Item>() { return ItemMethods; }
+
 template<>
 RegType<Unit>* GetMethodTable<Unit>() { return UnitMethods; }
 
@@ -553,6 +582,8 @@ void LuaEngine::LoadScripts()
 
 	do 
 	{
+		if(fd.dwFileAttributes  & FILE_ATTRIBUTE_DIRECTORY)
+			continue;
 		char * fn = strrchr(fd.cFileName, '\\');
 		if(!fn)
 			fn=fd.cFileName;
@@ -632,6 +663,45 @@ void LuaEngine::LoadScripts()
 			}
 		}
 	}
+}
+
+void LuaEngine::OnGossipEvent(ObjectPointer pObject, const char * FunctionName, uint32 EventType, PlayerPointer mPlayer, uint32 Id, uint32 IntId, const char * Code)
+{
+    if(FunctionName==NULL)
+		return;
+
+	m_Lock.Acquire();
+	lua_pushstring(L, FunctionName);
+	lua_gettable(L, LUA_GLOBALSINDEX);
+	if(lua_isnil(L, -1))
+	{
+		printf("Tried to call invalid LUA function '%s' from AspireCore (Gossip)!\n", FunctionName);
+		m_Lock.Release();
+	return;
+	}
+
+    if(pObject->GetTypeId() == TYPEID_UNIT)
+        Lunar<Unit>::push(L, TO_UNIT(pObject));
+
+    else if(pObject->GetTypeId() == TYPEID_ITEM)
+        Lunar<Item>::push(L, TO_ITEM(pObject));
+
+    else if(pObject->GetTypeId() == TYPEID_GAMEOBJECT)
+        Lunar<GameObject>::push(L, TO_GAMEOBJECT(pObject));
+
+    lua_pushinteger(L, EventType);
+	Lunar<Unit>::push(L, mPlayer);
+
+    lua_pushinteger(L, Id);
+    lua_pushinteger(L, IntId);
+
+    lua_pushstring(L, Code);
+
+	int r = lua_pcall(L, 6, LUA_MULTRET, 0);
+	if(r)
+		report(L);
+
+	m_Lock.Release();
 }
 
 void LuaEngine::OnUnitEvent(UnitPointer  pUnit, const char * FunctionName, uint32 EventType, UnitPointer  pMiscUnit, uint32 Misc)
@@ -750,6 +820,9 @@ void LuaEngine::OnGameObjectEvent(GameObjectPointer  pGameObject, const char * F
 static int RegisterUnitEvent(lua_State * L);
 static int RegisterQuestEvent(lua_State * L);
 static int RegisterGameObjectEvent(lua_State * L);
+static int RegisterUnitGossipEvent(lua_State * L);
+static int RegisterItemGossipEvent(lua_State * L);
+static int RegisterGOGossipEvent(lua_State * L);
 
 void LuaEngine::RegisterCoreFunctions()
 {
@@ -762,6 +835,17 @@ void LuaEngine::RegisterCoreFunctions()
 	lua_pushcfunction(L, &RegisterQuestEvent);
 	lua_setglobal(L, "RegisterQuestEvent");
 
+	// Unit, Item, GO gossip stuff
+	lua_pushcfunction(L, &RegisterUnitGossipEvent);
+	lua_setglobal(L, "RegisterUnitGossipEvent"); 
+	
+	lua_pushcfunction(L, &RegisterItemGossipEvent);
+	lua_setglobal(L, "RegisterItemGossipEvent"); 
+ 
+	lua_pushcfunction(L, &RegisterGOGossipEvent);
+	lua_setglobal(L, "RegisterGOGossipEvent");
+
+	Lunar<Item>::Register(L);
 	Lunar<Unit>::Register(L);
 	Lunar<GameObject>::Register(L);
 	//Lunar<Quest>::Register(L); quest isn't a class
@@ -806,9 +890,112 @@ static int RegisterGameObjectEvent(lua_State * L)
 	return 0;
 }
 
+// Gossip stuff
+static int RegisterUnitGossipEvent(lua_State * L)
+{
+	int entry = luaL_checkint(L, 1);
+	int ev = luaL_checkint(L, 2);
+	const char * str = luaL_checkstring(L, 3);
+ 
+	if(!entry || !ev || !str || !lua_is_starting_up)
+		return 0;
+
+    g_luaMgr.RegisterUnitGossipEvent(entry, ev, str);
+	return 0;
+}
+
+static int RegisterItemGossipEvent(lua_State * L)
+{
+	int entry = luaL_checkint(L, 1);
+	int ev = luaL_checkint(L, 2);
+	const char * str = luaL_checkstring(L, 3);
+	if(!entry || !ev || !str || !lua_is_starting_up)
+		return 0;
+
+    g_luaMgr.RegisterItemGossipEvent(entry, ev, str);
+	return 0;
+}
+
+static int RegisterGOGossipEvent(lua_State * L)
+{
+	int entry = luaL_checkint(L, 1);
+	int ev = luaL_checkint(L, 2);
+	const char * str = luaL_checkstring(L, 3);
+
+	if(!entry || !ev || !str || !lua_is_starting_up)
+		return 0;
+
+    g_luaMgr.RegisterGOGossipEvent(entry, ev, str);
+	return 0;
+}
+
+
 /************************************************************************/
 /* Manager Stuff                                                        */
 /************************************************************************/
+
+class LuaGossip : public GossipScript
+{
+public:
+	LuaGossip() : GossipScript() {}
+	~LuaGossip() {}
+
+	void GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool AutoSend) // Dont need GossipHello for GO's
+	{
+        if(pObject->GetTypeId() == TYPEID_UNIT)
+        {
+            if( m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_TALK] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_TALK], GOSSIP_EVENT_ON_TALK, Plr, NULL, NULL, NULL );
+        }
+        else if(pObject->GetTypeId() == TYPEID_ITEM)
+        {
+            if( m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_TALK] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_TALK], GOSSIP_EVENT_ON_TALK, Plr, NULL, NULL, NULL );
+        }
+	}
+
+	void GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * EnteredCode)
+	{
+        if(pObject->GetTypeId() == TYPEID_UNIT)
+        {
+            if( m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION], GOSSIP_EVENT_ON_SELECT_OPTION, Plr, Id, IntId, EnteredCode);
+        }
+        else if(pObject->GetTypeId() == TYPEID_ITEM)
+        {
+            if( m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION] != NULL )
+                g_engine->OnGossipEvent( pObject, m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION], GOSSIP_EVENT_ON_SELECT_OPTION, Plr, Id, IntId, EnteredCode);
+        }
+        else if(pObject->GetTypeId() == TYPEID_GAMEOBJECT)
+       {
+            if( m_go_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION] != NULL )
+                g_engine->OnGossipEvent( pObject, m_go_gossip_binding->Functions[GOSSIP_EVENT_ON_SELECT_OPTION], GOSSIP_EVENT_ON_SELECT_OPTION, Plr, Id, IntId, EnteredCode);
+        }
+	}
+
+void GossipEnd(ObjectPointer pObject, PlayerPointer Plr)
+	{
+        if(pObject->GetTypeId() == TYPEID_UNIT)
+        {
+		    if( m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_END] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_unit_gossip_binding->Functions[GOSSIP_EVENT_ON_END], GOSSIP_EVENT_ON_END, Plr, NULL, NULL, NULL );
+       }
+        else if(pObject->GetTypeId() == TYPEID_ITEM)
+        {
+            if( m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_END] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_item_gossip_binding->Functions[GOSSIP_EVENT_ON_END], GOSSIP_EVENT_ON_END, Plr, NULL, NULL, NULL );
+        }
+       else if(pObject->GetTypeId() == TYPEID_GAMEOBJECT)
+        {
+            if( m_go_gossip_binding->Functions[GOSSIP_EVENT_ON_END] != NULL )
+			    g_engine->OnGossipEvent( pObject, m_go_gossip_binding->Functions[GOSSIP_EVENT_ON_END], GOSSIP_EVENT_ON_END, Plr, NULL, NULL, NULL );
+       }
+	}
+
+	LuaUnitGossipBinding * m_unit_gossip_binding;
+	LuaItemGossipBinding * m_item_gossip_binding;
+    LuaGOGossipBinding * m_go_gossip_binding;
+};
 
 class LuaCreature : public CreatureAIScript
 {
@@ -945,6 +1132,39 @@ QuestScript * CreateLuaQuestScript(uint32 id)
 	pLua->m_binding = pBinding;
 	return pLua;
 }
+// Gossip stuff
+GossipScript * CreateLuaUnitGossipScript(uint32 id)
+{
+    LuaUnitGossipBinding * pBinding = g_luaMgr.GetLuaUnitGossipBinding( id );
+	if( pBinding == NULL )
+		return NULL;
+ 
+	LuaGossip * pLua = new LuaGossip();
+	pLua->m_unit_gossip_binding = pBinding;
+	return pLua;
+}
+
+GossipScript * CreateLuaItemGossipScript(uint32 id)
+{
+    LuaItemGossipBinding * pBinding = g_luaMgr.GetLuaItemGossipBinding( id );
+	if( pBinding == NULL )
+		return NULL;
+
+	LuaGossip * pLua = new LuaGossip();
+	pLua->m_item_gossip_binding = pBinding;
+	return pLua;
+}
+
+GossipScript * CreateLuaGOGossipScript(uint32 id)
+{
+    LuaGOGossipBinding * pBinding = g_luaMgr.GetLuaGOGossipBinding( id );
+	if( pBinding == NULL )
+		return NULL;
+
+	LuaGossip * pLua = new LuaGossip();
+    pLua->m_go_gossip_binding = pBinding;
+	return pLua;
+}
 
 void LuaEngineMgr::Startup()
 {
@@ -972,6 +1192,27 @@ void LuaEngineMgr::Startup()
 		if( qs != NULL )
 			m_scriptMgr->register_quest_script( itr->first, qs );
 	}
+    // Register Gossip Stuff
+    for(GossipUnitScriptsBindingMap::iterator itr = m_unit_gossipBinding.begin(); itr != m_unit_gossipBinding.end(); ++itr)
+	{
+		GossipScript * gs = CreateLuaUnitGossipScript( itr->first );
+	if( gs != NULL )
+			m_scriptMgr->register_gossip_script( itr->first, gs );
+    }
+
+    for(GossipItemScriptsBindingMap::iterator itr = m_item_gossipBinding.begin(); itr != m_item_gossipBinding.end(); ++itr)
+	{
+		GossipScript * gs = CreateLuaItemGossipScript( itr->first );
+		if( gs != NULL )
+			m_scriptMgr->register_item_gossip_script( itr->first, gs );
+    }
+
+    for(GossipGOScriptsBindingMap::iterator itr = m_go_gossipBinding.begin(); itr != m_go_gossipBinding.end(); ++itr)
+	{
+		GossipScript * gs = CreateLuaGOGossipScript( itr->first );
+		if( gs != NULL )
+			m_scriptMgr->register_go_gossip_script( itr->first, gs );
+    }
 }
 
 void LuaEngineMgr::RegisterUnitEvent(uint32 Id, uint32 Event, const char * FunctionName)
@@ -1020,6 +1261,66 @@ void LuaEngineMgr::RegisterGameObjectEvent(uint32 Id, uint32 Event, const char *
 		memset(&ub,0,sizeof(LuaGameObjectBinding));
 		ub.Functions[Event] = strdup(FunctionName);
 		m_gameobjectBinding.insert(make_pair(Id,ub));
+	}
+	else
+	{
+		if(itr->second.Functions[Event]!=NULL)
+			free((void*)itr->second.Functions[Event]);
+
+		itr->second.Functions[Event]=strdup(FunctionName);
+	}
+}
+// Gossip Events
+void LuaEngineMgr::RegisterUnitGossipEvent(uint32 Id, uint32 Event, const char * FunctionName)
+{
+    GossipUnitScriptsBindingMap::iterator itr = m_unit_gossipBinding.find(Id);
+ 
+    if(itr == m_unit_gossipBinding.end())
+	{
+		LuaUnitGossipBinding gb;
+		memset(&gb, 0, sizeof(LuaUnitGossipBinding));
+		gb.Functions[Event] = strdup(FunctionName);
+		m_unit_gossipBinding.insert(make_pair(Id, gb));
+	}
+	else
+	{
+		if(itr->second.Functions[Event]!=NULL)
+			free((void*)itr->second.Functions[Event]);
+
+		itr->second.Functions[Event]=strdup(FunctionName);
+	}
+}
+
+void LuaEngineMgr::RegisterItemGossipEvent(uint32 Id, uint32 Event, const char * FunctionName)
+{
+    GossipItemScriptsBindingMap::iterator itr = m_item_gossipBinding.find(Id);
+
+    if(itr == m_item_gossipBinding.end())
+	{
+		LuaItemGossipBinding gb;
+		memset(&gb, 0, sizeof(LuaItemGossipBinding));
+		gb.Functions[Event] = strdup(FunctionName);
+		m_item_gossipBinding.insert(make_pair(Id, gb));
+	}
+	else
+	{
+		if(itr->second.Functions[Event]!=NULL)
+			free((void*)itr->second.Functions[Event]);
+
+		itr->second.Functions[Event]=strdup(FunctionName);
+	}
+}
+
+void LuaEngineMgr::RegisterGOGossipEvent(uint32 Id, uint32 Event, const char * FunctionName)
+{
+    GossipGOScriptsBindingMap::iterator itr = m_go_gossipBinding.find(Id);
+
+    if(itr == m_go_gossipBinding.end())
+	{
+		LuaGOGossipBinding gb;
+		memset(&gb, 0, sizeof(LuaGOGossipBinding));
+		gb.Functions[Event] = strdup(FunctionName);
+		m_go_gossipBinding.insert(make_pair(Id, gb));
 	}
 	else
 	{
@@ -2001,7 +2302,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		{
 			uint32 count = 0;
 			UnitPointer mt = ptr->GetAIInterface()->GetMostHated();
-			if (!mt->IsPlayer())
+			if (!mt || !mt->IsPlayer())
 				return 0;
 
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
@@ -4239,4 +4540,69 @@ int luaGameObject_GetGUID(lua_State * L, GameObjectPointer ptr)
 	lua_pushinteger(L,(lua_Integer)ptr->GetGUID());
 	return 1;
 }
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////ITEM COMMANDS///////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+///////////////////////////////////////////////
+int luaItem_GossipCreateMenu(lua_State * L, ItemPointer ptr)
+{
+    int text_id = luaL_checkint(L, 1);
+	UnitPointer target = Lunar<Unit>::check(L, 2);
+ 	int autosend = luaL_checkint(L, 3);
 
+	PlayerPointer plr = TO_PLAYER(target);
+    
+    objmgr.CreateGossipMenuForPlayer(&Menu, ptr->GetGUID(), text_id, plr);
+	if(autosend)
+        Menu->SendTo(plr);
+	return 1;
+}
+
+int luaItem_GossipMenuAddItem(lua_State * L, ItemPointer ptr)
+{
+	int icon = luaL_checkint(L, 1);
+	const char * menu_text = luaL_checkstring(L, 2);
+    int IntId = luaL_checkint(L, 3);
+    int extra = luaL_checkint(L, 4);
+
+	Menu->AddItem(icon, menu_text, IntId, extra);
+	return 1;
+}
+
+int luaItem_GossipSendMenu(lua_State * L, ItemPointer ptr)
+{
+	UnitPointer target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(target);
+	Menu->SendTo(plr);
+	return 1;
+}
+
+int luaItem_GossipComplete(lua_State * L, ItemPointer ptr)
+{
+	UnitPointer target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(target);
+	plr->Gossip_Complete();
+	return 1;
+}
+
+int luaItem_GossipSendPOI(lua_State * L, ItemPointer ptr)
+{
+	UnitPointer target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(target);
+	float x = (float)luaL_checknumber(L, 2);
+	float y = (float)luaL_checknumber(L, 3);
+	int icon = luaL_checkint(L, 4);
+	int flags = luaL_checkint(L, 5);
+	int data = luaL_checkint(L, 6);
+	const char * name = luaL_checkstring(L, 7);
+
+	plr->Gossip_SendPOI(x, y, icon, flags, data, name);
+	return 1;
+}

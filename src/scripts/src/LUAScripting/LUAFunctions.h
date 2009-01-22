@@ -11,16 +11,19 @@
 ///////////////////
 ///Gossip Stuff////
 ///////////////////
-int luaItem_GossipCreateMenu(lua_State * L, Item * ptr);
-int luaItem_GossipMenuAddItem(lua_State * L, Item * ptr);
-int luaItem_GossipSendMenu(lua_State * L, Item * ptr);
-int luaItem_GossipComplete(lua_State * L, Item * ptr);
-int luaItem_GossipSendPOI(lua_State * L, Item * ptr);
+//Item Gossip
+int luaItem_GossipCreateMenu(lua_State * L, ItemPointer ptr);
+int luaItem_GossipMenuAddItem(lua_State * L, ItemPointer ptr);
+int luaItem_GossipSendMenu(lua_State * L, ItemPointer ptr);
+int luaItem_GossipComplete(lua_State * L, ItemPointer ptr);
+int luaItem_GossipSendPOI(lua_State * L, ItemPointer ptr);
+//Unit Gossip
 int luaUnit_GossipCreateMenu(lua_State * L, UnitPointer  ptr);
 int luaUnit_GossipMenuAddItem(lua_State * L, UnitPointer  ptr);
 int luaUnit_GossipSendMenu(lua_State * L, UnitPointer  ptr);
 int luaUnit_GossipComplete(lua_State * L, UnitPointer  ptr);
 int luaUnit_GossipSendPOI(lua_State * L, UnitPointer  ptr);
+//GameObject Gossip
 int luaGameObject_GossipCreateMenu(lua_State * L, GameObjectPointer  ptr);
 int luaGameObject_GossipMenuAddItem(lua_State * L, GameObjectPointer  ptr);
 int luaGameObject_GossipSendMenu(lua_State * L, GameObjectPointer  ptr);
@@ -30,7 +33,7 @@ int luaGameObject_GossipSendPOI(lua_State * L, GameObjectPointer  ptr);
 //GetStuff//
 ////////////
 
-;int luaUnit_GetPlayerRace(lua_State * L, UnitPointer  ptr);
+int luaUnit_GetPlayerRace(lua_State * L, UnitPointer  ptr);
 int luaUnit_GetCurrentSpellId(lua_State * L, UnitPointer  ptr);
 int luaUnit_GetStanding(lua_State * L, UnitPointer  ptr);
 int luaUnit_GetMainTank(lua_State * L, UnitPointer  ptr);

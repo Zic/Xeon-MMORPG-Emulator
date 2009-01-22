@@ -525,6 +525,15 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 		qst_giver=pitem;
 		Script=pitem->GetProto()->gossip_script;
 	}
+	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
+	{
+        GameObjectPointer gobj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		if(!gobj)
+			return;
+        
+		qst_giver=gobj;
+        Script=gobj->GetInfo()->gossip_script;
+    }
 
 	if(!Script||!qst_giver)
 		return;
