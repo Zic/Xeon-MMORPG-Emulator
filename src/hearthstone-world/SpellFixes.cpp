@@ -1975,6 +1975,8 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_HYPOTHERMIA )
 			sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
 
+		if( sp->NameHash == SPELL_HASH_IMPROVED_COUNTERSPELL )
+			sp->procFlags = PROC_ON_CAST_SPELL;
 
 		//////////////////////////////////////////
 		// WARLOCK								//
@@ -6035,6 +6037,16 @@ void ApplyNormalFixes()
 	//////////////////////////////////////////
 
 	// Insert mage spell fixes here
+
+	//improved blink
+	sp = dbcSpell.LookupEntryForced( 31570 );
+	if(sp)
+		sp->procFlags = PROC_ON_CAST_SPELL;
+
+	sp = dbcSpell.LookupEntryForced( 31569 );
+	if(sp)
+		sp->procFlags = PROC_ON_CAST_SPELL;
+
 
 	//////////////////////////////////////////
 	// WARLOCK								//

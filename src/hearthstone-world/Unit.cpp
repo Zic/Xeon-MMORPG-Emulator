@@ -1478,7 +1478,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if(GetHealthPct() > 35)
 									continue;
-							}
+							}break;
 						//paladin - Blessed Life
 						case 31828:
 							{
@@ -1765,6 +1765,12 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 53742: // Seal of Vengeance, Seal of Corruption
 							{
 								dmg_overwrite = float2int32((0.013f * GetDamageDoneMod(SCHOOL_HOLY) + 0.025f * GetAP()) * 1.2f);
+							}break;
+						case 46989: //improved blink
+						case 47000:
+							{
+								if (!CastingSpell || CastingSpell->NameHash != SPELL_HASH_BLINK)
+									continue; 
 							}break;
 					}
 				}
