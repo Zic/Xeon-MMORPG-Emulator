@@ -31,7 +31,7 @@ public:
 	void AIUpdate()
 	{
 		// Loop over in-range players, remove the infection, remove zombie form
-		set<PlayerPointer>::iterator itr = _unit->GetInRangePlayerSetBegin();
+		unordered_set<PlayerPointer>::iterator itr = _unit->GetInRangePlayerSetBegin();
 		for(; itr != _unit->GetInRangePlayerSetEnd(); ++itr)
 		{
 			PlayerPointer plr = (*itr);

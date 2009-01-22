@@ -140,8 +140,8 @@ public:
 		//   the value of the map is a timestamp of the last update, to avoid cpu time wasted
 		//   doing lookups of objects that have already been updated
 
-		set<PlayerPointer>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
-		set<PlayerPointer>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
+		unordered_set<PlayerPointer>::iterator itr = _gameobject->GetInRangePlayerSetBegin();		
+		unordered_set<PlayerPointer>::iterator itrend = _gameobject->GetInRangePlayerSetEnd();
 		map<uint32,uint32>::iterator it2, it3;
 		uint32 timeptr = (uint32)UNIXTIME;
 		bool in_range;

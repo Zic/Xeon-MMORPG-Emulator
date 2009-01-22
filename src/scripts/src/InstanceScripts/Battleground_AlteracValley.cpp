@@ -33,7 +33,7 @@
 class DrektharAI : public CreatureAIScript
 {
 public:
-	std::set<UnitPointer> slaves;
+	unordered_set<UnitPointer> slaves;
 	ADD_CREATURE_FACTORY_FUNCTION(DrektharAI);
 
 	uint32 nrspells;
@@ -82,7 +82,7 @@ public:
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Stormpike filth! In my keep?! Slay them all!");
 		_unit->PlaySoundToSet(SOUND_ALLIANCE_CAPTURE);
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -95,7 +95,7 @@ public:
 	{
 		RemoveAIUpdateEvent();
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -142,7 +142,7 @@ public:
 			_unit->GetAIInterface()->MoveTo(_unit->GetSpawnX(), _unit->GetSpawnY(), _unit->GetSpawnZ(), _unit->GetSpawnO());
 		}
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -197,7 +197,7 @@ public:
 class VanndarStormpikeAI : public CreatureAIScript
 {
 public:
-	std::set<UnitPointer> slaves;
+	unordered_set<UnitPointer> slaves;
 	ADD_CREATURE_FACTORY_FUNCTION(VanndarStormpikeAI);
 
 	uint32 nrspells;
@@ -256,7 +256,7 @@ public:
 		_unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Soldiers of Stormpike, your General is under attack! I require aid! Come! Come! Slay these mangy Frostwolf dogs.");
 		_unit->PlaySoundToSet(SOUND_HORDE_CAPTURE);
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -275,7 +275,7 @@ public:
 		RemoveAIUpdateEvent();
 		_unit->RemoveAura(VANNDAR_AVATAR);
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -327,7 +327,7 @@ public:
 			_unit->GetAIInterface()->MoveTo(_unit->GetSpawnX(), _unit->GetSpawnY(), _unit->GetSpawnZ(), _unit->GetSpawnO());
 		}
 
-		std::set<UnitPointer>::iterator itr = slaves.begin();
+		unordered_set<UnitPointer>::iterator itr = slaves.begin();
 		for(; itr != slaves.end(); ++itr)
 		{
 			UnitPointer  pSlave = *itr;
@@ -489,7 +489,7 @@ public:
 
 	void AIUpdate()
 	{
-		std::set<ObjectPointer>::iterator itr = _unit->GetInRangeOppFactsSetBegin();
+		unordered_set<ObjectPointer>::iterator itr = _unit->GetInRangeOppFactsSetBegin();
 		for(; itr != _unit->GetInRangeOppFactsSetEnd(); itr++)
 		{
 			ObjectPointer  pObj = (*itr);
