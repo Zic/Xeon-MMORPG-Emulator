@@ -1,5 +1,5 @@
 /*
-** $Id: linit.c,v 1.14 2005/12/29 15:32:11 roberto Exp $
+** $Id: linit.c,v 1.14.1.1 2007/12/27 13:02:25 roberto Exp $
 ** Initialization of libraries for lua.c
 ** See Copyright Notice in lua.h
 */
@@ -35,4 +35,5 @@ LUALIB_API void luaL_openlibs (lua_State *L) {
     lua_call(L, 1, 0);
   }
 }
+
 
