@@ -192,6 +192,7 @@ public:
 		m_summoner = mob;
 		m_summonedGo = true;
 	}
+	UnitPointer CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, UnitPointer u_caster);
 	void _Expire();
 	
 	void ExpireAndDelete();

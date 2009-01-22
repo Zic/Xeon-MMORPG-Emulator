@@ -3436,7 +3436,15 @@ void Spell::SummonGuardian(uint32 i) // Summon Guardian
 			veh->InitSeats( cp->vehicle_entry, p_caster );
 		}
 		else
-			u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = TO_CREATURE(u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level));
+		{
+			if ( g_caster ) 
+			{
+				u_caster = g_caster->m_summoner;
+				u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = TO_CREATURE(g_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle, u_caster));
+			}
+			else
+				u_caster->m_SummonSlots[ m_summonProperties->slot < 7 ? m_summonProperties->slot : 0 ] = TO_CREATURE(u_caster->CreateTemporaryGuardian(cr_entry,GetDuration(),m_fallowAngle,level));
+		}
 	}
 }
 

@@ -618,7 +618,56 @@ void GameObject::_LoadQuests()
 
 /////////////////
 // Summoned Go's
+//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
+UnitPointer GameObject::CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, UnitPointer u_caster)
+{
+	CreatureProto * proto = CreatureProtoStorage.LookupEntry(guardian_entry);
+	CreatureInfo * info = CreatureNameStorage.LookupEntry(guardian_entry);
+	if(!proto || !info)
+	{
+		DEBUG_LOG("Warning : Missing summon creature template %u !",guardian_entry);
+		return NULLUNIT;
+	}
+	uint32 lvl = u_caster->getLevel();
+	float m_fallowAngle=angle;
+	float x = GetPositionX()+(3*(cosf(m_fallowAngle+GetOrientation())));
+	float y = GetPositionY()+(3*(sinf(m_fallowAngle+GetOrientation())));
+	float z = GetPositionZ();
+	CreaturePointer p = GetMapMgr()->CreateCreature(guardian_entry);
+	p->SetInstanceID(GetMapMgr()->GetInstanceID());
+	p->Load(proto, x, y, z, 0.0f);
 
+	if (lvl != 0)
+	{
+		/* MANA */
+		p->SetPowerType(POWER_TYPE_MANA);
+		p->SetUInt32Value(UNIT_FIELD_MAXPOWER1,p->GetUInt32Value(UNIT_FIELD_MAXPOWER1)+28+10*lvl);
+		p->SetUInt32Value(UNIT_FIELD_POWER1,p->GetUInt32Value(UNIT_FIELD_POWER1)+28+10*lvl);
+		/* HEALTH */
+		p->SetUInt32Value(UNIT_FIELD_MAXHEALTH,p->GetUInt32Value(UNIT_FIELD_MAXHEALTH)+28+30*lvl);
+		p->SetUInt32Value(UNIT_FIELD_HEALTH,p->GetUInt32Value(UNIT_FIELD_HEALTH)+28+30*lvl);
+		/* LEVEL */
+		p->SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
+	}
+
+	p->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, GetGUID());
+    p->SetUInt64Value(UNIT_FIELD_CREATEDBY, GetGUID());
+    p->SetZoneId(GetZoneId());
+	p->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,u_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+	p->_setFaction();
+
+	p->GetAIInterface()->Init(p,AITYPE_PET,MOVEMENTTYPE_NONE,u_caster);
+	p->GetAIInterface()->SetUnitToFollow(unit_shared_from_this());
+	p->GetAIInterface()->SetUnitToFollowAngle(m_fallowAngle);
+	p->GetAIInterface()->SetFollowDistance(3.0f);
+
+	p->PushToWorld(GetMapMgr());
+
+	sEventMgr.AddEvent(p, &Creature::SummonExpire, EVENT_SUMMON_EXPIRE, duration, 1,0);
+
+	return p;
+
+}
 void GameObject::_Expire()
 {
 	sEventMgr.RemoveEvents(shared_from_this());
