@@ -6794,10 +6794,6 @@ void Aura::SpellAuraAddPctMod( bool apply )
 		DEBUG_LOG( "Unknown spell modifier type %u in spell %u.<<--report this line to the developer\n", modifier, GetSpellId() );
 		return;
 	}
-	
-
-	if(modifier == SMT_ATTACK_POWER_AND_DMG_BONUS)
-		modifier = SMT_DAMAGE_DONE;
 
 	SendModifierLog(&m_target->SM[modifier][1], val, AffectedGroups, modifier, true);
 	if(m_spellProto->Id == 16246)

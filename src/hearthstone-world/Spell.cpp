@@ -4109,21 +4109,29 @@ exit:*/
 	{
 		int32 spell_flat_modifers=0;
 		int32 spell_pct_modifers=0;
+		
 		SM_FIValue(caster->SM[SMT_MISC_EFFECT][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
 		SM_FIValue(caster->SM[SMT_MISC_EFFECT][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 
-		if(i == 1)
+		switch( i )
 		{
-			SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			case 0:
+				{
+					SM_FIValue(caster->SM[SMT_FIRST_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+					SM_FIValue(caster->SM[SMT_FIRST_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+				}break;
+			case 1:
+				{
+					SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+					SM_FIValue(caster->SM[SMT_SECOND_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+				}break;
+			case 2:
+				{
+					SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+					SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+				}break;
 		}
-
-		if(i == 2 || i == 1 && m_spellInfo->Effect[2] == 0)
-		{	// Only applied to the last effect of spell
-			SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(caster->SM[SMT_LAST_EFFECT_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
-		}
-		value = value + value*spell_pct_modifers/100 + spell_flat_modifers;
+		value += float2int32(value*(float)(spell_pct_modifers/100.0f)) + spell_flat_modifers;
 	}
 
 	return value;
