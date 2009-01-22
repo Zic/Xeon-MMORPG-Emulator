@@ -1484,7 +1484,7 @@ int luaUnit_SpawnCreature(lua_State * L, UnitPointer  ptr)
 	CreatureProto *p = CreatureProtoStorage.LookupEntry(entry_id);
     
     if(p == NULL)
-      return NULL;
+      return 0;
 	CreaturePointer  pCreature = ptr->GetMapMgr()->GetInterface()->SpawnCreature(entry_id,x,y,z,o,true,true,0,0);
 	pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,faction);
 	pCreature->_setFaction();
@@ -2528,7 +2528,7 @@ int luaUnit_GetCreatureNearestCoords(lua_State * L, UnitPointer  ptr)
     float x = (float)luaL_checknumber(L,1);
     float y = (float)luaL_checknumber(L,2);
     float z = (float)luaL_checknumber(L,3);
-    if(entryid==NULL) 
+    if(entryid == 0) 
         lua_pushnil(L);
     else
         Lunar<Unit>::push(L,ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid), false);
@@ -2542,7 +2542,7 @@ int luaUnit_GetGameObjectNearestCoords(lua_State *L, UnitPointer  ptr)
     float x = (float)luaL_checknumber(L,1);
     float y = (float)luaL_checknumber(L,2);
     float z = (float)luaL_checknumber(L,3);
-    if(entryid==NULL) 
+    if(entryid == 0) 
         lua_pushnil(L);
     else
         Lunar<GameObject>::push(L,ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid), false);
@@ -2659,7 +2659,7 @@ int luaUnit_IsCreatureMoving(lua_State * L, UnitPointer  ptr)
 int luaUnit_SetOutOfCombatRange(lua_State * L, UnitPointer  ptr)
 {
 	int range = luaL_checkint(L, 1);
-	if(ptr != NULL || range != NULL)
+	if(ptr && range != 0)
 		ptr->GetAIInterface()->setOutOfCombatRange(range);
 	return 0;
 }
@@ -2673,7 +2673,7 @@ int luaUnit_ModifyRunSpeed(lua_State * L, UnitPointer  ptr)
 int luaUnit_ModifyWalkSpeed(lua_State * L, UnitPointer  ptr)
 {
 	float Speed = (float)luaL_checkint(L,1);
-	if(ptr&&Speed)
+	if(ptr && Speed)
 		ptr->m_walkSpeed = Speed;
 	return 0;
 }
@@ -2779,7 +2779,7 @@ int luaUnit_GetCurrentSpell(lua_State * L, UnitPointer  ptr)
 	if(ptr)
 		if(ptr->GetCurrentSpell() != NULL)
 		{
-			lua_pushlstring(L,ptr->GetCurrentSpell()->GetSpellProto()->Name,NULL);
+			lua_pushlstring(L,ptr->GetCurrentSpell()->GetSpellProto()->Name,0);
 		}
 	return 1;
 }
@@ -3332,7 +3332,7 @@ int luaUnit_CalcAngle(lua_State * L, UnitPointer  ptr)
 }
 int luaUnit_CalcRadAngle(lua_State * L, UnitPointer  ptr)
 {
-	float ang = NULL;
+	float ang = 0.0f;
 	float x = (float)luaL_checkint(L,1 );
 	float y = (float)luaL_checkint(L, 2);
 	float dx = (float)luaL_checkint(L, 3);
@@ -3498,7 +3498,7 @@ int luaUnit_GetMapId(lua_State * L, UnitPointer  ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_UNIT || TYPEID_PLAYER);
 
-	if(ptr->GetMapId() == NULL)
+	if(!ptr->GetMapId())
 		lua_pushnil(L);
 	else
 		lua_pushinteger(L,ptr->GetMapId());
@@ -3827,7 +3827,7 @@ int luaGameObject_GetCreatureNearestCoords(lua_State * L, GameObjectPointer  ptr
     float x = (float)luaL_checknumber(L,1);
     float y = (float)luaL_checknumber(L,2);
     float z = (float)luaL_checknumber(L,3);
-    if(entryid==NULL) 
+    if(entryid == 0) 
         lua_pushnil(L);
     else
         Lunar<Unit>::push(L,ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid), false);
@@ -3841,7 +3841,7 @@ int luaGameObject_GetGameObjectNearestCoords(lua_State *L, GameObjectPointer  pt
     float x = (float)luaL_checknumber(L,1);
     float y = (float)luaL_checknumber(L,2);
     float z = (float)luaL_checknumber(L,3);
-    if(entryid==NULL) 
+    if(entryid == 0) 
         lua_pushnil(L);
     else
         Lunar<GameObject>::push(L,ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid), false);
@@ -3865,7 +3865,7 @@ int luaGameObject_GetClosestPlayer(lua_State * L, GameObjectPointer  ptr)
 		}
 	}
 
-	if(ret==NULL)
+	if(!ret)
 		lua_pushnil(L);
 	else
 		Lunar<Unit>::push(L,((UnitPointer)ret),false);
@@ -3922,7 +3922,7 @@ int luaGameObject_SpawnCreature(lua_State * L, GameObjectPointer  ptr)
 	CreatureProto *p = CreatureProtoStorage.LookupEntry(entry_id);
     
     if(p == NULL)
-      return NULL;
+      return 0;
 
     CreaturePointer pCreature = ptr->GetMapMgr()->CreateCreature(entry_id);
     pCreature->m_spawn = 0;
