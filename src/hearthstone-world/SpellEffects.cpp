@@ -3578,6 +3578,8 @@ void Spell::SpellEffectSkillStep(uint32 i) // Skill Step
 		break;
 	case SKILL_INSCRIPTION:
 		target->addSpell( 51005 );// Milling
+		target->addSpell( 48116 );// Scroll of Spirit
+		target->addSpell( 48114 );// Scroll of Intellect
 		target->addSpell( 45382 );// Scroll of Stamina
 		target->addSpell( 52738 );// Ivory Ink
 
