@@ -888,6 +888,8 @@ bool Player::Create(WorldPacket& data )
 
 			EquipInit(GMinfo);
 		}
+		else
+			EquipInit(info);
 	}
 	else
 		EquipInit(info);

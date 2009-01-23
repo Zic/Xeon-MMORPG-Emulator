@@ -114,7 +114,7 @@ public:
 	virtual shared_ptr<GameObject> GetObjectForOpenLock(PlayerPointer pCaster, SpellPointer pSpell, SpellEntry* pProto) { return NULLGOB; }
 
 	virtual void SetLockOptions(uint32 uEntryId, shared_ptr<GameObject> pGameObject) { }
-	virtual uint32 GetRespawnTimeForCreature(uint32 uEntryId, Creature *pCreature) { return 240000; }
+	virtual uint32 GetRespawnTimeForCreature(uint32 uEntryId, CreaturePointer pCreature) { return 240000; }
 
 	virtual void Destroy() {}
 	virtual void UpdateEvent() {}
