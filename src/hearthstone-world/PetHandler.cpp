@@ -79,12 +79,16 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 	case PET_ACTION_ACTION:
 		{
 			pPet->SetPetAction(misc);	   // set current action
+
+
+			// Action time? Stand up !
+			if( misc!=PET_ACTION_STAY && pPet->GetStandState() == STANDSTATE_SIT ) 
+						pPet->SetStandState(STANDSTATE_STAND);
+
 			switch(misc)
 			{
 			case PET_ACTION_ATTACK:
 				{
-					if( misc!=PET_ACTION_STAY && pPet->GetStandState() == STANDSTATE_SIT )// stand up 
-						pPet->SetStandState(STANDSTATE_STAND);
 					
 					// make sure the target is attackable
 					if(pTarget == pPet || !isAttackable(pPet, pTarget))
