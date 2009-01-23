@@ -1906,7 +1906,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 }
 
 //damage shield is a triggered spell by owner to atacker
-void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
+void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker, uint32 Damage)
 {
 	//make sure we do not loop dmg procs
 	if(shared_from_this()==attacker || !attacker)
@@ -1925,7 +1925,7 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 		{
 			if(PROC_MISC & (*i2).m_flags)
 			{
-				uint32 overkill = Target->computeOverkill(Damage);
+				uint32 overkill = attacker->computeOverkill(Damage);
 				data.Initialize(SMSG_SPELLDAMAGESHIELD);
 				data << this->GetGUID();
 				data << attacker->GetGUID();
@@ -3059,8 +3059,8 @@ else
 
 		if(realdamage > 0)
 		{
-			pVictim->HandleProcDmgShield(vproc,unit_shared_from_this());
-			HandleProcDmgShield(aproc,pVictim);
+			pVictim->HandleProcDmgShield(vproc,unit_shared_from_this(), realdamage);
+			HandleProcDmgShield(aproc,pVictim, realdamage);
 		}
 
 		if(resisted_dmg)

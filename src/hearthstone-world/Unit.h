@@ -740,7 +740,7 @@ public:
 
 	uint32 m_procCounter;
 	uint32 HandleProc(uint32 flag, UnitPointer Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0);
-	void HandleProcDmgShield(uint32 flag, UnitPointer attacker);//almost the same as handleproc :P
+	void HandleProcDmgShield(uint32 flag, UnitPointer attacker, uint32 Damage);//almost the same as handleproc :P
 
 	void RemoveExtraStrikeTarget(SpellEntry *spell_info);
 	void AddExtraStrikeTarget(SpellEntry *spell_info, uint32 charges);
