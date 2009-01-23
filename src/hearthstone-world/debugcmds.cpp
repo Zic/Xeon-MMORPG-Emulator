@@ -37,7 +37,7 @@ bool ChatHandler::HandleDebugInFrontCommand(const char* args, WorldSession *m_se
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	char buf[256];
 	snprintf((char*)buf, 256, "%d", m_session->GetPlayer()->isInFront(obj));
@@ -88,14 +88,14 @@ bool ChatHandler::HandleDistanceCommand(const char* args, WorldSession *m_sessio
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
 	{
-		if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
+		if(!(obj = TO_OBJECT(m_session->GetPlayer()->GetMapMgr()->GetUnit(guid))))
 		{
 			SystemMessage(m_session, "You should select a character or a creature.");
 			return true;
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	float dist = m_session->GetPlayer()->CalcDistance(obj);
 	std::stringstream sstext;
@@ -110,7 +110,7 @@ bool ChatHandler::HandleMoveInfoCommand(const char* args, WorldSession *m_sessio
 	ObjectPointer obj;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
-	if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid))))
+	if(!(obj = TO_OBJECT(m_session->GetPlayer())->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid))))
 	{
 		SystemMessage(m_session, "You should select a character or a creature.");
 		return true;
@@ -377,7 +377,7 @@ ObjectPointer obj = NULL;
 uint64 guid = m_session->GetPlayer()->GetSelection();
 if (guid != 0)
 {
-obj = (ObjectPointer)objmgr.GetCreature(guid);
+obj = TO_OBJECT(objmgr.GetCreature(guid));
 }
 
 if(obj == NULL)
@@ -422,7 +422,7 @@ float toY = m_session->GetPlayer()->GetPositionY();
 float toZ = m_session->GetPlayer()->GetPositionZ();
 float toO = m_session->GetPlayer()->GetOrientation();
 
-float distance = TO_CREATURE(obj)->CalcDistance((ObjectPointer)m_session->GetPlayer());
+float distance = TO_CREATURE(obj)->CalcDistance(TO_OBJECT(m_session->GetPlayer()));
 uint32 moveSpeed = 0;
 if(!Run)
 {
@@ -494,7 +494,7 @@ bool ChatHandler::HandleSetBytesCommand(const char* args, WorldSession *m_sessio
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	char* pBytesIndex = strtok((char*)args, " ");
 	if (!pBytesIndex)
@@ -547,7 +547,7 @@ bool ChatHandler::HandleGetBytesCommand(const char* args, WorldSession *m_sessio
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	char* pBytesIndex = strtok((char*)args, " ");
 	if (!pBytesIndex)
@@ -848,7 +848,7 @@ bool ChatHandler::HandleModifyBitCommand(const char* args, WorldSession* m_sessi
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	char* pField = strtok((char*)args, " ");
 	if (!pField)
@@ -897,14 +897,14 @@ bool ChatHandler::HandleModifyValueCommand(const char* args,  WorldSession* m_se
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)
 	{
-		if(!(obj = (ObjectPointer)m_session->GetPlayer()->GetMapMgr()->GetUnit(guid)))
+		if(!(obj = TO_OBJECT(m_session->GetPlayer())->GetMapMgr()->GetUnit(guid)))
 		{
 			SystemMessage(m_session, "You should select a character or a creature.");
 			return true;
 		}
 	}
 	else
-		obj = (ObjectPointer)m_session->GetPlayer();
+		obj = TO_OBJECT(m_session->GetPlayer());
 
 	char* pField = strtok((char*)args, " ");
 	if (!pField)

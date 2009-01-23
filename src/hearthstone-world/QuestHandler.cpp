@@ -50,7 +50,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 	}
@@ -58,7 +58,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 	}
@@ -145,7 +145,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -156,7 +156,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = true;
@@ -229,7 +229,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -241,7 +241,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		//bValid = quest_giver->isQuestGiver();
@@ -253,7 +253,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = true;
@@ -266,7 +266,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		PlayerPointer quest_giver = _player->GetMapMgr()->GetPlayer((uint32)guid);
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = true;
@@ -486,7 +486,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 	{
 		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -510,7 +510,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return; // oops..
 		bValid = quest_giver->isQuestGiver();
@@ -572,7 +572,7 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 	{
 		CreaturePointer quest_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		bValid = quest_giver->isQuestGiver();
@@ -593,7 +593,7 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return; // oops..
 		bValid = quest_giver->isQuestGiver();
@@ -678,7 +678,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 	{
 		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
-			qst_giver = (ObjectPointer)quest_giver;
+			qst_giver = TO_OBJECT(quest_giver);
 		else
 			return;
 		//bValid = quest_giver->isQuestGiver();

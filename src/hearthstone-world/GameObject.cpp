@@ -674,7 +674,7 @@ void GameObject::_Expire()
 	if(IsInWorld())
 		RemoveFromWorld(true);
 
-	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((ObjectPointer)this), EVENT_DELETE_TIMER, 1000, 1);
+	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, object_shared_from_this(), EVENT_DELETE_TIMER, 1000, 1);
 	//delete this; you don't get to do that.
 	Destructor();
 }

@@ -772,7 +772,7 @@ void Pet::PetSafeDelete()
 		RemoveFromWorld(false, false);
 	}
 
-	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, ((ObjectPointer)this), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
+	//sEventMgr.AddEvent(World::getSingletonPtr(), &World::DeleteObject, object_shared_from_this(), EVENT_CREATURE_SAFE_DELETE, 1000, 1);
 	Creature::SafeDelete();
 }
 

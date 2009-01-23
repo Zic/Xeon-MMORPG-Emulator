@@ -377,8 +377,8 @@ void EventableObjectHolder::Update(uint32 time_difference)
 			{
 				// Event expired :>
 				
-				/* remove the event from the ObjectPointer/
-				/*obj = (EventableObjectPointer)ev->obj;
+				/* remove the event from the ObjectPointer*/
+				/*obj = TO_EVENTABLEOBJECT(ev->obj);
 				obj->event_RemoveByPointer(ev);*/
 
 				/* remove the event from here */

@@ -1927,7 +1927,7 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker, uint32 Damage)
 			{
 				uint32 overkill = attacker->computeOverkill(Damage);
 				data.Initialize(SMSG_SPELLDAMAGESHIELD);
-				data << this->GetGUID();
+				data << GetGUID();
 				data << attacker->GetGUID();
 				data << (*i2).m_spellId;
 				data << (*i2).m_damage;
@@ -1987,7 +1987,7 @@ void Unit::RegenerateHealth()
 	{
 		// Only regen health out of combat
 		if(!CombatStatus.IsInCombat())
-			((Creature*)this)->RegenerateHealth();
+			creature_shared_from_this()->RegenerateHealth();
 	}
 }
 
@@ -2074,10 +2074,10 @@ void Unit::RegeneratePower(bool isinterrupted)
 		switch(powertype)
 		{
 		case POWER_TYPE_MANA:
-			((Creature*)this)->RegenerateMana();
+			creature_shared_from_this()->RegenerateMana();
 			break;
 		case POWER_TYPE_FOCUS:
-			((Creature*)this)->RegenerateFocus();
+			creature_shared_from_this()->RegenerateFocus();
 			break;
 		}
 	}
@@ -2399,7 +2399,7 @@ void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* a
 	else
 	{
 		if (GetTypeId() == TYPEID_UNIT)
-			dmg.school_type = ((Creature*)this)->BaseAttackType;
+			dmg.school_type = creature_shared_from_this()->BaseAttackType;
 		else
 			dmg.school_type = SCHOOL_NORMAL;
 	}
@@ -4171,7 +4171,7 @@ void Unit::Emote(EmoteType emote)
 void Unit::SendChatMessageToPlayer(uint8 type, uint32 lang, const char *msg, PlayerPointer plr)
 {
 	size_t UnitNameLength = 0, MessageLength = 0;
-	CreatureInfo *ci = (m_objectTypeId == TYPEID_UNIT) ? ((Creature*)this)->creature_info : NULL;
+	CreatureInfo *ci = (m_objectTypeId == TYPEID_UNIT) ? creature_shared_from_this()->creature_info : NULL;
 
 	if(ci == NULL || plr == NULL)
 		return;
@@ -4222,7 +4222,7 @@ void Unit::SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, 
 void Unit::SendChatMessage(uint8 type, uint32 lang, const char *msg)
 {
 	size_t UnitNameLength = 0, MessageLength = 0;
-	CreatureInfo *ci = (m_objectTypeId == TYPEID_UNIT) ? ((Creature*)this)->creature_info : NULL;
+	CreatureInfo *ci = (m_objectTypeId == TYPEID_UNIT) ? creature_shared_from_this()->creature_info : NULL;
 
 	if(ci == NULL)
 		return;
@@ -4327,7 +4327,7 @@ int32 Unit::GetDamageDoneMod(uint32 school)
 	if( this->IsPlayer() )
 	   return (int32)GetUInt32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school ) - (int32)GetUInt32Value( PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + school );
 	else
-	   return ((Creature*)this)->ModDamageDone[school];
+	   return creature_shared_from_this()->ModDamageDone[school];
 }
 	
 float Unit::GetDamageDonePctMod(uint32 school)
@@ -4335,7 +4335,7 @@ float Unit::GetDamageDonePctMod(uint32 school)
    if(this->IsPlayer())
 	   return m_floatValues[PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+school];
 	else
-	   return ((Creature*)this)->ModDamageDonePct[school];
+	   return creature_shared_from_this()->ModDamageDonePct[school];
 }
 
 void Unit::CalcDamage()
@@ -4352,8 +4352,8 @@ void Unit::CalcDamage()
 
 		float bonus = ap_bonus*GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
 	
-		delta = float(((Creature*)this)->ModDamageDone[0]);
-		mult = float(((Creature*)this)->ModDamageDonePct[0]);
+		delta = float(creature_shared_from_this()->ModDamageDone[0]);
+		mult = float(creature_shared_from_this()->ModDamageDonePct[0]);
 		r = BaseDamage[0]*mult+delta+bonus;
 		// give some diversity to pet damage instead of having a 77-78 damage range (as an example)
 		SetFloatValue(UNIT_FIELD_MINDAMAGE,r > 0 ? ( IsPet() ? r * 0.9f : r ) : 0 );
