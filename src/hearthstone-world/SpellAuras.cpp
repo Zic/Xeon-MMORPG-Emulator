@@ -6027,6 +6027,15 @@ void Aura::SpellAuraMounted(bool apply)
 	if(p_target->IsMounted())
 		m_target->Dismount();
 
+	//Dismiss any pets
+	if(p_target->GetSummon())
+	{
+		if(p_target->GetSummon()->GetUInt32Value(UNIT_CREATED_BY_SPELL) > 0)
+			p_target->GetSummon()->Dismiss(false);				// warlock summon -> dismiss
+		else
+			p_target->GetSummon()->Remove(false, true, true);	// hunter pet -> just remove for later re-call
+	}
+
 	if(m_target->IsStealth())
 	{
 		uint32 id = m_target->m_stealth;

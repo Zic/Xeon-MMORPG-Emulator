@@ -2016,6 +2016,7 @@ void AIInterface::SendCurrentMove(PlayerPointer plyr/*uint64 guid*/)
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
+	*splineBuf << uint8(0); // Pguid
 
 	plyr->AddSplinePacket(m_Unit->GetGUID(), splineBuf);
 

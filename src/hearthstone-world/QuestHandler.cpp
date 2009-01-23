@@ -394,7 +394,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleQuestgiverCancelOpcode(WorldPacket& recvPacket)
 {
-    OutPacket(SMSG_GOSSIP_COMPLETE, 0, NULL);
+	WorldPacket data(SMSG_GOSSIP_COMPLETE, 0);
+	SendPacket(&data);
+    //OutPacket(SMSG_GOSSIP_COMPLETE, 0, NULL);
 
 	DEBUG_LOG("WORLD: Sent SMSG_GOSSIP_COMPLETE");
 }

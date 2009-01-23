@@ -830,6 +830,7 @@ void InstanceMgr::BuildRaidSavedInstancesForPlayer(PlayerPointer plr)
 					data << in->m_mapId;
 					data << uint32(in->m_expiration - UNIXTIME);
 					data << in->m_instanceId;
+					data << in->m_difficulty;
 					++counter;
 				}
 			}

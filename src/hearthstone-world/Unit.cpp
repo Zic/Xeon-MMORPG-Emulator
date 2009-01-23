@@ -1925,11 +1925,13 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 		{
 			if(PROC_MISC & (*i2).m_flags)
 			{
+				uint32 overkill = Target->computeOverkill(Damage);
 				data.Initialize(SMSG_SPELLDAMAGESHIELD);
 				data << this->GetGUID();
 				data << attacker->GetGUID();
 				data << (*i2).m_spellId;
 				data << (*i2).m_damage;
+				data << uint32(overkill);
 				data << g_spellSchoolConversionTable[(*i2).m_school];				
 				SendMessageToSet(&data,true);
 				this->DealDamage(attacker,(*i2).m_damage,0,0,(*i2).m_spellId);

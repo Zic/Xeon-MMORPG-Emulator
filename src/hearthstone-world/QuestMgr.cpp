@@ -463,8 +463,9 @@ void QuestMgr::BuildRequestItems(WorldPacket *data, Quest* qst, ObjectPointer qs
         *data << uint32(2);
     }
 
+	*data << uint32(4);
 	*data << uint32(8);
-	*data << uint32(10);
+	*data << uint32(16);
 }
 
 void QuestMgr::BuildQuestComplete(PlayerPointer plr, Quest* qst)

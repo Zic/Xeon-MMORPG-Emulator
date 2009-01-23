@@ -97,12 +97,17 @@ WorldPacket* WorldSession::BuildQuestQueryResponse(Quest *qst)
 	{
 		*data << qst->required_mob[i];				// Kill mob entry ID [i]
 		*data << qst->required_mobcount[i];			// Kill mob count [i]
+		*data << uint32(0);							// 3.0.2
+	}
 
+	for(uint32 i = 0; i < 4; ++i)
+	{
 		*data << qst->required_item[i];				// Collect item [i]
 		*data << qst->required_itemcount[i];		// Collect item count [i]
-
-		*data << uint32(0);							//3.0.2
 	}
+
+	*data << uint32(0);	// more items?
+	*data << uint32(0);	// count
 
 	if(lci)
 	{
