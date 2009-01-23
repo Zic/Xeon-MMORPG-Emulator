@@ -123,6 +123,9 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 
 	m_asyncQuery = false;
 
+	//Erm, reset it here in case player deleted his DK.
+	m_hasDeathKnight= false;
+
 	// should be more than enough.. 200 bytes per char..
 	WorldPacket data(SMSG_CHAR_ENUM, (result ? result->GetRowCount() * 200 : 1));	
 
