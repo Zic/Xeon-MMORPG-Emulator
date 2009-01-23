@@ -1372,7 +1372,7 @@ void Aura::EventUpdatePlayerAA(float r)
 		{
 			// execute in the correct context
 			if(iplr->GetInstanceID() != plr->GetInstanceID())
-				sEventMgr.AddEvent(((shared_ptr<Unit>)iplr), &Unit::EventRemoveAura, m_spellProto->Id, EVENT_DELETE_TIMER, 10, 1,0);
+				sEventMgr.AddEvent(TO_UNIT(iplr), &Unit::EventRemoveAura, m_spellProto->Id, EVENT_DELETE_TIMER, 10, 1,0);
 			else
 				iplr->RemoveAura(m_spellProto->Id);
 			targets.erase(it2);

@@ -145,7 +145,7 @@ shared_ptr<Item>ItemInterface::SafeAddItem(uint32 ItemId, int8 ContainerSlot, in
 
 	if(pProto->InventoryType == INVTYPE_BAG)
 	{
-		pItem = (shared_ptr<Item>)new Container(HIGHGUID_TYPE_CONTAINER,objmgr.GenerateLowGuid(HIGHGUID_TYPE_CONTAINER));
+		pItem = shared_ptr<Container>(new Container(HIGHGUID_TYPE_CONTAINER,objmgr.GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
 		TO_CONTAINER(pItem)->Create( ItemId, m_pOwner);
 		if(m_AddItem(pItem, ContainerSlot, slot))
 		{
