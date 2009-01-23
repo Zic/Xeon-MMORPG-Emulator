@@ -83,6 +83,9 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 			{
 			case PET_ACTION_ATTACK:
 				{
+					if( misc!=PET_ACTION_STAY && pPet->GetStandState() == STANDSTATE_SIT )// stand up 
+						pPet->SetStandState(STANDSTATE_STAND);
+					
 					// make sure the target is attackable
 					if(pTarget == pPet || !isAttackable(pPet, pTarget))
 					{
@@ -122,6 +125,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 
 					// Stop following the owner, and sit.
 					pPet->GetAIInterface()->SetUnitToFollow(NULLUNIT);
+					pPet->SetStandState(STANDSTATE_SIT);
 				}break;
 			case PET_ACTION_DISMISS:
 				{
