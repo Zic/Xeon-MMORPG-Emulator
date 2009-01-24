@@ -2285,8 +2285,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	for(uint32 i = 0; i < 120; ++i)
 	{
 		ss << uint32(mActions[i].Action) << ","
-			<< uint32(mActions[i].Misc) << ","
-			<< uint32(mActions[i].Type) << ",";
+			<< uint32(mActions[i].Type) << ","
+			<< uint32(mActions[i].Misc) << ",";
 	}
 	ss << "','";
 
@@ -2995,12 +2995,12 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 		end = strchr(start,',');
 		if(!end)break;
 		*end=0;
-		mActions[Counter].Misc = (uint8)atol(start);
+		mActions[Counter].Type = (uint8)atol(start);
 		start = end +1;
 		end = strchr(start,',');
 		if(!end)break;
 		*end=0;
-		mActions[Counter++].Type = (uint8)atol(start);
+		mActions[Counter++].Misc = (uint8)atol(start);
 		start = end +1;
 	}
 	
