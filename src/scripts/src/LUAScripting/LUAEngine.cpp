@@ -271,7 +271,7 @@ RegType<Unit> UnitMethods[] = {
 	{ "GetPlayerRace", &luaUnit_GetPlayerRace },
 	{ "RemoveAurasByMechanic", &luaUnit_RemoveAurasByMechanic },
 	{ "RemoveAurasType", &luaUnit_RemoveAurasType },
-	//{ "AddAuraVisual", &luaUnit_AddAuraVisual },
+	{ "AddAuraVisual", &luaUnit_AddAuraVisual },
 
 	{ NULL, NULL },
 };
@@ -4038,18 +4038,24 @@ int luaUnit_RemoveAurasType(lua_State * L, UnitPointer  ptr)
 	}
 	return 0;
 }
-/*int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
 	uint32 spellid = luaL_checkint(L,1);
 	uint32 count = luaL_checkint(L,2);
 	uint32 positive = luaL_checkint(L,3);
 	if(ptr && spellid)
-	{ 
-		ptr->AddAuraVisual(ptr->FindAura(spellId), count,((positive > 0)? true : false));
+	{
+		SpellEntry * spinfo = dbcSpell.LookupEntry(spellid);
+		if(spinfo)
+		{
+			AuraPointer au = AuraPointer(new Aura( spinfo, std::min(GetDuration(dbcSpellDuration.LookupEntry(spinfo->DurationIndex)), (uint32)1000), TO_OBJECT(ptr), TO_UNIT(ptr)));
+			if(au)
+				ptr->AddAuraVisual(au, count,((positive > 0)? true : false));
+		}
 	}
 	return 0;
-}*/
+}
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
