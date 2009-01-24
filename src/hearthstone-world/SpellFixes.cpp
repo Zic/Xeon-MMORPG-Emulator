@@ -3841,6 +3841,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
 					sp->EffectApplyAuraName[1] = SPELL_AURA_ADD_FLAT_MODIFIER;
 					sp->EffectMiscValue[1] = SMT_LAST_EFFECT_BONUS;
+					sp->EffectSpellClassMask[1][0] = 0;
+					sp->EffectSpellClassMask[1][1] = 0x00004000; // Clearcasting
 				}break;
 		
 			//////////////////////////////////////////
