@@ -2231,7 +2231,7 @@ void Aura::SpellAuraDummy(bool apply)
 			{
 				// disabled this due to unstableness :S
 #if 0
-				Creature *summon = m_target->GetMapMgr()->GetCreature(m_target->GetUInt32Value(PLAYER_FARSIGHT));
+				CreaturePointer summon = m_target->GetMapMgr()->GetCreature(m_target->GetUInt32Value(PLAYER_FARSIGHT));
 				if(summon)
 				{
 					summon->RemoveFromWorld(false,true);

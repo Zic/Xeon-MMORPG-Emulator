@@ -540,7 +540,7 @@ uint64 Spell::GetSinglePossibleFriend(uint32 i,float prange)
 uint8 Spell::_DidHit(const shared_ptr<Unit>target)
 {
 	//note resistchance is vise versa, is full hit chance
-	UnitPointer u_victim = ((shared_ptr<Unit>)target);
+	UnitPointer u_victim = target;
 	PlayerPointer p_victim = ( target->GetTypeId() == TYPEID_PLAYER ) ? TO_PLAYER(target) : NULLPLR;
 
 	// 
