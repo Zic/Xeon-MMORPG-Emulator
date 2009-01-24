@@ -143,6 +143,18 @@ void WorldSession::HandleMoveTeleportAckOpcode( WorldPacket & recv_data )
 void _HandleBreathing(MovementInfo &movement_info, PlayerPointer _player, WorldSession * pSession)
 {
 
+	// Very dirty way of fixing swim bug in serpent lake :(
+	// The waterlavel at the entrance is NOT the same as where you surface again.
+	// This keeps players in breathing mode until they drown.
+	if( _player->GetAreaID() == 3653 )
+	{
+		float pposx = _player->GetPositionX();
+		float pposy = _player->GetPositionY();
+
+		if ( pposx > 650.0f && pposx < 730.0f && pposy > 6830.0f && pposy < 6905.0f )
+			pSession->m_wLevel = -72.75f + _player->m_noseLevel * 0.95f;
+	}
+
 	// no water breathing is required
 	if( !sWorld.BreathingEnabled || _player->FlyCheat || _player->m_bUnlimitedBreath || !_player->isAlive() || _player->GodModeCheat )
 	{
