@@ -106,7 +106,7 @@ void CorpseData::DeleteFromDB()
 
 void Corpse::Despawn()
 {
-	if(this->IsInWorld())
+	if(IsInWorld())
 	{
 		RemoveFromWorld(false);
 	}

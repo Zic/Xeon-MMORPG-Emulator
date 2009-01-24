@@ -93,7 +93,7 @@ public:
 	void SendQuestUpdateFailedTimer(Quest *pQuest, PlayerPointer plyr);
 	void SendQuestLogFull(PlayerPointer plyr);
 	
-	void LoadNPCQuests(Creature *qst_giver);
+	void LoadNPCQuests(CreaturePointer qst_giver);
 	void LoadGOQuests(shared_ptr<GameObject>go);
 
 	QuestRelationList* GetCreatureQuestList(uint32 entryid);

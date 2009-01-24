@@ -271,7 +271,7 @@ void Pet::Destructor()
 	m_AISpellStore.clear();
 
 	if(IsInWorld())
-		this->Remove(false, true, true);
+		Remove(false, true, true);
 
 	if( m_Owner )
 	{
@@ -411,7 +411,7 @@ void Pet::InitializeSpells()
 		{
 			// Cast on self..
 			shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(obj_shared_from_this(), info, true, NULLAURA));
-			SpellCastTargets targets(this->GetGUID());
+			SpellCastTargets targets(GetGUID());
 			sp->prepare(&targets);
 
 			continue;
@@ -599,7 +599,7 @@ void Pet::InitializeMe(bool first)
 
 	SetCreatureName(CreatureNameStorage.LookupEntry(GetEntry()));
 	proto=CreatureProtoStorage.LookupEntry(GetEntry());
-	m_Owner->SetUInt64Value(UNIT_FIELD_SUMMON, this->GetGUID());
+	m_Owner->SetUInt64Value(UNIT_FIELD_SUMMON, GetGUID());
 	SetUInt32Value(UNIT_FIELD_PETNUMBER, GetUIdFromGUID());
 	SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, (uint32)UNIXTIME);
 	myFamily = dbcCreatureFamily.LookupEntry(creature_info->Family);
@@ -766,7 +766,7 @@ void Pet::Remove(bool bSafeDelete, bool bUpdate, bool bSetOffline)
 
 void Pet::PetSafeDelete()
 {
-	if(this->IsInWorld())
+	if(IsInWorld())
 	{
 		// remove from world, and delete
 		RemoveFromWorld(false, false);
@@ -885,7 +885,7 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 		if(IsInWorld())
 		{
 			shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell(obj_shared_from_this(), sp, true, NULLAURA));
-			SpellCastTargets targets(this->GetGUID());
+			SpellCastTargets targets(GetGUID());
 			spell->prepare(&targets);
 			mSpells[sp] = 0x0100;
 		}	
@@ -1667,7 +1667,7 @@ bool Pet::UpdateLoyalty( char pts )
 {	
 	//updates loyalty_pts and loyalty lvl if needed
 	uint32 lvl;
-	if( !m_Owner || Summon || m_Owner->GetMapMgr() != this->GetMapMgr() )
+	if( !m_Owner || Summon || m_Owner->GetMapMgr() != GetMapMgr() )
 		return true;
 
 	lvl = m_Owner->GetUInt32Value( PLAYER_NEXT_LEVEL_XP );

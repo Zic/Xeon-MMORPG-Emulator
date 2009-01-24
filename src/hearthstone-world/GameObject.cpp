@@ -228,7 +228,7 @@ void GameObject::Update(uint32 p_time)
 void GameObject::Spawn(shared_ptr<MapMgr> m)
 {
 	PushToWorld(m);	
-	CALL_GO_SCRIPT_EVENT(this, OnSpawn)();
+	CALL_GO_SCRIPT_EVENT(gob_shared_from_this(), OnSpawn)();
 }
 
 void GameObject::Despawn(uint32 time)
@@ -243,7 +243,7 @@ void GameObject::Despawn(uint32 time)
 		SetUInt32Value(GAMEOBJECT_FLAGS, m_spawn->flags);
 	}
 
-	CALL_GO_SCRIPT_EVENT(this, OnDespawn)();
+	CALL_GO_SCRIPT_EVENT(gob_shared_from_this(), OnDespawn)();
 
 	if(time)
 	{

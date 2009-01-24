@@ -1217,7 +1217,7 @@ void Player::_EventAttack( bool offhand )
 			}
 		}
 
-		if(this->IsStealth())
+		if(IsStealth())
 		{
 			RemoveAura( m_stealth );
 			SetStealth(0);
@@ -1268,7 +1268,7 @@ void Player::_EventCharmAttack()
 	{
 		Log.Debug( "WORLD"," "I64FMT" doesn't exist.",m_curSelection);
 		DEBUG_LOG("Player::Update:  No valid current selection to attack, stopping attack\n");
-		this->setHRegenTimer(5000); //prevent clicking off creature for a quick heal
+		setHRegenTimer(5000); //prevent clicking off creature for a quick heal
 		clearStateFlag(UF_ATTACKING);
 		EventAttackStop();
 	}
@@ -2427,15 +2427,15 @@ bool Player::canCast(SpellEntry *m_spellInfo)
 {
 	if (m_spellInfo->EquippedItemClass != 0)
 	{
-		if(this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND))
+		if(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND))
 		{
-			if((int32)this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Class == m_spellInfo->EquippedItemClass)
+			if((int32)GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Class == m_spellInfo->EquippedItemClass)
 			{
 				if (m_spellInfo->EquippedItemSubClass != 0)
 				{
 					if (m_spellInfo->EquippedItemSubClass != 173555 && m_spellInfo->EquippedItemSubClass != 96 && m_spellInfo->EquippedItemSubClass != 262156)
 					{
-						if (pow(2.0,(this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))
+						if (pow(2.0,(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))
 							return false;
 					}
 				}
@@ -2444,15 +2444,15 @@ bool Player::canCast(SpellEntry *m_spellInfo)
 		else if(m_spellInfo->EquippedItemSubClass == 173555)
 			return false;
 
-		if (this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED))
+		if (GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED))
 		{
-			if((int32)this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->Class == m_spellInfo->EquippedItemClass)
+			if((int32)GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->Class == m_spellInfo->EquippedItemClass)
 			{
 				if (m_spellInfo->EquippedItemSubClass != 0)
 				{
 					if (m_spellInfo->EquippedItemSubClass != 173555 && m_spellInfo->EquippedItemSubClass != 96 && m_spellInfo->EquippedItemSubClass != 262156)
 					{
-						if (pow(2.0,(this->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))							return false;
+						if (pow(2.0,(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))							return false;
 					}
 				}
 			}
@@ -3725,7 +3725,7 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 						SpellEntry *info = dbcSpell.LookupEntry( set->SpellID[x] );
 						shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell( plr_shared_from_this(), info, true, NULLAURA ));
 						SpellCastTargets targets;
-						targets.m_unitTarget = this->GetGUID();
+						targets.m_unitTarget = GetGUID();
 						spell->prepare( &targets );
 					}
 				}

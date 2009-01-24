@@ -150,11 +150,11 @@ void Creature::Update( uint32 p_time )
 	if(m_corpseEvent)
 	{
 		sEventMgr.RemoveEvents(shared_from_this());
-		if(this->proto==NULL)
+		if(proto==NULL)
 			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, 1000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-		else if (this->creature_info->Rank == ELITE_WORLDBOSS)
+		else if (creature_info->Rank == ELITE_WORLDBOSS)
 			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_BOSSCORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-		else if ( this->creature_info->Rank == ELITE_RAREELITE || this->creature_info->Rank == ELITE_RARE)
+		else if ( creature_info->Rank == ELITE_RAREELITE || creature_info->Rank == ELITE_RARE)
 			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_RARECORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		else
 			sEventMgr.AddEvent(TO_CREATURE(shared_from_this()), &Creature::OnRemoveCorpse, EVENT_CREATURE_REMOVE_CORPSE, TIME_CREATURE_REMOVE_CORPSE, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
@@ -186,7 +186,7 @@ void Creature::OnRemoveCorpse()
 
 		DEBUG_LOG("Removing corpse of "I64FMT"...", GetGUID());
 	   
-			if((GetMapMgr()->GetMapInfo() && GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID && this->proto && this->proto->boss) || m_noRespawn)
+			if((GetMapMgr()->GetMapInfo() && GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID && proto && proto->boss) || m_noRespawn)
 			{
 				RemoveFromWorld(false, true);
 			}
@@ -276,7 +276,7 @@ void Creature::GenerateLoot()
 			if(m_uint32Values[UNIT_FIELD_MAXHEALTH] <= 1667)
 				m_loot.gold = (uint32)((info->Rank+1)*getLevel()*(rand()%5 + 1)); //generate copper
 			else
-				m_loot.gold = (uint32)((info->Rank+1)*getLevel()*(rand()%5 + 1)*(this->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.0006)); //generate copper
+				m_loot.gold = (uint32)((info->Rank+1)*getLevel()*(rand()%5 + 1)*(GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.0006)); //generate copper
 		}
 	}
 	
@@ -428,7 +428,7 @@ uint32 Creature::NumOfQuests()
 
 void Creature::_LoadQuests()
 {
-	sQuestMgr.LoadNPCQuests(this);
+	sQuestMgr.LoadNPCQuests(creature_shared_from_this());
 }
 
 void Creature::setDeathState(DeathState s) 
@@ -1249,7 +1249,7 @@ void Creature::OnPushToWorld()
 	}
 
 	m_aiInterface->m_is_in_instance = (m_mapMgr->GetMapInfo()->type!=INSTANCE_NULL) ? true : false;
-	if (this->HasItems())
+	if (HasItems())
 	{
 		for(std::vector<CreatureItem>::iterator itr = m_SellItems->begin(); itr != m_SellItems->end(); ++itr)
 		{

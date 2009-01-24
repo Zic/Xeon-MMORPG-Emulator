@@ -107,9 +107,9 @@ void Object::Destructor()
 	if(m_objectTypeId != TYPEID_ITEM)
 		ASSERT(!m_inQueue);
 
-	if (this->IsInWorld() && m_objectTypeId != TYPEID_ITEM && m_objectTypeId != TYPEID_CONTAINER)
+	if (IsInWorld() && m_objectTypeId != TYPEID_ITEM && m_objectTypeId != TYPEID_CONTAINER)
 	{
-		this->RemoveFromWorld(false);
+		RemoveFromWorld(false);
 	}
 
 	// for linux
@@ -1284,11 +1284,11 @@ void Object::RemoveFlag( const uint32 index, uint32 oldFlag )
 
 float Object::CalcDistance(ObjectPointer Ob)
 {
-	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
+	return CalcDistance(GetPositionX(), GetPositionY(), GetPositionZ(), Ob->GetPositionX(), Ob->GetPositionY(), Ob->GetPositionZ());
 }
 float Object::CalcDistance(float ObX, float ObY, float ObZ)
 {
-	return CalcDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ(), ObX, ObY, ObZ);
+	return CalcDistance(GetPositionX(), GetPositionY(), GetPositionZ(), ObX, ObY, ObZ);
 }
 float Object::CalcDistance(ObjectPointer Oa, ObjectPointer Ob)
 {
@@ -1477,7 +1477,7 @@ bool Object::isInRange(ObjectPointer target, float range)
 
 bool Object::IsPet()
 {
-	if( this->GetTypeId() != TYPEID_UNIT )
+	if( GetTypeId() != TYPEID_UNIT )
 		return false;
 
 	if( unit_shared_from_this()->m_isPet && m_uint32Values[UNIT_FIELD_CREATEDBY] != 0 && m_uint32Values[UNIT_FIELD_SUMMONEDBY] != 0 )
@@ -1588,7 +1588,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		}
 	}
 
-	if(this->IsUnit())
+	if(IsUnit())
 	{
 		if( obj_shared_from_this() != pVictim && pVictim->IsPlayer() && IsPlayer() && plr_shared_from_this()->m_hasInRangeGuards )
 		{
@@ -1694,7 +1694,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	}
 
 	/*------------------------------------ DUEL HANDLERS --------------------------*/
-	if((pVictim->IsPlayer()) && (this->IsPlayer()) && TO_PLAYER(pVictim)->DuelingWith == player_shared_from_this() ) //Both Players
+	if((pVictim->IsPlayer()) && (IsPlayer()) && TO_PLAYER(pVictim)->DuelingWith == player_shared_from_this() ) //Both Players
 	{
 		if((health <= damage) && player_shared_from_this()->DuelingWith != NULL)
 		{
@@ -1877,7 +1877,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		}
 
 		/* Stop victim from attacking */
-		if( this->IsUnit() )
+		if( IsUnit() )
 			pVictim->smsg_AttackStop( unit_shared_from_this() );
 
 		if( pVictim->GetTypeId() == TYPEID_PLAYER )
@@ -1914,10 +1914,10 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				player_shared_from_this()->GetGroup()->SendPartyKillLog( this, pVictim );*/
 
 		/* Stop Unit from attacking */
-		if( this->IsPlayer() )
+		if( IsPlayer() )
 			player_shared_from_this()->EventAttackStop();
 	   
-		if( this->IsUnit() )
+		if( IsUnit() )
 		{
 			CALL_SCRIPT_EVENT( obj_shared_from_this(), OnTargetDied )( pVictim );
 			unit_shared_from_this()->smsg_AttackStop( pVictim );
@@ -2160,7 +2160,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 			}
 			
 			// Send AI Victim Reaction
-			if( this->IsPlayer() || this->GetTypeId() == TYPEID_UNIT )
+			if( IsPlayer() || GetTypeId() == TYPEID_UNIT )
 			{
 				if( pVictim->GetTypeId() != TYPEID_PLAYER )
 				{
@@ -2191,7 +2191,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 	if(!spellInfo)
         return;
 
-	if (this->IsPlayer() && !player_shared_from_this()->canCast(spellInfo))
+	if (IsPlayer() && !player_shared_from_this()->canCast(spellInfo))
 		return;
 //==========================================================================================
 //==============================Variables Initialization====================================
@@ -2213,7 +2213,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 //==============================+Spell Damage Bonus Calculations============================
 //==========================================================================================
 //------------------------------by stats----------------------------------------------------
-	if( this->IsUnit() && !static_damage )
+	if( IsUnit() && !static_damage )
 	{
 		caster->RemoveAurasByInterruptFlag( AURA_INTERRUPT_ON_START_ATTACK );
 
@@ -2392,7 +2392,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 
 	//------------------------------resistance reducing-----------------------------------------	
 	float res_before_resist = res;
-	if(res > 0 && this->IsUnit())
+	if(res > 0 && IsUnit())
 	{
 		unit_shared_from_this()->CalculateResistanceReduction(pVictim,&dmg,spellInfo,0.0f);
 		if((int32)dmg.resisted_damage > dmg.full_damage)
@@ -2431,14 +2431,14 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 			unit_shared_from_this()->CombatStatus.OnDamageDealt(pVictim, 1);
 	}
 	
-	if( this->IsUnit() && allowProc && spellInfo->Id != 25501 )
+	if( IsUnit() && allowProc && spellInfo->Id != 25501 )
 	{
 		pVictim->HandleProc( vproc, unit_shared_from_this(), spellInfo, float2int32( res ) );
 		pVictim->m_procCounter = 0;
 		unit_shared_from_this()->HandleProc( aproc, pVictim, spellInfo, float2int32( res ) );
 		unit_shared_from_this()->m_procCounter = 0;
 	}
-	if( this->IsPlayer() )
+	if( IsPlayer() )
 	{
 			player_shared_from_this()->m_casted_amount[school] = ( uint32 )res;
 	}
@@ -2477,7 +2477,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 		if( IsPlayer() && unit_shared_from_this()->isAlive() && plr_shared_from_this()->getClass() == PRIEST )
 			plr_shared_from_this()->VampiricSpell(float2int32(res), pVictim);
 
-		if( pVictim->isAlive() && this->IsUnit() )
+		if( pVictim->isAlive() && IsUnit() )
 		{
 			//Shadow Word:Death
 			if( spellID == 32379 || spellID == 32996 ) 
@@ -2485,7 +2485,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 				uint32 damage = (uint32)( res + abs_dmg );
 				uint32 absorbed = unit_shared_from_this()->AbsorbDamage( school, &damage, dbcSpell.LookupEntryForced(spellID) );
 				DealDamage( unit_shared_from_this(), damage, 2, 0, spellID );
-				SendSpellNonMeleeDamageLog( obj_shared_from_this(), unit_shared_from_this(), spellID, damage, school, absorbed, 0, false, 0, false, this->IsPlayer() );
+				SendSpellNonMeleeDamageLog( obj_shared_from_this(), unit_shared_from_this(), spellID, damage, school, absorbed, 0, false, 0, false, IsPlayer() );
 			}
 		}
 	}

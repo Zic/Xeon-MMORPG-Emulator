@@ -1283,7 +1283,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 //		Quest Management		 //
 /////////////////////////////////////
 
-void QuestMgr::LoadNPCQuests(Creature *qst_giver)
+void QuestMgr::LoadNPCQuests(CreaturePointer qst_giver)
 {
 	qst_giver->SetQuestList(GetCreatureQuestList(qst_giver->GetEntry()));
 }
