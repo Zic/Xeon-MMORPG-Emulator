@@ -4342,40 +4342,25 @@ void Spell::Heal(int32 amount)
 		if( p_caster != NULL )  
 		{
 			for(uint32 a = 0; a < 6; a++)
-				bonus += float2int32(1.7f * p_caster->SpellHealDoneByAttribute[a][m_spellInfo->School] * p_caster->GetUInt32Value(UNIT_FIELD_STAT0 + a));
+				bonus += float2int32(p_caster->SpellHealDoneByAttribute[a][m_spellInfo->School] * p_caster->GetUInt32Value(UNIT_FIELD_STAT0 + a));
 		}
-
+		
 		//Spell Coefficient
+		float coefficient = 0.0f;
 		if(  m_spellInfo->Dspell_coef_override >= 0 ) //In case we have forced coefficients
-			bonus = float2int32( float( bonus ) * m_spellInfo->Dspell_coef_override );
-		else
+			coefficient = m_spellInfo->Dspell_coef_override;
+		else if( m_spellInfo->fixed_dddhcoef >= 0 ) //Bonus to DH part
+			coefficient = m_spellInfo->fixed_dddhcoef;
+
+		if( m_spellInfo->SpellGroupType )	// apply coefficient modifier
 		{
-			//Bonus to DH part
-			if( m_spellInfo->fixed_dddhcoef >= 0 )
-				bonus = float2int32( float( bonus ) * m_spellInfo->fixed_dddhcoef );
+			float modifier = 0;
+			SM_FFValue( u_caster->SM[SMT_SPD_BONUS][0], &modifier, m_spellInfo->SpellGroupType );
+			coefficient += modifier / 100.0f;
+			SM_PFValue( u_caster->SM[SMT_SPD_BONUS][1], &coefficient, m_spellInfo->SpellGroupType );
 		}
 
-		critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
-
-		if(m_spellInfo->SpellGroupType)
-		{
-			int penalty_pct = 0;
-			int penalty_flt = 0;
-			SM_FIValue( u_caster->SM[SMT_SPD_BONUS][0], &penalty_flt, m_spellInfo->SpellGroupType );
-			bonus += penalty_flt;
-			SM_FIValue( u_caster->SM[SMT_SPD_BONUS][1], &penalty_pct, m_spellInfo->SpellGroupType );
-			bonus += bonus * penalty_pct / 100;
-			SM_FIValue( u_caster->SM[SMT_CRITICAL][0],&critchance,m_spellInfo->SpellGroupType);
-			SM_PIValue( u_caster->SM[SMT_CRITICAL][1],&critchance,m_spellInfo->SpellGroupType);
-#ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
-			int spell_flat_modifers=0;
-			int spell_pct_modifers=0;
-			SM_FIValue(u_caster->SM[SMT_SPD_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(u_caster->SM[SMT_SPD_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
-			if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
-				printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,m_spellInfo->SpellGroupType);
-#endif
-		}
+		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
 		
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
@@ -4384,12 +4369,14 @@ void Spell::Heal(int32 amount)
 		// Healing Way fix
  		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)
 		{
-			amount += amount * 6 * unitTarget->GetAuraCount(29203) / 100;
+			if(unitTarget->HasActiveAura(29203))
+				amount += amount * 18 / 100;
 		}
 
 		if (m_spellInfo->SpellGroupType)
 			SM_FIValue(u_caster->SM[SMT_DAMAGE_DONE][1],&amount,m_spellInfo->SpellGroupType);
 
+		critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
 		if(critical = Rand(critchance))
 		{
 			/*int32 critbonus = amount >> 1;

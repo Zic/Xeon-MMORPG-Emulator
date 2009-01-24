@@ -3789,6 +3789,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->Unique = true;
 				}break;
+
+			// Killing Spree
+			case 51690:
+				{
+					sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA;
+					sp->Effect[1]	=	0;
+					sp->Effect[2]	=	0;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+				}break;
 			//////////////////////////////////////////
 			// PRIEST								//
 			//////////////////////////////////////////
@@ -3826,22 +3835,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//////////////////////////////////////////
 			// SHAMAN								//
 			//////////////////////////////////////////
-			case 25505:
-			case 16362:
-			case 10486:
-			case 8235:
-			case 8232:
-					{
-						sp->Flags3 |=	FLAGS3_ENCHANT_OWN_ONLY;
-				}break;
-
-		
-			case 51690:
+			case 51466:
+			case 51470: //Elemental Oath
 				{
-						sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA;
-						sp->Effect[1]	=	0;
-						sp->Effect[2]	=	0;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+					sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+					sp->EffectApplyAuraName[1] = SPELL_AURA_ADD_FLAT_MODIFIER;
+					sp->EffectMiscValue[1] = SMT_LAST_EFFECT_BONUS;
 				}break;
 		
 			//////////////////////////////////////////
@@ -5339,6 +5338,9 @@ void ApplyNormalFixes()
 			sp->NameHash == SPELL_HASH_FLASH_OF_LIGHT)
 			sp->spell_coef_flags |= SPELL_FLAG_IS_DD_OR_DH_SPELL;
 
+		if(sp->NameHash == SPELL_HASH_FIREBALL)
+			sp->spell_coef_flags = SPELL_FLAG_IS_DD_OR_DH_SPELL;
+
 		//Additional Effect (not healing or damaging)
 		for( uint8 i = 0 ; i < 3 ; i++ )
 		{
@@ -5443,6 +5445,43 @@ void ApplyNormalFixes()
 		///	SPELLS CAN CRIT ///
 		sp->spell_can_crit = true; // - except in special cases noted in this section
 
+		// Spells Coefficient Exceptions based on http://www.wowwiki.com/Spell_power
+		switch (sp->NameHash)
+		{
+		case SPELL_HASH_HOLY_FIRE:
+			sp->fixed_dddhcoef = 0.575f;
+			sp->fixed_hotdotcoef = 0.185f;
+			break;
+		case SPELL_HASH_REGROWTH:
+			sp->fixed_dddhcoef = 0.3f;
+			sp->fixed_hotdotcoef = 0.7f;
+			break;
+		case SPELL_HASH_CORRUPTION:
+			sp->fixed_hotdotcoef = 0.93f;
+			break;
+		case SPELL_HASH_CURSE_OF_AGONY:
+			sp->fixed_hotdotcoef = 1.2f;
+			break;
+		case SPELL_HASH_CURSE_OF_DOOM:
+			sp->fixed_hotdotcoef = 2.0f;
+			break;
+		case SPELL_HASH_SHADOW_WORD__PAIN:
+			sp->fixed_hotdotcoef = 1.1f;
+			break;
+		case SPELL_HASH_MIND_FLAY:
+			sp->fixed_hotdotcoef = 0.57f;
+			break;
+		case SPELL_HASH_SOUL_FIRE:
+			sp->fixed_hotdotcoef = 1.15f;
+			break;
+		case SPELL_HASH_PYROBLAST:
+			sp->fixed_dddhcoef = 1.15f;
+			sp->fixed_hotdotcoef = 0.05f;
+			break;
+		case SPELL_HASH_DRAIN_SOUL:
+			sp->fixed_hotdotcoef = 1.15f;
+			break;
+		}
 
 		//////////////////////////////////////////////////////
 		// CLASS-SPECIFIC SPELL FIXES						//
@@ -5533,11 +5572,11 @@ void ApplyNormalFixes()
 
 		// Fire Nova - 21.4% spd coefficient
 		if( sp->NameHash == SPELL_HASH_FIRE_NOVA )
-			sp->Dspell_coef_override = 0.214f;
+			sp->Dspell_coef_override = 0.2142f;
 
-		// Magma Totem - 6.67% spd coefficient
+		// Magma Totem - 10% spd coefficient
 		if( sp->NameHash == SPELL_HASH_MAGMA_TOTEM )
-			sp->Dspell_coef_override = 0.0667f;
+			sp->Dspell_coef_override = 0.1f;
 
 		// Searing Totem - 16.67% spd coefficient
 		if( sp->NameHash == SPELL_HASH_ATTACK )

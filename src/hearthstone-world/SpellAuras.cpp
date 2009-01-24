@@ -3062,42 +3062,30 @@ void Aura::EventPeriodicHeal( uint32 amount )
 				bonus += float2int32( 0.25f * TO_PLAYER( c )->GetUInt32Value( UNIT_FIELD_STAT4 ) );
 		}
 		//Spell Coefficient
+		float coefficient = 0.0f;
 		if( m_spellProto->OTspell_coef_override >= 0 ) //In case we have forced coefficients
-			bonus = float2int32( float( bonus ) * m_spellProto->OTspell_coef_override );
-		else
-		{
-			//Bonus to HoT part
-			if( m_spellProto->fixed_hotdotcoef >= 0 )
-			{
-				bonus = float2int32( float( bonus ) * m_spellProto->fixed_hotdotcoef );
-				//we did most calculations in world.cpp, but talents that increase DoT spells duration
-				//must be included now.
-				if( c->IsPlayer() )
-				{
-					int durmod = 0;
-					SM_FIValue(c->SM[SMT_DURATION][0], &durmod, m_spellProto->SpellGroupType);
-					bonus += float2int32( float( bonus * durmod ) / 15000.0f );
-				}
-			}
-		}
-	}
+			coefficient = m_spellProto->OTspell_coef_override;
+		else if( m_spellProto->fixed_hotdotcoef >= 0 )//Bonus to HoT part
+			coefficient = m_spellProto->fixed_hotdotcoef;
 
-	if( c != NULL && m_spellProto->SpellGroupType )
-	{
-		int penalty_pct = 0;
-		int penalty_flt = 0;
-		SM_FIValue( c->SM[SMT_SPD_BONUS][0], &penalty_flt, GetSpellProto()->SpellGroupType );
-		bonus += penalty_flt;
-		SM_FIValue( c->SM[SMT_SPD_BONUS][1], &penalty_pct, GetSpellProto()->SpellGroupType );
-		bonus += bonus * penalty_pct / 100;
-#ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
-		int spell_flat_modifers=0;
-		int spell_pct_modifers=0;
-		SM_FIValue(c->SM[SMT_SPD_BONUS][0],&spell_flat_modifers,GetSpellProto()->SpellGroupType);
-		SM_FIValue(c->SM[SMT_PENALTY][1],&spell_pct_modifers,GetSpellProto()->SpellGroupType);
-		if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
-			printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,GetSpellProto()->SpellGroupType);
-#endif
+		if( GetSpellProto()->SpellGroupType )	// apply coefficient modifier
+		{
+			float modifier = 0;
+			SM_FFValue( c->SM[SMT_SPD_BONUS][0], &modifier, GetSpellProto()->SpellGroupType );
+			coefficient += modifier / 100.0f;
+			SM_PFValue( c->SM[SMT_SPD_BONUS][1], &coefficient, GetSpellProto()->SpellGroupType );
+		}
+
+		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
+
+		//we did most calculations in world.cpp, but talents that increase DoT spells duration
+		//must be included now.
+		if( c->IsPlayer() )
+		{
+			int durmod = 0;
+			SM_FIValue(c->SM[SMT_DURATION][0], &durmod, m_spellProto->SpellGroupType);
+			bonus += float2int32( float( bonus * durmod ) / 15000.0f );
+		}
 	}
 	
 	if(m_spellProto->NameHash != SPELL_HASH_HEALING_STREAM){  // Healing Stream is not a HOT
@@ -8554,12 +8542,9 @@ void Aura::EventPeriodicRegenManaStatPct(uint32 perc,uint32 stat)
 	if(m_target->isDead())
 		return;
   
-	uint32 mana = m_target->GetUInt32Value(UNIT_FIELD_POWER1) + (m_target->GetUInt32Value(UNIT_FIELD_STAT0 + stat)*perc)/100;
+	uint32 spellId = pSpellId ? pSpellId : (GetSpellProto() ? GetSpellProto()->Id : 0);
 
-	if(mana <= m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
-		m_target->SetUInt32Value(UNIT_FIELD_POWER1, mana);
-	else
-		m_target->SetUInt32Value(UNIT_FIELD_POWER1, m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+	m_target->Energize(m_target, spellId, (m_target->GetUInt32Value(UNIT_FIELD_STAT0 + stat)*perc)/100, POWER_TYPE_MANA);
 }
 
 

@@ -4075,61 +4075,69 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 //==============================+Spell Damage Bonus Modifications===========================
 //==========================================================================================
 //------------------------------by cast duration--------------------------------------------
-	float dmgdoneaffectperc = 1.0f;
-	if(isdot)
-		dmgdoneaffectperc += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
+	//Spell Coefficient
+	float coefficient = 0.0f;
 
 	if( spellInfo->Dspell_coef_override >= 0 && !isdot )
-		plus_damage = float2int32( float( plus_damage ) * spellInfo->Dspell_coef_override );
+		coefficient = spellInfo->Dspell_coef_override;
 	else if( spellInfo->OTspell_coef_override >= 0 && isdot )
-		plus_damage = float2int32( float( plus_damage ) * spellInfo->OTspell_coef_override );
+		coefficient = spellInfo->OTspell_coef_override;
 	else
 	{
 		//Bonus to DD part
 		if( spellInfo->fixed_dddhcoef >= 0 && !isdot )
-			plus_damage = float2int32( float( plus_damage ) * spellInfo->fixed_dddhcoef );
+			coefficient = spellInfo->fixed_dddhcoef;
 		//Bonus to DoT part
 		else if( spellInfo->fixed_hotdotcoef >= 0 && isdot )
 		{
-			plus_damage = float2int32( float( plus_damage ) * spellInfo->fixed_hotdotcoef );
+			coefficient = spellInfo->fixed_hotdotcoef;
 			if( caster->IsPlayer() )
 			{
 				SM_FIValue(caster->SM[SMT_DURATION][0], &durmod, spellInfo->SpellGroupType);
 				plus_damage += float2int32( float( plus_damage * durmod ) / 15000.0f );
 			}
 		}
-		//In case we dont fit in previous cases do old thing
-		else
+		//In case we dont fit in previous cases do old thing // aren't all cases supposed to be done in SpellFixes?
+		/*else
 		{
 			plus_damage = float2int32( float( plus_damage ) * spellInfo->casttime_coef );
 			float td = float( GetDuration( dbcSpellDuration.LookupEntry( spellInfo->DurationIndex ) ));
 			//DOT-DD (Moonfire-Immolate-IceLance-Pyroblast)(Hack Fix) not sure its right
 			if( spellInfo->NameHash == SPELL_HASH_MOONFIRE || spellInfo->NameHash == SPELL_HASH_IMMOLATE || spellInfo->NameHash == SPELL_HASH_ICE_LANCE || spellInfo->NameHash == SPELL_HASH_PYROBLAST )
 				plus_damage = float2int32( float( plus_damage ) * float( 1.0f - ( ( td / 15000.0f ) / ( ( td / 15000.0f ) + dmgdoneaffectperc ) ) ) );
-		}
+		}*/
 	}
 
-//==========================================================================================
-//==============================Bonus Adding To Main Damage=================================
-//==========================================================================================
+	//==========================================================================================
+	//==============================Bonus Adding To Main Damage=================================
+	//==========================================================================================
+	
+	if( spellInfo->SpellGroupType )	// apply coefficient modifier
+	{
+		float modifier = 0;
+		SM_FFValue( caster->SM[SMT_SPD_BONUS][0], &modifier, spellInfo->SpellGroupType );
+		coefficient += modifier / 100.0f;
+		SM_PFValue( caster->SM[SMT_SPD_BONUS][1], &coefficient, spellInfo->SpellGroupType );
+	}
+
+	if(isdot)
+		coefficient += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
+
+	plus_damage = float2int32( float( plus_damage ) * coefficient );
+
 	int32 bonus_damage = plus_damage;
 
 	//bonus_damage +=pVictim->DamageTakenMod[school]; Bad copy-past i guess :P
-	int penalty_pct=0;
-	int dmg_bonus_pct=0;
 
 	if(spellInfo->SpellGroupType)
 	{
-		SM_FIValue(caster->SM[SMT_SPD_BONUS][0], &bonus_damage, spellInfo->SpellGroupType);
-		SM_FIValue(caster->SM[SMT_SPD_BONUS][1], &penalty_pct, spellInfo->SpellGroupType);
-		bonus_damage += bonus_damage*penalty_pct/100;
+		int dmg_bonus_pct=0;
 		SM_FIValue(caster->SM[SMT_DAMAGE_DONE][0], &bonus_damage, spellInfo->SpellGroupType);
-		
+		SM_FIValue(caster->SM[SMT_DAMAGE_DONE][1], &dmg_bonus_pct,spellInfo->SpellGroupType);
 		// Molten Fury - Should be done in SpellAuraOverrideClassScripts, but heh xD	
-		if( pVictim->GetHealthPct() < 35 && IsPlayer())
+		if(IsPlayer() && pVictim->GetHealthPct() < 35)
 			dmg_bonus_pct += (int) plr_shared_from_this()->m_moltenFuryDamageIncreasePct;
-
-		SM_FIValue(caster->SM[SMT_DAMAGE_DONE][1],&dmg_bonus_pct,spellInfo->SpellGroupType);
+		
 		bonus_damage += (base_dmg+bonus_damage)*dmg_bonus_pct/100;
 	}
 
