@@ -2218,7 +2218,7 @@ void Spell::SpellEffectWeapon(uint32 i)
 	default:
 		{
 			skill = 0;
-			DEBUG_LOG("WARNING: Could not determine skill for spell id %d (SPELL_EFFECT_WEAPON)", this->m_spellInfo->Id);
+			Log.Warning("Spell","Could not determine skill for spell id %d (SPELL_EFFECT_WEAPON)", this->m_spellInfo->Id);
 		}break;
 	}
 

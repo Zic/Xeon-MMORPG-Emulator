@@ -1130,8 +1130,7 @@ public:
 
 	void SetDiminishTimer(uint32 index);
 
-	uint32 AddAuraVisual(uint32 spellid, uint32 count, bool positive);
-	void SetAuraSlotLevel(uint32 slot, bool positive);
+	uint32 AddAuraVisual(AuraPointer au, uint32 count, bool positive);
 
 	bool HasVisibleAura(uint32 spellid);
 

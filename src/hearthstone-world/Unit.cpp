@@ -182,6 +182,8 @@ Unit::Unit()
 	memset(m_diminishCount, 0, DIMINISH_GROUPS*sizeof(uint16));
 	memset(m_diminishTimer, 0, DIMINISH_GROUPS*sizeof(uint16));
 	memset(m_auraStackCount, 0, MAX_AURAS);
+//	m_auraStackCount[0] = -1;
+
 	m_diminishActive = false;
 	pLastSpell = 0;
 	m_flyspeedModifier = 0;
@@ -3593,7 +3595,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 			} 
 
 			// add visual
-			AddAuraVisual(aur->GetSpellId(), 1, aur->IsPositive());
+			AddAuraVisual(aur, 1, aur->IsPositive());
 		}
 		else
 		{
@@ -5085,7 +5087,7 @@ bool Unit::IsPoisoned()
 	return false;
 }
 
-uint32 Unit::AddAuraVisual(uint32 spellid, uint32 count, bool positive)
+uint32 Unit::AddAuraVisual(AuraPointer au, uint32 count, bool positive)
 {
 	int32 free = -1;
 	uint32 start = positive ? 0 : MAX_POSITIVE_AURAS;
@@ -5096,7 +5098,7 @@ uint32 Unit::AddAuraVisual(uint32 spellid, uint32 count, bool positive)
 		if(free == -1 && m_auras[x] == 0)
 			free = x;
 
-		if(m_auras[x] != 0 && m_auras[x]->GetSpellId() == spellid)
+		if(m_auras[x] != 0 && m_auras[x]->GetSpellId() == au->GetSpellId())
 		{
 			// Increase count of this aura.
 			ModAuraStackCount(x, count);
@@ -5106,6 +5108,8 @@ uint32 Unit::AddAuraVisual(uint32 spellid, uint32 count, bool positive)
 
 	if(free == -1) return 0xFF;
 
+	// if we are here it means we didn't add the aura to our list yet, do it now.
+	m_auras[free] = au;
 	ModAuraStackCount(free, 1);
 	return free;
 }

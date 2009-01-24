@@ -1015,7 +1015,7 @@ void Aura::AddAuraVisual()
 	{
 		return;
 	}
-	m_visualSlot = m_target->AddAuraVisual(m_spellProto->Id, 1, IsPositive());
+	m_visualSlot = m_target->AddAuraVisual(TO_AURA(shared_from_this()), 1, IsPositive());
 	m_auraSlot = slot;
 	BuildAuraUpdate();
 }
