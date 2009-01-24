@@ -6174,13 +6174,6 @@ void Spell::SpellEffectEnchantHeldItem( uint32 i )
 		return;
 
 	uint32 Duration = 1800; // Needs to be found in dbc.. I guess?
-	switch( m_spellInfo->NameHash )
-	{
-		case SPELL_HASH_WINDFURY_TOTEM: // Windfury Totem
-		{   
-			Duration = 10;
-		}
-	}
 	EnchantEntry * Enchantment = dbcEnchant.LookupEntry( m_spellInfo->EffectMiscValue[i] );
 	
 	if( Enchantment == NULL )

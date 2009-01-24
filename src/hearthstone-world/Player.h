@@ -306,8 +306,8 @@ struct spells
 struct ActionButton
 {
 	uint16  Action;
-	uint8   Type;
 	uint8   Misc;
+	uint8   Type;
 };
 #pragma pack(pop)
 

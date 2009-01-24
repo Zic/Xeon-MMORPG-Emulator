@@ -4361,17 +4361,17 @@ void Spell::Heal(int32 amount)
 		{
 			int penalty_pct = 0;
 			int penalty_flt = 0;
-			SM_FIValue( u_caster->SM[SMT_PENALTY][0], &penalty_flt, m_spellInfo->SpellGroupType );
+			SM_FIValue( u_caster->SM[SMT_SPD_BONUS][0], &penalty_flt, m_spellInfo->SpellGroupType );
 			bonus += penalty_flt;
-			SM_FIValue( u_caster->SM[SMT_PENALTY][1], &penalty_pct, m_spellInfo->SpellGroupType );
-			bonus += bonus * ( penalty_pct / 100 );
+			SM_FIValue( u_caster->SM[SMT_SPD_BONUS][1], &penalty_pct, m_spellInfo->SpellGroupType );
+			bonus += bonus * penalty_pct / 100;
 			SM_FIValue( u_caster->SM[SMT_CRITICAL][0],&critchance,m_spellInfo->SpellGroupType);
 			SM_PIValue( u_caster->SM[SMT_CRITICAL][1],&critchance,m_spellInfo->SpellGroupType);
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 			int spell_flat_modifers=0;
 			int spell_pct_modifers=0;
-			SM_FIValue(u_caster->SM[SMT_PENALTY][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
-			SM_FIValue(u_caster->SM[SMT_PENALTY][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_SPD_BONUS][0],&spell_flat_modifers,m_spellInfo->SpellGroupType);
+			SM_FIValue(u_caster->SM[SMT_SPD_BONUS][1],&spell_pct_modifers,m_spellInfo->SpellGroupType);
 			if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 				printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,m_spellInfo->SpellGroupType);
 #endif

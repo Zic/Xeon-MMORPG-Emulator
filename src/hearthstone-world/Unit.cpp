@@ -1906,7 +1906,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 }
 
 //damage shield is a triggered spell by owner to atacker
-void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker, uint32 Damage)
+void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 {
 	//make sure we do not loop dmg procs
 	if(shared_from_this()==attacker || !attacker)
@@ -1925,7 +1925,7 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker, uint32 Damage)
 		{
 			if(PROC_MISC & (*i2).m_flags)
 			{
-				uint32 overkill = attacker->computeOverkill(Damage);
+				uint32 overkill = attacker->computeOverkill((*i2).m_damage);
 				data.Initialize(SMSG_SPELLDAMAGESHIELD);
 				data << GetGUID();
 				data << attacker->GetGUID();
@@ -3059,8 +3059,8 @@ else
 
 		if(realdamage > 0)
 		{
-			pVictim->HandleProcDmgShield(vproc,unit_shared_from_this(), realdamage);
-			HandleProcDmgShield(aproc,pVictim, realdamage);
+			pVictim->HandleProcDmgShield(vproc,unit_shared_from_this());
+			HandleProcDmgShield(aproc,pVictim);
 		}
 
 		if(resisted_dmg)
@@ -4120,8 +4120,8 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 
 	if(spellInfo->SpellGroupType)
 	{
-		SM_FIValue(caster->SM[SMT_PENALTY][0], &bonus_damage, spellInfo->SpellGroupType);
-		SM_FIValue(caster->SM[SMT_PENALTY][1], &penalty_pct, spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_SPD_BONUS][0], &bonus_damage, spellInfo->SpellGroupType);
+		SM_FIValue(caster->SM[SMT_SPD_BONUS][1], &penalty_pct, spellInfo->SpellGroupType);
 		bonus_damage += bonus_damage*penalty_pct/100;
 		SM_FIValue(caster->SM[SMT_DAMAGE_DONE][0], &bonus_damage, spellInfo->SpellGroupType);
 		

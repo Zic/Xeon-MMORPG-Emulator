@@ -3086,14 +3086,14 @@ void Aura::EventPeriodicHeal( uint32 amount )
 	{
 		int penalty_pct = 0;
 		int penalty_flt = 0;
-		SM_FIValue( c->SM[SMT_PENALTY][0], &penalty_flt, GetSpellProto()->SpellGroupType );
+		SM_FIValue( c->SM[SMT_SPD_BONUS][0], &penalty_flt, GetSpellProto()->SpellGroupType );
 		bonus += penalty_flt;
-		SM_FIValue( c->SM[SMT_PENALTY][1], &penalty_pct, GetSpellProto()->SpellGroupType );
-		bonus += bonus * ( penalty_pct / 100 );
+		SM_FIValue( c->SM[SMT_SPD_BONUS][1], &penalty_pct, GetSpellProto()->SpellGroupType );
+		bonus += bonus * penalty_pct / 100;
 #ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
 		int spell_flat_modifers=0;
 		int spell_pct_modifers=0;
-		SM_FIValue(c->SM[SMT_PENALTY][0],&spell_flat_modifers,GetSpellProto()->SpellGroupType);
+		SM_FIValue(c->SM[SMT_SPD_BONUS][0],&spell_flat_modifers,GetSpellProto()->SpellGroupType);
 		SM_FIValue(c->SM[SMT_PENALTY][1],&spell_pct_modifers,GetSpellProto()->SpellGroupType);
 		if(spell_flat_modifers!=0 || spell_pct_modifers!=0)
 			printf("!!!!!HEAL : spell dmg bonus(p=24) mod flat %d , spell dmg bonus(p=24) pct %d , spell dmg bonus %d, spell group %u\n",spell_flat_modifers,spell_pct_modifers,bonus,GetSpellProto()->SpellGroupType);
