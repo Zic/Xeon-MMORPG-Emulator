@@ -821,7 +821,10 @@ void Channel::SendToAll(WorldPacket * data)
 {
 	Guard guard(m_lock);
 	for(MemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-		itr->first->GetSession()->SendPacket(data);
+	{
+		if( itr->first->GetSession() )
+			itr->first->GetSession()->SendPacket(data);
+	}
 }
 
 void Channel::SendToAll(WorldPacket * data, PlayerPointer plr)
@@ -829,7 +832,7 @@ void Channel::SendToAll(WorldPacket * data, PlayerPointer plr)
 	Guard guard(m_lock);
 	for(MemberMap::iterator itr = m_members.begin(); itr != m_members.end(); ++itr) 
 	{
-		if (itr->first != plr)
+		if ( itr->first != plr && itr->first->GetSession() )
 			itr->first->GetSession()->SendPacket(data);
 	}
 }
