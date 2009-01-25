@@ -151,7 +151,7 @@ void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 		m_flagHolders[plr->GetTeam()] = 0;
 		plr->m_bgHasFlag = 0;
 
-		/* remove flag aura from PlayerPointer /
+		/* remove flag aura from PlayerPointer */
 		plr->RemoveAura(23333+(plr->GetTeam() * 2));
 
 		/* capture flag points */

@@ -852,34 +852,20 @@ void CBattleground::UpdatePvPData()
 
 void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 {
+	if(IsArena() && !m_ended)
+		return;
+
 	data->Initialize(MSG_PVP_LOG_DATA);
 	data->reserve(10*(m_players[0].size()+m_players[1].size())+50);
 
 	BGScore * bs;
+	*data << uint8(IsArena());
 	if(IsArena())
-	{
-		// disabled until proper structure is discovered to prevent client error 132
-		/*
-		if(!m_ended)
-		{
-			return;
-		}
-
-		// Is arena?
-		*data << uint8(1);
-		if(!Rated())
-		{
-			*data << uint32(3000+1+1);
-			*data << uint32(0);
-			*data << uint8(0);
-			*data << uint32(3000+1+1);
-			*data << uint32(0);
-			*data << uint8(0);
-		}
-		else
-		{
+	{	// send arena teams info
+		ArenaTeam * teams[2] = {NULL,NULL};
+		uint32 ratingNegativeChange[2] = {0,0}, ratingPositiveChange[2] = {0,0};	// Value in ratingNegativeChange is displayed with minus sign in the client
+		if(Rated()){
 			// Grab some arena teams
-			ArenaTeam * teams[2] = {NULL,NULL};
 			for(uint32 i = 0; i < 2; ++i)
 			{
 				for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
@@ -890,101 +876,69 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 				}
 			}
 
-			// team id, rating?, name
-
 			if(teams[0])
 			{
-				*data << uint32(teams[0]->m_id);
-				*data << uint32(0);
-//				*data << teams[0]->m_name;
-				*data << uint8(0);
+				// todo - rating change
 			}
-			else
-			{
-				*data << uint32(0);
-				*data << uint32(0);
-				*data << uint8(0);
-			}
-
 			if(teams[1])
 			{
-				*data << uint32(teams[1]->m_id);
-				*data << uint32(0);
-//				*data << teams[1]->m_name;
-				*data << uint8(0);
-			}
-			else
-			{
-				*data << uint32(0);
-				*data << uint32(0);
-				*data << uint8(0);
+				// todo - rating change
 			}
 		}
+		*data << ratingNegativeChange[0];
+		*data << ratingPositiveChange[0];
+		*data << ratingNegativeChange[1];
+		*data << ratingPositiveChange[1];
 
-		*data << uint8(1);
+		if(teams[0])
+			*data << teams[0]->m_name;
+		else
+			*data << uint8(0);
+
+		if(teams[1])
+			*data << teams[1]->m_name;
+		else
+			*data << uint8(0);
+	}
+
+	*data << uint8(m_ended);
+	if(m_ended)
 		*data << uint8(m_losingteam);
 
-		*data << uint32(m_players[0].size() + m_players[1].size());
-		for(uint32 i = 0; i < 2; ++i)
-		{
-			for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
-			{
-				*data << (*itr)->GetGUID();
-				bs = &(*itr)->m_bgScore;
-				*data << bs->KillingBlows;
+	size_t pos = data->wpos();
+	*data << uint32(0); //will be set to correct number later //uint32(m_players[0].size() + m_players[1].size());
 
-				*data << uint8((*itr)->m_bgTeam);
-				*data << bs->DamageDone;
-				*data << bs->HealingDone;
-
-				*data << uint32(1);			// count of values after this
-				*data << uint32(0);			// rating change		// NOT RLY! LOL!
-			}
-		}*/
-	}
-	else
+	uint32 count = 0;
+	uint32 fcount = BGPvPDataFieldCount[GetType()];
+	for(uint32 i = 0; i < 2; ++i)
 	{
-		*data << uint8(0);
-		if(m_ended)
+		for(set<PlayerPointer>::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 		{
-			*data << uint8(1);
-			*data << uint8(m_losingteam);
-		}
-		else
-			*data << uint8(0);		// If the game has ended - this will be 1
+			if( (*itr)->m_isGmInvisible ) continue;
+			*data << (*itr)->GetGUID();
+			bs = &(*itr)->m_bgScore;
+			*data << bs->KillingBlows;
 
-		*data << uint32(m_players[0].size() + m_players[1].size());
-
-		uint32 count = 0;
-		uint32 fcount = BGPvPDataFieldCount[GetType()];
-		for(uint32 i = 0; i < 2; ++i)
-		{
-			for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
+			if(IsArena())
+				*data << uint8((*itr)->m_bgTeam);
+			else
 			{
-				if( (*itr)->m_isGmInvisible ) continue;
-				*data << (*itr)->GetGUID();
-				bs = &(*itr)->m_bgScore;
-
-				*data << bs->KillingBlows;
 				*data << bs->HonorableKills;
 				*data << bs->Deaths;
 				*data << bs->BonusHonor;
-				*data << bs->DamageDone;
-				*data << bs->HealingDone;
-
-				*data << fcount;
-				for(uint32 j = 0; j < fcount; ++j)
-					*data << bs->MiscData[j];
-
-				count++;
 			}
-		}
-		if( !m_ended )
-			*(uint32*)&data->contents()[2] = count;
-		else
-			*(uint32*)&data->contents()[3] = count;
-	}
+			*data << bs->DamageDone;
+			*data << bs->HealingDone;
 
+			*data << fcount;	// count of values after this
+			for(uint32 j = 0; j < fcount; ++j)
+				*data << bs->MiscData[j];
+
+			count++;
+		}
+	}
+	// Have to set correct number of players sent in log since we skip invisible GMs
+	*(uint32*)&data->contents()[pos] = count;
 }
 
 void CBattleground::AddPlayer(PlayerPointer plr, uint32 team)
