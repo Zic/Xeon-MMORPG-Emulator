@@ -772,7 +772,7 @@ bool ChatHandler::HandleGuildSetLeaderCommand(const char *args, WorldSession *m_
 	}
 
 	Guild *pGuild = plr->m_playerInfo->guild;
-	pGuild->ChangeGuildMaster(new_leader, NULL);
+	pGuild->ChangeGuildMaster(new_leader, plr->GetSession());
 	SystemMessage(m_session, "Guild leader changed.");
 	return true;
 }
