@@ -97,7 +97,6 @@ typedef shared_ptr<World> WorldPointer;
 #define NULLGOB shared_ptr<GameObject>()
 #define NULLPLR shared_ptr<Player>()
 #define NULLOBJ shared_ptr<Object>()
-#define NULLGOB shared_ptr<GameObject>()
 #define NULLUNIT shared_ptr<Unit>()
 #define NULLPET shared_ptr<Pet>()
 #define NULLITEM shared_ptr<Item>()
