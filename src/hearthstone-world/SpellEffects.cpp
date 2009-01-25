@@ -2940,15 +2940,20 @@ void Spell::SpellEffectOpenLockItem(uint32 i)
 	if( gameObjTarget->GetByte(GAMEOBJECT_BYTES_1, 1) == GAMEOBJECT_TYPE_CHEST)
 	{
 		lootmgr.FillGOLoot(&gameObjTarget->m_loot,gameObjTarget->GetEntry(), gameObjTarget->GetMapMgr() ? (gameObjTarget->GetMapMgr()->iInstanceMode ? true : false) : false);
-		TO_PLAYER( m_caster )->SendLoot( gameObjTarget->GetGUID(), 1 );
+		if(gameObjTarget->m_loot.items.size() > 0)
+		{
+			TO_PLAYER(caster)->SendLoot(gameObjTarget->GetGUID(),LOOT_CORPSE);
+		}
 		gameObjTarget->SetUInt32Value(GAMEOBJECT_FLAGS, 1);
 	}
 
 	if( gameObjTarget->GetByte(GAMEOBJECT_BYTES_1, 1) == GAMEOBJECT_TYPE_DOOR)
+	{
 		gameObjTarget->SetUInt32Value(GAMEOBJECT_FLAGS, 33);
 
-	if(gameObjTarget->GetMapMgr()->GetMapInfo()->type==INSTANCE_NULL)//dont close doors for instances
-		sEventMgr.AddEvent(gameObjTarget,&GameObject::EventCloseDoor, EVENT_GAMEOBJECT_DOOR_CLOSE,10000,1,0);
+		if(gameObjTarget->GetMapMgr()->GetMapInfo()->type==INSTANCE_NULL)//dont close doors for instances
+			sEventMgr.AddEvent(gameObjTarget,&GameObject::EventCloseDoor, EVENT_GAMEOBJECT_DOOR_CLOSE,10000,1,0);
+	}
 
 	sEventMgr.AddEvent(gameObjTarget, &GameObject::Despawn, (uint32)1, EVENT_GAMEOBJECT_ITEM_SPAWN, 6*60*1000, 1, 0);
 }
