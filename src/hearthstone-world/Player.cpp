@@ -385,7 +385,10 @@ void Player::Init()
 		m_lastMoveType = 0;
 		m_tempSummon = NULLCREATURE;
 		m_spellcomboPoints = 0;
-		memset( &m_pendingBattleground, 0, sizeof(BattlegroundPointer) * 3);
+		for(uint8 i = 0; i < 3 ; ++i)
+		{
+			m_pendingBattleground[i] = NULLBATTLEGROUND;
+		}
 		m_deathVision = false;
 		m_retainComboPoints = false;
 		last_heal_spell = NULL;
