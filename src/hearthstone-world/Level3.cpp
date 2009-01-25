@@ -101,6 +101,14 @@ bool ChatHandler::HandleClearCooldownsCommand(const char *args, WorldSession *m_
 		BlueSystemMessage(m_session, "Cleared all Shaman cooldowns.");
 		return true;
 	}
+	if(plr->getClass()==DEATHKNIGHT)
+	{
+		plr->ClearCooldownsOnLine(770, guid);
+		plr->ClearCooldownsOnLine(771, guid);
+		plr->ClearCooldownsOnLine(772, guid);
+		BlueSystemMessage(m_session, "Cleared all Death Knight cooldowns.");
+		return true;
+	}
 	if(plr->getClass()==MAGE)
 	{
 		plr->ClearCooldownsOnLine(6, guid);

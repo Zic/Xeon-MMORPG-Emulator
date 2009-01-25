@@ -273,7 +273,7 @@ enum MsTimeVariables
 #include <unordered_map>
 #include <unordered_set>
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1500 && !_HAS_TR1
-#pragma error "FATAL ERROR: Please install Service Pack 1"
+#pragma message ("FATAL ERROR: Please install Service Pack 1 for Visual Studio 2008")
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER < 1500
 #include <boost/tr1/memory.hpp>
 #include <boost/tr1/unordered_map.hpp>

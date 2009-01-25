@@ -661,6 +661,7 @@ public:
 	void SpellAuraSetPhase(bool apply);
 	void SpellAuraIncreaseAPByAttribute(bool apply);
 	void SpellAuraVehiclePassenger(bool apply);
+	void SpellAuraReduceEffectDuration(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 
@@ -737,6 +738,7 @@ public:
 private:
 	uint32 GetCasterFaction() { return m_casterfaction; }
 	void SetCasterFaction(uint32 faction){ m_casterfaction = faction; }
+	HEARTHSTONE_INLINE void DurationPctMod(uint32 mechanic);
 
 	HEARTHSTONE_INLINE bool IsInrange(float x1,float y1, float z1, ObjectPointer o,float square_r)
 	{

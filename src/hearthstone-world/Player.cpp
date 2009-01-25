@@ -134,6 +134,10 @@ void Player::Init()
 	LfmDungeonId=0;
 	LfmType=0;
 
+	for(int32 i=0;i<NUM_MECHANIC;i++){
+		MechanicDurationPctMod[i] = 0;
+	}
+
 	m_invitersGuid		  = 0;
 
 	m_currentMovement	   = MOVE_UNROOT;
@@ -6963,6 +6967,12 @@ void Player::ResetAllCooldowns()
 			ClearCooldownsOnLine(56, guid);
 			ClearCooldownsOnLine(78, guid);
 			ClearCooldownsOnLine(613, guid);
+		} break;
+		case DEATHKNIGHT:
+		{
+			ClearCooldownsOnLine(770, guid);
+			ClearCooldownsOnLine(771, guid);
+			ClearCooldownsOnLine(772, guid);
 		} break;
 		case SHAMAN:
 		{

@@ -33,6 +33,7 @@ bool SERVER_DECL Rand(float);
 #define SPELL_GROUPS	96
 #define SPELL_MODIFIERS 30
 #define DIMINISH_GROUPS	13
+#define NUM_MECHANIC 31
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 
@@ -939,6 +940,7 @@ public:
 	void Energize(UnitPointer target,uint32 SpellId, uint32 amount, uint32 type);
 
 	uint32 SchoolCastPrevent[7];
+	int32 MechanicDurationPctMod[NUM_MECHANIC];
 	int32 GetDamageDoneMod(uint32 school);
 	float GetDamageDonePctMod(uint32 school);
 	float DamageDoneModPCT[7];

@@ -252,9 +252,9 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//229 Apply Aura:Reduces the damage your pet takes from area of effect attacks http://www.thottbot.com/s35694
 		&Aura::SpellAuraIncreaseMaxHealth,//230 Increase Max Health (commanding shout);
         &Aura::SpellAuraNULL,//231 curse a target http://www.thottbot.com/s40303
-        &Aura::SpellAuraNULL,//232 // Reduces duration of Magic effects by $s2%.
+        &Aura::SpellAuraReduceEffectDuration,//232 // Movement Slowing Effect Duration // Reduces duration of Magic effects by $s2%.
         &Aura::SpellAuraNULL,//233 // Beer Goggles
-        &Aura::SpellAuraNULL,//234 Apply Aura: Reduces Silence or Interrupt effects, Item spell magic http://www.thottbot.com/s42184
+        &Aura::SpellAuraReduceEffectDuration,//234 // modifies the duration of all (miscValue mechanic) effects used against you by % http://www.wowhead.com/?spell=16254
 		&Aura::SpellAuraNULL,//235 33206 Instantly reduces a friendly target's threat by $44416s1%, reduces all damage taken by $s1% and increases resistance to Dispel mechanics by $s2% for $d.
 		&Aura::SpellAuraVehiclePassenger,//236
 		&Aura::SpellAuraModSpellDamageFromAP,//237 Mod Spell Damage from Attack Power
@@ -634,6 +634,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	else
 		p_target = NULLPLR;
 
+	DurationPctMod(GetMechanic());
 	/*if( caster->GetTypeId() == TYPEID_PLAYER && target->GetTypeId() == TYPEID_PLAYER )
 	{
 		if( ( ( PlayerPointer )caster )->DuelingWith == ( ( PlayerPointer )target ) )
@@ -1068,6 +1069,17 @@ void Aura::BuildAuraUpdate()
 	}
 
 	m_target->SendMessageToSet(&data, true);
+}
+
+// Modifies current aura duration based on mechanic specified
+void Aura::DurationPctMod(uint32 mechanic)
+{
+	if(p_target != NULLPLR && mechanic < NUM_MECHANIC && GetDuration() > 0){
+		int32 DurationModifier = p_target->MechanicDurationPctMod[mechanic];
+		if(DurationModifier < - 100)
+			DurationModifier = -100; // Can't reduce by more than 100%
+		SetDuration((GetDuration()*(100+DurationModifier))/100);
+	}
 }
 
 void Aura::EventUpdateCreatureAA(float r)
@@ -8981,5 +8993,22 @@ void Aura::SpellAuraVehiclePassenger(bool apply)
 	{
 		if( m_target && m_target->m_CurrentVehicle )
 			m_target->m_CurrentVehicle->RemovePassenger(m_target);
+	}
+}
+
+void Aura::SpellAuraReduceEffectDuration(bool apply)
+{
+	if(!p_target)
+		return;
+	int32 val;
+	if(apply){
+		SetPositive();
+		val = mod->m_amount; // TODO Only maximum effect should be used for Silence or Interrupt effects reduction
+	}
+	else{
+		val = -mod->m_amount;
+	}
+	if(mod->m_miscValue > 0 && mod->m_miscValue < NUM_MECHANIC){
+		p_target->MechanicDurationPctMod[mod->m_miscValue] += val;
 	}
 }
