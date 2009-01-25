@@ -4274,7 +4274,6 @@ void ApplyNormalFixes()
 
 		uint32 result = 0;
 
-		uint32 rank = 0;
 		uint32 type = 0;
 		uint32 namehash = 0;
 
@@ -4539,19 +4538,27 @@ void ApplyNormalFixes()
 			}
 		}
 
-		//stupid spell ranking problem
-		if( strstr( sp->Name, "Apprentice "))
-			sp->RankNumber = 1;
-		else if( strstr( sp->Name, "Journeyman "))
-			sp->RankNumber = 2;
-		else if( strstr( sp->Name, "Expert "))
-			sp->RankNumber = 3;
-		else if( strstr( sp->Name, "Artisan "))
-			sp->RankNumber = 4;
-		else if( strstr( sp->Name, "Master "))
-			sp->RankNumber = 5;
-		else if( strstr( sp->Name, "Grand Master ") ) 
-				sp->RankNumber = 6;
+		// parse rank text
+		if( !sscanf( sp->Rank, "Rank %d", (unsigned int*)&sp->RankNumber) )
+		{
+			const char* ranktext = sp->Rank;
+			uint32 rank = 0;
+
+			//stupid spell ranking problem
+			if( strstr( ranktext, "Apprentice"))
+				rank = 1;
+			else if( strstr( ranktext, "Journeyman"))
+				rank = 2;
+			else if( strstr( ranktext, "Expert"))
+				rank = 3;
+			else if( strstr( ranktext, "Artisan"))
+				rank = 4;
+			else if( strstr( ranktext, "Master"))
+				rank = 5;
+			else if( strstr( ranktext, "Grandmaster"))
+				rank = 6;
+			sp->RankNumber = rank;
+		}
 
 		if(sp->spellLevel==0)
 		{
