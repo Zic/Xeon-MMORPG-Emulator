@@ -884,7 +884,7 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 			{
 				for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
 				{
-					teams[i] = (*itr)->m_playerInfo->arenaTeam[ ((Arena*)this)->GetArenaTeamType() ];
+					teams[i] = (*itr)->m_playerInfo->arenaTeam[ CAST(Arena, shared_from_this())->GetArenaTeamType() ];
 					if(teams[i])
 						break;
 				}

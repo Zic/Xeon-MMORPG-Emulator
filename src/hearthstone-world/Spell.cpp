@@ -3908,10 +3908,8 @@ exit:*/
 
 	//scripted shit
 	if( m_spellInfo->NameHash == SPELL_HASH_STEADY_SHOT )
-	{	//A steady shot that causes ${$RAP*0.3+$m1} damage. 
+	{	// todo: add ammo
 		//	Actual Equation (http://www.wowwiki.com/Steady_Shot)
-		//		* The tooltip is proven to be wrong and the following is the best player worked out formula so far with data taken from [1]
-		//		* Formula: DamagePercentageBonus*RangedWeaponSpecialization*(150 + WeaponDamage/WeaponSpeed*2.8 + 0.2*RAP + [Dazed: 175]) 
 		if(i==0 && u_caster)
 		{
 			if( p_caster != NULL )
@@ -3919,12 +3917,12 @@ exit:*/
 				shared_ptr<Item>it;
 				if(p_caster->GetItemInterface())
 				{
-					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 					if(it)
-						value += float2int32(150 + float(it->GetProto()->Damage[0].Min)/float(it->GetProto()->Delay)*2.8f);
+						value += float2int32(float((it->GetProto()->Damage[0].Min + it->GetProto()->Damage[0].Max) / 2)/float(it->GetProto()->Delay)*2800.0f);
 				}
 			}
-			if(target && target->HasNegativeAura(CREATURE_SPELL_TO_DAZE))
+			if(target && target->HasActiveAura(5116)) //Concussive Shot (Dazed)
 				value += 175;
 			value += (uint32)(u_caster->GetRAP()*0.2);
 		}

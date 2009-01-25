@@ -288,6 +288,20 @@ void GenerateNameHashesFile()
 	fclose(f);
 }
 
+// Copies effect number 'fromEffect' in 'fromSpell' to effect number 'toEffect' in 'toSpell'
+void CopyEffect(SpellEntry *fromSpell, uint8 fromEffect, SpellEntry *toSpell, uint8 toEffect)
+{
+	if(!fromSpell || !toSpell || fromEffect > 2 || toEffect > 2)
+		return;
+	uint32 *from = fromSpell->Effect;
+	uint32 *to = toSpell->Effect;
+	// Copy 20 values starting at Effect
+	for(uint8 index = 0;index < 20;index++)
+	{
+		to[index * 3 + toEffect] = from[index * 3 + fromEffect];
+	}
+}
+
 void ApplySingleSpellFixes(SpellEntry *sp)
 {
 	if(sp != NULL)
@@ -2152,6 +2166,20 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->c_is_flags |=	SPELL_FLAG_IS_EXPIREING_WITH_PET | SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET | PROC_TARGET_SELF;
 				}break;
 		
+			case 56641:
+			case 34120:
+			case 49051:
+			case 49052: //Steady Shot cast time fix
+				{
+						sp->CastingTimeIndex = 5; // Set 2 sec cast time
+				}break;
+
+			case 61846:
+			case 61847: // Aspect of the Dragonhawk
+				{	// need to copy Mod Dodge Percent aura from a separate spell
+					CopyEffect(dbcSpell.LookupEntryForced(61848), 0, sp, 2);
+				}break;
+
 			//Hunter - Unleashed Fury
 			case  19616:
 				{

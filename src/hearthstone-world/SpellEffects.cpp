@@ -1047,16 +1047,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 	//curse of agony(18230) = periodic damage increased in 
 	//flag 2031678
-	case 34120:
-		{//steady shot
-		if(unitTarget)
-		if(unitTarget->IsDazed())
-		{
-//			u_caster->SpellNonMeleeDamageLog(unitTarget,spellId,damage,false);
-			u_caster->SpellNonMeleeDamageLog(unitTarget,spellId,damage,pSpellId==0);
-		}
-		
-		}break;
 	case 1454://life tap
 	case 1455:
 	case 1456:
