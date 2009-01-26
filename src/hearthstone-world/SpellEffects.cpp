@@ -308,9 +308,11 @@ void Spell::SpellEffectInstantKill(uint32 i)
 				return;
 		}
 	}
-	//instant kill effects don't have a log
-	//m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH), true);
 	m_caster->DealDamage(unitTarget, unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH), 0, 0, 0);
+	uint8 buffer[100];
+	StackPacket data(SMSG_SPELLINSTAKILLLOG, buffer, 100);
+	data << m_caster->GetGUID() << unitTarget->GetGUID() << spellId;
+	m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school

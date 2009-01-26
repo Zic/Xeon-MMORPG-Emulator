@@ -71,7 +71,7 @@
 
 <xsl:template match="platform">
 </xsl:template>
-<xsl:template match="buildhost>
+<xsl:template match="buildhost">
 </xsl:template>
 <xsl:template match="uptime">
 </xsl:template>
