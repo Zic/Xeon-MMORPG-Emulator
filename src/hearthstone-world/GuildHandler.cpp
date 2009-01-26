@@ -1509,7 +1509,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 			CharacterDatabase.Execute("REPLACE INTO guild_bankitems VALUES(%u, %u, %u, %u)", 
 				pGuild->GetGuildId(), (uint32)pTab->iTabId, (uint32)dest_bankslot, pSourceItem->GetLowGUID());
 
-			/* remove the item's association with the PlayerPointer /
+			/* remove the item's association with the PlayerPointer */
 			pSourceItem->SetOwner(NULL);
 			pSourceItem->SetUInt32Value(ITEM_FIELD_OWNER, 0);
 			pSourceItem->SaveToDB(0, 0, true, NULL);
