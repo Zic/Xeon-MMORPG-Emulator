@@ -1838,7 +1838,9 @@ public:
     PlayerPointer 			p_caster;
     ObjectPointer			m_caster;
 
-    // 15007 = resurecting sickness
+	bool SpellEffectUpdateQuest(uint32 questid);
+
+	// 15007 = resurecting sickness
 	
 	// This returns SPELL_ENTRY_Spell_Dmg_Type where 0 = SPELL_DMG_TYPE_NONE, 1 = SPELL_DMG_TYPE_MAGIC, 2 = SPELL_DMG_TYPE_MELEE, 3 = SPELL_DMG_TYPE_RANGED
 	// It should NOT be used for weapon_damage_type which needs: 0 = MELEE, 1 = OFFHAND, 2 = RANGED
