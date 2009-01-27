@@ -34,6 +34,7 @@ extern SERVER_DECL SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZ
 extern SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							WorldMapInfoStorage;
 extern SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
 extern SERVER_DECL SQLStorage<AchievementReward, HashMapStorageContainer<AchievementReward> >	AchievementRewardStorage;
+extern SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >   ProfessionDiscoveryStorage;
 
 void Storage_FillTaskList(TaskList & tl);
 void Storage_Cleanup();

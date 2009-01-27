@@ -2004,25 +2004,53 @@ void Spell::SpellEffectCreateItem(uint32 i) // Create item
 			break;
 		}
 
-		if (skill && skill->skilline == SKILL_ALCHEMY)
+		if (skill)
 		{
-			//Potion Master
-			if (strstr(m_itemProto->Name1, "Potion"))
+			// Alchemy Specializations
+			// http://www.wowwiki.com/Alchemy#Alchemy_Specializations
+			if ( skill->skilline == SKILL_ALCHEMY && Rand(15) )
 			{
-				if(p_caster->HasSpell(28675)) 
-					while (Rand(20) && item_count<10) item_count++;
+				//Potion Master and Elixer Master (Elixers and Flasks)
+				if( ( p_caster->HasSpell(28675) && m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_POTION ) || 
+					( p_caster->HasSpell(28677) && ( m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_ELIXIR || m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_FLASK ) ))
+				{
+					for(int x=0; x<5; x++)
+					{
+						SpellEntry *spellInfo;
+						uint32 spellid = m_itemProto->Spells[x].Id;
+						if ( spellid ) 
+						{
+							spellInfo = dbcSpell.LookupEntry(spellid);
+							if ( spellInfo )
+							{
+								item_count = item_count + rand() % 4 + 1;
+								break;
+							}
+						}
+					}
+				}
+				//Transmutation Master
+				else if ( p_caster->HasSpell(28672) && m_spellInfo->Category == 310 )
+				{
+					item_count = item_count + rand() % 4 + 1;
+				}
 			}
-			//Elixir Master
-			if (strstr(m_itemProto->Name1, "Elixir") || strstr(m_itemProto->Name1, "Flask"))
+	
+			// Profession Discoveries
+			ProfessionDiscovery * pf = ProfessionDiscoveryStorage.LookupEntry( m_spellInfo->Id );
+			if ( pf && !p_caster->HasSpell( pf->SpellToDiscover ) && Rand( pf->Chance )&& p_caster->_GetSkillLineCurrent( skill->skilline ) >= pf->SkillValue )
 			{
-				if(p_caster->HasSpell(28677)) 
-					while (Rand(20) && item_count<10) item_count++;
-			}
-			//Transmutation Master
-			if (m_spellInfo->Category == 310)
-			{
-				if(p_caster->HasSpell(28672)) 
-					while (Rand(20) && item_count<10) item_count++;
+				// if something discovered learn p_caster that recipe and broadcast message
+				SpellEntry * se = dbcSpell.LookupEntry( pf->SpellToDiscover );
+				if ( se != NULL )
+				{
+					p_caster->addSpell( pf->SpellToDiscover );
+					WorldPacket * data;
+					char msg[256];
+					sprintf( msg, "%sDISCOVERY! %s has discovered how to create %s.|r", MSG_COLOR_GOLD, p_caster->GetName(), se->Name );
+					data = sChatHandler.FillMessageData( CHAT_MSG_SYSTEM, LANG_UNIVERSAL,  msg, p_caster->GetGUID(), 0 );
+					p_caster->GetMapMgr()->SendChatMessageToCellPlayers( p_caster, data, 2, 1, LANG_UNIVERSAL, p_caster->GetSession() );
+				}
 			}
 		}
 

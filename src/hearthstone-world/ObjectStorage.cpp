@@ -45,6 +45,7 @@ const char * gFishingFormat								= "uuu";
 const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
 const char * gZoneGuardsFormat							= "uuu";
 const char * gAchievementRewardFormat					= "uuuu";
+const char * gProfessionDiscoveryFormat					= "uuuu";
 
 /** SQLStorage symbols
  */
@@ -60,6 +61,7 @@ SERVER_DECL SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					Npc
 SERVER_DECL SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >		GraveyardStorage;
 SERVER_DECL SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >			TeleportCoordStorage;
 SERVER_DECL SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >		FishingZoneStorage;
+SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >	ProfessionDiscoveryStorage;
 SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							WorldMapInfoStorage;
 SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
 
@@ -511,6 +513,7 @@ void Storage_FillTaskList(TaskList & tl)
 	make_task(WorldMapInfoStorage, MapInfo, ArrayStorageContainer, "worldmap_info", gWorldMapInfoFormat);
 	make_task(ZoneGuardStorage, ZoneGuardEntry, HashMapStorageContainer, "zoneguards", gZoneGuardsFormat);
 	make_task(AchievementRewardStorage, AchievementReward, HashMapStorageContainer, "achievement_rewards", gAchievementRewardFormat);
+	make_task(ProfessionDiscoveryStorage, ProfessionDiscovery, HashMapStorageContainer, "professiondiscoveries", gProfessionDiscoveryFormat);
 }
 
 void Storage_Cleanup()
@@ -543,6 +546,7 @@ void Storage_Cleanup()
 	CreatureProtoStorage.Cleanup();
 	AreaTriggerStorage.Cleanup();
 	ItemPageStorage.Cleanup();
+	ProfessionDiscoveryStorage.Cleanup();
 	QuestStorage.Cleanup();
 	GraveyardStorage.Cleanup();
 	TeleportCoordStorage.Cleanup();

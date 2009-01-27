@@ -61,6 +61,13 @@ struct AchievementReward
 	uint32 ItemID;
 };
 
+struct ProfessionDiscovery
+{
+	uint32 SpellId;
+	uint32 SpellToDiscover;
+	uint32 SkillValue;
+	float Chance;
+};
 struct ItemPage
 {
     uint32 id;
