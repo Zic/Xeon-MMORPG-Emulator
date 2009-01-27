@@ -4046,13 +4046,7 @@ int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 	uint32 positive = luaL_checkint(L,3);
 	if(ptr && spellid)
 	{
-		SpellEntry * spinfo = dbcSpell.LookupEntry(spellid);
-		if(spinfo)
-		{
-			AuraPointer au = AuraPointer(new Aura( spinfo, std::min(GetDuration(dbcSpellDuration.LookupEntry(spinfo->DurationIndex)), (uint32)1000), TO_OBJECT(ptr), TO_UNIT(ptr)));
-			if(au)
-				ptr->AddAuraVisual(au, count,((positive > 0)? true : false));
-		}
+		ptr->AddAuraVisual(spellid, count,((positive > 0)? true : false));
 	}
 	return 0;
 }
