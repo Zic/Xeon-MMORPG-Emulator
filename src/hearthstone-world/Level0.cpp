@@ -148,7 +148,10 @@ bool ChatHandler::HandleCommandsCommand(const char* args, WorldSession *m_sessio
 
 bool ChatHandler::HandleStartCommand(const char* args, WorldSession *m_session)
 {
-	PlayerPointer m_plyr = getSelectedChar(m_session, false);
+	PlayerPointer m_plyr = TO_PLAYER(getSelectedChar(m_session, false));
+	if( m_plyr == NULL)
+		return false;
+
 	uint32 raceid = m_plyr->getRace();
 	uint32 classid = m_plyr->getClass();
 	std::string argument = args;

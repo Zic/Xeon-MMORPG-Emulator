@@ -3454,13 +3454,14 @@ void AIInterface::UpdateCivilian()
 	}
 
 	ZoneGuardEntry * zg = ZoneGuardStorage.LookupEntry( target->GetZoneId() );
-	uint32 guardId = zg ? (target->GetTeam() ? zg->HordeEntry : zg->AllianceEntry) : 0;
+	uint32 guardId = zg ? ( target->GetTeam() ? zg->AllianceEntry : zg->HordeEntry ) : 0;
 	if(guardId == 0)
 	{
 		if( target->GetTeam() )
 			guardId = 3296; // Orgrimmar Grunt
 		else
 			guardId = 68; // Stormwind City Guard
+		Log.Debug("ZoneGuards","No zone guard specified for zone %u, using default guardId %u", target->GetZoneId(), guardId);
 	}
 
 	CreatureProto * cp = CreatureProtoStorage.LookupEntry( guardId );
