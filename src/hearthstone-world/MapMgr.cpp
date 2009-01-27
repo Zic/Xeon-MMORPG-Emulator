@@ -609,7 +609,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 {
 	// Items and containers are of no interest for us
-	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != shared_from_this() )
+	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != CAST(MapMgr,shared_from_this()) )
 	{
 		return;
 	}
@@ -727,7 +727,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 
 				curObj->RemoveInRangeObject(obj);
 
-				if( obj->GetMapMgr() != shared_from_this() )
+				if( obj->GetMapMgr() != CAST(MapMgr,shared_from_this()) )
 				{
 					/* Something removed us. */
 					return;
@@ -740,7 +740,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 	///////////////////////////
 	// Get new cell coordinates
 	///////////////////////////
-	if(obj->GetMapMgr() != shared_from_this())
+	if(obj->GetMapMgr() != CAST(MapMgr,shared_from_this()))
 	{
 		/* Something removed us. */
 		return;
@@ -1177,7 +1177,7 @@ void MapMgr::_UpdateObjects()
 		eit = it;
 		++it;
 		_processQueue.erase(eit);
-		if(plyr->GetMapMgr() == shared_from_this())
+		if(plyr->GetMapMgr() == CAST(MapMgr,shared_from_this()))
 			plyr->ProcessPendingUpdates(&m_updateBuildBuffer, &m_compressionBuffer);
 	}
 }
@@ -1734,7 +1734,7 @@ void MapMgr::_PerformObjectDuties()
 			// Don't update players not on our map.
 			// If we abort in the handler, it means we will "lose" packets, or not process this.
 			// .. and that could be diasterous to our client :P
-			if(session->GetPlayer() && (session->GetPlayer()->GetMapMgr() != shared_from_this() && session->GetPlayer()->GetMapMgr() != NULLMAPMGR))
+			if(session->GetPlayer() && (session->GetPlayer()->GetMapMgr() != CAST(MapMgr,shared_from_this()) && session->GetPlayer()->GetMapMgr() != NULLMAPMGR))
 			{
 				continue;
 			}
@@ -1761,7 +1761,7 @@ void MapMgr::EventCorpseDespawn(uint64 guid)
 	if(pCorpse == NULLCORPSE)	// Already Deleted
 		return;
 
-	if(pCorpse->GetMapMgr() != shared_from_this())
+	if(pCorpse->GetMapMgr() != CAST(MapMgr,shared_from_this()))
 		return;
 
 	pCorpse->Despawn();

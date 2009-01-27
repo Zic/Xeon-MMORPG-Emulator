@@ -1689,7 +1689,7 @@ void Player::_SavePet(QueryBuffer * buf)
 	else
 		buf->AddQuery("DELETE FROM playerpets WHERE ownerguid=%u", GetUInt32Value(OBJECT_FIELD_GUID));
 
-	if(m_Summon&&m_Summon->IsInWorld()&&m_Summon->GetPetOwner()==shared_from_this())	// update PlayerPets array with current pet's info
+	if(m_Summon&&m_Summon->IsInWorld()&&m_Summon->GetPetOwner()==plr_shared_from_this())	// update PlayerPets array with current pet's info
 	{
 		PlayerPet*pPet = GetPlayerPet(m_Summon->m_PetNumber);
 		if(!pPet || pPet->active == false)
@@ -4823,8 +4823,8 @@ void Player::UpdateStats()
 
 	int32 AP = 0;
 	int32 RAP = 0;
-	int32 hpdelta = 128;
-	int32 manadelta = 128;
+	int32 stam = 0;
+	int32 intl = 0;
 
 	uint32 str = GetUInt32Value(UNIT_FIELD_STAT0);
 	uint32 agi = GetUInt32Value(UNIT_FIELD_STAT1);
@@ -4886,30 +4886,23 @@ void Player::UpdateStats()
 	SetUInt32Value( UNIT_FIELD_ATTACK_POWER, AP );
 	SetUInt32Value( UNIT_FIELD_RANGED_ATTACK_POWER, RAP ); 
 
-	LevelInfo* lvlinfo = objmgr.GetLevelInfo( this->getRace(), plr_shared_from_this()->getClass(), lev );
+	LevelInfo* lvlinfo = objmgr.GetLevelInfo( this->getRace(), this->getClass(), lev );
 
 	if( lvlinfo != NULL )
 	{
-		hpdelta = lvlinfo->Stat[2] * 10;
-		manadelta = lvlinfo->Stat[3] * 15;
-	}
-
-	lvlinfo = objmgr.GetLevelInfo( this->getRace(), plr_shared_from_this()->getClass(), 1 );
-
-	if( lvlinfo != NULL )
-	{
-		hpdelta -= lvlinfo->Stat[2] * 10;
-		manadelta -= lvlinfo->Stat[3] * 15;
+		stam = lvlinfo->Stat[STAT_STAMINA];
+		intl = lvlinfo->Stat[STAT_INTELLECT];
 	}
 
 	int32 hp = GetUInt32Value( UNIT_FIELD_BASE_HEALTH );
 
-	int32 stat_bonus = GetUInt32Value( UNIT_FIELD_POSSTAT2 ) - GetUInt32Value( UNIT_FIELD_NEGSTAT2 );
-	if ( stat_bonus < 0 )
-		stat_bonus = 0; //avoid of having negative health
-	int32 bonus = stat_bonus * 10 + m_healthfromspell + m_healthfromitems;
+	stam += GetUInt32Value( UNIT_FIELD_POSSTAT2 ) - GetUInt32Value( UNIT_FIELD_NEGSTAT2 );
 
-	int32 res = hp + bonus + hpdelta;
+	int32 res = hp + std::max(20, stam) + std::max(0, stam - 20) * 10 + m_healthfromspell + m_healthfromitems;
+
+	if (res < 1)
+		res = 1;
+
 	int32 oldmaxhp = GetUInt32Value( UNIT_FIELD_MAXHEALTH );
 
 	if( res < hp ) res = hp;
@@ -4928,22 +4921,32 @@ void Player::UpdateStats()
 		// MP
 		int32 mana = GetUInt32Value( UNIT_FIELD_BASE_MANA );
 
-		stat_bonus = GetUInt32Value( UNIT_FIELD_POSSTAT3 ) - GetUInt32Value( UNIT_FIELD_NEGSTAT3 );
-		if ( stat_bonus < 0 )
-			stat_bonus = 0; //avoid of having negative mana
-		bonus = stat_bonus * 15 + m_manafromspell + m_manafromitems ;
+		intl += GetUInt32Value( UNIT_FIELD_POSSTAT3 ) - GetUInt32Value( UNIT_FIELD_NEGSTAT3 );
 
-		res = mana + bonus + manadelta;
-		if( res < mana )res = mana;	
+		res = mana + std::max(20, intl) + std::max(0, intl - 20) * 15 + m_manafromspell + m_manafromitems;
+		if( res < mana )
+			res = mana;
+
 		SetUInt32Value(UNIT_FIELD_MAXPOWER1, res);
 
 		if((int32)GetUInt32Value(UNIT_FIELD_POWER1)>res)
 			SetUInt32Value(UNIT_FIELD_POWER1,res);
-
 		//Manaregen
-		const static float BaseRegen[80] = {0.034965f, 0.034191f, 0.033465f, 0.032526f, 0.031661f, 0.031076f, 0.030523f, 0.029994f, 0.029307f, 0.028661f, 0.027584f, 0.026215f, 0.025381f, 0.024300f, 0.023345f, 0.022748f, 0.021958f, 0.021386f, 0.020790f, 0.020121f, 0.019733f, 0.019155f, 0.018819f, 0.018316f, 0.017936f, 0.017576f, 0.017201f, 0.016919f, 0.016581f, 0.016233f, 0.015994f, 0.015707f, 0.015464f, 0.015204f, 0.014956f, 0.014744f, 0.014495f, 0.014302f, 0.014094f, 0.013895f, 0.013724f, 0.013522f, 0.013363f, 0.013175f, 0.012996f, 0.012853f, 0.012687f, 0.012539f, 0.012384f, 0.012233f, 0.012113f, 0.011973f, 0.011859f, 0.011714f, 0.011575f, 0.011473f, 0.011342f, 0.011245f, 0.011110f, 0.010999f, 0.010700f, 0.010522f, 0.010290f, 0.010119f, 0.009968f, 0.009808f, 0.009651f, 0.009553f, 0.009445f, 0.009327f, 0.008859f, 0.008415f, 0.007993f, 0.007592f, 0.007211f, 0.006849f, 0.006506f, 0.006179f, 0.005869f, 0.005575f };
+		const static float BaseRegen[80] = 
+		{
+			0.034965f, 0.034191f, 0.033465f, 0.032526f, 0.031661f, 0.031076f, 0.030523f, 0.029994f, 0.029307f, 0.028661f,
+			0.027584f, 0.026215f, 0.025381f, 0.024300f, 0.023345f, 0.022748f, 0.021958f, 0.021386f, 0.020790f, 0.020121f, 
+			0.019733f, 0.019155f, 0.018819f, 0.018316f, 0.017936f, 0.017576f, 0.017201f, 0.016919f, 0.016581f, 0.016233f,
+			0.015994f, 0.015707f, 0.015464f, 0.015204f, 0.014956f, 0.014744f, 0.014495f, 0.014302f, 0.014094f, 0.013895f,
+			0.013724f, 0.013522f, 0.013363f, 0.013175f, 0.012996f, 0.012853f, 0.012687f, 0.012539f, 0.012384f, 0.012233f,
+			0.012113f, 0.011973f, 0.011859f, 0.011714f, 0.011575f, 0.011473f, 0.011342f, 0.011245f, 0.011110f, 0.010999f, 
+			0.010700f, 0.010522f, 0.010290f, 0.010119f, 0.009968f, 0.009808f, 0.009651f, 0.009553f, 0.009445f, 0.009327f,
+			0.008859f, 0.008415f, 0.007993f, 0.007592f, 0.007211f, 0.006849f, 0.006506f, 0.006179f, 0.005869f, 0.005575f
+		};
+
 		uint32 lvl = getLevel();
 		if(lvl > 80) lvl = 80;
+
 		float amt = ( 0.001f + sqrt((float)GetUInt32Value( UNIT_FIELD_INTELLECT )) * GetUInt32Value( UNIT_FIELD_SPIRIT ) * BaseRegen[lvl-1] ) * PctPowerRegenModifier[POWER_TYPE_MANA];
 		SetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, amt + m_ModInterrMRegen / 5.0f);
 		SetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, amt * m_ModInterrMRegenPCT / 100.0f + m_ModInterrMRegen / 5.0f);
@@ -5079,7 +5082,7 @@ void Player::ApplyPlayerRestState(bool apply)
 
 bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - Partha *
 {
-	if (obj == shared_from_this())
+	if (obj == plr_shared_from_this())
 	   return true;
 
 	uint32 object_type = obj->GetTypeId();
@@ -5191,7 +5194,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 					if(stalker)
 					{
 						ObjectPointer pStalker = GetMapMgr() ? GetMapMgr()->_GetObject(stalker) : NULLOBJ;
-						if(pStalker == shared_from_this())
+						if(pStalker == plr_shared_from_this())
 							return true;
 
 						if(pStalker && pStalker->IsPlayer())
@@ -6836,7 +6839,7 @@ void Player::RemoveItemsFromWorld()
 uint32 Player::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target )
 {
 	int count = 0;
-	if(target == shared_from_this())
+	if(target == plr_shared_from_this())
 	{
 		// we need to send create objects for all items.
 		count += GetItemInterface()->m_CreateForPlayer(data);
@@ -7422,7 +7425,7 @@ void Player::ZoneUpdate(uint32 ZoneId)
 		if(m_currentSpell)
 		{
 			UnitPointer target = m_currentSpell->GetUnitTarget();
-			if(target && target != DuelingWith && target != shared_from_this())
+			if(target && target != DuelingWith && target != plr_shared_from_this())
 				m_currentSpell->cancel();
 		}
 	}
@@ -7743,7 +7746,7 @@ void Player::EndDuel(uint8 WinCondition)
 	{
 		this->GetSummon()->CombatStatus.Vanished();
 		this->GetSummon()->GetAIInterface()->SetUnitToFollow( plr_shared_from_this() );
-		this->GetSummon()->GetAIInterface()->HandleEvent( EVENT_FOLLOWOWNER, plr_shared_from_this()->GetSummon(), 0 );
+		this->GetSummon()->GetAIInterface()->HandleEvent( EVENT_FOLLOWOWNER, GetSummon(), 0 );
 		this->GetSummon()->GetAIInterface()->WipeTargetList();
 	}
 
@@ -8289,7 +8292,7 @@ void Player::CalculateBaseStats()
 
 	memcpy(BaseStats, lvlinfo->Stat, sizeof(uint32) * 5);
 
-	LevelInfo * levelone = objmgr.GetLevelInfo(this->getRace(), plr_shared_from_this()->getClass(),1);
+	LevelInfo * levelone = objmgr.GetLevelInfo(this->getRace(), this->getClass(),1);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, lvlinfo->HP);
 	SetUInt32Value(UNIT_FIELD_BASE_HEALTH, lvlinfo->BaseHP);
 	SetUInt32Value(PLAYER_NEXT_LEVEL_XP, lvlinfo->XPToNextLevel);
@@ -10159,14 +10162,14 @@ void Player::EventSummonPet( PetPointer new_pet )
 		SpellEntry *spellInfo = dbcSpell.LookupEntry(SpellID);
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_PET_OWNER )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, plr_shared_from_this()->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( this->GetGUID() );
 			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, plr_shared_from_this()->GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( new_pet->GetGUID() );
 			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
@@ -10246,7 +10249,7 @@ void Player::EventDumpCompressedMovement()
 	if(size >= 40000 && rate < 6)
 		rate = 6;
 	if(size <= 100)
-		rate = 0;			// don't bother compressing packet smaller than plr_shared_from_this(), zlib doesnt really handle them well
+		rate = 0;			// don't bother compressing packet smaller than this, zlib doesnt really handle them well
 
 	// set up stream
 	z_stream stream;

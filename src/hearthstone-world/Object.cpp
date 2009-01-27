@@ -190,7 +190,7 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	if(GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE)
 		flags |= 0x80;
 
-	if(target == shared_from_this())
+	if(target == obj_shared_from_this())
 	{
 		// player creating self
 		flags |= 0x01;
@@ -361,7 +361,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 	if(m_objectTypeId == TYPEID_PLAYER)
 	{
 		pThis = plr_shared_from_this();
-		if(target == shared_from_this())
+		if(target == obj_shared_from_this())
 		{
 			// Updating our last speeds.
 			pThis->UpdateLastSpeeds();
@@ -1590,7 +1590,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 
 	if(IsUnit())
 	{
-		if( obj_shared_from_this() != pVictim && pVictim->IsPlayer() && IsPlayer() && plr_shared_from_this()->m_hasInRangeGuards )
+		if( unit_shared_from_this() != pVictim && pVictim->IsPlayer() && IsPlayer() && plr_shared_from_this()->m_hasInRangeGuards )
 		{
 			plr_shared_from_this()->SetGuardHostileFlag(true);
 			plr_shared_from_this()->CreateResetGuardHostileFlagEvent();
@@ -1610,7 +1610,9 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		if(plr != NULL && plr->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_UNIT) // Units can't tag..
 			TO_CREATURE(pVictim)->Tag(plr);
 
-		if( pVictim != shared_from_this() )
+		// Pepsi1x1: is this correct obj_shared_from_this()
+		if( pVictim != 
+			unit_shared_from_this() )
 		{
 			// Set our attack target to the victim.
 			unit_shared_from_this()->CombatStatus.OnDamageDealt( pVictim, damage );
@@ -1621,7 +1623,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
         float val;
 
 		if( pVictim->GetPowerType() == POWER_TYPE_RAGE 
-			&& pVictim != shared_from_this()
+			&& pVictim != unit_shared_from_this()
 			&& pVictim->IsPlayer())
 		{
 			float level = (float)pVictim->getLevel();
@@ -1648,7 +1650,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	}
 
 	//* BATTLEGROUND DAMAGE COUNTER *//
-	if( pVictim != shared_from_this() )
+	if( pVictim != unit_shared_from_this() )
 	{
 		if( IsPlayer() )
 		{
@@ -1813,7 +1815,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 			pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 		}
 
-		if( pVictim->IsPlayer() && (!IsPlayer() || pVictim == shared_from_this() ) )
+		if( pVictim->IsPlayer() && (!IsPlayer() || pVictim == unit_shared_from_this() ) )
 		{
 			TO_PLAYER( pVictim )->DeathDurabilityLoss(0.10);
 		}
@@ -2151,7 +2153,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	}
 	else /* ---------- NOT DEAD YET --------- */
 	{
-		if(pVictim != shared_from_this() /* && updateskill */)
+		if(pVictim != unit_shared_from_this() /* && updateskill */)
 		{
 			// Send AI Reaction UNIT vs UNIT
 			if( GetTypeId() ==TYPEID_UNIT )
@@ -2640,7 +2642,7 @@ void Object::Deactivate(shared_ptr<MapMgr> mgr)
 
 	case TYPEID_GAMEOBJECT:
 		// check iterator
-		if( mgr->__gameobject_iterator != mgr->activeGameObjects.end() && (*mgr->__gameobject_iterator) == shared_from_this() )
+		if( mgr->__gameobject_iterator != mgr->activeGameObjects.end() && (*mgr->__gameobject_iterator) == gob_shared_from_this() )
 			++mgr->__gameobject_iterator;
 
 		mgr->activeGameObjects.erase(gob_shared_from_this());

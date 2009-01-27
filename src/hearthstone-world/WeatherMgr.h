@@ -41,7 +41,7 @@ private:
 	std::map<uint32, shared_ptr<WeatherInfo> > m_zoneWeathers;
 };
 
-class WeatherInfo : public EventableObject
+class WeatherInfo : public EventableObject, public std::tr1::enable_shared_from_this<WeatherInfo>
 {
 	friend class WeatherMgr;
 public:

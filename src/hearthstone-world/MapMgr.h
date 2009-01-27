@@ -75,7 +75,7 @@ typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectSqlIdM
 class Transporter;
 #define RESERVE_EXPAND_SIZE 1024
 
-class SERVER_DECL MapMgr : public CellHandler <MapCell>, public EventableObject,public ThreadContext
+class SERVER_DECL MapMgr : public CellHandler <MapCell>, public EventableObject,public ThreadContext, public std::tr1::enable_shared_from_this<MapMgr>
 {
 	friend class UpdateObjectThread;
 	friend class ObjectUpdaterThread;

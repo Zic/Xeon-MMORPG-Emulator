@@ -239,7 +239,7 @@ shared_ptr<Item>Container::SafeRemoveAndRetreiveItemFromSlot(int8 slot, bool des
 
 	shared_ptr<Item>pItem = m_Slot[slot];
 
-	if (pItem == NULL || pItem== shared_from_this()) return NULLITEM;
+	if (pItem == NULL || pItem == item_shared_from_this()) return NULLITEM;
 	m_Slot[slot] = NULLITEM;
 
 	if( pItem->GetOwner() == m_owner )
@@ -269,7 +269,7 @@ bool Container::SafeFullRemoveItemFromSlot(int8 slot)
 
 	shared_ptr<Item>pItem = m_Slot[slot];
 
-	if (pItem == NULL ||pItem==shared_from_this()) return false;
+	if (pItem == NULL ||pItem == item_shared_from_this()) return false;
 	m_Slot[slot] = NULLITEM;
 
 	SetUInt64Value(CONTAINER_FIELD_SLOT_1  + slot*2, 0 );

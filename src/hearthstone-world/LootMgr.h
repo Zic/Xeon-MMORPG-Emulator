@@ -23,7 +23,7 @@
 struct ItemPrototype;
 class MapMgr;
 class Player;
-class LootRoll : public EventableObject
+class LootRoll : public EventableObject, public std::tr1::enable_shared_from_this<LootRoll>
 {
 public:
 	LootRoll();

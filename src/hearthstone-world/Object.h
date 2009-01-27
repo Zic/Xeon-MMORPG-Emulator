@@ -126,7 +126,7 @@ class MapMgr;
 //  Object
 //  Base object for every item, unit, player, corpse, container, etc
 //====================================================================
-class SERVER_DECL Object : public EventableObject
+class SERVER_DECL Object : public EventableObject, public std::tr1::enable_shared_from_this<Object>
 {
 public:
 	typedef unordered_set< ObjectPointer > InRangeSet;

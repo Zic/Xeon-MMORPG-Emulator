@@ -820,7 +820,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						}break;
 						case 37310:
 						{
-							if( !this->IsPlayer() || plr_shared_from_this()->GetShapeShift() != FORM_CAT )
+							if( !IsPlayer() || plr_shared_from_this()->GetShapeShift() != FORM_CAT )
 								continue;
 						}break;
 
@@ -1276,7 +1276,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell == NULL )
 									continue;//this should not ocur unless we made a fuckup somewhere
 								//we need a finishing move for this 
-								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE) || victim==shared_from_this())
+								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE) || victim == unit_shared_from_this())
 									continue;
 
 								if(IsPlayer())
@@ -1336,7 +1336,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 28382:
 						case 28385:
 							{
-								if( CastingSpell && ( shared_from_this() == victim || !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) ) //no self casts allowed or beneficial spells
+								if( CastingSpell && ( unit_shared_from_this() == victim || !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) ) //no self casts allowed or beneficial spells
 									continue;//we can proc on ranged weapons too
 							}break;
 						//Priest - blackout
@@ -1370,7 +1370,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if( CastingSpell == NULL )
 									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_BLIZZARD || victim == shared_from_this() ) //Blizzard
+								if( CastingSpell->NameHash != SPELL_HASH_BLIZZARD || victim == unit_shared_from_this() ) //Blizzard
 									continue;
 							}break;
 						//mage - Master of Elements
@@ -1407,7 +1407,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if( CastingSpell == NULL )
 									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_SPRINT || victim != shared_from_this() ) //sprint
+								if( CastingSpell->NameHash != SPELL_HASH_SPRINT || victim != unit_shared_from_this() ) //sprint
 									continue;
 							}break;
 						//rogue - combat potency
@@ -1449,7 +1449,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell == NULL )
 									continue;
 								//trigger only on heal spell cast by NOT us
-								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) || shared_from_this() == victim )
+								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) || unit_shared_from_this() == victim )
 									continue; 
 							}break;
 						//paladin - Light's Grace
@@ -1463,7 +1463,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						//paladin - Eye for an Eye
 						case 25997:
 							{
-								if( victim == shared_from_this() )
+								if( victim == unit_shared_from_this() )
 									continue; //not self casted crits
 								//requires damageing spell
 								if( CastingSpell == NULL )
@@ -1711,7 +1711,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell == NULL )
 									continue;
 								//we need a finishing move for this 
-								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE) || victim==shared_from_this())
+								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE) || victim== unit_shared_from_this())
 									continue;
 							}break;
 						case 37445: //using a mana gem grants you 225 spell damage for 15 sec
@@ -1781,7 +1781,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 					continue;
 
 				SpellEntry *spellInfo = dbcSpell.LookupEntry(spellId );
-				if( victim == shared_from_this() && spellInfo->c_is_flags & SPELL_FLAG_CANNOT_PROC_ON_SELF )
+				if( victim == unit_shared_from_this() && spellInfo->c_is_flags & SPELL_FLAG_CANNOT_PROC_ON_SELF )
 					continue;
 
 				SpellPointer spell = shared_ptr<Spell>(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
@@ -1910,7 +1910,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 {
 	//make sure we do not loop dmg procs
-	if(shared_from_this()==attacker || !attacker)
+	if( !attacker || unit_shared_from_this() == attacker )
 		return;
 	if(m_damgeShieldsInUse)
 		return;
@@ -2637,7 +2637,7 @@ else
 		}
 
 	//Hackfix for Surprise Attacks
-	if(  this->IsPlayer() && ability && plr_shared_from_this()->m_finishingmovesdodge && ability->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE)
+	if(  IsPlayer() && ability && plr_shared_from_this()->m_finishingmovesdodge && ability->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE)
 			dodge = 0.0f;
 
 	if( skip_hit_check )
@@ -2709,7 +2709,7 @@ else
 		vproc |= PROC_ON_DODGE_VICTIM;
 		pVictim->Emote(EMOTE_ONESHOT_PARRYUNARMED);			// Animation
 		//allmighty warrior overpower
-		if( this->IsPlayer() && plr_shared_from_this()->getClass() == WARRIOR)
+		if( IsPlayer() && plr_shared_from_this()->getClass() == WARRIOR)
 		{
 			plr_shared_from_this()->AddComboPoints( pVictim->GetGUID(), 1 );
 			plr_shared_from_this()->UpdateComboPoints();
@@ -6089,7 +6089,7 @@ void Unit::EventStunOrImmobilize()
 // Proc on chill effects (such as frostbolt slow effect)
 void Unit::EventChill(shared_ptr<Unit>proc_target)
 {
-	if ( shared_from_this() == proc_target || proc_target == NULL )
+	if ( !proc_target || unit_shared_from_this() == proc_target )
 		return; //how and why would we chill ourselfs
 
 	if( trigger_on_chill )
@@ -6336,7 +6336,7 @@ void Unit::RemoveFFAPvPFlag()
 
 void Unit::OnPositionChange()
 {
-	if (m_CurrentVehicle != NULL && m_CurrentVehicle->GetControllingUnit() == shared_from_this() && (m_position != m_CurrentVehicle->GetPosition() || GetOrientation() != m_CurrentVehicle->GetOrientation())) //check orientation too since == operator of locationvector doesnt
+	if (m_CurrentVehicle != NULL && m_CurrentVehicle->GetControllingUnit() == unit_shared_from_this() && (m_position != m_CurrentVehicle->GetPosition() || GetOrientation() != m_CurrentVehicle->GetOrientation())) //check orientation too since == operator of locationvector doesnt
 	{
 		m_CurrentVehicle->MoveVehicle(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
 	}

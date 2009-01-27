@@ -980,7 +980,7 @@ void CBattleground::RemovePendingPlayer(PlayerPointer plr)
 	for(uint32 i = 0; i < 3; ++i)
 	{
 		if( plr->m_pendingBattleground[i] && 
-			plr->m_pendingBattleground[i] == shared_from_this())
+			plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()))
 		{
 			if( plr->m_pendingBattleground[i]->IsArena() )
 				plr->m_bgRatedQueue = false;
@@ -1013,7 +1013,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 	{
 		for(uint32 i = 0; i < 3; ++i)
 		{
-			if( plr->m_pendingBattleground[i] == shared_from_this() )
+			if( plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()) )
 			{
 				plr->m_pendingBattleground[i] = NULLBATTLEGROUND;
 				plr->m_bgIsQueued[i] = false;
@@ -1060,7 +1060,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 
 	for(uint32 i = 0; i < 3; ++i)
 	{
-		if( plr->m_pendingBattleground[i] == shared_from_this() )
+		if( plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()) )
 		{
 			plr->m_pendingBattleground[i] = NULLBATTLEGROUND;
 			plr->m_bgSlot = i;

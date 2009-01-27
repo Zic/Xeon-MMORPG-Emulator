@@ -362,7 +362,7 @@ typedef set<WorldSession*> SessionSet;
 // The maximum level attainable, period, regardless of flags on your account.
 #define MAXIMUM_ATTAINABLE_LEVEL 80
 
-class SERVER_DECL World : public Singleton<World>, public EventableObject
+class SERVER_DECL World : public Singleton<World>, public EventableObject, public std::tr1::enable_shared_from_this<World>
 {
 public:
 	World();

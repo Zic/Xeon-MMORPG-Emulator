@@ -424,7 +424,7 @@ void EventableObject::event_Relocate()
 		if(!nh)
 			nh = sEventMgr.GetEventHolder(-1);
 
-		nh->AddObject(shared_from_this());
+		nh->AddObject(this);
 
 		// reset our m_holder pointer and instance id
 		m_event_Instanceid = nh->GetInstanceID();
@@ -464,7 +464,7 @@ void EventableObjectHolder::AddEvent(TimedEvent * ev)
 	}
 }
 
-void EventableObjectHolder::AddObject(shared_ptr<EventableObject> obj)
+void EventableObjectHolder::AddObject(EventableObject* obj)
 {
 	// transfer all of this objects events into our holder
 	if(!m_lock.AttemptAcquire())
