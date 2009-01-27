@@ -148,34 +148,10 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 	uint32 crc;
 	uint32 unknown;
 	
-	if(m_session->GetClientBuild() > 9183)
-	{
-		unpacked >> addons;
-	}
+	unpacked >> addons;
 
 	std::string name;
-	size_t p = unpacked.rpos();
-	if(m_session->GetClientBuild() <= 9183)  //retain 3.0.3 support while we get the rest of 3.0.8 done
-	{
-		while(p != unpacked.size())	// make sure theres always room, otherwise *BAM* crash.
-		{
-			unpacked >> name;
-			unpacked >> Enable;
-			unpacked >> crc;
-			unpacked >> unknown;
-		
-			// Hacky fix, Yea I know its a hacky fix I will make a proper handler one's I got the crc crap
-			if (crc != 0x4C1C776D) // CRC of public key version 2.0.1
-				returnpacket.append(PublicKey,264); // part of the hacky fix
-			else
-				returnpacket << uint8(0x02) << uint8(0x01) << uint8(0x00) << uint32(0) << uint8(0);
-			/*if(!AppendPublicKey(returnpacket, name, crc))
-				returnpacket << uint8(1) << uint8(0) << uint8(0);*/
-
-			p = unpacked.rpos();
-		}
-	}
-	else // new 3.0.8 structure
+	//size_t p = unpacked.rpos();
 	{
 		uint8 unk;
 		uint8 unk1;
@@ -209,6 +185,8 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 			returnpacket << unk2;
 			if (unk2)
 				returnpacket << uint8(0);
+
+			//p = unpacked.rpos();
 		}
 
 		unpacked >> unk3; //Added in 3.0.8
