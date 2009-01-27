@@ -158,12 +158,26 @@ void AccountMgr::AddAccount(Field* field)
 			cnSave.SetBinary( acct->SrpHash, 20);
 			string hash = cnSave.AsHexStr();
 			Log.Debug("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
-			sLogonSQL->Execute("UPDATE accounts SET password = '%s' WHERE acct = %u", hash.c_str(), acct->AccountId);
+			sLogonSQL->Execute("UPDATE accounts SET password = SHA1(CONCAT(UPPER(login), ':', UPPER(password))) WHERE acct = %u", acct->AccountId);
 		}
 		else
 		{
-			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
-			reverse_array(acct->SrpHash, 20);
+			if ( Password.size() == 40 )
+			{
+				if( bn.GetNumBytes() < 20 )
+				{
+					// Hacky fix
+					memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
+					for (int n=bn.GetNumBytes(); n<=19; n++)
+						acct->SrpHash[n] = (uint8)0;
+					reverse_array(acct->SrpHash, 20);
+				}
+				else
+				{
+					memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+					reverse_array(acct->SrpHash, 20);
+				}
+			}
 		}
 	}
 	else
@@ -243,12 +257,26 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 			cnSave.SetBinary( acct->SrpHash, 20);
 			string hash = cnSave.AsHexStr();
 			Log.Debug("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
-			sLogonSQL->Execute("UPDATE accounts SET password = '%s' WHERE acct = %u", hash.c_str(), acct->AccountId);
+			sLogonSQL->Execute("UPDATE accounts SET password = SHA1(CONCAT(UPPER(login), ':', UPPER(password))) WHERE acct = %u", acct->AccountId);
 		}
 		else
 		{
-			memcpy(acct->SrpHash, bn.AsByteArray(), 20);
-			reverse_array(acct->SrpHash, 20);
+			if ( Password.size() == 40 )
+			{
+				if( bn.GetNumBytes() < 20 )
+				{
+					// Hacky fix
+					memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
+					for (int n=bn.GetNumBytes(); n<=19; n++)
+						acct->SrpHash[n] = (uint8)0;
+					reverse_array(acct->SrpHash, 20);
+				}
+				else
+				{
+					memcpy(acct->SrpHash, bn.AsByteArray(), 20);
+					reverse_array(acct->SrpHash, 20);
+				}
+			}
 		}
 	}
 	else
