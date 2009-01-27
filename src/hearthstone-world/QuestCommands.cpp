@@ -33,42 +33,58 @@ HEARTHSTONE_INLINE std::string MyConvertFloatToString(const float arg)
 string RemoveQuestFromPlayer(PlayerPointer plr, Quest *qst)
 {
 	std::string recout = "|cff00ff00";
+	bool has = false;
+
+	if ( plr->HasFinishedQuest(qst->id) )
+	{
+		if( plr->m_finishedQuests.find(qst->id) != plr->m_finishedQuests.end())
+		{
+			plr->m_finishedQuests.erase(qst->id);
+			recout += "Quest removed from finished quests history.\n\n";
+			has = true;
+		}
+	}
+
+	if ( plr->HasFinishedDailyQuest(qst->id) )
+	{
+		if( plr->m_finishedDailyQuests.find(qst->id) != plr->m_finishedDailyQuests.end())
+		{
+			plr->m_finishedDailyQuests.erase(qst->id);
+			recout += "Quest removed from finished dailies history.\n\n";
+			has = true;
+		}
+	}
 
 	if (plr->HasQuests())
 	{
-		if (plr->HasFinishedQuest(qst->id) || plr->HasFinishedDailyQuest(qst->id))
-			recout += "Player has already completed that quest.\n\n";
-		else
-		{
-			QuestLogEntry * qLogEntry = plr->GetQuestLogForEntry(qst->id);
-			if (qLogEntry)
-			{	
-				CALL_QUESTSCRIPT_EVENT(qLogEntry, OnQuestCancel)(plr);
-				qLogEntry->Finish();
+		QuestLogEntry * qLogEntry = plr->GetQuestLogForEntry(qst->id);
+		if (qLogEntry)
+		{	
+			CALL_QUESTSCRIPT_EVENT(qLogEntry, OnQuestCancel)(plr);
+			qLogEntry->Finish();
 
-				// Remove all items given by the questgiver at the beginning
-				for(uint32 i = 0; i < 4; ++i)
-				{
-					if(qst->receive_items[i])
-						plr->GetItemInterface()->RemoveItemAmt(qst->receive_items[i], 1 );
-				}
-				if(qst->time > 0)
-					plr->timed_quest_slot = 0;
-
-				plr->UpdateNearbyGameObjects();
+			// Remove all items given by the questgiver at the beginning
+			for(uint32 i = 0; i < 4; ++i)
+			{
+				if(qst->receive_items[i])
+					plr->GetItemInterface()->RemoveItemAmt(qst->receive_items[i], 1 );
 			}
-			else
-				recout += "No quest log entry found for that player.";
+			if(qst->time > 0)
+				plr->timed_quest_slot = 0;
+
+			plr->UpdateNearbyGameObjects();
 		}
+		recout += "Quest removed from current questlog.";
+		has = true;
 	}
-	else
-	{
-		recout += "Player has no quests to remove.";
-	}
+	
+	if(!has)
+		recout += "Quest not found on player.";
 
 	recout += "\n\n";
 
 	return recout;
+
 }
 
 bool ChatHandler::HandleQuestLookupCommand(const char * args, WorldSession * m_session)

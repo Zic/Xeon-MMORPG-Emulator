@@ -194,6 +194,7 @@ struct Quest
 	uint32 count_receiveitems;
 	uint32 count_reward_choiceitem;
 	uint32 count_required_item;
+	uint32 count_reward_facts; 
 	uint32 required_mobtype[4];
 	uint32 count_reward_item;
 

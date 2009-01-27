@@ -6231,6 +6231,12 @@ void Player::Reset_Talents()
 		}
 	}
 
+	// The dual wield skill for shamans can only be added by talents.
+	// so when reset, the dual wield skill should be removed too.
+	// (see also void Spell::SpellEffectDualWield)
+	if( getClass()==SHAMAN && _HasSkillLine( SKILL_DUAL_WIELD ) )
+		_RemoveSkillLine( SKILL_DUAL_WIELD );
+
 	uint32 l=getLevel();
 	if(l>9)
 	{

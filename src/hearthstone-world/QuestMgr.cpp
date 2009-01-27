@@ -80,6 +80,17 @@ uint32 QuestMgr::PlayerMeetsReqs(PlayerPointer plr, Quest* qst, bool skiplevelch
 		if(plr->GetStanding(qst->required_rep_faction) < (int32)qst->required_rep_value)
 			return QMGR_QUEST_NOT_AVAILABLE;
 
+	uint32 fact;
+	// Check reputation limit
+	for(uint32 z = 0; z < qst->count_reward_facts; z++)
+	{
+		fact = qst->reward_repfaction[z];
+		if( fact && qst->reward_replimit && plr->GetStanding(fact) >= (int32)qst->reward_replimit )
+		{
+			return QMGR_QUEST_NOT_AVAILABLE;
+		}
+	}
+
 	if (plr->HasFinishedQuest(qst->id) && !qst->is_repeatable)
 		return QMGR_QUEST_NOT_AVAILABLE;
 
@@ -997,6 +1008,31 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		} 
 	}
 	qle->ClearAffectedUnits();
+
+	// Cleanup aquired/required spells, items and kills.
+	for( uint32 x=0;x<4;x++)
+	{
+		if( IsQuestRepeatable(qst) || IsQuestDaily(qst) ) //reset kill-counter in case of repeatable's
+		{
+			if( qst->required_mob[x] && plr->HasQuestMob(qst->required_mob[x]) )
+				qle->SetMobCount(x,0);
+		}
+		else 
+		{
+			//Remove aquired spells
+			if( qst->required_spell[x] && plr->HasQuestSpell(qst->required_spell[x]) )
+				plr->RemoveQuestSpell(qst->required_spell[x]);
+
+			//Remove Killed npc's
+			if( qst->required_mob[x] && plr->HasQuestMob(qst->required_mob[x]) )
+				plr->RemoveQuestMob(qst->required_mob[x]);
+		}
+
+		//always remove collected items (need to be recollectable again in case of repeatable).
+		if( qst->required_item[x] )
+			plr->GetItemInterface()->RemoveItemAmt(qst->required_item[x],qst->required_itemcount[x]);
+	}
+
 	qle->Finish();
 	
 	if(qst_giver->GetTypeId() == TYPEID_UNIT)
@@ -1099,16 +1135,6 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 				}
 		    }
 	    }
-
-	    // Remove items
-	    for(uint32 i = 0; i < 4; ++i)
-	    {
-		    if(qst->required_item[i]) plr->GetItemInterface()->RemoveItemAmt(qst->required_item[i],qst->required_itemcount[i]);
-	    }
-
-	    // Remove srcitem
-	    if(qst->srcitem && qst->srcitem != qst->receive_items[0])
-		    plr->GetItemInterface()->RemoveItemAmt(qst->srcitem, qst->srcitemcount ? qst->srcitemcount : 1);
 
         // cast Effect Spell
 	    if(qst->effect_on_player)
@@ -1213,15 +1239,6 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		    }
 	    }
 
-	    // Remove items
-	    for(uint32 i = 0; i < 4; ++i)
-	    {
-		    if(qst->required_item[i]) plr->GetItemInterface()->RemoveItemAmt(qst->required_item[i],qst->required_itemcount[i]);
-	    }
-
-	    // Remove srcitem
-	    if(qst->srcitem && qst->srcitem != qst->receive_items[0])
-		    plr->GetItemInterface()->RemoveItemAmt(qst->srcitem, qst->srcitemcount ? qst->srcitemcount : 1);
 
 	    // cast learning spell
 	    if(qst->reward_spell)
@@ -1811,6 +1828,7 @@ void QuestMgr::LoadExtraQuestStuff()
 		qst->required_mobtype[3] = 0;
 
 		qst->count_requiredquests = 0;
+		qst->count_reward_facts = 0;
 
 		if(qst->is_repeatable != 0 && (qst->quest_flags & 4096))
 			qst->is_repeatable = REPEATABLE_DAILY;
@@ -1886,6 +1904,12 @@ void QuestMgr::LoadExtraQuestStuff()
 		for(int i = 0; i < 6; ++i)
 			if(qst->reward_choiceitem[i])
 				qst->count_reward_choiceitem++;
+
+		for(int i = 0; i < 5; ++i)
+		{
+			if(qst->reward_repfaction[i])
+				qst->count_reward_facts++;
+		}
 
 		if(!it->Inc())
 			break;
