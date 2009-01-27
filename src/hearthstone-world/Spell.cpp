@@ -2904,7 +2904,8 @@ uint8 Spell::CanCast(bool tolerate)
 		// check if spell is allowed while player is on a taxi
 		if(p_caster->m_onTaxi)
 		{
-			if( m_spellInfo->Id != 33836) // exception for Area 52 Special
+			// This uses the same flag as ordinary mounts
+			if(!(m_spellInfo->Attributes & ATTRIBUTES_MOUNT_CASTABLE))
 				return SPELL_FAILED_NOT_ON_TAXI;
 		}
 
