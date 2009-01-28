@@ -6355,6 +6355,7 @@ void Unit::Dismount()
 		{
 			RemoveAura( cavalier->m_FlyingAura );
 			cavalier->m_FlyingAura = 0;
+			cavalier->SetUInt32Value( UNIT_FIELD_DISPLAYID, cavalier->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );				
 		}
 	}
 	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
