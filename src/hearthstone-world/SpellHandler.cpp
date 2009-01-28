@@ -174,7 +174,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 		return;
 	}
 
-	SpellPointer spell = shared_ptr<Spell>(new Spell(_player, spellInfo, false, NULLAURA));
+	SpellPointer spell = SpellPointer(new Spell(_player, spellInfo, false, NULLAURA));
 	spell->extra_cast_number=cn;
 	spell->m_glyphIndex = glyphIndex;
 	spell->i_caster = tmpItem;
@@ -318,7 +318,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			}
 		}
 
-		SpellPointer spell = shared_ptr<Spell>(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
+		SpellPointer spell = SpellPointer(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
 		spell->extra_cast_number=cn;
 		spell->prepare(&targets);
 	}
@@ -410,6 +410,6 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	
 	targets.read(recvPacket, _player->GetGUID());
 
-	pSpell = shared_ptr<Spell>(new Spell(caster, sp, false, NULLAURA));
+	pSpell = SpellPointer(new Spell(caster, sp, false, NULLAURA));
 	pSpell->prepare(&targets);
 }

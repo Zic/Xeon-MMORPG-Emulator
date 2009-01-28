@@ -777,7 +777,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 							if( sp == NULL )
 								continue;
 
-							spell = shared_ptr<Spell>(new Spell( m_owner, sp, true, NULLAURA ));
+							spell = SpellPointer(new Spell( m_owner, sp, true, NULLAURA ));
 							spell->i_caster = item_shared_from_this();
 							spell->prepare( &targets );
 						}

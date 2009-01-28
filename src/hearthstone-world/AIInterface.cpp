@@ -513,7 +513,7 @@ void AIInterface::Update(uint32 p_time)
 		assert(totemspell != 0);
 		if(p_time >= m_totemspelltimer)
 		{
-			SpellPointer pSpell = shared_ptr<Spell>(new Spell(m_Unit, totemspell, true, NULLAURA));
+			SpellPointer pSpell = SpellPointer(new Spell(m_Unit, totemspell, true, NULLAURA));
 
 			SpellCastTargets targets(0);
 			if(!m_nextTarget ||
@@ -548,7 +548,7 @@ void AIInterface::Update(uint32 p_time)
 			}
 			// these will *almost always* be AoE, so no need to find a target here.
 //			SpellCastTargets targets(m_Unit->GetGUID());
-//			shared_ptr<Spell>pSpell = new Spell(m_Unit, totemspell, true, 0);
+//			SpellPointer pSpell = SpellPointer(new Spell(m_Unit, totemspell, true, NULLAURA));
 //			pSpell->prepare(&targets);
 			// need proper cooldown time!
 //			m_totemspelltimer = m_totemspelltime;

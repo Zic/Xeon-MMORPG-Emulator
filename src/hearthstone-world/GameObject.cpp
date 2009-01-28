@@ -205,7 +205,7 @@ void GameObject::Update(uint32 p_time)
 					if(!isAttackable(m_summoner,pUnit))continue;
 				}
 				
-				shared_ptr<Spell>sp= shared_ptr<Spell>(new Spell(obj_shared_from_this(),spell,true,NULLAURA));
+				SpellPointer sp= SpellPointer (new Spell(obj_shared_from_this(),spell,true,NULLAURA));
 				SpellCastTargets tgt((*itr)->GetGUID());
 				tgt.m_destX = GetPositionX();
 				tgt.m_destY = GetPositionY();

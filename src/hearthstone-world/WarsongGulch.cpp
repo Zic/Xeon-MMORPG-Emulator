@@ -129,7 +129,7 @@ void WarsongGulch::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 		{
 			/* apply the buff */
 			SpellEntry * sp = dbcSpell.LookupEntry(m_buffs[buffslot]->GetInfo()->sound3);
-			shared_ptr<Spell>s = shared_ptr<Spell>(new Spell(plr, sp, true, NULLAURA));
+			SpellPointer s = SpellPointer(new Spell(plr, sp, true, NULLAURA));
 			SpellCastTargets targets(plr->GetGUID());
 			s->prepare(&targets);
 
@@ -323,7 +323,7 @@ void WarsongGulch::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
 	m_dropFlags[plr->GetTeam()]->SetNewGuid(m_mapMgr->GenerateGameobjectGuid());
 	
 	SpellEntry * pSp = dbcSpell.LookupEntry(23333 + (plr->GetTeam() * 2));
-	shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(plr, pSp, true, NULLAURA));
+	SpellPointer sp = SpellPointer(new Spell(plr, pSp, true, NULLAURA));
 	SpellCastTargets targets(plr->GetGUID());
 	sp->prepare(&targets);
 	m_mapMgr->GetStateManager().UpdateWorldState(plr->GetTeam() ? WORLDSTATE_WSG_ALLIANCE_FLAG_DISPLAY : WORLDSTATE_WSG_HORDE_FLAG_DISPLAY, 2);
@@ -372,7 +372,7 @@ void WarsongGulch::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
 		return;
 
 	SpellEntry * pSp = dbcSpell.LookupEntry(23333 + (plr->GetTeam() * 2));
-	shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(plr, pSp, true, NULLAURA));
+	SpellPointer sp = SpellPointer(new Spell(plr, pSp, true, NULLAURA));
 	SpellCastTargets targets(plr->GetGUID());
 	sp->prepare(&targets);
 

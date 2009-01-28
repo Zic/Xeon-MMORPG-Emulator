@@ -389,14 +389,14 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 		if(se == 0) return false;
 
 		SpellCastTargets targets(target->GetGUID());
-		shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(m_session->GetPlayer(), se, true, NULLAURA));
+		SpellPointer sp = SpellPointer(new Spell(m_session->GetPlayer(), se, true, NULLAURA));
 		sp->prepare(&targets);
 
 /*		SpellEntry * se = dbcSpell.LookupEntry(20479);
 		if(se == 0) return false;
 		
 		SpellCastTargets targets(target->GetGUID());
-		shared_ptr<Spell>sp = new Spell(target, se, true, 0);
+		SpellPointer sp = SpellPointer(new Spell(target, se, true, NULLAURA));
 		sp->prepare(&targets);*/
 	}
 

@@ -410,7 +410,7 @@ void Pet::InitializeSpells()
 		if( info->Attributes & ATTRIBUTES_PASSIVE )
 		{
 			// Cast on self..
-			shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(obj_shared_from_this(), info, true, NULLAURA));
+			SpellPointer sp = SpellPointer(new Spell(obj_shared_from_this(), info, true, NULLAURA));
 			SpellCastTargets targets(GetGUID());
 			sp->prepare(&targets);
 
@@ -884,7 +884,7 @@ void Pet::AddSpell(SpellEntry * sp, bool learning)
 	{
 		if(IsInWorld())
 		{
-			shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell(obj_shared_from_this(), sp, true, NULLAURA));
+			SpellPointer spell = SpellPointer(new Spell(obj_shared_from_this(), sp, true, NULLAURA));
 			SpellCastTargets targets(GetGUID());
 			spell->prepare(&targets);
 			mSpells[sp] = 0x0100;

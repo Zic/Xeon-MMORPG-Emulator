@@ -1572,7 +1572,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 				{
 					if (!dmg)
 						return;
-					SpellPointer spelld = shared_ptr<Spell>(new Spell(GetUnitCaster(), parentsp ,false,NULLAURA));
+					SpellPointer spelld = SpellPointer(new Spell(GetUnitCaster(), parentsp ,false,NULLAURA));
 					SpellCastTargets targets(m_target->GetGUID());
 					//this is so not good, maybe parent spell has more then dmg effect and we use it to calc our new dmg :(
 					dmg = 0;
@@ -2611,7 +2611,7 @@ void Aura::SpellAuraDummy(bool apply)
 				pCaster = m_target;
 
 			// this is an ugly hack because i don't want to copy/paste code ;P
-			SpellPointer spell = shared_ptr<Spell>(new Spell(pCaster, m_spellProto, true, NULLAURA));
+			SpellPointer spell = SpellPointer(new Spell(pCaster, m_spellProto, true, NULLAURA));
 			spell->SetUnitTarget( m_target );
 			spell->Heal( mod->m_amount );			
 			spell->Destructor();
@@ -3873,7 +3873,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 
 	if( spellInfo->EffectImplicitTargetA[0] == 18 )			// Hellfire, if there are any others insert here
 	{
-		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
+		SpellPointer spell = SpellPointer(new Spell(m_caster, spellInfo, true, shared_from_this()));
 		SpellCastTargets targets;
 		targets.m_targetMask = TARGET_FLAG_SOURCE_LOCATION;
 		targets.m_srcX = m_caster->GetPositionX();
@@ -3889,7 +3889,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 
 	if(oTarget->GetTypeId()==TYPEID_DYNAMICOBJECT)
 	{
-		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
+		SpellPointer spell = SpellPointer(new Spell(m_caster, spellInfo, true, shared_from_this()));
 		SpellCastTargets targets;
 		targets.m_targetMask = TARGET_FLAG_DEST_LOCATION;
 		targets.m_destX = oTarget->GetPositionX();
@@ -3942,7 +3942,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 		return;
 	}
 
-	SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
+	SpellPointer spell = SpellPointer(new Spell(m_caster, spellInfo, true, shared_from_this()));
 	SpellCastTargets targets;
 	if(oTarget->IsUnit())
 		targets.m_targetMask = TARGET_FLAG_UNIT;
@@ -4621,7 +4621,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				{
 					SpellEntry *spellInfo = dbcSpell.LookupEntry( furorSpell );
 
-					SpellPointer sp = shared_ptr<Spell>(new Spell( m_target, spellInfo, true, NULLAURA ));
+					SpellPointer sp = SpellPointer(new Spell( m_target, spellInfo, true, NULLAURA ));
 					SpellCastTargets tgt;
 					tgt.m_unitTarget = m_target->GetGUID();
 					sp->prepare(&tgt);
@@ -4648,7 +4648,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 
 		SpellEntry* spellInfo = dbcSpell.LookupEntry(spellId );
 		
-		SpellPointer sp = shared_ptr<Spell>(new Spell( m_target, spellInfo, true, NULLAURA ));
+		SpellPointer sp = SpellPointer(new Spell( m_target, spellInfo, true, NULLAURA ));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget = m_target->GetGUID();
 		sp->prepare( &tgt );
@@ -4656,7 +4656,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		if( spellId2 != 0 )
 		{
 			spellInfo = dbcSpell.LookupEntry(spellId2);
-			sp = shared_ptr<Spell>(new Spell( m_target, spellInfo, true, NULLAURA ));
+			sp = SpellPointer(new Spell( m_target, spellInfo, true, NULLAURA ));
 			sp->prepare(&tgt);
 		}
 		
@@ -8630,7 +8630,7 @@ void Aura::SpellAuraSpiritOfRedemption(bool apply)
 		m_target->SetUInt32Value(UNIT_FIELD_HEALTH, 1);
 		SpellEntry * sorInfo = dbcSpell.LookupEntry(27792);
 		if(!sorInfo) return;
-		shared_ptr<Spell>sor = shared_ptr<Spell>(new Spell(m_target, sorInfo, true, NULLAURA));
+		SpellPointer sor = SpellPointer(new Spell(m_target, sorInfo, true, NULLAURA));
 		SpellCastTargets targets;
 		targets.m_unitTarget = m_target->GetGUID();
 		sor->prepare(&targets);

@@ -22,7 +22,7 @@
 #include "StdAfx.h"
 
 #define CREATESPELL(a,b,c,d) \
-	shared_ptr<Spell>(new Spell( a, b, c, (d == NULL ? NULLAURA : d)));
+	SpellPointer(new Spell( a, b, c, (d == NULL ? NULLAURA : d)));
 
 pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_NULL - 0
@@ -840,7 +840,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 
 			if(spellInfo && spellInfo->c_is_flags & SPELL_FLAG_IS_POISON )
 			{
-				Spell * spell = new Spell( p_caster, spellInfo, true, NULLAURA );
+				SpellPointer spell = SpellPointer(new Spell( p_caster, spellInfo, true, NULLAURA));
 				SpellCastTargets targets;
 				targets.m_unitTarget = unitTarget->GetGUID();
 				spell->prepare( &targets );
@@ -883,7 +883,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if (!u_caster->IsPlayer())
 				return;
-			Spell * spell=new Spell(u_caster,dbcSpell.LookupEntry(34123),true,NULLAURA);
+			SpellPointer spell= SpellPointer(new Spell(u_caster,dbcSpell.LookupEntry(34123),true,NULLAURA));
 			spell->forced_basepoints[0] = (u_caster->GetUInt32Value( UNIT_FIELD_STAT4 )) / 4;
 			SpellCastTargets targets;
 			targets.m_unitTarget = unitTarget->GetGUID();
@@ -2227,7 +2227,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 							amplitude = 3;
 
 						//our hapiness is that we did not store the aura mod amount so we have to recalc it
-						SpellPointer spell = shared_ptr<Spell>(new Spell( m_caster, taura->GetSpellProto(), false, NULLAURA ));				
+						SpellPointer spell = SpellPointer(new Spell( m_caster, taura->GetSpellProto(), false, NULLAURA ));				
 						uint32 healamount = spell->CalculateEffect( 1, unitTarget );  
 						spell->Destructor();
 						spell = NULLSPELL;
@@ -2252,7 +2252,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 								amplitude = 3;
 
 							//our hapiness is that we did not store the aura mod amount so we have to recalc it
-							SpellPointer spell = shared_ptr<Spell>(new Spell( m_caster, taura->GetSpellProto(), false, NULLAURA ));				
+							SpellPointer spell = SpellPointer(new Spell( m_caster, taura->GetSpellProto(), false, NULLAURA ));				
 							uint32 healamount = spell->CalculateEffect( 0, unitTarget );  
 							spell->Destructor();
 							spell = NULLSPELL;
@@ -4996,12 +4996,12 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			if( inc_resist_by_level_spell )
 			{
 				//for self
-				SpellPointer sp = shared_ptr<Spell>(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				SpellPointer sp = SpellPointer(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = p_caster->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt( p_caster->GetGUID() );
 				sp->prepare( &tgt );
 				//for pet
-				sp = shared_ptr<Spell>(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				sp = SpellPointer(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = unitTarget->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt1( unitTarget->GetGUID() );
 				sp->prepare( &tgt1 );
@@ -5046,12 +5046,12 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			if( inc_resist_by_level_spell )
 			{
 				//for self
-				SpellPointer sp = shared_ptr<Spell>(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				SpellPointer sp = SpellPointer(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = p_caster->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt( p_caster->GetGUID() );
 				sp->prepare( &tgt );
 				//for pet
-				sp = shared_ptr<Spell>(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				sp = SpellPointer(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = unitTarget->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt1( unitTarget->GetGUID() );
 				sp->prepare( &tgt1 );
@@ -5085,24 +5085,24 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			if( casted_spell_id )
 			{
 				//for self
-				SpellPointer sp = shared_ptr<Spell>(new Spell( p_caster, dbcSpell.LookupEntry( casted_spell_id ), true, NULLAURA ));
+				SpellPointer sp = SpellPointer(new Spell( p_caster, dbcSpell.LookupEntry( casted_spell_id ), true, NULLAURA ));
 				SpellCastTargets tgt( p_caster->GetGUID() );
 				sp->prepare( &tgt );
 				//for pet
-				sp = shared_ptr<Spell>(new Spell(  unitTarget, dbcSpell.LookupEntry( casted_spell_id ), true, NULLAURA ));
+				sp =SpellPointer(new Spell(  unitTarget, dbcSpell.LookupEntry( casted_spell_id ), true, NULLAURA ));
 				SpellCastTargets tgt1( unitTarget->GetGUID() );
 				sp->prepare( &tgt1 );
 			}
 			if( inc_resist_by_level_spell )
 			{
 				//for self
-				SpellPointer sp = shared_ptr<Spell>(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				SpellPointer sp = SpellPointer(new Spell( p_caster, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = p_caster->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt( p_caster->GetGUID() );
 				sp->prepare( &tgt );
 				//for pet
 				sp.reset();
-				sp = shared_ptr<Spell>(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
+				sp = SpellPointer(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				sp->forced_basepoints[0] = unitTarget->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt1( unitTarget->GetGUID() );
 				sp->prepare( &tgt1 );
@@ -5434,7 +5434,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 		pTotem->DisableAI();
 		pTotem->GetAIInterface()->totemspell = m_spellInfo;
 
-		shared_ptr<Spell>pSpell = shared_ptr<Spell>(new Spell(pTotem, TotemSpell, true, NULLAURA));
+		SpellPointer pSpell = SpellPointer(new Spell(pTotem, TotemSpell, true, NULLAURA));
 
 		SpellCastTargets targets;
 		targets.m_destX = pTotem->GetPositionX();
@@ -5859,7 +5859,7 @@ void Spell::SpellEffectFeedPet(uint32 i)  // Feed Pet
 	damage *= 1000;
 
 	SpellEntry *spellInfo = dbcSpell.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-	SpellPointer sp= shared_ptr<Spell>(new Spell(p_caster,spellInfo,true,NULLAURA));
+	SpellPointer sp= SpellPointer(new Spell(p_caster,spellInfo,true,NULLAURA));
 	sp->forced_basepoints[0] = damage - 1;
 	SpellCastTargets tgt;
 	tgt.m_unitTarget=pPet->GetGUID();
@@ -6073,7 +6073,7 @@ void Spell::SpellEffectSummonDemonOld(uint32 i)
 	{
 		SpellEntry *spellInfo = dbcSpell.LookupEntry(11726);
 		
-		SpellPointer sp= shared_ptr<Spell>(new Spell(TO_OBJECT(pPet),spellInfo,true,NULLAURA));
+		SpellPointer sp = SpellPointer(new Spell(TO_OBJECT(pPet),spellInfo,true,NULLAURA));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget=pPet->GetGUID();
 		sp->prepare(&tgt);
@@ -6286,7 +6286,7 @@ void Spell::SpellEffectDummyMelee( uint32 i ) // Normalized Weapon damage +
 		if(!spellInfo)
 			return; //omg how did this happen ?
 		//we should also cast sunder armor effect on target with or without dmg
-		SpellPointer spell = shared_ptr<Spell>(new Spell(u_caster, spellInfo ,true, NULLAURA));
+		SpellPointer spell = SpellPointer(new Spell(u_caster, spellInfo ,true, NULLAURA));
 		spell->ProcedOnSpell = m_spellInfo;
 		spell->pSpellId=m_spellInfo->Id;
 		SpellCastTargets targets(unitTarget->GetGUID());

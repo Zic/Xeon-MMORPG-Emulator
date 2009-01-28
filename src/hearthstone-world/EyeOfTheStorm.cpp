@@ -256,7 +256,7 @@ void EyeOfTheStorm::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 			SpellEntry * sp = dbcSpell.LookupEntryForced(spellid);
 			if(sp)
 			{
-				shared_ptr<Spell>pSpell = shared_ptr<Spell>(new Spell(plr, sp, true, NULLAURA));
+				SpellPointer pSpell = SpellPointer (new Spell(plr, sp, true, NULLAURA));
 				SpellCastTargets targets(plr->GetGUID());
 				pSpell->prepare(&targets);
 			}

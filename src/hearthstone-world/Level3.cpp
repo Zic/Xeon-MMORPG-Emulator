@@ -1760,7 +1760,7 @@ bool ChatHandler::HandleCastAllCommand(const char* args, WorldSession* m_session
 			}
 			else
 			{
-				shared_ptr<Spell>sp = shared_ptr<Spell>(new Spell(plr, info, true, NULLAURA));
+				SpellPointer sp = SpellPointer(new Spell(plr, info, true, NULLAURA));
 				SpellCastTargets targets(plr->GetGUID());
 				sp->prepare(&targets);
 			}

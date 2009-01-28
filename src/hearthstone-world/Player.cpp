@@ -1240,7 +1240,7 @@ void Player::_EventAttack( bool offhand )
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(GetOnMeleeSpell());
 			uint8 cn = m_meleespell_cn;
 			SetOnMeleeSpell(0, 0);
-			SpellPointer spell = shared_ptr<Spell>(new Spell(plr_shared_from_this(),spellInfo,true,NULLAURA));
+			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(),spellInfo,true,NULLAURA));
 			SpellCastTargets targets;
 			targets.m_unitTarget = GetSelection();
 			spell->extra_cast_number = cn;
@@ -1325,7 +1325,7 @@ void Player::_EventCharmAttack()
 				SpellEntry *spellInfo = dbcSpell.LookupEntry(m_CurrentCharm->GetOnMeleeSpell());
 				uint8 cn = m_meleespell_cn;
 				m_CurrentCharm->SetOnMeleeSpell(0, 0);
-				SpellPointer spell = shared_ptr<Spell>(new Spell(m_CurrentCharm,spellInfo,true,NULLAURA));
+				SpellPointer spell = SpellPointer(new Spell(m_CurrentCharm,spellInfo,true,NULLAURA));
 				SpellCastTargets targets;
 				targets.m_unitTarget = GetSelection();
 				spell->extra_cast_number = cn;
@@ -3730,7 +3730,7 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 					if( Set->itemscount==set->itemscount[x])
 					{//cast new spell
 						SpellEntry *info = dbcSpell.LookupEntry( set->SpellID[x] );
-						shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell( plr_shared_from_this(), info, true, NULLAURA ));
+						SpellPointer spell = SpellPointer(new Spell( plr_shared_from_this(), info, true, NULLAURA ));
 						SpellCastTargets targets;
 						targets.m_unitTarget = GetGUID();
 						spell->prepare( &targets );
@@ -3867,7 +3867,7 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 					continue;
 				}
 
-				SpellPointer spell = shared_ptr<Spell>(new Spell( plr_shared_from_this(), spells ,true, NULLAURA ));
+				SpellPointer spell = SpellPointer(new Spell( plr_shared_from_this(), spells ,true, NULLAURA ));
 				SpellCastTargets targets;
 				targets.m_unitTarget = this->GetGUID();
 				spell->castedItemId = item->GetEntry();
@@ -4067,18 +4067,18 @@ void Player::BuildPlayerRepop()
    
 	if(getRace()==RACE_NIGHTELF)
 	{
-		SpellEntry *inf=dbcSpell.LookupEntry(20584);
-		shared_ptr<Spell>sp=shared_ptr<Spell>(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
+		SpellEntry *inf = dbcSpell.LookupEntry(20584);
+		SpellPointer sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
 		sp->prepare(&tgt);
 		inf=dbcSpell.LookupEntry(9036);
-		sp=shared_ptr<Spell>(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
+		sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
 		sp->prepare(&tgt);
 	}
 	else
 	{
 	
 		SpellEntry *inf=dbcSpell.LookupEntry(8326);
-		shared_ptr<Spell>sp=shared_ptr<Spell>(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
+		SpellPointer sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
 		sp->prepare(&tgt);
 	}
 
@@ -5945,7 +5945,7 @@ void Player::EventRepeatSpell()
 	{		
 		m_AutoShotAttackTimer = m_AutoShotDuration;
 	
-		SpellPointer sp = shared_ptr<Spell>(new Spell( plr_shared_from_this(), m_AutoShotSpell, true, NULLAURA ));
+		SpellPointer sp = SpellPointer(new Spell( plr_shared_from_this(), m_AutoShotSpell, true, NULLAURA ));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget = m_curSelection;
 		tgt.m_targetMask = TARGET_FLAG_UNIT;
@@ -8342,7 +8342,7 @@ void Player::CompleteLoading()
 					continue;
 			}
 
-			shared_ptr<Spell>spell=shared_ptr<Spell>(new Spell(plr_shared_from_this(),info,true,NULLAURA));
+			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(),info,true,NULLAURA));
 			spell->prepare(&targets);
 		}
 	}
@@ -8827,7 +8827,7 @@ void Player::SetShapeShift(uint8 ss)
 		{
 			if( sp->RequiredShapeShift && ((uint32)1 << (ss-1)) & sp->RequiredShapeShift )
 			{
-				spe = shared_ptr<Spell>(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
+				spe = SpellPointer(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
 				spe->prepare( &t );
 			}
 		}
@@ -8841,7 +8841,7 @@ void Player::SetShapeShift(uint8 ss)
 
 		if( sp->RequiredShapeShift && ((uint32)1 << (ss-1)) & sp->RequiredShapeShift )
 		{
-			spe = shared_ptr<Spell>(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
+			spe = SpellPointer(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
 			spe->prepare( &t );
 		}
 	}
@@ -10327,7 +10327,7 @@ void Player::AddShapeShiftSpell(uint32 id)
 
 	if( sp->RequiredShapeShift && ((uint32)1 << (GetShapeShift()-1)) & sp->RequiredShapeShift )
 	{
-		shared_ptr<Spell>spe = shared_ptr<Spell>(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
+		SpellPointer spe = SpellPointer(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
 		SpellCastTargets t(this->GetGUID());
 		spe->prepare( &t );
 	}

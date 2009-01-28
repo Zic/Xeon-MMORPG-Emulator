@@ -299,7 +299,7 @@ void Creature::SaveToDB()
 		<< m_position.z << ","
 		<< m_position.o << ","
 		<< m_aiInterface->getMoveType() << ","
-		<< m_uint32Values[UNIT_FIELD_DISPLAYID] << ","
+		<< 0 << "," //Uses random display from proto. Setting a displayid manualy will override proto lookup
 		<< m_uint32Values[UNIT_FIELD_FACTIONTEMPLATE] << ","
 		<< m_uint32Values[UNIT_FIELD_FLAGS] << ","
 		<< m_uint32Values[UNIT_FIELD_BYTES_0] << ","
@@ -841,8 +841,17 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
 	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
 
+	uint32 model;
+	if(!spawn->displayid)
+	{
+		uint32 gender = creature_info->GenerateModelId(&model);
+		SetByte(UNIT_FIELD_BYTES_0,2,gender);
+		spawn->displayid = model;
+	}
+
 	SetUInt32Value(UNIT_FIELD_DISPLAYID,spawn->displayid);
 	SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,spawn->displayid);
+	SetFloatValue(OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))));
 
 	SetFloatValue( OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( spawn->displayid ))));
 	Log.Debug("Creatures","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, spawn->displayid, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( spawn->displayid ))); 
@@ -933,9 +942,6 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	BaseAttackType=proto->AttackType;
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
-	SetUInt32Value(UNIT_FIELD_BYTES_0, spawn->bytes);
-	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
-	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
 
 ////////////AI
 	

@@ -1160,7 +1160,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 	case GAMEOBJECT_TYPE_CHEST://cast da spell
 		{
 			spellInfo = dbcSpell.LookupEntry( OPEN_CHEST );
-			spell = shared_ptr<Spell>(new Spell(plyr, spellInfo, true, NULLAURA));
+			spell = SpellPointer(new Spell(plyr, spellInfo, true, NULLAURA));
 			_player->m_currentSpell = spell;
 			targets.m_unitTarget = obj->GetGUID();
 			spell->prepare(&targets); 
@@ -1230,7 +1230,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			SpellEntry *info = dbcSpell.LookupEntry(goinfo->SpellFocus);
 			if(!info)
 				break;
-			SpellPointer spell = shared_ptr<Spell>(new Spell(plyr, info, false, NULLAURA));
+			SpellPointer spell = SpellPointer(new Spell(plyr, info, false, NULLAURA));
 			//spell->SpellByOther = true;
 			SpellCastTargets targets;
 			targets.m_unitTarget = plyr->GetGUID();
@@ -1289,7 +1289,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 					if(!target)
 						return;
 
-					spell = shared_ptr<Spell>(new Spell(obj,info,true,NULLAURA));
+					spell = SpellPointer(new Spell(obj,info,true,NULLAURA));
 					SpellCastTargets targets;
 					targets.m_unitTarget = target->GetGUID();
 					spell->prepare(&targets);
@@ -1308,13 +1308,13 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 					info = dbcSpell.LookupEntry(goinfo->sound4);
 					if(!info)
 						break;
-					spell = shared_ptr<Spell>(new Spell(psacrifice, info, true, NULLAURA));
+					spell = SpellPointer(new Spell(psacrifice, info, true, NULLAURA));
 					targets.m_unitTarget = psacrifice->GetGUID();
 					spell->prepare(&targets);
 					
 					// summons demon		   
 					info = dbcSpell.LookupEntry(goinfo->sound1);
-					spell = shared_ptr<Spell>(new Spell(pCaster, info, true, NULLAURA));
+					spell = SpellPointer(new Spell(pCaster, info, true, NULLAURA));
 					SpellCastTargets targets;
 					targets.m_unitTarget = pCaster->GetGUID();
 					spell->prepare(&targets);					
@@ -1330,7 +1330,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 						return;
 
 					info = dbcSpell.LookupEntry(goinfo->sound1);
-					shared_ptr<Spell>spell = shared_ptr<Spell>(new Spell(pleader, info, true, NULLAURA));
+					SpellPointer spell = SpellPointer (new Spell(pleader, info, true, NULLAURA));
 					SpellCastTargets targets(plr->GetGUID());
 					spell->prepare(&targets);
 
@@ -1581,8 +1581,8 @@ void WorldSession::HandleSelfResurrectOpcode(WorldPacket& recv_data)
 	uint32 self_res_spell = _player->GetUInt32Value(PLAYER_SELF_RES_SPELL);
 	if(self_res_spell)
 	{
-		SpellEntry * sp=dbcSpell.LookupEntry(self_res_spell);
-		SpellPointer s=shared_ptr<Spell>(new Spell(_player,sp,false,NULLAURA));
+		SpellEntry * sp = dbcSpell.LookupEntry(self_res_spell);
+		SpellPointer s = SpellPointer(new Spell(_player,sp,false,NULLAURA));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget=_player->GetGUID();
 		s->prepare(&tgt);	

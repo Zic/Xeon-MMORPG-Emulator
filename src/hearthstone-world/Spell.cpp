@@ -2610,7 +2610,7 @@ void Spell::HandleAddAura(uint64 guid)
 	{
 		SpellEntry *spellInfo = dbcSpell.LookupEntry( spellid );
 		if(!spellInfo) return;
-		SpellPointer spell = shared_ptr<Spell>(new Spell(p_caster, spellInfo ,true, NULLAURA));
+		SpellPointer spell = SpellPointer(new Spell(p_caster, spellInfo ,true, NULLAURA));
 		SpellCastTargets targets(Target->GetGUID());
 		spell->prepare(&targets);	
 	}
@@ -2674,7 +2674,7 @@ void Spell::TriggerSpell()
 			return;
 		}
 
-		SpellPointer spell = new Spell(m_caster, spellInfo,false, NULL);
+		SpellPointer spell = SpellPointer(new Spell(m_caster, spellInfo,false, NULLAURA));
 		WPAssert(spell);
 
 		SpellCastTargets targets;
@@ -4552,7 +4552,7 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
 	if(!refspellid || m_caster == refunit) return false;
 	refunit->RemoveAura(refspellid);
 
-	SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, m_spellInfo, true, NULLAURA));
+	SpellPointer spell = SpellPointer(new Spell(m_caster, m_spellInfo, true, NULLAURA));
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
 	spell->m_reflectedParent = spell_shared_from_this();

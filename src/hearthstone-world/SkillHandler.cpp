@@ -226,7 +226,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 				}
 				else
 				{
-					shared_ptr<Spell>sp= shared_ptr<Spell>(new Spell(_player,spellInfo,true,NULLAURA));
+					SpellPointer sp = SpellPointer(new Spell(_player,spellInfo,true,NULLAURA));
 					SpellCastTargets tgt;
 					tgt.m_unitTarget=_player->GetGUID();
 					sp->prepare(&tgt);
