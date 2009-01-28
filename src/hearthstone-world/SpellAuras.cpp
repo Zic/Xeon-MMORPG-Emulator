@@ -726,14 +726,14 @@ void Aura::Remove()
 	m_deleted = true;
 
 	// prevent ourselves from deleting and going feeefee on us.
-	AuraPointer pThis = aura_shared_from_this();
+	AuraPointer pThis = shared_from_this();
 
 	sEventMgr.RemoveEvents( shared_from_this() );
 
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		RemoveAuraVisual();
 
-	if( m_target->m_auras[m_auraSlot] == shared_from_this() )
+	if( m_target->m_auras[m_auraSlot] == pThis )
 		m_target->m_auras[m_auraSlot] = NULLAURA;
 
 	ApplyModifiers( false );
@@ -797,7 +797,7 @@ void Aura::Remove()
 		m_target->CombatStatus.ForceRemoveAttacker( m_casterGuid );
 
 
-	if( caster != NULL && caster->IsPlayer() && caster->IsInWorld() )
+	if( caster && caster->IsPlayer() && caster->IsInWorld() )
 		sHookInterface.OnAuraRemove(TO_PLAYER(caster),m_spellProto->Id);
 
 	/**********************Cooldown**************************
@@ -1116,7 +1116,7 @@ void Aura::EventUpdateCreatureAA(float r)
 				aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount, m_modList[i].m_miscValue, m_modList[i].i);
 		}
 
-		u_caster->AddAura(aura, aura_shared_from_this());
+		u_caster->AddAura(aura, shared_from_this());
 		targets.insert(u_caster->GetUIdFromGUID());
 	}
 
@@ -1163,7 +1163,7 @@ void Aura::EventUpdateCreatureAA(float r)
 				if( m_spellProto->Effect[m_modList[i].i] == SPELL_EFFECT_APPLY_AREA_AURA )
 					aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount, m_modList[i].m_miscValue, m_modList[i].i);
 			}
-			t->AddAura(aura, aura_shared_from_this());
+			t->AddAura(aura, shared_from_this());
 			targets.insert(u_caster->GetUIdFromGUID());
 		}
 	}
@@ -1297,7 +1297,7 @@ void Aura::EventUpdatePlayerAA(float r)
 			}
 			if(aura)
 			{
-				plr->AddAura(aura, aura_shared_from_this());
+				plr->AddAura(aura, shared_from_this());
 				NewTargets.push_back(plr->GetLowGUID());
 			}
 		}
@@ -1336,7 +1336,7 @@ void Aura::EventUpdatePlayerAA(float r)
 					}
 					if(aura)
 					{
-						(*itr)->m_loggedInPlayer->AddAura(aura, aura_shared_from_this());
+						(*itr)->m_loggedInPlayer->AddAura(aura, shared_from_this());
 						NewTargets.push_back((*itr)->m_loggedInPlayer->GetLowGUID());
 					}
 				}
@@ -1618,7 +1618,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 		if(dmg<=0)
 			return; //who would want a neagtive dmg here ?
 
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicDamage,(uint32)dmg, 
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicDamage,(uint32)dmg, 
 			EVENT_AURA_PERIODIC_DAMAGE,GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 
 		/*TO_PLAYER( c )->GetSession()->SystemMessage("dot will do %u damage every %u seconds (total of %u)", dmg,m_spellProto->EffectAmplitude[mod->i],(GetDuration()/m_spellProto->EffectAmplitude[mod->i])*dmg);
@@ -1782,7 +1782,7 @@ void Aura::EventPeriodicDamage(uint32 amount)
 void Aura::SpellAuraDummy(bool apply)
 {
 	// Try a dummy SpellHandler
-	if(sScriptMgr.CallScriptedDummyAura(GetSpellId(), mod->i, aura_shared_from_this(), apply))
+	if(sScriptMgr.CallScriptedDummyAura(GetSpellId(), mod->i, shared_from_this(), apply))
 		return;
 
 	uint32 TamingSpellid = 0;
@@ -1886,7 +1886,7 @@ void Aura::SpellAuraDummy(bool apply)
 			if( apply )
 			{
 				//uint32 type, uint32 time, uint32 repeats, uint32 flags
-				sEventMgr.AddEvent( aura_shared_from_this(), &Aura::EventRelocateRandomTarget, EVENT_AURA_PERIODIC_TELEPORT, 500, 5, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT); 
+				sEventMgr.AddEvent( shared_from_this(), &Aura::EventRelocateRandomTarget, EVENT_AURA_PERIODIC_TELEPORT, 500, 5, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT); 
 			}
 			else
 			{
@@ -2565,7 +2565,7 @@ void Aura::SpellAuraDummy(bool apply)
 			//uint32 duration = GetDuration();
 			//printf("moo\n");
 			if(apply)
-				sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHeal1, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_HEAL, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_HEAL, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			else
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_HEAL);
             		
@@ -2577,7 +2577,7 @@ void Aura::SpellAuraDummy(bool apply)
 	case 27012:		// hurricane
 		{
 			if(apply)
-				sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicDamage, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_DAMAGE, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicDamage, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_DAMAGE, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			else
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_DAMAGE);
 		}break;
@@ -3035,7 +3035,7 @@ void Aura::SpellAuraPeriodicHeal( bool apply )
 
 		if (amount < 0) return;
 
-		sEventMgr.AddEvent( aura_shared_from_this(), &Aura::EventPeriodicHeal,(uint32)amount, EVENT_AURA_PERIODIC_HEAL, GetSpellProto()->EffectAmplitude[mod->i], 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+		sEventMgr.AddEvent( shared_from_this(), &Aura::EventPeriodicHeal,(uint32)amount, EVENT_AURA_PERIODIC_HEAL, GetSpellProto()->EffectAmplitude[mod->i], 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 
 		if( GetSpellProto()->NameHash == SPELL_HASH_REJUVENATION || GetSpellProto()->NameHash == SPELL_HASH_REGROWTH )
 		{
@@ -3701,7 +3701,7 @@ void Aura::SpellAuraModTotalHealthRegenPct(bool apply)
 	if(apply)
 	{
 		SetPositive();
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHealPct,(float)mod->m_amount,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHealPct,(float)mod->m_amount,
 			EVENT_AURA_PERIODIC_HEALPERC,	GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -3733,7 +3733,7 @@ void Aura::SpellAuraModTotalManaRegenPct(bool apply)
 	if(apply)
 	{
 		SetPositive();
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicManaPct,(float)mod->m_amount,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicManaPct,(float)mod->m_amount,
 			EVENT_AURA_PERIOCIC_MANA,	GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -3848,14 +3848,14 @@ void Aura::SpellAuraPeriodicTriggerSpell(bool apply)
 
 		if(m_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT))
 		{
-			sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicTriggerSpell, spe,
+			sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicTriggerSpell, spe,
 			EVENT_AURA_PERIODIC_TRIGGERSPELL,GetSpellProto()->EffectAmplitude[mod->i], 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 
             periodic_target = m_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT);
 		}
 		else if(m_target)
 		{
-			sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicTriggerSpell, spe, 
+			sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicTriggerSpell, spe, 
 				EVENT_AURA_PERIODIC_TRIGGERSPELL,GetSpellProto()->EffectAmplitude[mod->i], 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			periodic_target = m_target->GetGUID();
 		}
@@ -3873,7 +3873,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 
 	if( spellInfo->EffectImplicitTargetA[0] == 18 )			// Hellfire, if there are any others insert here
 	{
-		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, aura_shared_from_this()));
+		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
 		SpellCastTargets targets;
 		targets.m_targetMask = TARGET_FLAG_SOURCE_LOCATION;
 		targets.m_srcX = m_caster->GetPositionX();
@@ -3889,7 +3889,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 
 	if(oTarget->GetTypeId()==TYPEID_DYNAMICOBJECT)
 	{
-		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, aura_shared_from_this()));
+		SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
 		SpellCastTargets targets;
 		targets.m_targetMask = TARGET_FLAG_DEST_LOCATION;
 		targets.m_destX = oTarget->GetPositionX();
@@ -3942,7 +3942,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 		return;
 	}
 
-	SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, aura_shared_from_this()));
+	SpellPointer spell = shared_ptr<Spell>(new Spell(m_caster, spellInfo, true, shared_from_this()));
 	SpellCastTargets targets;
 	if(oTarget->IsUnit())
 		targets.m_targetMask = TARGET_FLAG_UNIT;
@@ -3958,7 +3958,7 @@ void Aura::SpellAuraPeriodicEnergize(bool apply)
 	if(apply)
 	{
 		SetPositive();
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)mod->m_amount,(uint32)mod->m_miscValue,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)mod->m_amount,(uint32)mod->m_miscValue,
 			EVENT_AURA_PERIODIC_ENERGIZE,GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -5079,7 +5079,7 @@ void Aura::SpellAuraPeriodicLeech(bool apply)
 	{
 		SetNegative();
 		uint32 amt = mod->m_amount;
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicLeech,amt,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicLeech,amt,
 			EVENT_AURA_PERIODIC_LEECH,	GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -5227,7 +5227,7 @@ void Aura::SpellAuraModSpellHitChance(bool apply)
 void Aura::SpellAuraTransform(bool apply)
 {
 	// Try a dummy SpellHandler
-	if(sScriptMgr.CallScriptedDummyAura(GetSpellId(), mod->i, aura_shared_from_this(), apply))
+	if(sScriptMgr.CallScriptedDummyAura(GetSpellId(), mod->i, shared_from_this(), apply))
 		return;
 
 	uint32 displayId = 0;
@@ -5249,7 +5249,7 @@ void Aura::SpellAuraTransform(bool apply)
 				m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, displayId);
 				uint32 manaToRegen = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) * 0.06f);
 				if( !manaToRegen ) return;
-				sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)manaToRegen,(uint32)0, EVENT_AURA_PERIODIC_ENERGIZE,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)manaToRegen,(uint32)0, EVENT_AURA_PERIODIC_ENERGIZE,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			}
 			else
 			{
@@ -5410,7 +5410,7 @@ void Aura::SpellAuraTransform(bool apply)
 						m_target->m_currentSpell = NULLSPELL;
 					}
 
-					sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)1000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+					sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)1000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 					m_target->polySpell = GetSpellProto()->Id;
 				}
 				else
@@ -5569,7 +5569,7 @@ void Aura::SpellAuraPeriodicHealthFunnel(bool apply)
 	if(apply)
 	{
 		uint32 amt = mod->m_amount;
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHealthFunnel, amt,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHealthFunnel, amt,
 			EVENT_AURA_PERIODIC_HEALTH_FUNNEL, GetSpellProto()->EffectAmplitude[mod->i], 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -5603,7 +5603,7 @@ void Aura::SpellAuraPeriodicManaLeech(bool apply)
 	if(apply)
 	{
 		uint32 amt=mod->m_amount;
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicManaLeech,amt,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicManaLeech,amt,
 			EVENT_AURA_PERIODIC_LEECH,	 GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -6264,7 +6264,7 @@ void Aura::SpellAuraModRegen(bool apply)
 	if(apply)//seems like only positive
 	{
 		SetPositive ();
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)((this->GetSpellProto()->EffectBasePoints[mod->i]+1)/5)*3,
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)((this->GetSpellProto()->EffectBasePoints[mod->i]+1)/5)*3,
 			EVENT_AURA_PERIODIC_REGEN,3000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
@@ -6277,7 +6277,7 @@ void Aura::SpellAuraDrinkNew(bool apply)
 		if( apply )
 		{
 			SetPositive();
-			sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicDrink, uint32(float2int32(float(mod->m_amount)/5.0f)),
+			sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicDrink, uint32(float2int32(float(mod->m_amount)/5.0f)),
 				EVENT_AURA_PERIODIC_REGEN, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		}
 		return;
@@ -6288,12 +6288,12 @@ void Aura::SpellAuraDrinkNew(bool apply)
 		sEventMgr.RemoveEvents( m_target, EVENT_AURA_PERIODIC_TRIGGERSPELL );
 		m_target->Root();
 		mod->fixed_amount[0] = 0;
-		sEventMgr.AddEvent( aura_shared_from_this(), &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent( shared_from_this(), &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		sEventMgr.AddEvent( m_target, &Unit::UnRoot, EVENT_AURA_PERIODIC_TRIGGERSPELL, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
-		sEventMgr.RemoveEvents( aura_shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE ); 
+		sEventMgr.RemoveEvents( shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE ); 
 		EventPeriodicSpeedModify( -(mod->fixed_amount[0]) ); 
 	}
 
@@ -6480,13 +6480,13 @@ void Aura::SpellAuraPeriodicDamagePercent(bool apply)
 		/*if(m_spellProto->Id == 28347) //Dimensional Siphon
 		{
 			uint32 dmg = (m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*5)/100;
-			sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicDamagePercent, dmg, 
+			sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicDamagePercent, dmg, 
 				EVENT_AURA_PERIODIC_DAMAGE_PERCENT, 1000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		}
 		else*/
 		{
 			uint32 dmg = mod->m_amount;
-			sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicDamagePercent, dmg, 
+			sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicDamagePercent, dmg, 
 				EVENT_AURA_PERIODIC_DAMAGE_PERCENT,GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		}
 		SetNegative();
@@ -6589,7 +6589,7 @@ void Aura::SpellAuraMagnet(bool apply)
 	// redirects one negative aura to the totem
 	
 	if( apply )
-		TO_PLAYER(m_target)->m_magnetAura = aura_shared_from_this();
+		TO_PLAYER(m_target)->m_magnetAura = shared_from_this();
 	else
 		TO_PLAYER(m_target)->m_magnetAura = NULLAURA;
 }
@@ -7722,7 +7722,7 @@ void Aura::SpellAuraModHealthRegInCombat(bool apply)
 	// demon armor etc, they all seem to be 5 sec.
 	if(apply)
 	{
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicHeal1, uint32(mod->m_amount), EVENT_AURA_PERIODIC_HEALINCOMB, 5000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1, uint32(mod->m_amount), EVENT_AURA_PERIODIC_HEALINCOMB, 5000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
 
@@ -7752,7 +7752,7 @@ void Aura::SpellAuraPowerBurn(bool apply)
 {
 	//0 mana,1 rage, 3 energy
 	if(apply)
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicBurn, uint32(mod->m_amount), (uint32)mod->m_miscValue, EVENT_AURA_PERIODIC_BURN, GetSpellProto()->EffectAmplitude[mod->i], 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicBurn, uint32(mod->m_amount), (uint32)mod->m_miscValue, EVENT_AURA_PERIODIC_BURN, GetSpellProto()->EffectAmplitude[mod->i], 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Aura::SpellAuraModCritDmgPhysical(bool apply)
@@ -8565,7 +8565,7 @@ void Aura::SpellAuraRegenManaStatPCT(bool apply)
 	if(apply)
 	{
 		SetPositive();
-		sEventMgr.AddEvent(aura_shared_from_this(), &Aura::EventPeriodicRegenManaStatPct,(uint32)mod->m_amount,(uint32)mod->m_miscValue,  EVENT_AURA_REGEN_MANA_STAT_PCT, 5000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicRegenManaStatPct,(uint32)mod->m_amount,(uint32)mod->m_miscValue,  EVENT_AURA_REGEN_MANA_STAT_PCT, 5000, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
 void Aura::SpellAuraSpellHealingStatPCT(bool apply)
@@ -8916,7 +8916,7 @@ void Aura::SpellAuraSetPhase(bool apply)
 			p_target->m_phaseAura->Remove();
 
 		p_target->EnablePhase( mod->m_miscValue );
-		p_target->m_phaseAura = aura_shared_from_this();
+		p_target->m_phaseAura = shared_from_this();
 	}
 	else
 	{
