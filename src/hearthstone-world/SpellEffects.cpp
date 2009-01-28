@@ -2156,7 +2156,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 		if(!chaindamage)
 		{
 			AuraPointer riptide = NULLAURA;
-			if(m_spellInfo->NameHash == SPELL_HASH_CHAIN_HEAL && unitTarget && (riptide = unitTarget->FindPositiveAuraByNameHash(SPELL_HASH_RIPTIDE)) != NULLAURA)
+			if(m_spellInfo->NameHash == SPELL_HASH_CHAIN_HEAL && unitTarget && (riptide = unitTarget->FindPositiveAuraByNameHash(SPELL_HASH_RIPTIDE)) != NULL)
 			{
 				damage += damage / 4; // +25%
 				riptide->Remove();

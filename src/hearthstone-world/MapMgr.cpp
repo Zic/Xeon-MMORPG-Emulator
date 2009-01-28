@@ -98,16 +98,16 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 
 void MapMgr::Init()
 {
-	m_stateManager = new WorldStateManager(CAST(MapMgr,shared_from_this()));
+	m_stateManager = new WorldStateManager(shared_from_this());
 	// Create script interface
-	ScriptInterface = new MapScriptInterface( CAST(MapMgr,shared_from_this()) );
+	ScriptInterface = new MapScriptInterface( shared_from_this() );
 }
 
 // call me to break the circular reference, perform cleanup
 void MapMgr::Destructor()
 {
 	// in case this goes feeefeee
-	shared_ptr<MapMgr> pThis = CAST(MapMgr,shared_from_this());
+	shared_ptr<MapMgr> pThis = shared_from_this();
 
 	sEventMgr.RemoveEvents(shared_from_this());
 	delete ScriptInterface;
@@ -276,7 +276,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 	if (!objCell)
 	{
 		objCell = Create(x,y);
-		objCell->Init(x, y, _mapId, CAST(MapMgr,shared_from_this()));
+		objCell->Init(x, y, _mapId, shared_from_this());
 	}
 
 	uint32 endX = (x <= _sizeX) ? x + 1 : (_sizeX-1);
@@ -373,7 +373,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 
 	// Handle activation of that object.
 	if(objCell->IsActive() && obj->CanActivate())
-		obj->Activate(CAST(MapMgr,shared_from_this()));
+		obj->Activate(shared_from_this());
 
 	// Add the session to our set if it is a player.
 	if(plObj)
@@ -501,7 +501,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 	}
 
 	if(obj->Active)
-		obj->Deactivate(CAST(MapMgr,shared_from_this()));
+		obj->Deactivate(shared_from_this());
 
 	// That object types are not map objects. TODO: add AI groups here?
 	if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetTypeId()==TYPEID_UNUSED)
@@ -609,7 +609,7 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 {
 	// Items and containers are of no interest for us
-	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != CAST(MapMgr,shared_from_this()) )
+	if( obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER || obj->GetMapMgr() != shared_from_this() )
 	{
 		return;
 	}
@@ -727,7 +727,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 
 				curObj->RemoveInRangeObject(obj);
 
-				if( obj->GetMapMgr() != CAST(MapMgr,shared_from_this()) )
+				if( obj->GetMapMgr() != shared_from_this() )
 				{
 					/* Something removed us. */
 					return;
@@ -740,7 +740,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 	///////////////////////////
 	// Get new cell coordinates
 	///////////////////////////
-	if(obj->GetMapMgr() != CAST(MapMgr,shared_from_this()))
+	if(obj->GetMapMgr() != shared_from_this())
 	{
 		/* Something removed us. */
 		return;
@@ -786,7 +786,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 	if (!objCell)
 	{
 		objCell = Create(cellX,cellY);
-		objCell->Init(cellX, cellY, _mapId, CAST(MapMgr,shared_from_this()));
+		objCell->Init(cellX, cellY, _mapId, shared_from_this());
 	}
 
 	// If object moved cell
@@ -798,7 +798,7 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 		// This is to prevent cpu leaks. I will think of a better solution very soon :P
 
 		if(!objCell->IsActive() && !plObj && obj->Active)
-			obj->Deactivate(CAST(MapMgr,shared_from_this()));
+			obj->Deactivate(shared_from_this());
 
 		if(obj->GetMapCell())
 			obj->GetMapCell()->RemoveObject(obj);
@@ -1177,7 +1177,7 @@ void MapMgr::_UpdateObjects()
 		eit = it;
 		++it;
 		_processQueue.erase(eit);
-		if(plyr->GetMapMgr() == CAST(MapMgr,shared_from_this()))
+		if(plyr->GetMapMgr() == shared_from_this())
 			plyr->ProcessPendingUpdates(&m_updateBuildBuffer, &m_compressionBuffer);
 	}
 }
@@ -1198,7 +1198,7 @@ void MapMgr::LoadAllCells()
 				// Cell doesn't exist, create it.
 				// There is no spoon. Err... cell.
 				cellInfo = Create( x , y );
-				cellInfo->Init( x , y , _mapId , CAST(MapMgr,shared_from_this()) );
+				cellInfo->Init( x , y , _mapId , shared_from_this() );
 				DEBUG_LOG( "Created cell [%u,%u] on map %d (instance %d)." , x , y , _mapId , m_instanceID );
 				cellInfo->SetActivity( true );
 				_map->CellGoneActive( x , y );
@@ -1253,7 +1253,7 @@ void MapMgr::UpdateCellActivity(uint32 x, uint32 y, int radius)
 				if (_CellActive(posX, posY))
 				{
 					objCell = Create(posX, posY);
-					objCell->Init(posX, posY, _mapId, CAST(MapMgr,shared_from_this()));
+					objCell->Init(posX, posY, _mapId, shared_from_this());
 
 //					DEBUG_LOG("Cell [%d,%d] on map %d (instance %d) is now active.", 
 //						posX, posY, this->_mapId, m_instanceID);
@@ -1451,13 +1451,13 @@ bool MapMgr::Do()
 		PushStaticObject(*itr);
 
 	/* load corpses */
-	objmgr.LoadCorpses(CAST(MapMgr,shared_from_this()));
+	objmgr.LoadCorpses(shared_from_this());
 
 	// initialize worldstates
-	sWorldStateTemplateManager.ApplyMapTemplate(CAST(MapMgr,shared_from_this()));
+	sWorldStateTemplateManager.ApplyMapTemplate(shared_from_this());
 
 	if( GetMapInfo()->type == INSTANCE_NULL )
-		sHookInterface.OnContinentCreate(CAST(MapMgr,shared_from_this()));
+		sHookInterface.OnContinentCreate(shared_from_this());
 
 	// always declare local variables outside of the loop!
 	// otherwise theres a lot of sub esp; going on.
@@ -1476,7 +1476,7 @@ bool MapMgr::Do()
 			for(i=m_objectinsertpool.begin();i!=m_objectinsertpool.end();++i)
 			{
 				//PushObject(*i);
-				(*i)->PushToWorld(CAST(MapMgr,shared_from_this()));
+				(*i)->PushToWorld(shared_from_this());
 			}
 			m_objectinsertpool.clear();
 		}
@@ -1521,7 +1521,7 @@ bool MapMgr::Do()
 	}
 
 	//prevent possible feeefeee
-	shared_ptr<MapMgr> pThis = CAST(MapMgr,shared_from_this());
+	shared_ptr<MapMgr> pThis = shared_from_this();
 
 	if(pInstance)
 	{
@@ -1734,7 +1734,7 @@ void MapMgr::_PerformObjectDuties()
 			// Don't update players not on our map.
 			// If we abort in the handler, it means we will "lose" packets, or not process this.
 			// .. and that could be diasterous to our client :P
-			if(session->GetPlayer() && (session->GetPlayer()->GetMapMgr() != CAST(MapMgr,shared_from_this()) && session->GetPlayer()->GetMapMgr() != NULLMAPMGR))
+			if(session->GetPlayer() && (!session->GetPlayer()->GetMapMgr() && session->GetPlayer()->GetMapMgr() != shared_from_this() ))
 			{
 				continue;
 			}
@@ -1758,10 +1758,10 @@ void MapMgr::_PerformObjectDuties()
 void MapMgr::EventCorpseDespawn(uint64 guid)
 {
 	shared_ptr<Corpse> pCorpse = objmgr.GetCorpse((uint32)guid);
-	if(pCorpse == NULLCORPSE)	// Already Deleted
+	if(pCorpse == NULL)	// Already Deleted
 		return;
 
-	if(pCorpse->GetMapMgr() != CAST(MapMgr,shared_from_this()))
+	if(pCorpse->GetMapMgr() != shared_from_this())
 		return;
 
 	pCorpse->Despawn();
@@ -1816,7 +1816,7 @@ void MapMgr::EventRespawnVehicle(VehiclePointer v, MapCell * p)
 	{
 		v->m_respawnCell=NULL;
 		p->_respawnObjects.erase(itr);
-		v->OnRespawn(CAST(MapMgr,shared_from_this()));
+		v->OnRespawn(shared_from_this());
 	}
 }
 
@@ -1827,7 +1827,7 @@ void MapMgr::EventRespawnCreature(CreaturePointer c, MapCell * p)
 	{
 		c->m_respawnCell=NULL;
 		p->_respawnObjects.erase(itr);
-		c->OnRespawn(CAST(MapMgr,shared_from_this()));
+		c->OnRespawn(shared_from_this());
 	}
 }
 
@@ -1838,7 +1838,7 @@ void MapMgr::EventRespawnGameObject(GameObjectPointer o, MapCell * c)
 	{
 		o->m_respawnCell=NULL;
 		c->_respawnObjects.erase(itr);
-		o->Spawn(CAST(MapMgr,shared_from_this()));
+		o->Spawn(shared_from_this());
 	}
 }
 

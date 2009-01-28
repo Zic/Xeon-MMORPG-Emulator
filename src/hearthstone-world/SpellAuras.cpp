@@ -733,7 +733,7 @@ void Aura::Remove()
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		RemoveAuraVisual();
 
-	if( m_target->m_auras[m_auraSlot] == TO_AURA(shared_from_this()) )
+	if( m_target->m_auras[m_auraSlot] == shared_from_this() )
 		m_target->m_auras[m_auraSlot] = NULLAURA;
 
 	ApplyModifiers( false );
@@ -1074,7 +1074,7 @@ void Aura::BuildAuraUpdate()
 // Modifies current aura duration based on mechanic specified
 void Aura::DurationPctMod(uint32 mechanic)
 {
-	if(p_target != NULLPLR && mechanic < NUM_MECHANIC && GetDuration() > 0){
+	if(p_target != NULL && mechanic < NUM_MECHANIC && GetDuration() > 0){
 		int32 DurationModifier = p_target->MechanicDurationPctMod[mechanic];
 		if(DurationModifier < - 100)
 			DurationModifier = -100; // Can't reduce by more than 100%
@@ -2593,7 +2593,7 @@ void Aura::SpellAuraDummy(bool apply)
 				for( x = 0; x < MAX_POSITIVE_AURAS; ++x )
 				{
 					pAura = m_target->m_auras[x];
-					if( pAura != NULL && pAura->GetSpellProto() == m_spellProto && pAura != TO_AURA(shared_from_this()) )
+					if( pAura != NULL && pAura->GetSpellProto() == m_spellProto && pAura != shared_from_this() )
 					{
 						mod->m_amount = 0;
 						return;
@@ -4754,7 +4754,7 @@ void Aura::SpellAuraModSchoolImmunity(bool apply)
 		for(uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
 		{
 			pAura = m_target->m_auras[i];
-			if( pAura != TO_AURA(shared_from_this()) && pAura != NULL && !pAura->IsPassive() && !pAura->IsPositive() && !(pAura->GetSpellProto()->Attributes & ATTRIBUTES_IGNORE_INVULNERABILITY) )
+			if( pAura != shared_from_this() && pAura != NULL && !pAura->IsPassive() && !pAura->IsPositive() && !(pAura->GetSpellProto()->Attributes & ATTRIBUTES_IGNORE_INVULNERABILITY) )
 			{
 				pAura->Remove();
 			}

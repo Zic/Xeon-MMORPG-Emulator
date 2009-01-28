@@ -120,7 +120,7 @@ void Object::Destructor()
 		delete m_extensions;
 
 #ifdef SHAREDPTR_DEBUGMODE
-	//ObjectPointer blah = obj_shared_from_this();
+	//ObjectPointer blah = shared_from_this();
 	// breakpoint this for further debugging
 	printf("Object::Destructor()\n");
 #endif
@@ -190,7 +190,7 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	if(GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE)
 		flags |= 0x80;
 
-	if(target == obj_shared_from_this())
+	if(target == shared_from_this())
 	{
 		// player creating self
 		flags |= 0x01;
@@ -361,7 +361,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 	if(m_objectTypeId == TYPEID_PLAYER)
 	{
 		pThis = plr_shared_from_this();
-		if(target == obj_shared_from_this())
+		if(target == shared_from_this())
 		{
 			// Updating our last speeds.
 			pThis->UpdateLastSpeeds();
@@ -719,7 +719,7 @@ bool Object::SetPosition(const LocationVector & v, bool allowPorting /* = false 
 
 	if (IsInWorld() && updateMap)
 	{
-		m_mapMgr->ChangeObjectLocation(obj_shared_from_this());
+		m_mapMgr->ChangeObjectLocation(shared_from_this());
 	}
 
 	return result;
@@ -747,7 +747,7 @@ bool Object::SetPosition( float newX, float newY, float newZ, float newOrientati
 	if (IsInWorld() && updateMap)
 	{
 		m_lastMapUpdatePosition.ChangeCoords(newX,newY,newZ,newOrientation);
-		m_mapMgr->ChangeObjectLocation(obj_shared_from_this());
+		m_mapMgr->ChangeObjectLocation(shared_from_this());
 
 		if( m_objectTypeId == TYPEID_PLAYER && plr_shared_from_this()->GetGroup() && plr_shared_from_this()->m_last_group_position.Distance2DSq(m_position) > 25.0f ) // distance of 5.0
 		{
@@ -897,7 +897,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 
 void Object::AddToWorld()
 {
-	shared_ptr<MapMgr> mapMgr = sInstanceMgr.GetInstance(obj_shared_from_this());
+	shared_ptr<MapMgr> mapMgr = sInstanceMgr.GetInstance(shared_from_this());
 	if(!mapMgr)
 		return; //instance add failed
 
@@ -923,7 +923,7 @@ void Object::AddToWorld()
 	m_mapMgr = mapMgr;
 	m_inQueue = true;
 
-	mapMgr->AddObject(obj_shared_from_this());
+	mapMgr->AddObject(shared_from_this());
 
 	// correct incorrect instance id's
 	m_instanceId = m_mapMgr->GetInstanceID();
@@ -939,7 +939,7 @@ void Object::AddToWorld(shared_ptr<MapMgr> pMapMgr)
 	m_mapMgr = pMapMgr;
 	m_inQueue = true;
 
-	pMapMgr->AddObject(obj_shared_from_this());
+	pMapMgr->AddObject(shared_from_this());
 
 	// correct incorrect instance id's
 	m_instanceId = pMapMgr->GetInstanceID();
@@ -960,7 +960,7 @@ void Object::PushToWorld(shared_ptr<MapMgr>mgr)
 	m_mapMgr = mgr;
 	OnPrePushToWorld();
 
-	mgr->PushObject(obj_shared_from_this());
+	mgr->PushObject(shared_from_this());
 
 	// correct incorrect instance id's
 	mSemaphoreTeleport = false;
@@ -985,7 +985,7 @@ void Object::RemoveFromWorld(bool free_guid)
 
 	mSemaphoreTeleport = true;
 
-	m->RemoveObject(obj_shared_from_this(), free_guid);
+	m->RemoveObject(shared_from_this(), free_guid);
 	
 	// remove any spells / free memory
 	sEventMgr.RemoveEvents(shared_from_this(), EVENT_UNIT_SPELL_HIT);
@@ -1010,7 +1010,7 @@ void Object::SetUInt32Value( const uint32 index, const uint32 value )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1058,7 +1058,7 @@ void Object::ModPUInt32Value(const uint32 index, const int32 value, bool apply )
 
 		if(!m_objectUpdated )
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1087,7 +1087,7 @@ void Object::ModUnsigned32Value(uint32 index, int32 mod)
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1123,7 +1123,7 @@ void Object::ModSignedInt32Value(uint32 index, int32 value )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1157,7 +1157,7 @@ void Object::ModFloatValue(const uint32 index, const float value )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1179,7 +1179,7 @@ void Object::SetUInt64Value( const uint32 index, const uint64 value )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1200,7 +1200,7 @@ void Object::SetFloatValue( const uint32 index, const float value )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1223,7 +1223,7 @@ void Object::SetFlag( const uint32 index, uint32 newFlag )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1260,7 +1260,7 @@ void Object::RemoveFlag( const uint32 index, uint32 oldFlag )
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -1515,18 +1515,18 @@ void Object::UpdateOppFactionSet()
 	{
 		if (((*i)->GetTypeId() == TYPEID_UNIT) || ((*i)->GetTypeId() == TYPEID_PLAYER) || ((*i)->GetTypeId() == TYPEID_GAMEOBJECT))
 		{
-			if (isHostile(obj_shared_from_this(), (*i)))
+			if (isHostile(shared_from_this(), (*i)))
 			{
-				if(!(*i)->IsInRangeOppFactSet(obj_shared_from_this()))
-					(*i)->m_oppFactsInRange.insert(obj_shared_from_this());
+				if(!(*i)->IsInRangeOppFactSet(shared_from_this()))
+					(*i)->m_oppFactsInRange.insert(shared_from_this());
 				if (!IsInRangeOppFactSet((*i)))
 					m_oppFactsInRange.insert((*i));
 				
 			}
 			else
 			{
-				if((*i)->IsInRangeOppFactSet(obj_shared_from_this()))
-					(*i)->m_oppFactsInRange.erase(obj_shared_from_this());
+				if((*i)->IsInRangeOppFactSet(shared_from_this()))
+					(*i)->m_oppFactsInRange.erase(shared_from_this());
 				if (IsInRangeOppFactSet((*i)))
 					m_oppFactsInRange.erase((*i));
 			}
@@ -1559,7 +1559,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	// Also, you WONT get flagged if you are dueling that person - FiShBaIt
 	if( pVictim->IsPlayer() && IsPlayer() )
 	{
-		if( isHostile( obj_shared_from_this(), pVictim ) && TO_PLAYER( pVictim )->DuelingWith != player_shared_from_this() )
+		if( isHostile( shared_from_this(), pVictim ) && TO_PLAYER( pVictim )->DuelingWith != player_shared_from_this() )
 			player_shared_from_this()->SetPvPFlag();
 	}
 	//If our pet attacks  - flag us.
@@ -1610,7 +1610,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		if(plr != NULL && plr->GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_UNIT) // Units can't tag..
 			TO_CREATURE(pVictim)->Tag(plr);
 
-		// Pepsi1x1: is this correct obj_shared_from_this()
+		// Pepsi1x1: is this correct shared_from_this()
 		if( pVictim != 
 			unit_shared_from_this() )
 		{
@@ -1921,7 +1921,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	   
 		if( IsUnit() )
 		{
-			CALL_SCRIPT_EVENT( obj_shared_from_this(), OnTargetDied )( pVictim );
+			CALL_SCRIPT_EVENT( shared_from_this(), OnTargetDied )( pVictim );
 			unit_shared_from_this()->smsg_AttackStop( pVictim );
 		
 			/* Tell Unit that it's target has Died */
@@ -2014,7 +2014,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 
 		if(pVictim->GetTypeId() == TYPEID_UNIT)
 		{
-			pVictim->GetAIInterface()->OnDeath( obj_shared_from_this() );
+			pVictim->GetAIInterface()->OnDeath( shared_from_this() );
 			if(GetTypeId() == TYPEID_PLAYER)
 			{
 				WorldPacket data(SMSG_PARTYKILLLOG, 16);
@@ -2291,7 +2291,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 			critical = Rand(CritChance);
 			//sLog.outString( "SpellNonMeleeDamageLog: Crit Chance %f%%, WasCrit = %s" , CritChance , critical ? "Yes" : "No" );
 			AuraPointer fs = NULLAURA;
-			if(spellInfo->NameHash == SPELL_HASH_LAVA_BURST && (fs = pVictim->FindNegativeAuraByNameHash(SPELL_HASH_FLAME_SHOCK)) != NULLAURA)
+			if(spellInfo->NameHash == SPELL_HASH_LAVA_BURST && (fs = pVictim->FindNegativeAuraByNameHash(SPELL_HASH_FLAME_SHOCK)) != NULL)
 			{
 				critical = true;
 				if(caster && !caster->HasAura(55447))	// Glyph of Flame Shock
@@ -2418,7 +2418,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 //==========================================================================================
 //==============================Data Sending ProcHandling===================================
 //==========================================================================================
-	SendSpellNonMeleeDamageLog(obj_shared_from_this(), pVictim, spellID, float2int32(res), school, abs_dmg, dmg.resisted_damage, false, 0, critical, IsPlayer());
+	SendSpellNonMeleeDamageLog(shared_from_this(), pVictim, spellID, float2int32(res), school, abs_dmg, dmg.resisted_damage, false, 0, critical, IsPlayer());
 
 	int32 ires = float2int32(res);
 	if( ires > 0 )
@@ -2487,7 +2487,7 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 				uint32 damage = (uint32)( res + abs_dmg );
 				uint32 absorbed = unit_shared_from_this()->AbsorbDamage( school, &damage, dbcSpell.LookupEntryForced(spellID) );
 				DealDamage( unit_shared_from_this(), damage, 2, 0, spellID );
-				SendSpellNonMeleeDamageLog( obj_shared_from_this(), unit_shared_from_this(), spellID, damage, school, absorbed, 0, false, 0, false, IsPlayer() );
+				SendSpellNonMeleeDamageLog( shared_from_this(), unit_shared_from_this(), spellID, damage, school, absorbed, 0, false, 0, false, IsPlayer() );
 			}
 		}
 	}
@@ -2668,7 +2668,7 @@ void Object::SetByte(uint32 index, uint32 index1,uint8 value)
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -2765,7 +2765,7 @@ void Object::SetByteFlag(const uint32 index, const uint32 flag, uint8 newFlag)
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}
@@ -2784,7 +2784,7 @@ void Object::RemoveByteFlag(const uint32 index, const uint32 flag, uint8 checkFl
 
 		if(!m_objectUpdated)
 		{
-			m_mapMgr->ObjectUpdated(obj_shared_from_this());
+			m_mapMgr->ObjectUpdated(shared_from_this());
 			m_objectUpdated = true;
 		}
 	}

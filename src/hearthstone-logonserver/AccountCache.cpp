@@ -166,7 +166,6 @@ void AccountMgr::AddAccount(Field* field)
 			{
 				if( bn.GetNumBytes() < 20 )
 				{
-					// Hacky fix
 					memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
 					for (int n=bn.GetNumBytes(); n<=19; n++)
 						acct->SrpHash[n] = (uint8)0;
@@ -265,7 +264,6 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 			{
 				if( bn.GetNumBytes() < 20 )
 				{
-					// Hacky fix
 					memcpy(acct->SrpHash, bn.AsByteArray(), bn.GetNumBytes());
 					for (int n=bn.GetNumBytes(); n<=19; n++)
 						acct->SrpHash[n] = (uint8)0;
