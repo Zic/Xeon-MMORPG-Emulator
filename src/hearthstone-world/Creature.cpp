@@ -841,6 +841,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetUInt32Value(UNIT_FIELD_BYTES_1, spawn->bytes1);
 	SetUInt32Value(UNIT_FIELD_BYTES_2, spawn->bytes2);
 
+	//Use proto displayid (random + gender generator), unless there is an id  specified in spawn->displayid
 	uint32 model;
 	if(!spawn->displayid)
 	{
