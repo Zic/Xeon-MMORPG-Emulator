@@ -47,6 +47,9 @@ static const uint32 g_neutralStateFields[3] = { WORLDSTATE_HELLFIRE_STADIUM_NEUT
 // updates clients visual counter, and adds the buffs to players if needed
 HEARTHSTONE_INLINE void UpdateTowerCount(shared_ptr<MapMgr> mgr)
 {
+	if(!mgr)
+		return;
+
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_HELLFIRE_ALLIANCE_TOWERS_CONTROLLED, g_allianceTowers);
 	mgr->GetStateManager().UpdateWorldState(WORLDSTATE_HELLFIRE_HORDE_TOWERS_CONTROLLED, g_hordeTowers);
 
@@ -136,7 +139,7 @@ public:
 		uint32 timeptr = (uint32)UNIXTIME;
 		bool in_range;
 		bool is_valid;
-		PlayerPointer plr;
+		PlayerPointer plr = NULLPLR;
 		
 		for(; itr != itrend; ++itr)
 		{
@@ -421,7 +424,7 @@ struct sgodata
 
 void SpawnObjects(shared_ptr<MapMgr> pmgr)
 {
-	if(pmgr->GetMapId() != 530)
+	if(!pmgr || pmgr->GetMapId() != 530)
 		return;
 
 	const static sgodata godata[] = {
@@ -445,15 +448,21 @@ void SpawnObjects(shared_ptr<MapMgr> pmgr)
 		p = &godata[i];
 		p2 = &godata_banner[i];
 
-		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
-		if( pGo == NULL )
-			continue;
-
-		GameObjectPointer pGo2 = pmgr->GetInterface()->SpawnGameObject(p2->entry, p2->posx, p2->posy, p2->posz, p2->facing, false, 0, 0);
-		if( pGo2 == NULL )
+		GameObjectPointer pGo = NULLGOB;
+		pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		if( !pGo )
 		{
 			pGo->Destructor();
 			pGo = NULLGOB;
+			continue;
+		}
+
+		GameObjectPointer pGo2 = NULLGOB;
+		pGo2 = pmgr->GetInterface()->SpawnGameObject(p2->entry, p2->posx, p2->posy, p2->posz, p2->facing, false, 0, 0);
+		if( !pGo2 )
+		{
+			pGo2->Destructor();
+			pGo2 = NULLGOB;
 			continue;
 		}
 

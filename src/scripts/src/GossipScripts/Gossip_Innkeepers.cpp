@@ -34,8 +34,9 @@ void InnkeeperGossip::GossipHello(ObjectPointer  pObject, PlayerPointer Plr, boo
 
 void InnkeeperGossip::GossipSelectOption(ObjectPointer  pObject, PlayerPointer Plr, uint32 Id, uint32 IntId, const char * Code)
 {
-	CreaturePointer pCreature = (pObject->GetTypeId()==TYPEID_UNIT)?TO_CREATURE(pObject):NULLCREATURE;
-	if(pCreature==NULL)
+	CreaturePointer pCreature = NULLCREATURE;
+	pCreature = (pObject->GetTypeId()==TYPEID_UNIT)?TO_CREATURE(pObject):NULLCREATURE;
+	if(!pCreature)
 		return;
 
     switch(IntId)

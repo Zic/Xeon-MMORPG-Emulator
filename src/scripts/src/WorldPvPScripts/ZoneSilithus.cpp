@@ -45,6 +45,8 @@ bool locked = false;
 
 void InitWorldStates(shared_ptr<MapMgr> pmgr)
 {
+	if(!pmgr)
+		return;
 	if(pmgr->GetMapId() == 1 ) // Kalimdor
 	{
 		pmgr->GetStateManager().CreateWorldState(WORLDSTATE_SILITHUS_SILITHYST_MAX, SILITHYST_MAX);
@@ -55,6 +57,9 @@ void InitWorldStates(shared_ptr<MapMgr> pmgr)
 
 void SilithusZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
+	if(!plr)
+		return;
+
 	if( Zone == ZONE_SILITHUS )
 	{
 		if( winners == plr->GetTeam() )
@@ -69,6 +74,9 @@ void SilithusZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 
 void AreatriggerHook(PlayerPointer pPlayer, uint32 triggerID)
 {
+	if(!pPlayer)
+		return;
+
 	if( triggerID == ALLIANCE_RETURN || 
 		triggerID == HORDE_RETURN )
 	{
@@ -121,7 +129,7 @@ public:
 
 void DropFlag(PlayerPointer  pPlayer, uint32 spellID)
 {
-	if( spellID != SILITHYST_SPELL )
+	if( !pPlayer || spellID != SILITHYST_SPELL )
 		return;
 	uint32 triggerID = pPlayer->GetTeam() == ALLIANCE ? ALLIANCE_RETURN : HORDE_RETURN;
 	// we have to use AreaTrigger.dbc here

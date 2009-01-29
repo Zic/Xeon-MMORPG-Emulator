@@ -36,13 +36,13 @@ public:
 		{
 			PlayerPointer plr = (*itr);
 			// We've got some plagues to cure, then?
-			if( plr->HasActiveAura( 43958 ) )
+			if( plr && plr->HasActiveAura( 43958 ) )
 			{
 				plr->RemoveNegativeAura( 43958 );
 				continue;
 			}
 
-			if( plr->GetShapeShift() == FORM_ZOMBIE )
+			if( plr && plr->GetShapeShift() == FORM_ZOMBIE )
 			{
 				plr->RemoveNegativeAura( 43869 );
 				continue;

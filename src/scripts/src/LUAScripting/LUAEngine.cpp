@@ -2053,18 +2053,24 @@ int luaUnit_AddItem(lua_State * L, UnitPointer  ptr)
 	if(proto==NULL)
 		return 0;
 
-	ItemPointer add = plr->GetItemInterface()->FindItemLessMax(id,count,false);
+	ItemPointer add = NULLITEM; 
+	add = plr->GetItemInterface()->FindItemLessMax(id,count,false);
 	if(add==NULL)
 	{
 		add=objmgr.CreateItem(id,plr);
-		add->SetUInt32Value(ITEM_FIELD_STACK_COUNT,count);
-		if(plr->GetItemInterface()->AddItemToFreeSlot(add))
-			plr->GetSession()->SendItemPushResult(add,false,true,false,true,plr->GetItemInterface()->LastSearchItemBagSlot(),plr->GetItemInterface()->LastSearchItemSlot(),count);
-		else
+		if(add)
 		{
-			add->Destructor();
-			add = NULLITEM;
+			add->SetUInt32Value(ITEM_FIELD_STACK_COUNT,count);
+			if(plr->GetItemInterface()->AddItemToFreeSlot(add))
+				plr->GetSession()->SendItemPushResult(add,false,true,false,true,plr->GetItemInterface()->LastSearchItemBagSlot(),plr->GetItemInterface()->LastSearchItemSlot(),count);
+			else
+			{
+				add->Destructor();
+				add = NULLITEM;
+			}
 		}
+		else
+			add = NULLITEM;
 	}
 	else
 	{

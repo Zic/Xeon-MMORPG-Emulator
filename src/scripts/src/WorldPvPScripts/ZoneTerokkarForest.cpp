@@ -284,7 +284,7 @@ public:
 				plr = _gameobject->GetMapMgr()->GetPlayer(it3->first);
 				
 				// they WILL be out of range at this point. this is guaranteed. means they left the set rly quickly.
-				if( plr != NULL )
+				if( plr )
 					plr->SendWorldStateUpdate(WORLDSTATE_TEROKKAR_PVP_CAPTURE_BAR_DISPLAY, 0);
 
 				StoredPlayers.erase(it3);
@@ -388,6 +388,9 @@ public:
 
 void TFZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
+	if(!plr)
+		return;
+
 	if( Zone == ZONE_TEROKKAR_FOREST )
 	{
 		if( TFg_superiorTeam == plr->GetTeam() )
@@ -421,7 +424,7 @@ struct sgodata
 
 void TFSpawnObjects(shared_ptr<MapMgr> pmgr)
 {
-	if(pmgr->GetMapId() != 530)
+	if(!pmgr || pmgr->GetMapId() != 530)
 		return;
 
 	const static sgodata godata[] = {
@@ -439,8 +442,9 @@ void TFSpawnObjects(shared_ptr<MapMgr> pmgr)
 	{
 		p = &godata[i];
 
-		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
-		if( pGo == NULL )
+		GameObjectPointer pGo = NULLGOB;
+		pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		if( !pGo )
 			continue;
 
 		pGo->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, p->state);

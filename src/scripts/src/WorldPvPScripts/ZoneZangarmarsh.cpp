@@ -49,7 +49,7 @@ void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side);
 
 void SetGrave(shared_ptr<MapMgr> pmgr)
 {
-	if(pmgr->GetMapId() != 530)
+	if(!pmgr || pmgr->GetMapId() != 530)
 		return;
 
 	// any better solution?
@@ -93,6 +93,9 @@ void SetGrave(shared_ptr<MapMgr> pmgr)
 
 HEARTHSTONE_INLINE void UpdateTowerCountZM(shared_ptr<MapMgr> mgr)
 {
+	if(!mgr)
+		return;
+
 	if( ZMg_superiorTeam == 0 && ZMg_allianceTowers != TOWER_COUNT )
 	{
 		mgr->GetStateManager().UpdateWorldState(WORLDSTATE_ZANGARMARSH_SCOUT_NOT_READY_ALLIANCE, 1);
@@ -336,7 +339,7 @@ public:
 				plr = _gameobject->GetMapMgr()->GetPlayer(it3->first);
 				
 				// they WILL be out of range at this point. this is guaranteed. means they left the set rly quickly.
-				if( plr != NULL )
+				if( plr )
 				{
 					if( towerid == TOWER_WEST )
 						plr->SendWorldStateUpdate(WORLDSTATE_ZANGARMARSH_CAPTURE_BAR_DISPLAY_WEST, 0);
@@ -462,11 +465,12 @@ public:
 
     void GossipSelectOption(ObjectPointer pObject, PlayerPointer  plr, uint32 Id, uint32 IntId, const char * Code)
     {
-		if( plr == NULL )
+		if( !plr )
 			return;
 		
-		CreaturePointer  pCreature = pObject->IsCreature() ? TO_CREATURE( pObject ) : NULLCREATURE;
-		if( pCreature == NULL )
+		CreaturePointer  pCreature = NULLCREATURE;
+		pCreature = pObject->IsCreature() ? TO_CREATURE( pObject ) : NULLCREATURE;
+		if( !pCreature )
 			return;
 
 		if( IntId == 3 )
@@ -491,7 +495,7 @@ public:
 
 	void OnActivate(PlayerPointer  pPlayer)
 	{
-		if( pPlayer == NULL )
+		if( !pPlayer )
 			return;
 
 		uint32 pTeam = pPlayer->GetTeam();
@@ -535,6 +539,9 @@ public:
 
 void ZMZoneHook(PlayerPointer plr, uint32 Zone, uint32 OldZone)
 {
+	if(!plr)
+		return;
+
 	if( Zone == ZONE_ZANGARMARSH )
 	{
 		if( ZMCityOwners == plr->GetTeam() )
@@ -568,6 +575,8 @@ struct sgodata
 
 void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side)
 {
+	if(!bmgr)
+		return;
 	// -1 = neutral
 	//  0 = alliance
 	//  1 = horde
@@ -586,8 +595,9 @@ void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side)
 	const sgodata *b;
 	b = &gobdata[i];
 
-	GameObjectPointer bGo = bmgr->GetInterface()->SpawnGameObject(b->entry, b->posx, b->posy, b->posz, b->facing, false, 0, 0);
-	if( bGo == NULL )
+	GameObjectPointer bGo = NULLGOB;
+	bGo = bmgr->GetInterface()->SpawnGameObject(b->entry, b->posx, b->posy, b->posz, b->facing, false, 0, 0);
+	if( !bGo )
 		return;
 
 	bGo->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, b->state);
@@ -604,7 +614,7 @@ void ZMSpawnBanners(shared_ptr<MapMgr> bmgr, int32 side)
 
 void ZMSpawnObjects(shared_ptr<MapMgr> pmgr)
 {
-	if(pmgr->GetMapId() != 530)
+	if(!pmgr || pmgr->GetMapId() != 530)
 		return;
 
 	ZMSpawnBanners(pmgr,ZMCityOwners);
@@ -621,8 +631,9 @@ void ZMSpawnObjects(shared_ptr<MapMgr> pmgr)
 	{
 		p = &godata[i];
 
-		GameObjectPointer pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
-		if( pGo == NULL )
+		GameObjectPointer pGo = NULLGOB;
+		pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
+		if( !pGo )
 			continue;
 
 		pGo->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, p->state);
@@ -645,6 +656,8 @@ void ZMSpawnObjects(shared_ptr<MapMgr> pmgr)
 
 void Tokens(PlayerPointer pPlayer, PlayerPointer pVictim)
 {
+	if( !pPlayer || !pVictim )
+		return;
 	if( !pPlayer->HasAura(TWIN_SPIRE_BLESSING) || pPlayer->GetTeam() == pVictim->GetTeam() )
 		return;
 
