@@ -192,7 +192,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 	uint8 cn, unk; // 3.0.2 unk
 
 	recvPacket >> cn >> spellId  >> unk;
-	if(!spellid)
+	if(!spellId)
 	{
 		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
 		return;
