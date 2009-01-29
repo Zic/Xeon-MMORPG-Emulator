@@ -513,7 +513,7 @@ void AIInterface::Update(uint32 p_time)
 		assert(totemspell != 0);
 		if(p_time >= m_totemspelltimer)
 		{
-			SpellPointer pSpell = SpellPointer(new Spell(m_Unit, totemspell, true, NULLAURA));
+			SpellPointer pSpell(new Spell(m_Unit, totemspell, true, NULLAURA));
 
 			SpellCastTargets targets(0);
 			if(!m_nextTarget ||
@@ -548,7 +548,7 @@ void AIInterface::Update(uint32 p_time)
 			}
 			// these will *almost always* be AoE, so no need to find a target here.
 //			SpellCastTargets targets(m_Unit->GetGUID());
-//			SpellPointer pSpell = SpellPointer(new Spell(m_Unit, totemspell, true, NULLAURA));
+//			SpellPointer pSpell(new Spell(m_Unit, totemspell, true, NULLAURA));
 //			pSpell->prepare(&targets);
 			// need proper cooldown time!
 //			m_totemspelltimer = m_totemspelltime;
@@ -641,7 +641,10 @@ void AIInterface::Update(uint32 p_time)
 		if(m_fleeTimer > p_time)
 		{
 			m_fleeTimer -= p_time;
-			_CalcDestinationAndMove(m_nextTarget, 5.0f);
+			if(!m_nextTarget) //something happened to our target, lets find another one
+				SetNextTarget(FindTargetForSpell(m_nextSpell));
+			if(m_nextTarget)
+				_CalcDestinationAndMove(m_nextTarget, 5.0f);
 		}
 		else
 		{
@@ -936,7 +939,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 								if(fabs(our_facing-his_facing)<CREATURE_DAZE_TRIGGER_ANGLE && !m_nextTarget->HasNegativeAura(CREATURE_SPELL_TO_DAZE))
 								{
 									SpellEntry *info = dbcSpell.LookupEntry(CREATURE_SPELL_TO_DAZE);
-									SpellPointer sp = SpellPointer(new Spell(m_Unit, info, false, NULLAURA));
+									SpellPointer sp(new Spell(m_Unit, info, false, NULLAURA));
 									SpellCastTargets targets;
 									targets.m_unitTarget = m_nextTarget->GetGUID();
 									sp->prepare(&targets);
@@ -1005,7 +1008,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							SpellEntry *info = dbcSpell.LookupEntry(m_RangedAttackSpell);
 							if(info)
 							{
-								SpellPointer sp = SpellPointer(new Spell(m_Unit, info, false, NULLAURA));
+								SpellPointer sp(new Spell(m_Unit, info, false, NULLAURA));
 								SpellCastTargets targets(m_nextTarget->GetGUID());
 								sp->prepare(&targets);
 
@@ -1662,7 +1665,7 @@ void AIInterface::_CalcDestinationAndMove(shared_ptr<Unit>target, float dist)
 		return;
 	}
 	
-	if(target->GetTypeId() == TYPEID_UNIT || target->GetTypeId() == TYPEID_PLAYER)
+	if(target && (target->GetTypeId() == TYPEID_UNIT || target->GetTypeId() == TYPEID_PLAYER))
 	{
 		float ResX = target->GetPositionX();
 		float ResY = target->GetPositionY();
@@ -2166,7 +2169,7 @@ bool AIInterface::showWayPoints(PlayerPointer pPlayer, bool Backwards)
 			wp = *itr;
 
 			//Create
-			CreaturePointer pWayPoint = CreaturePointer(new Creature((uint64)HIGHGUID_TYPE_WAYPOINT << 32 | wp->id));
+			CreaturePointer pWayPoint(new Creature((uint64)HIGHGUID_TYPE_WAYPOINT << 32 | wp->id));
 			pWayPoint->Init();
 			pWayPoint->CreateWayPoint(wp->id,pPlayer->GetMapId(),wp->x,wp->y,wp->z,0);
 			pWayPoint->SetUInt32Value(OBJECT_FIELD_ENTRY, 300000);
@@ -2808,7 +2811,7 @@ uint8 AIInterface::CastSpell(UnitPointer caster, SpellEntry *spellInfo, SpellCas
 	// Stop AI while casting.
 	m_AIState = STATE_CASTING;
 
-	SpellPointer nspell = SpellPointer(new Spell(caster, spellInfo, false, NULLAURA));
+	SpellPointer nspell(new Spell(caster, spellInfo, false, NULLAURA));
 	return nspell->prepare(&targets);
 }
 

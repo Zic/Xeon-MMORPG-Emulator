@@ -448,7 +448,7 @@ void ObjectMgr::LoadTransporters()
 	{
 		uint32 entry = QR->Fetch()[0].GetUInt32();
 
-		TransporterPointer pTransporter = shared_ptr<Transporter>(new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry));
+		TransporterPointer pTransporter(new Transporter((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 |entry));
 		if(!pTransporter->CreateAsTransporter(entry, ""))
 		{
 			Log.Warning("ObjectMgr","Skipped invalid transporterid %d.", entry);
@@ -494,7 +494,7 @@ void Transporter::AddNPC(uint32 Entry, float offsetX, float offsetY, float offse
 	if(inf==NULL||proto==NULL)
 		return;
 
-	CreaturePointer pCreature = CreaturePointer(new Creature((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 | guid));
+	CreaturePointer pCreature(new Creature((uint64)HIGHGUID_TYPE_TRANSPORTER<<32 | guid));
 	pCreature->Init();
 	pCreature->Load(proto, m_position.x, m_position.y, m_position.z, 0.0f);
 	pCreature->m_transportPosition = new LocationVector(offsetX, offsetY, offsetZ, offsetO);

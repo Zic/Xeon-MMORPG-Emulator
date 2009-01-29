@@ -174,7 +174,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 		return;
 	}
 
-	SpellPointer spell = SpellPointer(new Spell(_player, spellInfo, false, NULLAURA));
+	SpellPointer spell(new Spell(_player, spellInfo, false, NULLAURA));
 	spell->extra_cast_number=cn;
 	spell->m_glyphIndex = glyphIndex;
 	spell->i_caster = tmpItem;
@@ -192,8 +192,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 	uint8 cn, unk; // 3.0.2 unk
 
 	recvPacket >> cn >> spellId  >> unk;
+	if(!spellid)
+	{
+		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
+		return;
+	}
 	// check for spell id
-	SpellEntry *spellInfo = dbcSpell.LookupEntryForced(spellId );
+	SpellEntry *spellInfo = dbcSpell.LookupEntryForced(spellId);
 
 	if(!spellInfo || !sHookInterface.OnCastSpell(_player, spellInfo))
 	{
@@ -318,7 +323,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			}
 		}
 
-		SpellPointer spell = SpellPointer(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
+		SpellPointer spell(new Spell(GetPlayer(), spellInfo, false, NULLAURA));
 		spell->extra_cast_number=cn;
 		spell->prepare(&targets);
 	}

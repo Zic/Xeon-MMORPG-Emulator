@@ -769,7 +769,6 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 					{
 						SpellCastTargets targets( m_owner->GetGUID() );
 						SpellEntry* sp;
-						SpellPointer spell;
 						
 						if( Entry->spell[c] != 0 )
 						{
@@ -777,7 +776,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 							if( sp == NULL )
 								continue;
 
-							spell = SpellPointer(new Spell( m_owner, sp, true, NULLAURA ));
+							SpellPointer spell(new Spell( m_owner, sp, true, NULLAURA ));
 							spell->i_caster = item_shared_from_this();
 							spell->prepare( &targets );
 						}

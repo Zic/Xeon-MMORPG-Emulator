@@ -1682,7 +1682,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 		{
 			// Proc that cheating death!
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(45182);
-			SpellPointer spell = SpellPointer(new Spell(pVictim,spellInfo,true,NULLAURA));
+			SpellPointer spell(new Spell(pVictim,spellInfo,true,NULLAURA));
 			SpellCastTargets targets;
 			targets.m_unitTarget = pVictim->GetGUID();
 			spell->prepare(&targets);
@@ -1782,7 +1782,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				SpellEntry* sorInfo = dbcSpell.LookupEntry(54223);
 				if( sorInfo != NULL )
 				{
-					SpellPointer sor = SpellPointer(new Spell( pVictim, sorInfo, true, NULLAURA ));
+					SpellPointer sor(new Spell( pVictim, sorInfo, true, NULLAURA ));
 					SpellCastTargets targets;
 					targets.m_unitTarget = pVictim->GetGUID();
 					sor->prepare(&targets);
@@ -1939,7 +1939,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				SpellEntry* sorInfo = dbcSpell.LookupEntry(27827);
 				if( sorInfo != NULL )
 				{
-					SpellPointer sor = SpellPointer(new Spell( pVictim, sorInfo, true, NULLAURA ));
+					SpellPointer sor(new Spell( pVictim, sorInfo, true, NULLAURA ));
 					SpellCastTargets targets;
 					targets.m_unitTarget = pVictim->GetGUID();
 					sor->prepare(&targets);

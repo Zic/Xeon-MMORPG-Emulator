@@ -577,7 +577,7 @@ bool World::SetInitialWorldSettings()
 
 	Channel::LoadConfSettings();
 	Log.Notice("BattlegroundManager", "Starting...");
-	BattlegroundMgrPointer BattlegroundMgr = BattlegroundMgrPointer(new CBattlegroundManager);
+	BattlegroundMgrPointer BattlegroundMgr(new CBattlegroundManager);
 	BattlegroundMgr->Init();
 
 	dw = new DayWatcherThread();

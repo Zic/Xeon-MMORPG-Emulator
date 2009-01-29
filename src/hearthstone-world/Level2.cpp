@@ -389,14 +389,14 @@ bool ChatHandler::HandleKillCommand(const char *args, WorldSession *m_session)
 		if(se == 0) return false;
 
 		SpellCastTargets targets(target->GetGUID());
-		SpellPointer sp = SpellPointer(new Spell(m_session->GetPlayer(), se, true, NULLAURA));
+		SpellPointer sp(new Spell(m_session->GetPlayer(), se, true, NULLAURA));
 		sp->prepare(&targets);
 
 /*		SpellEntry * se = dbcSpell.LookupEntry(20479);
 		if(se == 0) return false;
 		
 		SpellCastTargets targets(target->GetGUID());
-		SpellPointer sp = SpellPointer(new Spell(target, se, true, NULLAURA));
+		SpellPointer sp(new Spell(target, se, true, NULLAURA));
 		sp->prepare(&targets);*/
 	}
 
@@ -445,7 +445,7 @@ bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_sessi
 		return false;
 	}
 	
-	SpellPointer sp = SpellPointer(new Spell(caster, spellentry, false, NULLAURA));
+	SpellPointer sp(new Spell(caster, spellentry, false, NULLAURA));
 	if(!sp)
 	{
 		RedSystemMessage(m_session, "Spell failed creation!");

@@ -1230,7 +1230,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			SpellEntry *info = dbcSpell.LookupEntry(goinfo->SpellFocus);
 			if(!info)
 				break;
-			SpellPointer spell = SpellPointer(new Spell(plyr, info, false, NULLAURA));
+			SpellPointer spell(new Spell(plyr, info, false, NULLAURA));
 			//spell->SpellByOther = true;
 			SpellCastTargets targets;
 			targets.m_unitTarget = plyr->GetGUID();
@@ -1582,7 +1582,7 @@ void WorldSession::HandleSelfResurrectOpcode(WorldPacket& recv_data)
 	if(self_res_spell)
 	{
 		SpellEntry * sp = dbcSpell.LookupEntry(self_res_spell);
-		SpellPointer s = SpellPointer(new Spell(_player,sp,false,NULLAURA));
+		SpellPointer s(new Spell(_player,sp,false,NULLAURA));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget=_player->GetGUID();
 		s->prepare(&tgt);	

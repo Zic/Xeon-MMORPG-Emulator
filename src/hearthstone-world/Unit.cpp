@@ -997,7 +997,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( new_caster != NULL && new_caster->isAlive() )
 								{
 									SpellEntry* spellInfo = dbcSpell.LookupEntry( 25228 ); //we already modified this spell on server loading so it must exist
-									SpellPointer spell = SpellPointer(new Spell( new_caster, spellInfo, true, NULLAURA ));
+									SpellPointer spell(new Spell( new_caster, spellInfo, true, NULLAURA ));
 									spell->forced_basepoints[0] = dmg;
 									SpellCastTargets targets;
 									targets.m_unitTarget = GetGUID();
@@ -1030,7 +1030,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 val = parentproc->EffectBasePoints[0] + 1;
                                 val = val * (ps->GetUInt32Value( UNIT_FIELD_STAT2 ) + ps->GetUInt32Value( UNIT_FIELD_STAT3 ) );
                                 SpellEntry *spellInfo = dbcSpell.LookupEntry( 39576 );
-                                SpellPointer spell = SpellPointer(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
+                                SpellPointer spell(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
                                 spell->forced_basepoints[0] = ( val / 100 );
                                 SpellCastTargets targets;
                                 targets.m_unitTarget = GetGUID();
@@ -1179,7 +1179,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if (!parentproc || !spellInfo)
 									continue;
 								int32 val = parentproc->EffectBasePoints[0] + 1;
-                                SpellPointer spell = SpellPointer(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
+                                SpellPointer spell(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
                                 spell->forced_basepoints[0] = (val*dmg)/300; //per tick
                                 SpellCastTargets targets;
                                 targets.m_unitTarget = GetGUID();
@@ -1747,7 +1747,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								SpellDuration *sd = dbcSpellDuration.LookupEntry(CastingSpell->DurationIndex);
 								if(!sd)
 									continue;
-								AuraPointer aura = AuraPointer(new Aura(spe, std::min(GetDuration(sd), (uint32)10000), object_shared_from_this(), unit_shared_from_this()));
+								AuraPointer aura(new Aura(spe, std::min(GetDuration(sd), (uint32)10000), object_shared_from_this(), unit_shared_from_this()));
 								aura->AddMod(spe->EffectApplyAuraName[0],spe->EffectBasePoints[0]+1,spe->EffectMiscValue[0],0);
 								this->AddAura(aura, NULLAURA);
 								continue;
@@ -1784,10 +1784,10 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				if( victim == unit_shared_from_this() && spellInfo->c_is_flags & SPELL_FLAG_CANNOT_PROC_ON_SELF )
 					continue;
 
-				SpellPointer spell = SpellPointer(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
+				SpellPointer spell(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
 				spell->forced_basepoints[0] = dmg_overwrite;
 				spell->ProcedOnSpell = CastingSpell;
-				//SpellPointer spell = SpellPointer(new Spell(unit_shared_from_this(),spellInfo,false,NULLAURA));
+				//SpellPointer spell(new Spell(unit_shared_from_this(),spellInfo,false,NULLAURA));
 				if(spellId==974||spellId==32593||spellId==32594) // Earth Shield handler
 				{
 					spell->pSpellId=itr2->spellId;
@@ -3138,7 +3138,7 @@ else
 				shared_ptr<Aura>aur = pVictim->m_auras[x];
 				SpellEntry * spinfo = aur->GetSpellProto();
 				aur->Remove();
-				SpellPointer sp = SpellPointer(new Spell( unit_shared_from_this() , spinfo , true , NULLAURA ));
+				SpellPointer sp(new Spell( unit_shared_from_this() , spinfo , true , NULLAURA ));
 				SpellCastTargets tgt;
 				tgt.m_unitTarget = pVictim->GetGUID();
 				sp->prepare( &tgt );
@@ -4408,7 +4408,7 @@ uint32 Unit::ManaShieldAbsorb(uint32 dmg, SpellEntry* sp)
 		SpellEntry *spInfo = dbcSpell.LookupEntry(44413);
 		if(spInfo)
 		{
-			SpellPointer sp = SpellPointer(new Spell(unit_shared_from_this(),spInfo,true,NULLAURA));
+			SpellPointer sp(new Spell(unit_shared_from_this(),spInfo,true,NULLAURA));
 			SpellCastTargets tgt;
 			sp->forced_basepoints[0] = potential * m_incanterAbsorption / 100;
 			tgt.m_unitTarget=this->GetGUID();
@@ -4485,7 +4485,7 @@ uint32 Unit::AbsorbDamage( uint32 School, uint32* dmg, SpellEntry * pSpell )
 		SpellEntry *spInfo = dbcSpell.LookupEntry(44413);
 		if(spInfo)
 		{
-			SpellPointer sp = SpellPointer(new Spell(unit_shared_from_this(),spInfo,true,NULLAURA));
+			SpellPointer sp(new Spell(unit_shared_from_this(),spInfo,true,NULLAURA));
 			SpellCastTargets tgt;
 			sp->forced_basepoints[0] = (m_incanterAbsorption * 100) / abs;
 			tgt.m_unitTarget=this->GetGUID();
@@ -4705,7 +4705,7 @@ void Unit::EventSummonPetExpire()
 			if(!spInfo)
 				return;
 
-			SpellPointer sp = SpellPointer(new Spell(summonPet,spInfo,true,NULLAURA));
+			SpellPointer sp(new Spell(summonPet,spInfo,true,NULLAURA));
 			SpellCastTargets tgt;
 			tgt.m_unitTarget=summonPet->GetGUID();
 			sp->prepare(&tgt);
@@ -4725,7 +4725,7 @@ void Unit::CastSpell(UnitPointer Target, SpellEntry* Sp, bool triggered)
 	if( Sp == NULL )
 		return;
 
-	SpellPointer newSpell = SpellPointer(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
+	SpellPointer newSpell(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
 	SpellCastTargets targets(0);
 	if(Target)
 	{
@@ -4753,7 +4753,7 @@ void Unit::CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered)
 		return;
 
 	SpellCastTargets targets(targetGuid);
-	SpellPointer newSpell = SpellPointer(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
+	SpellPointer newSpell(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
 	newSpell->prepare(&targets);
 }
 
@@ -4778,7 +4778,7 @@ uint8 Unit::CastSpellAoF(float x,float y,float z,SpellEntry* Sp, bool triggered)
 	targets.m_destY = y;
 	targets.m_destZ = z;
 	targets.m_targetMask=TARGET_FLAG_DEST_LOCATION;
-	SpellPointer newSpell = SpellPointer(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
+	SpellPointer newSpell(new Spell(unit_shared_from_this(), Sp, triggered, NULLAURA));
 	return newSpell->prepare(&targets);
 }
 

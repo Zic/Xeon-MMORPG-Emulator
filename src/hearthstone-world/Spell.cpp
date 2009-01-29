@@ -2610,7 +2610,7 @@ void Spell::HandleAddAura(uint64 guid)
 	{
 		SpellEntry *spellInfo = dbcSpell.LookupEntry( spellid );
 		if(!spellInfo) return;
-		SpellPointer spell = SpellPointer(new Spell(p_caster, spellInfo ,true, NULLAURA));
+		SpellPointer spell(new Spell(p_caster, spellInfo ,true, NULLAURA));
 		SpellCastTargets targets(Target->GetGUID());
 		spell->prepare(&targets);	
 	}
@@ -2674,7 +2674,7 @@ void Spell::TriggerSpell()
 			return;
 		}
 
-		SpellPointer spell = SpellPointer(new Spell(m_caster, spellInfo,false, NULLAURA));
+		SpellPointer spell(new Spell(m_caster, spellInfo,false, NULLAURA));
 		WPAssert(spell);
 
 		SpellCastTargets targets;
@@ -3355,17 +3355,9 @@ uint8 Spell::CanCast(bool tolerate)
 						return SPELL_FAILED_NO_AMMO;
 				}
 
-				if (p_caster->GetMapMgr() && p_caster->GetMapMgr()->IsCollisionEnabled())
+				if ( target != m_caster && !m_caster->IsInLineOfSight(target) )
 				{
-					if( target != m_caster )
-					{
-						if ( p_caster->GetMapId() == target->GetMapId() &&
-							!CollideInterface.CheckLOS(p_caster->GetMapId(),p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ(), 
-							target->GetPositionX(), target->GetPositionY(), target->GetPositionZ()) )
-						{
-							return SPELL_FAILED_LINE_OF_SIGHT;
-						}
-					}
+					return SPELL_FAILED_LINE_OF_SIGHT;
 				}
 
 				// check aurastate
@@ -4552,7 +4544,7 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
 	if(!refspellid || m_caster == refunit) return false;
 	refunit->RemoveAura(refspellid);
 
-	SpellPointer spell = SpellPointer(new Spell(m_caster, m_spellInfo, true, NULLAURA));
+	SpellPointer spell(new Spell(m_caster, m_spellInfo, true, NULLAURA));
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
 	spell->m_reflectedParent = spell_shared_from_this();

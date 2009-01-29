@@ -1957,14 +1957,14 @@ VehiclePointer MapMgr::CreateVehicle(uint32 entry)
 		_reusable_guids_vehicle.pop_front();
 
 		newguid |= guid;
-		VehiclePointer v = VehiclePointer(new Vehicle(newguid));
+		VehiclePointer v(new Vehicle(newguid));
 		v->Init();
 		ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
 		return v;
 	}
 
 	newguid |= ++m_VehicleHighGuid;
-	VehiclePointer v = VehiclePointer(new Vehicle(newguid));
+	VehiclePointer v(new Vehicle(newguid));
 	v->Init();
 	ASSERT( v->GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE );
 	m_VehicleStorage.insert( make_pair< uint32, VehiclePointer >(v->GetUIdFromGUID(), v));
@@ -1980,13 +1980,13 @@ CreaturePointer MapMgr::CreateCreature(uint32 entry)
 		_reusable_guids_creature.pop_front();
 
 		newguid |= guid;
-		CreaturePointer cr = CreaturePointer(new Creature(newguid));
+		CreaturePointer cr(new Creature(newguid));
 		cr->Init();
 		return cr;
 	}
 
 	newguid |= ++m_CreatureHighGuid;
-	CreaturePointer cr = CreaturePointer(new Creature(newguid));
+	CreaturePointer cr(new Creature(newguid));
 	cr->Init();
 	m_CreatureStorage.insert( make_pair< uint32, CreaturePointer >(cr->GetUIdFromGUID(), cr));
 	return cr;
@@ -1997,14 +1997,14 @@ GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 	uint64 new_guid = ( (uint64)HIGHGUID_TYPE_GAMEOBJECT << 32 ) | ( (uint64)entry << 24 );
 	m_GOHighGuid &= 0x00FFFFFF;
 	new_guid |= (uint64)(++m_GOHighGuid);
-	GameObjectPointer go = shared_ptr<GameObject>(new GameObject(new_guid));
+	GameObjectPointer go(new GameObject(new_guid));
 	go->Init();
 	return go;
 }
 
 shared_ptr<DynamicObject> MapMgr::CreateDynamicObject()
 {
-	shared_ptr<DynamicObject> dyn = shared_ptr<DynamicObject>(new DynamicObject(HIGHGUID_TYPE_DYNAMICOBJECT,(++m_DynamicObjectHighGuid)));
+	shared_ptr<DynamicObject> dyn(new DynamicObject(HIGHGUID_TYPE_DYNAMICOBJECT,(++m_DynamicObjectHighGuid)));
 	dyn->Init();
 	return dyn;
 }

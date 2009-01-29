@@ -1760,7 +1760,7 @@ bool ChatHandler::HandleCastAllCommand(const char* args, WorldSession* m_session
 			}
 			else
 			{
-				SpellPointer sp = SpellPointer(new Spell(plr, info, true, NULLAURA));
+				SpellPointer sp(new Spell(plr, info, true, NULLAURA));
 				SpellCastTargets targets(plr->GetGUID());
 				sp->prepare(&targets);
 			}

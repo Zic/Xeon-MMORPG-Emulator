@@ -1222,14 +1222,14 @@ ItemPointer ObjectMgr::CreateItem(uint32 entry,PlayerPointer owner)
 
 	if(proto->InventoryType == INVTYPE_BAG)
 	{
-		shared_ptr<Container> pContainer = shared_ptr<Container>(new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
+		shared_ptr<Container> pContainer(new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
 		pContainer->Create( entry, owner);
 		pContainer->SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 		return pContainer;
 	}
 	else
 	{
-		ItemPointer pItem = shared_ptr<Item>(new Item(HIGHGUID_TYPE_ITEM,GenerateLowGuid(HIGHGUID_TYPE_ITEM)));
+		ItemPointer pItem(new Item(HIGHGUID_TYPE_ITEM,GenerateLowGuid(HIGHGUID_TYPE_ITEM)));
 		pItem->Create(entry, owner);
 		pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 		return pItem;
@@ -1249,13 +1249,13 @@ ItemPointer ObjectMgr::LoadItem(uint64 guid)
 
 		if(pProto->InventoryType == INVTYPE_BAG)
 		{
-			shared_ptr<Container> pContainer = shared_ptr<Container>(new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid));
+			shared_ptr<Container> pContainer(new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid));
 			pContainer->LoadFromDB(result->Fetch());
 			pReturn = pContainer;
 		}
 		else
 		{
-			ItemPointer pItem = shared_ptr<Item>(new Item(HIGHGUID_TYPE_ITEM,(uint32)guid));
+			ItemPointer pItem(new Item(HIGHGUID_TYPE_ITEM,(uint32)guid));
 			pItem->LoadFromDB(result->Fetch(), NULLPLR, false);
 			pReturn = pItem;
 		}
@@ -2024,7 +2024,7 @@ PetPointer ObjectMgr::CreatePet()
 	m_petlock.Release();
 
 	uint64 fullguid = ((uint64)HIGHGUID_TYPE_PET << 32) | ((uint64)guid << 24) | guid;
-	PetPointer pet = PetPointer(new Pet(fullguid));
+	PetPointer pet(new Pet(fullguid));
 	pet->Init();
 	return pet;
 }
@@ -2035,7 +2035,7 @@ PlayerPointer ObjectMgr::CreatePlayer()
 	m_playerguidlock.Acquire();
 	guid =++m_hiPlayerGuid;
 	m_playerguidlock.Release();
-	PlayerPointer p = PlayerPointer (new Player(guid));
+	PlayerPointer p(new Player(guid));
 	p->Init();
 	return p;
 }
@@ -2061,7 +2061,7 @@ shared_ptr<Corpse> ObjectMgr::CreateCorpse()
 	m_corpseguidlock.Acquire();
 	guid =++m_hiCorpseGuid;
 	m_corpseguidlock.Release();
-	CorpsePointer pCorpse = CorpsePointer(new Corpse(HIGHGUID_TYPE_CORPSE,guid));
+	CorpsePointer pCorpse(new Corpse(HIGHGUID_TYPE_CORPSE,guid));
 	pCorpse->Init();
 	return pCorpse;
 }

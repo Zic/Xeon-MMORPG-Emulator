@@ -1240,7 +1240,7 @@ void Player::_EventAttack( bool offhand )
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(GetOnMeleeSpell());
 			uint8 cn = m_meleespell_cn;
 			SetOnMeleeSpell(0, 0);
-			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(),spellInfo,true,NULLAURA));
+			SpellPointer spell(new Spell(plr_shared_from_this(),spellInfo,true,NULLAURA));
 			SpellCastTargets targets;
 			targets.m_unitTarget = GetSelection();
 			spell->extra_cast_number = cn;
@@ -1325,7 +1325,7 @@ void Player::_EventCharmAttack()
 				SpellEntry *spellInfo = dbcSpell.LookupEntry(m_CurrentCharm->GetOnMeleeSpell());
 				uint8 cn = m_meleespell_cn;
 				m_CurrentCharm->SetOnMeleeSpell(0, 0);
-				SpellPointer spell = SpellPointer(new Spell(m_CurrentCharm,spellInfo,true,NULLAURA));
+				SpellPointer spell(new Spell(m_CurrentCharm,spellInfo,true,NULLAURA));
 				SpellCastTargets targets;
 				targets.m_unitTarget = GetSelection();
 				spell->extra_cast_number = cn;
@@ -3730,7 +3730,7 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 					if( Set->itemscount==set->itemscount[x])
 					{//cast new spell
 						SpellEntry *info = dbcSpell.LookupEntry( set->SpellID[x] );
-						SpellPointer spell = SpellPointer(new Spell( plr_shared_from_this(), info, true, NULLAURA ));
+						SpellPointer spell(new Spell( plr_shared_from_this(), info, true, NULLAURA ));
 						SpellCastTargets targets;
 						targets.m_unitTarget = GetGUID();
 						spell->prepare( &targets );
@@ -3867,7 +3867,7 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 					continue;
 				}
 
-				SpellPointer spell = SpellPointer(new Spell( plr_shared_from_this(), spells ,true, NULLAURA ));
+				SpellPointer spell(new Spell( plr_shared_from_this(), spells ,true, NULLAURA ));
 				SpellCastTargets targets;
 				targets.m_unitTarget = this->GetGUID();
 				spell->castedItemId = item->GetEntry();
@@ -4068,7 +4068,7 @@ void Player::BuildPlayerRepop()
 	if(getRace()==RACE_NIGHTELF)
 	{
 		SpellEntry *inf = dbcSpell.LookupEntry(20584);
-		SpellPointer sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
+		SpellPointer sp(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
 		sp->prepare(&tgt);
 		inf=dbcSpell.LookupEntry(9036);
 		sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
@@ -4078,7 +4078,7 @@ void Player::BuildPlayerRepop()
 	{
 	
 		SpellEntry *inf=dbcSpell.LookupEntry(8326);
-		SpellPointer sp = SpellPointer(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
+		SpellPointer sp(new Spell(plr_shared_from_this(),inf,true,NULLAURA));
 		sp->prepare(&tgt);
 	}
 
@@ -5945,7 +5945,7 @@ void Player::EventRepeatSpell()
 	{		
 		m_AutoShotAttackTimer = m_AutoShotDuration;
 	
-		SpellPointer sp = SpellPointer(new Spell( plr_shared_from_this(), m_AutoShotSpell, true, NULLAURA ));
+		SpellPointer sp(new Spell( plr_shared_from_this(), m_AutoShotSpell, true, NULLAURA ));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget = m_curSelection;
 		tgt.m_targetMask = TARGET_FLAG_UNIT;
@@ -8342,7 +8342,7 @@ void Player::CompleteLoading()
 					continue;
 			}
 
-			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(),info,true,NULLAURA));
+			SpellPointer spell(new Spell(plr_shared_from_this(),info,true,NULLAURA));
 			spell->prepare(&targets);
 		}
 	}
@@ -10170,14 +10170,14 @@ void Player::EventSummonPet( PetPointer new_pet )
 		{
 			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( this->GetGUID() );
-			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
+			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET )
 		{
 			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( new_pet->GetGUID() );
-			SpellPointer spell = SpellPointer(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
+			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 	}
@@ -10327,7 +10327,7 @@ void Player::AddShapeShiftSpell(uint32 id)
 
 	if( sp->RequiredShapeShift && ((uint32)1 << (GetShapeShift()-1)) & sp->RequiredShapeShift )
 	{
-		SpellPointer spe = SpellPointer(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
+		SpellPointer spe(new Spell( plr_shared_from_this(), sp, true, NULLAURA ));
 		SpellCastTargets t(this->GetGUID());
 		spe->prepare( &t );
 	}
