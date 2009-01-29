@@ -116,59 +116,78 @@ uint32 CalculateXpToGive(shared_ptr<Unit>pVictim, shared_ptr<Unit>pAttacker)
 	float g = 5;
 
 	// get zero diff
-	if(AttackerLvl >= 70)
-		zd = 19;
-	else if(AttackerLvl >= 65)
-		zd = 18;
-	else if(AttackerLvl >= 60)
-		zd = 17;
-	else if(AttackerLvl >= 55)
-		zd = 16;
-	else if(AttackerLvl >= 50)
-		zd = 15;
-	else if(AttackerLvl >= 45)
-		zd = 14;
-	else if(AttackerLvl >= 40)
-		zd = 13;
-	else if(AttackerLvl >= 30)
-		zd = 12;
-	else if(AttackerLvl >= 20)
-		zd = 11;
-	else if(AttackerLvl >= 16)
-		zd = 9;
-	else if(AttackerLvl >= 12)
-		zd = 8;
-	else if(AttackerLvl >= 10)
-		zd = 7;
-	else if(AttackerLvl >= 8)
-		zd = 6;
-	else
-		zd = 5;
-
 	// get grey diff
 
 	if(AttackerLvl >= 70)
+	{
+		zd = 19;
 		g = 15;
+	}
 	else if(AttackerLvl >= 65)
-		g = 14;
-	else if(AttackerLvl >= 60)
+	{
+		zd = 18;
 		g = 13;
+	}
+	else if(AttackerLvl >= 60)
+	{
+		zd = 17;
+		g = 14;
+	}
 	else if(AttackerLvl >= 55)
+	{
+		zd = 16;
 		g = 12;
+	}
 	else if(AttackerLvl >= 50)
+	{
+		zd = 15;
 		g = 11;
+	}
 	else if(AttackerLvl >= 45)
+	{
+		zd = 14;
 		g = 10;
+	}
 	else if(AttackerLvl >= 40)
+	{
+		zd = 13;
 		g = 9;
+	}
 	else if(AttackerLvl >= 30)
+	{
+		zd = 12;
 		g = 8;
+	}
 	else if(AttackerLvl >= 20)
+	{
+		zd = 11;
 		g = 7;
-	else if(AttackerLvl >= 10)
+	}
+	else if(AttackerLvl >= 16)
+	{
+		zd = 9;
 		g = 6;
-	else
+	}
+	else if(AttackerLvl >= 12)
+	{
+		zd = 8;
+		g = 6;
+	}
+	else if(AttackerLvl >= 10)
+	{
+		zd = 7;
+		g = 6;
+	}
+	else if(AttackerLvl >= 8)
+	{
+		zd = 6;
 		g = 5;
+	}
+	else
+	{
+		zd = 5;
+		g = 5;
+	}
 
 	float xp = 0.0f;
 	float fVictim = float(VictimLvl);

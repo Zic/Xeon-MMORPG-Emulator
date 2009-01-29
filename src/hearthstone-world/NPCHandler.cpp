@@ -600,7 +600,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 	GossipText *pGossip;
 
 	recv_data >> textID;
-	DEBUG_LOG("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID );
+	Log.Debug("WORLD","CMSG_NPC_TEXT_QUERY ID '%u'", textID );
 
 	recv_data >> targetGuid;
 	GetPlayer()->SetUInt64Value(UNIT_FIELD_TARGET, targetGuid);
@@ -664,13 +664,15 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 	if(!pC) return;
 
 	SendInnkeeperBind(pC);
+	_player->bHasBindDialogOpen = false;
 }
 
-#define ITEM_ID_HEARTH_STONE 6948
-#define BIND_SPELL_ID 3286
 
 void WorldSession::SendInnkeeperBind(CreaturePointer pCreature)
 {
+#define ITEM_ID_HEARTH_STONE 6948
+#define BIND_SPELL_ID 3286
+
 	if(!_player->IsInWorld()) return;
 	WorldPacket data(45);
 
@@ -692,7 +694,7 @@ void WorldSession::SendInnkeeperBind(CreaturePointer pCreature)
 		// We don't have a hearthstone. Add one.
 		if(_player->GetItemInterface()->CalculateFreeSlots(NULL) > 0)
 		{
-			shared_ptr<Item>item = objmgr.CreateItem( ITEM_ID_HEARTH_STONE, _player);
+			ItemPointer item = objmgr.CreateItem( ITEM_ID_HEARTH_STONE, _player);
 			if( _player->GetItemInterface()->AddItemToFreeSlot(item) )
 			{
 				SlotResult * lr = _player->GetItemInterface()->LastSearchResult();
@@ -706,8 +708,6 @@ void WorldSession::SendInnkeeperBind(CreaturePointer pCreature)
 		}
 	}
 
-	_player->bHasBindDialogOpen = false;
-
 	_player->SetBindPoint(_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetMapId(),_player->GetZoneId());
 
 	data.Initialize(SMSG_BINDPOINTUPDATE);
@@ -720,32 +720,17 @@ void WorldSession::SendInnkeeperBind(CreaturePointer pCreature)
 
     OutPacket(SMSG_GOSSIP_COMPLETE, 0, NULL);
 
-	data.Initialize( SMSG_SPELL_START );
-	data << pCreature->GetNewGUID();
-	data << pCreature->GetNewGUID();
-	data << uint32(BIND_SPELL_ID);
-	data << uint8(0);
-	data << uint16(0);
-	data << uint32(0);
-	data << uint16(2);
-	data << _player->GetGUID();
-	_player->SendMessageToSet(&data, true);
 
-	data.Initialize( SMSG_SPELL_GO );
-	data << pCreature->GetNewGUID();
-	data << pCreature->GetNewGUID();
-	data << uint32(BIND_SPELL_ID);  // spellID
-	data << uint8(0) << uint8(1);   // flags
-	data << uint8(1);			   // amount of targets
-	data << _player->GetGUID();
-	data << uint8(0);
-	data << uint16(2);
-	data << _player->GetGUID();
-	_player->SendMessageToSet( &data, true );
-}
+	//Animate and send the spell too
+	SpellPointer BindSpell = SpellPointer(new Spell(pCreature, dbcSpell.LookupEntry( BIND_SPELL_ID ), false, NULLAURA));
+	SpellCastTargets targets;
+	targets.m_unitTarget = GetPlayer()->GetGUID();
+	BindSpell->prepare(&targets);
 
 #undef ITEM_ID_HEARTH_STONE
 #undef BIND_SPELL_ID
+}
+
 
 void WorldSession::SendSpiritHealerRequest(CreaturePointer pCreature)
 {

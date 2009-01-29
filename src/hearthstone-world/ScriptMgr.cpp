@@ -492,6 +492,7 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 {
 	GossipMenu *Menu;
 	uint32 TextID = 2;
+	uint8 menu_lines = 0;
 	CreaturePointer pCreature = (pObject->GetTypeId()==TYPEID_UNIT)?TO_CREATURE( pObject ):NULLCREATURE;
 	if(!pCreature)
 		return;
@@ -509,9 +510,6 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 	
 	uint32 flags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-	if(flags & UNIT_NPC_FLAG_VENDOR)
-		Menu->AddItem(1, "I would like to browse your goods", 1);
-	
 	if((flags & UNIT_NPC_FLAG_TRAINER || flags & UNIT_NPC_FLAG_TRAINER_PROF) && pTrainer != 0)
 	{
 		string name = pCreature->GetCreatureName()->Name;
@@ -562,7 +560,7 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 			msg += ".";
 
 			Menu->AddItem(3, msg.c_str(), 2);
-
+			menu_lines += 1;
 		}
 		else
 		{
@@ -571,32 +569,62 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 			msg += ".";
 
 			Menu->AddItem(3, msg.c_str(), 2);
+			menu_lines += 1;
 		}
 	}
 
+	if(flags & UNIT_NPC_FLAG_VENDOR)
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_VENDOR, "I would like to browse your goods", 1);
+		menu_lines += 1;
+	}
 	if(flags & UNIT_NPC_FLAG_TAXIVENDOR)
-		Menu->AddItem(2, "Give me a ride.", 3);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_FLIGHT, "Give me a ride.", 3);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_AUCTIONEER)
-		Menu->AddItem(0, "I would like to make a bid.", 4);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_AUCTION, "I would like to make a bid.", 4);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_INNKEEPER)
-		Menu->AddItem(5, "Make this inn your home.", 5);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_EXTRA, "What can I do at an Inn.", 15);
+		menu_lines += 1;
+	}
 
 	if(flags & UNIT_NPC_FLAG_BANKER)
-		Menu->AddItem(0, "I would like to check my deposit box.", 6);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_COIN, "I would like to check my deposit box.", 6);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_SPIRITHEALER)
-		Menu->AddItem(0, "Bring me back to life.", 7);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Bring me back to life.", 7);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_ARENACHARTER)
-		Menu->AddItem(0, "How do I create a guild/arena team?", 8);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_ARENA, "How do I create a guild/arena team?", 8);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_TABARDCHANGER)
-		Menu->AddItem(0, "I want to create a guild crest.", 9);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_TABARD, "I want to create a guild crest.", 9);
+		menu_lines += 1;
+	}	
 
 	if(flags & UNIT_NPC_FLAG_BATTLEFIELDPERSON)
-		Menu->AddItem(0, "I would like to go to the battleground.", 10);
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_ARENA, "I would like to go to the battleground.", 10);
+		menu_lines += 1;
+	}	
 
 	if( pTrainer &&
 		pCreature->getLevel() > 10 &&				   // creature level
@@ -607,11 +635,14 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 			if(pTrainer->RequiredClass == Plr->getClass())
 			{
 				Menu->AddItem(0, "I would like to reset my talents.", 11);
+				menu_lines += 1;
 			}
 		}
 		else
+		{
 			Menu->AddItem(0, "I would like to reset my talents.", 11);
-
+			menu_lines += 1;
+		}
 	}
 	
 	if( pTrainer &&
@@ -620,6 +651,13 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 		Plr->GetSummon() != NULL )						// have pet
 	{
 		Menu->AddItem(0, "I would like to untrain my pet.", 13); //TODO: Find proper message
+		menu_lines += 1;
+	}
+
+	// Force gossip to show in a menu, if there is only 1 option (client skips gossip otherwise)
+	if(	Text != 0 && menu_lines == 1)
+	{
+		Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
 	}
 
 	if(AutoSend)
@@ -680,6 +718,7 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 			GossipMenu *Menu;
 			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 5674, Plr);
 			Menu->AddItem(0, "I understand, continue.", 12);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
 			Menu->SendTo(Plr);
 		}break;
 	case 12:
@@ -694,6 +733,7 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 			GossipMenu *Menu;
 			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 7722, Plr);
 			Menu->AddItem(0, "Yes, please do.", 14);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
 			Menu->SendTo(Plr);
 		}break;
 	case 14:
@@ -702,9 +742,24 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 			Plr->Gossip_Complete();
 			Plr->SendPetUntrainConfirm();
 		}break;
+	case 15:
+		// switch Innkeeper help menu
+		{
+			Plr->bHasBindDialogOpen = false;
+			GossipMenu *Menu;
+			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 1853, Plr);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_ENGINEER2, "Make this inn your home", 5);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
+			Menu->SendTo(Plr);
+		}break;
+	case 99:
+		// Goodbye
+		{
+			Plr->Gossip_Complete();
+		}break;
 
 	default:
-		DEBUG_LOG("Unknown IntId %u on entry %u", IntId, pCreature->GetEntry());
+		Log.Debug("GossipSelectOption","Unknown menuitem %u on npc %u", IntId, pCreature->GetEntry());
 		break;
 	}	
 }

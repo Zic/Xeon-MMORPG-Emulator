@@ -1369,9 +1369,10 @@ void GossipMenu::AddItem(GossipMenuItem* GossipItem)
 
 void GossipMenu::BuildPacket(WorldPacket& Packet)
 {
-	Packet << CreatureGuid;
+	std::string somestring = "";
+	Packet << uint64(CreatureGuid);
 	Packet << uint32(0);			// some new menu type in 2.4?
-	Packet << TextId;
+	Packet << uint32(TextId);
 	Packet << uint32(Menu.size());
 
 	for(std::vector<GossipMenuItem>::iterator iter = Menu.begin();
@@ -1382,7 +1383,7 @@ void GossipMenu::BuildPacket(WorldPacket& Packet)
 		Packet << iter->Extra;
 		Packet << uint32(0);	// something new in tbc. maybe gold requirement or smth?
 		Packet << iter->Text;
-		Packet << uint8(0); // ?
+		Packet << somestring; // ?
 	}
 }
 
