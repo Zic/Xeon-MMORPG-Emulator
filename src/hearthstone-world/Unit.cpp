@@ -5392,7 +5392,7 @@ bool Unit::GetSpeedDecrease()
 
 void Unit::EventCastSpell(UnitPointer Target, SpellEntry * Sp)
 {
-	shared_ptr<Spell>pSpell = SpellPointer(new Spell(Target, Sp, true, NULLAURA));
+	SpellPointer pSpell(new Spell(Target, Sp, true, NULLAURA));
 	SpellCastTargets targets(Target->GetGUID());
 	pSpell->prepare(&targets);
 }

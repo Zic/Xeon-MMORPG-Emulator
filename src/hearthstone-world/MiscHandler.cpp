@@ -1330,7 +1330,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 						return;
 
 					info = dbcSpell.LookupEntry(goinfo->sound1);
-					SpellPointer spell = SpellPointer (new Spell(pleader, info, true, NULLAURA));
+					SpellPointer spell(new Spell(pleader, info, true, NULLAURA));
 					SpellCastTargets targets(plr->GetGUID());
 					spell->prepare(&targets);
 
