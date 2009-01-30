@@ -620,7 +620,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	uint32 spellId = m_spellInfo->Id;
 	
 	// Try a dummy SpellHandler
-	if(sScriptMgr.CallScriptedDummySpell(spellId, i, spell_shared_from_this() ))
+	if(sScriptMgr.CallScriptedDummySpell(spellId, i, shared_from_this() ))
 		return;
 
 	// warrior: Slam
@@ -1950,7 +1950,7 @@ void Spell::SpellEffectTeleportUnits( uint32 i )  // Teleport Units
 		return;
 
 	// Try a dummy SpellHandler
-	if( sScriptMgr.CallScriptedDummySpell( spellId, i, spell_shared_from_this() ) )
+	if( sScriptMgr.CallScriptedDummySpell( spellId, i, shared_from_this() ) )
 		return;
 
 	// Shadowstep
@@ -2687,14 +2687,14 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	{		
 	case TARGET_FLAG_SELF:
 		{
-			dynObj->Create(u_caster, spell_shared_from_this(),	m_caster->GetPositionX(), 
+			dynObj->Create(u_caster, shared_from_this(),	m_caster->GetPositionX(), 
 				m_caster->GetPositionY(), m_caster->GetPositionZ(), dur,r);		 
 		}break;
 	case TARGET_FLAG_UNIT:
 		{
 			if(!unitTarget||!unitTarget->isAlive())
 				break;
-			dynObj->Create( u_caster, spell_shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
+			dynObj->Create( u_caster, shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
 		}break;
 	case TARGET_FLAG_OBJECT:
@@ -2703,19 +2703,19 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 				break;
 			if(!unitTarget->isAlive())
 				break;
-			dynObj->Create(u_caster, spell_shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
+			dynObj->Create(u_caster, shared_from_this(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
 				dur, r);
 		}break;
 	case TARGET_FLAG_SOURCE_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
-			dynObj->Create(u_caster, spell_shared_from_this(), m_targets.m_srcX,
+			dynObj->Create(u_caster, shared_from_this(), m_targets.m_srcX,
 				m_targets.m_srcY, m_targets.m_srcZ, dur,r);
 		}break;
 	case TARGET_FLAG_DEST_LOCATION:
 		{
 			dynObj->SetInstanceID(m_caster->GetInstanceID());
-			dynObj->Create(u_caster?u_caster:g_caster->m_summoner, spell_shared_from_this(),
+			dynObj->Create(u_caster?u_caster:g_caster->m_summoner, shared_from_this(),
 				m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ,dur,r);
 		}break;
 	default:
@@ -3279,7 +3279,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 			if(p_caster->m_bgFlagIneligible) return;
 
 			if(p_caster && p_caster->m_bg)
-				if(p_caster->m_bg->HookSlowLockOpen(gameObjTarget,p_caster,spell_shared_from_this()))
+				if(p_caster->m_bg->HookSlowLockOpen(gameObjTarget,p_caster,shared_from_this()))
 					return;
 
 			uint32 spellid = !gameObjTarget->GetInfo()->Unknown1 ? 23932 : gameObjTarget->GetInfo()->Unknown1;
@@ -3403,7 +3403,7 @@ void Spell::SpellEffectSendEvent(uint32 i) //Send Event
 	uint32 spellId = m_spellInfo->Id;
 
 	// Try a dummy SpellHandler
-	if(sScriptMgr.CallScriptedDummySpell(spellId, i, spell_shared_from_this()))
+	if(sScriptMgr.CallScriptedDummySpell(spellId, i, shared_from_this()))
 		return;
 
 	switch(spellId)
@@ -4649,7 +4649,7 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 	uint32 spellId = m_spellInfo->Id;
 
 	// Try a dummy SpellHandler
-	if(sScriptMgr.CallScriptedDummySpell(spellId, i, spell_shared_from_this()))
+	if(sScriptMgr.CallScriptedDummySpell(spellId, i, shared_from_this()))
 		return;
 
 	switch(spellId)
