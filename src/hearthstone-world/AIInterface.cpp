@@ -1105,11 +1105,11 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 								pPet->AddPetSpellToOwner(spellInfo->Id);
 						}
 						//This spell won't be cast until it cooldown cleared.
-						if(m_nextSpell&&m_nextSpell->cooldown)
+						if(m_nextSpell && m_nextSpell->cooldown)
 							m_nextSpell->cooldowntime = getMSTime() + m_nextSpell->cooldown;
 
 						//increase procCounter if we're counting
-						if(m_nextSpell->procCount)
+						if(m_nextSpell && m_nextSpell->procCount)
 							m_nextSpell->procCounter++;
 					}
 					else
