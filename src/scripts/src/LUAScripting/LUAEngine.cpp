@@ -2055,7 +2055,7 @@ int luaUnit_AddItem(lua_State * L, UnitPointer  ptr)
 
 	ItemPointer add = NULLITEM; 
 	add = plr->GetItemInterface()->FindItemLessMax(id,count,false);
-	if(add==NULL)
+	if(!add)
 	{
 		add=objmgr.CreateItem(id,plr);
 		if(add)
@@ -2069,8 +2069,6 @@ int luaUnit_AddItem(lua_State * L, UnitPointer  ptr)
 				add = NULLITEM;
 			}
 		}
-		else
-			add = NULLITEM;
 	}
 	else
 	{
@@ -4500,7 +4498,7 @@ int luaGameObject_CastSpell(lua_State * L, GameObjectPointer  ptr)
 	uint32 sp = luaL_checkint(L,1);
 	if( !ptr || !sp|| sp == 0) return 0;
 	
-	SpellPointer spp = SpellPointer(new Spell( ptr, dbcSpell.LookupEntry(sp), true, NULLAURA));
+	SpellPointer spp(new Spell( ptr, dbcSpell.LookupEntry(sp), true, NULLAURA));
 	SpellCastTargets tar(ptr->GetGUID());
 	spp->prepare(&tar);
 	return 0;
@@ -4511,7 +4509,7 @@ int luaGameObject_FullCastSpell(lua_State * L, GameObjectPointer  ptr)
 	uint32 sp = luaL_checkint(L,1);
 	if( !ptr || !sp|| sp == 0) return 0;
 	
-	SpellPointer nspell = SpellPointer(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
+	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
 	SpellCastTargets tar(ptr->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
@@ -4523,7 +4521,7 @@ int luaGameObject_CastSpellOnTarget(lua_State * L, GameObjectPointer  ptr)
 	UnitPointer  target = Lunar<Unit>::check(L,2);
 	if( !ptr || !sp || sp == 0) return 0;
 
-	SpellPointer nspell = SpellPointer(new Spell(ptr,dbcSpell.LookupEntry(sp),true,NULLAURA));
+	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),true,NULLAURA));
 	SpellCastTargets tar(target->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
@@ -4534,7 +4532,7 @@ int luaGameObject_FullCastSpellOnTarget(lua_State * L, GameObjectPointer  ptr)
 	uint32 sp = luaL_checkint(L,1);
 	UnitPointer  target = Lunar<Unit>::check(L,2);
 	if( !ptr || !sp || sp == 0) return 0;
-	SpellPointer nspell = SpellPointer(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
+	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
 	SpellCastTargets tar(target->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
