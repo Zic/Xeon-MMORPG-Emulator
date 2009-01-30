@@ -22,11 +22,11 @@ struct PlayerInfo;
 
 class Arena : public CBattleground
 {
-	set<shared_ptr<GameObject> > m_gates;
+	set< GameObjectPointer  > m_gates;
 	uint32 m_arenateamtype;
 
 	uint32 m_pcWorldStates[2];
-	shared_ptr<GameObject> m_buffs[2];
+	GameObjectPointer m_buffs[2];
 	ArenaTeam * m_teams[2];
 
 	uint32 m_playersCount[2];
@@ -63,8 +63,8 @@ public:
 
 	/* dummy stuff */
 	void HookOnMount(PlayerPointer plr) {}
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj) {}
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj) {}
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj) {}
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj) {}
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 
 	void BuffRespawn(uint32 buffId);
@@ -87,7 +87,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return false; }
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse) {}
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse) {}
 
 	uint32 CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome);
 };

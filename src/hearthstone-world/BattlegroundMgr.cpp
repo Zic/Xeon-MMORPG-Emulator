@@ -1254,9 +1254,9 @@ void CBattlegroundManager::DeleteBattleground(BattlegroundPointer bg)
 
 }
 
-shared_ptr<GameObject> CBattleground::SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale)
+GameObjectPointer CBattleground::SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale)
 {
-	shared_ptr<GameObject>go = m_mapMgr->CreateGameObject(entry);
+	GameObjectPointer go = m_mapMgr->CreateGameObject(entry);
 
 	go->CreateFromProto(entry, m_mapMgr->GetMapId(), x, y, z, o);
 
@@ -2034,7 +2034,7 @@ void CBattleground::GiveHonorToTeam(uint32 team, uint32 amt)
 }
 
 
-bool CBattleground::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+bool CBattleground::HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	if( pPlayer->m_CurrentVehicle )
 		pPlayer->m_CurrentVehicle->RemovePassenger(pPlayer);

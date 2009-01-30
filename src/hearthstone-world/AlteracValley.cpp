@@ -1299,7 +1299,7 @@ void AVNode::Capture()
 		{
 			// spawn fire!
 			const AVSpawnLocation *spi = g_fireLocations[m_nodeId];
-			shared_ptr<GameObject>go;
+			GameObjectPointer go;
 
 			DEBUG_LOG("spawning fires at bunker %s", m_template->m_name);
 			while(spi->x != 0.0f)
@@ -1390,7 +1390,7 @@ AlteracValley::~AlteracValley()
 
 }
 
-bool AlteracValley::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+bool AlteracValley::HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
 {
 	// burlex todo: find a cleaner way to do this that doesnt waste memory.
 	if(pGo->bannerslot >= 0 && pGo->bannerslot < AV_NUM_CONTROL_POINTS)
@@ -1405,12 +1405,12 @@ bool AlteracValley::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer p
 	return false;
 }
 
-void AlteracValley::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
+void AlteracValley::HookFlagDrop(PlayerPointer plr, GameObjectPointer obj)
 {
 
 }
 
-void AlteracValley::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
+void AlteracValley::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 {
 
 }
@@ -1485,7 +1485,7 @@ void AlteracValley::OnCreate()
 	sm.CreateWorldState(WORLDSTATE_AV_HORDE_SCORE, 600);
 
 	// Alliance Gate
-	shared_ptr<GameObject>gate = SpawnGameObject(AV_GAMEOBJECT_GATE, 780.487f, -493.024f, 99.9553f, 3.0976f, 32, 114, 3.000000f);
+	GameObjectPointer gate = SpawnGameObject(AV_GAMEOBJECT_GATE, 780.487f, -493.024f, 99.9553f, 3.0976f, 32, 114, 3.000000f);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
@@ -1528,7 +1528,7 @@ void AlteracValley::OnStart()
 	}
 
 	// open gates
-	for(list<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list< GameObjectPointer >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -1739,7 +1739,7 @@ const static AVLoot g_avLoot[] = {
 	{ 0, 0, 0},
 };
 
-void AlteracValley::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
+void AlteracValley::HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse)
 {
 	const AVLoot *loot_ptr = &g_avLoot[0];
 	while(loot_ptr->ItemId != 0)

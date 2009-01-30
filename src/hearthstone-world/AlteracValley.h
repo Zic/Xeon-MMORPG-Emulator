@@ -99,11 +99,11 @@ class AVNode
 	vector<CreaturePointer> m_peonLocations;
 
 	// control point (capturable)
-	shared_ptr<GameObject>m_flag;
+	GameObjectPointer m_flag;
 
 	// aura (light-shiny stuff)
-	shared_ptr<GameObject>m_aura;
-	shared_ptr<GameObject>m_glow;
+	GameObjectPointer m_aura;
+	GameObjectPointer m_glow;
 
 	// home NPc
 	CreaturePointer m_homeNPC;
@@ -205,7 +205,7 @@ public:
 class AlteracValley : public CBattleground
 {
 protected:
-	list<shared_ptr<GameObject> > m_gates;
+	list< GameObjectPointer  > m_gates;
 	uint32 m_reinforcements[2];
 	bool m_nearingVictory[2];
 	AVNode *m_nodes[AV_NUM_CONTROL_POINTS];
@@ -218,8 +218,8 @@ public:
 	void EventAssaultControlPoint(uint32 x);
 
 	void HookOnPlayerDeath(PlayerPointer plr);
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj);
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj);
 	void HookOnMount(PlayerPointer plr);
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	bool HookHandleRepop(PlayerPointer plr);
@@ -239,7 +239,7 @@ public:
 	void OnStart();
 
 	void EventUpdateResources();
-	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
+	bool HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell);
 
 	/* AV Functions */
 	void AddReinforcements(uint32 teamId, uint32 amt);
@@ -248,7 +248,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 
 	/* herald */
 	void Herald(const char *format, ...);

@@ -40,7 +40,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 		return;
 
 //	printf("Got ATTACK SWING: %08X %08X\n", GUID_HIPART(guid), GUID_LOPART(guid));
-	shared_ptr<Unit>pEnemy = _player->GetMapMgr()->GetUnit(guid);
+	UnitPointer pEnemy = _player->GetMapMgr()->GetUnit(guid);
 	//printf("Pointer: %08X\n", pEnemy);
 
 	if(!pEnemy)
@@ -76,7 +76,7 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 	uint64 guid = GetPlayer()->GetSelection();
-	shared_ptr<Unit>pEnemy = NULLUNIT;
+	UnitPointer pEnemy = NULLUNIT;
 
 	if(guid)
 	{

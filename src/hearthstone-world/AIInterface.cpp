@@ -109,7 +109,7 @@ AIInterface::AIInterface()
 
 }
 
-void AIInterface::Init(shared_ptr<Unit>un, AIType at, MovementType mt)
+void AIInterface::Init(UnitPointer un, AIType at, MovementType mt)
 {
 	ASSERT(at != AITYPE_PET);
 
@@ -150,7 +150,7 @@ AIInterface::~AIInterface()
 	}
 }
 
-void AIInterface::Init(shared_ptr<Unit>un, AIType at, MovementType mt, shared_ptr<Unit>owner)
+void AIInterface::Init(UnitPointer un, AIType at, MovementType mt, UnitPointer owner)
 {
 	ASSERT(at == AITYPE_PET || at == AITYPE_TOTEM);
 
@@ -1332,7 +1332,7 @@ UnitPointer AIInterface::FindTarget()
 
 	unordered_set<ObjectPointer >::iterator itr, it2;
 	ObjectPointer pObj;
-	shared_ptr<Unit>pUnit;
+	UnitPointer pUnit;
 	float dist;
 	bool pvp=true;
 	if(m_Unit->GetTypeId()==TYPEID_UNIT&&TO_CREATURE(m_Unit)->GetCreatureName()&&TO_CREATURE(m_Unit)->GetCreatureName()->Civilian)
@@ -1552,7 +1552,7 @@ bool AIInterface::FindFriends(float dist)
 	TargetMap::iterator it;
 
 	unordered_set<ObjectPointer >::iterator itr;
-	shared_ptr<Unit>pUnit;
+	UnitPointer pUnit;
 
 	
 
@@ -1657,7 +1657,7 @@ float AIInterface::_CalcAggroRange(UnitPointer target)
 	return (AggroRange*AggroRange);
 }
 
-void AIInterface::_CalcDestinationAndMove(shared_ptr<Unit>target, float dist)
+void AIInterface::_CalcDestinationAndMove(UnitPointer target, float dist)
 {
 	if(!m_canMove || m_Unit->IsStunned())
 	{
@@ -2992,7 +2992,7 @@ void AIInterface::addSpellToList(AI_Spell *sp)
 
 uint32 AIInterface::getThreatByGUID(uint64 guid)
 {
-	shared_ptr<Unit>obj = m_Unit->GetMapMgr()->GetUnit(guid);
+	UnitPointer obj = m_Unit->GetMapMgr()->GetUnit(guid);
 	if(obj)
 		return getThreatByPtr(obj);
 
@@ -3010,9 +3010,9 @@ uint32 AIInterface::getThreatByPtr(UnitPointer obj)
 }
 
 //should return a valid target
-shared_ptr<Unit>AIInterface::GetMostHated()
+UnitPointer AIInterface::GetMostHated()
 {
-	shared_ptr<Unit>ResultUnit=NULLUNIT;
+	UnitPointer ResultUnit=NULLUNIT;
 
 	//override mosthated with taunted target. Basic combat checks are made for it. 
 	//What happens if we can't see tauntedby unit ?
@@ -3020,7 +3020,7 @@ shared_ptr<Unit>AIInterface::GetMostHated()
 	if(ResultUnit)
 		return ResultUnit;
 
-	pair<shared_ptr<Unit>, int32> currentTarget;
+	pair< UnitPointer , int32> currentTarget;
 	currentTarget.first = NULLUNIT;
 	currentTarget.second = -1;
 
@@ -3051,11 +3051,11 @@ shared_ptr<Unit>AIInterface::GetMostHated()
 
 	return currentTarget.first;
 }
-shared_ptr<Unit>AIInterface::GetSecondHated()
+UnitPointer AIInterface::GetSecondHated()
 {
-	shared_ptr<Unit>ResultUnit=GetMostHated();
+	UnitPointer ResultUnit=GetMostHated();
 
-	pair<shared_ptr<Unit>, int32> currentTarget;
+	pair< UnitPointer, int32> currentTarget;
 	currentTarget.first = NULLUNIT;
 	currentTarget.second = -1;
 
@@ -3090,7 +3090,7 @@ bool AIInterface::modThreatByGUID(uint64 guid, int32 mod)
 	if (!m_aiTargets.size())
 		return false;
 
-	shared_ptr<Unit>obj = m_Unit->GetMapMgr()->GetUnit(guid);
+	UnitPointer obj = m_Unit->GetMapMgr()->GetUnit(guid);
 	if(obj)
 		return modThreatByPtr(obj, mod);
 
@@ -3367,7 +3367,7 @@ void AIInterface::ResetProcCounts()
 void AIInterface::Event_Summon_EE_totem(uint32 summon_duration)
 {
 	m_totemspelltimer = 0xEFFFFFFF;
-	shared_ptr<Unit>ourslave=m_Unit->CreateTemporaryGuardian(15352,summon_duration,float(-M_PI*2), 0);
+	UnitPointer ourslave=m_Unit->CreateTemporaryGuardian(15352,summon_duration,float(-M_PI*2), 0);
 	if(ourslave)
 	{
 		TO_CREATURE(ourslave)->ResistanceModPct[NATURE_DAMAGE]=100;//we should be imune to nature dmg. This can be also set in db
@@ -3388,7 +3388,7 @@ void AIInterface::Event_Summon_FE_totem(uint32 summon_duration)
 	//timer should not reach this value thus not cast this spell again
 	m_totemspelltimer = 0xEFFFFFFF;
 	//creatures do not support PETs and the spell uses that effect so we force a summon guardian thing
-	shared_ptr<Unit>ourslave=m_Unit->CreateTemporaryGuardian(15438,summon_duration,float(-M_PI*2), 0);
+	UnitPointer ourslave=m_Unit->CreateTemporaryGuardian(15438,summon_duration,float(-M_PI*2), 0);
 	if(ourslave)
 	{
 		TO_CREATURE(ourslave)->ResistanceModPct[FIRE_DAMAGE]=100;//we should be imune to fire dmg. This can be also set in db

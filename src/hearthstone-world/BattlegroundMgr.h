@@ -278,8 +278,8 @@ public:
 	virtual void HookOnMount(PlayerPointer plr) = 0;
 
 	/* Only used in CTF (as far as I know) */
-	virtual void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj) = 0;
-	virtual void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj) = 0;
+	virtual void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj) = 0;
+	virtual void HookFlagStand(PlayerPointer plr, GameObjectPointer obj) = 0;
 
 	/* Used when a player kills a unit/PlayerPointer */
 	virtual void HookOnPlayerKill(PlayerPointer plr, UnitPointer pVictim) = 0;
@@ -292,7 +292,7 @@ public:
 	virtual void HookOnShadowSight() = 0;
 
 	/* Used to generate loot for players (AV) */
-	virtual void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse) = 0;
+	virtual void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse) = 0;
 	virtual bool SupportsPlayerLoot() = 0;
 
 	/* Retreival Functions */
@@ -357,7 +357,7 @@ public:
 		return (uint32)s;
 	}
 
-	shared_ptr<GameObject> SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
+	GameObjectPointer SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale);
 	CreaturePointer SpawnCreature(uint32 entry,float x, float y, float z, float o);
 	void UpdatePvPData();
 
@@ -386,7 +386,7 @@ public:
 	void EventResurrectPlayers();
 	virtual bool CanPlayerJoin(PlayerPointer plr);
 	virtual bool CreateCorpse(PlayerPointer plr) { return true; }
-	virtual bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
+	virtual bool HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell);
 
 	void BuildPvPUpdateDataPacket(WorldPacket * data);
 	virtual uint8 Rated() { return 0; }

@@ -585,7 +585,7 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 
 		CharacterDatabase.WaitExecute("DELETE FROM characters WHERE guid = %u", (uint32)guid);
 
-		shared_ptr<Corpse> c=objmgr.GetCorpseByOwner((uint32)guid);
+		CorpsePointer c=objmgr.GetCorpseByOwner((uint32)guid);
 		if(c)
 			CharacterDatabase.Execute("DELETE FROM corpses WHERE guid = %u", c->GetLowGUID());
 
@@ -836,7 +836,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	// Find our transporter and add us if we're on one.
 	if(plr->m_TransporterGUID != 0)
 	{
-		shared_ptr<Transporter> pTrans = objmgr.GetTransporter(GUID_LOPART(plr->m_TransporterGUID));
+		TransporterPointer pTrans = objmgr.GetTransporter(GUID_LOPART(plr->m_TransporterGUID));
 		if(pTrans)
 		{
 			if(plr->isDead())
@@ -961,7 +961,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	//death system checkout
 	if(_player->GetUInt32Value(UNIT_FIELD_HEALTH) == 0 || _player->isDead() || _player->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_DEATH_WORLD_ENABLE))
 	{
-		shared_ptr<Corpse> corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
+		CorpsePointer corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
 		if( corpse != NULL )
 		{
 			shared_ptr<MapMgr>myMgr = sInstanceMgr.GetInstance(_player);
@@ -1079,7 +1079,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	data << uint32(1) // not enough money
 	data << uint32(2) // you must be sitting on the barber's chair
 	
-	shared_ptr<GameObject> barberChair = _player->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), BARBERCHAIR_ID);
+	GameObjectPointer barberChair = _player->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), BARBERCHAIR_ID);
 	if(!barberChair || _player->GetStandState() != STANDSTATE_SIT_MEDIUM_CHAIR)
 	{
 		data << uint32(2);

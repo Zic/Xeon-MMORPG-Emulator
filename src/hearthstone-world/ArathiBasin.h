@@ -52,13 +52,13 @@ enum ABSpawnTypes
 class ArathiBasin : public CBattleground
 {
 public:
-	shared_ptr<GameObject> m_buffs[AB_NUM_BUFFS];
-	shared_ptr<GameObject> m_controlPoints[AB_NUM_CONTROL_POINTS];
-	shared_ptr<GameObject> m_controlPointAuras[AB_NUM_CONTROL_POINTS];
+	GameObjectPointer m_buffs[AB_NUM_BUFFS];
+	GameObjectPointer m_controlPoints[AB_NUM_CONTROL_POINTS];
+	GameObjectPointer m_controlPointAuras[AB_NUM_CONTROL_POINTS];
 	bool m_nearingVictory[2];
 
 protected:
-	list<shared_ptr<GameObject> > m_gates;
+	list< GameObjectPointer > m_gates;
 	
 	uint32 m_resources[2];
 	uint32 m_capturedBases[2];
@@ -76,8 +76,8 @@ public:
 	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj);
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj);
 	void HookOnMount(PlayerPointer plr);
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	bool HookHandleRepop(PlayerPointer plr);
@@ -97,7 +97,7 @@ public:
 	void OnStart();
 
 	void EventUpdateResources(uint32 Team);
-	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
+	bool HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell);
 
 	/* AB Game Mechanics */
 	void SpawnControlPoint(uint32 Id, uint32 Type);
@@ -106,7 +106,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 };

@@ -194,14 +194,14 @@ bool isGuard(uint32 id);
 uint32 getGuardId(uint32 id);
 
 
-typedef std::tr1::unordered_map<shared_ptr<Unit>, int32> TargetMap;
+typedef std::tr1::unordered_map< UnitPointer, int32> TargetMap;
 #ifdef TRHAX
 	namespace std
 	{
 		namespace tr1
 		{
 			template <>
-			class hash < UnitPointer > : public unary_function<shared_ptr<Unit>, size_t>
+			class hash < UnitPointer > : public unary_function< UnitPointer, size_t>
 			{
 			public:
 				size_t operator()(UnitPointer __x) const
@@ -213,7 +213,7 @@ typedef std::tr1::unordered_map<shared_ptr<Unit>, int32> TargetMap;
 	};
 #endif
 
-typedef unordered_set<shared_ptr<Unit> > AssistTargetSet;
+typedef unordered_set< UnitPointer > AssistTargetSet;
 typedef std::map<uint32, AI_Spell*> SpellMap;
 
 class ChainAggroEntity;
@@ -225,10 +225,10 @@ public:
 	~AIInterface();
 
 	// Misc
-	void Init(shared_ptr<Unit>un, AIType at, MovementType mt);
-	void Init(shared_ptr<Unit>un, AIType at, MovementType mt, shared_ptr<Unit>owner); // used for pets
-	shared_ptr<Unit>GetUnit() { return m_Unit; }
-	shared_ptr<Unit>GetPetOwner() { return m_PetOwner; }
+	void Init(UnitPointer un, AIType at, MovementType mt);
+	void Init(UnitPointer un, AIType at, MovementType mt, UnitPointer owner); // used for pets
+	UnitPointer GetUnit() { return m_Unit; }
+	UnitPointer GetPetOwner() { return m_PetOwner; }
 	void DismissPet();
 	void SetUnitToFollow(UnitPointer un) { UnitToFollow = un; };
 	void SetUnitToFear(UnitPointer un)  { UnitToFear = un; };
@@ -273,7 +273,7 @@ public:
 	// Event Handler
 	void HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1);
 	void OnDeath(ObjectPointer pKiller);
-	void AttackReaction(shared_ptr<Unit>pUnit, uint32 damage_dealt, uint32 spellId = 0);
+	void AttackReaction( UnitPointer pUnit, uint32 damage_dealt, uint32 spellId = 0);
 	bool HealReaction(UnitPointer caster, UnitPointer victim, uint32 amount, SpellEntry * sp);
 	void Event_Summon_EE_totem(uint32 summon_duration);
 	void Event_Summon_FE_totem(uint32 summon_duration);
@@ -309,7 +309,7 @@ public:
 
 	// Calculation
 	float _CalcAggroRange(UnitPointer target);
-	void _CalcDestinationAndMove(shared_ptr<Unit>target, float dist);
+	void _CalcDestinationAndMove( UnitPointer target, float dist);
 	float _CalcCombatRange(UnitPointer target, bool ranged);
 	float _CalcDistanceFromHome();
 	uint32 _CalcThreat(uint32 damage, SpellEntry * sp, UnitPointer Attacker);
@@ -358,7 +358,7 @@ public:
 	HEARTHSTONE_INLINE void AddStopTime(uint32 Time) { m_moveTimer += Time; }
 	HEARTHSTONE_INLINE void SetNextSpell(AI_Spell*sp) { m_nextSpell = sp; }
 	HEARTHSTONE_INLINE UnitPointer GetNextTarget() { return m_nextTarget; }
-	HEARTHSTONE_INLINE void SetNextTarget (shared_ptr<Unit>nextTarget) 
+	HEARTHSTONE_INLINE void SetNextTarget (UnitPointer nextTarget) 
 	{ 
 		m_nextTarget = nextTarget; 
 		if(nextTarget)
@@ -443,8 +443,8 @@ protected:
 	bool m_hasCalledForHelp;
 	uint32 m_outOfCombatRange;
 
-	shared_ptr<Unit>m_Unit;
-	shared_ptr<Unit>m_PetOwner;
+	UnitPointer m_Unit;
+	UnitPointer m_PetOwner;
 	CreaturePointer m_summonedGuard;
 	uint32 m_guardCallTimer;
 	float FollowDistance;
@@ -484,9 +484,9 @@ protected:
 	float m_lastFollowX;
 	float m_lastFollowY;
 	//typedef std::map<uint32, WayPoint*> WayPointMap;
-	shared_ptr<Unit>UnitToFollow;
-	shared_ptr<Unit>UnitToFollow_backup;//used unly when forcing creature to wander (blind spell) so when effect wears off we can follow our master again (guardian)
-	shared_ptr<Unit>UnitToFear;
+	UnitPointer UnitToFollow;
+	UnitPointer UnitToFollow_backup;//used unly when forcing creature to wander (blind spell) so when effect wears off we can follow our master again (guardian)
+	UnitPointer UnitToFear;
 	uint32 m_timeToMove;
 	uint32 m_timeMoved;
 	uint32 m_moveTimer;

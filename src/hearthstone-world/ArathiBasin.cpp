@@ -284,7 +284,7 @@ void ArathiBasin::SpawnControlPoint(uint32 Id, uint32 Type)
 void ArathiBasin::OnCreate()
 {
 	// Alliance Gate
-	shared_ptr<GameObject>gate = SpawnGameObject(180255, 1284.597290f, 1281.166626f, -15.977916f, 0.76f, 32, 114, 1.5799990f);
+	GameObjectPointer gate = SpawnGameObject(180255, 1284.597290f, 1281.166626f, -15.977916f, 0.76f, 32, 114, 1.5799990f);
 	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
@@ -382,7 +382,7 @@ void ArathiBasin::OnStart()
 	}
 
 	// open gates
-	for(list<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list< GameObjectPointer  >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -594,12 +594,12 @@ void ArathiBasin::OnRemovePlayer(PlayerPointer plr)
 	plr->RemoveAura(BG_PREPARATION);
 }
 
-void ArathiBasin::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
+void ArathiBasin::HookFlagDrop(PlayerPointer plr, GameObjectPointer obj)
 {
 	// nothing?
 }
 
-void ArathiBasin::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
+void ArathiBasin::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 {
 	// nothing?
 }
@@ -876,7 +876,7 @@ void ArathiBasin::AssaultControlPoint(PlayerPointer pPlayer, uint32 Id)
 	UpdatePvPData();
 }
 
-bool ArathiBasin::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+bool ArathiBasin::HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	if( pPlayer->m_bgFlagIneligible )
 		return false;
@@ -892,7 +892,7 @@ bool ArathiBasin::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPl
 	return false;
 }
 
-void ArathiBasin::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
+void ArathiBasin::HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

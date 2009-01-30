@@ -127,7 +127,7 @@ void Arena::OnAddPlayer(PlayerPointer plr)
 	UpdatePlayerCounts();
 
 	/* Add the green/gold team flag */
-	shared_ptr<Aura>aura = shared_ptr<Aura>(new Aura(dbcSpell.LookupEntry(32724+plr->m_bgTeam), -1, plr, plr));
+	AuraPointer aura(new Aura(dbcSpell.LookupEntry(32724+plr->m_bgTeam), -1, plr, plr));
 	plr->AddAura(aura, NULLAURA);
 	
 	/* Set FFA PvP Flag */
@@ -181,7 +181,7 @@ void Arena::HookOnPlayerDeath(PlayerPointer plr)
 
 void Arena::OnCreate()
 {
-	shared_ptr<GameObject> obj;
+	GameObjectPointer obj;
 	WorldStateManager &sm = m_mapMgr->GetStateManager();
 
 	switch(m_mapMgr->GetMapId())
@@ -315,7 +315,7 @@ void Arena::OnCreate()
 	}
 
 	/* push gates into world */
-	for(set<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set< GameObjectPointer >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 		(*itr)->PushToWorld(m_mapMgr);
 
 	
@@ -357,7 +357,7 @@ void Arena::OnStart()
 	}
 
 	/* open gates */
-	for(set<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(set< GameObjectPointer >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
