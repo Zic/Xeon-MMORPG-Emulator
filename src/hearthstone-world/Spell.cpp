@@ -1120,7 +1120,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		m_castPositionY = m_caster->GetPositionY();
 		m_castPositionZ = m_caster->GetPositionZ();
 
-		u_caster->CastSpell( spell_shared_from_this() );
+		u_caster->CastSpell( shared_from_this() );
 	}
 	else
 		cast( false );
@@ -1404,7 +1404,7 @@ void Spell::cast(bool check)
 				}
 
 				if( u_caster != NULL )
-					u_caster->SetCurrentSpell(spell_shared_from_this());
+					u_caster->SetCurrentSpell(shared_from_this());
 			}
 			else
 			{
@@ -1422,7 +1422,7 @@ void Spell::cast(bool check)
 						if( tmpTime > 100.0f )
 						{
 							m_projectileWait = true;
-							sEventMgr.AddEvent(m_caster, &Object::EventSpellHit, spell_shared_from_this(), EVENT_UNIT_SPELL_HIT,
+							sEventMgr.AddEvent(m_caster, &Object::EventSpellHit, shared_from_this(), EVENT_UNIT_SPELL_HIT,
 								(uint32)float2int32(tmpTime), 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_FIRE_ON_DELETE);
 
 							if( u_caster->GetCurrentSpell() == shared_from_this() )
@@ -1812,7 +1812,7 @@ void Spell::finish()
 	otherwise it's instant spell and we delete it right after completion
 	*/
 	
-	SpellPointer spl = spell_shared_from_this(); // feeefeee! <3
+	SpellPointer spl = shared_from_this(); // feeefeee! <3
 
 	if( u_caster != NULL )
 	{
@@ -4547,7 +4547,7 @@ bool Spell::Reflect(shared_ptr<Unit>refunit)
 	SpellPointer spell(new Spell(m_caster, m_spellInfo, true, NULLAURA));
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
-	spell->m_reflectedParent = spell_shared_from_this();
+	spell->m_reflectedParent = shared_from_this();
 	spell->prepare(&targets);
 	return true;
 }
