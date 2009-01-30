@@ -179,7 +179,7 @@ void ClusterInterface::HandlePlayerLogin(WorldPacket & pck)
 	/* find the instance */
 	Map * ma = sWorldCreator.GetMap(mapid);
 	ASSERT(ma);
-	shared_ptr<MapMgr> mm = ma->GetInstance(instance);
+	MapMgrPointer mm = ma->GetInstance(instance);
 	ASSERT(mm);
 
 	/* create the session */

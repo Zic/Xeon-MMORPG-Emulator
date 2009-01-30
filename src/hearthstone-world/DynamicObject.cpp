@@ -172,7 +172,6 @@ void DynamicObject::UpdateTargets()
 		unordered_set<ObjectPointer >::iterator itr = GetInRangeSetBegin(),itr2;
 		unordered_set<ObjectPointer >::iterator iend = GetInRangeSetEnd();
 		UnitPointer target;
-		shared_ptr<Aura>pAura;
 		float radius = m_floatValues[DYNAMICOBJECT_RADIUS]*m_floatValues[DYNAMICOBJECT_RADIUS];
 
 		while(itr != iend)
@@ -197,7 +196,7 @@ void DynamicObject::UpdateTargets()
 
 			if(GetDistanceSq(target) <= radius)
 			{
-				pAura = shared_ptr<Aura>(new Aura(m_spellProto, m_aliveDuration, u_caster, target));
+				AuraPointer pAura(new Aura(m_spellProto, m_aliveDuration, u_caster, target));
 				for(uint32 i = 0; i < 3; ++i)
 				{
 					if(m_spellProto->Effect[i] == 27)

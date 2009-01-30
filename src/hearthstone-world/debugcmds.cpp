@@ -644,7 +644,7 @@ bool ChatHandler::HandleDebugRoot(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleAggroRangeCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>obj = NULLUNIT;
+	UnitPointer obj = NULLUNIT;
 
 	uint64 guid = m_session->GetPlayer()->GetSelection();
 	if (guid != 0)

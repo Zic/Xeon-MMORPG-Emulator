@@ -226,10 +226,10 @@ enum EventFlags
 class EventableObject;
 struct SERVER_DECL TimedEvent
 {
-	TimedEvent(shared_ptr<EventableObject> object, CallbackBase* callback, uint32 type, time_t time, uint32 repeat, uint32 flags) : 
+	TimedEvent(EventableObjectPointer object, CallbackBase* callback, uint32 type, time_t time, uint32 repeat, uint32 flags) : 
 		obj(object), cb(callback), eventType(type), eventFlag(flags), msTime(time), currTime(time), repeats(repeat), deleted(false),ref(0) {}
 		
-	shared_ptr<EventableObject> obj;
+	EventableObjectPointer obj;
 	CallbackBase *cb;
 	uint32 eventType;
 	uint16 eventFlag;

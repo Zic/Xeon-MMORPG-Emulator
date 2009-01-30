@@ -265,7 +265,7 @@ public:
 	void Load(CreatureProto * proto_, float x, float y, float z, float o = 0.0f);
 
 	void AddToWorld();
-	void AddToWorld(shared_ptr<MapMgr> pMapMgr);
+	void AddToWorld(MapMgrPointer pMapMgr);
 	void RemoveFromWorld(bool addrespawnevent, bool free_guid);
 
 	/// Creation
@@ -457,7 +457,7 @@ public:
 
 	void OnJustDied();
 	void OnRemoveCorpse();
-	void OnRespawn(shared_ptr<MapMgr> m);
+	void OnRespawn(MapMgrPointer m);
 	void SafeDelete();
 	//void Despawn();
 	void SummonExpire(); // this is used for guardians. They are non respawnable creatures linked to a player

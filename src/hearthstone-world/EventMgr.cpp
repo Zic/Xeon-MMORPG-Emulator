@@ -21,7 +21,7 @@
 
 initialiseSingleton( EventMgr );
 
-TimedEvent * TimedEvent::Allocate(shared_ptr<EventableObject> object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat)
+TimedEvent * TimedEvent::Allocate(EventableObjectPointer object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat)
 {
 	return new TimedEvent(object, callback, flags, time, repeat, 0);
 }

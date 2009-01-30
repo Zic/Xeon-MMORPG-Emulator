@@ -34,7 +34,7 @@ public:
 
 	bool AddItem(int8 slot, ItemPointer item);
 	bool AddItemToFreeSlot(ItemPointer pItem, uint32 * r_slot);
-	shared_ptr<Item>GetItem(int8 slot)
+	ItemPointer GetItem(int8 slot)
 	{
 		if(slot >= 0 && (uint8)slot < GetProto()->ContainerSlots)
 			return m_Slot[slot];
@@ -52,7 +52,7 @@ public:
 	void SaveBagToDB(int8 slot, bool first, QueryBuffer * buf);
 
 protected:
-	shared_ptr<Item> m_Slot[72];
+	ItemPointer m_Slot[72];
 	uint32 __fields[CONTAINER_END];
 };
 

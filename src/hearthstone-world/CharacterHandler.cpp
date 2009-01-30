@@ -964,7 +964,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		CorpsePointer corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
 		if( corpse != NULL )
 		{
-			shared_ptr<MapMgr>myMgr = sInstanceMgr.GetInstance(_player);
+			MapMgrPointer myMgr = sInstanceMgr.GetInstance(_player);
 			if( myMgr == NULL || (myMgr->GetMapInfo()->type != INSTANCE_NULL && myMgr->GetMapInfo()->type != INSTANCE_PVP)
 				|| (myMgr->GetMapId() == corpse->GetMapId()) )	
 			{

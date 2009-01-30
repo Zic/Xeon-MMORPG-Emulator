@@ -209,7 +209,7 @@ void Creature::OnRemoveCorpse()
 	}
 }
 
-void Creature::OnRespawn(shared_ptr<MapMgr> m)
+void Creature::OnRespawn( MapMgrPointer m)
 {
 	DEBUG_LOG("Respawning "I64FMT"...", GetGUID());
 	SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
@@ -467,7 +467,7 @@ void Creature::AddToWorld()
 	Object::AddToWorld();
 }
 
-void Creature::AddToWorld(shared_ptr<MapMgr> pMapMgr)
+void Creature::AddToWorld(MapMgrPointer pMapMgr)
 {
 	// force set faction
 	if(m_faction == 0 || m_factionDBC == 0)
@@ -768,7 +768,7 @@ void Creature::ChannelLinkUpGO(uint32 SqlId)
 	if(!m_mapMgr)		// shouldnt happen
 		return;
 
-	shared_ptr<GameObject> go = m_mapMgr->GetSqlIdGameObject(SqlId);
+	GameObjectPointer go = m_mapMgr->GetSqlIdGameObject(SqlId);
 	if(go != 0)
 	{
 		event_RemoveEvents(EVENT_CREATURE_CHANNEL_LINKUP);
