@@ -97,7 +97,7 @@ CBattlegroundManager::CBattlegroundManager() : EventableObject()
 
 void CBattlegroundManager::Init()
 {
-	sEventMgr.AddEvent(TO_CBATTLEGROUNDMGR(shared_from_this()), &CBattlegroundManager::EventQueueUpdate, false, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 5000, 0,0);
+	sEventMgr.AddEvent(shared_from_this(), &CBattlegroundManager::EventQueueUpdate, false, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 5000, 0,0);
 }
 
 CBattlegroundManager::~CBattlegroundManager()
@@ -808,7 +808,7 @@ CBattleground::CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgrou
 
 void CBattleground::Init()
 {
-	sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::EventResurrectPlayers, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 30000, 0,0);
+	sEventMgr.AddEvent(shared_from_this(), &CBattleground::EventResurrectPlayers, EVENT_BATTLEGROUNDMGR_QUEUE_UPDATE, 30000, 0,0);
 }
 
 CBattleground::~CBattleground()
@@ -958,7 +958,7 @@ void CBattleground::AddPlayer(PlayerPointer plr, uint32 team)
 	/* Add an event to remove them in 2 minutes time. */
 	sEventMgr.AddEvent(plr, &Player::RemoveFromBattlegroundQueue, queueSlot, true, EVENT_BATTLEGROUND_QUEUE_UPDATE_SLOT_1 + queueSlot, 120000, 1,0);
 
-	plr->m_pendingBattleground[queueSlot] = TO_CBATTLEGROUND(shared_from_this());
+	plr->m_pendingBattleground[queueSlot] = shared_from_this();
 	plr->m_bgIsQueued[queueSlot] = false;
 
 	/* Send a packet telling them that they can enter */
@@ -980,7 +980,7 @@ void CBattleground::RemovePendingPlayer(PlayerPointer plr)
 	for(uint32 i = 0; i < 3; ++i)
 	{
 		if( plr->m_pendingBattleground[i] && 
-			plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()))
+			plr->m_pendingBattleground[i] == shared_from_this() )
 		{
 			if( plr->m_pendingBattleground[i]->IsArena() )
 				plr->m_bgRatedQueue = false;
@@ -1013,7 +1013,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 	{
 		for(uint32 i = 0; i < 3; ++i)
 		{
-			if( plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()) )
+			if( plr->m_pendingBattleground[i] == shared_from_this() )
 			{
 				plr->m_pendingBattleground[i] = NULLBATTLEGROUND;
 				plr->m_bgIsQueued[i] = false;
@@ -1060,7 +1060,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 
 	for(uint32 i = 0; i < 3; ++i)
 	{
-		if( plr->m_pendingBattleground[i] == TO_CBATTLEGROUND(shared_from_this()) )
+		if( plr->m_pendingBattleground[i] == shared_from_this() )
 		{
 			plr->m_pendingBattleground[i] = NULLBATTLEGROUND;
 			plr->m_bgSlot = i;
@@ -1090,7 +1090,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 	if(!m_countdownStage)
 	{
 		m_countdownStage = 1;
-		sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::EventCountdown, EVENT_BATTLEGROUND_COUNTDOWN, 30000, 0,0);
+		sEventMgr.AddEvent(shared_from_this(), &CBattleground::EventCountdown, EVENT_BATTLEGROUND_COUNTDOWN, 30000, 0,0);
 		sEventMgr.ModifyEventTimeLeft(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 10000);
 	}
 
@@ -1103,7 +1103,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 		plr->SafeTeleport(m_mapMgr,GetStartingCoords(plr->m_bgTeam));
 	}
 
-	plr->m_bg = TO_CBATTLEGROUND(shared_from_this());
+	plr->m_bg = shared_from_this();
 
 	m_mainLock.Release();
 }
@@ -1264,7 +1264,7 @@ GameObjectPointer CBattleground::SpawnGameObject(uint32 entry,float x, float y, 
 	go->SetFloatValue(OBJECT_FIELD_SCALE_X,scale);	
 	go->SetUInt32Value(GAMEOBJECT_FLAGS, flags);
 	go->SetInstanceID(m_mapMgr->GetInstanceID());
-	go->m_battleground = TO_CBATTLEGROUND(shared_from_this());
+	go->m_battleground = shared_from_this();
 
 	return go;
 }
@@ -1549,7 +1549,7 @@ void CBattleground::RemovePlayer(PlayerPointer plr, bool logout)
 	{
 		/* create an inactive event */
 		sEventMgr.RemoveEvents(shared_from_this(), EVENT_BATTLEGROUND_CLOSE);						// 10mins
-		sEventMgr.AddEvent(TO_CBATTLEGROUND(shared_from_this()), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 600000, 1,0);
+		sEventMgr.AddEvent(shared_from_this(), &CBattleground::Close, EVENT_BATTLEGROUND_CLOSE, 600000, 1,0);
 	}
 
 	plr->m_bgTeam=plr->GetTeam();
@@ -2034,7 +2034,7 @@ void CBattleground::GiveHonorToTeam(uint32 team, uint32 amt)
 }
 
 
-bool CBattleground::HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
+bool CBattleground::HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	if( pPlayer->m_CurrentVehicle )
 		pPlayer->m_CurrentVehicle->RemovePassenger(pPlayer);

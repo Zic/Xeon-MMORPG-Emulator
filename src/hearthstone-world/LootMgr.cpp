@@ -668,7 +668,7 @@ LootRoll::LootRoll() : EventableObject()
 void LootRoll::Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr)
 {
 	_mgr = mgr;
-	sEventMgr.AddEvent(lootroll_shared_from_this(), &LootRoll::Finalize, EVENT_LOOT_ROLL_FINALIZE, 60000, 1,0);
+	sEventMgr.AddEvent(shared_from_this(), &LootRoll::Finalize, EVENT_LOOT_ROLL_FINALIZE, 60000, 1,0);
 	_groupcount = groupcount;
 	_guid = guid;
 	_slotid = slotid;
