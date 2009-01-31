@@ -177,6 +177,7 @@ void MapMgr::Destructor()
 	}
 
 	Log.Notice("MapMgr", "Instance %u shut down. (%s)" , m_instanceID, GetBaseMap()->GetName());
+	pThis.reset();
 }
 
 

@@ -486,8 +486,7 @@ Player::~Player ( )
 
 void Player::Destructor()
 {
-	Unit::Destructor();
-
+	PlayerPointer pThis = player_shared_from_this(); //prevent us going feeefee
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Player::Destructor()\n");
 #endif
@@ -539,7 +538,7 @@ void Player::Destructor()
 	CleanupGossipMenu();
 	ASSERT(!IsInWorld());
 
-	sEventMgr.RemoveEvents(shared_from_this());
+	sEventMgr.RemoveEvents(player_shared_from_this());
 
 	// delete m_talenttree
 
@@ -590,6 +589,13 @@ void Player::Destructor()
 		hashmap_free(mSpellsUniqueTargets);
 		mSpellsUniqueTargets = NULL;
 	}
+
+	//am I right in thinking this should be reset here
+	//and the unit destructor should be called at the
+	//end of the player destructor rather than the start
+	//Pepsi1x1
+	pThis.reset();
+	Unit::Destructor();
 
 #ifdef SHAREDPTR_DEBUGMODE
 	ObjectPointer sthis = obj_shared_from_this();
