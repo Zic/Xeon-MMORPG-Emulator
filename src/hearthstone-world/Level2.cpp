@@ -427,8 +427,8 @@ bool ChatHandler::HandleKillByPlrCommand( const char *args , WorldSession *m_ses
 }
 bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>caster = m_session->GetPlayer();
-	shared_ptr<Unit>target = getSelectedChar(m_session, false);
+	UnitPointer caster = m_session->GetPlayer();
+	UnitPointer target = getSelectedChar(m_session, false);
 	if(!target)
 		target = getSelectedCreature(m_session, false);
 	if(!target)

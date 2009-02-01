@@ -6345,18 +6345,19 @@ void Unit::Dismount()
 {			
 	if(IsPlayer())
 	{
-		PlayerPointer cavalier = plr_shared_from_this();
-		if( cavalier->m_MountSpellId )
+		PlayerPointer plr = plr_shared_from_this();
+		if( plr->m_MountSpellId )
 		{
-			RemoveAura( cavalier->m_MountSpellId );
-			cavalier->m_MountSpellId = 0;
+			RemoveAura( plr->m_MountSpellId );
+			plr->m_MountSpellId = 0;
 		}
-		if( cavalier->m_FlyingAura )
+		if( plr->m_FlyingAura )
 		{
-			RemoveAura( cavalier->m_FlyingAura );
-			cavalier->m_FlyingAura = 0;
-			cavalier->SetUInt32Value( UNIT_FIELD_DISPLAYID, cavalier->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );				
+			RemoveAura( plr->m_FlyingAura );
+			plr->m_FlyingAura = 0;
+			plr->SetUInt32Value( UNIT_FIELD_DISPLAYID, plr->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		}
+		plr->SetPlayerSpeed(RUN, m_runSpeed);
 	}
 	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
 	RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI );

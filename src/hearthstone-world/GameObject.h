@@ -187,7 +187,7 @@ public:
 	std::list<QuestRelation *>::iterator QuestsEnd() { return m_quests->end(); };
 	void SetQuestList(std::list<QuestRelation *>* qst_lst) { m_quests = qst_lst; };
 
-	void SetSummoned(shared_ptr<Unit>mob)
+	void SetSummoned(UnitPointer mob)
 	{
 		m_summoner = mob;
 		m_summonedGo = true;

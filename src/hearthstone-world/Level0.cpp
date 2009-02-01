@@ -260,7 +260,7 @@ bool ChatHandler::HandleNYICommand(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleDismountCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>m_target = NULLUNIT;
+	UnitPointer m_target = NULLUNIT;
 
 	PlayerPointer p_target = getSelectedChar(m_session, false);
 
@@ -342,7 +342,7 @@ bool ChatHandler::HandleRangeCheckCommand( const char *args , WorldSession *m_se
 		return true;
 	}
 
-	shared_ptr<Unit>unit = m_session->GetPlayer()->GetMapMgr()->GetUnit( guid );
+	UnitPointer unit = m_session->GetPlayer()->GetMapMgr()->GetUnit( guid );
 	if(!unit)
 	{
 		m_session->SystemMessage("Invalid selection imo.");

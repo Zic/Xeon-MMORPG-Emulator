@@ -1125,7 +1125,7 @@ void WorldSession::HandleAmmoSetOpcode(WorldPacket & recv_data)
 #endif
 }
 
-#define OPEN_CHEST 11437 
+#define OPEN_CHEST 11437
 void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 {
 	if(!_player->IsInWorld()) return;
@@ -1157,7 +1157,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			plyr->SafeTeleport( plyr->GetMapId(), plyr->GetInstanceID(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation() );
 			plyr->SetStandState(STANDSTATE_SIT_MEDIUM_CHAIR);
 		}break;
-	case GAMEOBJECT_TYPE_CHEST://cast da spell
+		case GAMEOBJECT_TYPE_CHEST://cast da spell
 		{
 			spellInfo = dbcSpell.LookupEntry( OPEN_CHEST );
 			spell = SpellPointer(new Spell(plyr, spellInfo, true, NULLAURA));
@@ -1165,11 +1165,11 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			targets.m_unitTarget = obj->GetGUID();
 			spell->prepare(&targets); 
 		}break;
-	case GAMEOBJECT_TYPE_FISHINGNODE:
+		case GAMEOBJECT_TYPE_FISHINGNODE:
 		{
 			obj->UseFishingNode(plyr);
 		}break;
-	case GAMEOBJECT_TYPE_DOOR:
+		case GAMEOBJECT_TYPE_DOOR:
 		{
 			// door
 			if((obj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE) == 1) && (obj->GetUInt32Value(GAMEOBJECT_FLAGS) == 33))
@@ -1181,7 +1181,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				sEventMgr.AddEvent(obj,&GameObject::EventCloseDoor,EVENT_GAMEOBJECT_DOOR_CLOSE,20000,1,0);
 			}
 		}break;
-	case GAMEOBJECT_TYPE_FLAGSTAND:
+		case GAMEOBJECT_TYPE_FLAGSTAND:
 		{
 			// battleground/warsong gulch flag
 			if(plyr->m_bg)
@@ -1200,7 +1200,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			}
 
 		}break;
-	case GAMEOBJECT_TYPE_FLAGDROP:
+		case GAMEOBJECT_TYPE_FLAGDROP:
 		{
 			// Dropped flag
 			if(plyr->m_bg)
@@ -1218,14 +1218,14 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			}
 
 		}break;
-	case GAMEOBJECT_TYPE_QUESTGIVER:
+		case GAMEOBJECT_TYPE_QUESTGIVER:
 		{
 			// Questgiver
 			if(obj->HasQuests())
 				sQuestMgr.OnActivateQuestGiver(obj, plyr);
 
 		}break;
-	case GAMEOBJECT_TYPE_SPELLCASTER:
+		case GAMEOBJECT_TYPE_SPELLCASTER:
 		{
 			SpellEntry *info = dbcSpell.LookupEntry(goinfo->SpellFocus);
 			if(!info)
@@ -1238,7 +1238,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			if(obj->charges>0 && !--obj->charges)
 				obj->ExpireAndDelete();
 		}break;
-	case GAMEOBJECT_TYPE_RITUAL: 
+		case GAMEOBJECT_TYPE_RITUAL: 
 		{
 			// store the members in the ritual, cast sacrifice spell, and summon.
 			uint32 i = 0;
@@ -1339,11 +1339,11 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				}
 			}
 		}break;
-	case GAMEOBJECT_TYPE_GOOBER:
+		case GAMEOBJECT_TYPE_GOOBER:
 		{
 			//Quest related mostly
 		}
-	case GAMEOBJECT_TYPE_CAMERA://eye of azora
+		case GAMEOBJECT_TYPE_CAMERA://eye of azora
 		{
 			/*WorldPacket pkt(SMSG_TRIGGER_CINEMATIC,4);
 			pkt << (uint32)1;//i ve found only on such item,id =1
@@ -1354,10 +1354,10 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			if(sp != NULL)
 				_player->CastSpell(_player,sp,true);
 		}break;
-	case GAMEOBJECT_TYPE_MEETINGSTONE:	// Meeting Stone
+		case GAMEOBJECT_TYPE_MEETINGSTONE:	// Meeting Stone
 		{
 			/* Use selection */
-            PlayerPointer pPlayer = objmgr.GetPlayer((uint32)_player->GetSelection());
+			PlayerPointer pPlayer = objmgr.GetPlayer((uint32)_player->GetSelection());
 			if(!pPlayer || _player->GetGroup() != pPlayer->GetGroup() || !_player->GetGroup())
 				return;
 
@@ -1381,7 +1381,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			/* expire after 2mins*/
 			sEventMgr.AddEvent(pGo, &GameObject::_Expire, EVENT_GAMEOBJECT_EXPIRE, 120000, 1,0);
 		}break;
-	case GAMEOBJECT_TYPE_BARBER_CHAIR:
+		case GAMEOBJECT_TYPE_BARBER_CHAIR:
 		{
 			plyr->SafeTeleport( plyr->GetMapId(), plyr->GetInstanceID(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation() );
 			plyr->SetStandState(STANDSTATE_SIT_MEDIUM_CHAIR);
@@ -1390,7 +1390,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			WorldPacket data(SMSG_ENABLE_BARBER_SHOP, 0);
 			plyr->GetSession()->SendPacket(&data);
 		}break;
-	}   
+	}
 }
 
 void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )

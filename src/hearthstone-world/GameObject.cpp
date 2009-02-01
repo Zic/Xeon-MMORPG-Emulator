@@ -332,14 +332,14 @@ void GameObject::InitAI()
 		pInfo->sound9 == 1)
 		return;
 
-	if(pInfo->DisplayID == 1027)//Shaman Shrine
+/*	if(pInfo->DisplayID == 1027)//Shaman Shrine
 	{
 		if(pInfo->ID != 177964 || pInfo->ID != 153556)
 		{
-			//Deactivate
-			//SetUInt32Value(GAMEOBJECT_DYNAMIC, 0);
+			Deactivate
+			SetUInt32Value(GAMEOBJECT_DYNAMIC, 0);
 		}
-	}
+	}*/
 
 
 	uint32 spellid = 0;
@@ -362,28 +362,27 @@ void GameObject::InitAI()
 		m_ritualmembers = new uint32[pInfo->SpellFocus];
 		memset(m_ritualmembers,0,sizeof(uint32)*pInfo->SpellFocus);
 	}
-    else if(pInfo->Type == GAMEOBJECT_TYPE_CHEST)
-    {
-        Lock *pLock = dbcLock.LookupEntry(GetInfo()->SpellFocus);
-        if(pLock)
-        {
-            for(uint32 i=0; i < 5; i++)
-            {
-                if(pLock->locktype[i])
-                {
-                    if(pLock->locktype[i] == 2) //locktype;
-                    {
-                        //herbalism and mining;
-                        if(pLock->lockmisc[i] == LOCKTYPE_MINING || pLock->lockmisc[i] == LOCKTYPE_HERBALISM)
-                        {
-				CalcMineRemaining(true);
-                        }
-                    }
-                }
-            }
-        }
-
-    }
+	else if(pInfo->Type == GAMEOBJECT_TYPE_CHEST)
+ 	{
+		Lock *pLock = dbcLock.LookupEntry(GetInfo()->SpellFocus);
+		if(pLock)
+		{
+			for(uint32 i=0; i < 5; i++)
+			{
+				if(pLock->locktype[i])
+				{
+					if(pLock->locktype[i] == 2) //locktype;
+					{
+						//herbalism and mining;
+						if(pLock->lockmisc[i] == LOCKTYPE_MINING || pLock->lockmisc[i] == LOCKTYPE_HERBALISM)
+						{
+							CalcMineRemaining(true);
+						}
+					}
+				}
+			}
+		}
+	}
 
 	myScript = sScriptMgr.CreateAIScriptClassForGameObject(GetEntry(), gob_shared_from_this());
 

@@ -591,7 +591,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 
 		if(target && GetTypeId() == TYPEID_GAMEOBJECT)
 		{
-			shared_ptr<GameObject>go = gob_shared_from_this();
+			GameObjectPointer go = gob_shared_from_this();
 			GameObjectInfo *info;
 			info = go->GetInfo();
 			if(info && info->InvolvedQuestCount && info->InvolvedQuestIds[0])
