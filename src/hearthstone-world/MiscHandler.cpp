@@ -1136,10 +1136,13 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 	SpellEntry *spellInfo = NULL;
 	DEBUG_LOG("WORLD: CMSG_GAMEOBJ_USE: [GUID %d]", guid);   
 
-	shared_ptr<GameObject>obj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
-	if (!obj) return;
+	GameObjectPointer obj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+	if (!obj)
+		return;
+
 	GameObjectInfo *goinfo= obj->GetInfo();
-	if (!goinfo) return;
+	if (!goinfo)
+		return;
 
 	PlayerPointer plyr = GetPlayer();
    

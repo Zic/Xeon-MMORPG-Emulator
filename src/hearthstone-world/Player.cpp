@@ -6475,15 +6475,11 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	for(uint32 i = start_node; i < endn; ++i)
 	{
 		TaxiPathNode *pn = path->GetPathNode(i);
-		// temporary workaround for taximodes with changing map
-		if (!pn || path->GetID() == 766 || path->GetID() == 767 || path->GetID() == 771 || path->GetID() == 772
-				|| path->GetID() == 775 || path->GetID() == 776 || path->GetID() == 796 || path->GetID() == 797
-				|| path->GetID() == 807)
+		if(!pn)
 		{
 			JumpToEndTaxiNode(path);
 			return;
 		}
-
 
 		if( pn->mapid != m_mapId )
 		{
