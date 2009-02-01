@@ -133,7 +133,7 @@ public:
 	/************************************************************************/
 	/* LUA Stuff                                                            */
 	/************************************************************************/
-/*	typedef struct { const char *name; int(*mfunc)(lua_State*,shared_ptr<GameObject>); } RegType;
+/*	typedef struct { const char *name; int(*mfunc)(lua_State*,GameObjectPointer ); } RegType;
 	static const char className[];
 	static RegType methods[];
 
@@ -156,7 +156,7 @@ public:
 
 	virtual void Update(uint32 p_time);
 
-	void Spawn(shared_ptr<MapMgr> m);
+	void Spawn( MapMgrPointer m);
 	void Despawn(uint32 time);
 
 	//void _EnvironmentalDamageUpdate();

@@ -23,7 +23,7 @@
 #define GREEN_TEAM 0
 #define GOLD_TEAM 1
 
-Arena::Arena(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side) : CBattleground(mgr, id, lgroup, t)
+Arena::Arena( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t, uint32 players_per_side) : CBattleground(mgr, id, lgroup, t)
 {
 	int i;
 

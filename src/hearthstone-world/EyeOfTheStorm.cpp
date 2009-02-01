@@ -127,7 +127,7 @@ const uint32 EOTSTowerIds[EOTS_TOWER_COUNT] = { EOTS_GO_BE_TOWER, EOTS_GO_FELREA
 #define EOTS_NETHERWING_FLAG_SPELL 34976
 //#define EOTS_CAPTURE_RATE 20
 
-EyeOfTheStorm::EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
+EyeOfTheStorm::EyeOfTheStorm( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
 	uint32 i;
 
@@ -338,7 +338,7 @@ void EyeOfTheStorm::HookOnPlayerDeath(PlayerPointer plr)
 	UpdatePvPData();
 }
 
-void EyeOfTheStorm::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
+void EyeOfTheStorm::HookFlagDrop(PlayerPointer plr, GameObjectPointer obj)
 {
 	if( !m_dropFlag->IsInWorld() )
 		return;
@@ -360,12 +360,12 @@ void EyeOfTheStorm::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
 	event_RemoveEvents( EVENT_EOTS_RESET_FLAG );
 }
 
-void EyeOfTheStorm::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
+void EyeOfTheStorm::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 {
 
 }
 
-bool EyeOfTheStorm::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+bool EyeOfTheStorm::HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	if( m_flagHolder != 0 )
 		return false;
@@ -917,7 +917,7 @@ bool EyeOfTheStorm::GivePoints(uint32 team, uint32 points)
 					(*itr)->GetAchievementInterface()->HandleAchievementCriteriaWinBattleground( m_mapMgr->GetMapId(), diff, ((uint32)UNIXTIME - m_startTime) / 1000, TO_CBATTLEGROUND(shared_from_this()));
 				}
 
-				shared_ptr<Item>pReward;
+				ItemPointer pReward;
 				SlotResult res;
 				if( ( pReward = (*itr)->GetItemInterface()->FindItemLessMax(EOTS_MARK_ID, item_count, false) ) == NULL )
 				{

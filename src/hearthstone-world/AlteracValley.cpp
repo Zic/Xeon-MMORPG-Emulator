@@ -898,7 +898,7 @@ static const char *g_stateNames[AV_NODE_STATE_COUNT] = {
 	"AV_NODE_STATE_HORDE_CONTROLLED",
 };
 
-AVNode::AVNode(shared_ptr<AlteracValley> parent, AVNodeTemplate *tmpl, uint32 nodeid) : m_template(tmpl), m_nodeId(nodeid)
+AVNode::AVNode( AlteracValleyPointer parent, AVNodeTemplate *tmpl, uint32 nodeid) : m_template(tmpl), m_nodeId(nodeid)
 {
 	m_bg = parent;
 	m_boss = NULLCREATURE;
@@ -1371,7 +1371,7 @@ void AVNode::Capture()
 	}
 }
 
-AlteracValley::AlteracValley(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
+AlteracValley::AlteracValley( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
 	m_playerCountPerTeam = 40;
 	m_reinforcements[0] = AV_NUM_REINFORCEMENTS;
@@ -1390,7 +1390,7 @@ AlteracValley::~AlteracValley()
 
 }
 
-bool AlteracValley::HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell)
+bool AlteracValley::HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	// burlex todo: find a cleaner way to do this that doesnt waste memory.
 	if(pGo->bannerslot >= 0 && pGo->bannerslot < AV_NUM_CONTROL_POINTS)

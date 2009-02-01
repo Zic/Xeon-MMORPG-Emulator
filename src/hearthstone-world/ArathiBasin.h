@@ -71,7 +71,7 @@ protected:
 	uint32 m_lgroup;
 
 public:
-	ArathiBasin(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
+	ArathiBasin( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t);
 	~ArathiBasin();
 	virtual void Init();
 
@@ -91,7 +91,7 @@ public:
 	LocationVector GetStartingCoords(uint32 Team);
 	void DropFlag(PlayerPointer plr);
 
-	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<ArathiBasin>(new ArathiBasin(m, i, l, t)); }
+	static BattlegroundPointer Create( MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return ArathiBasinPointer(new ArathiBasin(m, i, l, t)); }
 
 	const char * GetName() { return "Arathi Basin"; }
 	void OnStart();

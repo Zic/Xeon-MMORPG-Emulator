@@ -52,7 +52,7 @@ private:
 	ItemPointer m_pItems[MAX_INVENTORY_SLOT];
 	ItemPointer m_pBuyBack[MAX_BUYBACK_SLOT];
 
-	AddItemResult m_AddItem(shared_ptr<Item>item, int8 ContainerSlot, int8 slot);
+	AddItemResult m_AddItem(ItemPointer item, int8 ContainerSlot, int8 slot);
 
 public:
 	friend class ItemIterator;
@@ -68,26 +68,26 @@ public:
 	void mLoadItemsFromDatabase(QueryResult * result);
 	void mSaveItemsToDatabase(bool first, QueryBuffer * buf);
 
-	shared_ptr<Item>GetInventoryItem(int8 slot);
-	shared_ptr<Item>GetInventoryItem(int8 ContainerSlot, int8 slot);
+	ItemPointer GetInventoryItem(int8 slot);
+	ItemPointer GetInventoryItem(int8 ContainerSlot, int8 slot);
 	int8 GetInventorySlotById(uint32 ID);
 	int8 GetInventorySlotByGuid(uint64 guid);
 	int8 GetBagSlotByGuid(uint64 guid);
 
-	shared_ptr<Item>SafeAddItem(uint32 ItemId, int8 ContainerSlot, int8 slot);
-	AddItemResult SafeAddItem(shared_ptr<Item>pItem, int8 ContainerSlot, int8 slot);
-	shared_ptr<Item>SafeRemoveAndRetreiveItemFromSlot(int8 ContainerSlot, int8 slot, bool destroy); //doesnt destroy item from memory
-	shared_ptr<Item>SafeRemoveAndRetreiveItemByGuid(uint64 guid, bool destroy);
-	shared_ptr<Item>SafeRemoveAndRetreiveItemByGuidRemoveStats(uint64 guid, bool destroy);
+	ItemPointer SafeAddItem(uint32 ItemId, int8 ContainerSlot, int8 slot);
+	AddItemResult SafeAddItem(ItemPointer pItem, int8 ContainerSlot, int8 slot);
+	ItemPointer SafeRemoveAndRetreiveItemFromSlot(int8 ContainerSlot, int8 slot, bool destroy); //doesnt destroy item from memory
+	ItemPointer SafeRemoveAndRetreiveItemByGuid(uint64 guid, bool destroy);
+	ItemPointer SafeRemoveAndRetreiveItemByGuidRemoveStats(uint64 guid, bool destroy);
 	bool SafeFullRemoveItemFromSlot(int8 ContainerSlot, int8 slot); //destroys item fully
 	bool SafeFullRemoveItemByGuid(uint64 guid); //destroys item fully
-	AddItemResult AddItemToFreeSlot(shared_ptr<Item>item);
-	AddItemResult AddItemToFreeBankSlot(shared_ptr<Item>item);
+	AddItemResult AddItemToFreeSlot(ItemPointer item);
+	AddItemResult AddItemToFreeBankSlot(ItemPointer item);
 	
 	ItemPointer FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBank);
 	uint32 GetItemCount(uint32 itemid, bool IncBank = false);
 	uint32 RemoveItemAmt(uint32 id, uint32 amt);
-	uint32 RemoveItemAmt_ProtectPointer(uint32 id, uint32 amt, shared_ptr<Item>* pointer);
+	uint32 RemoveItemAmt_ProtectPointer(uint32 id, uint32 amt, ItemPointer * pointer);
 	void RemoveAllConjured();
 	void BuyItem(ItemPrototype *item, uint32 total_amount, CreaturePointer pVendor, ItemExtendedCostEntry *ec);
 
@@ -104,7 +104,7 @@ public:
 	SlotResult FindAmmoBag();
 	int8 FindFreeBackPackSlot();
 	int8 FindFreeKeyringSlot();
-	int8 FindSpecialBag(shared_ptr<Item>item);
+	int8 FindSpecialBag(ItemPointer item);
 
 
 	int8 CanEquipItemInSlot(int8 DstInvSlot, int8 slot, ItemPrototype* item, bool ignore_combat = false, bool skip_2h_check = false);
@@ -114,7 +114,7 @@ public:
 	ItemPointer GetItemByGUID(uint64 itemGuid);
 
 
-	void BuildInventoryChangeError(shared_ptr<Item>SrcItem, shared_ptr<Item>DstItem, uint8 Error);
+	void BuildInventoryChangeError(ItemPointer SrcItem, ItemPointer DstItem, uint8 Error);
 	void SwapItemSlots(int8 srcslot, int8 dstslot);
 
 	int8 GetInternalBankSlotFromPlayer(int8 islot); //converts inventory slots into 0-x numbers

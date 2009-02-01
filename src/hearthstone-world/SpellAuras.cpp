@@ -1108,7 +1108,7 @@ void Aura::EventUpdateCreatureAA(float r)
 	// apply to caster
 	if( m_target != u_caster && targets.find(u_caster->GetUIdFromGUID()) == targets.end() )
 	{
-		aura = shared_ptr<Aura>(new Aura(m_spellProto, -1, u_caster, u_caster));
+		aura = AuraPointer(new Aura(m_spellProto, -1, u_caster, u_caster));
 		aura->m_areaAura = true;
 		for(i = 0; i < m_modcount; ++i)
 		{
@@ -1156,7 +1156,7 @@ void Aura::EventUpdateCreatureAA(float r)
 		// ok to apply?
 		if( !t->HasActiveAura(m_spellProto->Id) )
 		{
-			shared_ptr<Aura>aura = shared_ptr<Aura>(new Aura(m_spellProto, -1, u_caster, t));
+			AuraPointer aura(new Aura(m_spellProto, -1, u_caster, t));
 			aura->m_areaAura = true;
 			for(i = 0; i < m_modcount; ++i)
 			{
@@ -1280,7 +1280,7 @@ void Aura::EventUpdatePlayerAA(float r)
 	{
 		if(!plr->HasActiveAura(m_spellProto->Id))
 		{
-			shared_ptr<Aura>aura = NULLAURA;
+			AuraPointer aura = NULLAURA;
 			for(i = 0; i < m_modcount; ++i)
 			{
 				/* is this an area aura modifier? */
@@ -1288,7 +1288,7 @@ void Aura::EventUpdatePlayerAA(float r)
 				{
 					if(!aura)
 					{
-						aura = shared_ptr<Aura>(new Aura(m_spellProto, -1, u_caster, plr));
+						aura = AuraPointer(new Aura(m_spellProto, -1, u_caster, plr));
 						aura->m_areaAura = true;
 					}
 					aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount,
@@ -1318,7 +1318,7 @@ void Aura::EventUpdatePlayerAA(float r)
 				if(!(*itr)->m_loggedInPlayer->HasActiveAura(m_spellProto->Id) &&
 					(*itr)->m_loggedInPlayer->GetInstanceID() == plr->GetInstanceID() && (*itr)->m_loggedInPlayer->isAlive())
 				{
-					shared_ptr<Aura>aura = NULLAURA;
+					AuraPointer aura = NULLAURA;
 					//aura->AddMod(mod->m_type, mod->m_amount, mod->m_miscValue, mod->i);
 					for(i = 0; i < m_modcount; ++i)
 					{
@@ -1327,7 +1327,7 @@ void Aura::EventUpdatePlayerAA(float r)
 						{
 							if(!aura)
 							{
-								aura = shared_ptr<Aura>(new Aura(m_spellProto, -1, u_caster, (*itr)->m_loggedInPlayer));
+								aura = AuraPointer(new Aura(m_spellProto, -1, u_caster, (*itr)->m_loggedInPlayer));
 								aura->m_areaAura = true;
 							}
 							aura->AddMod(m_modList[i].m_type, m_modList[i].m_amount,

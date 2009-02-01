@@ -2639,7 +2639,7 @@ void Spell::HandleAddAura(uint64 guid)
 				AuraPointer aur=NULLAURA;
 				for(int i=0;i<itr->second->GetSpellProto()->procCharges-1;i++)
 				{
-					aur = shared_ptr<Aura>(new Aura(itr->second->GetSpellProto(),itr->second->GetDuration(),itr->second->GetCaster(),itr->second->GetTarget()));
+					aur = AuraPointer(new Aura(itr->second->GetSpellProto(),itr->second->GetDuration(),itr->second->GetCaster(),itr->second->GetTarget()));
 					Target->AddAura(aur, NULLAURA);
 					aur=NULLAURA;
 				}

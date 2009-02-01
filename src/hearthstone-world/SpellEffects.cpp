@@ -2081,9 +2081,9 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 			return;
 		}
 		if(g_caster && g_caster->GetUInt32Value(OBJECT_FIELD_CREATED_BY) && g_caster->m_summoner)
-			pAura= shared_ptr<Aura>(new Aura(m_spellInfo, Duration, g_caster->m_summoner, unitTarget));
+			pAura = AuraPointer(new Aura(m_spellInfo, Duration, g_caster->m_summoner, unitTarget));
 		else
-			pAura= shared_ptr<Aura>(new Aura(m_spellInfo, Duration, m_caster, unitTarget));
+			pAura = AuraPointer(new Aura(m_spellInfo, Duration, m_caster, unitTarget));
 
 		pAura->pSpellId = pSpellId; //this is required for triggered spells
 		
@@ -3493,11 +3493,11 @@ void Spell::SpellEffectApplyAA(uint32 i) // Apply Area Aura
 	if(u_caster!=unitTarget)
 		return;
 
-	shared_ptr<Aura>pAura;
-	std::map<uint32,shared_ptr<Aura> >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
+	AuraPointer pAura;
+	std::map<uint32,AuraPointer >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
 	if(itr==unitTarget->tmpAura.end())
 	{
-		pAura= shared_ptr<Aura>(new Aura(m_spellInfo,GetDuration(),m_caster,unitTarget));
+		pAura = AuraPointer(new Aura(m_spellInfo,GetDuration(),m_caster,unitTarget));
 		
 		unitTarget->tmpAura [m_spellInfo->Id]= pAura;
 	

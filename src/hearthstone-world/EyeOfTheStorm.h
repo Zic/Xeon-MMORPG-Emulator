@@ -27,13 +27,13 @@
 class EyeOfTheStorm : public CBattleground
 {
 public:
-	EyeOfTheStorm(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
+	EyeOfTheStorm( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t);
 	~EyeOfTheStorm();
 	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj);
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj);
 	void HookOnMount(PlayerPointer plr);
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	bool HookHandleRepop(PlayerPointer plr);
@@ -45,7 +45,7 @@ public:
 	void HookOnShadowSight();
 	void SpawnBuff(uint32 x);
 	LocationVector GetStartingCoords(uint32 Team);
-	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<EyeOfTheStorm>(new EyeOfTheStorm(m, i, l, t)); }
+	static BattlegroundPointer Create( MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return EyeOfTheStormPointer(new EyeOfTheStorm(m, i, l, t)); }
 	uint32 GetFlagHolderGUID() { return m_flagHolder; }
 
 	const char * GetName() { return "Eye of the Storm"; }
@@ -59,14 +59,14 @@ public:
 
 	void RespawnCPFlag(uint32 i, uint32 id);		// 0 = Neutral, <0 = Leaning towards alliance, >0 Leaning towards horde
 
-	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell>pSpell);
+	bool HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell);
 	void DropFlag(PlayerPointer plr);
 	void EventResetFlag();
 	void RepopPlayersOfTeam(int32 team, CreaturePointer sh);
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 
@@ -75,13 +75,13 @@ protected:
 	int32 m_CPStatus[EOTS_TOWER_COUNT];		
 	uint32 m_flagHolder;
 
-	shared_ptr<GameObject> m_standFlag;
-	shared_ptr<GameObject> m_dropFlag;
+	GameObjectPointer m_standFlag;
+	GameObjectPointer m_dropFlag;
 
-	shared_ptr<GameObject> m_CPStatusGO[EOTS_TOWER_COUNT];
-	shared_ptr<GameObject> m_CPBanner[EOTS_TOWER_COUNT];
-	shared_ptr<GameObject> m_bubbles[2];
-	shared_ptr<GameObject> m_EOTSbuffs[4];
+	GameObjectPointer m_CPStatusGO[EOTS_TOWER_COUNT];
+	GameObjectPointer m_CPBanner[EOTS_TOWER_COUNT];
+	GameObjectPointer m_bubbles[2];
+	GameObjectPointer m_EOTSbuffs[4];
 
 	typedef map<uint32, uint32> EOTSStoredPlayerMap;
 	EOTSStoredPlayerMap m_CPStored[EOTS_TOWER_COUNT];

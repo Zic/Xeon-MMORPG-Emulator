@@ -715,7 +715,7 @@ void AIInterface::_UpdateTargets()
 	if( m_updateAssist )
 	{
 		m_updateAssist = false;
-	/*	deque<shared_ptr<Unit> > tokill;
+	/*	deque< UnitPointer > tokill;
 
 		//modified for vs2005 compatibility
 		for(i = m_assistTargets.begin(); i != m_assistTargets.end(); ++i)
@@ -726,7 +726,7 @@ void AIInterface::_UpdateTargets()
 			}
 		}
 
-		for(deque<shared_ptr<Unit> >::iterator i2 = tokill.begin(); i2 != tokill.end(); ++i2)
+		for(deque< UnitPointer >::iterator i2 = tokill.begin(); i2 != tokill.end(); ++i2)
 			m_assistTargets.erase(*i2);*/
 
 		for(i = m_assistTargets.begin(); i != m_assistTargets.end();)
@@ -743,7 +743,7 @@ void AIInterface::_UpdateTargets()
 	if( m_updateTargets )
 	{
 		m_updateTargets = false;
-		/*deque<shared_ptr<Unit> > tokill;
+		/*deque< UnitPointer > tokill;
 
 		//modified for vs2005 compatibility
 		for(itr = m_aiTargets.begin(); itr != m_aiTargets.end();++itr)
@@ -753,7 +753,7 @@ void AIInterface::_UpdateTargets()
 				tokill.push_back(itr->first);
 			}
 		}
-		for(deque<shared_ptr<Unit> >::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
+		for(deque< UitPointer >::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
 			m_aiTargets.erase((*itr));
 		tokill.clear();*/
 

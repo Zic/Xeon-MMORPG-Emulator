@@ -21,7 +21,7 @@
 
 
 initialiseSingleton(CBattlegroundManager);
-typedef BattlegroundPointer(*CreateBattlegroundFunc)(shared_ptr<MapMgr> mgr,uint32 iid,uint32 group, uint32 type);
+typedef BattlegroundPointer(*CreateBattlegroundFunc)( MapMgrPointer mgr,uint32 iid,uint32 group, uint32 type);
 
 const static uint32 BGMapIds[BATTLEGROUND_NUM_TYPES] = {
 	0,		// 0
@@ -369,7 +369,7 @@ void CBattlegroundManager::AddGroupToArena(BattlegroundPointer bg, Group * group
 
 int CBattlegroundManager::CreateArenaType(int type, Group * group1, Group * group2)
 {
-	shared_ptr<Arena>  ar = TO_ARENA(CreateInstance(type, LEVEL_GROUP_RATED_ARENA));
+	ArenaPointer ar = TO_ARENA(CreateInstance(type, LEVEL_GROUP_RATED_ARENA));
 	if (ar == NULL)
 	{
 		Log.Error("BattlegroundMgr", "%s (%u): Couldn't create Arena Instance", __FILE__, __LINE__);
@@ -422,7 +422,7 @@ void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 	list<uint32>::iterator it3, it4;
 	//vector<PlayerPointer  >::iterator it6;
 	map<uint32, BattlegroundPointer >::iterator iitr;
-	shared_ptr<Arena>  arena;
+	ArenaPointer arena;
 	int32 team;
 	m_queueLock.Acquire();
 	m_instanceLock.Acquire();
@@ -787,7 +787,7 @@ bool CBattlegroundManager::CanCreateInstance(uint32 Type, uint32 LevelGroup)
 	return true;
 }
 
-CBattleground::CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgroup, uint32 type) : m_mapMgr(mgr), m_id(id), m_type(type), m_levelGroup(levelgroup)
+CBattleground::CBattleground( MapMgrPointer mgr, uint32 id, uint32 levelgroup, uint32 type) : m_mapMgr(mgr), m_id(id), m_type(type), m_levelGroup(levelgroup)
 {
 	m_nextPvPUpdateTime = 0;
 	m_countdownStage = 0;
@@ -1111,7 +1111,7 @@ void CBattleground::PortPlayer(PlayerPointer plr, bool skip_teleport /* = false*
 BattlegroundPointer CBattlegroundManager::CreateInstance(uint32 Type, uint32 LevelGroup)
 {
 	CreateBattlegroundFunc cfunc = BGCFuncs[Type];
-	shared_ptr<MapMgr> mgr = NULLMAPMGR;
+	MapMgrPointer mgr = NULLMAPMGR;
 	BattlegroundPointer bg;
 	bool isWeekend = false;
 	struct tm tm;
@@ -1151,7 +1151,7 @@ BattlegroundPointer CBattlegroundManager::CreateInstance(uint32 Type, uint32 Lev
 		}
 
 		iid = ++m_maxBattlegroundId;
-        bg = shared_ptr<Arena>(new Arena(mgr, iid, LevelGroup, Type, players_per_side));
+        bg = ArenaPointer(new Arena(mgr, iid, LevelGroup, Type, players_per_side));
 		bg->Init();
 		mgr->m_battleground = bg;
 		Log.Success("BattlegroundManager", "Created arena battleground type %u for level group %u on map %u.", Type, LevelGroup, mapid);

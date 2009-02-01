@@ -365,7 +365,7 @@ void Item::DeleteFromDB()
 {
 	if( m_itemProto->ContainerSlots>0 && GetTypeId() == TYPEID_CONTAINER )
 	{
-		/* deleting a shared_ptr<Container> */
+		/* deleting a ContainerPointer */
 		for( uint32 i = 0; i < m_itemProto->ContainerSlots; ++i )
 		{
 			if( CAST(Container,shared_from_this())->GetItem( i ) != NULL )

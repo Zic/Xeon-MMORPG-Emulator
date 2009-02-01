@@ -216,7 +216,7 @@ protected:
 	Group * m_groups[2];
 
 	time_t m_nextPvPUpdateTime;
-	shared_ptr<MapMgr> m_mapMgr;
+	MapMgrPointer m_mapMgr;
 	uint32 m_id;
 	uint32 m_type;
 	uint32 m_levelGroup;
@@ -298,10 +298,10 @@ public:
 	/* Retreival Functions */
 	HEARTHSTONE_INLINE uint32 GetId() { return m_id; }
 	HEARTHSTONE_INLINE uint32 GetLevelGroup() { return m_levelGroup; }
-	HEARTHSTONE_INLINE shared_ptr<MapMgr> GetMapMgr() { return m_mapMgr; }
+	HEARTHSTONE_INLINE MapMgrPointer GetMapMgr() { return m_mapMgr; }
 
 	/* Creating a battleground requires a pre-existing map manager */
-	CBattleground(shared_ptr<MapMgr> mgr, uint32 id, uint32 levelgroup, uint32 type);
+	CBattleground( MapMgrPointer mgr, uint32 id, uint32 levelgroup, uint32 type);
 	virtual ~CBattleground();
 	virtual void Init();
 

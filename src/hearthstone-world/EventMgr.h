@@ -240,7 +240,7 @@ struct SERVER_DECL TimedEvent
 	int instanceId;
 	volatile long ref;
 
-	static TimedEvent * Allocate(shared_ptr<EventableObject> object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat);
+	static TimedEvent * Allocate( EventableObjectPointer object, CallbackBase* callback, uint32 flags, time_t time, uint32 repeat);
 
 #ifdef WIN32
 	void DecRef()

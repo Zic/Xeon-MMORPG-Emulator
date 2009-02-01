@@ -1558,7 +1558,7 @@ void WorldSession::HandleGuildBankDepositItem(WorldPacket & recv_data)
 
 void WorldSession::HandleGuildBankOpenVault(WorldPacket & recv_data)
 {
-	shared_ptr<GameObject> pObj;
+	GameObjectPointer pObj;
 	uint64 guid;
 
 	if(!_player->IsInWorld() || _player->m_playerInfo->guild==NULL)
@@ -1642,7 +1642,7 @@ void Guild::SendGuildBank(WorldSession * pClient, GuildBankTab * pTab, int8 upda
 	uint32 count=0;
 	WorldPacket data(SMSG_GUILD_BANK_LIST, 1100);
 	GuildMember * pMember = pClient->GetPlayer()->m_playerInfo->guildMember;
-	shared_ptr<Item>pItem;
+	ItemPointer pItem;
 
 	if(pMember==NULL || !pMember->pRank->CanPerformBankCommand(GR_RIGHT_GUILD_BANK_VIEW_TAB, pTab->iTabId))
 		return;

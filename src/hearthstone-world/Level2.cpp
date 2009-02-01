@@ -150,7 +150,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args, WorldSession *m_session)
 
 	BlueSystemMessage(m_session, "Deleted creature ID %u", unit->spawnid);
 	
-	shared_ptr<MapMgr>unitMgr = unit->GetMapMgr();
+	MapMgrPointer unitMgr = unit->GetMapMgr();
 	if(unit->IsInWorld())
 	{
 		unit->RemoveFromWorld(false,true);

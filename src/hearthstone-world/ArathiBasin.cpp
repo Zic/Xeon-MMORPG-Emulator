@@ -394,7 +394,7 @@ void ArathiBasin::OnStart()
 	m_started = true;
 }
 
-ArathiBasin::ArathiBasin(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
+ArathiBasin::ArathiBasin( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
 	uint32 i;
 

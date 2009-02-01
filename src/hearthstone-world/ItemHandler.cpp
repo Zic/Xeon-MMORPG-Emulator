@@ -46,10 +46,10 @@ void WorldSession::HandleSplitOpcode(WorldPacket& recv_data)
 		return;
 
 	int32 c=count;
-	shared_ptr<Item>i1 =_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
+	ItemPointer i1 =_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 	if(!i1)
 		return;
-	shared_ptr<Item>i2=_player->GetItemInterface()->GetInventoryItem(DstInvSlot,DstSlot);
+	ItemPointer i2=_player->GetItemInterface()->GetInventoryItem(DstInvSlot,DstSlot);
 
 	if( (i1 && i1->wrapped_item_id) || (i2 && i2->wrapped_item_id) || ( i1 && i1->GetProto()->MaxCount < 2 ) || ( i2 && i2->GetProto()->MaxCount < 2 ) || count < 1 )
 	{
@@ -136,11 +136,8 @@ void WorldSession::HandleSwapItemOpcode(WorldPacket& recv_data)
 	CHECK_PACKET_SIZE(recv_data, 4);
 	WorldPacket data;
 	WorldPacket packet;
-	shared_ptr<Item>SrcItem = NULLITEM;
-	shared_ptr<Item>DstItem = NULLITEM;
-
-	//shared_ptr<Item>SrcTemp = NULL;
-	//shared_ptr<Item>DstTemp = NULL;
+	ItemPointer SrcItem = NULLITEM;
+	ItemPointer DstItem = NULLITEM;
 
 	int8 DstInvSlot=0, DstSlot=0, SrcInvSlot=0, SrcSlot=0, error=0;
 	//	 20		   5			255	  26
@@ -498,7 +495,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 	recv_data >> SrcInvSlot >> SrcSlot;
 
 	DEBUG_LOG( "ITEM: destroy, SrcInv Slot: %i Src slot: %i", SrcInvSlot, SrcSlot );
-	shared_ptr<Item>it = _player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
+	ItemPointer it = _player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
 	if(it)
 	{
@@ -596,7 +593,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
 	DEBUG_LOG("ITEM: autoequip, Inventory slot: %i Source Slot: %i", SrcInvSlot, SrcSlot); 
 
-	shared_ptr<Item>eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
+	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
 	if(!eitem) 
 	{
@@ -880,7 +877,7 @@ void WorldSession::HandleBuyBackOpcode( WorldPacket & recv_data )
 		return;
 
 	//what a magical number 69???
-	shared_ptr<Item>it = _player->GetItemInterface()->GetBuyBack(stuff);
+	ItemPointer it = _player->GetItemInterface()->GetBuyBack(stuff);
 	if (it)
 	{
 		// Find free slot and break if inv full
@@ -1085,7 +1082,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 	if( unit == NULL || !unit->HasItems() )
 		return;
 
-	shared_ptr<Container> c = NULLCONTAINER;
+	ContainerPointer c = NULLCONTAINER;
 
 	CreatureItem ci;
 	unit->GetSellItemByItemId( itemid, ci );
@@ -1275,7 +1272,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 	uint8 amount=0;
 //	int8 playerslot = 0;
 //	int8 bagslot = 0;
-	shared_ptr<Item>add = NULLITEM;
+	ItemPointer add = NULLITEM;
 	uint8 error = 0;
 	SlotResult slotresult;
 	AddItemResult result;
@@ -1347,7 +1344,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 
 	if(!add)
 	{
-		shared_ptr<Item>itm = objmgr.CreateItem(item.itemid, _player);
+		ItemPointer itm = objmgr.CreateItem(item.itemid, _player);
 		if(!itm)
 		{
 			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_DONT_OWN_THAT_ITEM);
@@ -1370,7 +1367,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 		}
 		else 
 		{
-			if(shared_ptr<Item>bag = _player->GetItemInterface()->GetInventoryItem(slotresult.ContainerSlot))
+			if( ItemPointer bag = _player->GetItemInterface()->GetInventoryItem(slotresult.ContainerSlot))
 			{
 				if( !TO_CONTAINER(bag)->AddItem(slotresult.Slot, itm) )
 				{
@@ -1491,9 +1488,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 	//WorldPacket data;
 	WorldPacket packet;
 	int8 SrcInv=0, Slot=0, DstInv=0;
-//	shared_ptr<Item>item= NULL;
-	shared_ptr<Item>srcitem = NULLITEM;
-	shared_ptr<Item>dstitem= NULLITEM;
+	ItemPointer srcitem = NULLITEM;
+	ItemPointer dstitem= NULLITEM;
 	int8 NewSlot = 0;
 	int8 error;
 	AddItemResult result;
@@ -1609,7 +1605,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket &recvPacket)
 	if(!GetPlayer())
 		return;
 
-	shared_ptr<Item>item = _player->GetItemInterface()->GetInventoryItem(uslot, slot);
+	ItemPointer item = _player->GetItemInterface()->GetInventoryItem(uslot, slot);
 	Log.Debug("WorldSession","Received CMSG_READ_ITEM %d", slot);
 
 	if(item)
@@ -1673,7 +1669,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 	uint64 npcguid;
 	uint64 itemguid;
 	ItemPointer pItem;
-	shared_ptr<Container> pContainer;
+	ContainerPointer pContainer;
 	uint32 j, i;
 
 	recvPacket >> npcguid >> itemguid;
@@ -1719,7 +1715,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 	}
 	else 
 	{
-		shared_ptr<Item>item = _player->GetItemInterface()->GetItemByGUID(itemguid);
+		ItemPointer item = _player->GetItemInterface()->GetItemByGUID(itemguid);
 		if(item)
 		{
 			SlotResult *searchres=_player->GetItemInterface()->LastSearchResult();//this never gets null since we get a pointer to the inteface internal var
@@ -1792,7 +1788,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
 
 	Log.Debug("WorldSession","HandleAutoBankItemOpcode: Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
 
-	shared_ptr<Item>eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
+	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
 	if(!eitem) 
 	{
@@ -1839,7 +1835,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket &recvPacket)
 
 	DEBUG_LOG("ITEM: AutoStore Bank Item, Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
 
-	shared_ptr<Item>eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
+	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
 	if(!eitem) 
 	{

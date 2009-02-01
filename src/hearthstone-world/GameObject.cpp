@@ -225,7 +225,7 @@ void GameObject::Update(uint32 p_time)
 	}
 }
 
-void GameObject::Spawn(shared_ptr<MapMgr> m)
+void GameObject::Spawn( MapMgrPointer m)
 {
 	PushToWorld(m);	
 	CALL_GO_SCRIPT_EVENT(gob_shared_from_this(), OnSpawn)();
@@ -511,7 +511,7 @@ void GameObject::UseFishingNode(PlayerPointer player)
 
 void GameObject::EndFishing(PlayerPointer player, bool abort )
 {
-	shared_ptr<Spell>spell = player->GetCurrentSpell();
+	SpellPointer spell = player->GetCurrentSpell();
 	
 	if(spell)
 	{

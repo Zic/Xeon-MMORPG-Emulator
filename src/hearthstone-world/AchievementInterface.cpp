@@ -470,7 +470,7 @@ void AchievementInterface::HandleAchievementCriteriaWinBattleground(uint32 bgMap
 				// AV stuff :P
 				if( bg->GetType() == BATTLEGROUND_ALTERAC_VALLEY )
 				{
-					shared_ptr<AlteracValley> pAV = TO_ALTERACVALLEY(bg);
+					AlteracValleyPointer pAV(TO_ALTERACVALLEY(bg));
 					if( pAchievementEntry->ID == 225 ||  pAchievementEntry->ID == 1164) // AV: Everything Counts
 					{
 						continue; // We do not support mines yet in AV

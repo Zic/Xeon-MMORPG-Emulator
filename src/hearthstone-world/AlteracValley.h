@@ -86,7 +86,7 @@ struct AVNodeTemplate
 class AlteracValley;
 class AVNode
 {
-	shared_ptr<AlteracValley> m_bg;
+	AlteracValleyPointer m_bg;
 	AVNodeTemplate *m_template;
 
 	// boss, changes ownership upon death?
@@ -123,7 +123,7 @@ public:
 	friend class AlteracValley;
 
 	// constructor
-	AVNode(shared_ptr<AlteracValley> parent, AVNodeTemplate *tmpl, uint32 node_id);
+	AVNode(AlteracValleyPointer parent, AVNodeTemplate *tmpl, uint32 node_id);
 	~AVNode();
 
 	// initial spawn
@@ -211,7 +211,7 @@ protected:
 	AVNode *m_nodes[AV_NUM_CONTROL_POINTS];
 
 public:
-	AlteracValley(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
+	AlteracValley( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t);
 	~AlteracValley();
 	virtual void Init();
 
@@ -233,7 +233,7 @@ public:
 	LocationVector GetStartingCoords(uint32 Team);
 	void DropFlag(PlayerPointer plr);
 
-	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<AlteracValley>(new AlteracValley(m, i, l, t)); }
+	static BattlegroundPointer Create( MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return AlteracValleyPointer(new AlteracValley(m, i, l, t)); }
 
 	const char * GetName() { return "Alterac Valley"; }
 	void OnStart();
