@@ -6330,38 +6330,45 @@ void Player::UpdateNearbyGameObjects()
 	{
 		if((*itr)->GetTypeId() == TYPEID_GAMEOBJECT)
 		{
-			bool activate_quest_object = false;
-			shared_ptr<GameObject> go = TO_GAMEOBJECT(*itr);
+			GameObjectPointer go = TO_GAMEOBJECT(*itr);
 			GameObjectInfo *info;
+			uint32 oldstate = 0;
+			bool reset = false;
 
 			info = go->GetInfo();
 			if (!info)
 			{
 				sLog.outString("%s: go->GetInfo returned NULL for go entry = %d", __FUNCTION__, go->GetEntry());
 				continue;
-			} else
-			if( info->InvolvedQuestIds != NULL )
+			} else if( info->InvolvedQuestIds != NULL )
 			{
 				uint32 v = 0;
 				for(; v < info->InvolvedQuestCount; ++v)
 				{
 					if( GetQuestLogForEntry(info->InvolvedQuestIds[v]) != NULL )
 					{
-						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_DYNAMIC, GO_DYNFLAG_QUEST);
-
-						uint32 state = GetUInt32Value(GAMEOBJECT_BYTES_1);
+						uint32 state = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
 						uint8 * v = (uint8*)&state;
+						oldstate = state;
 						v[GAMEOBJECT_BYTES_STATE] = 1;
 
+						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_DYNAMIC, GO_DYNFLAG_QUEST);
 						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_BYTES_1, state);
 						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_FLAGS, 0);
+						reset = true;
 						break;
 					}
+				}
+				if(reset)
+				{
+					go->SetUInt32Value(GAMEOBJECT_DYNAMIC,0);
+					go->SetUInt32Value(GAMEOBJECT_FLAGS,GO_FLAG_IN_USE);
+					go->SetUInt32Value(GAMEOBJECT_BYTES_1,oldstate);
 				}
 
 				if( v == info->InvolvedQuestCount )
 				{
-					uint32 state = GetUInt32Value(GAMEOBJECT_BYTES_1);
+					uint32 state = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
 					uint8 * v = (uint8*)&state;
 					v[GAMEOBJECT_BYTES_STATE] = 0;
 
@@ -6404,10 +6411,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	m_taxiMapChangeNode = 0;
 
 	if( IsMounted() )
-	{
 		TO_UNIT(shared_from_this())->Dismount();
-		SetPlayerSpeed(RUN, m_runSpeed);
-	}
 
 	//also remove morph spells
 	if(GetUInt32Value(UNIT_FIELD_DISPLAYID)!=GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID))
@@ -6427,6 +6431,15 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 
 	//uint32 traveltime = uint32(path->getLength() * TAXI_TRAVEL_SPEED); // 36.7407
 	float traveldist = 0;
+
+	// temporary workaround for taximodes with changing map 
+	if (   path->GetID() == 766 || path->GetID() == 767 || path->GetID() == 771 || path->GetID() == 772 
+		|| path->GetID() == 775 || path->GetID() == 776 || path->GetID() == 796 || path->GetID() == 797 
+		|| path->GetID() == 807) 
+	{
+		JumpToEndTaxiNode(path);
+		return;
+	}
 
 	float lastx = 0, lasty = 0, lastz = 0;
 	TaxiPathNode *firstNode = path->GetPathNode(start_node);
@@ -6462,11 +6475,15 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	for(uint32 i = start_node; i < endn; ++i)
 	{
 		TaxiPathNode *pn = path->GetPathNode(i);
-		if(!pn)
+		// temporary workaround for taximodes with changing map
+		if (!pn || path->GetID() == 766 || path->GetID() == 767 || path->GetID() == 771 || path->GetID() == 772
+				|| path->GetID() == 775 || path->GetID() == 776 || path->GetID() == 796 || path->GetID() == 797
+				|| path->GetID() == 807)
 		{
 			JumpToEndTaxiNode(path);
 			return;
 		}
+
 
 		if( pn->mapid != m_mapId )
 		{
