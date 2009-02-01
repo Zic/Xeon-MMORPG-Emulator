@@ -2026,6 +2026,8 @@ public:
 
 protected:
 
+	bool m_sharedPtrDestructed;
+
     /// Spell state's
     bool    m_usesMana;
     bool    m_Spell_Failed;        //for 5sr

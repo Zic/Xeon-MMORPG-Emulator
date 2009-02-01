@@ -590,7 +590,7 @@ void Player::Destructor()
 		mSpellsUniqueTargets = NULL;
 	}
 
-	//am I right in thinking this should be reset here
+	//Am I right in thinking this should be reset here
 	//and the unit destructor should be called at the
 	//end of the player destructor rather than the start
 	//Pepsi1x1
@@ -598,11 +598,14 @@ void Player::Destructor()
 	Unit::Destructor();
 
 #ifdef SHAREDPTR_DEBUGMODE
-	ObjectPointer sthis = obj_shared_from_this();
+	ObjectPointer sthis = shared_from_this();
 	long references = sthis.use_count() - 2;
 	if( references > 0 )
 	{
 		printf("Player::Destructor() called when Player has %d references left in memory!\n", references);
+#ifdef WIN32
+		PrintSharedPtrInformation(true, references);
+#endif
 	}
 #endif
 }

@@ -753,7 +753,7 @@ void AIInterface::_UpdateTargets()
 				tokill.push_back(itr->first);
 			}
 		}
-		for(deque< UitPointer >::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
+		for(deque< UnitPointer >::iterator itr = tokill.begin(); itr != tokill.end(); ++itr)
 			m_aiTargets.erase((*itr));
 		tokill.clear();*/
 

@@ -173,6 +173,37 @@ static const TCHAR *GetExceptionDescription(DWORD ExceptionCode)
 	return _T("an Unknown exception type");
 }
 
+void spEcho(const char * format, ...)
+{
+	va_list ap;
+	va_start(ap, format);
+	vprintf(format, ap);
+	std::string s = FormatOutputString("logs", "SharedPtrLog", false);
+	FILE * m_file = fopen(s.c_str(), "a");
+	if(!m_file)
+	{
+		va_end(ap);
+		return;
+	}
+
+	vfprintf(m_file, format, ap);
+	fclose(m_file);
+	va_end(ap);
+}
+
+void __cdecl PrintSharedPtrInformation(bool m_sharedPtrDestructed, long references)
+{
+	if(!m_sharedPtrDestructed)
+		spEcho("Failure to call Destructor method on deletion.\n");
+	if(references)
+		spEcho("Destructor() called when it has %i references left in memory!\n", references);
+	spEcho("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+	spEcho("Call Stack: \n");
+	CStackWalker sw;
+	sw.ShowCallstack(TRUE);
+	spEcho("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+}
+
 void echo(const char * format, ...)
 {
 	va_list ap;
@@ -269,7 +300,11 @@ void CStackWalker::OnCallstackEntry(CallstackEntryType eType, CallstackEntry &en
 
 void CStackWalker::OnOutput(LPCSTR szText)
 {
-	std::string s = FormatOutputString("logs", "CrashLog", false);
+	std::string s;
+	if(m_sharedptrlog)
+		s = FormatOutputString("logs", "SharedPtrLog", false);
+	else
+		s = FormatOutputString("logs", "CrashLog", false);
 	FILE * m_file = fopen(s.c_str(), "a");
 	if(!m_file) return;
 

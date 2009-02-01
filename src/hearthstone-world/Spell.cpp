@@ -146,6 +146,7 @@ Spell::Spell(ObjectPointer Caster, SpellEntry *info, bool triggered, AuraPointer
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Spell::Spell()\n");
 #endif
+	m_sharedPtrDestructed = false;
 	ASSERT( Caster != NULL && info != NULL );
   
 	m_spellInfo = info;
@@ -249,13 +250,35 @@ Spell::~Spell()
 {
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Spell::~Spell()\n");
+	
+	if( !m_sharedPtrDestructed )
+	{
+		Log.Error("SharedPtr", "Failure to call Spell Destructor method on deletion.");
+#ifdef WIN32
+		PrintSharedPtrInformation(false, NULL);
+#endif
+	}
+
 #endif
 }
 
 void Spell::Destructor()
 {
+	m_sharedPtrDestructed = true;
 	if( u_caster != NULL && u_caster->GetCurrentSpell() == shared_from_this() )
-		u_caster->SetCurrentSpell(NULLSPELL); 
+		u_caster->SetCurrentSpell(NULLSPELL);
+
+	#ifdef SHAREDPTR_DEBUGMODE
+	SpellPointer sthis = shared_from_this();
+	long references = sthis.use_count() - 2;
+	if( references > 0 )
+	{
+		printf("Spell::Destructor() called when Player has %d references left in memory!\n", references);
+#ifdef WIN32
+		PrintSharedPtrInformation(true, references);
+#endif
+	}
+#endif
 }
 
 //i might forget conditions here. Feel free to add them

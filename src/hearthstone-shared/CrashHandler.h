@@ -54,6 +54,7 @@ void OnCrash(bool Terminate);
 
 typedef struct _EXCEPTION_POINTERS EXCEPTION_POINTERS, *PEXCEPTION_POINTERS;
 int __cdecl HandleCrash(PEXCEPTION_POINTERS pExceptPtrs);
+void __cdecl PrintSharedPtrInformation(bool m_sharedPtrDestructed, long references);
 
 #define THREAD_TRY_EXECUTION __try 
 #define THREAD_HANDLE_CRASH  __except(HandleCrash(GetExceptionInformation())) {}

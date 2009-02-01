@@ -290,6 +290,7 @@ public:
 
 protected:
 
+	bool m_sharedPtrDestructed;
 	//! Collect and send updates to clients
 	void _UpdateObjects();
 

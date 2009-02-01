@@ -712,6 +712,7 @@ Aura::~Aura()
 	{
 		Log.Error("SharedPtr", "Aura deleted without being removed.");
 #ifdef WIN32
+		PrintSharedPtrInformation(false, NULL);
 		CStackWalker cw;
 		cw.ShowCallstack();
 #endif
@@ -819,6 +820,18 @@ void Aura::Remove()
 		data.guid = caster->GetGUID();
 		caster->OutPacketToSet( SMSG_COOLDOWN_EVENT, sizeof( packetSMSG_COOLDOWN_EVENT ), &data, true );
 	}
+
+#ifdef SHAREDPTR_DEBUGMODE
+	AuraPointer sthis = shared_from_this();
+	long references = sthis.use_count() - 2;
+	if( references > 0 )
+	{
+		printf("Aura::Destructor() called when Player has %d references left in memory!\n", references);
+#ifdef WIN32
+		PrintSharedPtrInformation(true, references);
+#endif
+	}
+#endif
 }
 
 void Aura::AddMod( uint32 t, int32 a, uint32 miscValue, uint32 i )

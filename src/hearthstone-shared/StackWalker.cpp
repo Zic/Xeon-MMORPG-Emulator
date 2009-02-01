@@ -760,6 +760,7 @@ StackWalker::StackWalker(int options, LPCSTR szSymPath, DWORD dwProcessId, HANDL
   }
   else
 	this->m_szSymPath = NULL;
+  this->m_sharedptrlog = FALSE;
 }
 
 StackWalker::~StackWalker()
@@ -894,8 +895,9 @@ BOOL StackWalker::LoadModules()
 static StackWalker::PReadProcessMemoryRoutine s_readMemoryFunction = NULL;
 static LPVOID s_readMemoryFunction_UserData = NULL;
 
-BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadProcessMemoryRoutine readMemoryFunction, LPVOID pUserData)
+BOOL StackWalker::ShowCallstack(BOOL issharedptrlog, HANDLE hThread, const CONTEXT *context, PReadProcessMemoryRoutine readMemoryFunction, LPVOID pUserData)
 {
+  m_sharedptrlog = issharedptrlog;
   CONTEXT c;;
   CallstackEntry csEntry;
   IMAGEHLP_SYMBOL64 *pSym = NULL;

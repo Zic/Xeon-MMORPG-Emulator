@@ -32,6 +32,7 @@ extern bool bServerShutdown;
 
 MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>(map), _mapId(mapId), eventHolder(instanceid)
 {
+	m_sharedPtrDestructed = false;
 	m_instanceID = instanceid;
 	pMapInfo = WorldMapInfoStorage.LookupEntry(mapId);
 	m_UpdateDistance = pMapInfo->update_distance * pMapInfo->update_distance;
@@ -106,6 +107,7 @@ void MapMgr::Init()
 // call me to break the circular reference, perform cleanup
 void MapMgr::Destructor()
 {
+	m_sharedPtrDestructed = true;
 	// in case this goes feeefeee
 	shared_ptr<MapMgr> pThis = shared_from_this();
 
@@ -178,12 +180,34 @@ void MapMgr::Destructor()
 
 	Log.Notice("MapMgr", "Instance %u shut down. (%s)" , m_instanceID, GetBaseMap()->GetName());
 	pThis.reset();
+
+#ifdef SHAREDPTR_DEBUGMODE
+	MapMgrPointer sthis = shared_from_this();
+	long references = sthis.use_count() - 2;
+	if( references > 0 )
+	{
+		printf("MapMgr::Destructor() called when Player has %d references left in memory!\n", references);
+#ifdef WIN32
+		PrintSharedPtrInformation(true, references);
+#endif
+	}
+#endif
 }
 
 
 MapMgr::~MapMgr()
 {
+#ifdef SHAREDPTR_DEBUGMODE
+	printf("MapMgr::~MapMgr()\n");
+#endif
 
+	if( !m_sharedPtrDestructed )
+	{
+		Log.Error("SharedPtr", "Failure to call Object Destructor method on deletion.");
+#ifdef WIN32
+		PrintSharedPtrInformation(false, NULL);
+#endif
+	}
 }
 
 void MapMgr::PushObject(ObjectPointer obj)
