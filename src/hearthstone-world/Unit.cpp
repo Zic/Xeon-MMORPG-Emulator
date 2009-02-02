@@ -1732,6 +1732,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							}break;
 						case 48108: // [Mage] Hot Streak
 							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_FIREBALL ||
+									CastingSpell->NameHash != SPELL_HASH_FIRE_BLAST ||
+									CastingSpell->NameHash != SPELL_HASH_SCORCH ||
+									CastingSpell->NameHash != SPELL_HASH_FROSTFIRE_BOLT )
+									continue; 
+
 								m_hotStreakCount++;
 								if (m_hotStreakCount >= 2)
 									m_hotStreakCount = 0;
@@ -1794,6 +1802,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									int32 toheal = (int32)(dmg * 0.04);
 									Heal( unit_shared_from_this(), 50475, toheal );
 								}
+							}break;
+						case 54741: //Firestarter
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_BLAST_WAVE &&
+									CastingSpell->NameHash != SPELL_HASH_DRAGON_S_BREATH )
+									continue; 
 							}break;
 					}
 				}

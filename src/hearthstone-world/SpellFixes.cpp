@@ -4266,6 +4266,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->AdditionalAura = 49772;
 				}break;
+			case 44443:
+			case 44442:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
 			}
 		}
 	}
