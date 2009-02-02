@@ -4400,7 +4400,10 @@ void Spell::Heal(int32 amount)
 		}
 
 		if (m_spellInfo->SpellGroupType)
-			SM_FIValue(u_caster->SM[SMT_DAMAGE_DONE][1],&amount,m_spellInfo->SpellGroupType);
+		{
+			SM_FIValue(u_caster->SM[SMT_DAMAGE_DONE][0],&amount,m_spellInfo->SpellGroupType);
+			SM_PIValue(u_caster->SM[SMT_DAMAGE_DONE][1],&amount,m_spellInfo->SpellGroupType);
+		}
 
 		critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
 		if(critical = Rand(critchance))
