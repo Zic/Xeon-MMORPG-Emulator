@@ -624,6 +624,10 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	m_duration = duration;
 	m_positive = 0; //we suppose spell will have positive impact on target
 	m_deleted = false;
+	m_tmpAuradeleted = false;
+#ifdef SHAREDPTR_DEBUGMODE
+	deleting = true;
+#endif
 	m_creatureAA = false;
 
 	m_casterGuid = caster->GetGUID();
@@ -731,6 +735,17 @@ void Aura::Remove()
 
 	sEventMgr.RemoveEvents( shared_from_this() );
 
+	if (!m_tmpAuradeleted && m_target->tmpAura.find(m_spellProto->Id) != m_target->tmpAura.end())
+	{
+		if (m_target->tmpAura[m_spellProto->Id] != shared_from_this())
+		{
+			m_target->tmpAura[m_spellProto->Id]->m_tmpAuradeleted = true;
+			m_target->tmpAura[m_spellProto->Id]->Remove();
+		}
+		m_target->tmpAura.erase(m_spellProto->Id);
+		m_tmpAuradeleted = true;
+	}
+
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		RemoveAuraVisual();
 
@@ -749,7 +764,7 @@ void Aura::Remove()
 	for( uint32 x = 0; x < 3; x++ )
 	{
 		if( !m_spellProto->Effect[x] )
-			break;
+			continue;
 
 		if( m_spellProto->Effect[x] == SPELL_EFFECT_TRIGGER_SPELL && !m_spellProto->always_apply )
 		{
@@ -789,6 +804,7 @@ void Aura::Remove()
 		{
 			// try to remove
 			caster->CombatStatus.RemoveAttackTarget(m_target);
+			m_target->CombatStatus.ForceRemoveAttacker( caster->GetGUID() );
 		}
 
 		if( m_spellProto->buffIndexType != 0 && m_target->IsPlayer() )
@@ -820,21 +836,26 @@ void Aura::Remove()
 		data.guid = caster->GetGUID();
 		caster->OutPacketToSet( SMSG_COOLDOWN_EVENT, sizeof( packetSMSG_COOLDOWN_EVENT ), &data, true );
 	}
-
+/*
 	if( m_spellProto->AdditionalAura )
 		m_target->RemoveAura( m_spellProto->AdditionalAura );
 
 #ifdef SHAREDPTR_DEBUGMODE
-	AuraPointer sthis = shared_from_this();
-	long references = sthis.use_count() - 2;
-	if( references > 0 )
+	if(deleting)
 	{
-		printf("Aura::Destructor() called when Player has %d references left in memory!\n", references);
+		deleting = false;
+		AuraPointer sthis = shared_from_this();
+		long references = sthis.use_count() - 2;
+		if( references > 0 )
+		{
+			printf("Aura::Destructor() called when Aura has %d references left in memory!\n", references);
 #ifdef WIN32
-		PrintSharedPtrInformation(true, references);
+			PrintSharedPtrInformation(true, references);
 #endif
+		}
 	}
 #endif
+*/
 }
 
 void Aura::AddMod( uint32 t, int32 a, uint32 miscValue, uint32 i )

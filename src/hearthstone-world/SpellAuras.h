@@ -774,6 +774,10 @@ protected:
 	void SendChannelUpdate(uint32 time, ObjectPointer m_caster);
 public:
 	bool m_deleted;
+	bool m_tmpAuradeleted;
+#ifdef SHAREDPTR_DEBUGMODE
+	bool deleting;
+#endif
 	bool m_creatureAA;
 	int16 m_interrupted;
 

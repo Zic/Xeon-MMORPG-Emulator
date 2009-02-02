@@ -159,7 +159,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 			{
 				Field *fields = result->Fetch();
 				entry = fields[0].GetUInt32();
-				agent = fields[1].GetUInt32();
+				agent = fields[1].GetUInt16();
 				spellID = fields[4].GetUInt32();
 				int32 tcd = fields[7].GetInt32();
 

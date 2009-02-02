@@ -186,7 +186,7 @@ void MapMgr::Destructor()
 	long references = sthis.use_count() - 2;
 	if( references > 0 )
 	{
-		printf("MapMgr::Destructor() called when Player has %d references left in memory!\n", references);
+		printf("MapMgr::Destructor() called when MapMgr has %d references left in memory!\n", references);
 #ifdef WIN32
 		PrintSharedPtrInformation(true, references);
 #endif
@@ -203,7 +203,7 @@ MapMgr::~MapMgr()
 
 	if( !m_sharedPtrDestructed )
 	{
-		Log.Error("SharedPtr", "Failure to call Object Destructor method on deletion.");
+		Log.Error("SharedPtr", "Failure to call MapMgr Destructor method on deletion.");
 #ifdef WIN32
 		PrintSharedPtrInformation(false, NULL);
 #endif

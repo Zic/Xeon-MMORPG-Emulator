@@ -273,7 +273,7 @@ void Spell::Destructor()
 	long references = sthis.use_count() - 2;
 	if( references > 0 )
 	{
-		printf("Spell::Destructor() called when Player has %d references left in memory!\n", references);
+		printf("Spell::Destructor() called when Spell has %d references left in memory!\n", references);
 #ifdef WIN32
 		PrintSharedPtrInformation(true, references);
 #endif
@@ -1850,6 +1850,8 @@ void Spell::finish()
 	
 	if( p_caster && ( cancastresult == SPELL_CANCAST_OK && !GetSpellFailed() ) )
 		RemoveItems();
+
+	spl.reset();
 	Destructor();
 }
 
