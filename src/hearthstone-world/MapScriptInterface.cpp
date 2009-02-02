@@ -120,8 +120,9 @@ CreaturePointer MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float 
 	sp->flags = 0;
 	sp->factionid = proto->Faction;
 	sp->bytes=0;
+	sp->bytes=0;
 	sp->bytes2=0;
-	//sp->respawnNpcLink = 0;
+	sp->displayid=0;
 	sp->stand_state = 0;
 	sp->channel_spell=sp->channel_target_creature=sp->channel_target_go=0;
 	sp->MountedDisplayID = 0;
