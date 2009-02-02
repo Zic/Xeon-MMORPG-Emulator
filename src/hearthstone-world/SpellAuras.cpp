@@ -821,6 +821,9 @@ void Aura::Remove()
 		caster->OutPacketToSet( SMSG_COOLDOWN_EVENT, sizeof( packetSMSG_COOLDOWN_EVENT ), &data, true );
 	}
 
+	if( m_spellProto->AdditionalAura )
+		m_target->RemoveAura( m_spellProto->AdditionalAura );
+
 #ifdef SHAREDPTR_DEBUGMODE
 	AuraPointer sthis = shared_from_this();
 	long references = sthis.use_count() - 2;

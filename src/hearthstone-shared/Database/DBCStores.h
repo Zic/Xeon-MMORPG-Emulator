@@ -784,6 +784,8 @@ struct SpellEntry
 
 	uint32 area_aura_update_interval;
 	uint32 skilline;
+
+	uint32 AdditionalAura;
 };
 
 struct SpellRuneCostEntry

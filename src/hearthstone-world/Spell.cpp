@@ -2628,6 +2628,8 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 23230;
 	else if( m_spellInfo->Id == 31884)
 		spellid = 25771;
+	else if( m_spellInfo->AdditionalAura )
+		spellid = m_spellInfo->AdditionalAura;
 
 	switch( m_spellInfo->NameHash )
 	{

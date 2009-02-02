@@ -4249,6 +4249,23 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->procFlags = PROC_ON_SPELL_LAND;
 				}break;
+			case 48266://blood presence
+				{
+					sp->EffectTriggerSpell[1] = 50475;
+					sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_MELEE_ATTACK;
+				}break;
+			case 50475:
+				{
+					sp->Effect[0] = NULL;
+				}break;
+			case 48263://Frost Presence
+				{
+					sp->AdditionalAura = 61261;
+				}break;
+			case 48265://Unholy Presence
+				{
+					sp->AdditionalAura = 49772;
+				}break;
 			}
 		}
 	}
@@ -4285,6 +4302,7 @@ void ApplyNormalFixes()
 		uint32 type = 0;
 		uint32 namehash = 0;
 
+		sp->AdditionalAura = 0;
 		sp->self_cast_only = false;
 		sp->Unique = false;
 		sp->apply_on_shapeshift_change = false;
@@ -4515,7 +4533,8 @@ void ApplyNormalFixes()
 			type |= SPELL_TYPE_HUNTER_MARK;
 		else if( namehash == SPELL_HASH_COMMANDING_SHOUT || namehash == SPELL_HASH_BATTLE_SHOUT )
 		    type |= SPELL_TYPE_WARRIOR_SHOUT;
-		else if( namehash == SPELL_HASH_FROST_PRESENCE || namehash == SPELL_HASH_BLOOD_PRESENCE || namehash == SPELL_HASH_UNHOLY_PRESENCE )
+		else if( ( namehash == SPELL_HASH_FROST_PRESENCE || namehash == SPELL_HASH_BLOOD_PRESENCE || namehash == SPELL_HASH_UNHOLY_PRESENCE ) &&
+				 ( sp->Id != 61261 ) && ( sp->Id != 49772 ))
 			type |= SPELL_TYPE_DK_PRESENCE;
 		else if( strstr( sp->Description, "Finishing move")==sp->Description)
 			sp->c_is_flags |= SPELL_FLAG_IS_FINISHING_MOVE;

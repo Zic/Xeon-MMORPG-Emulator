@@ -1786,6 +1786,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 										CastingSpell->EffectMechanic[2] == 26 ) )
 									continue;
 							}break;
+						case 50475:
+							{
+								//heal him :)
+								if( dmg )
+								{
+									int32 toheal = (int32)(dmg * 0.04);
+									Heal( unit_shared_from_this(), 50475, toheal );
+								}
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
