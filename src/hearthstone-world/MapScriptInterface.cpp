@@ -120,7 +120,7 @@ CreaturePointer MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float 
 	sp->flags = 0;
 	sp->factionid = proto->Faction;
 	sp->bytes=0;
-	sp->bytes=0;
+	sp->bytes1=0;
 	sp->bytes2=0;
 	sp->displayid=0;
 	sp->stand_state = 0;
