@@ -5715,6 +5715,13 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_IMPROVED_COUNTERSPELL )
 			sp->procFlags = PROC_ON_CAST_SPELL;
 
+		if( sp->NameHash == SPELL_HASH_FROSTBITE )
+		{
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectTriggerSpell[0] = 12494;
+			sp->procFlags = PROC_ON_CAST_SPELL;
+		}
+
 		//////////////////////////////////////////
 		// WARLOCK								//
 		//////////////////////////////////////////

@@ -1811,6 +1811,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash != SPELL_HASH_DRAGON_S_BREATH )
 									continue; 
 							}break;
+						case 12494: //Frostbite
+							{
+								if (!CastingSpell )
+									continue;
+								//me thinks its correct
+								if( !( CastingSpell->SpellGroupType[0] & 0x100220 ) || victim == unit_shared_from_this() ) //frost
+									continue;
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
