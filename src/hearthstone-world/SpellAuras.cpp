@@ -2737,19 +2737,6 @@ void Aura::SpellAuraDummy(bool apply)
 					caster->RemoveOnAuraRemoveSpell(SPELL_HASH_ICE_BARRIER);
 			}
 		}break;
-	case 29447: // Mage: Torment the Weak
-	case 55339:
-	case 55340:
-		{
-			shared_ptr<Unit>caster = GetUnitCaster();
-			if(caster)
-			{
-				if (apply)
-					caster->m_dmgToSnaredTargets = ((float)mod->m_amount)/100+1.f;
-				else
-					caster->m_dmgToSnaredTargets = 0;
-			}
-		}break;
 	case 44394:// Mage: Incanter's Absorption
 	case 44395:
 	case 44396:
@@ -2797,6 +2784,23 @@ void Aura::SpellAuraDummy(bool apply)
 			}
 		}break;
 	}
+
+	if( m_target )
+		switch( GetSpellProto()->NameHash )
+		{
+			case SPELL_HASH_TORMENT_THE_WEAK:
+				{
+					m_target->m_DummyAuras[DUMMY_AURA_TORMENT_THE_WEAK] = apply ? mod->m_amount : 0;
+				}break;
+			case SPELL_HASH_ARCANE_POTENCY:
+				{
+					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_POTENCY] = apply ? mod->m_amount : 0;
+				}break;
+			case SPELL_HASH_ARCANE_EMPOWERMENT:
+				{
+					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_EMPOWERMENT] = apply ? GetSpellProto()->RankNumber : 0;
+				}break;
+		}
 
 	if ( TamingSpellid && ! GetTimeLeft() )
 	{

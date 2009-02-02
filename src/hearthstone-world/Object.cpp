@@ -2354,13 +2354,6 @@ void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uin
 				caster->RemoveAura(caster->m_frozenTargetId);
 		}
 
-		// [Mage] Torment the Weak
-		if ((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) &&
-		    caster->m_dmgToSnaredTargets > 0 && pVictim->m_speedModifier < 0)
-		{
-			res*= caster->m_dmgToSnaredTargets;
-		}
-
 		// [Mage] Hot Streak
 		if (!(aproc & PROC_ON_SPELL_CRIT_HIT))
 			caster->m_hotStreakCount = 0;

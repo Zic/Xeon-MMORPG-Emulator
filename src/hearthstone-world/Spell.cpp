@@ -2629,6 +2629,16 @@ void Spell::HandleAddAura(uint64 guid)
 	else if( m_spellInfo->Id == 31884)
 		spellid = 25771;
 
+	switch( m_spellInfo->NameHash )
+	{
+	case SPELL_HASH_CLEARCASTING:
+	case SPELL_HASH_PRESENCE_OF_MIND:
+		{
+			if( Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] )
+				spellid = Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] == 15 ? 57529 : 57531;
+		}break;
+	}
+
 	if(spellid && p_caster)
 	{
 		SpellEntry *spellInfo = dbcSpell.LookupEntry( spellid );

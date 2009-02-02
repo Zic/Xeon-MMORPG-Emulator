@@ -2538,22 +2538,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->EffectMiscValue[0]=SMT_SPELL_VALUE_PCT;
 						sp->EffectBasePoints[0]	=	-(sp->EffectBasePoints[0]+2);
-				}break;
-		
-			//mage : Empowered Arcane	Missiles
-			case  31579:
-				{
-						sp->EffectBasePoints[0]	*= 5;	//heh	B	thinks he	is smart by	adding this	to description ? If	it doesn;t work	std	then it	still	needs	to made	by hand
-				}break;
-			case  31582:
-				{
-						sp->EffectBasePoints[0]	*= 5;	//heh	B	thinks he	is smart by	adding this	to description ? If	it doesn;t work	std	then it	still	needs	to made	by hand
-				}break;
-			case  31583:
-				{
-						sp->EffectBasePoints[0]	*= 5;	//heh	B	thinks he	is smart by	adding this	to description ? If	it doesn;t work	std	then it	still	needs	to made	by hand
-				}break;
-		
+				}break;	
 			//Mage - Improved	Blizzard
 			case  11185:
 				{		 
@@ -4240,7 +4225,30 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[2]	=	SPELL_EFFECT_APPLY_AURA;
 						sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
 						sp->Flags4 |=	CAN_PERSIST_AND_CASTED_WHILE_DEAD;
-				}break;				
+				}break;
+			case 31579:
+			case 31582:
+			case 31583://Arcane Empowerment	
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+					/* -- commented until i will be able to finish it - that means never ;)
+					//this field is fucked, first mistake
+					sp->EffectSpellClassMask[0][0] = 0x20000000;
+					//there is no effect for first part of description, Arcane Missiles, second mistake
+					//we have to copy effect, nice
+					sp->Effect[1] = sp->Effect[0];
+					sp->EffectBasePoints[1] = 44;
+					sp->EffectImplicitTargetA[1] = sp->EffectImplicitTargetA[0];
+					sp->EffectApplyAuraName[1] = sp->EffectApplyAuraName[0];
+					sp->EffectMiscValue[1] = sp->EffectMiscValue[0];
+					//this is strange but EffectSpellClassMask for second effect is correct
+					//i think someone was drunk while making this spell ;)*/
+				}break;
+			case 54749://Burning Determination
+			case 54747:
+				{
+					sp->procFlags = PROC_ON_SPELL_LAND;
+				}break;
 			}
 		}
 	}

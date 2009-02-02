@@ -609,6 +609,14 @@ enum AURA_CHECK_RESULT
 	AURA_CHECK_RESULT_LOWER_BUFF_PRESENT	= 3,
 };
 
+enum DUMMY_AURAS
+{
+	DUMMY_AURA_TORMENT_THE_WEAK,
+	DUMMY_AURA_ARCANE_POTENCY,
+	DUMMY_AURA_ARCANE_EMPOWERMENT,
+	NUM_DUMMY_AURAS
+};
+
 typedef std::list<struct ProcTriggerSpellOnSpell> ProcTriggerSpellOnSpellList;
 
 /************************************************************************/
@@ -1161,7 +1169,6 @@ public:
 	//solo target auras
 	uint32 m_hotStreakCount;
 	uint32 m_incanterAbsorption;
-	float m_dmgToSnaredTargets;
 	uint32 m_frozenTargetCharges;
 	uint32 m_frozenTargetId;
 	uint32 polySpell;
@@ -1191,6 +1198,8 @@ public:
 	void Dismount();
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
+
+	int32 m_DummyAuras[NUM_DUMMY_AURAS];
 
 protected:
 	Unit ();

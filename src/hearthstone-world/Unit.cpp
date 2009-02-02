@@ -25,7 +25,7 @@ Unit::Unit()
 	printf("Unit::Unit()\n");
 #endif
 	m_lastHauntInitialDamage = 0;
-	memset(m_damageOverTimePctIncrease, 0, sizeof(uint32) * 7);
+	memset(m_damageOverTimePctIncrease, 0, sizeof(int32) * 7);
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
 	m_duelWield = false;
@@ -209,7 +209,6 @@ Unit::Unit()
 
 	m_frozenTargetCharges = 0;
 	m_frozenTargetId = 0;
-	m_dmgToSnaredTargets = 0;
 	m_incanterAbsorption = 0;
 	m_hotStreakCount = 0;
 
@@ -233,6 +232,8 @@ Unit::Unit()
 	m_chargeSpells.clear();
 	m_chargeSpellRemoveQueue.clear();
 	tmpAura.clear();
+
+	memset(m_DummyAuras, 0, sizeof(int32) * NUM_DUMMY_AURAS);
 }
 
 Unit::~Unit()
@@ -1772,6 +1773,18 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if (!CastingSpell || CastingSpell->NameHash != SPELL_HASH_BLINK)
 									continue; 
+							}break;
+						case 54748: //Burning Determination
+							{
+								if( !CastingSpell )
+									continue;
+								if( !(	CastingSpell->EffectMechanic[0] == 9 || 
+										CastingSpell->EffectMechanic[1] == 9 ||
+										CastingSpell->EffectMechanic[2] == 9 ||
+										CastingSpell->EffectMechanic[0] == 26 || 
+										CastingSpell->EffectMechanic[1] == 26 ||
+										CastingSpell->EffectMechanic[2] == 26 ) )
+									continue;
 							}break;
 					}
 				}
@@ -4098,15 +4111,6 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 				plus_damage += float2int32( float( plus_damage * durmod ) / 15000.0f );
 			}
 		}
-		//In case we dont fit in previous cases do old thing // aren't all cases supposed to be done in SpellFixes?
-		/*else
-		{
-			plus_damage = float2int32( float( plus_damage ) * spellInfo->casttime_coef );
-			float td = float( GetDuration( dbcSpellDuration.LookupEntry( spellInfo->DurationIndex ) ));
-			//DOT-DD (Moonfire-Immolate-IceLance-Pyroblast)(Hack Fix) not sure its right
-			if( spellInfo->NameHash == SPELL_HASH_MOONFIRE || spellInfo->NameHash == SPELL_HASH_IMMOLATE || spellInfo->NameHash == SPELL_HASH_ICE_LANCE || spellInfo->NameHash == SPELL_HASH_PYROBLAST )
-				plus_damage = float2int32( float( plus_damage ) * float( 1.0f - ( ( td / 15000.0f ) / ( ( td / 15000.0f ) + dmgdoneaffectperc ) ) ) );
-		}*/
 	}
 
 	//==========================================================================================
@@ -4116,6 +4120,17 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 	if( spellInfo->SpellGroupType )	// apply coefficient modifier
 	{
 		float modifier = 0;
+		if( caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ] )
+		{
+			if( spellInfo->NameHash == SPELL_HASH_ARCANE_MISSILES )
+			{
+				modifier += 15 * caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ];
+			}
+			else if( spellInfo->NameHash == SPELL_HASH_ARCANE_BLAST )
+			{
+				modifier += 3 * caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ];
+			}
+		}
 		SM_FFValue( caster->SM[SMT_SPD_BONUS][0], &modifier, spellInfo->SpellGroupType );
 		coefficient += modifier / 100.0f;
 		SM_PFValue( caster->SM[SMT_SPD_BONUS][1], &coefficient, spellInfo->SpellGroupType );
@@ -4123,6 +4138,13 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 
 	if(isdot)
 		coefficient += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
+
+	if((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) && 
+		caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] &&
+		pVictim->m_speedModifier < 0 )
+	{
+		coefficient += (caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] / 100.f);
+	}
 
 	plus_damage = float2int32( float( plus_damage ) * coefficient );
 
