@@ -1941,13 +1941,6 @@ void Aura::SpellAuraDummy(bool apply)
 				}
 			}
 		}break;
-	case 66:
-		{
-			// mage - invisibility
-			if( !apply && !this->IsInterrupted() )
-				m_target->CastSpell( m_target, 32612, true );
-		}break;
-
 	case 32612:
 		{
 			// mage - invisibility override

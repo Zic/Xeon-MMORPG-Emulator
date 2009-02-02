@@ -2246,16 +2246,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 12579:
 				{
 						sp->c_is_flags |=	SPELL_FLAG_CANNOT_PROC_ON_SELF;
-				}break;
-		
-			// Mage	-	Invisibility 
-			case  66:
-				{
-						// make	a	new	dummy	effect for it
-						sp->Effect[2]	=	SPELL_EFFECT_APPLY_AURA;
-						sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
-				}break;
-		
+				}break;	
 			// Mage	-	Invisibility part	2
 			case  32612:
 				{
@@ -2267,7 +2258,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[2]	=	0;
 						sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_CAST_SPELL;	//The	effect is	cancelled	if you perform or	receive	any	actions
 				}break;
-		
 			//Mage - Icy Veins
 			case  12472:
 				{
@@ -4271,6 +4261,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->procFlags = PROC_ON_CAST_SPELL;
 				}break;
+			case 66:
+				{
+					sp->EffectTriggerSpell[0] = 32612;
+				}break;
 			}
 		}
 	}
@@ -4506,7 +4500,7 @@ void ApplyNormalFixes()
 		    type |= SPELL_TYPE_MARK_GIFT;
 		else if( namehash == SPELL_HASH_IMMOLATION_TRAP || namehash == SPELL_HASH_FREEZING_TRAP || namehash == SPELL_HASH_FROST_TRAP || namehash == SPELL_HASH_EXPLOSIVE_TRAP || namehash == SPELL_HASH_SNAKE_TRAP )
 		    type |= SPELL_TYPE_HUNTER_TRAP;
-		else if( namehash == SPELL_HASH_ARCANE_INTELLECT || namehash == SPELL_HASH_ARCANE_BRILLIANCE )
+		else if( sp->EffectApplyAuraName[0] == SPELL_AURA_MOD_STAT && sp->EffectMiscValue[0] == 3 )
 		    type |= SPELL_TYPE_MAGE_INTEL;
 		else if( namehash == SPELL_HASH_AMPLIFY_MAGIC || namehash == SPELL_HASH_DAMPEN_MAGIC )
 		    type |= SPELL_TYPE_MAGE_MAGI;
