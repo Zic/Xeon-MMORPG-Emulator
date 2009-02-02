@@ -6770,18 +6770,13 @@ void Aura::SpellAuraWaterWalk( bool apply )
 
 void Aura::SpellAuraFeatherFall( bool apply )
 {
-	//FIXME:Find true flag
-	if( m_target->GetTypeId() == TYPEID_PLAYER )
-	{
-		if( apply )
-		{
-			TO_PLAYER( m_target )->m_noFallDamage = true;
-		}
-		else
-		{
-			TO_PLAYER( m_target )->m_noFallDamage = false;
-		}
-	}
+	if( !m_target->IsPlayer() )
+		return;
+
+	WorldPacket data(12); 
+	data.SetOpcode(apply ? SMSG_MOVE_FEATHER_FALL : SMSG_MOVE_NORMAL_FALL);
+	data << m_target->GetNewGUID() << (uint32)0;
+	TO_PLAYER( m_target )->GetSession()->SendPacket( &data );
 }
 
 void Aura::SpellAuraHover( bool apply )
