@@ -2035,6 +2035,10 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	if( unitTarget->isDead() && !(m_spellInfo->Flags4 & CAN_PERSIST_AND_CASTED_WHILE_DEAD) )
 		return;
 
+	//we shouldn't apply fireball dot if we have fireball glyph
+	if( m_spellInfo->NameHash == SPELL_HASH_FIREBALL && p_caster && p_caster->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] )
+		return;
+
 	// can't apply stuns/fear/polymorph/root etc on boss
 	if ( !playerTarget )
 	{

@@ -259,6 +259,7 @@ enum MOD_TYPES
 	SPELL_AURA_VEHICLE_PASSENGER=236,
 	SPELL_AURA_MODIFY_AXE_SKILL=240,
 	SPELL_AURA_ADD_HEALTH=250,
+	SPELL_AURA_NO_REAGENT=256,
 	SPELL_AURA_SET_PHASE=261,
 	SPELL_AURA_FROZEN_TARGET=262,
 	SPELL_AURA_INCREASE_AP_BY_ATTRIBUTE=268,
@@ -662,6 +663,7 @@ public:
 	void SpellAuraIncreaseAPByAttribute(bool apply);
 	void SpellAuraVehiclePassenger(bool apply);
 	void SpellAuraReduceEffectDuration(bool apply);
+	void SpellAuraNoReagent(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 

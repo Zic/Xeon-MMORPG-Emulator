@@ -3088,15 +3088,31 @@ uint8 Spell::CanCast(bool tolerate)
 				return SPELL_FAILED_ALREADY_AT_FULL_MANA;
 		}
 
-		// check if we have the required reagents
-		for(i=0; i<8 ;i++)
+		bool CheckReagents = true;
+		if( m_spellInfo->SpellGroupType )
 		{
-			if( m_spellInfo->Reagent[i] == 0 || m_spellInfo->ReagentCount[i] == 0)
-				continue;
-
-			if(p_caster->GetItemInterface()->GetItemCount(m_spellInfo->Reagent[i]) < m_spellInfo->ReagentCount[i])
-				return SPELL_FAILED_ITEM_GONE;
+			//lets check if we need regeants
+			uint32 AffectedSpellGroupType[3] = {0,0,0};
+			for(uint32 x=0;x<3;x++)
+				AffectedSpellGroupType[x] |= p_caster->GetUInt32Value(PLAYER_NO_REAGENT_COST_1+x);
+			if( AffectedSpellGroupType )
+			{
+				for(uint32 x=0;x<3;x++)
+					if( AffectedSpellGroupType[x] & m_spellInfo->SpellGroupType[x] )
+						CheckReagents = false;
+			}
 		}
+
+		// check if we have the required reagents
+		if( CheckReagents )
+			for(i=0; i<8 ;i++)
+			{
+				if( m_spellInfo->Reagent[i] == 0 || m_spellInfo->ReagentCount[i] == 0)
+					continue;
+
+				if(p_caster->GetItemInterface()->GetItemCount(m_spellInfo->Reagent[i]) < m_spellInfo->ReagentCount[i])
+					return SPELL_FAILED_ITEM_GONE;
+			}
 
 		// check if we have the required tools, totems, etc
 		if( m_spellInfo->Totem[0] != 0)

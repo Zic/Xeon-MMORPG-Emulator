@@ -4265,6 +4265,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->EffectTriggerSpell[0] = 32612;
 				}break;
+			case 56368:
+				{
+					sp->Effect[1] = sp->Effect[0];
+					sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+				}break;
 			}
 		}
 	}

@@ -276,7 +276,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//253
 		&Aura::SpellAuraNULL,//254
 		&Aura::SpellAuraNULL,//255
-		&Aura::SpellAuraNULL,//256
+		&Aura::SpellAuraNoReagent,//256
 		&Aura::SpellAuraNULL,//257
 		&Aura::SpellAuraNULL,//258
 		&Aura::SpellAuraNULL,//259
@@ -2795,6 +2795,10 @@ void Aura::SpellAuraDummy(bool apply)
 			case SPELL_HASH_ARCANE_EMPOWERMENT:
 				{
 					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_EMPOWERMENT] = apply ? GetSpellProto()->RankNumber : 0;
+				}break;
+			case SPELL_HASH_GLYPH_OF_FIREBALL:
+				{
+					m_target->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] = apply;
 				}break;
 		}
 
@@ -9019,4 +9023,23 @@ void Aura::SpellAuraReduceEffectDuration(bool apply)
 	if(mod->m_miscValue > 0 && mod->m_miscValue < NUM_MECHANIC){
 		p_target->MechanicDurationPctMod[mod->m_miscValue] += val;
 	}
+}
+
+void Aura::SpellAuraNoReagent(bool apply)
+{
+	if( !p_target )
+		return;
+
+	uint32 ClassMask[3] = {0,0,0};
+	for(uint32 x=0;x<3;x++)
+		ClassMask[x] |= p_target->GetUInt32Value(PLAYER_NO_REAGENT_COST_1+x);
+
+	for(uint32 x=0;x<3;x++)
+		if(apply)
+			ClassMask[x] |= m_spellProto->EffectSpellClassMask[mod->i][x];
+		else
+			ClassMask[x] &= ~m_spellProto->EffectSpellClassMask[mod->i][x];
+
+	for(uint32 x=0;x<3;x++)
+		p_target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+x, ClassMask[x]);
 }
