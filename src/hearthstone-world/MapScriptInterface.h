@@ -85,7 +85,7 @@ public:
 
 	uint32 GetPlayerCountInRadius(float x, float y, float z = 0.0f, float radius = 5.0f);
 	
-	shared_ptr<GameObject> SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2);
+	GameObjectPointer SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2);
 	CreaturePointer SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2);
 	WayPoint * CreateWaypoint();
 
