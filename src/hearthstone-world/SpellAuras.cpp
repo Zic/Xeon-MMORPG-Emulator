@@ -8106,10 +8106,10 @@ void Aura::SpellAuraModHealingDonePct(bool apply)
 			if( apply )
 			{
 				mod->fixed_float_amount[x] = m_target->HealTakenPctMod[x] * baseMod;
-				m_target->HealTakenPctMod[x] += mod->fixed_float_amount[x];
+				m_target->HealDonePctMod[x] += mod->fixed_float_amount[x];
 			}
 			else
-				m_target->HealTakenPctMod[x] -= mod->fixed_float_amount[x];
+				m_target->HealDonePctMod[x] -= mod->fixed_float_amount[x];
 			
 		}
 	}
