@@ -2671,10 +2671,18 @@ void Spell::HandleAddAura(uint64 guid)
 				return;
 			}
 
-			if(itr->second->GetSpellProto()->procCharges>0)
+			//charges
+			int32 procCharges = itr->second->GetSpellProto()->procCharges;
+			if( u_caster && itr->second->GetSpellProto()->SpellGroupType )
+			{
+				SM_FIValue(u_caster->SM[SMT_CHARGES][0],&procCharges, itr->second->GetSpellProto()->SpellGroupType);
+				SM_PIValue(u_caster->SM[SMT_CHARGES][1],&procCharges, itr->second->GetSpellProto()->SpellGroupType);
+			}
+
+			if( procCharges >0)
 			{
 				AuraPointer aur=NULLAURA;
-				for(int i=0;i<itr->second->GetSpellProto()->procCharges-1;i++)
+				for(int i=0;i< procCharges-1;i++)
 				{
 					aur = AuraPointer(new Aura(itr->second->GetSpellProto(),itr->second->GetDuration(),itr->second->GetCaster(),itr->second->GetTarget()));
 					Target->AddAura(aur, NULLAURA);
@@ -2683,7 +2691,7 @@ void Spell::HandleAddAura(uint64 guid)
 				if(!(itr->second->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
 				{
 					SpellCharge charge;
-					charge.count=itr->second->GetSpellProto()->procCharges;
+					charge.count=procCharges;
 					charge.spellId=itr->second->GetSpellId();
 					charge.ProcFlag=itr->second->GetSpellProto()->procFlags;
 					charge.lastproc = 0;

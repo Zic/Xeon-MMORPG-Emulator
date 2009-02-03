@@ -3529,6 +3529,14 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		if( IsPlayer() && plr_shared_from_this()->stack_cheat )
 			maxStack = 999;
 
+		if( aur->m_spellProto->SpellGroupType )
+		{
+			int32 add_maxstack = 0;
+			SM_FIValue( SM[SMT_CHARGES][0],&add_maxstack, aur->m_spellProto->SpellGroupType);
+			SM_PIValue( SM[SMT_CHARGES][1],&add_maxstack, aur->m_spellProto->SpellGroupType);
+			maxStack += add_maxstack;
+		}
+
 		SpellEntry * info = aur->GetSpellProto();
 		//uint32 flag3 = aur->GetSpellProto()->Flags3;
 
