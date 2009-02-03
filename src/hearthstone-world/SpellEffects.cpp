@@ -1095,7 +1095,18 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH,pet_dmg);
 			unitTarget->DealDamage(u_caster,pet_dmg,0,0,25228,true);
 		}break;
-
+		//Demonic Circle
+	case 48020:
+		{
+			if( !p_caster )
+				return;
+		
+			GameObjectPointer DemonicCircle = p_caster->GetMapMgr()->GetGameObject( p_caster->m_ObjectSlots[0] );
+			if( DemonicCircle )
+			{
+				p_caster->SafeTeleport( DemonicCircle->GetMapId(), DemonicCircle->GetInstanceID(), DemonicCircle->GetPosition());
+			}
+		}break;
 	/*************************
 	 * DEATH KNIGHT SPELLS
 	 *************************/

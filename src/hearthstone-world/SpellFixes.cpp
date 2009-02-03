@@ -4270,6 +4270,16 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[1] = sp->Effect[0];
 					sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 				}break;
+			case 48020:
+				{
+					sp->Effect[1] = SPELL_EFFECT_DUMMY;
+				}break;
+			case 48018:
+				{
+					sp->AdditionalAura = 62388;
+					sp->EffectImplicitTargetA[0] = 1;
+				}break;
+
 			}
 		}
 	}
@@ -5804,7 +5814,18 @@ void ApplyNormalFixes()
 			}
 		}
 		ApplySingleSpellFixes(sp);
-	}	
+	}
+
+	sp = dbcSpell.LookupEntryForced( 26659 );
+	SpellEntry * sp2 = new SpellEntry;
+	memset(sp2, 0, sizeof(SpellEntry));
+	sp2 = sp;
+	sp2->Id = 62388;
+	sp2->Name = "Dummy Shit";
+	sp2->DurationIndex = 41;
+	sp2->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
+	dbcSpell.SetRow(62388,sp2);
+
 #ifdef DUMP_CLASS_SPELLS
 	DumpClassSpells();
 #endif
