@@ -4279,7 +4279,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->AdditionalAura = 62388;
 					sp->EffectImplicitTargetA[0] = 1;
 				}break;
-
+			case 30708://Totem of Wrath
+				{
+					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+				}break;
 			}
 		}
 	}
@@ -5624,12 +5627,19 @@ void ApplyNormalFixes()
 		//////////////////////////////////////////
 
 		// Insert rogue spell fixes here
+		if( sp->NameHash == SPELL_HASH_REMORSELESS_ATTACKS )
+			sp->procFlags = PROC_ON_GAIN_EXPIERIENCE;
+
+		if( sp->NameHash == SPELL_HASH_UNFAIR_ADVANTAGE )
+			sp->procFlags = PROC_ON_DODGE_VICTIM;
 
 		//////////////////////////////////////////
 		// PRIEST								//
 		//////////////////////////////////////////
 
 		// Insert priest spell fixes here
+		if( sp->NameHash == SPELL_HASH_BORROWED_TIME )
+			sp->procFlags = PROC_ON_CAST_SPELL;
 
 		//////////////////////////////////////////
 		// SHAMAN								//
@@ -5710,6 +5720,13 @@ void ApplyNormalFixes()
 			sp->Effect[0] = SPELL_EFFECT_ENERGIZE;
 			sp->EffectMiscValue[0] = POWER_TYPE_MANA;
 		}
+
+		if(sp->NameHash == SPELL_HASH_TIDAL_WAVES )
+			sp->procFlags = PROC_ON_CAST_SPELL;
+
+		//Earthliving Weapon
+		if(sp->NameHash == SPELL_HASH_EARTHLIVING_WEAPON__PASSIVE_)
+			sp->procFlags = PROC_ON_CAST_SPELL;
 
 		//////////////////////////////////////////
 		// MAGE								//

@@ -1819,6 +1819,39 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( !( CastingSpell->SpellGroupType[0] & 0x100220 ) || victim == unit_shared_from_this() ) //frost
 									continue;
 							}break;
+						case 53390: //Tidal Waves
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_CHAIN_HEAL &&
+									CastingSpell->NameHash != SPELL_HASH_RIPTIDE )
+									continue; 
+							}break;
+							//Earthliving
+						case 51945:
+						case 51990:
+						case 51997:
+						case 51998:
+						case 51999:
+						case 52000:
+							{
+								if (!CastingSpell )
+									continue;
+								if( !(CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING) )
+									continue;
+							}break;
+							//Borrowed Time
+						case 59887:
+						case 59888:
+						case 59889:
+						case 59890:
+						case 59891:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_POWER_WORD__SHIELD )
+									continue;
+							};
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
