@@ -1,1 +1,0 @@
-ALTER TABLE questlog ADD COLUMN `player_slain` int(10) UNSIGNED NOT NULL DEFAULT 0;

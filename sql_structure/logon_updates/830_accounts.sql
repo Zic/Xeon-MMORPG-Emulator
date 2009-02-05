@@ -1,1 +1,0 @@
-ALTER TABLE accounts ADD COLUMN Encrypted_Password varchar(255) NOT NULL default '' AFTER Password;

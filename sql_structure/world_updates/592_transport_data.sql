@@ -1,1 +1,0 @@
-ALTER TABLE transport_data DROP period;

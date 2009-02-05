@@ -1,1 +1,0 @@
-ALTER TABLE characters ADD COLUMN `finished_daily_quests` longtext not null AFTER `finished_quests`;

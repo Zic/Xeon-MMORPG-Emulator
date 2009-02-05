@@ -1,1 +1,0 @@
-ALTER TABLE accounts ADD COLUMN `forceLanguage` varchar(5) NOT NULL default 'enUS'  AFTER lastip

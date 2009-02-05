@@ -1,1 +1,0 @@
-ALTER TABLE quests ADD `SuggestedPlayers` INT DEFAULT 0 NOT NULL AFTER RequiredRepValue

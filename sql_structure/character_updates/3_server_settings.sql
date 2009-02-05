@@ -1,1 +1,0 @@
-ALTER TABLE server_settings MODIFY setting_value INT UNSIGNED NOT NULL;
