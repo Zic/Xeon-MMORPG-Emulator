@@ -804,7 +804,6 @@ void Aura::Remove()
 		{
 			// try to remove
 			caster->CombatStatus.RemoveAttackTarget(m_target);
-			m_target->CombatStatus.ForceRemoveAttacker( caster->GetGUID() );
 		}
 
 		if( m_spellProto->buffIndexType != 0 && m_target->IsPlayer() )
@@ -1783,7 +1782,7 @@ void Aura::EventPeriodicDamage(uint32 amount)
 		}
 
 		
-		SendPeriodicAuraLog(m_casterGuid, m_target, GetSpellProto()->Id, school, float2int32(res), abs_dmg, dmg.resisted_damage, FLAG_PERIODIC_DAMAGE);
+		SendPeriodicAuraLog(m_casterGuid, m_target, GetSpellProto(), float2int32(res), abs_dmg, dmg.resisted_damage, FLAG_PERIODIC_DAMAGE);
 
 		if(school == SHADOW_DAMAGE)
 			if( c != NULL && c->isAlive() && c->IsPlayer() && c->getClass() == PRIEST )
@@ -3152,23 +3151,6 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			bonus = 0;
 	}
 
-    //Downranking
-    if( c != NULL && c->IsPlayer() )
-    {
-		if( m_spellProto->baseLevel > 0 && m_spellProto->maxLevel > 0 )
-		{
-            float downrank1 = 1.0f;
-            if( m_spellProto->baseLevel < 20 )
-                downrank1 = 1.0f - ( 20.0f - float( m_spellProto->baseLevel ) ) * 0.0375f;
-
-            float downrank2 = ( float(m_spellProto->maxLevel + 5.0f) / float(c->getLevel()) );
-            if( downrank2 >= 1 || downrank2 < 0 )
-                downrank2 = 1.0f;
-
-            bonus = float2int32( float( bonus ) * downrank1 * downrank2 );
-        }
-    }
-
 	int32 add = ( bonus + amount > 0 ) ? bonus + amount : 0;
 	if( c != NULL )
 	{
@@ -3186,7 +3168,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 	
 	m_target->SetUInt32Value( UNIT_FIELD_HEALTH, newHealth );
 
-	SendPeriodicHealAuraLog( add );
+	SendPeriodicAuraLog( add, FLAG_PERIODIC_HEAL );
 
 	if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_ON_STAND_UP )
 	{
@@ -3758,7 +3740,7 @@ void Aura::EventPeriodicHealPct(float RegenPct)
 	else
 		m_target->SetUInt32Value(UNIT_FIELD_HEALTH, m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 
-	SendPeriodicAuraLog(m_casterGuid, m_target, m_spellProto->Id, m_spellProto->School, add, 0, 0, FLAG_PERIODIC_HEAL);
+	SendPeriodicAuraLog(m_casterGuid, m_target, m_spellProto, add, 0, 0, FLAG_PERIODIC_HEAL);
 
 	if(GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_ON_STAND_UP)
 	{
@@ -4011,7 +3993,7 @@ void Aura::EventPeriodicEnergize(uint32 amount,uint32 type)
 	else
 		m_target->SetUInt32Value(UNIT_FIELD_POWER1 + type,totalEnergy);
 	
-	SendPeriodicAuraLog( m_casterGuid, m_target, m_spellProto->Id, m_spellProto->School, amount, 0, 0, FLAG_PERIODIC_ENERGIZE);
+	SendPeriodicAuraLog( m_casterGuid, m_target, m_spellProto, amount, 0, 0, FLAG_PERIODIC_ENERGIZE);
 
 	if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_ON_STAND_UP) && type == 0)
 	{
@@ -5181,17 +5163,8 @@ void Aura::EventPeriodicLeech(uint32 amount)
 		bonus = (Amount * siphonbonus) / 100;
 		Amount+= bonus;
 	}
-	
-	WorldPacket data(SMSG_PERIODICAURALOG, 32);
-	data << m_caster->GetNewGUID();
-	data << m_target->GetNewGUID();
-	data << m_spellProto->Id;
-	data << uint32(1);
-	data << uint32(FLAG_PERIODIC_HEAL);
-	data << uint32(Amount);
-	m_target->SendMessageToSet(&data,true);
 
-	SendPeriodicAuraLog(m_target, m_target, m_spellProto->Id, m_spellProto->School, Amount, 0, 0, FLAG_PERIODIC_LEECH);
+	SendPeriodicAuraLog(m_target, m_target, GetSpellProto(), Amount, 0, 0, FLAG_PERIODIC_LEECH);
 
 	//deal damage before we add healing bonus to damage
 	m_target->DealDamage(m_target, Amount, 0, 0, GetSpellProto()->Id,true);
@@ -5632,7 +5605,7 @@ void Aura::EventPeriodicHealthFunnel(uint32 amount)
 		else
 			m_caster->SetUInt32Value(UNIT_FIELD_HEALTH, mh);
 
-		SendPeriodicAuraLog(m_target, m_target, m_spellProto->Id, m_spellProto->School, 1000, 0, 0, FLAG_PERIODIC_LEECH);
+		SendPeriodicAuraLog(m_target, m_target, m_spellProto, amount, 0, 0, FLAG_PERIODIC_LEECH);
 	}
 }
 
@@ -6366,6 +6339,7 @@ void Aura::EventPeriodicDrink(uint32 amount)
 	if( v > m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
 		v = m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 	m_target->SetUInt32Value(UNIT_FIELD_POWER1, v);
+	SendPeriodicAuraLog(amount, FLAG_PERIODIC_ENERGIZE);
 }
 
 void Aura::EventPeriodicHeal1(uint32 amount)
@@ -6389,7 +6363,7 @@ void Aura::EventPeriodicHeal1(uint32 amount)
 	else
 	{
 		if(!(m_spellProto->buffType & SPELL_TYPE_ARMOR))
-			SendPeriodicHealAuraLog(amount);
+			SendPeriodicAuraLog(amount, FLAG_PERIODIC_HEAL);
 	}
 }
 
@@ -7776,7 +7750,7 @@ void Aura::EventPeriodicBurn(uint32 amount, uint32 misc)
 		uint32 Amount = (uint32)min( amount, m_target->GetUInt32Value( field ) );
 		uint32 newHealth = m_target->GetUInt32Value(field) - Amount ;
 				
-		SendPeriodicAuraLog(m_target, m_target, m_spellProto->Id, m_spellProto->School, newHealth, 0, 0, FLAG_PERIODIC_DAMAGE);
+		SendPeriodicAuraLog(m_target, m_target, m_spellProto, newHealth, 0, 0, FLAG_PERIODIC_DAMAGE);
 		m_target->DealDamage(m_target, Amount, 0, 0, GetSpellProto()->Id);
 	}  
 }
@@ -8863,54 +8837,41 @@ void Aura::SetTimeLeft(int32 time)
 	}
 }
 
-void Aura::SendPeriodicHealAuraLog(uint32 amt)
+void Aura::SendPeriodicAuraLog(uint32 amt, uint32 Flags)
 {
-	WorldPacket data(32);
-	data.SetOpcode(SMSG_PERIODICAURALOG);
-	data << m_target->GetNewGUID();
-	FastGUIDPack(data, m_casterGuid);
-	data << GetSpellProto()->Id;
-	data << uint32(1);
-	data << uint32(FLAG_PERIODIC_HEAL);
-	data << uint32(amt);
-	m_target->SendMessageToSet(&data,true);
+	Aura::SendPeriodicAuraLog(m_casterGuid, m_target, GetSpellProto(), amt, 0, 0, Flags, pSpellId);
 }
 
 // log message's
-void Aura::SendPeriodicAuraLog(UnitPointer Caster, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags)
+void Aura::SendPeriodicAuraLog(UnitPointer Caster, UnitPointer Target, SpellEntry *sp, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags, uint32 pSpellId)
 {
-	uint32 overkill = Target->computeOverkill(Amount);
-
-	WorldPacket data(SMSG_PERIODICAURALOG, 46);
-	data << Target->GetNewGUID();		// target guid
-	data << Caster->GetNewGUID();		// caster guid
-	data << SpellID;					// spellid
-	data << (uint32)1;					// unknown? need research?
-	data << uint32(Flags | 0x1);		// aura school
-	data << Amount;						// amount of done to target / heal / damage
-	data << (uint32)overkill;			// overkill
-	data << g_spellSchoolConversionTable[School];
-	data << uint32(abs_dmg);
-	data << uint32(resisted_damage);
-
-	Caster->SendMessageToSet(&data, true);
+	Aura::SendPeriodicAuraLog(Caster->GetGUID(), Target, sp, Amount, abs_dmg, resisted_damage, Flags, pSpellId);
 }
 
-void Aura::SendPeriodicAuraLog(const uint64& CasterGuid, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags)
+void Aura::SendPeriodicAuraLog(const uint64& CasterGuid, UnitPointer Target, SpellEntry *sp, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags, uint32 pSpellId)
 {
-	uint32 overkill = Target->computeOverkill(Amount);
+	uint32 overkill = 0;
+	if(Flags == FLAG_PERIODIC_DAMAGE || Flags == FLAG_PERIODIC_LEECH)
+		overkill = Target->computeOverkill(Amount);
+	if(!(Flags & FLAG_PERIODIC_HEAL))
+		 Flags |= 0x1;
+
+	uint32 spellId = sp->logsId ? sp->logsId : (pSpellId ? pSpellId : sp->Id);
 
 	WorldPacket data(SMSG_PERIODICAURALOG, 46);
 	data << Target->GetNewGUID();		// target guid
 	FastGUIDPack(data, CasterGuid);		// caster guid
-	data << SpellID;					// spellid
+	data << spellId;					// spellid
 	data << (uint32)1;					// unknown?? need resource?
-	data << uint32(Flags | 0x1);		// aura school
+	data << uint32(Flags);				// aura school
 	data << Amount;						// amount of done to target / heal / damage
-	data << (uint32)overkill;			// overkill
-	data << g_spellSchoolConversionTable[School];
-	data << uint32(abs_dmg);
-	data << uint32(resisted_damage);
+	if(Flags & FLAG_PERIODIC_HEAL)
+	{
+		data << (uint32)overkill;			// overkill
+		data << g_spellSchoolConversionTable[sp->School];
+		data << uint32(abs_dmg);
+		data << uint32(resisted_damage);
+	}
 
 	Target->SendMessageToSet(&data, true);
 }

@@ -3076,7 +3076,8 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 	else  
         modEnergy = damage;
 
-	u_caster->Energize(unitTarget, pSpellId ? pSpellId : m_spellInfo->Id, modEnergy, m_spellInfo->EffectMiscValue[i]);
+	u_caster->Energize(unitTarget, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id), 
+		modEnergy, m_spellInfo->EffectMiscValue[i]);
 }
 
 void Spell::SpellEffectWeaponDmgPerc(uint32 i) // Weapon Percent damage

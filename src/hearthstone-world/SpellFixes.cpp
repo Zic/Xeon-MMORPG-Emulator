@@ -562,7 +562,20 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					// Damage	caused may interrupt the effect.
 					sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_UNUSED2;
 				}break;
-			
+
+			//shaman - Ancestral Awakening
+			case 51558:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+					sp->EffectTriggerSpell[0] = 52752;
+				}break;
+			case 52752:
+				{
+					sp->Dspell_coef_override = 0.0f;
+					sp->spell_can_crit = false;
+					sp->logsId = sp->Id;
+				}break;
 			// shaman	-	Maelstrom	Weapon
 			case 51528:
 			case 51529:
@@ -690,6 +703,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 					sp->EffectSpellClassMask[0][0] = 0x00100000	|	0x10000000 | 0x80000000; //Earth + Flame + Frost Shocks
 					sp->EffectSpellClassMask[0][1] = 0x08000000;	// Wind	Shock
+				}break;
+			case 60567:
+				{
+					sp->EffectImplicitTargetA[1] = EFF_TARGET_SELF;
 				}break;
 			
 			// Totem of	Indomitability,	Totem	of Dueling (proc on	Stormstrike)
@@ -3847,6 +3864,34 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectSpellClassMask[1][0] = 0;
 					sp->EffectSpellClassMask[1][1] = 0x00004000; // Clearcasting
 				}break;
+			case 51562:
+			case 51563:
+			case 51564:
+			case 51565:
+			case 51566: // Tidal Waves
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[0][0] = 0x00000100;	// Chain heal
+					sp->EffectSpellClassMask[0][1] = 0x00000000;
+					sp->EffectSpellClassMask[0][2] = 0x00000010;	// Riptide
+				}break;
+			case 53390:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			case 51940:
+			case 51989:
+			case 52004:
+			case 52005:
+			case 52008: // Earthliving Weapon
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->procChance = 20;
+				}break;
+			case 52000:
+				{
+					sp->logsId = 52000;
+				}break;
 		
 			//////////////////////////////////////////
 			// MAGE								//
@@ -4237,7 +4282,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 54749://Burning Determination
 			case 54747:
 				{
-					sp->procFlags = PROC_ON_SPELL_LAND;
+					sp->procFlags = PROC_ON_SPELL_LAND_VICTIM;
 				}break;
 			case 48266://blood presence
 				{
@@ -5712,6 +5757,7 @@ void ApplyNormalFixes()
 		{
 			sp->EffectRadiusIndex[0] = 10; // 30 yards
 			sp->Effect[0] = SPELL_EFFECT_HEAL;
+			sp->logsId = 5394;
 		}
 
 		// Mana Spring
@@ -5719,14 +5765,8 @@ void ApplyNormalFixes()
 		{
 			sp->Effect[0] = SPELL_EFFECT_ENERGIZE;
 			sp->EffectMiscValue[0] = POWER_TYPE_MANA;
+			sp->logsId = 5675;
 		}
-
-		if(sp->NameHash == SPELL_HASH_TIDAL_WAVES )
-			sp->procFlags = PROC_ON_CAST_SPELL;
-
-		//Earthliving Weapon
-		if(sp->NameHash == SPELL_HASH_EARTHLIVING_WEAPON__PASSIVE_)
-			sp->procFlags = PROC_ON_CAST_SPELL;
 
 		//////////////////////////////////////////
 		// MAGE								//

@@ -1782,16 +1782,22 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if (!CastingSpell || CastingSpell->NameHash != SPELL_HASH_BLINK)
 									continue; 
 							}break;
+						case 52752: // Ancestral Awakening
+							{
+								if((CastingSpell->NameHash != SPELL_HASH_HEALING_WAVE &&
+									CastingSpell->NameHash != SPELL_HASH_LESSER_HEALING_WAVE &&
+									CastingSpell->NameHash != SPELL_HASH_RIPTIDE) ||
+									!IsPlayer())
+										continue;
+								targets.m_unitTarget = Spell::FindLowestHealthRaidMember(plr_shared_from_this(), 1600); // within 40 yards
+								if(!targets.m_unitTarget)	// shouldn't happen
+									continue;
+								dmg_overwrite = dmg * (ospinfo->EffectBasePoints[0] + 1) / 100;
+							}break;
 						case 54748: //Burning Determination
 							{
-								if( !CastingSpell )
-									continue;
-								if( !(	CastingSpell->EffectMechanic[0] == 9 || 
-										CastingSpell->EffectMechanic[1] == 9 ||
-										CastingSpell->EffectMechanic[2] == 9 ||
-										CastingSpell->EffectMechanic[0] == 26 || 
-										CastingSpell->EffectMechanic[1] == 26 ||
-										CastingSpell->EffectMechanic[2] == 26 ) )
+								if( !CastingSpell || !(Spell::HasMechanic(CastingSpell, MECHANIC_SILENCED) || 
+										Spell::HasMechanic(CastingSpell, MECHANIC_INTERRUPTED)))
 									continue;
 							}break;
 						case 50475:
@@ -4213,13 +4219,6 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 	if(isdot)
 		coefficient += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
 
-	if((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) && 
-		caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] &&
-		pVictim->m_speedModifier < 0 )
-	{
-		coefficient += (caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] / 100.f);
-	}
-
 	plus_damage = float2int32( float( plus_damage ) * coefficient );
 
 	int32 bonus_damage = plus_damage;
@@ -4243,6 +4242,13 @@ int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,i
 	summaryPCTmod += pVictim->DamageTakenPctMod[school]-1;//value is initialized with 1
 	summaryPCTmod += caster->DamageDoneModPCT[school];	// BURLEX FIXME
 	summaryPCTmod += pVictim->ModDamageTakenByMechPCT[spellInfo->MechanicsType];
+
+	if((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) && 
+		caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] &&
+		pVictim->m_speedModifier < 0 )
+	{
+		summaryPCTmod += (caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] / 100.f);
+	}
 	
 	int32 res = (int32)((base_dmg+bonus_damage)*summaryPCTmod + bonus_damage); // 1.x*(base_dmg+bonus_damage) == 1.0*base_dmg + 1.0*bonus_damage + 0.x*(base_dmg+bonus_damage) -> we add the returned value to base damage so we do not add it here (function returns bonus only)
 	//ASSERT(res < 60000);
@@ -5918,13 +5924,7 @@ void Unit::Energize(UnitPointer target,uint32 SpellId, uint32 amount,uint32 type
 		else 
 			target->SetUInt32Value(UNIT_FIELD_POWER1+type, cm);
 
-		WorldPacket datamr(SMSG_SPELLENERGIZELOG, 30);
-		datamr << target->GetNewGUID();
-		datamr << this->GetNewGUID();
-		datamr << uint32(SpellId);
-		datamr << uint32(type);
-		datamr << uint32(amount);
-		this->SendMessageToSet(&datamr,true);
+		Spell::SendHealManaSpellOnPlayer(shared_from_this(),target, amount, type, SpellId);
 		target->SendPowerUpdate();
 	}
 }

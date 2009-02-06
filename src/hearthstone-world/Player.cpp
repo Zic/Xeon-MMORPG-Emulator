@@ -5454,15 +5454,7 @@ void Player::EventCannibalize(uint32 amount)
 	if(cannibalizeCount == 5)
 		SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
 
-	WorldPacket data(SMSG_PERIODICAURALOG, 38);
-	data << GetNewGUID();				   // caster guid
-	data << GetNewGUID();				   // target guid
-	data << (uint32)(20577);				// spellid
-	data << (uint32)1;					  // unknown?? need resource?
-	data << (uint32)FLAG_PERIODIC_HEAL;		// aura school
-	data << amt;							// amount of done to target / heal / damage
-	data << (uint32)0;					  // unknown in some sniff this was 0x0F
-	SendMessageToSet(&data, true);
+	Aura::SendPeriodicAuraLog(GetGUID(), unit_shared_from_this(), dbcSpell.LookupEntry(20577), amt, 0, 0, FLAG_PERIODIC_HEAL);
 }
 
 void Player::EventReduceDrunk(bool full)

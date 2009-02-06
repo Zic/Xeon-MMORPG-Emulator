@@ -784,7 +784,7 @@ struct SpellEntry
 
 	uint32 area_aura_update_interval;
 	uint32 skilline;
-
+	uint32 logsId;	// SpellId used to send log to client for this spell
 	uint32 AdditionalAura;
 };
 

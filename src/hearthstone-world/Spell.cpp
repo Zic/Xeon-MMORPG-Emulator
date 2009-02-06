@@ -1851,7 +1851,7 @@ void Spell::finish()
 	if( p_caster && ( cancastresult == SPELL_CANCAST_OK && !GetSpellFailed() ) )
 		RemoveItems();
 
-	spl.reset();
+	//spl.reset();	// seems to cause crash
 	Destructor();
 }
 
@@ -4431,7 +4431,8 @@ void Spell::Heal(int32 amount)
 			SM_PIValue(u_caster->SM[SMT_DAMAGE_DONE][1],&amount,m_spellInfo->SpellGroupType);
 		}
 
-		critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
+		if(m_spellInfo->spell_can_crit)
+			critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
 		if(critical = Rand(critchance))
 		{
 			/*int32 critbonus = amount >> 1;
@@ -4477,7 +4478,7 @@ void Spell::Heal(int32 amount)
 
 	if( m_caster && unitTarget->IsPlayer() )
 	{
-		SendHealSpellOnPlayer( m_caster, unitTarget, amount, critical, overheal, pSpellId ? pSpellId : m_spellInfo->Id );
+		SendHealSpellOnPlayer( m_caster, unitTarget, amount, critical, overheal, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id) );
 	}
 	if( p_caster != NULL )  
 	{

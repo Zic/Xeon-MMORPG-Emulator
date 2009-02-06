@@ -952,3 +952,36 @@ void Spell::SpellTargetSameGroupSameClass(uint32 i, uint32 j)
 		Target->GetGroup()->Unlock();
 	}
 }
+
+
+// returns Guid of lowest percentage health friendly party or raid target within sqrt('dist') yards
+uint64 Spell::FindLowestHealthRaidMember(PlayerPointer Target, uint32 dist)
+{
+
+	if(!Target || !Target->IsInWorld())
+		return 0;
+
+	uint64 lowestHealthTarget = Target->GetGUID();
+	uint32 lowestHealthPct = Target->GetHealthPct();
+	Group *group = Target->GetGroup();
+	if(group)
+	{
+		group->Lock();
+		for(uint32 j = 0; j < group->GetSubGroupCount(); ++j) {
+			for(GroupMembersSet::iterator itr = group->GetSubGroup(j)->GetGroupMembersBegin(); itr != group->GetSubGroup(j)->GetGroupMembersEnd(); ++itr)
+			{
+				if((*itr)->m_loggedInPlayer && Target->GetDistance2dSq((*itr)->m_loggedInPlayer) <= dist)
+				{
+					uint32 healthPct = (*itr)->m_loggedInPlayer->GetHealthPct();
+					if(healthPct < lowestHealthPct)
+					{
+						lowestHealthPct = healthPct;
+						lowestHealthTarget = (*itr)->m_loggedInPlayer->GetGUID();
+					}
+				}
+			}
+		}
+		group->Unlock();
+	}
+	return lowestHealthTarget;
+}

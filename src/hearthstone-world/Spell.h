@@ -1830,6 +1830,8 @@ public:
     void SpellTargetSameGroupSameClass(uint32 i, uint32 j);
 	void SpellTargetPositionOfTarget(uint32 i, uint32 j);
 
+	uint64 static FindLowestHealthRaidMember(PlayerPointer Target, uint32 dist);
+
     void Heal(int32 amount);
 
     shared_ptr<GameObject>		g_caster;

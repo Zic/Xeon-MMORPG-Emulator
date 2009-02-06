@@ -689,9 +689,9 @@ public:
 	int32 event_GetInstanceID();
 
 	// log message's
-	void SendPeriodicHealAuraLog(uint32 amt);
-	void SendPeriodicAuraLog(UnitPointer Caster, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
-	void SendPeriodicAuraLog(const uint64& CasterGuid, UnitPointer Target, uint32 SpellID, uint32 School, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags);
+	void SendPeriodicAuraLog(uint32 amt, uint32 Flags);
+	static void SendPeriodicAuraLog(UnitPointer Caster, UnitPointer Target, SpellEntry *sp, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags, uint32 pSpellId = 0);
+	static void SendPeriodicAuraLog(const uint64& CasterGuid, UnitPointer Target, SpellEntry *sp, uint32 Amount, uint32 abs_dmg, uint32 resisted_damage, uint32 Flags, uint32 pSpellId = 0);
 
 	bool WasCastInDuel() { return m_castInDuel; }
 
