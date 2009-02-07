@@ -1,3 +1,4 @@
+<<<<<<< .working
 /*
  * Aspire Hearthstone
  * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
@@ -1352,7 +1353,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 		}
 
 		itm->m_isDirty=true;
-		itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, amount*item.amount);
+		itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, amount*item.amount <= itm->GetProto()->MaxCount ? amount*item.amount : itm->GetProto()->MaxCount);
 
 		if(slotresult.ContainerSlot == ITEM_NO_SLOT_AVAILABLE)
 		{
