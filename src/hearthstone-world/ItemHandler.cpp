@@ -1,4 +1,3 @@
-<<<<<<< .working
 /*
  * Aspire Hearthstone
  * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
