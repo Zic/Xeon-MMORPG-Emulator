@@ -269,8 +269,7 @@ void Spell::Destructor()
 		u_caster->SetCurrentSpell(NULLSPELL);
 
 	#ifdef SHAREDPTR_DEBUGMODE
-	SpellPointer sthis = shared_from_this();
-	long references = sthis.use_count() - 2;
+	long references = shared_from_this().use_count() - 2;
 	if( references > 0 )
 	{
 		printf("Spell::Destructor() called when Spell has %d references left in memory!\n", references);
@@ -3483,6 +3482,21 @@ uint8 Spell::CanCast(bool tolerate)
 					return SPELL_FAILED_SPELL_UNAVAILABLE;
 				}break;
 
+				case 45072: //Arcane Charges
+				{
+					if(u_caster->IsPlayer() && !p_caster->HasQuest(11532) && !p_caster->HasQuest(11533))
+						return SPELL_FAILED_BAD_TARGETS;
+				}break;
+
+				//These spells are NPC only.
+				case 25166: //Call Glyphs of Warding
+				case 38892: //Shadow Bolt
+				case 40536: //Chain Lightning
+				case 41078: //Shadow Blast
+				{
+					if(u_caster->IsPlayer())
+						return SPELL_FAILED_BAD_TARGETS;
+				}break;
 				case 36314: //The Seer's Presence
 				{
 					// this spell can be cast only on socrethar. Otherwife cool exploit

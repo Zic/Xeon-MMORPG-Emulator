@@ -772,8 +772,6 @@ enum SpellEffects
     TOTAL_SPELL_EFFECTS,                    //    160
 };
 
-// spell target system
-#define TOTAL_SPELL_TARGET 88 // note: all spells with target type's > 80 are test spells
 
 enum SPELL_ENTRY
 {
@@ -1434,7 +1432,8 @@ enum MECHANICS
     MECHANIC_SAPPED,
 };
 
-typedef enum {
+typedef enum SpellEffectTarget 
+{
    EFF_TARGET_NONE										= 0,
    EFF_TARGET_SELF										= 1,
    EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS		= 3,
@@ -1496,6 +1495,10 @@ typedef enum {
    EFF_TARGET_ENEMYS_IN_ARE_CHANNELED_WITH_EXCEPTIONS	= 76,
    EFF_TARGET_SELECTED_ENEMY_CHANNELED					= 77,
    EFF_TARGET_SELECTED_ENEMY_DEADLY_POISON				= 86,
+   EFF_TARGET_SIMPLE_AOE								= 87, //just seems to be a simple aoe target, with a little circle
+   EFF_TARGET_SMALL_AOE									= 88, //even smaller aoe circle
+   EFF_TARGET_NONCOMBAT_PET								= 90, //target non-combat pet :P
+   TOTAL_SPELL_TARGET									= 101 // note: all spells with target type's > 101 are test spells
 } SpellEffectTarget;
 
 HEARTHSTONE_INLINE bool IsFlyingSpell(SpellEntry *sp)
@@ -1834,11 +1837,11 @@ public:
 
     void Heal(int32 amount);
 
-    shared_ptr<GameObject>		g_caster;
-    shared_ptr<Unit>			u_caster;
-    shared_ptr<Item>			i_caster;
-    PlayerPointer 			p_caster;
-    ObjectPointer			m_caster;
+    GameObjectPointer			g_caster;
+    UnitPointer					u_caster;
+    ItemPointer					i_caster;
+    PlayerPointer 				p_caster;
+    ObjectPointer				m_caster;
 
 	bool SpellEffectUpdateQuest(uint32 questid);
 
