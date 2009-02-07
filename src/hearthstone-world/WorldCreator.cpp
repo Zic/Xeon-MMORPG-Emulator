@@ -375,17 +375,16 @@ shared_ptr<MapMgr> InstanceMgr::GetInstance(ObjectPointer obj)
 	}
 }
 
-shared_ptr<MapMgr> InstanceMgr::_CreateInstance(uint32 mapid, uint32 instanceid)
+MapMgrPointer InstanceMgr::_CreateInstance(uint32 mapid, uint32 instanceid)
 {
 	MapInfo * inf = WorldMapInfoStorage.LookupEntry(mapid);
-	shared_ptr<MapMgr> ret;
 
 	ASSERT(inf && inf->type == INSTANCE_NULL);
 	ASSERT(mapid < NUM_MAPS && m_maps[mapid] != NULL);
 
 	Log.Notice("InstanceMgr", "Creating continent %s.", m_maps[mapid]->GetName());
 
-	ret = shared_ptr<MapMgr>(new MapMgr(m_maps[mapid], mapid, instanceid));
+	MapMgrPointer ret(new MapMgr(m_maps[mapid], mapid, instanceid));
 	ret->Init();
 
 	// start its thread
@@ -396,7 +395,7 @@ shared_ptr<MapMgr> InstanceMgr::_CreateInstance(uint32 mapid, uint32 instanceid)
 	return ret;
 }
 
-shared_ptr<MapMgr> InstanceMgr::_CreateInstance(Instance * in)
+MapMgrPointer InstanceMgr::_CreateInstance(Instance * in)
 {
 	Log.Notice("InstanceMgr", "Creating saved instance %u (%s)", in->m_instanceId, m_maps[in->m_mapId]->GetName());
 	ASSERT(in->m_mapMgr==NULL);

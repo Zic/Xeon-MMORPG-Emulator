@@ -85,7 +85,7 @@ class Instance
 public:
 	uint32 m_instanceId;
 	uint32 m_mapId;
-	shared_ptr<MapMgr> m_mapMgr;
+	MapMgrPointer m_mapMgr;
 	uint32 m_creatorGuid;
 	uint32 m_creatorGroup;
 	uint32 m_difficulty;

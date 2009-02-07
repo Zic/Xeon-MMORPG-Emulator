@@ -42,14 +42,13 @@ public:
 	MapScriptInterface(shared_ptr<MapMgr> mgr);
 	~MapScriptInterface();
 
-	template<class T, uint32 TypeId> shared_ptr<T> GetObjectNearestCoords(uint32 Entry, float x, float y, float z = 0.0f)
+	template<class T, uint32 TypeId> shared_ptr<T> GetObjectNearestCoords(uint32 Entry, float x, float y, float z = 0.0f, float ClosestDist = 999999.0f)
 	{
 		MapCell * pCell = mapMgr->GetCell(mapMgr->GetPosX(x), mapMgr->GetPosY(y));
 		if(pCell == 0)
 			return CAST(T, NULLPTR);
 
 		ObjectPointer ClosestObject;
-		float ClosestDist = 999999.0f;
 		float CurrentDist = 0;
         ObjectSet::const_iterator iter = pCell->Begin();
 		for(; iter != pCell->End(); ++iter)
@@ -68,19 +67,19 @@ public:
 		return CAST(T, ClosestObject);
 	}
 
-	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0, float ClosestDistance = 999999.0f)
 	{
-		return GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(Entry, x, y, z);
+		return GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(Entry, x, y, z, ClosestDistance);
 	}
 
-	HEARTHSTONE_INLINE CreaturePointer GetCreatureNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE CreaturePointer GetCreatureNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0, float ClosestDistance = 999999.0f)
 	{
-		return GetObjectNearestCoords<Creature, TYPEID_UNIT>(Entry, x, y, z);
+		return GetObjectNearestCoords<Creature, TYPEID_UNIT>(Entry, x, y, z, ClosestDistance);
 	}
 
-	HEARTHSTONE_INLINE PlayerPointer GetPlayerNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0)
+	HEARTHSTONE_INLINE PlayerPointer GetPlayerNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0, float ClosestDistance = 999999.0f)
 	{
-		return GetObjectNearestCoords<Player, TYPEID_PLAYER>(Entry, x, y, z);
+		return GetObjectNearestCoords<Player, TYPEID_PLAYER>(Entry, x, y, z, ClosestDistance);
 	}
 
 	uint32 GetPlayerCountInRadius(float x, float y, float z = 0.0f, float radius = 5.0f);
