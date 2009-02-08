@@ -455,7 +455,7 @@ void Spell::SpellTargetAllPartyMembersRangeNR(uint32 i, uint32 j)
 /// Spell Target Handling for type 21: Single Target Friend
 void Spell::SpellTargetSingleTargetFriend(uint32 i, uint32 j)
 {
-	shared_ptr<Unit>Target;
+	UnitPointer Target;
 	if(m_targets.m_unitTarget == m_caster->GetGUID())
 		Target = u_caster;
 	else
@@ -863,7 +863,7 @@ void Spell::SpellTargetSimpleTargetAdd(uint32 i, uint32 j)
 /// Spell Target Handling for type 53: Target Area by Players CurrentSelection()
 void Spell::SpellTargetTargetAreaSelectedUnit(uint32 i, uint32 j)
 {
-	shared_ptr<Unit>Target = NULLUNIT;
+	UnitPointer Target = NULLUNIT;
 	if(m_caster->IsInWorld())
 	{
 		if(p_caster)

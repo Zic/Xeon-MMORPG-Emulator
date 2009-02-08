@@ -28,7 +28,7 @@ class LootRoll : public EventableObject, public std::tr1::enable_shared_from_thi
 public:
 	LootRoll();
 	~LootRoll();
-	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr);
+	void Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, MapMgrPointer mgr);
 	void PlayerRolled(PlayerPointer player, uint8 choice);
 	void Finalize();
 
@@ -46,7 +46,7 @@ private:
 	uint32 _itemunk2;
 	uint32 _remaining;
 	uint64 _guid;
-	shared_ptr<MapMgr> _mgr;
+	MapMgrPointer _mgr;
 };
 
 typedef vector<pair<RandomProps*, float> > RandomPropertyVector;
@@ -66,7 +66,7 @@ typedef struct
 	uint32 iItemsCount;
 	RandomProps * iRandomProperty;
 	ItemRandomSuffixEntry * iRandomSuffix;
-	shared_ptr<LootRoll> roll;
+	LootRollPointer roll;
 	bool passed;
 	LooterSet has_looted;
 	uint32 ffa_loot;

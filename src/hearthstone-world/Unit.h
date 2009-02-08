@@ -719,7 +719,7 @@ public:
 
     void setAttackTimer(int32 time, bool offhand);
 	bool isAttackReady(bool offhand);
-	bool __fastcall canReachWithAttack(shared_ptr<Unit>pVictim);
+	bool __fastcall canReachWithAttack(UnitPointer pVictim);
 
 	HEARTHSTONE_INLINE void SetDuelWield(bool enabled)
 	{
@@ -769,8 +769,8 @@ public:
 
 	bool isCasting();
 	bool IsInInstance();
-	double GetResistanceReducion(shared_ptr<Unit>pVictim, uint32 type, float armorReducePct);
-    void CalculateResistanceReduction(shared_ptr<Unit>pVictim,dealdamage *dmg,SpellEntry* ability, float armorreducepct) ;
+	double GetResistanceReducion(UnitPointer pVictim, uint32 type, float armorReducePct);
+    void CalculateResistanceReduction(UnitPointer pVictim,dealdamage *dmg,SpellEntry* ability, float armorreducepct) ;
 	void RegenerateHealth();
 	void RegeneratePower(bool isinterrupted);
 	void SendPowerUpdate();
@@ -784,7 +784,7 @@ public:
 	void smsg_AttackStop(uint64 victimGuid);
 	
 	bool IsDazed();
-	float CalculateDazeCastChance(shared_ptr<Unit>target);
+	float CalculateDazeCastChance(UnitPointer target);
 
 	// Stealth  
 	HEARTHSTONE_INLINE int32 GetStealthLevel() { return m_stealthLevel; }
@@ -819,14 +819,14 @@ public:
 	uint32 trigger_on_chill_chance;
 
 	void SetTriggerChill(uint32 newtrigger, uint32 new_chance);
-    void EventChill(shared_ptr<Unit>proc_target);
+    void EventChill(UnitPointer proc_target);
 
 	bool HasAura(uint32 spellid);
 	bool HasAuraVisual(uint32 visualid);//not spell id!!!
 	bool HasActiveAura(uint32 spelllid);
 	bool HasActiveAura(uint32 spelllid,uint64);
 	
-	void GiveGroupXP(shared_ptr<Unit>pVictim, PlayerPointer PlayerInGroup);
+	void GiveGroupXP(UnitPointer pVictim, PlayerPointer PlayerInGroup);
 
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
@@ -883,7 +883,7 @@ public:
 	void InterruptCurrentSpell();
 
 	//caller is the caster
-	int32 GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
+	int32 GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
    
 	//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
 	UnitPointer CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
@@ -916,7 +916,7 @@ public:
 
 	void AddOnAuraRemoveSpell(uint32 NameHash, uint32 procSpell, uint32 procChance, bool procSelf);
 	void RemoveOnAuraRemoveSpell(uint32 NameHash);
-	void OnAuraRemove(uint32 NameHash, shared_ptr<Unit>m_target);
+	void OnAuraRemove(uint32 NameHash, UnitPointer m_target);
 
 	// Split Damage
 	struct DamageSplitTarget m_damageSplitTarget;
@@ -977,7 +977,7 @@ public:
 
 	//SM
 	int32 * SM[SPELL_MODIFIERS][2]; // 0 = flat, 1 = percent
-	void InheritSMMods(shared_ptr<Unit>inherit_from);
+	void InheritSMMods(UnitPointer inherit_from);
 
 	//Events
 	void Emote (EmoteType emote);

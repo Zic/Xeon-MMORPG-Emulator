@@ -109,7 +109,7 @@ void MapMgr::Destructor()
 {
 	m_sharedPtrDestructed = true;
 	// in case this goes feeefeee
-	shared_ptr<MapMgr> pThis = shared_from_this();
+	MapMgrPointer pThis = shared_from_this();
 
 	sEventMgr.RemoveEvents(shared_from_this());
 	delete ScriptInterface;
@@ -165,8 +165,8 @@ void MapMgr::Destructor()
 	//free(m_VehicleStorage);
 	//free(m_CreatureStorage);
 
-	shared_ptr<Corpse> pCorpse;
-	for(set<shared_ptr<Corpse> >::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
+	CorpsePointer pCorpse;
+	for(set<CorpsePointer >::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
 	{
 		pCorpse = *itr;
 		++itr;
@@ -1459,7 +1459,7 @@ bool MapMgr::Do()
 	/* create static objects */
 	for(GOSpawnList::iterator itr = _map->staticSpawns.GOSpawns.begin(); itr != _map->staticSpawns.GOSpawns.end(); ++itr)
 	{
-		shared_ptr<GameObject> obj = CreateGameObject((*itr)->entry);
+		GameObjectPointer obj = CreateGameObject((*itr)->entry);
 		obj->Load((*itr));
 		_mapWideStaticObjects.insert(obj);
 	}
@@ -1546,7 +1546,7 @@ bool MapMgr::Do()
 	}
 
 	//prevent possible feeefeee
-	shared_ptr<MapMgr> pThis = shared_from_this();
+	MapMgrPointer pThis = shared_from_this();
 
 	if(pInstance)
 	{
@@ -1726,7 +1726,7 @@ void MapMgr::_PerformObjectDuties()
 		difftime = mstime - lastGameobjectUpdate;
 
 		__gameobject_iterator = activeGameObjects.begin();
-		shared_ptr<GameObject> ptr;
+		GameObjectPointer ptr;
 		for(; __gameobject_iterator != activeGameObjects.end(); )
 		{
 			ptr = *__gameobject_iterator;
@@ -1782,7 +1782,7 @@ void MapMgr::_PerformObjectDuties()
 
 void MapMgr::EventCorpseDespawn(uint64 guid)
 {
-	shared_ptr<Corpse> pCorpse = objmgr.GetCorpse((uint32)guid);
+	CorpsePointer pCorpse = objmgr.GetCorpse((uint32)guid);
 	if(pCorpse == NULL)	// Already Deleted
 		return;
 
@@ -2027,9 +2027,9 @@ GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 	return go;
 }
 
-shared_ptr<DynamicObject> MapMgr::CreateDynamicObject()
+DynamicObjectPointer MapMgr::CreateDynamicObject()
 {
-	shared_ptr<DynamicObject> dyn(new DynamicObject(HIGHGUID_TYPE_DYNAMICOBJECT,(++m_DynamicObjectHighGuid)));
+	DynamicObjectPointer dyn(new DynamicObject(HIGHGUID_TYPE_DYNAMICOBJECT,(++m_DynamicObjectHighGuid)));
 	dyn->Init();
 	return dyn;
 }

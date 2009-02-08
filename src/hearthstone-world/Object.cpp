@@ -896,7 +896,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 
 void Object::AddToWorld()
 {
-	shared_ptr<MapMgr> mapMgr = sInstanceMgr.GetInstance(shared_from_this());
+	MapMgrPointer mapMgr = sInstanceMgr.GetInstance(shared_from_this());
 	if(!mapMgr)
 		return; //instance add failed
 
@@ -930,7 +930,7 @@ void Object::AddToWorld()
 	mSemaphoreTeleport = false;
 }
 
-void Object::AddToWorld(shared_ptr<MapMgr> pMapMgr)
+void Object::AddToWorld(MapMgrPointer pMapMgr)
 {
 	if(!pMapMgr)
 		return; //instance add failed
@@ -948,7 +948,7 @@ void Object::AddToWorld(shared_ptr<MapMgr> pMapMgr)
 
 //Unlike addtoworld it pushes it directly ignoring add pool
 //this can only be called from the thread of mapmgr!!!
-void Object::PushToWorld(shared_ptr<MapMgr>mgr)
+void Object::PushToWorld(MapMgrPointer mgr)
 {
 	if(!mgr/* || (m_mapMgr != NULL && m_mapCell != NULL) */)
 		return; //instance add failed
@@ -979,7 +979,7 @@ void Object::RemoveFromWorld(bool free_guid)
 		dynObj->Remove();
 
 	ASSERT(m_mapMgr);
-	shared_ptr<MapMgr> m = m_mapMgr;
+	MapMgrPointer m = m_mapMgr;
 	m_mapMgr = NULLMAPMGR;
 
 	mSemaphoreTeleport = true;
@@ -1538,7 +1538,7 @@ void Object::EventSetUInt32Value(uint32 index, uint32 value)
 	SetUInt32Value(index,value);
 }
 
-void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras)
+void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras)
 {
 	PlayerPointer plr = NULLPLR;
 
@@ -1862,7 +1862,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				{
 					if(spl->m_spellInfo->Effect[i] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
 					{
-						shared_ptr<DynamicObject>dObj = GetMapMgr()->GetDynamicObject(pVictim->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
+						DynamicObjectPointer dObj = GetMapMgr()->GetDynamicObject(pVictim->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
 						if(!dObj)
 							return;
 						WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
@@ -2066,7 +2066,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				if( pVictim->GetTypeId() != TYPEID_PLAYER )
 					sQuestMgr.OnPlayerKill( player_shared_from_this(), TO_CREATURE( pVictim ) );
 			}
-			else /* is Creature or shared_ptr<GameObject>*/
+			else /* is Creature or GameObjectPointer */
 			{
 				/* ----------------------------- PET XP HANDLING -------------- */
 				if( owner_participe && IsPet() && !pVictim->IsPet() )
@@ -2123,7 +2123,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 				else if( pVictim->GetUInt64Value( UNIT_FIELD_CHARMEDBY ) )
 				{
 					//remove owner warlock soul link from caster
-					shared_ptr<Unit>owner=pVictim->GetMapMgr()->GetUnit( pVictim->GetUInt64Value( UNIT_FIELD_CHARMEDBY ) );
+					UnitPointer owner=pVictim->GetMapMgr()->GetUnit( pVictim->GetUInt64Value( UNIT_FIELD_CHARMEDBY ) );
 					if( owner != NULL && owner->IsPlayer())
 						TO_PLAYER( owner )->EventDismissPet();
 				}
@@ -2180,7 +2180,7 @@ void Object::DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEve
 	}
 }
 
-void Object::SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage, bool no_remove_auras)
+void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage, bool no_remove_auras)
 {
 //==========================================================================================
 //==============================Unacceptable Cases Processing===============================
@@ -2590,7 +2590,7 @@ bool Object::CanActivate()
 	return false;
 }
 
-void Object::Activate(shared_ptr<MapMgr> mgr)
+void Object::Activate(MapMgrPointer mgr)
 {
 	switch(m_objectTypeId)
 	{
@@ -2609,7 +2609,7 @@ void Object::Activate(shared_ptr<MapMgr> mgr)
 	Active = true;
 }
 
-void Object::Deactivate(shared_ptr<MapMgr> mgr)
+void Object::Deactivate(MapMgrPointer mgr)
 {
 	switch(m_objectTypeId)
 	{

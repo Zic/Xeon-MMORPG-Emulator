@@ -41,12 +41,12 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 	uint8 error = 0;
 	SlotResult slotresult;
 
-	shared_ptr<Item>add;
+	ItemPointer add;
 
 	if(_player->isCasting())
 		_player->InterruptCurrentSpell();
 
-	shared_ptr<GameObject> pGO = NULLGOB;
+	GameObjectPointer pGO = NULLGOB;
 	ObjectPointer pLootObj;
 	
 	// handle item loot
@@ -111,7 +111,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		}
 	
 		DEBUG_LOG("AutoLootItem MISC");
-		shared_ptr<Item>item = objmgr.CreateItem( itemid, GetPlayer());
+		ItemPointer item = objmgr.CreateItem( itemid, GetPlayer());
 	   
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
 		if(pLootObj->m_loot.items.at(lootSlot).iRandomProperty!=NULL)
@@ -325,7 +325,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 	// special case
 	if( GET_TYPE_FROM_GUID( guid ) == HIGHGUID_TYPE_GAMEOBJECT )
 	{	   
-		shared_ptr<GameObject> pGO = _player->GetMapMgr()->GetGameObject( GET_LOWGUID_PART(guid) );
+		GameObjectPointer pGO = _player->GetMapMgr()->GetGameObject( GET_LOWGUID_PART(guid) );
 		if( pGO == NULL )
 			return;
 
@@ -431,7 +431,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 	else if( GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_ITEM )
 	{
 		// if we have no items left, destroy the item.
-		shared_ptr<Item>pItem = _player->GetItemInterface()->GetItemByGUID(guid);
+		ItemPointer pItem = _player->GetItemInterface()->GetItemByGUID(guid);
 		if( pItem != NULL )
 		{
 			if( !pItem->m_loot.HasLoot() )
@@ -443,7 +443,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
 	else if( GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_UNIT )
 	{
-		shared_ptr<Unit>pLootTarget = _player->GetMapMgr()->GetUnit(guid);
+		UnitPointer pLootTarget = _player->GetMapMgr()->GetUnit(guid);
 		if( pLootTarget != NULL )
 		{
 			pLootTarget->m_loot.looters.erase(_player->GetLowGUID());
@@ -462,7 +462,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
 	else if( GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_CORPSE )
 	{
-		shared_ptr<Corpse>pCorpse = objmgr.GetCorpse((uint32)guid);
+		CorpsePointer pCorpse = objmgr.GetCorpse((uint32)guid);
 		if( pCorpse != NULL && !pCorpse->m_loot.HasLoot() )
 			pCorpse->Despawn();
 	}
@@ -802,7 +802,7 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 	uint64 guid;
 	recv_data >> guid;
 
-	shared_ptr<Corpse> pCorpse = objmgr.GetCorpse( (uint32)guid );
+	CorpsePointer pCorpse = objmgr.GetCorpse( (uint32)guid );
 
 	if( pCorpse == NULL )
 		return;
@@ -1337,7 +1337,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 					SpellCastTargets targets(plr->GetGUID());
 					spell->prepare(&targets);
 
-					/* expire the shared_ptr<GameObject> */
+					/* expire the GameObjectPointer */
 					obj->ExpireAndDelete();
 				}
 			}
@@ -1369,7 +1369,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				return;
 
 			/* Create the summoning portal */
-			shared_ptr<GameObject> pGo = _player->GetMapMgr()->CreateGameObject(179944);
+			GameObjectPointer pGo = _player->GetMapMgr()->CreateGameObject(179944);
 			pGo->CreateFromProto(179944, _player->GetMapId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), 0);
 			pGo->m_ritualcaster = _player->GetLowGUID();
 			pGo->m_ritualtarget = pPlayer->GetLowGUID();
@@ -1720,7 +1720,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
 		return;
 	}
 
-	shared_ptr<Item>item = objmgr.CreateItem( itemid, player);
+	ItemPointer item = objmgr.CreateItem( itemid, player);
 	
 	item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
 	if(pLoot->items.at(slotid).iRandomProperty!=NULL)
@@ -1807,12 +1807,12 @@ void WorldSession::HandleLootRollOpcode(WorldPacket& recv_data)
 	uint8 choice;
 	recv_data >> creatureguid >> slotid >> choice;
 
-	shared_ptr<LootRoll> li = NULLROLL;
+	LootRollPointer li = NULLROLL;
 
 	uint32 guidtype = GET_TYPE_FROM_GUID(creatureguid);
 	if (guidtype == HIGHGUID_TYPE_GAMEOBJECT) 
 	{
-		shared_ptr<GameObject> pGO = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(creatureguid));
+		GameObjectPointer pGO = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(creatureguid));
 		if (!pGO)
 			return;
 		if (slotid >= pGO->m_loot.items.size() || pGO->m_loot.items.size() == 0)
@@ -1848,7 +1848,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket &recv_data)
 	int8 slot, containerslot;
 	recv_data >> containerslot >> slot;
 
-	shared_ptr<Item>pItem = _player->GetItemInterface()->GetInventoryItem(containerslot, slot);
+	ItemPointer pItem = _player->GetItemInterface()->GetInventoryItem(containerslot, slot);
 	if(!pItem)
 		return;
 

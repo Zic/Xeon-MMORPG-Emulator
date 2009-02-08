@@ -71,7 +71,7 @@ public:
 	void BuildQuestFailed(WorldPacket* data, uint32 questid);
 	void SendPushToPartyResponse(PlayerPointer plr, PlayerPointer pTarget, uint32 response);
 
-	bool OnGameObjectActivate(PlayerPointer plr, shared_ptr<GameObject>go);
+	bool OnGameObjectActivate(PlayerPointer plr, GameObjectPointer go);
 	void OnPlayerKill(PlayerPointer plr, CreaturePointer victim);
 	void OnPlayerCast(PlayerPointer plr, uint32 spellid, uint64& victimguid);
 	void OnPlayerItemPickup(PlayerPointer plr, ItemPointer item);
@@ -94,7 +94,7 @@ public:
 	void SendQuestLogFull(PlayerPointer plyr);
 	
 	void LoadNPCQuests(CreaturePointer qst_giver);
-	void LoadGOQuests(shared_ptr<GameObject>go);
+	void LoadGOQuests(GameObjectPointer go);
 
 	QuestRelationList* GetCreatureQuestList(uint32 entryid);
 	QuestRelationList* GetGOQuestList(uint32 entryid);

@@ -194,7 +194,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 {
 	DEBUG_LOG("WORLD: Received MSG_CORPSE_QUERY");
 
-	shared_ptr<Corpse>pCorpse;
+	CorpsePointer pCorpse;
 	//WorldPacket data(MSG_CORPSE_QUERY, 21);
 	uint8 databuffer[100];
 	StackPacket data(MSG_CORPSE_QUERY, databuffer, 100);

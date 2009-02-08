@@ -13,13 +13,13 @@ static const float SOTAStartLocations[2][3] = {
 class StrandOfTheAncients : public CBattleground
 {
 public:
-	StrandOfTheAncients(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
+	StrandOfTheAncients(MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t);
 	~StrandOfTheAncients();
 	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj);
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj);
 	void HookOnMount(PlayerPointer plr);
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	bool HookHandleRepop(PlayerPointer plr);
@@ -31,15 +31,15 @@ public:
 	void HookOnShadowSight();
 	LocationVector GetStartingCoords(uint32 Team);
 
-	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<StrandOfTheAncients>(new StrandOfTheAncients(m, i, l, t)); }
+	static BattlegroundPointer Create(MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return shared_ptr<StrandOfTheAncients>(new StrandOfTheAncients(m, i, l, t)); }
 
 	const char * GetName() { return "Strand of the Ancients"; }
 	void OnStart();
 
 	bool SupportsPlayerLoot() { return true; }
-	bool HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, shared_ptr<Spell> pSpell);
+	bool HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, shared_ptr<Spell> pSpell);
 
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse> pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 	void SetTime(uint32 secs, uint32 WorldState);

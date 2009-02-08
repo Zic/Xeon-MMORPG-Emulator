@@ -378,7 +378,7 @@ CreatureAIScript* ScriptMgr::CreateAIScriptClassForEntry(CreaturePointer pCreatu
 	return (function_ptr)(pCreature);
 }
 
-GameObjectAIScript * ScriptMgr::CreateAIScriptClassForGameObject(uint32 uEntryId, shared_ptr<GameObject> pGameObject)
+GameObjectAIScript * ScriptMgr::CreateAIScriptClassForGameObject(uint32 uEntryId, GameObjectPointer pGameObject)
 {
 	GameObjectCreateMap::iterator itr = _gameobjects.find(pGameObject->GetEntry());
 	if(itr == _gameobjects.end())
@@ -456,7 +456,7 @@ void CreatureAIScript::RemoveAIUpdateEvent()
 
 /* GameObjectAI Stuff */
 
-GameObjectAIScript::GameObjectAIScript(shared_ptr<GameObject> goinstance) : _gameobject(goinstance)
+GameObjectAIScript::GameObjectAIScript(GameObjectPointer goinstance) : _gameobject(goinstance)
 {
 
 }
@@ -469,7 +469,7 @@ void GameObjectAIScript::RegisterAIUpdateEvent(uint32 frequency)
 
 /* InstanceAI Stuff */
 
-InstanceScript::InstanceScript(shared_ptr<MapMgr>instance) : _instance(instance)
+InstanceScript::InstanceScript(MapMgrPointer instance) : _instance(instance)
 {
 }
 
@@ -947,7 +947,7 @@ void HookInterface::OnArenaFinish(PlayerPointer pPlayer, uint32 type, ArenaTeam*
 	OUTER_LOOP_END
 }
 
-void HookInterface::OnContinentCreate(shared_ptr<MapMgr>pMgr)
+void HookInterface::OnContinentCreate(MapMgrPointer pMgr)
 {
 	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_CONTIENT_CREATE, tOnContinentCreate)
 		(call)(pMgr);

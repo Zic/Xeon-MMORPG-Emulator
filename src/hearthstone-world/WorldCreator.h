@@ -118,7 +118,7 @@ public:
 	}
 
 	uint32 PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instanceid);
-	shared_ptr<MapMgr> GetInstance(ObjectPointer obj);
+	MapMgrPointer GetInstance(ObjectPointer obj);
 	uint32 GenerateInstanceID();
 	void BuildXMLStats(char * m_file);
 	void Load(TaskList * l);
@@ -172,17 +172,17 @@ public:
 	// packets, w000t! we all love packets!
 	void BuildRaidSavedInstancesForPlayer(PlayerPointer plr);
 	void BuildSavedInstancesForPlayer(PlayerPointer plr);
-	shared_ptr<MapMgr> CreateBattlegroundInstance(uint32 mapid);
+	MapMgrPointer CreateBattlegroundInstance(uint32 mapid);
 
 	// this only frees the instance pointer, not the mapmgr itself
 	void DeleteBattlegroundInstance(uint32 mapid, uint32 instanceid);
-	shared_ptr<MapMgr> GetMapMgr(uint32 mapId);
+	MapMgrPointer GetMapMgr(uint32 mapId);
 
 private:
 	void _LoadInstances();
 	void _CreateMap(uint32 mapid);
-	shared_ptr<MapMgr> _CreateInstance(Instance * in);
-	shared_ptr<MapMgr> _CreateInstance(uint32 mapid, uint32 instanceid);		// only used on main maps!
+	MapMgrPointer _CreateInstance(Instance * in);
+	MapMgrPointer _CreateInstance(uint32 mapid, uint32 instanceid);		// only used on main maps!
 	bool _DeleteInstance(Instance * in, bool ForcePlayersOut);
 
 	uint32 m_InstanceHigh;
@@ -190,7 +190,7 @@ private:
 	Mutex m_mapLock;
 	Map * m_maps[NUM_MAPS];
 	InstanceMap* m_instances[NUM_MAPS];
-	shared_ptr<MapMgr> m_singleMaps[NUM_MAPS];
+	MapMgrPointer m_singleMaps[NUM_MAPS];
 };
 
 extern SERVER_DECL InstanceMgr sInstanceMgr;

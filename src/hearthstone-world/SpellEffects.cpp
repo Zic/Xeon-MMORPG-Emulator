@@ -939,7 +939,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			//we will try to lure 3 enemies from our target
 			if(!unitTarget || !u_caster)
 				break;
-			shared_ptr<Unit>targets[3];
+			UnitPointer targets[3];
 			int targets_got=0;
 			for(unordered_set<ObjectPointer >::iterator itr = unitTarget->GetInRangeSetBegin(), i2; itr != unitTarget->GetInRangeSetEnd(); )
 			{
@@ -1230,7 +1230,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 				if (cloudtype==17407) item=22577;//-shadow
 				if (cloudtype==17378) item=22578;//-water
 
-				shared_ptr<Item>add = p_caster->GetItemInterface()->FindItemLessMax(item, count, false);
+				ItemPointer add = p_caster->GetItemInterface()->FindItemLessMax(item, count, false);
 				if (!add)
 				{
 					ItemPrototype* proto = ItemPrototypeStorage.LookupEntry(item);
@@ -1969,7 +1969,7 @@ void Spell::SpellEffectTeleportUnits( uint32 i )  // Teleport Units
 	{
 		/* this is rather tricky actually. we have to calculate the orientation of the creature/player, and then calculate a little bit of distance behind that. */
 		float ang;
-		shared_ptr<Unit>pTarget = unitTarget;
+		UnitPointer pTarget = unitTarget;
 		if( pTarget == m_caster )
 		{
 			/* try to get a selection */
@@ -2345,7 +2345,7 @@ void Spell::SpellEffectCreateItem(uint32 i) // Create item
 		return;
 
 	ItemPointer newItem;
-	shared_ptr<Item>add;
+	ItemPointer add;
 	uint8 slot;
 	SlotResult slotresult;
 
@@ -2677,7 +2677,7 @@ void Spell::SpellEffectPersistentAA(uint32 i) // Persistent Area Aura
 	//it can'be on unit or self or item or object
 	//uncomment it if i'm wrong
 	//We are thinking in general so it might be useful later DK
-	shared_ptr<DynamicObject> dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
+	DynamicObjectPointer dynObj = m_caster->GetMapMgr()->CreateDynamicObject();
 	 
 	if(g_caster && g_caster->IsInWorld() && g_caster->m_summoner)
 	{
@@ -3129,7 +3129,7 @@ void Spell::SpellEffectTriggerMissile(uint32 i) // Trigger Missile
 	{
 		if(!((*itr)->IsUnit()) || !(TO_UNIT(*itr))->isAlive())
 			continue;
-		shared_ptr<Unit>t=TO_UNIT(*itr);
+		UnitPointer t=TO_UNIT(*itr);
 	
 		float r;
 		float d=m_targets.m_destX-t->GetPositionX();
@@ -4030,7 +4030,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 	{
 		float co = cos( orient );
 		float si = sin( orient );
-		shared_ptr<MapMgr> map = m_caster->GetMapMgr();
+		MapMgrPointer map = m_caster->GetMapMgr();
 		shared_ptr<Spell>spell = u_caster->GetCurrentSpell();
 
 		float r;
@@ -4065,7 +4065,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		spell->SendCastResult(SPELL_CANCAST_OK);
 		spell->SendSpellGo ();*/
 
-		shared_ptr<GameObject>go = u_caster->GetMapMgr()->CreateGameObject(GO_FISHING_BOBBER);
+		GameObjectPointer go = u_caster->GetMapMgr()->CreateGameObject(GO_FISHING_BOBBER);
 
 		go->CreateFromProto( GO_FISHING_BOBBER, mapid, posx, posy, posz, orient );
 		go->SetUInt32Value( GAMEOBJECT_FLAGS, 0 );
@@ -4098,7 +4098,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 			}
 			return;
 		}
-		shared_ptr<GameObject>go=u_caster->GetMapMgr()->CreateGameObject(entry);
+		GameObjectPointer go=u_caster->GetMapMgr()->CreateGameObject(entry);
 		
 		go->SetInstanceID(m_caster->GetInstanceID());
 		go->CreateFromProto(entry,mapid,posx,posy,pz,orient);
@@ -4641,7 +4641,7 @@ void Spell::SpellEffectSummonObjectWild(uint32 i)
   
 
 	// spawn a new one
-	shared_ptr<GameObject>GoSummon = u_caster->GetMapMgr()->CreateGameObject(m_spellInfo->EffectMiscValue[i]);
+	GameObjectPointer GoSummon = u_caster->GetMapMgr()->CreateGameObject(m_spellInfo->EffectMiscValue[i]);
 	if(!GoSummon->CreateFromProto(m_spellInfo->EffectMiscValue[i],
 		m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() ))
 	{
@@ -5907,7 +5907,7 @@ void Spell::SpellEffectSummonObjectSlot(uint32 i)
 	if(!u_caster || !u_caster->IsInWorld())
 		return;
 
-	shared_ptr<GameObject>GoSummon = NULLGOB;
+	GameObjectPointer GoSummon = NULLGOB;
 
 	uint32 slot=m_spellInfo->Effect[i] - SPELL_EFFECT_SUMMON_OBJECT_SLOT1;
 	GoSummon = u_caster->m_ObjectSlots[slot] ? u_caster->GetMapMgr()->GetGameObject(u_caster->m_ObjectSlots[slot]) : NULLGOB;
@@ -6159,7 +6159,7 @@ void Spell::SpellEffectAttackMe(uint32 i)
 
 void Spell::SpellEffectSkinPlayerCorpse(uint32 i)
 {
-	shared_ptr<Corpse> corpse = NULLCORPSE;
+	CorpsePointer corpse = NULLCORPSE;
 	if(!playerTarget)
 	{
 		// means we're "skinning" a corpse
@@ -6187,7 +6187,7 @@ void Spell::SpellEffectSkinPlayerCorpse(uint32 i)
 
 		// and.. force him to the graveyard and repop him.
 		// this will also convert the corpse to bones.
-		shared_ptr<Corpse>pCorpse = playerTarget->RepopRequestedPlayer();
+		CorpsePointer pCorpse = playerTarget->RepopRequestedPlayer();
 
 		// sanity checks
 		if( pCorpse == NULL )
@@ -6536,7 +6536,7 @@ void Spell::SpellEffectTranformItem(uint32 i)
 
 	i_caster=NULLITEM;
 
-	shared_ptr<Item>it=objmgr.CreateItem(itemid,owner);
+	ItemPointer it=objmgr.CreateItem(itemid,owner);
 	it->SetDurability(dur);
 	//additem
 	

@@ -236,7 +236,7 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 					{
 						if(qst->receive_items[i])
 						{
-							shared_ptr<Item>item = objmgr.CreateItem( qst->receive_items[i], plr);
+							ItemPointer item = objmgr.CreateItem( qst->receive_items[i], plr);
 							if(!plr->GetItemInterface()->AddItemToFreeSlot(item))
 							{
 								item->Destructor();

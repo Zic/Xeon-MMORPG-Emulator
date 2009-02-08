@@ -65,10 +65,10 @@ typedef HM_NAMESPACE::hash_map<uint32, ObjectPointer > StorageMap;
 typedef unordered_set<uint64> CombatProgressMap;
 typedef unordered_set<VehiclePointer> VehicleSet;
 typedef unordered_set<CreaturePointer> CreatureSet;
-typedef unordered_set<shared_ptr<GameObject> > GameObjectSet;
+typedef unordered_set<GameObjectPointer > GameObjectSet;
 typedef HM_NAMESPACE::hash_map<uint32, VehiclePointer> VehicleSqlIdMap;
 typedef HM_NAMESPACE::hash_map<uint32, CreaturePointer> CreatureSqlIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectSqlIdMap;
+typedef HM_NAMESPACE::hash_map<uint32, GameObjectPointer > GameObjectSqlIdMap;
 
 #define MAX_TRANSPORTERS_PER_MAP 25
 
@@ -92,7 +92,7 @@ public:
 ////////////////////////////////////////////////////////
 // Local (mapmgr) storage/generation of GameObjects
 /////////////////////////////////////////////
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<GameObject> > GameObjectMap;
+	typedef HM_NAMESPACE::hash_map<uint32, GameObjectPointer > GameObjectMap;
 	GameObjectMap m_gameObjectStorage;
 	uint32 m_GOHighGuid;
 	GameObjectPointer CreateGameObject(uint32 entry);
@@ -103,7 +103,7 @@ public:
 		return ++m_GOHighGuid;
 	}
 
-	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObject(uint32 guid)
+	HEARTHSTONE_INLINE GameObjectPointer GetGameObject(uint32 guid)
 	{
 		GameObjectMap::iterator itr = m_gameObjectStorage.find(guid);
 		if( itr == m_gameObjectStorage.end() )
@@ -148,11 +148,11 @@ public:
 // Local (mapmgr) storage/generation of DynamicObjects
 ////////////////////////////////////////////
 	uint32 m_DynamicObjectHighGuid;
-	typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<DynamicObject> > DynamicObjectStorageMap;
+	typedef HM_NAMESPACE::hash_map<uint32, DynamicObjectPointer > DynamicObjectStorageMap;
 	DynamicObjectStorageMap m_DynamicObjectStorage;
-	shared_ptr<DynamicObject> CreateDynamicObject();
+	DynamicObjectPointer CreateDynamicObject();
 	
-	HEARTHSTONE_INLINE shared_ptr<DynamicObject> GetDynamicObject(uint32 guid)
+	HEARTHSTONE_INLINE DynamicObjectPointer GetDynamicObject(uint32 guid)
 	{
 		DynamicObjectStorageMap::iterator itr = m_DynamicObjectStorage.find(guid);
 		return (itr != m_DynamicObjectStorage.end()) ? itr->second : NULLDYN;
@@ -261,7 +261,7 @@ public:
 	void UnloadCell(uint32 x,uint32 y);
 	void EventRespawnVehicle(VehiclePointer v, MapCell * p);
 	void EventRespawnCreature(CreaturePointer c, MapCell * p);
-	void EventRespawnGameObject(shared_ptr<GameObject> o, MapCell * c);
+	void EventRespawnGameObject(GameObjectPointer o, MapCell * c);
 	void SendMessageToCellPlayers(ObjectPointer obj, WorldPacket * packet, uint32 cell_radius = 2);
 	void SendChatMessageToCellPlayers(ObjectPointer obj, WorldPacket * packet, uint32 cell_radius, uint32 langpos, int32 lang, WorldSession * originator);
 
@@ -335,14 +335,14 @@ public:
 	VehicleSet activeVehicles;
 	EventableObjectHolder eventHolder;
 	BattlegroundPointer m_battleground;
-	set<shared_ptr<Corpse> > m_corpses;
+	set<CorpsePointer > m_corpses;
 	VehicleSqlIdMap _sqlids_vehicles;
 	CreatureSqlIdMap _sqlids_creatures;
 	GameObjectSqlIdMap _sqlids_gameobjects;
 
 	VehiclePointer GetSqlIdVehicle(uint32 sqlid);
 	CreaturePointer GetSqlIdCreature(uint32 sqlid);
-	shared_ptr<GameObject> GetSqlIdGameObject(uint32 sqlid);
+	GameObjectPointer GetSqlIdGameObject(uint32 sqlid);
 	deque<uint32> _reusable_guids_creature;
 	deque<uint32> _reusable_guids_vehicle;
 

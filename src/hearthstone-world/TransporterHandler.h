@@ -130,7 +130,7 @@ public:
 	void DestroyTransportNPCs(PlayerPointer target);
 	void AddNPC(uint32 Entry, float offsetX, float offsetY, float offsetZ, float offsetO);
 	CreaturePointer GetCreature(uint32 Guid);
-	shared_ptr<GameObject> GetGameObject(uint32 Guid);
+	GameObjectPointer GetGameObject(uint32 Guid);
 
 private:
 	

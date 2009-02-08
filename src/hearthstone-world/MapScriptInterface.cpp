@@ -30,7 +30,7 @@
 #include "StdAfx.h"
 createFileSingleton(StructFactory);
 
-MapScriptInterface::MapScriptInterface(shared_ptr<MapMgr> mgr)
+MapScriptInterface::MapScriptInterface(MapMgrPointer mgr)
 {
 	mapMgr = mgr;
 }
@@ -79,10 +79,10 @@ uint32 MapScriptInterface::GetPlayerCountInRadius(float x, float y, float z /* =
 	return PlayerCount;
 }
 
-shared_ptr<GameObject> MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2)
+GameObjectPointer MapScriptInterface::SpawnGameObject(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, uint32 Misc1, uint32 Misc2)
 {
    
-	shared_ptr<GameObject>pGameObject = mapMgr->CreateGameObject(Entry);
+	GameObjectPointer pGameObject = mapMgr->CreateGameObject(Entry);
 	if(!pGameObject->CreateFromProto(Entry, mapMgr->GetMapId(), cX, cY, cZ, cO))
 	{
 		pGameObject->Destructor();
@@ -145,7 +145,7 @@ void MapScriptInterface::DeleteCreature(CreaturePointer ptr)
 	ptr = NULLCREATURE;
 }
 
-void MapScriptInterface::DeleteGameObject(shared_ptr<GameObject>ptr)
+void MapScriptInterface::DeleteGameObject(GameObjectPointer ptr)
 {
 	ptr->Destructor();
 	ptr = NULLGOB;

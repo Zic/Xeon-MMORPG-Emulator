@@ -65,7 +65,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 	if(!pPet || !pPet->isAlive())
 		return;
 
-	shared_ptr<Unit>pTarget = NULLUNIT;
+	UnitPointer pTarget = NULLUNIT;
 
 	if(action == PET_ACTION_SPELL || action == PET_ACTION_SPELL_1 || action == PET_ACTION_SPELL_2 || (action == PET_ACTION_ACTION && misc == PET_ACTION_ATTACK )) // >> target
 	{

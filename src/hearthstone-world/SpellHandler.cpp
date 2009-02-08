@@ -236,7 +236,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 		if((spellInfo->Flags3 & FLAGS3_ACTIVATE_AUTO_SHOT) /*spellInfo->Attributes == 327698*/)	// auto shot..
 		{
 			//sLog.outString( "HandleSpellCast: Auto Shot-type spell cast (id %u, name %s)" , spellInfo->Id , spellInfo->Name );
-			shared_ptr<Item>weapon = GetPlayer()->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
+			ItemPointer weapon = GetPlayer()->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 			if(!weapon) 
 				return;
 			uint32 spellid;
@@ -378,7 +378,7 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	uint8 counter;
 	uint32 spellid;
 	uint32 flags;
-	shared_ptr<Unit>caster;
+	UnitPointer caster;
 	SpellCastTargets targets;
 	SpellEntry *sp;
 	shared_ptr<Spell>pSpell;

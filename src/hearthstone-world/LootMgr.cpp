@@ -665,7 +665,7 @@ LootRoll::LootRoll() : EventableObject()
 {
 }
 
-void LootRoll::Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, shared_ptr<MapMgr> mgr)
+void LootRoll::Init(uint32 timer, uint32 groupcount, uint64 guid, uint32 slotid, uint32 itemid, uint32 itemunk1, uint32 itemunk2, MapMgrPointer mgr)
 {
 	_mgr = mgr;
 	sEventMgr.AddEvent(shared_from_this(), &LootRoll::Finalize, EVENT_LOOT_ROLL_FINALIZE, 60000, 1,0);
@@ -735,7 +735,7 @@ void LootRoll::Finalize()
 	}
 	else if( guidtype == HIGHGUID_TYPE_GAMEOBJECT )
 	{
-		shared_ptr<GameObject> go = _mgr->GetGameObject(GET_LOWGUID_PART(_guid));
+		GameObjectPointer go = _mgr->GetGameObject(GET_LOWGUID_PART(_guid));
 		if(go) pLoot = &go->m_loot;
 	}
 
@@ -753,7 +753,7 @@ void LootRoll::Finalize()
 	}
 
 	// set this so we're not deleted yet.
-	shared_ptr<LootRoll> pThis = pLoot->items.at(_slotid).roll;
+	LootRollPointer pThis = pLoot->items.at(_slotid).roll;
 
 	pLoot->items.at(_slotid).roll = NULLROLL;
 
@@ -818,7 +818,7 @@ void LootRoll::Finalize()
 		}
 
 		DEBUG_LOG("AutoLootItem MISC");
-		shared_ptr<Item>item = objmgr.CreateItem( itemid, _player);
+		ItemPointer item = objmgr.CreateItem( itemid, _player);
 
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
 		if(pLoot->items.at(_slotid).iRandomProperty!=NULL)

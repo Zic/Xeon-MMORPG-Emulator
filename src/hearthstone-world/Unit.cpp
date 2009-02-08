@@ -385,7 +385,7 @@ void Unit::Update( uint32 p_time )
 	}
 }
 
-bool Unit::canReachWithAttack(shared_ptr<Unit>pVictim)
+bool Unit::canReachWithAttack(UnitPointer pVictim)
 {
 //	float targetreach = pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH);
 	float selfreach = m_floatValues[UNIT_FIELD_COMBATREACH];
@@ -428,7 +428,7 @@ bool Unit::canReachWithAttack(shared_ptr<Unit>pVictim)
 	return ( distance <= attackreach );
 }
 
-void Unit::GiveGroupXP(shared_ptr<Unit>pVictim, PlayerPointer PlayerInGroup)
+void Unit::GiveGroupXP(UnitPointer pVictim, PlayerPointer PlayerInGroup)
 {
 	if(!PlayerInGroup) 
 		return;
@@ -2169,7 +2169,7 @@ void Unit::RegeneratePower(bool isinterrupted)
 	}
 }
 
-double Unit::GetResistanceReducion(shared_ptr<Unit>pVictim, uint32 school, float armorReducePct)
+double Unit::GetResistanceReducion(UnitPointer pVictim, uint32 school, float armorReducePct)
 {
 	double reduction = 0.0;
 	float resistance = (float) pVictim->GetResistance(school);
@@ -2190,7 +2190,7 @@ double Unit::GetResistanceReducion(shared_ptr<Unit>pVictim, uint32 school, float
 	return reduction;
 }
 
-void Unit::CalculateResistanceReduction(shared_ptr<Unit>pVictim,dealdamage * dmg, SpellEntry* ability, float armorReducePct)
+void Unit::CalculateResistanceReduction(UnitPointer pVictim,dealdamage * dmg, SpellEntry* ability, float armorReducePct)
 {
 	if(dmg->school_type && ability && Spell::IsBinary(ability))	// damage isn't reduced for binary spells
 	{
@@ -4144,7 +4144,7 @@ void Unit::CastSpell( shared_ptr<Spell>pSpell )
 	pLastSpell = pSpell->m_spellInfo;
 }
 
-int32 Unit::GetSpellBonusDamage(shared_ptr<Unit>pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot)
+int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot)
 {
 	int32 plus_damage = 0;
 	UnitPointer caster = unit_shared_from_this();
@@ -4374,7 +4374,7 @@ void Unit::OnRemoveInRangeObject(ObjectPointer pObj)
 	{
 		/*if(m_useAI)*/
 
-		shared_ptr<Unit>pUnit = TO_UNIT(pObj);
+		UnitPointer pUnit = TO_UNIT(pObj);
 		GetAIInterface()->CheckTarget(pUnit);
 
 		if(GetUInt64Value(UNIT_FIELD_CHARM) == pObj->GetGUID())
@@ -5044,7 +5044,7 @@ void Unit::RemoveFromWorld(bool free_guid)
 	{
 		if(m_ObjectSlots[i] != 0)
 		{
-			shared_ptr<GameObject> obj = m_mapMgr->GetGameObject(m_ObjectSlots[i]);
+			GameObjectPointer obj = m_mapMgr->GetGameObject(m_ObjectSlots[i]);
 			if(obj)
 				obj->ExpireAndDelete();
 
@@ -5572,7 +5572,7 @@ UnitPointer Unit::CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,
 
 }
 
-float Unit::CalculateDazeCastChance(shared_ptr<Unit>target)
+float Unit::CalculateDazeCastChance(UnitPointer target)
 {
 	float attack_skill = float( getLevel() ) * 5.0f;
 	float defense_skill;
@@ -5767,7 +5767,7 @@ void CombatStatusHandler::UpdateTargets()
 	uint32 mytm = (uint32)UNIXTIME;
 	AttackTMap::iterator itr = m_attackTargets.begin();
 	AttackTMap::iterator it2 = m_attackTargets.begin();
-	shared_ptr<Unit>pUnit;
+	UnitPointer pUnit;
 
 	for(; itr != m_attackTargets.end();)
 	{
@@ -5885,7 +5885,7 @@ void CombatStatusHandler::OnRemoveFromWorld()
 	DamageMap.clear();
 }
 
-void Unit::Heal(shared_ptr<Unit>target, uint32 SpellId, uint32 amount)
+void Unit::Heal(UnitPointer target, uint32 SpellId, uint32 amount)
 {//Static heal
 	if(!target || !SpellId || !amount || !target->isAlive() )
 		return;
@@ -5929,7 +5929,7 @@ void Unit::Energize(UnitPointer target,uint32 SpellId, uint32 amount,uint32 type
 	}
 }
 
-void Unit::InheritSMMods(shared_ptr<Unit>inherit_from)
+void Unit::InheritSMMods(UnitPointer inherit_from)
 {
 	for(uint32 x=0;x<SPELL_MODIFIERS;x++)
 		for(uint32 y=0;y<2;y++)
@@ -6183,7 +6183,7 @@ void Unit::EventStunOrImmobilize()
 }
 
 // Proc on chill effects (such as frostbolt slow effect)
-void Unit::EventChill(shared_ptr<Unit>proc_target)
+void Unit::EventChill(UnitPointer proc_target)
 {
 	if ( !proc_target || unit_shared_from_this() == proc_target )
 		return; //how and why would we chill ourselfs
@@ -6341,7 +6341,7 @@ void Unit::RemoveOnAuraRemoveSpell(uint32 NameHash)
 }
 
 // Aura by NameHash has been removed
-void Unit::OnAuraRemove(uint32 NameHash, shared_ptr<Unit>m_target)
+void Unit::OnAuraRemove(uint32 NameHash, UnitPointer m_target)
 {
 	onAuraRemove *proc;
 

@@ -837,7 +837,7 @@ public:
 	void SendMeetingStoneQueue(uint32 DungeonId, uint8 Status);
 
 	void AddToWorld();
-	void AddToWorld(shared_ptr<MapMgr> pMapMgr);
+	void AddToWorld(MapMgrPointer pMapMgr);
 	void RemoveFromWorld();
 	bool Create ( WorldPacket &data );
 	
@@ -1242,11 +1242,11 @@ public:
     /* Death system                                                         */
     /************************************************************************/
 	void SpawnCorpseBones();
-	shared_ptr<Corpse>CreateCorpse();
+	CorpsePointer CreateCorpse();
 	void KillPlayer();
 	void ResurrectPlayer(PlayerPointer pResurrector);
 	void BuildPlayerRepop();
-	shared_ptr<Corpse>RepopRequestedPlayer();
+	CorpsePointer RepopRequestedPlayer();
 	
 	// silly event handler
 	void EventRepopRequestedPlayer() { RepopRequestedPlayer(); }
@@ -1444,8 +1444,8 @@ public:
 	uint32 GetBGQueueSlot();
 
 	void EventRepeatSpell();
-	void EventCastRepeatedSpell(uint32 spellid, shared_ptr<Unit>target);
-	int32 CanShootRangedWeapon(uint32 spellid, shared_ptr<Unit>target, bool autoshot);
+	void EventCastRepeatedSpell(uint32 spellid, UnitPointer target);
+	int32 CanShootRangedWeapon(uint32 spellid, UnitPointer target, bool autoshot);
 	uint32 m_AutoShotDuration;
 	uint32 m_AutoShotAttackTimer;
 	bool m_onAutoShot;
@@ -1531,7 +1531,7 @@ public:
 	uint8 cannibalizeCount;
 	int32 rageFromDamageDealt;
 	// GameObject commands
-	shared_ptr<GameObject>m_GM_SelectedGO;
+	GameObjectPointer m_GM_SelectedGO;
 	
 #ifndef CLUSTERING
 	void _Relocate(uint32 mapid,const LocationVector & v, bool sendpending, bool force_new_world, uint32 instance_id);
@@ -1650,8 +1650,8 @@ public:
 	set<PlayerPointer  > gmTargets;
 	uint32 m_UnderwaterMaxTime;
 	uint32 m_UnderwaterLastDmg;
-	HEARTHSTONE_INLINE void setMyCorpse(shared_ptr<Corpse> corpse) { myCorpse = corpse; }
-	HEARTHSTONE_INLINE shared_ptr<Corpse> getMyCorpse() { return myCorpse; }
+	HEARTHSTONE_INLINE void setMyCorpse(CorpsePointer corpse) { myCorpse = corpse; }
+	HEARTHSTONE_INLINE CorpsePointer getMyCorpse() { return myCorpse; }
 
 	uint32 m_resurrectHealth, m_resurrectMana;
 	uint32 resurrector;
@@ -1668,7 +1668,7 @@ public:
 	bool triggerpass_cheat;
 	bool SafeTeleport(uint32 MapID, uint32 InstanceID, float X, float Y, float Z, float O);
 	bool SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec);
-	void SafeTeleport(shared_ptr<MapMgr> mgr, LocationVector vec);
+	void SafeTeleport(MapMgrPointer mgr, LocationVector vec);
 	void EjectFromInstance();
 	bool raidgrouponlysent;
 	
@@ -1708,7 +1708,7 @@ public:
 	void OnPrePushToWorld();
 	void OnWorldPortAck();
 	uint32 m_TeleportState;
-	set<shared_ptr<Unit> > visiblityChangableSet;
+	set<UnitPointer > visiblityChangableSet;
 	bool m_beingPushed;
 	bool CanSignCharter(Charter * charter, PlayerPointer requester);
 	uint32 m_FlyingAura;
@@ -1757,7 +1757,7 @@ public:
 		return m_mapMgr->GetPlayer((uint32)mTradeTarget);
 	}
 
-	shared_ptr<Item>getTradeItem(uint32 slot) {return mTradeItems[slot];};
+	ItemPointer getTradeItem(uint32 slot) {return mTradeItems[slot];};
         
 	// Water level related stuff (they are public because they need to be accessed fast)
 	// Nose level of the character (needed for proper breathing)
@@ -1994,7 +1994,7 @@ protected:
 	ObjectPointer m_SummonedObject;
 
     // other system
-	shared_ptr<Corpse>    myCorpse;
+	CorpsePointer    myCorpse;
 
 	uint32      m_lastHonorResetTime;
 	uint32      _fields[PLAYER_END];
@@ -2133,7 +2133,7 @@ public:
 	static void InitializeTalentInspectSupport();
 
 	// loooooot
-	void GenerateLoot(shared_ptr<Corpse>pCorpse);
+	void GenerateLoot(CorpsePointer pCorpse);
 };
 
 class SkillIterator

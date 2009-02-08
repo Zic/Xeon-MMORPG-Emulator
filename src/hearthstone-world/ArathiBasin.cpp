@@ -382,7 +382,7 @@ void ArathiBasin::OnStart()
 	}
 
 	// open gates
-	for(list< GameObjectPointer  >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list< GameObjectPointer >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);

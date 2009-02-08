@@ -133,7 +133,7 @@ void InstanceMgr::Shutdown()
 
 		if(m_singleMaps[i] != NULL)
 		{
-			shared_ptr<MapMgr> ptr = m_singleMaps[i];
+			MapMgrPointer ptr = m_singleMaps[i];
 			ptr->KillThread();
 			ptr->Destructor();
 			ptr = NULLMAPMGR;
@@ -272,12 +272,12 @@ uint32 InstanceMgr::PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instance
 	return INSTANCE_OK;
 }
 
-shared_ptr<MapMgr> InstanceMgr::GetMapMgr(uint32 mapId)
+MapMgrPointer InstanceMgr::GetMapMgr(uint32 mapId)
 {
 	return m_singleMaps[mapId];
 }
 
-shared_ptr<MapMgr> InstanceMgr::GetInstance(ObjectPointer obj)
+MapMgrPointer InstanceMgr::GetInstance(ObjectPointer obj)
 {
 	PlayerPointer plr;
 	Instance * in;
@@ -401,7 +401,7 @@ MapMgrPointer InstanceMgr::_CreateInstance(Instance * in)
 	ASSERT(in->m_mapMgr==NULL);
 
 	// we don't have to check for world map info here, since the instance wouldn't have been saved if it didn't have any.
-	in->m_mapMgr = shared_ptr<MapMgr>(new MapMgr(m_maps[in->m_mapId], in->m_mapId, in->m_instanceId));
+	in->m_mapMgr = MapMgrPointer (new MapMgr(m_maps[in->m_mapId], in->m_mapId, in->m_instanceId));
 	in->m_mapMgr->Init();
 	in->m_mapMgr->pInstance = in;
 	in->m_mapMgr->iInstanceMode = in->m_difficulty;
@@ -440,7 +440,7 @@ uint32 InstanceMgr::GenerateInstanceID()
 	return iid;
 }
 
-void BuildStats(shared_ptr<MapMgr> mgr, char * m_file, Instance * inst, MapInfo * inf)
+void BuildStats(MapMgrPointer mgr, char * m_file, Instance * inst, MapInfo * inf)
 {
 	char tmp[200];
 	strcpy(tmp, "");
@@ -912,7 +912,7 @@ void InstanceMgr::PlayerLeftGroup(Group * pGroup, PlayerPointer pPlayer)
 	m_mapLock.Release();
 }
 
-shared_ptr<MapMgr> InstanceMgr::CreateBattlegroundInstance(uint32 mapid)
+MapMgrPointer InstanceMgr::CreateBattlegroundInstance(uint32 mapid)
 {
 	// shouldn't happen
 	if( mapid >= NUM_MAPS )
@@ -925,7 +925,7 @@ shared_ptr<MapMgr> InstanceMgr::CreateBattlegroundInstance(uint32 mapid)
 			return NULLMAPMGR;
 	}
 
-	shared_ptr<MapMgr> ret = shared_ptr<MapMgr>(new MapMgr(m_maps[mapid],mapid,GenerateInstanceID()));
+	MapMgrPointer ret = MapMgrPointer (new MapMgr(m_maps[mapid],mapid,GenerateInstanceID()));
 	ret->Init();
 	Instance * pInstance = new Instance();
 	pInstance->m_creation = UNIXTIME;

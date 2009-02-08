@@ -1136,7 +1136,7 @@ void Aura::EventUpdateCreatureAA(float r)
 		return;
 	}
 
-	shared_ptr<Unit>t;
+	UnitPointer t;
 	AuraPointer aura;
 	uint32 i;
 	
@@ -1166,7 +1166,7 @@ void Aura::EventUpdateCreatureAA(float r)
 		if( (*it2) == GET_LOWGUID_PART(m_casterGuid) )
 			continue;
 
-		shared_ptr<Unit>c = u_caster->GetMapMgr()->GetCreature(*it2);
+		UnitPointer c = u_caster->GetMapMgr()->GetCreature(*it2);
 		if( c == NULL || c->GetDistanceSq(u_caster) > r || c->isDead() )
 		{
 			targets.erase(it2);
@@ -1214,7 +1214,7 @@ void Aura::EventRelocateRandomTarget()
 	PlayerPointer p_caster = TO_PLAYER(u_caster);
 
 	// Ok, let's do it. :D
-	set<shared_ptr<Unit> > enemies;
+	set<UnitPointer > enemies;
 
 	unordered_set<ObjectPointer >::iterator itr = u_caster->GetInRangeOppFactsSetBegin();
 	for(; itr != u_caster->GetInRangeOppFactsSetEnd(); ++itr)
@@ -1244,7 +1244,7 @@ void Aura::EventRelocateRandomTarget()
 		return;
 
 	uint32 random = RandomUInt(enemies.size() - 1);
-	set<shared_ptr<Unit> >::iterator it2 = enemies.begin();
+	set<UnitPointer >::iterator it2 = enemies.begin();
 	while( random-- )
 		it2++;
 
@@ -1528,14 +1528,14 @@ void Aura::SpellAuraBindSight(bool apply)
 	// MindVision
 	if(apply)
 	{
-		shared_ptr<Unit>caster = GetUnitCaster();
+		UnitPointer caster = GetUnitCaster();
 		if(!caster || !caster->IsPlayer())
 			return;
 		caster->SetUInt64Value(PLAYER_FARSIGHT, m_target->GetGUID());
 	}
 	else
 	{
-		shared_ptr<Unit>caster = GetUnitCaster();
+		UnitPointer caster = GetUnitCaster();
 		if(!caster || !caster->IsPlayer())
 			return;
 		caster->SetUInt64Value(PLAYER_FARSIGHT, 0 );
@@ -1544,7 +1544,7 @@ void Aura::SpellAuraBindSight(bool apply)
 
 void Aura::SpellAuraModPossess(bool apply)
 {
-	shared_ptr<Unit>caster = GetUnitCaster();
+	UnitPointer caster = GetUnitCaster();
 
 	if(apply)
 	{
@@ -1579,7 +1579,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 	if(apply)
 	{
 		int32 dmg	= mod->m_amount;
-		shared_ptr<Unit>c = GetUnitCaster();
+		UnitPointer c = GetUnitCaster();
 		switch(m_spellProto->Id)
 		{
 			case 703:
@@ -1637,7 +1637,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 				PlayerPointer pr=TO_PLAYER(c);
 				if(pr->GetItemInterface())
 				{
-					shared_ptr<Item>it;
+					ItemPointer it;
 					it = pr->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 					if(it && it->GetProto())
 					{
@@ -2515,13 +2515,13 @@ void Aura::SpellAuraDummy(bool apply)
 	//Second Wind - triggers only on stun and Immobilize
 	case 29834:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
 				TO_PLAYER(caster)->SetTriggerStunOrImmobilize(29841,100);//fixed 100% chance
 		}break;
 	case 29838:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
 				TO_PLAYER(caster)->SetTriggerStunOrImmobilize(29842,100);//fixed 100% chance
 		}break;
@@ -2530,7 +2530,7 @@ void Aura::SpellAuraDummy(bool apply)
 	case 12496:
 	case 12497:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
 				TO_PLAYER(caster)->SetTriggerStunOrImmobilize(12494,mod->m_amount);
 		}break;
@@ -2701,7 +2701,7 @@ void Aura::SpellAuraDummy(bool apply)
 	case 17804: // Warlock: Soul Siphon
 	case 17805:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster) {
 				if( apply )
 					caster->m_soulSiphon.amt+= mod->m_amount;
@@ -2711,7 +2711,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 53754: // Warlock: Improved Fear
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2722,7 +2722,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 53759:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2733,7 +2733,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 44745: // Mage: Shattered Barrier
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2744,7 +2744,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 54787:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2757,7 +2757,7 @@ void Aura::SpellAuraDummy(bool apply)
 	case 44395:
 	case 44396:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if (apply)
@@ -2770,7 +2770,7 @@ void Aura::SpellAuraDummy(bool apply)
 	case 55359:
 	case 55360:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2779,7 +2779,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 47571:// Priest: Psychic Horror
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -2790,7 +2790,7 @@ void Aura::SpellAuraDummy(bool apply)
 		}break;
 	case 47572:
 		{
-			shared_ptr<Unit>caster = GetUnitCaster();
+			UnitPointer caster = GetUnitCaster();
 			if(caster)
 			{
 				if( apply )
@@ -3219,7 +3219,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			*/
 			uint32 threat = base_threat / (count * 2);
 
-			for(std::vector<shared_ptr<Unit> >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
+			for(std::vector<UnitPointer >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
 				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
@@ -3408,7 +3408,7 @@ void Aura::SpellAuraModStun(bool apply)
 		case 11298:
 			{
 				// sap
-				shared_ptr<Unit>c = GetUnitCaster();
+				UnitPointer c = GetUnitCaster();
 				if(c)
 					c->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_START_ATTACK);  // remove stealth
 			}break;
@@ -3428,7 +3428,7 @@ void Aura::SpellAuraModStun(bool apply)
 		case 28456:
 			{
 				// gouge
-				shared_ptr<Unit>c = GetUnitCaster();
+				UnitPointer c = GetUnitCaster();
 				if(c && c->GetTypeId() == TYPEID_PLAYER)
 				{
 					//TO_PLAYER( c )->CombatModeDelay = 10;
@@ -3862,7 +3862,7 @@ void Aura::SpellAuraPeriodicTriggerSpell(bool apply)
 			return;//null spell
 		}
 
-		shared_ptr<Unit>m_caster = GetUnitCaster();
+		UnitPointer m_caster = GetUnitCaster();
 		if(!m_caster)
 			return;
 
@@ -3887,7 +3887,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 	// Trigger Spell
 	// check for spell id
 
-	shared_ptr<Unit>m_caster=GetUnitCaster();
+	UnitPointer m_caster=GetUnitCaster();
 	if(!m_caster || !m_caster->IsInWorld())
 		return;
 
@@ -3919,7 +3919,7 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 		return;
 	}
 
-	shared_ptr<Unit>pTarget = TO_UNIT(oTarget);
+	UnitPointer pTarget = TO_UNIT(oTarget);
 
 	if(oTarget->IsUnit())
 	{	
@@ -4305,7 +4305,7 @@ void Aura::SpellAuraModDecreaseSpeed(bool apply)
 		//let's check Mage talents if we proc anythig 
 		if(m_spellProto->School==SCHOOL_FROST)
 		{
-			shared_ptr<Unit>caster=GetUnitCaster();
+			UnitPointer caster=GetUnitCaster();
 			//yes we are freezing the bastard, so can we proc anything on this ?
 			if(caster && m_target)
 				caster->EventChill(m_target);
@@ -4340,7 +4340,7 @@ void Aura::UpdateAuraModDecreaseSpeed()
 	if(m_spellProto->School==SCHOOL_FROST)
 	{
 		//yes we are freezing the bastard, so can we proc anything on this ?
-		shared_ptr<Unit>caster = GetUnitCaster();
+		UnitPointer caster = GetUnitCaster();
 		if( caster && m_target )
 			caster->EventChill( m_target );
 	}
@@ -5106,7 +5106,7 @@ void Aura::SpellAuraPeriodicLeech(bool apply)
 
 void Aura::EventPeriodicLeech(uint32 amount)
 {
-	shared_ptr<Unit>m_caster = GetUnitCaster();
+	UnitPointer m_caster = GetUnitCaster();
 	
 	if(!m_caster || !m_target->isAlive() || !m_caster->isAlive())
 		return;
@@ -6059,7 +6059,7 @@ void Aura::SpellAuraMounted(bool apply)
 	if(apply)
 	{   
 		if( isVehicleSpell ) // get rid of meeeee, I'm a useless placeholder!
-			SetTimeLeft(100);
+			SetDuration(100);
 
 		p_target->m_bgFlagIneligible++;
 		SetPositive();
@@ -6417,7 +6417,7 @@ void Aura::SpellAuraChannelDeathItem(bool apply)
 					ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(itemid);
 					if(pCaster->GetItemInterface()->CalculateFreeSlots(proto) > 0)
 					{
-						shared_ptr<Item>item = objmgr.CreateItem(itemid,pCaster);
+						ItemPointer item = objmgr.CreateItem(itemid,pCaster);
 						if(!item) return;
 
 
@@ -6481,7 +6481,7 @@ void Aura::SpellAuraPeriodicDamagePercent(bool apply)
 		//uint32 gr = GetSpellProto()->SpellGroupType;
 		//if(gr)
 		//{
-		//	shared_ptr<Unit>c=GetUnitCaster();
+		//	UnitPointer c=GetUnitCaster();
 		//	if(c)
 		//	{
 		//		SM_FIValue(c->SM[SMT_SPELL_VALUE_PCT][0],(int32*)&dmg,gr);
@@ -6534,7 +6534,7 @@ void Aura::SpellAuraModResistChance(bool apply)
 
 void Aura::SpellAuraModDetectRange(bool apply)
 {
-	shared_ptr<Unit>m_caster=GetUnitCaster();
+	UnitPointer m_caster=GetUnitCaster();
 	if(!m_caster)return;
 	if(apply)
 	{
@@ -7619,7 +7619,7 @@ void Aura::SpellAuraModDetectedRange(bool apply)
 void Aura::SpellAuraSplitDamageFlat(bool apply)
 {
 	DamageSplitTarget *ds;
-	shared_ptr<Unit>caster;
+	UnitPointer caster;
 
 	if( !m_target || !m_target->IsUnit() )
 		return;
@@ -7735,7 +7735,7 @@ void Aura::SpellAuraModHealthRegInCombat(bool apply)
 
 void Aura::EventPeriodicBurn(uint32 amount, uint32 misc)
 {
-	shared_ptr<Unit>m_caster = GetUnitCaster();
+	UnitPointer m_caster = GetUnitCaster();
 	
 	if(!m_caster)
 		return;

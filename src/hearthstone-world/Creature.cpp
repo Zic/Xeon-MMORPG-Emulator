@@ -1064,9 +1064,7 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 
 	SetUInt32Value(UNIT_FIELD_DISPLAYID,model);
 	SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,model);
-	//SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,proto->MountedDisplayID);
 
-	//SetUInt32Value(UNIT_FIELD_LEVEL, (mode ? proto->Level + (info ? info->lvl_mod_a : 0) : proto->Level));
 	SetUInt32Value(UNIT_FIELD_LEVEL, proto->MinLevel + (RandomUInt(proto->MaxLevel - proto->MinLevel)));
 
 	for(uint32 i = 0; i < 7; ++i)

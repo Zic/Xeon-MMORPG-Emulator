@@ -621,7 +621,7 @@ void QuestMgr::SendPushToPartyResponse(PlayerPointer plr, PlayerPointer pTarget,
 	plr->GetSession()->SendPacket(&data);
 }
 
-bool QuestMgr::OnGameObjectActivate(PlayerPointer plr, shared_ptr<GameObject>go)
+bool QuestMgr::OnGameObjectActivate(PlayerPointer plr, GameObjectPointer go)
 {
 	uint32 i, j;
 	QuestLogEntry *qle;
@@ -1066,7 +1066,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 			    }
 			    else
 			    {   
-					shared_ptr<Item>add;
+					ItemPointer add;
 					SlotResult slotresult;
 					add = plr->GetItemInterface()->FindItemLessMax(qst->reward_item[i], qst->reward_itemcount[i], false);
 					if (!add)
@@ -1078,7 +1078,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 						}
 						else
 						{
-							shared_ptr<Item>itm = objmgr.CreateItem(qst->reward_item[i], plr);
+							ItemPointer itm = objmgr.CreateItem(qst->reward_item[i], plr);
 							itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, uint32(qst->reward_itemcount[i]));
 							if( !plr->GetItemInterface()->SafeAddItem(itm,slotresult.ContainerSlot, slotresult.Slot) )
 							{
@@ -1106,7 +1106,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		    }
 		    else
 		    {
-				shared_ptr<Item>add;
+				ItemPointer add;
 				SlotResult slotresult;
 				add = plr->GetItemInterface()->FindItemLessMax(qst->reward_choiceitem[reward_slot], qst->reward_choiceitemcount[reward_slot], false);
 				if (!add)
@@ -1118,7 +1118,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 					}
 					else
 					{
-						shared_ptr<Item>itm = objmgr.CreateItem(qst->reward_choiceitem[reward_slot], plr);
+						ItemPointer itm = objmgr.CreateItem(qst->reward_choiceitem[reward_slot], plr);
 						itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, uint32(qst->reward_choiceitemcount[reward_slot]));
 						if( !plr->GetItemInterface()->SafeAddItem(itm,slotresult.ContainerSlot, slotresult.Slot) )
 						{
@@ -1170,7 +1170,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 			    }
 			    else
 			    {   
-					shared_ptr<Item>add;
+					ItemPointer add;
 					SlotResult slotresult;
 					add = plr->GetItemInterface()->FindItemLessMax(qst->reward_item[i], qst->reward_itemcount[i], false);
 					if (!add)
@@ -1182,7 +1182,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 						}
 						else
 						{
-							shared_ptr<Item>itm = objmgr.CreateItem(qst->reward_item[i], plr);
+							ItemPointer itm = objmgr.CreateItem(qst->reward_item[i], plr);
 							itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, uint32(qst->reward_itemcount[i]));
 							if( !plr->GetItemInterface()->SafeAddItem(itm,slotresult.ContainerSlot, slotresult.Slot) )
 							{
@@ -1210,7 +1210,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		    }
 		    else
 		    {
-				shared_ptr<Item>add;
+				ItemPointer add;
 				SlotResult slotresult;
 				add = plr->GetItemInterface()->FindItemLessMax(qst->reward_choiceitem[reward_slot], qst->reward_choiceitemcount[reward_slot], false);
 				if (!add)
@@ -1222,7 +1222,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 					}
 					else 
 					{
-						shared_ptr<Item>itm = objmgr.CreateItem(qst->reward_choiceitem[reward_slot], plr);
+						ItemPointer itm = objmgr.CreateItem(qst->reward_choiceitem[reward_slot], plr);
 						itm->SetUInt32Value(ITEM_FIELD_STACK_COUNT, uint32(qst->reward_choiceitemcount[reward_slot]));
 						if( !plr->GetItemInterface()->SafeAddItem(itm,slotresult.ContainerSlot, slotresult.Slot) )
 						{
@@ -1305,7 +1305,7 @@ void QuestMgr::LoadNPCQuests(CreaturePointer qst_giver)
 	qst_giver->SetQuestList(GetCreatureQuestList(qst_giver->GetEntry()));
 }
 
-void QuestMgr::LoadGOQuests(shared_ptr<GameObject>go)
+void QuestMgr::LoadGOQuests(GameObjectPointer go)
 {
 	go->SetQuestList(GetGOQuestList(go->GetEntry()));
 }

@@ -21,22 +21,22 @@
 
 class WarsongGulch : public CBattleground
 {
-	shared_ptr<GameObject> m_buffs[6];
-	shared_ptr<GameObject> m_homeFlags[2];
-	shared_ptr<GameObject> m_dropFlags[2];
+	GameObjectPointer m_buffs[6];
+	GameObjectPointer m_homeFlags[2];
+	GameObjectPointer m_dropFlags[2];
 	uint32 m_flagHolders[2];
-	list<shared_ptr<GameObject> > m_gates;
+	list<GameObjectPointer > m_gates;
 	uint32 m_scores[2];
 	uint32 m_lgroup;
 	bool m_flagAtBase[2];
 public:
-	WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t);
+	WarsongGulch(MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t);
 	~WarsongGulch();
 	virtual void Init();
 
 	void HookOnPlayerDeath(PlayerPointer plr);
-	void HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj);
-	void HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj);
+	void HookFlagDrop(PlayerPointer plr, GameObjectPointer obj);
+	void HookFlagStand(PlayerPointer plr, GameObjectPointer obj);
 	void HookOnMount(PlayerPointer plr);
 	void HookOnAreaTrigger(PlayerPointer plr, uint32 id);
 	bool HookHandleRepop(PlayerPointer plr);
@@ -51,7 +51,7 @@ public:
 	void DropFlag(PlayerPointer plr);
 	void ReturnFlag(uint32 team);
 
-	static BattlegroundPointer Create(shared_ptr<MapMgr> m, uint32 i, uint32 l, uint32 t) { return shared_ptr<WarsongGulch>(new WarsongGulch(m, i, l, t)); }
+	static BattlegroundPointer Create(MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return shared_ptr<WarsongGulch>(new WarsongGulch(m, i, l, t)); }
 
 	uint32 GetAllianceFlagHolderGUID() { return m_flagHolders[0]; }
 	uint32 GetHordeFlagHolderGUID() { return m_flagHolders[1]; }
@@ -60,7 +60,7 @@ public:
 
 	/* looooooot */
 	bool SupportsPlayerLoot() { return true; }
-	void HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse);
+	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 
 	void SetIsWeekend(bool isweekend);
 };

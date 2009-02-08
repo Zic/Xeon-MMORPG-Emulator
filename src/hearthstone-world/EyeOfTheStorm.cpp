@@ -1050,7 +1050,7 @@ void EyeOfTheStorm::OnStart()
 	PlaySoundToAll(SOUND_BATTLEGROUND_BEGIN);
 }
 
-void EyeOfTheStorm::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
+void EyeOfTheStorm::HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

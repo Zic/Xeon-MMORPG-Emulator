@@ -68,7 +68,7 @@ uint32 getConColor(uint16 AttackerLvl, uint16 VictimLvl)
 #undef PLAYER_LEVEL_CAP
 }
 
-uint32 CalculateXpToGive(shared_ptr<Unit>pVictim, shared_ptr<Unit>pAttacker)
+uint32 CalculateXpToGive(UnitPointer pVictim, UnitPointer pAttacker)
 {
 	if(pVictim->IsPlayer())
 		return 0;
@@ -526,7 +526,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 		{
 			if(!pAttacker->disarmed)
 			{
-				shared_ptr<Item>it = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
+				ItemPointer it = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
 				if(it)
 				{
 					wspeed = (float)it->GetProto()->Delay;
@@ -592,7 +592,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 		{
 			if(!pAttacker->disarmed)
 			{
-				shared_ptr<Item>it = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+				ItemPointer it = TO_PLAYER(pAttacker)->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 
 				if(it)
 					wspeed = (float)it->GetProto()->Delay;

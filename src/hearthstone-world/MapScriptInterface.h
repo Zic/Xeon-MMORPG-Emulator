@@ -39,7 +39,7 @@ class Player;
 class SERVER_DECL MapScriptInterface
 {
 public:
-	MapScriptInterface(shared_ptr<MapMgr> mgr);
+	MapScriptInterface(MapMgrPointer mgr);
 	~MapScriptInterface();
 
 	template<class T, uint32 TypeId> shared_ptr<T> GetObjectNearestCoords(uint32 Entry, float x, float y, float z = 0.0f, float ClosestDist = 999999.0f)
@@ -67,7 +67,7 @@ public:
 		return CAST(T, ClosestObject);
 	}
 
-	HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0, float ClosestDistance = 999999.0f)
+	HEARTHSTONE_INLINE GameObjectPointer GetGameObjectNearestCoords(float x, float y, float z = 0.0f, uint32 Entry = 0, float ClosestDistance = 999999.0f)
 	{
 		return GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(Entry, x, y, z, ClosestDistance);
 	}
@@ -88,11 +88,11 @@ public:
 	CreaturePointer SpawnCreature(uint32 Entry, float cX, float cY, float cZ, float cO, bool AddToWorld, bool tmplate, uint32 Misc1, uint32 Misc2);
 	WayPoint * CreateWaypoint();
 
-	void DeleteGameObject(shared_ptr<GameObject>ptr);
+	void DeleteGameObject(GameObjectPointer ptr);
 	void DeleteCreature(CreaturePointer ptr);
 
 private:
-	shared_ptr<MapMgr> mapMgr;
+	MapMgrPointer mapMgr;
 };
 
 class SERVER_DECL StructFactory : public Singleton<StructFactory>
@@ -107,19 +107,19 @@ public:
 class SERVER_DECL InstanceScript
 {
 public:
-	InstanceScript(shared_ptr<MapMgr>instance);
+	InstanceScript(MapMgrPointer instance);
 	virtual ~InstanceScript() {}
 
-	virtual shared_ptr<GameObject> GetObjectForOpenLock(PlayerPointer pCaster, SpellPointer pSpell, SpellEntry* pProto) { return NULLGOB; }
+	virtual GameObjectPointer GetObjectForOpenLock(PlayerPointer pCaster, SpellPointer pSpell, SpellEntry* pProto) { return NULLGOB; }
 
-	virtual void SetLockOptions(uint32 uEntryId, shared_ptr<GameObject> pGameObject) { }
+	virtual void SetLockOptions(uint32 uEntryId, GameObjectPointer pGameObject) { }
 	virtual uint32 GetRespawnTimeForCreature(uint32 uEntryId, CreaturePointer pCreature) { return 240000; }
 
 	virtual void Destroy() {}
 	virtual void UpdateEvent() {}
 
 protected:
-	shared_ptr<MapMgr> _instance;
+	MapMgrPointer _instance;
 
 };
 

@@ -1176,7 +1176,7 @@ void Player::_EventAttack( bool offhand )
 	if( m_special_state & ( UNIT_STATE_FEAR | UNIT_STATE_CHARM | UNIT_STATE_SLEEP | UNIT_STATE_STUN | UNIT_STATE_CONFUSE ) || IsStunned() || IsFeared() )
 		return;
 
-	shared_ptr<Unit>pVictim = NULLUNIT;
+	UnitPointer pVictim = NULLUNIT;
 	if(m_curSelection)
 		pVictim = GetMapMgr()->GetUnit(m_curSelection);
 	
@@ -1263,7 +1263,7 @@ void Player::_EventCharmAttack()
 	if(!m_CurrentCharm)
 		return;
 
-	shared_ptr<Unit>pVictim = NULLUNIT;
+	UnitPointer pVictim = NULLUNIT;
 	if(!IsInWorld())
 	{
 		m_CurrentCharm=NULLUNIT;
@@ -3335,7 +3335,7 @@ void Player::AddToWorld()
 		m_session->SetInstance(m_mapMgr->GetInstanceID());
 }
 
-void Player::AddToWorld(shared_ptr<MapMgr> pMapMgr)
+void Player::AddToWorld(MapMgrPointer pMapMgr)
 {
 	FlyCheat = false;
 	m_setflycheat=false;
@@ -4101,7 +4101,7 @@ void Player::BuildPlayerRepop()
 	SetMovement(MOVE_WATER_WALK, 1);
 }
 
-shared_ptr<Corpse>Player::RepopRequestedPlayer()
+CorpsePointer Player::RepopRequestedPlayer()
 {
 	if( myCorpse != NULL )
 	{
@@ -4144,7 +4144,7 @@ shared_ptr<Corpse>Player::RepopRequestedPlayer()
 	RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
 
 	bool corpse = (m_bg != NULL) ? m_bg->CreateCorpse( plr_shared_from_this() ) : true;
-	shared_ptr<Corpse>ret = NULLCORPSE;
+	CorpsePointer ret = NULLCORPSE;
 
 	if( corpse )
 		ret = CreateCorpse();
@@ -4266,9 +4266,9 @@ void Player::KillPlayer()
 	sHookInterface.OnDeath(plr_shared_from_this());
 }
 
-shared_ptr<Corpse>Player::CreateCorpse()
+CorpsePointer Player::CreateCorpse()
 {
-	shared_ptr<Corpse>pCorpse;
+	CorpsePointer pCorpse;
 	uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
 	objmgr.DelinkPlayerCorpses(plr_shared_from_this());
@@ -4358,7 +4358,7 @@ shared_ptr<Corpse>Player::CreateCorpse()
 
 void Player::SpawnCorpseBones()
 {
-	shared_ptr<Corpse>pCorpse;
+	CorpsePointer pCorpse;
 	pCorpse = objmgr.GetCorpseByOwner(GetLowGUID());
 	myCorpse = NULLCORPSE;
 	if(pCorpse)
@@ -4791,7 +4791,7 @@ void Player::UpdateChanceFields()
 void Player::UpdateAttackSpeed()
 {
 	uint32 speed=2000;
-	shared_ptr<Item>weap ;
+	ItemPointer weap ;
 	if(GetShapeShift()==FORM_CAT)//cat form
 	{
 		speed = 1000;
@@ -5147,7 +5147,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 
 		if(object_type == TYPEID_UNIT)
 		{
-			shared_ptr<Unit>uObj = TO_UNIT(obj);
+			UnitPointer uObj = TO_UNIT(obj);
 
 			return uObj->IsSpiritHealer(); // we can't see any NPCs except spirit-healers
 		}
@@ -5243,7 +5243,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 
 		case TYPEID_UNIT:
 			{	
-				shared_ptr<Unit>uObj = TO_UNIT(obj);
+				UnitPointer uObj = TO_UNIT(obj);
 					
 				if(uObj->IsSpiritHealer()) // can't see spirit-healers when alive
 					return false;
@@ -5258,7 +5258,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 
 		case TYPEID_GAMEOBJECT:
 			{
-				shared_ptr<GameObject>gObj = TO_GAMEOBJECT(obj);
+				GameObjectPointer gObj = TO_GAMEOBJECT(obj);
 
 				if(gObj->invisible) // Invisibility - Detection of GameObjects
 				{
@@ -5695,7 +5695,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 
 				if(iter->item.itemproto)
 				{
-					iter->roll = shared_ptr<LootRoll>(new LootRoll);
+					iter->roll = LootRollPointer (new LootRoll);
 					iter->roll->Init(60000, (m_Group != NULL ? m_Group->MemberCount() : 1),  guid, x, iter->item.itemproto->ItemId, factor, uint32(ipid), GetMapMgr());
 					
 					data2.Initialize(SMSG_LOOT_START_ROLL);
@@ -6793,7 +6793,7 @@ void Player::AddItemsToWorld()
 			{
 				for(uint32 e=0; e < pItem->GetProto()->ContainerSlots; e++)
 				{
-					shared_ptr<Item>item = TO_CONTAINER(pItem)->GetItem(e);
+					ItemPointer item = TO_CONTAINER(pItem)->GetItem(e);
 					if(item)
 					{
 						item->PushToWorld(m_mapMgr);
@@ -6830,7 +6830,7 @@ void Player::RemoveItemsFromWorld()
 			{
 				for(uint32 e=0; e < pItem->GetProto()->ContainerSlots; e++)
 				{
-					shared_ptr<Item>item = TO_CONTAINER(pItem)->GetItem(e);
+					ItemPointer item = TO_CONTAINER(pItem)->GetItem(e);
 					if(item && item->IsInWorld())
 					{
 						item->RemoveFromWorld();
@@ -7580,7 +7580,7 @@ void Player::RequestDuel(PlayerPointer pTarget)
 	float z = (GetPositionZ() + pTarget->GetPositionZ()*dist)/(1+dist);
 
 	//Create flag/arbiter
-	shared_ptr<GameObject> pGameObj = GetMapMgr()->CreateGameObject(21680);
+	GameObjectPointer pGameObj = GetMapMgr()->CreateGameObject(21680);
 	pGameObj->CreateFromProto(21680,GetMapId(), x, y, z, GetOrientation());
 	pGameObj->SetInstanceID(GetInstanceID());
 
@@ -7635,7 +7635,7 @@ void Player::DuelBoundaryTest()
 	if(!IsInWorld())
 		return;
 
-	shared_ptr<GameObject> pGameObject = GetMapMgr()->GetGameObject(GET_LOWGUID_PART(GetUInt64Value(PLAYER_DUEL_ARBITER)));
+	GameObjectPointer pGameObject = GetMapMgr()->GetGameObject(GET_LOWGUID_PART(GetUInt64Value(PLAYER_DUEL_ARBITER)));
 	if(!pGameObject)
 	{
 		EndDuel(DUEL_WINNER_RETREAT);
@@ -7730,7 +7730,7 @@ void Player::EndDuel(uint8 WinCondition)
 
 	//Clear Duel Related Stuff
 
-	shared_ptr<GameObject> arbiter = m_mapMgr ? GetMapMgr()->GetGameObject(GET_LOWGUID_PART(GetUInt64Value(PLAYER_DUEL_ARBITER))) : NULLGOB;
+	GameObjectPointer arbiter = m_mapMgr ? GetMapMgr()->GetGameObject(GET_LOWGUID_PART(GetUInt64Value(PLAYER_DUEL_ARBITER))) : NULLGOB;
 
 	if( arbiter != NULL )
 	{
@@ -8031,7 +8031,7 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 #endif
 }
 
-void Player::SafeTeleport(shared_ptr<MapMgr> mgr, LocationVector vec)
+void Player::SafeTeleport(MapMgrPointer mgr, LocationVector vec)
 {
 	if(IsInWorld())
 		RemoveFromWorld();
@@ -8889,7 +8889,7 @@ void Player::CalcDamage()
 		}
 //////no druid ss	
 		uint32 speed=2000;
-		shared_ptr<Item>it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+		ItemPointer it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 		
 		if(!disarmed)
 		{	
@@ -9061,7 +9061,7 @@ uint32 Player::GetMainMeleeDamage(uint32 AP_owerride)
 	}
 //////no druid ss	
 	uint32 speed=2000;
-	shared_ptr<Item>it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+	ItemPointer it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 	if(!disarmed)
 	{	
 		if(it)
@@ -11275,7 +11275,7 @@ void Player::UpdateTalentInspectBuffer()
 	}
 }
 
-void Player::GenerateLoot(shared_ptr<Corpse>pCorpse)
+void Player::GenerateLoot(CorpsePointer pCorpse)
 {
 	if( m_bg == NULL )
 		return;
@@ -11365,7 +11365,7 @@ void Player::CheckSpellUniqueTargets(SpellEntry *sp, uint64 guid)
 		{
 			if (GetMapMgr())
 			{
-				shared_ptr<Unit>unit = GetMapMgr()->GetUnit(ids[0]);
+				UnitPointer unit = GetMapMgr()->GetUnit(ids[0]);
 				if (unit)
 				{
 					unit->RemoveAuraByNameHash(sp->NameHash);

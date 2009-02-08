@@ -32,7 +32,7 @@ MapCell::~MapCell()
 	RemoveObjects();
 }
 
-void MapCell::Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr)
+void MapCell::Init(uint32 x, uint32 y, uint32 mapid, MapMgrPointer mapmgr)
 {
 	_mapmgr = mapmgr;
 	_active = false;
@@ -255,7 +255,7 @@ void MapCell::LoadObjects(CellSpawns * sp)
 	{
 		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
 		{
-			shared_ptr<GameObject> go = _mapmgr->CreateGameObject((*i)->entry);
+			GameObjectPointer go = _mapmgr->CreateGameObject((*i)->entry);
 			if(go->Load(*i))
 			{
 				//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);

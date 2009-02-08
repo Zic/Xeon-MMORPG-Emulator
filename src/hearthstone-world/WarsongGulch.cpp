@@ -25,7 +25,7 @@ static int winHonorTable[8]				= {  0,  2,  4,  7, 11, 19, 20, 20 };
 static int extraCompleteHonorTable[8]	= {  0,  7, 12, 20, 34, 57, 59, 59 }; // extras only for weekends
 static int extraWinHonorTable[8]		= {  0,  5,  8, 14, 23, 38, 40, 40 };
 
-WarsongGulch::WarsongGulch(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr, id, lgroup, t)
+WarsongGulch::WarsongGulch(MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr, id, lgroup, t)
 {
 	int i;
 
@@ -266,7 +266,7 @@ void WarsongGulch::DropFlag(PlayerPointer plr)
 		SendChatMessage( CHAT_MSG_BG_SYSTEM_HORDE, plr->GetGUID(), "The Horde flag was dropped by %s!", plr->GetName() );
 }
 
-void WarsongGulch::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
+void WarsongGulch::HookFlagDrop(PlayerPointer plr, GameObjectPointer obj)
 {
 	/* picking up a dropped flag */
 	if(m_dropFlags[plr->GetTeam()] != obj)
@@ -348,7 +348,7 @@ void WarsongGulch::ReturnFlag(uint32 team)
 	m_flagAtBase[team] = true;
 }
 
-void WarsongGulch::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
+void WarsongGulch::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 {
 	if(m_flagHolders[plr->GetTeam()] || m_homeFlags[plr->GetTeam()] != obj)
 	{
@@ -513,7 +513,7 @@ void WarsongGulch::OnCreate()
 	}
 
 	// Alliance Gates
-	shared_ptr<GameObject>gate = SpawnGameObject(179921, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
+	GameObjectPointer gate = SpawnGameObject(179921, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
 	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
@@ -572,7 +572,7 @@ void WarsongGulch::OnStart()
 	}
 
 	/* open the gates */
-	for(list<shared_ptr<GameObject> >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
+	for(list<GameObjectPointer >::iterator itr = m_gates.begin(); itr != m_gates.end(); ++itr)
 	{
 		(*itr)->SetUInt32Value(GAMEOBJECT_FLAGS, 64);
 		(*itr)->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
@@ -594,7 +594,7 @@ void WarsongGulch::OnStart()
 	m_started = true;
 }
 
-void WarsongGulch::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse>pCorpse)
+void WarsongGulch::HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse)
 {
 	// add some money
 	float gold = ((float(plr->getLevel()) / 2.5f)+1) * 100.0f;			// fix this later

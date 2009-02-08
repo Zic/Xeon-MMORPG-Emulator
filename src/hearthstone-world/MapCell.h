@@ -39,7 +39,7 @@ public:
 	typedef unordered_set<ObjectPointer > ObjectSet;
 
 	//Init
-	void Init(uint32 x, uint32 y, uint32 mapid, shared_ptr<MapMgr>mapmgr);
+	void Init(uint32 x, uint32 y, uint32 mapid, MapMgrPointer mapmgr);
 
 	//Object Managing
 	void AddObject(ObjectPointer obj); 
@@ -83,7 +83,7 @@ private:
 	bool _unloadpending;
 
 	uint16 _playerCount;
-	shared_ptr<MapMgr> _mapmgr;
+	MapMgrPointer _mapmgr;
 };
 
 #endif

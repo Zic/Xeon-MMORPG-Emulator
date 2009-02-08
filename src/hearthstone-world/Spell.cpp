@@ -559,7 +559,7 @@ uint64 Spell::GetSinglePossibleFriend(uint32 i,float prange)
 	return 0;
 }
 
-uint8 Spell::_DidHit(const shared_ptr<Unit>target)
+uint8 Spell::_DidHit(const UnitPointer target)
 {
 	//note resistchance is vise versa, is full hit chance
 	UnitPointer u_victim = target;
@@ -771,7 +771,7 @@ void Spell::GenerateTargets(SpellCastTargets *store_buff)
 					{
 						if( p_caster != NULL )
 						{
-							shared_ptr<Unit>selected = p_caster->GetMapMgr()->GetUnit(p_caster->GetSelection());
+							UnitPointer selected = p_caster->GetMapMgr()->GetUnit(p_caster->GetSelection());
 							if(isAttackable(p_caster,selected,!(m_spellInfo->c_is_flags & SPELL_FLAG_IS_TARGETINGSTEALTHED)))
 								store_buff->m_unitTarget = p_caster->GetSelection();
 						}
@@ -1165,7 +1165,7 @@ void Spell::cancel()
 		{
 			if(p_caster && p_caster->IsInWorld())
 			{
-				shared_ptr<Unit>pTarget = p_caster->GetMapMgr()->GetUnit(m_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT));
+				UnitPointer pTarget = p_caster->GetMapMgr()->GetUnit(m_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT));
 				if(!pTarget)
 					pTarget = p_caster->GetMapMgr()->GetUnit(p_caster->GetSelection());
 				  
@@ -1176,7 +1176,7 @@ void Spell::cancel()
 				if(m_AreaAura)//remove of blizz and shit like this
 				{
 					
-					shared_ptr<DynamicObject> dynObj=m_caster->GetMapMgr()->GetDynamicObject(m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
+					DynamicObjectPointer dynObj=m_caster->GetMapMgr()->GetDynamicObject(m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
 					if(dynObj)
 					{
 						dynObj->RemoveFromWorld(true);
@@ -1809,7 +1809,7 @@ void Spell::finish()
 		}
 		if(m_Delayed)
 		{
-			shared_ptr<Unit>pTarget = NULLUNIT;
+			UnitPointer pTarget = NULLUNIT;
 			if( p_caster->IsInWorld() )
 			{
 				pTarget = p_caster->GetMapMgr()->GetUnit(m_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT));
@@ -1834,7 +1834,7 @@ void Spell::finish()
 	otherwise it's instant spell and we delete it right after completion
 	*/
 	
-	SpellPointer spl = shared_from_this(); // feeefeee! <3
+//	SpellPointer spl = shared_from_this(); // feeefeee! <3
 
 	if( u_caster != NULL )
 	{
@@ -1988,7 +1988,7 @@ void Spell::SendSpellStart()
         {
 			if( p_caster != NULL )
 			{
-				shared_ptr<Item>itm = p_caster->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_RANGED );
+				ItemPointer itm = p_caster->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_RANGED );
 				if( itm != NULL )
 				{
 	                ip = itm->GetProto();
@@ -2251,7 +2251,7 @@ void Spell::SendChannelUpdate(uint32 time)
 	{
 		if(u_caster && u_caster->IsInWorld() && u_caster->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT))
 		{
-			shared_ptr<DynamicObject> dynObj=u_caster->GetMapMgr()->GetDynamicObject(u_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
+			DynamicObjectPointer dynObj=u_caster->GetMapMgr()->GetDynamicObject(u_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT));
 			if(dynObj)
 			{
 				dynObj->RemoveFromWorld(true);
@@ -3199,7 +3199,7 @@ uint8 Spell::CanCast(bool tolerate)
 	// Targetted Item Checks
 	if(m_targets.m_itemTarget && p_caster)
 	{
-		shared_ptr<Item>i_target = NULLITEM;
+		ItemPointer i_target = NULLITEM;
 
 		// check if the targeted item is in the trade box
 		if( m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM )
@@ -3373,7 +3373,7 @@ uint8 Spell::CanCast(bool tolerate)
 			return SPELL_FAILED_OUT_OF_RANGE;
 	}
 
-	shared_ptr<Unit>target = NULLUNIT;
+	UnitPointer target = NULLUNIT;
 	if( m_targets.m_targetMask == TARGET_FLAG_SELF )
 		target = u_caster;
 
@@ -3594,7 +3594,7 @@ uint8 Spell::CanCast(bool tolerate)
 					float posx = 0,posy = 0,posz = 0;
 					float co = cos(orient);
 					float si = sin(orient);
-					shared_ptr<MapMgr> map = m_caster->GetMapMgr(); 
+					MapMgrPointer map = m_caster->GetMapMgr(); 
 
 					float r;
 					for(r=20; r>10; r--)
@@ -3902,7 +3902,7 @@ void Spell::RemoveItems()
 	}
 }
 
-int32 Spell::CalculateEffect(uint32 i,shared_ptr<Unit>target)
+int32 Spell::CalculateEffect(uint32 i,UnitPointer target)
 {
 	// TODO: Add ARMOR CHECKS; Add npc that have ranged weapons use them;
 
@@ -3982,7 +3982,7 @@ exit:*/
 		{
 			if( p_caster != NULL )
 			{
-				shared_ptr<Item>it;
+				ItemPointer it;
 				if(p_caster->GetItemInterface())
 				{
 					it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
@@ -4170,7 +4170,7 @@ exit:*/
 	if( i_caster != NULL && target && target->GetMapMgr() && i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) )
 	{	
 		//we should inherit the modifiers from the conjured food caster
-		shared_ptr<Unit>item_creator = target->GetMapMgr()->GetUnit( i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) );
+		UnitPointer item_creator = target->GetMapMgr()->GetUnit( i_caster->GetUInt64Value( ITEM_FIELD_CREATOR ) );
 		if( item_creator != NULL )
 			caster = item_creator;
 	}
@@ -4251,8 +4251,8 @@ void Spell::CreateItem(uint32 itemId)
         return;
 
 	PlayerPointer 			pUnit = TO_PLAYER( m_caster );
-	shared_ptr<Item>			newItem = NULLITEM;
-	shared_ptr<Item>			add = NULLITEM;
+	ItemPointer 			newItem = NULLITEM;
+	ItemPointer 			add = NULLITEM;
 	SlotResult		slotresult;
 	ItemPrototype*	m_itemProto;
 
@@ -4512,8 +4512,8 @@ void Spell::Heal(int32 amount)
 	{
 		uint32 base_threat=Spell::GetBaseThreat(amount);
 		int count = 0;
-		shared_ptr<Unit>unit;
-		std::vector<shared_ptr<Unit> > target_threat;
+		UnitPointer unit;
+		std::vector<UnitPointer > target_threat;
 		if(base_threat)
 		{
 			target_threat.reserve(u_caster->GetInRangeCount()); // this helps speed
@@ -4539,7 +4539,7 @@ void Spell::Heal(int32 amount)
 			*/
 			uint32 threat = base_threat / (count * 2);
 				
-			for(std::vector<shared_ptr<Unit> >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
+			for(std::vector<UnitPointer >::iterator itr = target_threat.begin(); itr != target_threat.end(); ++itr)
 			{
 				// for now we'll just use heal amount as threat.. we'll prolly need a formula though
 				TO_UNIT(*itr)->GetAIInterface()->HealReaction( u_caster, unitTarget, threat, m_spellInfo );
@@ -4591,7 +4591,7 @@ void Spell::DetermineSkillUp(uint32 skillid)
 		p_caster->_AdvanceSkillLine(skillid, float2int32( 1.0f * sWorld.getRate(RATE_SKILLRATE)));
 }
 
-bool Spell::Reflect(shared_ptr<Unit>refunit)
+bool Spell::Reflect(UnitPointer refunit)
 {
 	uint32 refspellid = 0;
 
@@ -4854,7 +4854,7 @@ uint32 GetDiminishingGroup(uint32 NameHash)
 	plr->GetSession()->OutPacket(SMSG_CLEAR_EXTRA_AURA_INFO, c, buffer);
 }*/
 
-void Spell::_AddTarget(const shared_ptr<Unit>target, const uint32 effectid)
+void Spell::_AddTarget(const UnitPointer target, const uint32 effectid)
 {
 	SpellTargetList::iterator itr;
 	SpellTarget tgt;

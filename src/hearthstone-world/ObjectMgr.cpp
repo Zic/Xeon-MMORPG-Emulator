@@ -621,9 +621,9 @@ void ObjectMgr::LoadGuilds()
 	Log.Notice("ObjectMgr", "%u guilds loaded.", mGuild.size());
 }
 
-shared_ptr<Corpse> ObjectMgr::LoadCorpse(uint32 guid)
+CorpsePointer ObjectMgr::LoadCorpse(uint32 guid)
 {
-	shared_ptr<Corpse>pCorpse;
+	CorpsePointer pCorpse;
 	QueryResult *result = CharacterDatabase.Query("SELECT * FROM Corpses WHERE guid =%u ", guid );
 
 	if( !result )
@@ -632,7 +632,7 @@ shared_ptr<Corpse> ObjectMgr::LoadCorpse(uint32 guid)
 	do
 	{
 		Field *fields = result->Fetch();
-		pCorpse = shared_ptr<Corpse>(new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
+		pCorpse = CorpsePointer (new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
 		pCorpse->Init();
 		pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 		pCorpse->SetZoneId(fields[5].GetUInt32());
@@ -660,10 +660,10 @@ shared_ptr<Corpse> ObjectMgr::LoadCorpse(uint32 guid)
 // Live corpse retreival.
 // comments: I use the same tricky method to start from the last corpse instead of the first
 //------------------------------------------------------
-shared_ptr<Corpse> ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
+CorpsePointer ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
 {
 	CorpseMap::const_iterator itr;
-	shared_ptr<Corpse> rv = NULLCORPSE;
+	CorpsePointer rv = NULLCORPSE;
 	_corpseslock.Acquire();
 	for (itr = m_corpses.begin();itr != m_corpses.end(); ++itr)
 	{
@@ -682,7 +682,7 @@ shared_ptr<Corpse> ObjectMgr::GetCorpseByOwner(uint32 ownerguid)
 void ObjectMgr::DelinkPlayerCorpses(PlayerPointer pOwner)
 {
 	//dupe protection agaisnt crashs
-	shared_ptr<Corpse> c;
+	CorpsePointer c;
 	c=this->GetCorpseByOwner(pOwner->GetLowGUID());
 	if(!c)return;
 	sEventMgr.AddEvent(c, &Corpse::Delink, EVENT_CORPSE_SPAWN_BONES, 1, 1, 0);
@@ -1265,9 +1265,9 @@ ItemPointer ObjectMgr::LoadItem(uint64 guid)
 	return pReturn;
 }
 
-void ObjectMgr::LoadCorpses(shared_ptr<MapMgr> mgr)
+void ObjectMgr::LoadCorpses(MapMgrPointer mgr)
 {
-	shared_ptr<Corpse>pCorpse = NULLCORPSE;
+	CorpsePointer pCorpse = NULLCORPSE;
 
 	QueryResult *result = CharacterDatabase.Query("SELECT * FROM corpses WHERE instanceId = %u", mgr->GetInstanceID());
 
@@ -1276,7 +1276,7 @@ void ObjectMgr::LoadCorpses(shared_ptr<MapMgr> mgr)
 		do
 		{
 			Field *fields = result->Fetch();
-			pCorpse = shared_ptr<Corpse>(new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
+			pCorpse = CorpsePointer (new Corpse(HIGHGUID_TYPE_CORPSE,fields[0].GetUInt32()));
 			pCorpse->Init();
 			pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 			pCorpse->SetZoneId(fields[5].GetUInt32());
@@ -1302,7 +1302,7 @@ std::list<ItemPrototype*>* ObjectMgr::GetListForItemSet(uint32 setid)
 	return mItemSets[setid];
 }
 
-void ObjectMgr::CorpseAddEventDespawn(shared_ptr<Corpse> pCorpse)
+void ObjectMgr::CorpseAddEventDespawn(CorpsePointer pCorpse)
 {
 	if(!pCorpse->IsInWorld())
 	{
@@ -1315,7 +1315,7 @@ void ObjectMgr::CorpseAddEventDespawn(shared_ptr<Corpse> pCorpse)
 
 void ObjectMgr::DespawnCorpse(uint64 Guid)
 {
-	shared_ptr<Corpse> pCorpse = objmgr.GetCorpse((uint32)Guid);
+	CorpsePointer pCorpse = objmgr.GetCorpse((uint32)Guid);
 	if(pCorpse == 0)	// Already Deleted
 		return;
 	
@@ -1330,7 +1330,7 @@ void ObjectMgr::CorpseCollectorUnload()
 	_corpseslock.Acquire();
 	for (itr = m_corpses.begin(); itr != m_corpses.end();)
 	{
-		shared_ptr<Corpse> c =itr->second;
+		CorpsePointer c =itr->second;
 		++itr;
 		if(c->IsInWorld())
 			c->RemoveFromWorld(false);
@@ -2056,7 +2056,7 @@ void ObjectMgr::RemovePlayer(PlayerPointer p)
 
 }
 
-shared_ptr<Corpse> ObjectMgr::CreateCorpse()
+CorpsePointer ObjectMgr::CreateCorpse()
 {
 	uint32 guid;
 	m_corpseguidlock.Acquire();
@@ -2067,23 +2067,23 @@ shared_ptr<Corpse> ObjectMgr::CreateCorpse()
 	return pCorpse;
 }
 
-void ObjectMgr::AddCorpse(shared_ptr<Corpse> p)//add it to global storage
+void ObjectMgr::AddCorpse(CorpsePointer p)//add it to global storage
 {
 	_corpseslock.Acquire();
 	m_corpses[p->GetLowGUID()]=p;
 	_corpseslock.Release();
 }
 
-void ObjectMgr::RemoveCorpse(shared_ptr<Corpse> p)
+void ObjectMgr::RemoveCorpse(CorpsePointer p)
 {
 	_corpseslock.Acquire();
 	m_corpses.erase(p->GetLowGUID());
 	_corpseslock.Release();
 }
 
-shared_ptr<Corpse> ObjectMgr::GetCorpse(uint32 corpseguid)
+CorpsePointer ObjectMgr::GetCorpse(uint32 corpseguid)
 {
-	shared_ptr<Corpse> rv;
+	CorpsePointer rv;
 	_corpseslock.Acquire();
 	CorpseMap::const_iterator itr = m_corpses.find(corpseguid);
 	rv = (itr != m_corpses.end()) ? itr->second : NULLCORPSE;

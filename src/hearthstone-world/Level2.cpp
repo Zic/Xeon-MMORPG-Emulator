@@ -463,7 +463,7 @@ bool ChatHandler::HandleCastSpellCommand(const char* args, WorldSession *m_sessi
 
 bool ChatHandler::HandleMonsterCastCommand(const char * args, WorldSession * m_session)
 {
-	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
+	UnitPointer crt = getSelectedCreature(m_session, false);
 	if(!crt)
 	{
 		RedSystemMessage(m_session, "Please select a creature before using this command.");
@@ -476,8 +476,8 @@ bool ChatHandler::HandleMonsterCastCommand(const char * args, WorldSession * m_s
 
 bool ChatHandler::HandleCastSpellNECommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>caster = m_session->GetPlayer();
-	shared_ptr<Unit>target = getSelectedChar(m_session, false);
+	UnitPointer caster = m_session->GetPlayer();
+	UnitPointer target = getSelectedChar(m_session, false);
 	if(!target)
 		target = getSelectedCreature(m_session, false);
 	if(!target)
@@ -525,7 +525,7 @@ bool ChatHandler::HandleCastSpellNECommand(const char* args, WorldSession *m_ses
 
 bool ChatHandler::HandleMonsterSayCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
+	UnitPointer crt = getSelectedCreature(m_session, false);
 	if(!crt)
 		crt = getSelectedChar(m_session, false);
 
@@ -550,7 +550,7 @@ bool ChatHandler::HandleMonsterSayCommand(const char* args, WorldSession *m_sess
 
 bool ChatHandler::HandleMonsterYellCommand(const char* args, WorldSession *m_session)
 {
-	shared_ptr<Unit>crt = getSelectedCreature(m_session, false);
+	UnitPointer crt = getSelectedCreature(m_session, false);
 	if(!crt)
 		crt = getSelectedChar(m_session, false);
 
@@ -576,7 +576,7 @@ bool ChatHandler::HandleMonsterYellCommand(const char* args, WorldSession *m_ses
 
 bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 {
-	shared_ptr<GameObject>GObj = NULLGOB;
+	GameObjectPointer GObj = NULLGOB;
 
 	unordered_set<ObjectPointer >::iterator Itr = m_session->GetPlayer()->GetInRangeSetBegin();
 	unordered_set<ObjectPointer >::iterator Itr2 = m_session->GetPlayer()->GetInRangeSetEnd();
@@ -650,7 +650,7 @@ bool ChatHandler::HandleGOSelect(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGODelete(const char *args, WorldSession *m_session)
 {
-	shared_ptr<GameObject>GObj = m_session->GetPlayer()->m_GM_SelectedGO;
+	GameObjectPointer GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");
@@ -720,7 +720,7 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 	sstext << "Spawning GameObject By Entry '" << EntryID << "'" << '\0';
 	SystemMessage(m_session, sstext.str().c_str());
 
-	shared_ptr<GameObject>go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
+	GameObjectPointer go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
 	
 	PlayerPointer chr = m_session->GetPlayer();
 	uint32 mapid = chr->GetMapId();
@@ -773,7 +773,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 {
 	std::stringstream sstext;
 	GameObjectInfo *GOInfo = NULL;
-	shared_ptr<GameObject> GObj = NULLGOB;
+	GameObjectPointer GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -850,7 +850,7 @@ bool ChatHandler::HandleGOInfo(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOEnable(const char *args, WorldSession *m_session)
 {
-	shared_ptr<GameObject>GObj = NULLGOB;
+	GameObjectPointer GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -872,7 +872,7 @@ bool ChatHandler::HandleGOEnable(const char *args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOActivate(const char* args, WorldSession *m_session)
 {
-	shared_ptr<GameObject>GObj = NULLGOB;
+	GameObjectPointer GObj = NULLGOB;
 
 	GObj = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !GObj )
@@ -896,7 +896,7 @@ bool ChatHandler::HandleGOActivate(const char* args, WorldSession *m_session)
 
 bool ChatHandler::HandleGOScale(const char* args, WorldSession* m_session)
 {
-	shared_ptr<GameObject>go = m_session->GetPlayer()->m_GM_SelectedGO;
+	GameObjectPointer go = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !go )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");
@@ -951,7 +951,7 @@ bool ChatHandler::HandleMountCommand(const char *args, WorldSession *m_session)
 		return true;
 	}
 
-	shared_ptr<Unit>m_target = NULLUNIT;
+	UnitPointer m_target = NULLUNIT;
 	PlayerPointer m_plyr = getSelectedChar(m_session, false);
 	if(m_plyr)
 		m_target = m_plyr;

@@ -48,7 +48,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     }
     else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		ItemPointer quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -56,7 +56,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 	}
     else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -143,7 +143,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -154,7 +154,7 @@ void WorldSession::HandleQuestGiverQueryQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		ItemPointer quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -239,7 +239,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -251,7 +251,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	} 
 	else if(guidtype==HIGHGUID_TYPE_ITEM)
 	{
-		shared_ptr<Item>quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
+		ItemPointer quest_giver = GetPlayer()->GetItemInterface()->GetItemByGUID(guid);
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -343,7 +343,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		if(qst->receive_items[i])
 		{
-			shared_ptr<Item>item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
+			ItemPointer item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
 			if(!GetPlayer()->GetItemInterface()->AddItemToFreeSlot(item))
 			{
 				item->Destructor();
@@ -508,7 +508,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -591,7 +591,7 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else
@@ -676,7 +676,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 	} 
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-		shared_ptr<GameObject>quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer quest_giver = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(quest_giver)
 			qst_giver = TO_OBJECT(quest_giver);
 		else

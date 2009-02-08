@@ -99,7 +99,7 @@ uint32 GetAutoCastTypeForSpell(SpellEntry * ent)
 	return AUTOCAST_EVENT_NONE;
 }
 
-void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, CreaturePointer created_from_creature, shared_ptr<Unit>owner, SpellEntry* created_by_spell, uint32 type, uint32 expiretime)
+void Pet::CreateAsSummon(uint32 entry, CreatureInfo *ci, CreaturePointer created_from_creature, UnitPointer owner, SpellEntry* created_by_spell, uint32 type, uint32 expiretime)
 {
 	SetIsPet(true);
 

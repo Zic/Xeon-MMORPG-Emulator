@@ -348,7 +348,7 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, Group*>						GroupMap;
 	
     // HashMap typedef's
-    typedef HM_NAMESPACE::hash_map<uint64, shared_ptr<Item> >                       ItemMap;
+    typedef HM_NAMESPACE::hash_map<uint64, ItemPointer >                       ItemMap;
 	typedef HM_NAMESPACE::hash_map<uint32, CorpseData*>                 CorpseCollectorMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerInfo*>                 PlayerNameMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerCreateInfo*>           PlayerCreateInfoMap;
@@ -359,7 +359,7 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, Trainer*>                    TrainerMap;
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<TrainerSpell*> > TrainerSpellMap;
     typedef HM_NAMESPACE::hash_map<uint32, ReputationModifier*>         ReputationModMap;
-    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Corpse> >                     CorpseMap;
+    typedef HM_NAMESPACE::hash_map<uint32, CorpsePointer >                     CorpseMap;
     
     // Map typedef's
     typedef std::map<uint32, LevelInfo*>                                LevelMap;
@@ -452,15 +452,15 @@ public:
 	void LoadAchievements();
 
 	//Corpse Stuff
-	shared_ptr<Corpse>GetCorpseByOwner(uint32 ownerguid);
+	CorpsePointer GetCorpseByOwner(uint32 ownerguid);
 	void CorpseCollectorUnload();
 	void DespawnCorpse(uint64 Guid);
-	void CorpseAddEventDespawn(shared_ptr<Corpse>pCorpse);
+	void CorpseAddEventDespawn(CorpsePointer pCorpse);
 	void DelinkPlayerCorpses(PlayerPointer pOwner);
-	shared_ptr<Corpse> CreateCorpse();
-	void AddCorpse(shared_ptr<Corpse>);
-	void RemoveCorpse(shared_ptr<Corpse>);
-	shared_ptr<Corpse> GetCorpse(uint32 corpseguid);
+	CorpsePointer CreateCorpse();
+	void AddCorpse(CorpsePointer );
+	void RemoveCorpse(CorpsePointer );
+	CorpsePointer GetCorpse(uint32 corpseguid);
 
 	uint32 GetGossipTextForNpc(uint32 ID);
 
@@ -510,8 +510,8 @@ public:
 	void LoadPlayersInfo();
 	void LoadPlayerCreateInfo();
 	void LoadGuilds();
-	shared_ptr<Corpse> LoadCorpse(uint32 guid);
-	void LoadCorpses(shared_ptr<MapMgr> mgr);
+	CorpsePointer LoadCorpse(uint32 guid);
+	void LoadCorpses(MapMgrPointer mgr);
 	void LoadGMTickets();
 	void SaveGMTicket(uint64 guid, QueryBuffer * buf);
 	void LoadAuctions();

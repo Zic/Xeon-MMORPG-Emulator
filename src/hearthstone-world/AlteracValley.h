@@ -205,7 +205,7 @@ public:
 class AlteracValley : public CBattleground
 {
 protected:
-	list< GameObjectPointer  > m_gates;
+	list< GameObjectPointer > m_gates;
 	uint32 m_reinforcements[2];
 	bool m_nearingVictory[2];
 	AVNode *m_nodes[AV_NUM_CONTROL_POINTS];

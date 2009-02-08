@@ -142,8 +142,8 @@ public:
 	
 	HEARTHSTONE_INLINE bool IsInWorld() { return m_mapMgr != NULL; }
 	virtual void AddToWorld();
-	virtual void AddToWorld(shared_ptr<MapMgr> pMapMgr);
-	void PushToWorld(shared_ptr<MapMgr>);
+	virtual void AddToWorld(MapMgrPointer pMapMgr);
+	void PushToWorld(MapMgrPointer );
 	virtual void OnPushToWorld() { }
 	virtual void OnPrePushToWorld() { }
 	virtual void RemoveFromWorld(bool free_guid);
@@ -180,7 +180,7 @@ public:
 	void BuildFieldUpdatePacket(PlayerPointer Target, uint32 Index, uint32 Value);
 	void BuildFieldUpdatePacket(ByteBuffer * buf, uint32 Index, uint32 Value);
 
-	void DealDamage(shared_ptr<Unit>pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras = false);
+	void DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, uint32 unitEvent, uint32 spellId, bool no_remove_auras = false);
 	
 
 	virtual void DestroyForPlayer( PlayerPointer target ) const;
@@ -225,7 +225,7 @@ public:
 	//! Only for MapMgr use
 	HEARTHSTONE_INLINE void SetMapCell(MapCell* cell) { m_mapCell = cell; }
 	//! Only for MapMgr use
-	HEARTHSTONE_INLINE shared_ptr<MapMgr> GetMapMgr() const { return m_mapMgr; }
+	HEARTHSTONE_INLINE MapMgrPointer GetMapMgr() const { return m_mapMgr; }
 
 	HEARTHSTONE_INLINE void SetMapId(uint32 newMap) { m_mapId = newMap; }
 	void SetZoneId(uint32 newZone);
@@ -447,7 +447,7 @@ public:
 	float m_base_runSpeed;
 	float m_base_walkSpeed;
 
-	void SpellNonMeleeDamageLog(shared_ptr<Unit>pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false);
+	void SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false);
 	
 	//*****************************************************************************************
 	//* SpellLog packets just to keep the code cleaner and better to read
@@ -473,10 +473,10 @@ public:
 
 	bool Active;
 	bool CanActivate();
-	void Activate(shared_ptr<MapMgr> mgr);
-	void Deactivate(shared_ptr<MapMgr> mgr);
+	void Activate(MapMgrPointer mgr);
+	void Deactivate(MapMgrPointer mgr);
 	bool m_inQueue;
-	HEARTHSTONE_INLINE void SetMapMgr(shared_ptr<MapMgr> mgr) { m_mapMgr = mgr; }
+	HEARTHSTONE_INLINE void SetMapMgr(MapMgrPointer mgr) { m_mapMgr = mgr; }
 
 	void Delete()
 	{
@@ -533,7 +533,7 @@ protected:
 	//! Continent/map id.
 	uint32 m_mapId;
 	//! Map manager
-	shared_ptr<MapMgr> m_mapMgr;
+	MapMgrPointer m_mapMgr;
 	//! Current map cell
 	MapCell *m_mapCell;
 

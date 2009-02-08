@@ -632,7 +632,7 @@ bool ChatHandler::HandleIncreaseWeaponSkill(const char *args, WorldSession *m_se
 	uint32 SubClassSkill = 0;
 	if(!pr) pr = m_session->GetPlayer();
 	if(!pr) return false;
-	shared_ptr<Item>it = pr->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+	ItemPointer it = pr->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
 	ItemPrototype* proto = NULL;
 	if (!it)
 		it = pr->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED);
@@ -939,7 +939,7 @@ bool ChatHandler::HandleParalyzeCommand(const char* args, WorldSession *m_sessio
 {
 	//PlayerPointer plr = getSelectedChar(m_session, true);
 	//if(!plr) return false;
-	shared_ptr<Unit>plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
+	UnitPointer plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
 	if(!plr || plr->GetTypeId() != TYPEID_PLAYER)
 	{
 		RedSystemMessage(m_session, "Invalid target.");
@@ -961,7 +961,7 @@ bool ChatHandler::HandleUnParalyzeCommand(const char* args, WorldSession *m_sess
 {
 	//PlayerPointer plr = getSelectedChar(m_session, true);
 	//if(!plr) return false;
-	shared_ptr<Unit>plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
+	UnitPointer plr = m_session->GetPlayer()->GetMapMgr()->GetUnit(m_session->GetPlayer()->GetSelection());
 	if(!plr || plr->GetTypeId() != TYPEID_PLAYER)
 	{
 		RedSystemMessage(m_session, "Invalid target.");
@@ -1021,7 +1021,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args, WorldSession* m_sess
 	sGMLog.writefromsession(m_session, "used add item set command, set %u, target %s", setid, chr->GetName());
 	for(std::list<ItemPrototype*>::iterator itr = l->begin(); itr != l->end(); ++itr)
 	{
-		shared_ptr<Item>itm = objmgr.CreateItem((*itr)->ItemId, m_session->GetPlayer());
+		ItemPointer itm = objmgr.CreateItem((*itr)->ItemId, m_session->GetPlayer());
 		if(!itm) continue;
 		if(itm->GetProto()->Bonding == ITEM_BIND_ON_PICKUP)
 			itm->SoulBind();
@@ -1794,7 +1794,7 @@ bool ChatHandler::HandleNpcReturnCommand(const char* args, WorldSession* m_sessi
 
 bool ChatHandler::HandleModPeriodCommand(const char* args, WorldSession * m_session)
 {
-	shared_ptr<Transporter> trans = m_session->GetPlayer()->m_CurrentTransporter;
+	TransporterPointer trans = m_session->GetPlayer()->m_CurrentTransporter;
 	if(trans == 0)
 	{
 		RedSystemMessage(m_session, "You must be on a transporter.");
@@ -2441,7 +2441,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char * args, WorldSession * 
 
 bool ChatHandler::HandleGORotate(const char * args, WorldSession * m_session)
 {
-	shared_ptr<GameObject>go = m_session->GetPlayer()->m_GM_SelectedGO;
+	GameObjectPointer go = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !go )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");
@@ -2475,7 +2475,7 @@ bool ChatHandler::HandleGORotate(const char * args, WorldSession * m_session)
 bool ChatHandler::HandleGOMove(const char * args, WorldSession * m_session)
 {
 	// move the go to player's coordinates
-	shared_ptr<GameObject>go = m_session->GetPlayer()->m_GM_SelectedGO;
+	GameObjectPointer go = m_session->GetPlayer()->m_GM_SelectedGO;
 	if( !go )
 	{
 		RedSystemMessage(m_session, "No selected GameObject...");

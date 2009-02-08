@@ -48,7 +48,7 @@ class SERVER_DECL WorldStateManager
 	WorldStateMap m_states;
 
 	// mapmgr we are working with.
-	shared_ptr<MapMgr> m_mapMgr;
+	MapMgrPointer m_mapMgr;
 
 	// synchronization object
 	// shouldn't REALLY be needed, but we're paranoid..
@@ -58,7 +58,7 @@ class SERVER_DECL WorldStateManager
 public:
 
 	// constructor, not much to do though, except set mapmgr reference
-	WorldStateManager(shared_ptr<MapMgr> mgr)
+	WorldStateManager(MapMgrPointer mgr)
 	{
 		m_mapMgr = mgr;
 	}
@@ -108,7 +108,7 @@ public:
 	void LoadFromDB();
 
 	// applys a map template to a new instance
-	void ApplyMapTemplate(shared_ptr<MapMgr>pmgr);
+	void ApplyMapTemplate(MapMgrPointer pmgr);
 };
 
 #define sWorldStateTemplateManager WorldStateTemplateManager::getSingleton()

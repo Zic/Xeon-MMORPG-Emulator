@@ -8,7 +8,7 @@
 #define ALLIANCE 1
 #define ROUND_LENGTH 600 //in secs
 
-StrandOfTheAncients::StrandOfTheAncients(shared_ptr<MapMgr> mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
+StrandOfTheAncients::StrandOfTheAncients(MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t) : CBattleground(mgr,id,lgroup,t)
 {
 	Attackers = RandomUInt(2)-1;
 	BattleRound = 1;
@@ -36,15 +36,15 @@ void StrandOfTheAncients::HookOnPlayerDeath(PlayerPointer plr)
 {
 }
 
-void StrandOfTheAncients::HookFlagDrop(PlayerPointer plr, shared_ptr<GameObject> obj)
+void StrandOfTheAncients::HookFlagDrop(PlayerPointer plr, GameObjectPointer obj)
 {
 }
 
-void StrandOfTheAncients::HookFlagStand(PlayerPointer plr, shared_ptr<GameObject> obj)
+void StrandOfTheAncients::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 {
 }
 
-bool StrandOfTheAncients::HookSlowLockOpen(shared_ptr<GameObject> pGo, PlayerPointer pPlayer, SpellPointer pSpell)
+bool StrandOfTheAncients::HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell)
 {
 	return true;
 }
@@ -95,7 +95,7 @@ void StrandOfTheAncients::OnStart()
 	sEventMgr.AddEvent( TO_SOTA( shared_from_this() ), &StrandOfTheAncients::TimeTick, EVENT_SOTA_TIMER, MSTIME_SECOND * 5, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
 }
 
-void StrandOfTheAncients::HookGenerateLoot(PlayerPointer plr, shared_ptr<Corpse> pCorpse)
+void StrandOfTheAncients::HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse)
 {
 }
 

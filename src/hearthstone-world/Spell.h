@@ -1647,7 +1647,7 @@ public:
     // Removes reagents, ammo, and items/charges
     void RemoveItems();
     // Calculates the i'th effect value
-    int32 CalculateEffect(uint32, shared_ptr<Unit>target);
+    int32 CalculateEffect(uint32, UnitPointer target);
     // Handles Teleport function
     void HandleTeleport(uint32 id, UnitPointer Target);
     // Determines how much skill caster going to gain
@@ -1661,7 +1661,7 @@ public:
     bool Reflect(UnitPointer refunit);
 
     HEARTHSTONE_INLINE uint32 getState() { return m_spellState; }
-    HEARTHSTONE_INLINE void SetUnitTarget(shared_ptr<Unit>punit){unitTarget=punit;}
+    HEARTHSTONE_INLINE void SetUnitTarget(UnitPointer punit){unitTarget=punit;}
 	HEARTHSTONE_INLINE SpellEntry *GetSpellProto() { return m_spellInfo; }
 
     // Send Packet functions
@@ -1853,7 +1853,7 @@ public:
     HEARTHSTONE_INLINE ItemPointer GetItemTarget() { return itemTarget; }
     HEARTHSTONE_INLINE UnitPointer GetUnitTarget() { return unitTarget; }
     HEARTHSTONE_INLINE PlayerPointer GetPlayerTarget() { return playerTarget; }
-    HEARTHSTONE_INLINE shared_ptr<GameObject> GetGameObjectTarget() { return gameObjTarget; }
+    HEARTHSTONE_INLINE GameObjectPointer GetGameObjectTarget() { return gameObjTarget; }
 
     uint32 chaindamage;
     // -------------------------------------------
@@ -2042,11 +2042,11 @@ protected:
     int32   m_timer;
     
 	// Current Targets to be used in effect handler
-    UnitPointer       unitTarget;
-    ItemPointer       itemTarget;
-    shared_ptr<GameObject> gameObjTarget;
+    UnitPointer      unitTarget;
+    ItemPointer      itemTarget;
+    GameObjectPointer gameObjTarget;
     PlayerPointer     playerTarget;
-    shared_ptr<Corpse>     corpseTarget;
+    CorpsePointer     corpseTarget;
     uint32      add_damage;
 
     uint8       cancastresult;
@@ -2071,13 +2071,13 @@ private:
 	SpellTargetList m_targetList;
 
 	// adds a target to the list, performing DidHit checks
-	void _AddTarget(const shared_ptr<Unit>target, const uint32 effectid);
+	void _AddTarget(const UnitPointer target, const uint32 effectid);
 
 	// adds a target to the list, negating DidHit checks
 	void _AddTargetForced(const uint64& guid, const uint32 effectid);
 
 	// didhit checker
-	uint8 _DidHit(const shared_ptr<Unit>target);
+	uint8 _DidHit(const UnitPointer target);
 
 	// gets the pointer of an object (optimized for spell system)
 	ObjectPointer _LookupObject(const uint64& guid);

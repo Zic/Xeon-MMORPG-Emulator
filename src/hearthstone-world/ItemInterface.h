@@ -184,7 +184,7 @@ class ItemIterator
 	bool m_searchInProgress;
 	uint32 m_slot;
 	uint32 m_containerSlot;
-	shared_ptr<Container> m_container;
+	ContainerPointer m_container;
 	ItemPointer m_currentItem;
 	ItemInterface* m_target;
 public:

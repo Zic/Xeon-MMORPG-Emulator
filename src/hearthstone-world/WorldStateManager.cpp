@@ -224,7 +224,7 @@ void WorldStateTemplateManager::LoadFromDB()
 	delete pResult;
 }
 
-void WorldStateTemplateManager::ApplyMapTemplate(shared_ptr<MapMgr>pmgr)
+void WorldStateTemplateManager::ApplyMapTemplate(MapMgrPointer pmgr)
 {
 	WorldStateTemplateList::iterator itr = m_templatesForMaps[pmgr->GetMapId()].begin();
 	WorldStateTemplateList::iterator itrend = m_templatesForMaps[pmgr->GetMapId()].end();

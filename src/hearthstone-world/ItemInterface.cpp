@@ -1286,7 +1286,7 @@ void ItemInterface::RemoveAllConjured()
 		{
 			if(IsBagSlot(x) && m_pItems[x]->IsContainer())
 			{
-				shared_ptr<Container> bag = TO_CONTAINER(m_pItems[x]);
+				ContainerPointer bag = TO_CONTAINER(m_pItems[x]);
  
 				for(uint32 i = 0; i < bag->GetProto()->ContainerSlots; i++)
 				{
