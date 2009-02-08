@@ -2577,30 +2577,16 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 	{
 		if( strchr(m_pOwner->GetSession()->GetPermissions(),'az')==NULL)
 		{
-			if(dstslot<23)
+			//don't allow anything else then these items
+			if( dstslot < INVENTORY_SLOT_BAG_END )
 			{
-				switch(dstslot)
+				if( !(SrcItem->GetUInt32Value(OBJECT_FIELD_ENTRY) == 12064 || 
+					SrcItem->GetUInt32Value(OBJECT_FIELD_ENTRY) == 2586 ||
+					SrcItem->GetUInt32Value(OBJECT_FIELD_ENTRY) == 11508 ))
 				{
-					case 0://head
-					{
-						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 12064 ));
-						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,12064);
-					}break;
-					case 4://chest
-					{
-						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 2586 ));
-						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,2586);
-					}break;
-					case 7://feet
-					{
-						SrcItem->SetProto(ItemPrototypeStorage.LookupEntry( 11508 ));
-						SrcItem->SetUInt32Value(OBJECT_FIELD_ENTRY,11508);
-					}break;
-					default:
-						return;
+					AddItemToFreeSlot(SrcItem);
+					return;
 				}
-				AddItemToFreeSlot(SrcItem);
-				return;
 			}
 		}
 	}
