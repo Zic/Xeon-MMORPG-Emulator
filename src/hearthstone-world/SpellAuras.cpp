@@ -2394,51 +2394,18 @@ void Aura::SpellAuraDummy(bool apply)
 			else if(m_target->isAlive())
 				_ptarget->SoulStone = _ptarget->SoulStoneReceiver = 0;
 		}break;
-	//case 20154://Soulstone Resurrecton
-	//case 20287:
-	//case 20288:
-	//case 20289:
-	//case 20290:
-	//case 20291:
-	//case 20292:
-	//case 20293:
-	/*case 20165:
-	case 20347:
-	case 20348:
-	case 20349:
-	case 20166:
-	case 20356:
-	case 20357:
-	case 20164:
-	case 20375:
-	case 20915:
-	case 20918:
-	case 20919:
-	case 20920:
-	case 21082:
-	case 20162:
-	case 20305:
-	case 20306:
-	case 20307:
-	case 20308:
+
+	case 47883:
 		{
-			if(mod->i == 2 || mod->i == 0)
+			if(apply)
 			{
-				PlayerPointer c = TO_PLAYER( GetUnitCaster() );
-				if(apply)
-				{
-					c->RemoveAura(c->Seal);
-					c->Seal = GetSpellId();
-					c->judgespell = mod->m_amount;
-					c->SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_JUDGEMENT);
-				}
-				else
-				{
-					c->Seal = 0;
-					c->RemoveFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_JUDGEMENT);
-				}
+				_ptarget->SoulStone = 47882;
+				_ptarget->SoulStoneReceiver = (uint32)m_casterGuid;
 			}
-		}break;*/
+			else if(m_target->isAlive())
+				_ptarget->SoulStone = _ptarget->SoulStoneReceiver = 0;
+		}break;
+
 	case 1002:  // Eyes of the beast
 		{
 			// Take control of pets vision
