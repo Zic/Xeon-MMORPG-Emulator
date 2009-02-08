@@ -84,6 +84,12 @@ public:
 	AddItemResult AddItemToFreeSlot(ItemPointer item);
 	AddItemResult AddItemToFreeBankSlot(ItemPointer item);
 	
+	/** Finds a stack that didn't reach max capacity
+	\param itemid The entry of the item to search for
+	\param cnt The item count you wish to add to the stack
+	\param IncBank Should this search the player's bank as well?
+	\return An ItemPointer to a stack of itemid which can contain cnt more items
+	*/
 	ItemPointer FindItemLessMax(uint32 itemid, uint32 cnt, bool IncBank);
 	uint32 GetItemCount(uint32 itemid, bool IncBank = false);
 	uint32 RemoveItemAmt(uint32 id, uint32 amt);
