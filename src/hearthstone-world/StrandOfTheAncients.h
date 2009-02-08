@@ -37,7 +37,7 @@ public:
 	void OnStart();
 
 	bool SupportsPlayerLoot() { return true; }
-	bool HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, shared_ptr<Spell> pSpell);
+	bool HookSlowLockOpen(GameObjectPointer pGo, PlayerPointer pPlayer, SpellPointer pSpell);
 
 	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse);
 

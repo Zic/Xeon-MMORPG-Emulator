@@ -879,7 +879,7 @@ public:
 	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();
 
-	void CastSpell(shared_ptr<Spell>pSpell);
+	void CastSpell(SpellPointer pSpell);
 	void InterruptCurrentSpell();
 
 	//caller is the caster
@@ -1027,14 +1027,14 @@ public:
 	virtual void OnRemoveInRangeObject(ObjectPointer pObj);
 	void ClearInRangeSet();
 
-	HEARTHSTONE_INLINE shared_ptr<Spell>GetCurrentSpell(){return m_currentSpell;}
+	HEARTHSTONE_INLINE SpellPointer GetCurrentSpell(){return m_currentSpell;}
 	HEARTHSTONE_INLINE void SetCurrentSpell(SpellPointer cSpell) { m_currentSpell = cSpell; }
 
 	uint32 m_CombatUpdateTimer;
 
 	HEARTHSTONE_INLINE void setcanperry(bool newstatus){can_parry=newstatus;}
 		
-	std::map<uint32,shared_ptr<Aura> > tmpAura;
+	std::map<uint32,AuraPointer > tmpAura;
 
 	uint32 BaseResistance[7]; //there are resistances for silence, fear, mechanics ....
 	uint32 BaseStats[5];
@@ -1179,7 +1179,7 @@ public:
 	CombatStatusHandler CombatStatus;
 	bool m_temp_summon;
 
-	void CancelSpell(shared_ptr<Spell>ptr);
+	void CancelSpell(SpellPointer ptr);
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);
 
@@ -1229,7 +1229,7 @@ protected:
 	//uint32 m_pet_action;
 
 	// Spell currently casting
-	shared_ptr<Spell>m_currentSpell;
+	SpellPointer m_currentSpell;
 
 	// AI
 	AIInterface *m_aiInterface;

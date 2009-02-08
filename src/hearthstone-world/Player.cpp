@@ -2878,7 +2878,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	m_TransporterGUID = get_next_field.GetUInt32();
 	if(m_TransporterGUID)
 	{
-		shared_ptr<Transporter> t = objmgr.GetTransporter(GUID_LOPART(m_TransporterGUID));
+		TransporterPointer t = objmgr.GetTransporter(GUID_LOPART(m_TransporterGUID));
 		m_TransporterGUID = t ? t->GetGUID() : 0;
 	}
 
@@ -2903,7 +2903,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 #else		
 		if (spProto)
 		{
-			skilllineshared_ptr<Spell>_spell = objmgr.GetSpellSkill(spProto->Id);
+			SpellPointer skillline_spell = objmgr.GetSpellSkill(spProto->Id);
 			if (_spell)
 			{
 				skilllineentry * _skill = dbcSkillLine.LookupEntry(_spell->skilline);
@@ -5317,7 +5317,7 @@ void Player::AddInRangeObject(ObjectPointer pObj)
 	if (pObj->IsUnit())
 	{
 		UnitPointer pUnit=TO_UNIT(pObj);
-		shared_ptr<Aura>aur = NULLAURA;
+		AuraPointer aur = NULLAURA;
 		
 		if (GetSession() != NULL)
 		{
@@ -8818,7 +8818,7 @@ void Player::SetShapeShift(uint8 ss)
 	// apply any talents/spells we have that apply only in this form.
 	set<uint32>::iterator itr;
 	SpellEntry * sp;
-	shared_ptr<Spell>spe;
+	SpellPointer spe;
 	SpellCastTargets t(GetGUID());
 
 	for( itr = mSpells.begin(); itr != mSpells.end(); ++itr )

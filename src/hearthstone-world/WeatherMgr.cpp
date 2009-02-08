@@ -118,7 +118,7 @@ void WeatherMgr::LoadFromDB()
 	do
 	{
 		Field *fields = result->Fetch();
-		shared_ptr<WeatherInfo> wi = shared_ptr<WeatherInfo>(new WeatherInfo);
+		WeatherInfoPointer wi(new WeatherInfo);
 		wi->m_zoneId = fields[0].GetUInt32();
 		wi->m_effectValues[0] = fields[1].GetUInt32();  // high_chance
 		wi->m_effectValues[1] = fields[2].GetUInt32();  // high_type
@@ -137,7 +137,7 @@ void WeatherMgr::LoadFromDB()
 
 void WeatherMgr::SendWeather(PlayerPointer plr)  //Update weather when player has changed zone (WorldSession::HandleZoneUpdateOpcode)
 {
-	std::map<uint32, shared_ptr<WeatherInfo> >::iterator itr;
+	std::map<uint32, WeatherInfoPointer >::iterator itr;
 	itr = m_zoneWeathers.find(plr->GetZoneId());
 
 	if (itr == m_zoneWeathers.end())

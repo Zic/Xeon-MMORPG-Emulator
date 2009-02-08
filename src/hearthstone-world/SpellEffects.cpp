@@ -815,7 +815,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !unitTarget || !unitTarget->isAlive())
 				return;
 
-			shared_ptr<Aura>pAura;
+			AuraPointer pAura;
 			for(uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
 			{
 				pAura = unitTarget->m_auras[i];
@@ -1333,7 +1333,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 27172: //Judgement of Command
 		{
 			uint32 SpellID = m_spellInfo->EffectBasePoints[i]+1;
-			shared_ptr<Spell>spell= CREATESPELL(m_caster,dbcSpell.LookupEntry(SpellID),true,NULLAURA);
+			SpellPointer spell= CREATESPELL(m_caster,dbcSpell.LookupEntry(SpellID),true,NULLAURA);
 			SpellCastTargets targets;
 			targets.m_unitTarget = unitTarget->GetGUID();
 			spell->prepare(&targets);
@@ -1400,7 +1400,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellCastTargets tgt;
 			tgt.m_unitTarget = playerTarget->GetGUID();
 			SpellEntry * inf =dbcSpell.LookupEntry(23782);
-			shared_ptr<Spell>spe = CREATESPELL(u_caster,inf,true,NULLAURA);
+			SpellPointer spe = CREATESPELL(u_caster,inf,true,NULLAURA);
 			spe->prepare(&tgt);
 
 		}break;
@@ -1411,7 +1411,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellCastTargets tgt;
 			tgt.m_unitTarget = playerTarget->GetGUID();
 			SpellEntry * inf =dbcSpell.LookupEntry(12976);
-			shared_ptr<Spell>spe = CREATESPELL(u_caster,inf,true,NULLAURA);
+			SpellPointer spe = CREATESPELL(u_caster,inf,true,NULLAURA);
 			spe->prepare(&tgt);
 		}break;
 	/*************************
@@ -2080,7 +2080,7 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	//check if we already have stronger aura
 	AuraPointer pAura;
 
-	std::map<uint32,shared_ptr<Aura> >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
+	std::map<uint32,AuraPointer >::iterator itr=unitTarget->tmpAura.find(m_spellInfo->Id);
 	//if we do not make a check to see if the aura owner is the same as the caster then we will stack the 2 auras and they will not be visible client sided
 	if(itr==unitTarget->tmpAura.end())
 	{
@@ -2234,7 +2234,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 				{
 					uint32 new_dmg = 0;
 					//consume rejuvenetaion and regrowth
-					shared_ptr<Aura>taura = unitTarget->FindPositiveAuraByNameHash( SPELL_HASH_REGROWTH ); //Regrowth
+					AuraPointer taura = unitTarget->FindPositiveAuraByNameHash( SPELL_HASH_REGROWTH ); //Regrowth
 					if( taura != NULL && taura->GetSpellProto() != NULL)
 					{
 						uint32 amplitude = taura->GetSpellProto()->EffectAmplitude[1] / 1000;
@@ -3144,7 +3144,7 @@ void Spell::SpellEffectTriggerMissile(uint32 i) // Trigger Missile
 		if(!isAttackable(m_caster, TO_UNIT(*itr)))//Fixme only enemy targets?
 			continue;
 
-		shared_ptr<Spell>sp=CREATESPELL(m_caster,spInfo,true,NULLAURA);
+		SpellPointer sp=CREATESPELL(m_caster,spInfo,true,NULLAURA);
 		SpellCastTargets tgt;
 		tgt.m_unitTarget=(*itr)->GetGUID();
 		sp->prepare(&tgt);
@@ -4031,7 +4031,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		float co = cos( orient );
 		float si = sin( orient );
 		MapMgrPointer map = m_caster->GetMapMgr();
-		shared_ptr<Spell>spell = u_caster->GetCurrentSpell();
+		SpellPointer spell = u_caster->GetCurrentSpell();
 
 		float r;
 		for( r = 20; r > 10; r-- )
@@ -4371,7 +4371,7 @@ void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 	if(!unitTarget )
 		return;
 
-	shared_ptr<Spell>sp=CREATESPELL(m_caster,dbcSpell.LookupEntry(m_spellInfo->EffectTriggerSpell[i]),true,NULLAURA);
+	SpellPointer sp=CREATESPELL(m_caster,dbcSpell.LookupEntry(m_spellInfo->EffectTriggerSpell[i]),true,NULLAURA);
 	SpellCastTargets tgt(unitTarget->GetGUID());
 	sp->prepare(&tgt);
 }
@@ -6319,7 +6319,7 @@ void Spell::SpellEffectDummyMelee( uint32 i ) // Normalized Weapon damage +
 			{
 				// Refresh it!
 				// oh noes, they don't stack...
-				shared_ptr<Aura>aur = unitTarget->m_auras[x];
+				AuraPointer aur = unitTarget->m_auras[x];
 				SpellEntry * spinfo = aur->GetSpellProto();
 				aur->Remove();
 				SpellPointer sp = CREATESPELL( this->u_caster , spinfo , true , NULLAURA );

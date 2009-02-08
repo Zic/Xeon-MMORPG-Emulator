@@ -1300,7 +1300,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				else if(goinfo->ID == 177193) // doom portal
 				{
 					PlayerPointer psacrifice = NULLPLR;
-					shared_ptr<Spell>spell = NULLSPELL;
+					SpellPointer spell = NULLSPELL;
 					
 					// kill the sacrifice player
 					psacrifice = _player->GetMapMgr()->GetPlayer(obj->m_ritualmembers[(int)(rand()%(goinfo->SpellFocus-1))]);

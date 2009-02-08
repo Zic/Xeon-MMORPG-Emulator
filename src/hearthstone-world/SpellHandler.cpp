@@ -381,7 +381,7 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	UnitPointer caster;
 	SpellCastTargets targets;
 	SpellEntry *sp;
-	shared_ptr<Spell>pSpell;
+	SpellPointer pSpell;
 	list<AI_Spell*>::iterator itr;
 
 	recvPacket >> guid >> counter >> spellid >> flags;

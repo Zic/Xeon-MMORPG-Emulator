@@ -4770,7 +4770,7 @@ void Aura::SpellAuraModSchoolImmunity(bool apply)
 		if( !m_target || !m_target->isAlive())
 			return;
 
-		shared_ptr<Aura>pAura;
+		AuraPointer pAura;
 		for(uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
 		{
 			pAura = m_target->m_auras[i];

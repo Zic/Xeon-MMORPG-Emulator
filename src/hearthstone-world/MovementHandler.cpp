@@ -79,7 +79,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 	if(_player->m_CurrentTransporter && _player->GetMapId() != _player->m_CurrentTransporter->GetMapId())
 	{
 		/* wow, our pc must really suck. */
-		shared_ptr<Transporter> pTrans = _player->m_CurrentTransporter;
+		TransporterPointer pTrans = _player->m_CurrentTransporter;
 		float c_tposx = pTrans->GetPositionX() + _player->m_TransporterX;
 		float c_tposy = pTrans->GetPositionY() + _player->m_TransporterY;
 		float c_tposz = pTrans->GetPositionZ() + _player->m_TransporterZ;
@@ -590,7 +590,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		/*float x = movement_info.x - movement_info.transX;
 		float y = movement_info.y - movement_info.transY;
 		float z = movement_info.z - movement_info.transZ;
-		shared_ptr<Transporter> trans = _player->m_CurrentTransporter;
+		TransporterPointer trans = _player->m_CurrentTransporter;
 		if(trans) sChatHandler.SystemMessageToPlr(_player, "Client t pos: %f %f\nServer t pos: %f %f   Diff: %f %f", x,y, trans->GetPositionX(), trans->GetPositionY(), trans->CalcDistance(x,y,z), trans->CalcDistance(movement_info.x, movement_info.y, movement_info.z));*/
 	}
 

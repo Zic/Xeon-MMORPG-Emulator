@@ -1222,7 +1222,7 @@ ItemPointer ObjectMgr::CreateItem(uint32 entry,PlayerPointer owner)
 
 	if(proto->InventoryType == INVTYPE_BAG)
 	{
-		shared_ptr<Container> pContainer(new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
+		ContainerPointer pContainer(new Container(HIGHGUID_TYPE_CONTAINER,GenerateLowGuid(HIGHGUID_TYPE_CONTAINER)));
 		pContainer->Create( entry, owner);
 		pContainer->SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 		return pContainer;
@@ -1249,7 +1249,7 @@ ItemPointer ObjectMgr::LoadItem(uint64 guid)
 
 		if(pProto->InventoryType == INVTYPE_BAG)
 		{
-			shared_ptr<Container> pContainer(new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid));
+			ContainerPointer pContainer(new Container(HIGHGUID_TYPE_CONTAINER,(uint32)guid));
 			pContainer->LoadFromDB(result->Fetch());
 			pReturn = pContainer;
 		}
@@ -2091,28 +2091,28 @@ CorpsePointer ObjectMgr::GetCorpse(uint32 corpseguid)
 	return rv;
 }
 
-shared_ptr<Transporter> ObjectMgr::GetTransporter(uint32 guid)
+TransporterPointer ObjectMgr::GetTransporter(uint32 guid)
 {
-	shared_ptr<Transporter> rv;
+	TransporterPointer rv;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >::const_iterator itr = mTransports.find(guid);
+	HM_NAMESPACE::hash_map<uint32, TransporterPointer >::const_iterator itr = mTransports.find(guid);
 	rv = (itr != mTransports.end()) ? itr->second : NULLTRANSPORT;
 	_TransportLock.Release();
 	return rv;
 }
 
-void ObjectMgr::AddTransport(shared_ptr<Transporter>pTransporter)
+void ObjectMgr::AddTransport(TransporterPointer pTransporter)
 {
 	_TransportLock.Acquire();
 	mTransports[pTransporter->GetUIdFromGUID()]=pTransporter;
  	_TransportLock.Release();
 }
 
-shared_ptr<Transporter> ObjectMgr::GetTransporterByEntry(uint32 entry)
+TransporterPointer ObjectMgr::GetTransporterByEntry(uint32 entry)
 {
-	shared_ptr<Transporter> rv = NULLTRANSPORT;
+	TransporterPointer rv = NULLTRANSPORT;
 	_TransportLock.Acquire();
-	HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >::iterator itr = mTransports.begin();
+	HM_NAMESPACE::hash_map<uint32, TransporterPointer >::iterator itr = mTransports.begin();
 	for(; itr != mTransports.end(); ++itr)
 	{
 		if(itr->second->GetEntry() == entry)

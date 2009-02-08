@@ -2019,7 +2019,7 @@ public:
     HEARTHSTONE_INLINE bool GetSpellFailed(){return m_Spell_Failed;}
     HEARTHSTONE_INLINE void SetSpellFailed(bool failed = true){m_Spell_Failed = failed;}
 
-	shared_ptr<Spell>m_reflectedParent;
+	SpellPointer m_reflectedParent;
 
 	// Returns true iff spellEffect's effectNum effect affects testSpell based on EffectSpellClassMask
 	HEARTHSTONE_INLINE static bool EffectAffectsSpell(SpellEntry* spellEffect, uint32 effectNum, SpellEntry* testSpell)

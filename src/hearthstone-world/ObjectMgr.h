@@ -348,18 +348,18 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, Group*>						GroupMap;
 	
     // HashMap typedef's
-    typedef HM_NAMESPACE::hash_map<uint64, ItemPointer >                       ItemMap;
+    typedef HM_NAMESPACE::hash_map<uint64, ItemPointer >                ItemMap;
 	typedef HM_NAMESPACE::hash_map<uint32, CorpseData*>                 CorpseCollectorMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerInfo*>                 PlayerNameMap;
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerCreateInfo*>           PlayerCreateInfoMap;
 	typedef HM_NAMESPACE::hash_map<uint32, Guild*>                      GuildMap;
 	typedef HM_NAMESPACE::hash_map<uint32, skilllinespell*>             SLMap;
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<CreatureItem>*>  VendorMap;
-    typedef HM_NAMESPACE::hash_map<uint32, shared_ptr<Transporter> >                TransportMap;
+    typedef HM_NAMESPACE::hash_map<uint32, TransporterPointer >         TransportMap;
 	typedef HM_NAMESPACE::hash_map<uint32, Trainer*>                    TrainerMap;
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<TrainerSpell*> > TrainerSpellMap;
     typedef HM_NAMESPACE::hash_map<uint32, ReputationModifier*>         ReputationModMap;
-    typedef HM_NAMESPACE::hash_map<uint32, CorpsePointer >                     CorpseMap;
+    typedef HM_NAMESPACE::hash_map<uint32, CorpsePointer >              CorpseMap;
     
     // Map typedef's
     typedef std::map<uint32, LevelInfo*>                                LevelMap;
@@ -532,7 +532,7 @@ public:
 	
 	void LoadTransporters();
 	void ProcessGameobjectQuests();
-    void AddTransport(shared_ptr<Transporter> pTransporter);
+    void AddTransport(TransporterPointer pTransporter);
    
 	void LoadTrainers();
 	Trainer* GetTrainer(uint32 Entry);
@@ -567,8 +567,8 @@ public:
 		return r;
 	}
 
-	shared_ptr<Transporter> GetTransporter(uint32 guid);
-	shared_ptr<Transporter> GetTransporterByEntry(uint32 entry);
+	TransporterPointer GetTransporter(uint32 guid);
+	TransporterPointer GetTransporterByEntry(uint32 entry);
 
 	Charter * CreateCharter(uint32 LeaderGuid, CharterTypes Type);
 	Charter * GetCharter(uint32 CharterId, CharterTypes Type);

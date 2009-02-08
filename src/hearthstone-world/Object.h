@@ -496,7 +496,7 @@ public:
 	void DisablePhase(int32 phaseMode);
 	void SetPhase(int32 phase); // Don't fucking use this.
 
-	shared_ptr<Aura>m_phaseAura;
+	AuraPointer m_phaseAura;
 
 protected:
 	Object (  );

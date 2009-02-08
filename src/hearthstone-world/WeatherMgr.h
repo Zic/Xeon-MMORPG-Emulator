@@ -38,7 +38,7 @@ public:
 	void SendWeather(PlayerPointer plr);
 
 private:
-	std::map<uint32, shared_ptr<WeatherInfo> > m_zoneWeathers;
+	std::map<uint32, WeatherInfoPointer > m_zoneWeathers;
 };
 
 class WeatherInfo : public EventableObject, public std::tr1::enable_shared_from_this<WeatherInfo>

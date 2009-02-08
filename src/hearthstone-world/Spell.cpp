@@ -2655,7 +2655,7 @@ void Spell::HandleAddAura(uint64 guid)
 	if(Target->GetInstanceID()!=m_caster->GetInstanceID())
 		return;
 
-	std::map<uint32,shared_ptr<Aura> >::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
+	std::map<uint32,AuraPointer >::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
 	if(itr!=Target->tmpAura.end())
 	{
 		if(itr->second != NULL)

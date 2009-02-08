@@ -51,7 +51,7 @@ public:
 	void DropFlag(PlayerPointer plr);
 	void ReturnFlag(uint32 team);
 
-	static BattlegroundPointer Create(MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return shared_ptr<WarsongGulch>(new WarsongGulch(m, i, l, t)); }
+	static BattlegroundPointer Create(MapMgrPointer m, uint32 i, uint32 l, uint32 t) { return WarsongGulchPointer(new WarsongGulch(m, i, l, t)); }
 
 	uint32 GetAllianceFlagHolderGUID() { return m_flagHolders[0]; }
 	uint32 GetHordeFlagHolderGUID() { return m_flagHolders[1]; }

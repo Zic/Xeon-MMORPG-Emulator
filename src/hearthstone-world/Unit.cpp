@@ -275,7 +275,7 @@ void Unit::Destructor()
 	}
 
 	// clear tmpAura pointers
-	for(map<uint32, shared_ptr<Aura> >::iterator itr = tmpAura.begin(); itr != tmpAura.end(); ++itr)
+	for(map<uint32, AuraPointer >::iterator itr = tmpAura.begin(); itr != tmpAura.end(); ++itr)
 	{
 		if( itr->second )
 		{
@@ -3220,7 +3220,7 @@ else
 		{
 			if( pVictim->m_auras[x] != NULL && pVictim->m_auras[x]->GetUnitCaster() != NULL && pVictim->m_auras[x]->GetUnitCaster()->GetGUID() == GetGUID() && pVictim->m_auras[x]->GetSpellProto()->buffIndexType == SPELL_TYPE_INDEX_JUDGEMENT )
 			{
-				shared_ptr<Aura>aur = pVictim->m_auras[x];
+				AuraPointer aur = pVictim->m_auras[x];
 				SpellEntry * spinfo = aur->GetSpellProto();
 				aur->Remove();
 				SpellPointer sp(new Spell( unit_shared_from_this() , spinfo , true , NULLAURA ));
@@ -4033,7 +4033,7 @@ void Unit::RemoveAllAurasOfType(uint32 auratype)
 
 bool Unit::SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration)
 {
-	shared_ptr<Aura>aur=FindAura(spellId,caster->GetGUID());
+	AuraPointer aur=FindAura(spellId,caster->GetGUID());
 	if(!aur)
 		return false;
 	aur->SetDuration(duration);
@@ -4044,7 +4044,7 @@ bool Unit::SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration)
 
 bool Unit::SetAuraDuration(uint32 spellId,uint32 duration)
 {
-	shared_ptr<Aura>aur=FindAura(spellId);
+	AuraPointer aur=FindAura(spellId);
 
 	if(!aur) 
 		return false;
@@ -4138,7 +4138,7 @@ void Unit::_UpdateSpells( uint32 time )
 	}
 }
 
-void Unit::CastSpell( shared_ptr<Spell>pSpell )
+void Unit::CastSpell( SpellPointer pSpell )
 {
 	m_currentSpell = pSpell;
 	pLastSpell = pSpell->m_spellInfo;
@@ -4658,7 +4658,7 @@ void Unit::SetStandState(uint8 standstate)
 
 void Unit::RemoveAurasByInterruptFlag(uint32 flag)
 {
-	shared_ptr<Aura>a;
+	AuraPointer a;
 	for(uint32 x=0;x<MAX_AURAS;x++)
 	{
 		a = m_auras[x];
@@ -5079,7 +5079,7 @@ void Unit::RemoveFromWorld(bool free_guid)
 
 void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 {
-	shared_ptr<Aura>a;
+	AuraPointer a;
 	for(uint32 x=0;x<MAX_AURAS;x++)
 	{
 		a = m_auras[x];
@@ -5941,7 +5941,7 @@ void Unit::InheritSMMods(UnitPointer inherit_from)
 			}
 }
 
-void Unit::CancelSpell(shared_ptr<Spell>ptr)
+void Unit::CancelSpell(SpellPointer ptr)
 {
 	if(ptr)
 		ptr->cancel();
