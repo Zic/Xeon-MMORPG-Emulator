@@ -4410,6 +4410,12 @@ void Aura::SpellAuraModShapeshift(bool apply)
 					m_target->m_stealth = 0;
 					m_target->RemoveAura(sp);//prowl
 				}
+				if(m_target->HasActiveAura(1850))
+					m_target->RemoveAura(1850);//Dash rank1
+				if(m_target->HasActiveAura(9821))
+					m_target->RemoveAura(9821);//Dash rank2
+				if(m_target->HasActiveAura(33357))
+					m_target->RemoveAura(33357);//Dash rank3
 			}  
 			TO_PLAYER( m_target )->UpdateAttackSpeed();
 

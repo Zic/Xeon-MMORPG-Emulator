@@ -3470,9 +3470,19 @@ uint8 Spell::CanCast(bool tolerate)
 				}break;
 
 				case 13907:
+				{
 					if (!target || target->IsPlayer() || target->getClass()!=TARGET_TYPE_DEMON )
 						return SPELL_FAILED_SPELL_UNAVAILABLE;
-					break;
+				}break;
+
+				// Dash (can't use namehash, as there is hunters/pets ability using same namehash)
+				case 1850:
+				case 9821:
+				case 33357:
+				{
+					if(p_caster && p_caster->GetShapeShift() != FORM_CAT)
+						return SPELL_FAILED_ONLY_SHAPESHIFT;
+				}break;
 
 				// disable spell
 				case 25997: // Eye for an Eye
