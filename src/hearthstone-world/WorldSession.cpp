@@ -243,8 +243,6 @@ int WorldSession::Update(uint32 InstanceID)
 
 void WorldSession::LogoutPlayer(bool Save)
 {
-	PlayerPointer pPlayer = GetPlayer();
-
 	if( _loggingOut )
 		return;
 
@@ -254,7 +252,7 @@ void WorldSession::LogoutPlayer(bool Save)
 	{
 		_player->ObjLock();
 
-		sHookInterface.OnLogout( pPlayer );
+		sHookInterface.OnLogout( _player );
 		if( _player->DuelingWith )
 			_player->EndDuel( DUEL_WINNER_RETREAT );
 
@@ -263,13 +261,18 @@ void WorldSession::LogoutPlayer(bool Save)
 			ObjectPointer obj = _player->GetMapMgr()->_GetObject( _player->m_currentLoot );
 			if( obj != NULL )
 				obj->m_loot.looters.erase(_player->GetLowGUID());
+			obj = NULLOBJ;
 		}
 
 		// part channels
 		_player->CleanupChannels();
 
 		if( _player->m_CurrentTransporter != NULL )
+		{
 			_player->m_CurrentTransporter->RemovePlayer( _player );
+			_player->m_CurrentTransporter = NULLTRANSPORT;
+			_player->m_TransporterGUID = 0;
+		}
 
 		// cancel current spell
 		if( _player->m_currentSpell != NULL )
@@ -375,7 +378,8 @@ void WorldSession::LogoutPlayer(bool Save)
 		_player->ObjUnlock();
 
 		_player->Destructor();
-		_player = NULLPLR;
+		if(_player)
+			_player = NULLPLR;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);
 		Log.Debug( "WorldSession","Sent SMSG_LOGOUT_COMPLETE Message" );

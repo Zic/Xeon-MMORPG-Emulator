@@ -2144,7 +2144,7 @@ class SkillIterator
 	PlayerPointer m_target;
 public:
 	SkillIterator(PlayerPointer target) : m_searchInProgress(false),m_target(target) {}
-	~SkillIterator() { if(m_searchInProgress) { EndSearch(); } }
+	~SkillIterator() { if(m_searchInProgress) { EndSearch(); } if(m_target) { m_target = NULLPLR; } }
 
 	void BeginSearch()
 	{

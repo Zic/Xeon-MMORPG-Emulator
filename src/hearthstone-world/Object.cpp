@@ -103,6 +103,14 @@ void Object::Destructor()
 {
 	m_sharedPtrDestructed = true;
 
+	ClearInRangeSet();
+
+	if(m_phaseAura)
+	{
+		m_phaseAura->Remove();
+		m_phaseAura = NULLAURA;
+	}
+
 	if(m_objectTypeId != TYPEID_ITEM)
 		ASSERT(!m_inQueue);
 
@@ -117,6 +125,8 @@ void Object::Destructor()
 
 	if( m_extensions != NULL )
 		delete m_extensions;
+
+	sEventMgr.RemoveEvents(shared_from_this());
 
 #ifdef SHAREDPTR_DEBUGMODE
 	//ObjectPointer blah = shared_from_this();

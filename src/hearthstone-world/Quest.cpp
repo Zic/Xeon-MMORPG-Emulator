@@ -143,7 +143,8 @@ QuestLogEntry::QuestLogEntry()
 
 QuestLogEntry::~QuestLogEntry()
 {
-
+	m_plr = NULLPLR;
+	m_quest = NULL;
 }
 
 void QuestLogEntry::Init(Quest* quest, PlayerPointer plr, uint32 slot)

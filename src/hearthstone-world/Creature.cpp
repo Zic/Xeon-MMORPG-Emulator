@@ -112,8 +112,14 @@ void Creature::Destructor()
 {
 	sEventMgr.RemoveEvents(shared_from_this());
 
+	if(m_escorter)
+		m_escorter = NULLPLR;
+
 	if(IsTotem() && totemSlot >= 0 && totemOwner)
+	{
 		totemOwner->m_SummonSlots[totemSlot] = NULLCREATURE;
+		totemOwner = NULLPLR;
+	}
 
 	if(_myScriptClass != 0)
 		_myScriptClass->Destroy();

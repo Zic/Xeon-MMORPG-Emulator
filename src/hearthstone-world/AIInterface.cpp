@@ -148,6 +148,13 @@ AIInterface::~AIInterface()
 	{
 		m_ChainAgroSet->RemoveAggroEntity( TO_CREATURE(m_Unit) );
 	}
+
+	m_formationLinkTarget = NULLCREATURE;
+	m_Unit = NULLUNIT;
+	m_PetOwner = NULLUNIT;
+	m_summonedGuard = NULLCREATURE;
+	soullinkedWith = NULLUNIT;
+	UnitToFollow_backup = NULLUNIT;
 }
 
 void AIInterface::Init(UnitPointer un, AIType at, MovementType mt, UnitPointer owner)
@@ -3350,7 +3357,7 @@ void AIInterface::WipeReferences()
 	m_nextSpell = 0;
 	m_currentHighestThreat = 0;
 	m_aiTargets.clear();
-	SetNextTarget(NULLUNIT);
+	m_nextTarget = NULLUNIT;
 	UnitToFear = NULLUNIT;
 	UnitToFollow = NULLUNIT;
 	tauntedBy = NULLUNIT;

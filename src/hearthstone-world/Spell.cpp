@@ -268,8 +268,22 @@ void Spell::Destructor()
 	if( u_caster != NULL && u_caster->GetCurrentSpell() == shared_from_this() )
 		u_caster->SetCurrentSpell(NULLSPELL);
 
-	#ifdef SHAREDPTR_DEBUGMODE
-	long references = shared_from_this().use_count() - 2;
+	g_caster = NULLGOB;
+	u_caster = NULLUNIT;
+	i_caster = NULLITEM;
+	p_caster = NULLPLR;
+	m_caster = NULLOBJ;
+	m_triggeredByAura = NULLAURA;
+	unitTarget = NULLUNIT;
+	itemTarget = NULLITEM;
+	gameObjTarget = NULLGOB;
+	playerTarget = NULLPLR;
+	corpseTarget = NULLCORPSE;
+	m_magnetTarget = NULLUNIT;
+	m_reflectedParent = NULLSPELL;
+
+#ifdef SHAREDPTR_DEBUGMODE
+	long references = shared_from_this().use_count() - 3;
 	if( references > 0 )
 	{
 		printf("Spell::Destructor() called when Spell has %d references left in memory!\n", references);
@@ -2664,6 +2678,7 @@ void Spell::HandleAddAura(uint64 guid)
 			if( Target->isDead() && !(m_spellInfo->Flags4 & CAN_PERSIST_AND_CASTED_WHILE_DEAD))
 			{
 				// free pointer
+				itr->second->m_tmpAuradeleted = true;
 				itr->second->Remove();
 				itr->second = NULLAURA;
 				Target->tmpAura.erase(itr);

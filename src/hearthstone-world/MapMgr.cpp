@@ -179,11 +179,9 @@ void MapMgr::Destructor()
 	}
 
 	Log.Notice("MapMgr", "Instance %u shut down. (%s)" , m_instanceID, GetBaseMap()->GetName());
-	pThis.reset();
 
 #ifdef SHAREDPTR_DEBUGMODE
-	MapMgrPointer sthis = shared_from_this();
-	long references = sthis.use_count() - 2;
+	long references = shared_from_this().use_count() - 2;
 	if( references > 0 )
 	{
 		printf("MapMgr::Destructor() called when MapMgr has %d references left in memory!\n", references);

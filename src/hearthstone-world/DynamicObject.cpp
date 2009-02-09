@@ -68,6 +68,14 @@ void DynamicObject::Destructor()
 	if(m_caster && m_caster->dynObj == dyn_shared_from_this() )
 		m_caster->dynObj = NULLDYN;
 
+	m_parentSpell=NULLSPELL;
+	m_aliveDuration = 0;
+	u_caster = NULLUNIT;
+	m_spellProto = 0;
+	p_caster = NULLPLR;
+	m_caster = NULLOBJ;
+	g_caster = NULLGOB;
+
 	Object::Destructor();
 }
 

@@ -487,6 +487,8 @@ Player::~Player ( )
 void Player::Destructor()
 {
 	PlayerPointer pThis = player_shared_from_this(); //prevent us going feeefee
+	Unit::Destructor();
+
 #ifdef SHAREDPTR_DEBUGMODE
 	printf("Player::Destructor()\n");
 #endif
@@ -506,7 +508,10 @@ void Player::Destructor()
 	objmgr.RemovePlayer(player_shared_from_this());
 
 	if(m_session)
+	{
 		m_session->SetPlayer(NULLPLR);
+		SetSession(NULL);
+	}
 
 	PlayerPointer pTarget;
 	if(mTradeTarget != 0)
@@ -520,10 +525,21 @@ void Player::Destructor()
 	if(pTarget)
 		pTarget->SetInviter(0);
 
+	pTarget = NULLPLR;
+
 	if(m_Summon)
 	{
 		m_Summon->Dismiss(true);
 		m_Summon->ClearPetOwner();
+	}
+
+	if (m_GM_SelectedGO)
+		m_GM_SelectedGO = NULLGOB;
+
+	if (m_SummonedObject)
+	{
+		m_SummonedObject->Delete();
+		m_SummonedObject = NULLOBJ;
 	}
 
 	if( m_mailBox )
@@ -590,24 +606,29 @@ void Player::Destructor()
 		mSpellsUniqueTargets = NULL;
 	}
 
-	//Am I right in thinking this should be reset here
-	//and the unit destructor should be called at the
-	//end of the player destructor rather than the start
-	//Pepsi1x1
-	pThis.reset();
-	Unit::Destructor();
 
-#ifdef SHAREDPTR_DEBUGMODE
-	ObjectPointer sthis = shared_from_this();
-	long references = sthis.use_count() - 2;
-	if( references > 0 )
-	{
-		printf("Player::Destructor() called when Player has %d references left in memory!\n", references);
-#ifdef WIN32
-		PrintSharedPtrInformation(true, references);
-#endif
-	}
-#endif
+	if(myCorpse)
+		myCorpse = NULLCORPSE;
+
+	if(linkTarget)
+		linkTarget = NULLUNIT;
+
+	m_wratings.clear();
+	m_QuestGOInProgress.clear();
+	m_removequests.clear();
+	m_finishedQuests.clear();
+	quest_spells.clear();
+	quest_mobs.clear();
+	loginauras.clear();
+	OnMeleeAuras.clear();
+
+	for(std::map<uint32, PlayerPet*>::iterator itr = m_Pets.begin(); itr != m_Pets.end(); ++itr)
+		delete itr->second;
+	m_Pets.clear();
+	
+	m_itemsets.clear();
+	m_channels.clear();
+
 }
 
 HEARTHSTONE_INLINE uint32 GetSpellForLanguage(uint32 SkillID)

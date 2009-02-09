@@ -265,6 +265,18 @@ void Unit::Destructor()
 
 	delete m_aiInterface;
 
+	for(i = 0; i < 7; ++i)
+	{
+		if(m_SummonSlots[i] && m_SummonSlots[i]->IsTotem() )
+			m_SummonSlots[i]->TotemExpire();
+		else if( m_SummonSlots[i] )
+			m_SummonSlots[i]->SafeDelete();
+
+		m_SummonSlots[i] = NULLCREATURE;
+	}
+
+	m_redirectSpellPackets = NULLPLR;
+
 	/*for(int i = 0; i < 4; i++)
 	if(m_ObjectSlots[i])
 	delete m_ObjectSlots[i];*/
@@ -274,11 +286,18 @@ void Unit::Destructor()
 		m_currentSpell->cancel();
 	}
 
+	if( m_CurrentVehicle != NULL )
+	{
+		m_CurrentVehicle->RemovePassenger( unit_shared_from_this() );
+		m_CurrentVehicle = NULLVEHICLE;
+	}
+
 	// clear tmpAura pointers
 	for(map<uint32, AuraPointer >::iterator itr = tmpAura.begin(); itr != tmpAura.end(); ++itr)
 	{
 		if( itr->second )
 		{
+			itr->second->m_tmpAuradeleted = true;
 			itr->second->Remove();
 		}
 	}
@@ -307,6 +326,17 @@ void Unit::Destructor()
 
 	CombatStatus.SetUnit( NULLUNIT );
 	CombatStatus.Vanished();
+
+	m_damageShields.clear();
+
+	for (std::list<ReflectSpellSchool*>::iterator itr=m_reflectSpellSchool.begin(); itr!=m_reflectSpellSchool.end(); ++itr)
+		delete (*itr);
+	m_reflectSpellSchool.clear();
+	
+	m_procSpells.clear();
+
+	m_chargeSpells.clear();
+	m_chargeSpellRemoveQueue.clear();
 }
 
 void Unit::SetDiminishTimer(uint32 index)
@@ -5026,7 +5056,10 @@ void Unit::OnPushToWorld()
 void Unit::RemoveFromWorld(bool free_guid)
 {
 	if( m_CurrentVehicle )
+	{
 		m_CurrentVehicle->RemovePassenger( unit_shared_from_this() );
+		m_CurrentVehicle = NULLVEHICLE;
+	}
 
 	CombatStatus.OnRemoveFromWorld();
 

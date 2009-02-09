@@ -92,13 +92,17 @@ void GameObject::Destructor()
 			if (m_summoner->m_ObjectSlots[i] == GetUIdFromGUID())
 				m_summoner->m_ObjectSlots[i] = 0;
 
-	if( m_battleground != NULL && m_battleground->GetType() == BATTLEGROUND_ARATHI_BASIN )
+	if( m_battleground != NULL )
 	{
-		if( bannerslot >= 0 && TO_ARATHIBASIN(m_battleground)->m_controlPoints[bannerslot] == gob_shared_from_this() )
-			TO_ARATHIBASIN(m_battleground)->m_controlPoints[bannerslot] = NULLGOB;
+		if( m_battleground->GetType() == BATTLEGROUND_ARATHI_BASIN )
+		{
+			if( bannerslot >= 0 && TO_ARATHIBASIN(m_battleground)->m_controlPoints[bannerslot] == gob_shared_from_this() )
+				TO_ARATHIBASIN(m_battleground)->m_controlPoints[bannerslot] = NULLGOB;
 
-		if( bannerauraslot >= 0 && TO_ARATHIBASIN(m_battleground)->m_controlPointAuras[bannerauraslot] == gob_shared_from_this() )
-			TO_ARATHIBASIN(m_battleground)->m_controlPointAuras[bannerauraslot] = NULLGOB;
+			if( bannerauraslot >= 0 && TO_ARATHIBASIN(m_battleground)->m_controlPointAuras[bannerauraslot] == gob_shared_from_this() )
+				TO_ARATHIBASIN(m_battleground)->m_controlPointAuras[bannerauraslot] = NULLGOB;
+		}
+		m_battleground = NULLBATTLEGROUND;
 	}
 
 	Object::Destructor();
