@@ -110,8 +110,21 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 	&Spell::SpellTargetNULL,					// 84
 	&Spell::SpellTargetNULL,					// 85
 	&Spell::SpellTargetNULL,					// 86
-	&Spell::SpellTargetNULL,					// 87
-	// all 81 > n spelltargettype's are from test spells
+	&Spell::SpellTargetAreaOfEffect,			// 87
+	&Spell::SpellTargetNULL,					// 88
+	&Spell::SpellTargetNULL,					// 89
+	&Spell::SpellTargetNULL,					// 90
+	&Spell::SpellTargetNULL,					// 91
+	&Spell::SpellTargetNULL,					// 92
+	&Spell::SpellTargetNULL,					// 93
+	&Spell::SpellTargetNULL,					// 94
+	&Spell::SpellTargetNULL,					// 95
+	&Spell::SpellTargetNULL,					// 96
+	&Spell::SpellTargetNULL,					// 97
+	&Spell::SpellTargetNULL,					// 98
+	&Spell::SpellTargetNULL,					// 99
+	&Spell::SpellTargetNULL,					// 100
+	// all 100 > n spelltargettype's are from test spells
 };
 
 /* LEFTOVER RESEARCH, this contains note's comments from Captnoord
