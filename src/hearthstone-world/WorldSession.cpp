@@ -253,7 +253,9 @@ void WorldSession::LogoutPlayer(bool Save)
 		_player->ObjLock();
 
 		sHookInterface.OnLogout( _player );
-		if( _player->DuelingWith )
+
+		//Duel Cancel on Leave
+		if( _player->DuelingWith != NULL )
 			_player->EndDuel( DUEL_WINNER_RETREAT );
 
 		if( _player->m_currentLoot && _player->IsInWorld() )
@@ -298,10 +300,6 @@ void WorldSession::LogoutPlayer(bool Save)
 		_player->RemoveFromBattlegroundQueue(1); // Pending BGs
 		_player->RemoveFromBattlegroundQueue(2); // Pending BGs
 		BattlegroundManager.RemovePlayerFromQueues( _player );
-
-		//Duel Cancel on Leave
-		if( _player->DuelingWith != NULL )
-			_player->EndDuel( DUEL_WINNER_RETREAT );
 
 		//Issue a message telling all guild members that this player signed off
 		if( _player->IsInGuild() )

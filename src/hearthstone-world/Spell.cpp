@@ -895,7 +895,7 @@ void Spell::GenerateTargets(SpellCastTargets *store_buff)
 					}break;
 				case EFF_TARGET_DUEL: 
 					{// Single Target Friend Used in Duel
-						if(p_caster && p_caster->DuelingWith && p_caster->DuelingWith->isAlive() && IsInrange(p_caster,p_caster->DuelingWith,r))
+						if(p_caster && p_caster->DuelingWith != NULL && p_caster->DuelingWith->isAlive() && IsInrange(p_caster,p_caster->DuelingWith,r))
 							store_buff->m_unitTarget = p_caster->GetSelection();
 					}break;
 				case EFF_TARGET_GAMEOBJECT_ITEM:{// Gameobject/Item Target

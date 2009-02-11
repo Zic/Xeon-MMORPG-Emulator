@@ -811,7 +811,7 @@ void WorldSession::HandlePushQuestToPartyOpcode(WorldPacket &recv_data)
 							continue;
 						}
 						//Anything more?
-						if(pPlayer->DuelingWith)
+						if(pPlayer->DuelingWith != NULL)
 						{
 							response = QUEST_SHARE_MSG_BUSY;
 							continue;

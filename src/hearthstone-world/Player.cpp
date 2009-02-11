@@ -547,7 +547,7 @@ void Player::Destructor()
 
 	mTradeTarget = 0;
 
-	if(DuelingWith != 0)
+	if(DuelingWith != NULL)
 		DuelingWith->DuelingWith = NULLPLR;
 	DuelingWith = NULLPLR;
 
@@ -8072,7 +8072,7 @@ void Player::SafeTeleport(MapMgrPointer mgr, LocationVector vec)
 	SetPosition(vec);
 	ResetHeartbeatCoords();
 
-	if(DuelingWith)
+	if(DuelingWith != NULL)
 	{
 		EndDuel(DUEL_WINNER_RETREAT);
 	}
