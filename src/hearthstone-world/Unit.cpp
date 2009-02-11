@@ -4432,6 +4432,12 @@ void Unit::EventAddEmote(EmoteType emote, uint32 time)
 	sEventMgr.AddEvent(unit_shared_from_this(), &Unit::EmoteExpire, EVENT_UNIT_EMOTE, time, 1,0);
 }
 
+void Unit::EventAllowCombat(bool allow)
+{
+		m_aiInterface->SetAllowedToEnterCombat(allow);
+		m_aiInterface->setCanMove(allow);
+}
+
 void Unit::EmoteExpire()
 {
 	SetUInt32Value(UNIT_NPC_EMOTESTATE, m_oldEmote);

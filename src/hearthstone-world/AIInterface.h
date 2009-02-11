@@ -304,6 +304,7 @@ public:
 	HEARTHSTONE_INLINE uint32 getMoveType() { return m_moveType; }
 	HEARTHSTONE_INLINE void setMoveRunFlag(bool f) { m_moveRun = f; }
 	HEARTHSTONE_INLINE bool getMoveRunFlag() { return m_moveRun; }
+	HEARTHSTONE_INLINE void setCanMove(bool canmove) { m_canMove = canmove; }
 	void setWaypointToMove(uint32 id) { m_currentWaypoint = id; }
 	bool IsFlying();
 

@@ -982,6 +982,7 @@ public:
 	//Events
 	void Emote (EmoteType emote);
 	void EventAddEmote(EmoteType emote, uint32 time);
+	void EventAllowCombat(bool allow);
 	void EmoteExpire();
 	HEARTHSTONE_INLINE void setEmoteState(uint8 emote) { m_emoteState = emote; };
 	HEARTHSTONE_INLINE uint32 GetOldEmote() { return m_oldEmote; }
