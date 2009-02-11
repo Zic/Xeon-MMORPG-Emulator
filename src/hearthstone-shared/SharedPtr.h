@@ -1,7 +1,7 @@
 #ifndef _SHARED_PTR_H
 #define _SHARED_PTR_H
 
-#define SHAREDPTR_DEBUGMODE // devs only, or prepare for spam, seriously.
+//#define SHAREDPTR_DEBUGMODE // devs only, or prepare for spam, seriously.
 
 // Meh
 class CBattleground;
