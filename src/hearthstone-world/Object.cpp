@@ -103,8 +103,6 @@ void Object::Destructor()
 {
 	m_sharedPtrDestructed = true;
 
-	ClearInRangeSet();
-
 	if(m_phaseAura)
 	{
 		m_phaseAura->Remove();
@@ -118,6 +116,8 @@ void Object::Destructor()
 	{
 		RemoveFromWorld(false);
 	}
+
+	ClearInRangeSet();
 
 	// for linux
 	m_instanceId = -1;

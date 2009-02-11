@@ -160,6 +160,7 @@ void MapMgr::Destructor()
 		}
 		pObject = NULLOBJ;
 	}
+	_mapWideStaticObjects.clear();
 
 
 	//free(m_VehicleStorage);
@@ -177,11 +178,33 @@ void MapMgr::Destructor()
 		pCorpse->Destructor();
 		pCorpse = NULLCORPSE;
 	}
+	m_corpses.clear();
+
+	//Clear our remaining containers
+	m_PlayerStorage.clear();
+	m_PetStorage.clear();
+	m_DynamicObjectStorage.clear();
+
+	_combatProgress.clear();
+	_updates.clear();
+	_processQueue.clear();
+	Sessions.clear();
+
+	activeGameObjects.clear();
+	activeCreatures.clear();
+	activeVehicles.clear();
+	_sqlids_vehicles.clear();
+	_sqlids_creatures.clear();
+	_sqlids_gameobjects.clear();
+	_reusable_guids_creature.clear();
+	_reusable_guids_vehicle.clear();
+
+	m_battleground = NULLBATTLEGROUND;
 
 	Log.Notice("MapMgr", "Instance %u shut down. (%s)" , m_instanceID, GetBaseMap()->GetName());
 
 #ifdef SHAREDPTR_DEBUGMODE
-	long references = shared_from_this().use_count() - 2;
+	long references = shared_from_this().use_count() - 3;
 	if( references > 0 )
 	{
 		printf("MapMgr::Destructor() called when MapMgr has %d references left in memory!\n", references);
