@@ -2136,15 +2136,22 @@ void Unit::RegeneratePower(bool isinterrupted)
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					m_P_regenTimer = 3000;
-					plr_shared_from_this()->LooseRage(30);
+					if (HasAura(29131)) //Fix for bloodrage, no decay
+					{	m_P_regenTimer = 3000;
+						plr_shared_from_this()->LoseRage(0);
+					}
+					else
+					{
+						m_P_regenTimer = 3000;
+						plr_shared_from_this()->LoseRage(30);
+					}
 				}
 				else
 				{
 					if (plr_shared_from_this()->mAngerManagement)
 					{
 						m_P_regenTimer = 3000;
-						plr_shared_from_this()->LooseRage(-10);
+						plr_shared_from_this()->LoseRage(-10);
 					}
 				}
 

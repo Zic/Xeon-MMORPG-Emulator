@@ -1508,7 +1508,7 @@ public:
 	void RegenerateMana(bool is_interrupted);
 	void RegenerateHealth(bool inCombat);
 	void RegenerateEnergy();
-	void LooseRage(int32 value);
+	void LoseRage(int32 value);
 	void LooseRunic(int32 value);
 	void LoosePower(uint32 powerField, int32 value);
 	

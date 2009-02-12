@@ -6688,7 +6688,7 @@ void Player::LoosePower(uint32 powerField, int32 decayValue)
     SetUInt32Value(powerField,newpower);
 }
 
-void Player::LooseRage(int32 decayValue)
+void Player::LoseRage(int32 decayValue)
 {
 	//Rage is lost at a rate of 3 rage every 3 seconds. 
 	//The Anger Management talent changes this to 2 rage every 3 seconds.
