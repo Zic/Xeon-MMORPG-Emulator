@@ -446,7 +446,15 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 				{
 					if(u_caster)
 						dmg += float2int32(float(u_caster->GetRAP())*0.15f);
+					if(u_caster && u_caster->HasAurasOfNameHashWithCaster(SPELL_HASH_RAPID_KILLING, u_caster)) //Arcane shot deals Y% extra damage with rapid killing buff
+						dmg += (dmg * (m_spellInfo->RankNumber * 0.1));
 				}break;
+			case SPELL_HASH_AIMED_SHOT: // hunter - aimed shot
+			case SPELL_HASH_AUTO_SHOT: // hunter - auto shot
+				{
+					if(u_caster && u_caster->HasAurasOfNameHashWithCaster(SPELL_HASH_RAPID_KILLING, u_caster)) //Aimed/Auto shot deals Y% extra damage with rapid killing buff
+						dmg += (dmg * (m_spellInfo->RankNumber / 0.1));
+				}break;				
 			case SPELL_HASH_GORE: // boar/ravager: Gore (50% chance of double damage)
 				{
 					if( !u_caster->IsPet() )
