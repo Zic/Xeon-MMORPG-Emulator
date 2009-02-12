@@ -3202,7 +3202,7 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			}
 		}
 
-		if(m_target->IsInWorld() && u_caster->IsInWorld())
+		if(m_target && m_target->IsInWorld() && u_caster && u_caster->IsInWorld())
 			u_caster->CombatStatus.WeHealed(m_target);
 	}   
 }
