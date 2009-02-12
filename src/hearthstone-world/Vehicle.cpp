@@ -294,7 +294,7 @@ void Vehicle::RemovePassenger(UnitPointer pPassenger)
 	pPassenger->m_CurrentVehicle.reset();
 	pPassenger->m_inVehicleSeatId = 0xFF;
 
-	pPassenger->RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNKNOWN_5 | UNIT_FLAG_UNKNOWN_6));
+	pPassenger->RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNKNOWN_5 | UNIT_FLAG_PREPARATION));
 	if( pPassenger->IsPlayer() )
 		pPassenger->RemoveAura(TO_PLAYER(pPassenger)->m_MountSpellId);
 
@@ -451,7 +451,7 @@ void Vehicle::_AddToSlot(UnitPointer pPassenger, uint8 slot)
 
 		pPlayer->m_CurrentVehicle = vehicle_shared_from_this();
 
-		pPlayer->SetFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNKNOWN_5 | UNIT_FLAG_UNKNOWN_6));
+		pPlayer->SetFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_UNKNOWN_5 | UNIT_FLAG_PREPARATION));
 
 		//pPlayer->ResetHeartbeatCoords();
 		pPlayer->SetUInt64Value(PLAYER_FARSIGHT, GetGUID());
