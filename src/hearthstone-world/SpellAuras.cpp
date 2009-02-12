@@ -5235,6 +5235,32 @@ void Aura::SpellAuraTransform(bool apply)
    // SetPositive();
 	switch( GetSpellProto()->Id )
 	{
+		case 13809: //Frost Traps
+		{
+			UnitPointer caster = GetUnitCaster();
+			UnitPointer target = GetUnitCaster();	
+
+			SpellEntry *spellentry = dbcSpell.LookupEntry( 13810 );
+			if(!spellentry)
+			{
+				return;
+			}
+			if (!m_spellProto->Effect[0])
+			{
+				return;
+			}
+	
+			SpellPointer sp(new Spell(caster, spellentry, false, shared_from_this()));
+			if(!sp)
+			{
+				return;
+			}
+
+			SpellCastTargets targets;
+			targets.m_unitTarget = target->GetGUID();
+			sp->prepare(&targets);
+
+		}break;
 		case 47585: // Dispersion
 		{
 			if(apply)

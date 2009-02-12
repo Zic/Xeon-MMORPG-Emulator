@@ -3377,6 +3377,39 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->Unique = true;
 				}break;
+
+			//Hunter : Explosive Trap
+			case 13813:
+				{
+					sp->procFlags = PROC_ON_TRAP_TRIGGER;
+					sp->EffectTriggerSpell[1] = 13812;
+				}break;
+
+			case 14316:
+				{
+					sp->procFlags = PROC_ON_TRAP_TRIGGER;
+					sp->EffectTriggerSpell[1] = 14314;
+				}break;
+
+			case 14317:
+				{	
+					sp->procFlags = PROC_ON_TRAP_TRIGGER;
+					sp->EffectTriggerSpell[1] = 14315;
+				}break;
+
+			case 27025:
+				{
+					sp->procFlags = PROC_ON_TRAP_TRIGGER;
+					sp->EffectTriggerSpell[1] = 27026;
+				}break;
+
+				//Hunter : Entrapment
+			case 19184:
+			case 19387:
+			case 19388:
+				{
+					sp->procFlags = PROC_ON_TRAP_TRIGGER;
+				}break;
 		
 			//////////////////////////////////////////
 			// ROGUE								//
