@@ -489,11 +489,11 @@ enum UnitFieldFlags // UNIT_FIELD_FLAGS #46 - these are client flags
 	UNIT_FLAG_LOCK_PLAYER                = 0x00000004, // 3            4  ? does nothing to client (probably wrong) - only taxi code checks this
 	UNIT_FLAG_PLAYER_CONTROLLED          = 0x00000008, // 4            8  makes players and NPCs attackable / not attackable
 	UNIT_FLAG_UNKNOWN_5                  = 0x00000010, // 5           16  ? some NPCs have this
-	UNIT_FLAG_UNKNOWN_6                  = 0x00000020, // 6           32
+	UNIT_FLAG_PREPARATION                = 0x00000020, // 6           32  don't take reagents for spells with SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP
 	UNIT_FLAG_PLUS_MOB                   = 0x00000040, // 7           64  ? some NPCs have this (Rare/Elite/Boss?)
-	UNIT_FLAG_UNKNOWN_8                  = 0x00000080, // 8          128  ? can change attackable status 
+	UNIT_FLAG_NOT_ATTACKABLE_1           = 0x00000080, // 8          128  ? can change attackable status (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_NOT_ATTACKABLE_1) is NON_PVP_ATTACKABLE
 	UNIT_FLAG_NOT_ATTACKABLE_9           = 0x00000100, // 9          256  changes attackable status
-	UNIT_FLAG_UNKNOWN_10                 = 0x00000200, // 10         512  ? some NPCs have this
+	UNIT_FLAG_UNKNOWN_10                 = 0x00000200, // 10         512  3.0.3 - makes you unable to attack everything
 	UNIT_FLAG_LOOTING                    = 0x00000400, // 11        1024
 	UNIT_FLAG_SELF_RES                   = 0x00000800, // 12        2048  ? some NPCs have this
 	UNIT_FLAG_PVP                        = 0x00001000, // 13        4096  sets PvP flag
@@ -505,16 +505,16 @@ enum UnitFieldFlags // UNIT_FIELD_FLAGS #46 - these are client flags
 	UNIT_FLAG_STUNNED                    = 0x00040000, // 19      262144
 	UNIT_FLAG_COMBAT                     = 0x00080000, // 20      524288  sets combat flag
 	UNIT_FLAG_MOUNTED_TAXI               = 0x00100000, // 21     1048576  mounted on a taxi
-	UNIT_FLAG_DISARMED                   = 0x00200000, // 22     2097152
+	UNIT_FLAG_DISARMED                   = 0x00200000, // 22     2097152  3.0.3, disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
 	UNIT_FLAG_CONFUSED                   = 0x00400000, // 23     4194304
 	UNIT_FLAG_FLEEING                    = 0x00800000, // 24     8388608  fear
-	UNIT_FLAG_PLAYER_CONTROLLED_CREATURE = 0x01000000, // 25    16777216
+	UNIT_FLAG_PLAYER_CONTROLLED_CREATURE = 0x01000000, // 25    16777216  used in spell Eyes of the Beast for pet
 	UNIT_FLAG_NOT_SELECTABLE             = 0x02000000, // 26    33554432  cannot select the unit
 	UNIT_FLAG_SKINNABLE                  = 0x04000000, // 27    67108864
-	UNIT_FLAG_UNKNOWN_28                 = 0x08000000, // 28   134217728  ? was MAKE_CHAR_UNTOUCHABLE (probably wrong), nothing ever set it
+	UNIT_FLAG_MOUNT		                 = 0x08000000, // 28   134217728  ? was MAKE_CHAR_UNTOUCHABLE (probably wrong), nothing ever set it
 	UNIT_FLAG_UNKNOWN_29                 = 0x10000000, // 29   268435456
 	UNIT_FLAG_FEIGN_DEATH                = 0x20000000, // 30   536870912
-	UNIT_FLAG_UNKNOWN_31                 = 0x40000000, // 31  1073741824  ? was WEAPON_OFF and being used for disarm
+	UNIT_FLAG_SHEATHE                    = 0x40000000, // 31  1073741824  ? was WEAPON_OFF and being used for disarm
 	UNIT_FLAG_UNKNOWN_32                 = 0x80000000, // 32  2147483648
 };
 
