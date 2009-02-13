@@ -151,6 +151,13 @@ void AddonMgr::SendAddonInfoPacket(WorldPacket *source, uint32 pos, WorldSession
 	if(m_session->GetClientBuild() > 9183)
 	{
 		unpacked >> addons;
+		size_t p = unpacked.rpos(); 
+		if( p + (addons*10) > unpacked.size() - p - 4) 
+		{ 
+			// stupid fucker, trying to make us waste CPU cycles 
+			m_session->Disconnect(); 
+			return; 
+		}
 	}
 
 	std::string name;
