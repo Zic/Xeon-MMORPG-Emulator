@@ -20,8 +20,6 @@
 #include "StdAfx.h"
 initialiseSingleton( ObjectMgr );
 
-const char * NormalTalkMessage = "What can I teach you, $N?";
-
 ObjectMgr::ObjectMgr()
 {
 	m_hiPetGuid = 0;
@@ -74,7 +72,7 @@ ObjectMgr::~ObjectMgr()
 	Log.Notice("ObjectMgr", "Deleting Trainers...");
 	for( TrainerMap::iterator i = mTrainers.begin( ); i != mTrainers.end( ); ++ i) {
 		Trainer * t = i->second;
-		if(t->UIMessage && t->UIMessage != (char*)NormalTalkMessage)
+		if(t->UIMessage)
 			delete [] t->UIMessage;
 		delete t;
 	}
@@ -1437,23 +1435,24 @@ void ObjectMgr::LoadTrainers()
 	if(!result)
 		return;
 
+	const char * NormalTalkMessage = "What can I teach you $N?";
 
 	do 
 	{
 		Field * fields = result->Fetch();
 		uint32 entry = fields[0].GetUInt32();
+		CreatureInfo*trainer_info = CreatureNameStorage.LookupEntry(entry);
+		if( trainer_info == NULL )
+		{
+			Log.Warning("Trainers", "NPC id for Trainer %u does not exist, skipping.", entry);
+			continue;
+		}
+
 		Trainer * tr = new Trainer;
 		tr->RequiredSkill = fields[1].GetUInt32();
 		tr->RequiredSkillLine = fields[2].GetUInt32();
 		tr->RequiredClass = fields[3].GetUInt32();
 		tr->TrainerType = fields[4].GetUInt32();
-		tr->Can_Train_Gossip_TextId = fields[6].GetUInt32();
-		tr->Cannot_Train_GossipTextId = fields[7].GetUInt32();
-		tr->UIMessage = (char*)NormalTalkMessage;
-		if(!tr->Can_Train_Gossip_TextId)
-			tr->Can_Train_Gossip_TextId=1;
-		if(!tr->Cannot_Train_GossipTextId)
-			tr->Cannot_Train_GossipTextId=1;
 
 		temp = fields[5].GetString();
 		len=strlen(temp);
@@ -1463,6 +1462,26 @@ void ObjectMgr::LoadTrainers()
 			strcpy(tr->UIMessage, temp);
 			tr->UIMessage[len] = 0;
 		}
+		else
+			tr->UIMessage = (char*)NormalTalkMessage;
+
+		uint32 tmptxtid[2];
+		for( uint32 i = 0; i < 2; ++i)
+		{
+			tmptxtid[i] = fields[6+i].GetUInt32();
+			if( tmptxtid[i] ) 
+			{
+				GossipText * text;
+				text = NpcTextStorage.LookupEntry(tmptxtid[i]);
+				if(text == 0)
+				{
+					Log.Warning("Trainers", "Trainer %u contains an invalid npc_gossip_id %d.", entry, tmptxtid[i] );
+					tmptxtid[i] = 0;
+				}
+			}
+		}
+		tr->Can_Train_Gossip_TextId = tmptxtid[0];
+		tr->Cannot_Train_GossipTextId = tmptxtid[1];
 
 		//now load the spells
 		result2 = WorldDatabase.Query("SELECT * FROM trainer_spells where entry='%u'",entry);

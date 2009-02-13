@@ -510,60 +510,63 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 	
 	uint32 flags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
-	if((flags & UNIT_NPC_FLAG_TRAINER || flags & UNIT_NPC_FLAG_TRAINER_PROF) && pTrainer != 0)
+	if(pTrainer != NULL && (flags & UNIT_NPC_FLAG_TRAINER || flags & UNIT_NPC_FLAG_TRAINER_PROF))
 	{
 		string name = pCreature->GetCreatureName()->Name;
 		string::size_type pos = name.find(" ");	  // only take first name
 		if(pos != string::npos)
 			name = name.substr(0, pos);
 
-		if(CanTrainAt(Plr, pTrainer))
-			Menu->SetTextID(pTrainer->Can_Train_Gossip_TextId);
-		else
-			Menu->SetTextID(pTrainer->Cannot_Train_GossipTextId);
-        
-		string msg = "I seek ";
-		if(pTrainer->RequiredClass)
+		if(!CanTrainAt(Plr, pTrainer))
 		{
-			switch(Plr->getClass())
+			if(pTrainer->Cannot_Train_GossipTextId)
 			{
-			case MAGE:
-				msg += "mage";
-				break;
-			case SHAMAN:
-				msg += "shaman";
-				break;
-			case WARRIOR:
-				msg += "warrior";
-				break;
-			case PALADIN:
-				msg += "paladin";
-				break;
-			case WARLOCK:
-				msg += "warlock";
-				break;
-			case HUNTER:
-				msg += "hunter";
-				break;
-			case ROGUE:
-				msg += "rogue";
-				break;
-			case DRUID:
-				msg += "druid";
-				break;
-			case PRIEST:
-				msg += "priest";
-				break;
+				//replace normal gossipid by Cannot_Train_GossipTextId.
+				Menu->SetTextID(pTrainer->Cannot_Train_GossipTextId);
 			}
-			msg += " training, ";
-			msg += name;
-			msg += ".";
-
-			Menu->AddItem(3, msg.c_str(), 2);
-			menu_lines += 1;
 		}
 		else
-		{
+		{	
+			if(pTrainer->Can_Train_Gossip_TextId)
+			{
+				//replace normal gossipid by Can_Train_GossipTextId.
+				Menu->SetTextID(pTrainer->Can_Train_Gossip_TextId);
+			}
+
+			string msg = "I seek ";
+			if(pTrainer->RequiredClass)
+			{
+				switch(Plr->getClass())
+				{
+				case MAGE:
+					msg += "mage";
+					break;
+				case SHAMAN:
+					msg += "shaman";
+					break;
+				case WARRIOR:
+					msg += "warrior";
+					break;
+				case PALADIN:
+					msg += "paladin";
+					break;
+				case WARLOCK:
+					msg += "warlock";
+					break;
+				case HUNTER:
+					msg += "hunter";
+					break;
+				case ROGUE:
+					msg += "rogue";
+					break;
+				case DRUID:
+					msg += "druid";
+					break;
+				case PRIEST:
+					msg += "priest";
+					break;
+				}
+			}
 			msg += "training, ";
 			msg += name;
 			msg += ".";
@@ -572,7 +575,6 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 			menu_lines += 1;
 		}
 	}
-
 	if(flags & UNIT_NPC_FLAG_VENDOR)
 	{
 		Menu->AddItem(GOSSIP_ICON_GOSSIP_VENDOR, "I would like to browse your goods", 1);
@@ -626,19 +628,9 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 		menu_lines += 1;
 	}	
 
-	if( pTrainer &&
-		pCreature->getLevel() > 10 &&				   // creature level
-		Plr->getLevel() > 10 )						  // player level
+	if( pTrainer && pTrainer->RequiredClass )
 	{
-		if(pTrainer->RequiredClass)
-		{
-			if(pTrainer->RequiredClass == Plr->getClass())
-			{
-				Menu->AddItem(0, "I would like to reset my talents.", 11);
-				menu_lines += 1;
-			}
-		}
-		else
+		if( pTrainer->RequiredClass == Plr->getClass() && pCreature->getLevel() > 10 && Plr->getLevel() > 10 )
 		{
 			Menu->AddItem(0, "I would like to reset my talents.", 11);
 			menu_lines += 1;
