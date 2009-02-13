@@ -694,6 +694,12 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 						TS.caster = m_owner->GetGUID();
 						TS.origId = 0;
 						TS.procFlags = PROC_ON_MELEE_ATTACK;
+						if(ItemSlot == EQUIPMENT_SLOT_MAINHAND * PLAYER_VISIBLE_ITEM_LENGTH)
+							TS.weapon_damage_type = 1; // Proc only on main hand attacks
+						else if(ItemSlot == EQUIPMENT_SLOT_OFFHAND * PLAYER_VISIBLE_ITEM_LENGTH)
+							TS.weapon_damage_type = 2; // Proc only on off hand attacks
+						else
+							TS.weapon_damage_type = 0; // Doesn't depend on weapon
 						TS.procCharges = 0;
 						/* This needs to be modified based on the attack speed of the weapon.
 						 * Secondly, need to assign some static chance for instant attacks (ss,

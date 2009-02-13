@@ -367,6 +367,7 @@ struct ProcTriggerSpell
 	uint32 LastTrigger;
 	uint32 ProcType; //0=triggerspell/1=triggerclassspell
 	uint32 SpellClassMask[3];
+	uint32 weapon_damage_type; // 0=Any, 1=Main hand, 2=off hand
 	bool deleted;
 };
 

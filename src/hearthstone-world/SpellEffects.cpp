@@ -885,6 +885,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			ILotP.deleted = false;
 			ILotP.caster = u_caster->GetGUID();
 			ILotP.LastTrigger = 0;
+			ILotP.weapon_damage_type = 0;
 			u_caster->m_procSpells.push_back(ILotP);
 		}break;
 	case 5420: // Tree of Life (Passive)
@@ -2116,7 +2117,12 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	{
 		 pAura=itr->second;
 	} 
-	pAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,m_spellInfo->EffectMiscValue[i],i);
+	int32 miscValue = m_spellInfo->EffectMiscValue[i];
+
+	if(i_caster && m_caster->IsPlayer() && m_spellInfo->EffectApplyAuraName[i]==SPELL_AURA_PROC_TRIGGER_SPELL)
+		miscValue = p_caster->GetItemInterface()->GetInventorySlotByGuid( i_caster->GetGUID() ); // Need to know on which hands attacks spell should proc
+	
+	pAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,miscValue,i);
 }
 
 void Spell::SpellEffectPowerDrain(uint32 i)  // Power Drain
@@ -5125,7 +5131,6 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 				SpellCastTargets tgt( p_caster->GetGUID() );
 				sp->prepare( &tgt );
 				//for pet
-				sp.reset();
 				SpellPointer Petsp(new Spell( unitTarget, dbcSpell.LookupEntry( inc_resist_by_level_spell ), true, NULLAURA ));
 				Petsp->forced_basepoints[0] = unitTarget->GetUInt32Value( UNIT_FIELD_LEVEL ) * inc_resist_by_level / 100;
 				SpellCastTargets tgt1( unitTarget->GetGUID() );
@@ -5406,8 +5411,8 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	pTotem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
 	pTotem->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 	pTotem->SetUInt64Value(UNIT_FIELD_CREATEDBY, p_caster->GetGUID());
-	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] + 1 : 5 );
-	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] + 1: 5);
+	pTotem->SetUInt32Value(UNIT_FIELD_HEALTH, damage > 1 ? damage: 5 );
+	pTotem->SetUInt32Value(UNIT_FIELD_MAXHEALTH, damage > 1 ? damage: 5);
 	pTotem->SetUInt32Value(UNIT_FIELD_POWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_MAXPOWER3, p_caster->getLevel() * 30);
 	pTotem->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
@@ -5982,9 +5987,7 @@ void Spell::SpellEffectDispelMechanic(uint32 i)
 			if( unitTarget->m_auras[x] && !unitTarget->m_auras[x]->IsPositive())
 			{
 				p = unitTarget->m_auras[x]->GetSpellProto();
-				if( p->EffectMechanic[0] == sMisc ||
-					p->EffectMechanic[1] == sMisc ||
-					p->EffectMechanic[2] == sMisc )
+				if( Spell::HasMechanic(p, sMisc) )
 				{
 					unitTarget->m_auras[x]->AttemptDispel( u_caster );
 				}
@@ -5998,9 +6001,7 @@ void Spell::SpellEffectDispelMechanic(uint32 i)
 			if( unitTarget->m_auras[x] && unitTarget->m_auras[x]->IsPositive())
 			{
 				p = unitTarget->m_auras[x]->GetSpellProto();
-				if( p->EffectMechanic[0] == sMisc ||
-					p->EffectMechanic[1] == sMisc ||
-					p->EffectMechanic[2] == sMisc )
+				if( Spell::HasMechanic(p, sMisc) )
 				{
 					unitTarget->m_auras[x]->AttemptDispel( u_caster );
 				}

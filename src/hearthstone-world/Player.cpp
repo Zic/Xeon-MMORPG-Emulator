@@ -3913,6 +3913,12 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 				ts.procChance = 5;
 				ts.caster = this->GetGUID();
 				ts.procFlags = PROC_ON_MELEE_ATTACK;
+				if(slot == EQUIPMENT_SLOT_MAINHAND)
+					ts.weapon_damage_type = 1; // Proc only on main hand attacks
+				else if(slot == EQUIPMENT_SLOT_OFFHAND)
+					ts.weapon_damage_type = 2; // Proc only on off hand attacks
+				else
+					ts.weapon_damage_type = 0; // Doesn't depend on weapon
 				ts.deleted = false;
 				m_procSpells.push_front( ts );			
 			}

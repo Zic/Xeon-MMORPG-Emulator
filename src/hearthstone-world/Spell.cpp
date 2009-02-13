@@ -1864,7 +1864,6 @@ void Spell::finish()
 	if( p_caster && ( cancastresult == SPELL_CANCAST_OK && !GetSpellFailed() ) )
 		RemoveItems();
 
-	//spl.reset();	// seems to cause crash
 	Destructor();
 }
 
@@ -3753,15 +3752,10 @@ uint8 Spell::CanCast(bool tolerate)
 
 					// {Insignia|Medallion} of the {Horde|Alliance}
 					case 0xC7C45478: //Immune Movement Impairment and Loss of Control
-					case 0xDD06F1BF: // insignia of the alliance/horde 2.4.3
-					case 0x048c32f9: // insignia of the alliance/horde prior to 2.4.3
-						break;
-
+					case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
 						{
-							if( u_caster->m_special_state & ( UNIT_STATE_FEAR | UNIT_STATE_CHARM | UNIT_STATE_SLEEP | UNIT_STATE_ROOT | UNIT_STATE_STUN | UNIT_STATE_CONFUSE | UNIT_STATE_SNARE ) )
-								break;
-						}
 							break;
+						}
 
 					case 0xCD4CDF55: // Barksin
 					{ // This spell is usable while stunned, frozen, incapacitated, feared or asleep.  Lasts 12 sec.
@@ -3837,8 +3831,7 @@ uint8 Spell::CanCast(bool tolerate)
 				case 0x3DFA70E5: /* Will of the Forsaken (Undead Racial) */
 					break;
 
-				case 0xDD06F1BF: // insignia of the alliance/horde 2.4.3
-				case 0x048c32f9: // insignia of the alliance/horde prior to 2.4.3
+				case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
 					break;
 
 				case SPELL_HASH_BLINK:
@@ -4421,7 +4414,7 @@ void Spell::Heal(int32 amount)
 
 	//Make it critical
 	bool critical = false;
-	int32 critchance = 0; 
+	float critchance = 0; 
 	int32 bonus = 0;
 	if( u_caster != NULL )
 	{
@@ -4471,7 +4464,14 @@ void Spell::Heal(int32 amount)
 		}
 
 		if(m_spellInfo->spell_can_crit)
-			critchance = float2int32(u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School]);
+		{
+			critchance = u_caster->spellcritperc + u_caster->SpellCritChanceSchool[m_spellInfo->School];
+			if( m_spellInfo->SpellGroupType )
+			{
+				SM_FFValue(u_caster->SM[SMT_CRITICAL][0], &critchance, m_spellInfo->SpellGroupType);
+				SM_PFValue(u_caster->SM[SMT_CRITICAL][1], &critchance, m_spellInfo->SpellGroupType);
+			}
+		}
 		if(critical = Rand(critchance))
 		{
 			/*int32 critbonus = amount >> 1;

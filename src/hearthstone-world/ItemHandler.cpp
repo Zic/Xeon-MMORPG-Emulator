@@ -517,7 +517,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 				if(gc != NULL)
 					gc->Destroy();
 
-				_player->m_playerInfo->charterId[CHARTER_TYPE_GUILD] = NULL;
+				_player->m_playerInfo->charterId[CHARTER_TYPE_GUILD] = 0;
 			}
 		}
 
@@ -529,7 +529,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 				if(gc != NULL)
 					gc->Destroy();
 
-				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_2V2] = NULL;
+				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_2V2] = 0;
 			}
 		}
 
@@ -541,7 +541,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 				if(gc != NULL)
 					gc->Destroy();
 
-				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_5V5] = NULL;
+				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_5V5] = 0;
 			}
 		}
 

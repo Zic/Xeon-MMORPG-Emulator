@@ -3510,9 +3510,39 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags = PROC_ON_CAST_SPELL;
 					sp->procChance = 20;
 				}break;
+			case 51945:
+			case 51990:
+			case 51997:
+			case 51998:
+			case 51999:
 			case 52000:
 				{
-					sp->logsId = 52000;
+					sp->logsId = sp->Id;
+				}break; 
+			case 55198:	// Tidal Force
+				{
+					sp->Effect[0] = SPELL_EFFECT_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0] = 55166;
+				}break;
+			case 55166:
+				{
+					sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+				}break;
+			case 16187:
+			case 16205:
+			case 16206:
+			case 16207:
+			case 16208: // Restorative Totems
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+					sp->EffectMiscValue[0] = SMT_DAMAGE_DONE;
+					sp->EffectApplyAuraName[1] = SPELL_AURA_ADD_PCT_MODIFIER;
+				}break;
+			case 31616: // Nature's Guardian
+				{
+					sp->logsId = sp->Id;
+					sp->fixed_dddhcoef = 0.0f;
+					sp->spell_can_crit = false;
 				}break;
 		
 			//////////////////////////////////////////

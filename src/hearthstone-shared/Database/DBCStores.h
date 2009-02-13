@@ -761,7 +761,6 @@ struct SpellEntry
 	bool is_melee_spell;					//!!! CUSTOM,
 	bool is_ranged_spell;					//!!! CUSTOM,
 	bool spell_can_crit;					//!!! CUSTOM,
-    uint32 EffectSpellGroupRelation_high[3];     //!!! this is not contained in client dbc but server must have it
 	uint32 ThreatForSpell;
 
 	// love me or hate me, all "In a cone in front of the caster" spells don't necessarily mean "in front"

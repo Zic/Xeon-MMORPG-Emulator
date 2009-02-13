@@ -749,7 +749,7 @@ public:
 	void Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
 
 	uint32 m_procCounter;
-	uint32 HandleProc(uint32 flag, UnitPointer Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0);
+	uint32 HandleProc(uint32 flag, UnitPointer Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0, uint32 weapon_damage_type=0);
 	void HandleProcDmgShield(uint32 flag, UnitPointer attacker);//almost the same as handleproc :P
 
 	void RemoveExtraStrikeTarget(SpellEntry *spell_info);
@@ -1009,9 +1009,9 @@ public:
 	void SendChatMessageAlternateEntry(uint32 entry, uint8 type, uint32 lang, const char * msg);
 	void RegisterPeriodicChatMessage(uint32 delay, uint32 msgid, std::string message, bool sendnotify);
 
-	HEARTHSTONE_INLINE int GetHealthPct() { return (int)((GetUInt32Value(UNIT_FIELD_HEALTH)+1) * 100 / (GetUInt32Value(UNIT_FIELD_MAXHEALTH)+1)); };
-    HEARTHSTONE_INLINE void SetHealthPct(uint32 val) { if (val>0) SetUInt32Value(UNIT_FIELD_HEALTH,float2int32(val*0.01f*GetUInt32Value(UNIT_FIELD_MAXHEALTH))); };
-	HEARTHSTONE_INLINE int GetManaPct() { return (int)((GetUInt32Value(UNIT_FIELD_POWER1)+1) * 100 / (GetUInt32Value(UNIT_FIELD_MAXPOWER1)+1)); };
+	HEARTHSTONE_INLINE int32 GetHealthPct() { return (int32)(GetUInt32Value(UNIT_FIELD_HEALTH) * 100 / std::max(1, (int32)GetUInt32Value(UNIT_FIELD_MAXHEALTH))); }
+    HEARTHSTONE_INLINE void SetHealthPct(uint32 val) { if (val>0) SetUInt32Value(UNIT_FIELD_HEALTH,float2int32(val*0.01f*GetUInt32Value(UNIT_FIELD_MAXHEALTH))); }
+	HEARTHSTONE_INLINE int32 GetManaPct() { return (int32)(GetUInt32Value(UNIT_FIELD_POWER1) * 100 / std::max(1, (int32)GetUInt32Value(UNIT_FIELD_MAXPOWER1))); }
 		
 	uint32 GetResistance(uint32 type);	
 

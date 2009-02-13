@@ -985,6 +985,7 @@ void Aura::ApplyModifiers( bool apply )
 			pts.procCharges = GetSpellProto()->procCharges;
 			pts.LastTrigger = 0;
 			pts.ProcType = 0;
+			pts.weapon_damage_type = 0;
 			/*
 			pts.SpellClassMask[0] = GetSpellProto()->EffectSpellClassMask[mod->i][0];
 			pts.SpellClassMask[1] = GetSpellProto()->EffectSpellClassMask[mod->i][1];
@@ -2211,6 +2212,7 @@ void Aura::SpellAuraDummy(bool apply)
 			pts.procCharges = GetSpellProto()->procCharges;
 			pts.LastTrigger = 0;
 			pts.deleted = false;
+			pts.weapon_damage_type = 0;
 			m_target->m_procSpells.push_front(pts);
 			}
 			else
@@ -4854,6 +4856,12 @@ void Aura::SpellAuraProcTriggerSpell(bool apply)
 		pts.procChance = GetSpellProto()->procChance;
 		pts.procFlags = GetSpellProto()->procFlags;
 		pts.procCharges = GetSpellProto()->procCharges;
+		if(mod->m_miscValue == EQUIPMENT_SLOT_MAINHAND)
+			pts.weapon_damage_type = 1; // Proc only on main hand attacks
+		else if(mod->m_miscValue == EQUIPMENT_SLOT_OFFHAND)
+			pts.weapon_damage_type = 2; // Proc only on off hand attacks
+		else
+			pts.weapon_damage_type = 0; // Doesn't depend on weapon
 		pts.LastTrigger = 0;
 		pts.SpellClassMask[0] = GetSpellProto()->EffectSpellClassMask[mod->i][0];
 		pts.SpellClassMask[1] = GetSpellProto()->EffectSpellClassMask[mod->i][1];
@@ -6015,20 +6023,33 @@ void Aura::SpellAuraMechanicImmunity(bool apply)
 				m_target->RemoveAllAurasByMechanic( (uint32)mod->m_miscValue , -1 , false );
 			}
 
-			if(m_spellProto->Id==42292)
+			if(m_spellProto->Id==42292)	// PvP Trinket
 			{
-				m_target->RemoveAllAurasByMechanic( MECHANIC_CHARMED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_DISORIENTED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_FLEEING, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_ROOTED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_PACIFIED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_ASLEEP, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_STUNNED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_INCAPACIPATED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_POLYMORPHED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_SEDUCED, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_FROZEN, -1, true );
-				m_target->RemoveAllAurasByMechanic( MECHANIC_ENSNARED, -1, true );
+				// insignia of the A/H
+				for(uint32 x= MAX_POSITIVE_AURAS; x < MAX_AURAS; ++x)
+				{
+					if(m_target->m_auras[x])
+					{
+						uint32 mechanic = Spell::GetMechanic(m_target->m_auras[x]->GetSpellProto());
+						switch(mechanic)
+						{
+							case MECHANIC_CHARMED:
+							case MECHANIC_DISORIENTED:
+							case MECHANIC_FLEEING:
+							case MECHANIC_ROOTED:
+							case MECHANIC_PACIFIED:
+							case MECHANIC_ASLEEP:
+							case MECHANIC_STUNNED:
+							case MECHANIC_INCAPACIPATED:
+							case MECHANIC_POLYMORPHED:
+							case MECHANIC_SEDUCED:
+							case MECHANIC_FROZEN:
+							case MECHANIC_ENSNARED:
+							case MECHANIC_BANISHED:
+								m_target->m_auras[x]->Remove();
+						}
+					}
+				}
 			}
 		}
 		else

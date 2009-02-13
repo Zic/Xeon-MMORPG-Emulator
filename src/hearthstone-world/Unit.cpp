@@ -607,9 +607,8 @@ void Unit::GiveGroupXP(UnitPointer pVictim, PlayerPointer PlayerInGroup)
 	}*/
 }
 
-uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpell, uint32 dmg, uint32 abs )
+uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpell, uint32 dmg, uint32 abs, uint32 weapon_damage_type )
 {
-	uint32 weapon_damage_type = 1; // todo: port
 	uint32 resisted_dmg = 0;
 
 	++m_procCounter;
@@ -654,6 +653,11 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 		//this requires some specific spell check,not yet implemented
 		if( itr2->procFlags & flag )
 		{
+			if(itr2->weapon_damage_type > 0 && itr2->weapon_damage_type < 3 &&
+				(itr2->procFlags & (PROC_ON_MELEE_ATTACK | PROC_ON_CRIT_ATTACK)) &&
+				itr2->weapon_damage_type != weapon_damage_type)
+				continue; // This spell should proc only from other hand attacks
+
 			uint32 spellId = itr2->spellId;
 
 			if( itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND) {
@@ -704,30 +708,26 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 			{
 				float ppm = ospinfo->ProcsPerMinute;
 
-				ItemPointer mh = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-				ItemPointer of = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-				
-				if( mh != NULL && of != NULL )
+				PlayerPointer plr = plr_shared_from_this();
+				ItemPointer weapon = NULLITEM;
+				if(plr->GetItemInterface() && weapon_damage_type > 0 && weapon_damage_type < 3)
 				{
-					float mhs = float( mh->GetProto()->Delay );
-					float ohs = float( of->GetProto()->Delay );
-					proc_Chance = float2int32( ( mhs + ohs ) * 0.001f * ppm / 0.6f );
+						weapon = plr->GetItemInterface()->
+							GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 				}
-				else if( mh != NULL )
+				if(weapon && weapon->GetProto())
 				{
-					float mhs = float( mh->GetProto()->Delay );
-					proc_Chance = float2int32( mhs * 0.001f * ppm / 0.6f );
+					float speed = float( weapon->GetProto()->Delay );
+					proc_Chance = float2int32( speed * 0.001f * ppm / 0.6f );
 				}
-				else
-					proc_Chance = 0;
 
-				if( plr_shared_from_this()->IsInFeralForm() )
+				if( plr->IsInFeralForm() )
 				{
-					if( plr_shared_from_this()->GetShapeShift() == FORM_CAT )
+					if( plr->GetShapeShift() == FORM_CAT )
 					{
 						proc_Chance = float2int32( ppm / 0.6f );
 					}
-					else if( plr_shared_from_this()->GetShapeShift() == FORM_BEAR || plr_shared_from_this()->GetShapeShift() == FORM_DIREBEAR )
+					else if( plr->GetShapeShift() == FORM_BEAR || plr->GetShapeShift() == FORM_DIREBEAR )
 					{
 						proc_Chance = float2int32( ppm / 0.24f );
 					}
@@ -1289,6 +1289,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 58787:
 						case 58788:
 							{
+								if(!IsPlayer() || weapon_damage_type < 1 || weapon_damage_type > 2)
+									continue;
 								spellId = 29469;	// Flametongue Weapon proc
 								ItemPointer mh = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 
@@ -1448,7 +1450,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 35547:
 						case 35548:
 							{
-								if( !IsPlayer() || !dmg )
+								if( !IsPlayer() || !dmg || weapon_damage_type != 2 )
 									continue;
 								//this needs offhand weapon
 								ItemPointer it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
@@ -3174,10 +3176,10 @@ else
     {
 		uint32 resisted_dmg;
 
-		HandleProc(aproc,pVictim, ability,realdamage,abs); //maybe using dmg.resisted_damage is better sometimes but then if using godmode dmg is resisted instead of absorbed....bad
+		HandleProc(aproc,pVictim, ability,realdamage,abs,weapon_damage_type + 1); //maybe using dmg.resisted_damage is better sometimes but then if using godmode dmg is resisted instead of absorbed....bad
 		m_procCounter = 0;
 
-		resisted_dmg = pVictim->HandleProc(vproc,unit_shared_from_this(), ability,realdamage,abs);
+		resisted_dmg = pVictim->HandleProc(vproc,unit_shared_from_this(), ability,realdamage,abs,weapon_damage_type + 1);
 		pVictim->m_procCounter = 0;
 
 		if(realdamage > 0)
@@ -6034,7 +6036,7 @@ bool Unit::RemoveAllAurasByMechanic( uint32 MechanicType , uint32 MaxDispel = -1
 
 			if( m_auras[x] )
 			{
-					if( m_auras[x]->GetSpellProto()->MechanicsType == MechanicType ) // Remove all mechanics of type MechanicType (my english goen boom)
+				if( Spell::HasMechanic(m_auras[x]->GetSpellProto(), MechanicType) ) // Remove all mechanics of type MechanicType (my english goen boom)
 					{
 						//sLog.outString( "Removed aura. [AuraSlot %u, SpellId %u]" , x , m_auras[x]->GetSpellId() );
 						// TODO: Stop moving if fear was removed.
