@@ -469,6 +469,8 @@ bool Master::Run(int argc, char ** argv)
 
 	Log.Notice( "World", "~World()" );
 	//delete World::getSingletonPtr();
+	World::getSingletonPtr()->Destructor();
+
 
 	sScriptMgr.UnloadScripts();
 	delete ScriptMgr::getSingletonPtr();

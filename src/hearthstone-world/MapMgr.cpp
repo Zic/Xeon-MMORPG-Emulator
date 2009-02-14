@@ -1402,19 +1402,16 @@ void MapMgr::PushToProcessed(PlayerPointer plr)
 }
 
 
-void MapMgr::ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight)
+void MapMgr::ChangeFarsightLocation(PlayerPointer plr, UnitPointer farsight, bool apply)
 {
-	if(farsight == 0)
+	if(!apply)
 	{
 		// We're clearing.
 		for(ObjectSet::iterator itr = plr->m_visibleFarsightObjects.begin(); itr != plr->m_visibleFarsightObjects.end();
 			++itr)
 		{
-			if(plr->IsVisible((*itr)) && !plr->CanSee((*itr)))
-			{
-				// Send destroy
-				plr->PushOutOfRange((*itr)->GetNewGUID());
-			}
+			// Send destroy
+			plr->PushOutOfRange((*itr)->GetNewGUID());
 		}
 		plr->m_visibleFarsightObjects.clear();
 	}
@@ -1445,6 +1442,59 @@ void MapMgr::ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight)
 					{
 						obj = (*iter);
 						if(!plr->IsVisible(obj) && plr->CanSee(obj) && farsight->GetDistance2dSq(obj) <= m_UpdateDistance)
+						{
+							ByteBuffer buf;
+							count = obj->BuildCreateUpdateBlockForPlayer(&buf, plr);
+							plr->PushCreationData(&buf, count);
+							plr->m_visibleFarsightObjects.insert(obj);
+						}
+					}
+					
+				}
+			}
+		}
+	}
+}
+
+void MapMgr::ChangeFarsightLocation(PlayerPointer plr, float X, float Y, bool apply)
+{
+	if(!apply)
+	{
+		// We're clearing.
+		for(ObjectSet::iterator itr = plr->m_visibleFarsightObjects.begin(); itr != plr->m_visibleFarsightObjects.end();
+			++itr)
+		{
+			// Send destroy
+			plr->PushOutOfRange((*itr)->GetNewGUID());
+		}
+		plr->m_visibleFarsightObjects.clear();
+	}
+	else
+	{
+		uint32 cellX = GetPosX(X);
+		uint32 cellY = GetPosY(Y);
+		uint32 endX = (cellX <= _sizeX) ? cellX + 1 : (_sizeX-1);
+		uint32 endY = (cellY <= _sizeY) ? cellY + 1 : (_sizeY-1);
+		uint32 startX = cellX > 0 ? cellX - 1 : 0;
+		uint32 startY = cellY > 0 ? cellY - 1 : 0;
+		uint32 posX, posY;
+		MapCell *cell;
+		ObjectPointer obj;
+		MapCell::ObjectSet::iterator iter, iend;
+		uint32 count;
+		for (posX = startX; posX <= endX; ++posX )
+		{
+			for (posY = startY; posY <= endY; ++posY )
+			{
+				cell = GetCell(posX, posY);
+				if (cell)
+				{
+					iter = cell->Begin();
+					iend = cell->End();
+					for(; iter != iend; ++iter)
+					{
+						obj = (*iter);
+						if(!plr->IsVisible(obj) && plr->CanSee(obj) && obj->GetDistance2dSq(X, Y) <= m_UpdateDistance)
 						{
 							ByteBuffer buf;
 							count = obj->BuildCreateUpdateBlockForPlayer(&buf, plr);

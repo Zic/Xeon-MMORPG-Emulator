@@ -139,6 +139,10 @@ void World::LogoutPlayers()
 
 World::~World()
 {
+}
+
+void World::Destructor()
+{
 	Log.Notice("LocalizationMgr", "~LocalizationMgr()");
 	sLocalizationMgr.Shutdown();
 

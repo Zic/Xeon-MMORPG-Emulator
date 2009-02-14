@@ -577,12 +577,14 @@ public:
 	void SpellAuraModMechanicResistance(bool apply);
 	void SpellAuraModHealingPCT(bool apply);   
 	void SpellAuraEmphaty(bool apply);
+	void SpellAuraUntrackable(bool apply);
 	void SpellAuraModOffhandDamagePCT(bool apply);
 	void SpellAuraModPenetration(bool apply);
 	void SpellAuraModRangedAttackPower(bool apply);
 	void SpellAuraModMeleeDamageTaken(bool apply);
 	void SpellAuraModMeleeDamageTakenPct(bool apply);
-	void SpellAuraRAPAttackerBonus(bool apply);	
+	void SpellAuraRAPAttackerBonus(bool apply);
+	void SpellAuraModPossessPet(bool apply);
 	void SpellAuraModIncreaseSpeedAlways(bool apply);
 	void SpellAuraModIncreaseMountedSpeed(bool apply);
 	void SpellAuraModCreatureRangedAttackPower(bool apply);
@@ -645,6 +647,7 @@ public:
 	void SpellAuraIncreaseCastTimePCT(bool apply);
 	void SpellAuraRegenManaStatPCT(bool apply);
 	void SpellAuraSpellHealingStatPCT(bool apply);
+	void SpellAuraAuraModInvisibilityDetection(bool apply);
 	void SpellAuraIncreaseMaxHealth(bool apply);
 	void SpellAuraSpiritOfRedemption(bool apply);
 	void SpellAuraIncreaseAttackerSpellCrit(bool apply);

@@ -9294,6 +9294,7 @@ void Player::Possess(UnitPointer pTarget)
 	m_noInterrupt++;
 	SetUInt64Value(UNIT_FIELD_CHARM, pTarget->GetGUID());
 	SetUInt64Value(PLAYER_FARSIGHT, pTarget->GetGUID());
+	pTarget->GetMapMgr()->ChangeFarsightLocation(player_shared_from_this(), pTarget, true);
 
 	pTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY, GetGUID());
 	pTarget->SetCharmTempVal(pTarget->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
@@ -9375,6 +9376,7 @@ void Player::UnPossess()
 
 	m_noInterrupt--;
 	SetUInt64Value(PLAYER_FARSIGHT, 0);
+	pTarget->GetMapMgr()->ChangeFarsightLocation(player_shared_from_this(), pTarget, false);
 	SetUInt64Value(UNIT_FIELD_CHARM, 0);
 	pTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY, 0);
 

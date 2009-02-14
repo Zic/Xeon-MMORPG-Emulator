@@ -213,7 +213,8 @@ public:
 	void PushStaticObject(ObjectPointer obj);
 	void RemoveObject(ObjectPointer obj, bool free_guid);
 	void ChangeObjectLocation(ObjectPointer obj); // update inrange lists
-	void ChangeFarsightLocation(PlayerPointer plr, CreaturePointer farsight);
+	void ChangeFarsightLocation(PlayerPointer plr, UnitPointer farsight, bool apply);
+	void ChangeFarsightLocation(PlayerPointer plr, float X, float Y, bool apply);
 
 	//! Mark object as updated
 	void ObjectUpdated(ObjectPointer obj);
