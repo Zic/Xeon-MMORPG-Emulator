@@ -7997,44 +7997,31 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 	delete data;
 #else
 	/* Normal Version */
-	bool instance = false;
+	bool force_new_world = false;
 	MapInfo * mi = WorldMapInfoStorage.LookupEntry(MapID);
 
 	if(InstanceID && (uint32)m_instanceId != InstanceID)
 	{
-		instance = true;
-		this->SetInstanceID(InstanceID);
-		// if we are mounted remove it
-		if( m_MountSpellId )
-			RemoveAura( m_MountSpellId );
+		force_new_world = true;
+		SetInstanceID(InstanceID);
 	}
 	else if(m_mapId != MapID)
 	{
-		instance = true;
-		// if we are mounted remove it
-		if( m_MountSpellId )
-			RemoveAura( m_MountSpellId );
+		force_new_world = true;
+	}
+
+	if(force_new_world )
+		TO_UNIT(shared_from_this())->Dismount();
+
+	if((GetShapeShift() == FORM_FLIGHT || GetShapeShift() == FORM_SWIFT) && MapID != 530 && MapID != 571 )
+	{
+		//no flying outside new continent
+		RemoveShapeShiftSpell(m_ShapeShifted);
 	}
 
 	// make sure player does not drown when teleporting from under water
 	if (m_UnderwaterState & UNDERWATERSTATE_UNDERWATER)
 		m_UnderwaterState &= ~UNDERWATERSTATE_UNDERWATER;
-
-	if(MapID != 530 && MapID != 571 )
-	{
-		if( m_FlyingAura )
-		{
-			TO_UNIT(shared_from_this())->Dismount();
-			SetPlayerSpeed(RUN, m_runSpeed);
-		}
-		else if( GetShapeShift() == FORM_FLIGHT )//Remove flight form from druids when leaving 530 or 571
-		{
-			RemoveShapeShiftSpell(m_ShapeShifted);
-			TO_UNIT(shared_from_this())->Dismount();
-			SetPlayerSpeed(RUN, m_runSpeed);
-		}
-
-	}
 
 	// Lookup map info
 	if(mi && mi->flags & WMI_INSTANCE_XPACK_01 && !m_session->HasFlag(ACCOUNT_FLAG_XPACK_01) && !m_session->HasFlag(ACCOUNT_FLAG_XPACK_02))
@@ -8053,7 +8040,7 @@ bool Player::SafeTeleport(uint32 MapID, uint32 InstanceID, LocationVector vec)
 		return false;
 	}
 
-	_Relocate(MapID, vec, true, instance, InstanceID);
+	_Relocate(MapID, vec, true, force_new_world, InstanceID);
 	return true;
 #endif
 }
