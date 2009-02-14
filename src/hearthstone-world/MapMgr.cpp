@@ -280,8 +280,8 @@ void MapMgr::PushObject(ObjectPointer obj)
 	ASSERT(obj->GetPositionY() < _maxY && obj->GetPositionY() > _minY);
 	ASSERT(_cells);
 
-	uint32 mx = obj->GetPositionX();
-	uint32 my = obj->GetPositionY();
+	float mx = obj->GetPositionX();
+	float my = obj->GetPositionY();
 	uint32 cx = GetPosX(mx);
 	uint32 cy = GetPosY(my);
 
