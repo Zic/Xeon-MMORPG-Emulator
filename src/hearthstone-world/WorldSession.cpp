@@ -125,24 +125,11 @@ int WorldSession::Update(uint32 InstanceID)
 	{
 		// Check if the player is in the process of being moved. We can't delete him
 		// if we are.
-		if(_player && _player->m_beingPushed)
-		{
-			// Abort..
+		if(_player && _player->m_beingPushed) // Abort
 			return 0;
-		}
 
 		if(!_logoutTime)
-			_logoutTime = m_currMsTime + PLAYER_LOGOUT_DELAY;
-
-/*
-				if(_player && _player->DuelingWith)
-					_player->EndDuel(DUEL_WINNER_RETREAT);
-		
-				bDeleted = true;
-				LogoutPlayer(true);
-				// 1 - Delete session completely.
-				return 1;*/
-		
+			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 
 	while ((packet = _recvQueue.Pop()))
@@ -177,64 +164,39 @@ int WorldSession::Update(uint32 InstanceID)
 		//delete packet;
 		g_bufferPool.Deallocate(packet);
 
-		if(InstanceID != instanceId)
-		{
-			// If we hit this -> means a packet has changed our map.
+		if(InstanceID != instanceId) // A packet has changed our map, so the mapsession should be deleted for this map.
 			return 2;
-		}
 
-		if( bDeleted )
-		{
+		if( bDeleted ) // if we hit this, it means our client has lost it's socket earlier on, delete both map- and world-session.
 			return 1;
-		}
 	}
 
-	if(InstanceID != instanceId)
-	{
-		// If we hit this -> means a packet has changed our map.
-		return 2;
-	}
+	// Check if the player is in the process of being moved. We can't delete him
+	// if we are.
+	if( _player && _player->m_beingPushed ) // Abort
+		return 0;
 
+	//logout timer expired
 	if( _logoutTime && (m_currMsTime >= _logoutTime) && instanceId == InstanceID)
 	{
-		// Check if the player is in the process of being moved. We can't delete him
-		// if we are.
-		if(_player && _player->m_beingPushed)
+		LogoutPlayer(true);
+		if( _socket == NULL ) //Player lost connection socket
 		{
-			// Abort..
-			return 0;
+			bDeleted = true; // Abort and fully delete map- and world-session in next loop.			return 1;
 		}
-
-		if( _socket == NULL )
-		{
-			bDeleted = true;
-			LogoutPlayer(true);
-			return 1;
-		}
-		else
-			LogoutPlayer(true);
 	}
 
 	if(m_lastPing + WORLDSOCKET_TIMEOUT < (uint32)UNIXTIME)
 	{
-		// Check if the player is in the process of being moved. We can't delete him
-		// if we are.
-		if(_player && _player->m_beingPushed)
-		{
-			// Abort..
-			return 0;
-		}
-
 		// ping timeout!
 		if( _socket != NULL )
 		{
 			Disconnect();
 			_socket = NULL;
 		}
-
 		m_lastPing = (uint32)UNIXTIME;		// Prevent calling this code over and over.
 		if(!_logoutTime)
-			_logoutTime = m_currMsTime + PLAYER_LOGOUT_DELAY;
+			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 
 	return 0;
