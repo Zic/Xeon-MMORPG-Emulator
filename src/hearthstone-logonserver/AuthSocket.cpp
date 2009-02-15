@@ -610,15 +610,13 @@ void AuthSocket::HandleReconnectProof()
 	if( m_account == NULL )
 		return;
 
-	return; // fuck blocking SQL queries, seriously.
-
 	// Load sessionkey from account database.
-	QueryResult * result = sLogonSQL->Query ("SELECT SessionKey FROM accounts WHERE login = '%s'", AccountName.c_str());
+	QueryResult * result = sLogonSQL->Query ("SELECT SessionKey FROM accounts WHERE acct = %u", m_account->AccountId);
 	if(result)
 	{
 		Field * field = result->Fetch();
 		K.SetHexStr(field[0].GetString ());
-	    delete result;
+		delete result;
 	}
 	else
 	{
