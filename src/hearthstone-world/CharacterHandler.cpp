@@ -624,8 +624,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket & recv_data)
 	PlayerInfo * pi = objmgr.GetPlayerInfo((uint32)guid);
 	if(pi == 0) return;
 
-	QueryResult * result = CharacterDatabase.Query("SELECT forced_rename_pending FROM characters WHERE guid = %u AND acct = %u", 
-		(uint32)guid, _accountId);
+	QueryResult * result = CharacterDatabase.Query("SELECT forced_rename_pending FROM characters WHERE guid = %u AND acct = %u", (uint32)guid, _accountId);
 	if(result == 0)
 	{
 		delete result;
@@ -675,6 +674,7 @@ void WorldSession::HandleCharRenameOpcode(WorldPacket & recv_data)
 	sPlrLog.writefromsession(this, "a rename was pending. renamed character %s (GUID: %u) to %s.", pi->name, pi->guid, name.c_str());
 
 	// If we're here, the name is okay.
+	CharacterDatabase.Query("UPDATE characters SET name = \'%s\',  forced_rename_pending  = 0 WHERE guid = %u AND acct = %u",name.c_str(), (uint32)guid, _accountId);
 	free(pi->name);
 	pi->name = strdup(name.c_str());
 
