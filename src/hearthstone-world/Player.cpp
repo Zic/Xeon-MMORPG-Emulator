@@ -991,12 +991,12 @@ void Player::Update( uint32 p_time )
 	{
 		if( m_AutoShotAttackTimer > p_time )
 		{
-			//DEBUG_LOG( "HUNTER AUTOSHOT 0) %i, %i", m_AutoShotAttackTimer, p_time );
+			//OUT_DEBUG( "HUNTER AUTOSHOT 0) %i, %i", m_AutoShotAttackTimer, p_time );
 			m_AutoShotAttackTimer -= p_time;
 		}
 		else
 		{
-			//DEBUG_LOG( "HUNTER AUTOSHOT 1) %i", p_time );
+			//OUT_DEBUG( "HUNTER AUTOSHOT 1) %i", p_time );
 			EventRepeatSpell();
 		}
 	}
@@ -1204,7 +1204,7 @@ void Player::_EventAttack( bool offhand )
 	//Can't find victim, stop attacking
 	if (!pVictim)
 	{
-		DEBUG_LOG("Player::Update:  No valid current selection to attack, stopping attack\n");
+		OUT_DEBUG("Player::Update:  No valid current selection to attack, stopping attack\n");
 		setHRegenTimer(5000); //prevent clicking off creature for a quick heal
 		EventAttackStop();
 		return;
@@ -1303,8 +1303,8 @@ void Player::_EventCharmAttack()
 	//Can't find victim, stop attacking
 	if (!pVictim)
 	{
-		Log.Debug( "WORLD"," "I64FMT" doesn't exist.",m_curSelection);
-		DEBUG_LOG("Player::Update:  No valid current selection to attack, stopping attack\n");
+		DEBUG_LOG( "WORLD"," "I64FMT" doesn't exist.",m_curSelection);
+		OUT_DEBUG("Player::Update:  No valid current selection to attack, stopping attack\n");
 		setHRegenTimer(5000); //prevent clicking off creature for a quick heal
 		clearStateFlag(UF_ATTACKING);
 		EventAttackStop();
@@ -1678,7 +1678,7 @@ void Player::smsg_InitialSpells()
 
 		++itemCount;
 
-		DEBUG_LOG("sending spell cooldown for spell %u to %u ms", itr2->first, itr2->second.ExpireTime - mstime);
+		OUT_DEBUG("sending spell cooldown for spell %u to %u ms", itr2->first, itr2->second.ExpireTime - mstime);
 	}
 
 	for( itr = m_cooldownMap[COOLDOWN_TYPE_CATEGORY].begin(); itr != m_cooldownMap[COOLDOWN_TYPE_CATEGORY].end(); )
@@ -1700,7 +1700,7 @@ void Player::smsg_InitialSpells()
 
 		++itemCount;
 
-		DEBUG_LOG("InitialSpells", "sending category cooldown for cat %u to %u ms", itr2->first, itr2->second.ExpireTime - mstime);
+		OUT_DEBUG("InitialSpells", "sending category cooldown for cat %u to %u ms", itr2->first, itr2->second.ExpireTime - mstime);
 	}
 
 	
@@ -1885,7 +1885,7 @@ void Player::SpawnPet(uint32 pet_number)
 	std::map<uint32, PlayerPet*>::iterator itr = m_Pets.find(pet_number);
 	if(itr == m_Pets.end())
 	{
-		DEBUG_LOG("PET SYSTEM: "I64FMT" Tried to load invalid pet %d", GetGUID(), pet_number);
+		OUT_DEBUG("PET SYSTEM: "I64FMT" Tried to load invalid pet %d", GetGUID(), pet_number);
 		return;
 	}
 
@@ -2665,7 +2665,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	{
 		_LoadSkills(results[12].result);
 		field_index++;
-		Log.Debug("WorldSession","Skills loaded");
+		DEBUG_LOG("WorldSession","Skills loaded");
 	}
 	else 
 	{
@@ -2736,7 +2736,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 			}
 			free(f);
 			_UpdateMaxSkillCounts();
-			Log.Debug("Player","loaded old style skills for player %s", m_name.c_str());
+			DEBUG_LOG("Player","loaded old style skills for player %s", m_name.c_str());
 		}
 	}
 
@@ -5074,7 +5074,7 @@ void Player::EventPlayerRest()
 	uint32 diff = (uint32)UNIXTIME - m_lastRestUpdate;
 	m_lastRestUpdate = (uint32)UNIXTIME;
 	uint32 RestXP = CalculateRestXP((uint32)diff);
-	DEBUG_LOG("REST: Adding %d rest XP for %d seconds of rest time", RestXP, diff);
+	OUT_DEBUG("REST: Adding %d rest XP for %d seconds of rest time", RestXP, diff);
 	AddRestXP(RestXP);
 }
 
@@ -5919,7 +5919,7 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, UnitPointer target, bool aut
 			m_session->OutPacket( SMSG_CANCEL_AUTO_REPEAT, 4, &spellid2 );
 		}
 		//sLog.outString( "Result for CanShootWIthRangedWeapon: %u" , fail );
-		//DEBUG_LOG( "Can't shoot with ranged weapon: %u (Timer: %u)" , fail , m_AutoShotAttackTimer );
+		//OUT_DEBUG( "Can't shoot with ranged weapon: %u (Timer: %u)" , fail , m_AutoShotAttackTimer );
 		return fail;
 	}
 
@@ -5939,7 +5939,7 @@ void Player::EventRepeatSpell()
 	{
 		m_AutoShotAttackTimer = 0; //avoid flooding client with error mesages
 		m_onAutoShot = false;
-		//DEBUG_LOG( "Can't cast Autoshot: Target changed! (Timer: %u)" , m_AutoShotAttackTimer );
+		//OUT_DEBUG( "Can't cast Autoshot: Target changed! (Timer: %u)" , m_AutoShotAttackTimer );
 		return;
 	}
 
@@ -5947,9 +5947,9 @@ void Player::EventRepeatSpell()
 
 	if( m_isMoving )
 	{
-		//DEBUG_LOG( "HUNTER AUTOSHOT 2) %i, %i", m_AutoShotAttackTimer, m_AutoShotDuration );
+		//OUT_DEBUG( "HUNTER AUTOSHOT 2) %i, %i", m_AutoShotAttackTimer, m_AutoShotDuration );
 		//m_AutoShotAttackTimer = m_AutoShotDuration;//avoid flooding client with error mesages
-		//DEBUG_LOG( "Can't cast Autoshot: You're moving! (Timer: %u)" , m_AutoShotAttackTimer );
+		//OUT_DEBUG( "Can't cast Autoshot: You're moving! (Timer: %u)" , m_AutoShotAttackTimer );
 		m_AutoShotAttackTimer = 100; // shoot when we can
 		return;
 	}
@@ -6159,7 +6159,7 @@ void Player::SendInitialLogonPackets()
 	data << (float)0.0166666669777748f;  // Normal Game Speed
 	GetSession()->SendPacket( &data );
 
-	Log.Debug("WORLD","Sent initial logon packets for %s.", GetName());
+	DEBUG_LOG("WORLD","Sent initial logon packets for %s.", GetName());
 }
 
 void Player::Reset_Spells()
@@ -6354,6 +6354,8 @@ void Player::UpdateNearbyGameObjects()
 		{
 			GameObjectPointer go = TO_GAMEOBJECT(*itr);
 			GameObjectInfo *info;
+			uint32 oldstate = 0;
+			bool reset = false;
 
 			info = go->GetInfo();
 			if (!info)
@@ -6367,19 +6369,34 @@ void Player::UpdateNearbyGameObjects()
 				{
 					if( GetQuestLogForEntry(info->InvolvedQuestIds[v]) != NULL )
 					{
+						uint32 state = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
+						uint8 * v = (uint8*)&state;
+						oldstate = state;
+						v[GAMEOBJECT_BYTES_STATE] = 1;
 
-						go->SetUInt32Value(GAMEOBJECT_DYNAMIC, GO_DYNFLAG_QUEST);
-						go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-						go->SetUInt32Value(GAMEOBJECT_FLAGS, 0);
+						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_DYNAMIC, GO_DYNFLAG_QUEST);
+						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_BYTES_1, state);
+						go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_FLAGS, 0);
+						reset = true;
 						break;
 					}
+				}
+				if(reset)
+				{
+					go->SetUInt32Value(GAMEOBJECT_DYNAMIC,0);
+					go->SetUInt32Value(GAMEOBJECT_FLAGS,GO_FLAG_IN_USE);
+					go->SetUInt32Value(GAMEOBJECT_BYTES_1,oldstate);
 				}
 
 				if( v == info->InvolvedQuestCount )
 				{
-					go->SetUInt32Value(GAMEOBJECT_DYNAMIC, 0);
-					go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
-					go->SetUInt32Value(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+					uint32 state = go->GetUInt32Value(GAMEOBJECT_BYTES_1);
+					uint8 * v = (uint8*)&state;
+					v[GAMEOBJECT_BYTES_STATE] = 0;
+
+					go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_DYNAMIC, 0);
+					go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_BYTES_1, state);
+					go->BuildFieldUpdatePacket(plr_shared_from_this(), GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
 				}
 			}
 		}
@@ -6480,15 +6497,11 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	for(uint32 i = start_node; i < endn; ++i)
 	{
 		TaxiPathNode *pn = path->GetPathNode(i);
-		// temporary workaround for taximodes with changing map
-		if (!pn || path->GetID() == 766 || path->GetID() == 767 || path->GetID() == 771 || path->GetID() == 772
-				|| path->GetID() == 775 || path->GetID() == 776 || path->GetID() == 796 || path->GetID() == 797
-				|| path->GetID() == 807)
+		if(!pn)
 		{
 			JumpToEndTaxiNode(path);
 			return;
 		}
-
 
 		if( pn->mapid != m_mapId )
 		{
@@ -7250,7 +7263,7 @@ bool Player::CompressAndSendUpdateBuffer(uint32 size, const uint8* update_buffer
 	
 	if(deflateInit(&stream, rate) != Z_OK)
 	{
-		DEBUG_LOG("deflateInit failed.");
+		OUT_DEBUG("deflateInit failed.");
 		return false;
 	}
 
@@ -7269,7 +7282,7 @@ bool Player::CompressAndSendUpdateBuffer(uint32 size, const uint8* update_buffer
 	if(deflate(&stream, Z_NO_FLUSH) != Z_OK ||
 		stream.avail_in != 0)
 	{
-		DEBUG_LOG("deflate failed.");
+		OUT_DEBUG("deflate failed.");
 		delete [] buffer;
 		return false;
 	}
@@ -7277,7 +7290,7 @@ bool Player::CompressAndSendUpdateBuffer(uint32 size, const uint8* update_buffer
 	// finish the deflate
 	if(deflate(&stream, Z_FINISH) != Z_STREAM_END)
 	{
-		DEBUG_LOG("deflate failed: did not end stream");
+		OUT_DEBUG("deflate failed: did not end stream");
 		delete [] buffer;
 		return false;
 	}
@@ -7285,7 +7298,7 @@ bool Player::CompressAndSendUpdateBuffer(uint32 size, const uint8* update_buffer
 	// finish up
 	if(deflateEnd(&stream) != Z_OK)
 	{
-		DEBUG_LOG("deflateEnd failed.");
+		OUT_DEBUG("deflateEnd failed.");
 		delete [] buffer;
 		return false;
 	}
@@ -7851,7 +7864,7 @@ void Player::ApplyLevelInfo(LevelInfo* Info, uint32 Level)
 	GetAchievementInterface()->HandleAchievementCriteriaLevelUp( getLevel() );
 	InitGlyphsForLevel();
 
-	DEBUG_LOG("Player %s set parameters to level %u", GetName(), Level);
+	OUT_DEBUG("Player %s set parameters to level %u", GetName(), Level);
 }
 
 void Player::BroadcastMessage(const char* Format, ...)
@@ -8757,13 +8770,13 @@ void Player::SaveAuras(stringstream &ss)
 			//disabled proc spells until proper loading is fixed. Some spells tend to block or not remove when restored
 			if(aur->GetSpellProto()->procFlags)
 			{
-//				DEBUG_LOG("skipping aura %d because has flags %d",aur->GetSpellId(),aur->GetSpellProto()->procFlags);
+//				OUT_DEBUG("skipping aura %d because has flags %d",aur->GetSpellId(),aur->GetSpellProto()->procFlags);
 				skip = true;
 			}
 			//disabled proc spells until proper loading is fixed. We cannot recover the charges that were used up. Will implement later
 			if(aur->GetSpellProto()->procCharges)
 			{
-//				DEBUG_LOG("skipping aura %d because has proccharges %d",aur->GetSpellId(),aur->GetSpellProto()->procCharges);
+//				OUT_DEBUG("skipping aura %d because has proccharges %d",aur->GetSpellId(),aur->GetSpellProto()->procCharges);
 				skip = true;
 			}
 			//we are going to cast passive spells anyway on login so no need to save auras for them
@@ -10062,13 +10075,13 @@ void Player::save_Auras()
 			//disabled proc spells until proper loading is fixed. Some spells tend to block or not remove when restored
 			if(aur->GetSpellProto()->procFlags)
 			{
-				//				DEBUG_LOG("skipping aura %d because has flags %d",aur->GetSpellId(),aur->GetSpellProto()->procFlags);
+				//				OUT_DEBUG("skipping aura %d because has flags %d",aur->GetSpellId(),aur->GetSpellProto()->procFlags);
 				skip = true;
 			}
 			//disabled proc spells until proper loading is fixed. We cannot recover the charges that were used up. Will implement later
 			if(aur->GetSpellProto()->procCharges)
 			{
-				//				DEBUG_LOG("skipping aura %d because has proccharges %d",aur->GetSpellId(),aur->GetSpellProto()->procCharges);
+				//				OUT_DEBUG("skipping aura %d because has proccharges %d",aur->GetSpellId(),aur->GetSpellProto()->procCharges);
 				skip = true;
 			}
 			//we are going to cast passive spells anyway on login so no need to save auras for them
@@ -10384,7 +10397,7 @@ void Player::_Cooldown_Add(uint32 Type, uint32 Misc, uint32 Time, uint32 SpellId
 		m_cooldownMap[Type].insert( make_pair( Misc, cd ) );
 	}
 
-	DEBUG_LOG("added cooldown for type %u misc %u time %u item %u spell %u", Type, Misc, Time - getMSTime(), ItemId, SpellId);
+	OUT_DEBUG("added cooldown for type %u misc %u time %u item %u spell %u", Type, Misc, Time - getMSTime(), ItemId, SpellId);
 }
 
 void Player::Cooldown_Add(SpellEntry * pSpell, ItemPointer pItemCaster)
@@ -10441,7 +10454,7 @@ void Player::Cooldown_AddStart(SpellEntry * pSpell)
 		_Cooldown_Add( COOLDOWN_TYPE_CATEGORY, pSpell->Category, mstime + pSpell->StartRecoveryTime, pSpell->Id, 0 );*/
 	else									// no category, so it's a gcd
 	{
-		DEBUG_LOG("Global cooldown adding: %u ms", atime );
+		OUT_DEBUG("Global cooldown adding: %u ms", atime );
 		m_globalCooldown = mstime + atime;
 	}
 }
@@ -10698,7 +10711,7 @@ void Player::_SpeedhackCheck()
 			uint32 time_diff = m_lastMoveTime - m_startMoveTime;
 			uint32 move_time = float2int32( ( distance / ( speed * 0.001f ) ) );
 			int32 difference = time_diff - move_time;
-			Log.Debug("Player","SpeedhackCheck: speed=%f diff=%i dist=%f move=%u tdiff=%u", speed, difference, distance, move_time, time_diff );
+			DEBUG_LOG("Player","SpeedhackCheck: speed=%f diff=%i dist=%f move=%u tdiff=%u", speed, difference, distance, move_time, time_diff );
 			if( difference < World::m_speedHackThreshold )
 			{
 				if( m_speedhackChances != 0 )
@@ -11239,12 +11252,12 @@ void Player::UpdateTalentInspectBuffer()
 		{
 			TalentEntry const* talent_info = dbcTalent.LookupRow( j );
 
-			//DEBUG_LOG( "HandleInspectOpcode: i(%i) j(%i)", i, j );
+			//OUT_DEBUG( "HandleInspectOpcode: i(%i) j(%i)", i, j );
 
 			if( talent_info == NULL )
 				continue;
 
-			//DEBUG_LOG( "HandleInspectOpcode: talent_info->TalentTree(%i) talent_tab_id(%i)", talent_info->TalentTree, talent_tab_id );
+			//OUT_DEBUG( "HandleInspectOpcode: talent_info->TalentTree(%i) talent_tab_id(%i)", talent_info->TalentTree, talent_tab_id );
 
 			if( talent_info->TalentTree != talent_tab_id )
 				continue;
@@ -11252,7 +11265,7 @@ void Player::UpdateTalentInspectBuffer()
 			talent_max_rank = 0;
 			for( uint32 k = 5; k > 0; --k )
 			{
-				//DEBUG_LOG( "HandleInspectOpcode: k(%i) RankID(%i) HasSpell(%i) TalentTree(%i) Tab(%i)", k, talent_info->RankID[k - 1], player->HasSpell( talent_info->RankID[k - 1] ), talent_info->TalentTree, talent_tab_id );
+				//OUT_DEBUG( "HandleInspectOpcode: k(%i) RankID(%i) HasSpell(%i) TalentTree(%i) Tab(%i)", k, talent_info->RankID[k - 1], player->HasSpell( talent_info->RankID[k - 1] ), talent_info->TalentTree, talent_tab_id );
 				if( talent_info->RankID[k - 1] != 0 && HasSpell( talent_info->RankID[k - 1] ) )
 				{
 					talent_max_rank = k;
@@ -11260,7 +11273,7 @@ void Player::UpdateTalentInspectBuffer()
 				}
 			}
 
-			//DEBUG_LOG( "HandleInspectOpcode: RankID(%i) talent_max_rank(%i)", talent_info->RankID[talent_max_rank-1], talent_max_rank );
+			//OUT_DEBUG( "HandleInspectOpcode: RankID(%i) talent_max_rank(%i)", talent_info->RankID[talent_max_rank-1], talent_max_rank );
 
 			if( talent_max_rank <= 0 )
 				continue;
@@ -11272,7 +11285,7 @@ void Player::UpdateTalentInspectBuffer()
 			if( itr != sWorld.InspectTalentTabPos.end() )
 				talent_index += itr->second;
 			//else
-			//DEBUG_LOG( "HandleInspectOpcode: talent(%i) rank_id(%i) talent_index(%i) talent_tab_pos(%i) rank_index(%i) rank_slot(%i) rank_offset(%i)", talent_info->TalentID, talent_info->RankID[talent_max_rank-1], talent_index, talent_tab_pos, rank_index, rank_slot, rank_offset );
+			//OUT_DEBUG( "HandleInspectOpcode: talent(%i) rank_id(%i) talent_index(%i) talent_tab_pos(%i) rank_index(%i) rank_slot(%i) rank_offset(%i)", talent_info->TalentID, talent_info->RankID[talent_max_rank-1], talent_index, talent_tab_pos, rank_index, rank_slot, rank_offset );
 
 			rank_index = ( uint32( ( talent_index + talent_max_rank - 1 ) / 7 ) ) * 8  + ( uint32( ( talent_index + talent_max_rank - 1 ) % 7 ) );
 			rank_slot = rank_index / 8;
@@ -11285,7 +11298,7 @@ void Player::UpdateTalentInspectBuffer()
 				m_talentInspectBuffer[rank_offset] |= v;
 			};
 
-			Log.Debug( "Player","HandleInspectOpcode: talent(%i) talent_max_rank(%i) rank_id(%i) talent_index(%i) talent_tab_pos(%i) rank_index(%i) rank_slot(%i) rank_offset(%i)", talent_info->TalentID, talent_max_rank, talent_info->RankID[talent_max_rank-1], talent_index, talent_tab_pos, rank_index, rank_slot, rank_offset );
+			DEBUG_LOG( "Player","HandleInspectOpcode: talent(%i) talent_max_rank(%i) rank_id(%i) talent_index(%i) talent_tab_pos(%i) rank_index(%i) rank_slot(%i) rank_offset(%i)", talent_info->TalentID, talent_max_rank, talent_info->RankID[talent_max_rank-1], talent_index, talent_tab_pos, rank_index, rank_slot, rank_offset );
 		}
 
 		std::map< uint32, uint32 >::iterator itr = sWorld.InspectTalentTabSize.find( talent_tab_id );

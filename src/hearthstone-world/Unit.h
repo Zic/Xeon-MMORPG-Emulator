@@ -927,6 +927,7 @@ public:
 
 	// AIInterface
 	AIInterface *GetAIInterface() { return m_aiInterface; }
+
 	void ReplaceAIInterface(AIInterface *new_interface) ;
 
 	int32 GetThreatModifier() { return m_threatModifyer; }
@@ -1234,6 +1235,7 @@ protected:
 
 	// AI
 	AIInterface *m_aiInterface;
+
 	bool m_useAI;
 	bool can_parry;//will be enabled by block spell
 	int32 m_threatModifyer;

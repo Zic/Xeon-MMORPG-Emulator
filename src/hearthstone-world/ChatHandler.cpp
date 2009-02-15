@@ -440,7 +440,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 			}		  
 		} break;
 	default:
-		DEBUG_LOG("CHAT: unknown msg type %u, lang: %u", type, lang);
+		OUT_DEBUG("CHAT: unknown msg type %u, lang: %u", type, lang);
 	}
 }
 

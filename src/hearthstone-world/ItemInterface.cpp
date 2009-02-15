@@ -2504,7 +2504,7 @@ void ItemInterface::AddBuyBackItem(ItemPointer it,uint32 price)
 	{
 		if((m_pOwner->GetUInt32Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i) == 0) || (m_pBuyBack[i/2] == NULL))
 		{
-			DEBUG_LOG("setting buybackslot %u\n",i/2);
+			OUT_DEBUG("setting buybackslot %u\n",i/2);
 			m_pBuyBack[i >> 1] = it;
 
 			m_pOwner->SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + i,m_pBuyBack[i >> 1]->GetGUID());
@@ -2538,7 +2538,7 @@ void ItemInterface::RemoveBuyBackItem(uint32 index)
 						m_pBuyBack[j] = NULLITEM;
 				}
 
-				DEBUG_LOG( "nulling %u\n", j );
+				OUT_DEBUG( "nulling %u\n", j );
 			}
 		}
 		else
@@ -2570,7 +2570,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 	ItemPointer SrcItem = GetInventoryItem( srcslot );
 	ItemPointer DstItem = GetInventoryItem( dstslot );
 
-	Log.Debug( "ItemInterface","SwapItemSlots(%u, %u);" , srcslot , dstslot );
+	DEBUG_LOG( "ItemInterface","SwapItemSlots(%u, %u);" , srcslot , dstslot );
 
 	// Force GM robes on all GM's execpt 'az' status, if set in world config
 	if(m_pOwner->GetSession()->HasGMPermissions() && sWorld.gm_force_robes )
@@ -2633,7 +2633,7 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 			m_pOwner->ApplyItemMods( m_pItems[(int)dstslot], dstslot, false );
 	}
 
-	//DEBUG_LOG( "Putting items into slots..." );
+	//OUT_DEBUG( "Putting items into slots..." );
 
 
 
@@ -2697,23 +2697,23 @@ void ItemInterface::SwapItemSlots(int8 srcslot, int8 dstslot)
 
 	if( m_pItems[(int)dstslot] != NULL )
 	{
-		//DEBUG_LOG( "(SrcItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now %u" , dstslot * 2 , m_pItems[(int)dstslot]->GetGUID() );
+		//OUT_DEBUG( "(SrcItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now %u" , dstslot * 2 , m_pItems[(int)dstslot]->GetGUID() );
 		m_pOwner->SetUInt64Value( PLAYER_FIELD_INV_SLOT_HEAD + (dstslot*2),  m_pItems[(int)dstslot]->GetGUID() );
 	}
 	else
 	{
-		//DEBUG_LOG( "(SrcItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now 0" , dstslot * 2 );
+		//OUT_DEBUG( "(SrcItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now 0" , dstslot * 2 );
 		m_pOwner->SetUInt64Value( PLAYER_FIELD_INV_SLOT_HEAD + (dstslot*2), 0 );
 	}
 
 	if( m_pItems[(int)srcslot] != NULL )
 	{
-		//DEBUG_LOG( "(DstItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now %u" , dstslot * 2 , m_pItems[(int)srcslot]->GetGUID() );
+		//OUT_DEBUG( "(DstItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now %u" , dstslot * 2 , m_pItems[(int)srcslot]->GetGUID() );
 		m_pOwner->SetUInt64Value( PLAYER_FIELD_INV_SLOT_HEAD + (srcslot*2), m_pItems[(int)srcslot]->GetGUID() );
 	}
 	else
 	{
-		//DEBUG_LOG( "(DstItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now 0" , dstslot * 2 );
+		//OUT_DEBUG( "(DstItem) PLAYER_FIELD_INV_SLOT_HEAD + %u is now 0" , dstslot * 2 );
 		m_pOwner->SetUInt64Value( PLAYER_FIELD_INV_SLOT_HEAD + (srcslot*2), 0 );
 	}
 
@@ -2993,7 +2993,7 @@ SlotResult ItemInterface::FindFreeInventorySlot(ItemPrototype *proto)
 	//special slots will be ignored of item is not set
 	if( proto != NULL )
 	{
-		//DEBUG_LOG( "ItemInterface::FindFreeInventorySlot called for item %s" , proto->Name1 );
+		//OUT_DEBUG( "ItemInterface::FindFreeInventorySlot called for item %s" , proto->Name1 );
 		if( proto->BagFamily)
 		{
 			if( proto->BagFamily & ITEM_TYPE_KEYRING )

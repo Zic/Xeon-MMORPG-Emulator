@@ -420,7 +420,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	// reputation
 	_player->Reputation_OnTalk(qst_giver->m_factionDBC);
 
-	Log.Debug( "WORLD"," Received CMSG_GOSSIP_HELLO from %u",GUID_LOPART(guid) );
+	DEBUG_LOG( "WORLD"," Received CMSG_GOSSIP_HELLO from %u",GUID_LOPART(guid) );
 
 	GossipScript * Script = qst_giver->GetCreatureName() ? qst_giver->GetCreatureName()->gossip_script : NULL;
 	if(!Script)
@@ -480,7 +480,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 		data.wpos(pos);
 		data << count;
 		SendPacket(&data);
-		Log.Debug( "WORLD"," Sent SMSG_GOSSIP_MESSAGE" );
+		DEBUG_LOG( "WORLD"," Sent SMSG_GOSSIP_MESSAGE" );
 	}
 	else
 	{
@@ -502,7 +502,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 	recv_data >> guid >> unk24 >> option;
 
-	DEBUG_LOG("WORLD: CMSG_GOSSIP_SELECT_OPTION Option %i Guid %.8X", option, guid );
+	OUT_DEBUG("WORLD: CMSG_GOSSIP_SELECT_OPTION Option %i Guid %.8X", option, guid );
 	GossipScript * Script=NULL;
 	ObjectPointer qst_giver=NULLOBJ;
 	uint32 guidtype = GET_TYPE_FROM_GUID(guid);
@@ -600,7 +600,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 	GossipText *pGossip;
 
 	recv_data >> textID;
-	Log.Debug("WORLD","CMSG_NPC_TEXT_QUERY ID '%u'", textID );
+	DEBUG_LOG("WORLD","CMSG_NPC_TEXT_QUERY ID '%u'", textID );
 
 	recv_data >> targetGuid;
 	GetPlayer()->SetUInt64Value(UNIT_FIELD_TARGET, targetGuid);

@@ -751,7 +751,7 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 		}break;
 
 	default:
-		Log.Debug("GossipSelectOption","Unknown menuitem %u on npc %u", IntId, pCreature->GetEntry());
+		DEBUG_LOG("GossipSelectOption","Unknown menuitem %u on npc %u", IntId, pCreature->GetEntry());
 		break;
 	}	
 }

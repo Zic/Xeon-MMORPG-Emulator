@@ -125,6 +125,7 @@ public:
 		return (config_flags & flag) ? true : false;
 	}
 	uint32 config_flags;
+	uint32 max_id;
 
 	uint32 Generate_Message_Id();
 };

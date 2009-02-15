@@ -32,6 +32,8 @@ struct AchievementData
 
 	uint32 num_criterias;
 	uint32 completionTimeLast;
+	
+	bool m_isDirty;
 };
 
 enum AchievementFlags

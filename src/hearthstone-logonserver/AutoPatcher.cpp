@@ -314,7 +314,7 @@ bool PatchJob::Update()
 	bool result;
 	header.cmd = 0x31;
 	header.chunk_size = (m_bytesLeft>1500)?1500:m_bytesLeft;
-	//Log.Debug("PatchJob", "Sending %u byte chunk", header.chunk_size);
+	//DEBUG_LOG("PatchJob", "Sending %u byte chunk", header.chunk_size);
 
 	result = m_client->BurstSend((const uint8*)&header,sizeof(TransferDataPacket));
 	if(result)

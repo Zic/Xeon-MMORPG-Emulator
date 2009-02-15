@@ -142,6 +142,9 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 	}
 
 	// Load AI Agents
+	if(!Config.MainConfig.GetBoolDefault("Server", "LoadAIAgents", true))
+		return;
+
 	QueryResult * result = WorldDatabase.Query( "SELECT Entry,Type+0,Chance,MaxCount,Spell,SpellType+0,TargetType+0,CoolDown,floatMisc1,Misc2 FROM ai_agents" );
 	CreatureProto * cn = NULL;
 
@@ -153,7 +156,6 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 		uint32 spellID = 0;
 		uint16 agent = 0;
 		uint32 counter = 0;
-		if(Config.MainConfig.GetBoolDefault("Server", "LoadAIAgents", true))
 		{
 			do
 			{

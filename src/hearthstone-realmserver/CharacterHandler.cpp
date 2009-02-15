@@ -136,7 +136,7 @@ void Session::HandleCharacterEnum(WorldPacket & pck)
 
 	data.put<uint8>(0, num);
 
-	Log.Debug("Character Enum", "Built in %u ms.", getMSTime() - start_time);
+	DEBUG_LOG("Character Enum", "Built in %u ms.", getMSTime() - start_time);
 	SendPacket( &data );
 }
 

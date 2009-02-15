@@ -80,11 +80,11 @@ Session * ClientMgr::CreateSession(uint32 AccountId)
 
 	if(m_maxSessionId < i)
 	{
-		Log.Debug("ClientMgr", "New max session id: %u", i);
+		DEBUG_LOG("ClientMgr", "New max session id: %u", i);
 		m_maxSessionId = i;
 	}
 
-	Log.Debug("ClientMgr", "Allocating session %u for account id %u", i, AccountId);
+	DEBUG_LOG("ClientMgr", "Allocating session %u for account id %u", i, AccountId);
 	m_sessions[i] = new Session(i);
 	return m_sessions[i];
 }
