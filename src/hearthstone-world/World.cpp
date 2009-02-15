@@ -812,10 +812,10 @@ void World::UpdateSessions(uint32 diff)
 			Sessions.erase(it2);
 			continue;
 		}
-		result = session->Update(0);
-		if(result)
+
+		if((result = session->Update(0)))
 		{
-			if(result == 1)//socket don't exist anymore, delete from worldsessions.
+			if(result == 1)
 			{
 				// complete deletion
 				DeleteSession(session);

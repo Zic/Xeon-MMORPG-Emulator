@@ -250,59 +250,62 @@ void MapMgr::PushObject(ObjectPointer obj)
 		m_corpses.insert( TO_CORPSE(obj) );
 	}	
 	
-	PlayerPointer plObj = NULLPLR;
-
-	if(obj->GetTypeId() == TYPEID_PLAYER)
+	obj->ClearInRangeSet();
+	ASSERT(obj->GetMapId() == _mapId);
+	if(!(obj->GetPositionX() < _maxX && obj->GetPositionX() > _minX) || 
+	   !(obj->GetPositionY() < _maxY && obj->GetPositionY() > _minY))
 	{
-		plObj = TO_PLAYER( obj );
-		if(plObj == NULL)
+		if(obj->IsPlayer())
 		{
-			Log.Error("MapMgr","Could not get a valid playerobject from object while trying to push to world");
-			return;
+			PlayerPointer plr = TO_PLAYER( obj );
+			if(plr->GetBindMapId() != GetMapId())
+			{
+				plr->SafeTeleport(plr->GetBindMapId(),0,plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
+				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
+				return;
+			}
+			else
+			{
+				obj->GetPositionV()->ChangeCoords(plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
+				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
+				WorldPacket * data = plr->BuildTeleportAckMsg(plr->GetPosition());
+				plr->GetSession()->SendPacket(data);
+				delete data;
+			}
 		}
-		WorldSession * plSession = NULL;
-		plSession = plObj->GetSession();
-		if(plSession == NULL)
+		else
 		{
-			Log.Error("MapMgr","Could not get a valid session for player while trying to push to world");
-			return;
+			obj->GetPositionV()->ChangeCoords(0,0,0,0);
 		}
 	}
-	
-	obj->ClearInRangeSet();
+
+	ASSERT(obj->GetPositionY() < _maxY && obj->GetPositionY() > _minY);
+	ASSERT(_cells);
 
 	///////////////////////
 	// Get cell coordinates
 	///////////////////////
 
-	ASSERT(obj->GetMapId() == _mapId);
+	uint32 x = GetPosX(obj->GetPositionX());
+	uint32 y = GetPosY(obj->GetPositionY());
 
-	ASSERT(obj->GetPositionY() < _maxY && obj->GetPositionY() > _minY);
-	ASSERT(_cells);
-
-	float mx = obj->GetPositionX();
-	float my = obj->GetPositionY();
-	uint32 cx = GetPosX(mx);
-	uint32 cy = GetPosY(my);
-
-	if(	mx > _maxX || my > _maxY ||
-		mx < _minX || my < _minY ||
-		cx >= _sizeX || cy >= _sizeY)
+	if(x >= _sizeX || y >= _sizeY)
 	{
-		if( plObj != NULL )
+		if(obj->IsPlayer())
 		{
-			if(plObj->GetBindMapId() != GetMapId())
+			PlayerPointer plr = TO_PLAYER( obj );
+			if(plr->GetBindMapId() != GetMapId())
 			{
-				plObj->SafeTeleport(plObj->GetBindMapId(),0,plObj->GetBindPositionX(),plObj->GetBindPositionY(),plObj->GetBindPositionZ(),0);
-				plObj->GetSession()->SystemMessage("Teleported you to your hearthstone location as you ended up on the wrong map.");
+				plr->SafeTeleport(plr->GetBindMapId(),0,plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
+				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
 				return;
 			}
 			else
 			{
-				obj->GetPositionV()->ChangeCoords(plObj->GetBindPositionX(),plObj->GetBindPositionY(),plObj->GetBindPositionZ(),0);
-				plObj->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
-				WorldPacket * data = plObj->BuildTeleportAckMsg(plObj->GetPosition());
-				plObj->GetSession()->SendPacket(data);
+				obj->GetPositionV()->ChangeCoords(plr->GetBindPositionX(),plr->GetBindPositionY(),plr->GetBindPositionZ(),0);
+				plr->GetSession()->SystemMessage("Teleported you to your hearthstone location as you were out of the map boundaries.");
+				WorldPacket * data = plr->BuildTeleportAckMsg(plr->GetPosition());
+				plr->GetSession()->SendPacket(data);
 				delete data;
 			}
 		}
@@ -311,26 +314,32 @@ void MapMgr::PushObject(ObjectPointer obj)
 			obj->GetPositionV()->ChangeCoords(0,0,0,0);
 		}
 
-		cx = GetPosX(obj->GetPositionX());
-		cy = GetPosY(obj->GetPositionY());
+		x = GetPosX(obj->GetPositionX());
+		y = GetPosY(obj->GetPositionY());
 	}
 
-	MapCell *objCell = GetCell(cx,cy);
+	MapCell *objCell = GetCell(x,y);
 	if (!objCell)
 	{
-		objCell = Create(cx,cy);
-		objCell->Init(cx, cy, _mapId, shared_from_this());
+		objCell = Create(x,y);
+		objCell->Init(x, y, _mapId, shared_from_this());
 	}
 
-	uint32 endX = (cx <= _sizeX) ? cx + 1 : (_sizeX-1);
-	uint32 endY = (cy <= _sizeY) ? cy + 1 : (_sizeY-1);
-	uint32 startX = cx > 0 ? cx - 1 : 0;
-	uint32 startY = cy > 0 ? cy - 1 : 0;
+	uint32 endX = (x <= _sizeX) ? x + 1 : (_sizeX-1);
+	uint32 endY = (y <= _sizeY) ? y + 1 : (_sizeY-1);
+	uint32 startX = x > 0 ? x - 1 : 0;
+	uint32 startY = y > 0 ? y - 1 : 0;
 	uint32 posX, posY;
 	MapCell *cell;
 	MapCell::ObjectSet::iterator iter;
 
 	uint32 count;
+	PlayerPointer plObj;
+
+	if(obj->GetTypeId() == TYPEID_PLAYER)
+		plObj = TO_PLAYER( obj );
+	else
+		plObj = NULLPLR;
 
 	if(plObj)
 	{
@@ -363,8 +372,8 @@ void MapMgr::PushObject(ObjectPointer obj)
 	 //Add to the mapmanager's object list
 	if(plObj)
 	{
-		m_PlayerStorage[plObj->GetLowGUID()] = plObj;
-		UpdateCellActivity(cx, cy, 2);
+	   m_PlayerStorage[plObj->GetLowGUID()] = plObj;
+	   UpdateCellActivity(x, y, 2);
 	}
 	else
 	{
@@ -1801,7 +1810,7 @@ void MapMgr::_PerformObjectDuties()
 
 	// Sessions are updated every loop.
 	{
-		int result = 0;
+		int result;
 		WorldSession * session;
 		SessionSet::iterator itr = Sessions.begin();
 		SessionSet::iterator it2;
@@ -1821,14 +1830,18 @@ void MapMgr::_PerformObjectDuties()
 			// Don't update players not on our map.
 			// If we abort in the handler, it means we will "lose" packets, or not process this.
 			// .. and that could be diasterous to our client :P
-			if( session->GetPlayer() != NULL && session->GetPlayer()->GetMapMgr()!= NULL && session->GetPlayer()->GetMapMgr() != shared_from_this())
-				continue;
-
-			result = session->Update(m_instanceID);
-			if(result)//session or socket deleted?
+			if(session->GetPlayer() && (!session->GetPlayer()->GetMapMgr() && session->GetPlayer()->GetMapMgr() != shared_from_this() ))
 			{
-				if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
+				continue;
+			}
+
+			if((result = session->Update(m_instanceID)))
+			{
+				if(result == 1)
+				{
+					// complete deletion
 					sWorld.DeleteSession(session);
+				}
 				Sessions.erase(it2);
 			}
 		}

@@ -314,14 +314,13 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	delete key;
 
 	//checking if player is already connected
-	//disconnect current player and login this one(blizzlike)
+    //disconnect corrent player and login this one(blizzlike)
 
 	if(recvData.rpos() != recvData.wpos())
 		recvData.read((uint8*)lang.data(), 4);
 
-	WorldSession *session = NULL;
-	session = sWorld.FindSession( AccountID );
-	if( session != NULL )
+	WorldSession *session = sWorld.FindSession( AccountID );
+	if( session)
 	{
 		// AUTH_FAILED = 0x0D
 		session->Disconnect();
