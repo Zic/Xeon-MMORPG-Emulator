@@ -161,7 +161,7 @@ void LogonCommClientSocket::HandleSessionInfo(WorldPacket & recvData)
 void LogonCommClientSocket::HandlePong(WorldPacket & recvData)
 {
 	if(latency)
-		DEBUG_LOG(">> logonserver latency: %ums", getMSTime() - pingtime);
+		OUT_DEBUG(">> logonserver latency: %ums", getMSTime() - pingtime);
 	latency = getMSTime() - pingtime;
 	last_pong = uint32(time(NULL));
 }

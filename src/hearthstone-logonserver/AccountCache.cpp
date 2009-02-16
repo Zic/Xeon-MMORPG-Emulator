@@ -135,7 +135,7 @@ void AccountMgr::AddAccount(Field* field)
 	{
 		//Accounts should be unbanned once the date is past their set expiry date.
 		acct->Muted= 0;
-		Log.Debug("AccountMgr","Account %s's mute has expired.", Username.c_str());
+		DEBUG_LOG("AccountMgr","Account %s's mute has expired.", Username.c_str());
 		sLogonSQL->Execute("UPDATE accounts SET muted = 0 WHERE acct=%u",acct->AccountId);
 	}
 	// Convert username/password to uppercase. this is needed ;)
@@ -157,7 +157,7 @@ void AccountMgr::AddAccount(Field* field)
 			BigNumber cnSave;
 			cnSave.SetBinary( acct->SrpHash, 20);
 			string hash = cnSave.AsHexStr();
-			Log.Debug("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
+			DEBUG_LOG("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
 			sLogonSQL->Execute("UPDATE accounts SET password = SHA1(CONCAT(UPPER(login), ':', UPPER(password))) WHERE acct = %u", acct->AccountId);
 		}
 		else
@@ -215,7 +215,7 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 	{
 		//Accounts should be unbanned once the date is past their set expiry date.
 		acct->Banned = 0;
-		Log.Debug("AccountMgr","Account %s's ban has expired.",acct->UsernamePtr->c_str());
+		DEBUG_LOG("AccountMgr","Account %s's ban has expired.",acct->UsernamePtr->c_str());
 		sLogonSQL->Execute("UPDATE accounts SET banned = 0 WHERE acct=%u",acct->AccountId);
 	}
 	acct->SetGMFlags(GMFlags.c_str());
@@ -255,7 +255,7 @@ void AccountMgr::UpdateAccount(Account * acct, Field * field)
 			BigNumber cnSave;
 			cnSave.SetBinary( acct->SrpHash, 20);
 			string hash = cnSave.AsHexStr();
-			Log.Debug("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
+			DEBUG_LOG("AccountMgr", "Found account %s [%u] with invalid password format. Converting to encrypted password.", Username.c_str(), acct->AccountId);
 			sLogonSQL->Execute("UPDATE accounts SET password = SHA1(CONCAT(UPPER(login), ':', UPPER(password))) WHERE acct = %u", acct->AccountId);
 		}
 		else
@@ -459,7 +459,7 @@ void InformationCore::UpdateRealmStatus(uint32 realm_id, uint8 Color)
 	map<uint32, Realm*>::iterator itr = m_realms.find(realm_id);
 	if(itr != m_realms.end())
 	{
-		Log.Debug("Socket","Updating realm `%s`(id:%u) to status %u.", itr->second->Name.c_str(), realm_id, Color);
+		DEBUG_LOG("Socket","Updating realm `%s`(id:%u) to status %u.", itr->second->Name.c_str(), realm_id, Color);
 		itr->second->Colour = Color;
 	}
 	realmLock.Release();
@@ -555,7 +555,7 @@ void InformationCore::SetRealmOffline(uint32 realm_id, LogonCommServerSocket *ss
 		Realm * pr = itr->second;
 		if( pr->ServerSocket == ss )
 		{
-			Log.Debug("LogonServer","Realm: %s is now offline.\n", pr->Name.c_str());
+			DEBUG_LOG("LogonServer","Realm: %s is now offline.\n", pr->Name.c_str());
 			pr->Colour = REALMCOLOUR_OFFLINE;
 	
 			// clear the mapping, when its re-registered it will send it again
@@ -582,7 +582,7 @@ void InformationCore::CheckServers()
 
 		if(!IsServerAllowed(s->GetRemoteAddress().s_addr))
 		{
-			Log.Debug("LogonServer","Disconnecting socket: %s due to it no longer being on an allowed IP.\n", s->GetRemoteIP().c_str());
+			DEBUG_LOG("LogonServer","Disconnecting socket: %s due to it no longer being on an allowed IP.\n", s->GetRemoteIP().c_str());
 			s->Disconnect();
 		}
 	}

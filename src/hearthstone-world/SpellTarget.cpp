@@ -265,7 +265,7 @@ void Spell::FillTargetMap(uint32 i)
 
 void Spell::SpellTargetNULL(uint32 i, uint32 j)
 {
-	DEBUG_LOG("[SPELL][TARGET] Unhandled target typeA: %u typeB: %u", m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]);
+	OUT_DEBUG("[SPELL][TARGET] Unhandled target typeA: %u typeB: %u", m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]);
 }
 
 /// Spell Target Handling for type 0: Default targeting

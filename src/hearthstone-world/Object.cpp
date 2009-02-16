@@ -721,7 +721,7 @@ bool Object::SetPosition(const LocationVector & v, bool allowPorting /* = false 
 	if (!allowPorting && v.z < -500)
 	{
 		m_position.z = 500;
-		DEBUG_LOG( "setPosition: fell through map; height ported" );
+		OUT_DEBUG( "setPosition: fell through map; height ported" );
 
 		result = false;
 	}
@@ -744,11 +744,18 @@ bool Object::SetPosition( float newX, float newY, float newZ, float newOrientati
 		updateMap = true;
 
 	m_position.ChangeCoords(newX, newY, newZ, newOrientation);
+	// We have unitfields for this. Why? Who the fuck knows.
+	if( m_objectTypeId == TYPEID_GAMEOBJECT )
+	{
+		SetFloatValue( GAMEOBJECT_POS_X, newX );
+		SetFloatValue( GAMEOBJECT_POS_Y, newY );
+		SetFloatValue( GAMEOBJECT_POS_Z, newZ );
+	}
 
 	if (!allowPorting && newZ < -500)
 	{
 		m_position.z = 500;
-		DEBUG_LOG( "setPosition: fell through map; height ported" );
+		OUT_DEBUG( "setPosition: fell through map; height ported" );
 
 		result = false;
 	}
@@ -1409,7 +1416,7 @@ bool Object::inArc(float Position1X, float Position1Y, float FOV, float Orientat
 	float angle = calcAngle( Position1X, Position1Y, Position2X, Position2Y );
 	float lborder = getEasyAngle( ( Orientation - (FOV*0.5f/*/2*/) ) );
 	float rborder = getEasyAngle( ( Orientation + (FOV*0.5f/*/2*/) ) );
-	//DEBUG_LOG("Orientation: %f Angle: %f LeftBorder: %f RightBorder %f",Orientation,angle,lborder,rborder);
+	//OUT_DEBUG("Orientation: %f Angle: %f LeftBorder: %f RightBorder %f",Orientation,angle,lborder,rborder);
 	if(((angle >= lborder) && (angle <= rborder)) || ((lborder > rborder) && ((angle < rborder) || (angle > lborder))))
 	{
 		return true;
@@ -2158,7 +2165,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			}
 			/* -------------------- KILL PET WHEN PLAYER DIES END---------------*/
 		}
-		else DEBUG_LOG("DealDamage for Unknown Object.");
+		else OUT_DEBUG("DealDamage for Unknown Object.");
 	}
 	else /* ---------- NOT DEAD YET --------- */
 	{
@@ -2500,7 +2507,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 		val = 2.5f * dmg.full_damage / c;
 		val *= 10;
 
-		//DEBUG_LOG( "Rd(%i) d(%i) c(%f) rage = %f", realdamage, dmg.full_damage, c, val );
+		//OUT_DEBUG( "Rd(%i) d(%i) c(%f) rage = %f", realdamage, dmg.full_damage, c, val );
 
 		pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, (int32)val );
 		if( pVictim->GetUInt32Value( UNIT_FIELD_POWER2) > 1000 )

@@ -245,7 +245,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket* recvPacket)
 	}
 	catch(ByteBuffer::error &)
 	{
-		DEBUG_LOG("Incomplete copy of AUTH_SESSION Received.");
+		OUT_DEBUG("Incomplete copy of AUTH_SESSION Received.");
 		return;
 	}
 
@@ -294,7 +294,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	if( ForcedPermissions != NULL )
 		GMFlags.assign(ForcedPermissions->c_str());
 
-	Log.Debug( "WorldSocket","Received information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
+	DEBUG_LOG( "WorldSocket","Received information packet from logon: `%s` ID %u (request %u)", AccountName.c_str(), AccountID, mRequestID);
 //	sLog.outColor(TNORMAL, "\n");
 
 	mRequestID = 0;
@@ -415,7 +415,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 		}
 	}
 
-	Log.Debug("Auth", "%s from %s:%u [%ums]", AccountName.c_str(), GetRemoteIP().c_str(), GetRemotePort(), _latency);
+	DEBUG_LOG("Auth", "%s from %s:%u [%ums]", AccountName.c_str(), GetRemoteIP().c_str(), GetRemotePort(), _latency);
 #ifdef SESSION_CAP
 	if( sWorld.GetSessionCount() >= SESSION_CAP )
 	{
@@ -432,7 +432,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 		// Queued, sucker.
 		uint32 Position = sWorld.AddQueuedSocket(this);
 		mQueued = true;
-		Log.Debug("Queue", "%s added to queue in position %u", AccountName.c_str(), Position);
+		DEBUG_LOG("Queue", "%s added to queue in position %u", AccountName.c_str(), Position);
 
 		// Send packet so we know what we're doing
 		UpdateQueuePosition(Position);
@@ -607,7 +607,7 @@ void WorldLog::LogPacket(uint32 len, uint16 opcode, const uint8* data, uint8 dir
 	unsigned int count;
 
 #ifdef ECHO_PACKET_LOG_TO_CONSOLE
-	Log.Debug("WorldLog","[%s]: %s %s (0x%03X) of %u bytes.", direction ? "SERVER" : "CLIENT", direction ? "sent" : "received",
+	DEBUG_LOG("WorldLog","[%s]: %s %s (0x%03X) of %u bytes.", direction ? "SERVER" : "CLIENT", direction ? "sent" : "received",
 		LookupOpcodeName(opcode), opcode, len);
 #endif
 

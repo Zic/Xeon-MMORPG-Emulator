@@ -253,7 +253,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 
 	data.put<uint8>(0, num);
 
-	//DEBUG_LOG("Character Enum", "Built in %u ms.", getMSTime() - start_time);
+	//OUT_DEBUG("Character Enum", "Built in %u ms.", getMSTime() - start_time);
 	SendPacket( &data );
 }
 
@@ -689,7 +689,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	CHECK_PACKET_SIZE(recv_data, 8);
 	uint64 playerGuid = 0;
 
-	Log.Debug( "WorldSession"," Recvd Player Logon Message" );
+	DEBUG_LOG( "WorldSession"," Recvd Player Logon Message" );
 
 	recv_data >> playerGuid; // this is the GUID selected by the player
 	if(objmgr.GetPlayer((uint32)playerGuid) != NULL || m_loggingInPlayer || _player)
@@ -705,14 +705,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	plr->SetSession(this);
 	m_bIsWLevelSet = false;
 	
-	Log.Debug("WorldSession", "Async loading player %u", (uint32)playerGuid);
+	DEBUG_LOG("WorldSession", "Async loading player %u", (uint32)playerGuid);
 	m_loggingInPlayer = plr;
 	plr->LoadFromDB((uint32)playerGuid);
 }
 
 void WorldSession::FullLogin(PlayerPointer plr)
 {
-	Log.Debug("WorldSession", "Fully loading player %u", plr->GetLowGUID());
+	DEBUG_LOG("WorldSession", "Fully loading player %u", plr->GetLowGUID());
 	SetPlayer(plr); 
 	m_MoverWoWGuid.Init(plr->GetGUID());
 
@@ -866,7 +866,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	}
 #endif
 
-	Log.Debug( "WorldSession","Player %s logged in.", plr->GetName());
+	DEBUG_LOG( "WorldSession","Player %s logged in.", plr->GetName());
 
 	if(plr->GetTeam() == 1)
 		sWorld.HordePlayers++;
@@ -876,7 +876,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	if(plr->m_FirstLogin && !HasGMPermissions())
 		OutPacket(SMSG_TRIGGER_CINEMATIC, 4, &plr->myRace->cinematic_id);
 
-	Log.Debug( "WorldSession","Created new player for existing players (%s)", plr->GetName() );
+	DEBUG_LOG( "WorldSession","Created new player for existing players (%s)", plr->GetName() );
 
 	// Login time, will be used for played time calc
 	plr->m_playedtime[2] = (uint32)UNIXTIME;
@@ -936,7 +936,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 			// We are resting at an inn, calculate XP and add it.
 			uint32 RestXP = plr->CalculateRestXP((uint32)timediff);
 			plr->AddRestXP(RestXP);
-			Log.Debug( "WorldSession","Gained on additional %u XP from resting.", RestXP);
+			DEBUG_LOG( "WorldSession","Gained on additional %u XP from resting.", RestXP);
 			plr->ApplyPlayerRestState(true);
 		}
 		else if(timediff > 0)
@@ -1089,7 +1089,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	*/
 	
 
-	DEBUG_LOG("WORLD: CMSG_ALTER_APPEARANCE");
+	OUT_DEBUG("WORLD: CMSG_ALTER_APPEARANCE");
 	CHECK_PACKET_SIZE(recv_data, 12);
 	
 	uint32 hair, colour, facialhair;

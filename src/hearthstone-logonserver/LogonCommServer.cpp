@@ -407,7 +407,7 @@ void LogonCommServerSocket::HandleTestConsoleLogin(WorldPacket & recvData)
 	recvData >> request;
 	recvData >> accountname;
 	recvData.read(key, 20);
-	Log.Debug("LogonCommServerSocket","Testing console login: %s\n", accountname.c_str());
+	DEBUG_LOG("LogonCommServerSocket","Testing console login: %s\n", accountname.c_str());
 
 	data << request;
 

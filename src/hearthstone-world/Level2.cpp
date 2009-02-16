@@ -716,7 +716,7 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 		return true;
 	}
 
-	DEBUG_LOG("Spawning GameObject By Entry '%u'", EntryID);
+	OUT_DEBUG("Spawning GameObject By Entry '%u'", EntryID);
 	sstext << "Spawning GameObject By Entry '" << EntryID << "'" << '\0';
 	SystemMessage(m_session, sstext.str().c_str());
 

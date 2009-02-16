@@ -200,7 +200,7 @@ uint8 QuestMgr::CalcStatus(ObjectPointer quest_giver, PlayerPointer plr)
 	if(!bValid)
 	{
         //anoying msg that is not needed since all objects dont exactly have quests 
-		//DEBUG_LOG("QUESTS: Warning, invalid NPC "I64FMT" specified for CalcStatus. TypeId: %d.", quest_giver->GetGUID(), quest_giver->GetTypeId());
+		//OUT_DEBUG("QUESTS: Warning, invalid NPC "I64FMT" specified for CalcStatus. TypeId: %d.", quest_giver->GetGUID(), quest_giver->GetTypeId());
 		return status;
 	}
 
@@ -258,7 +258,7 @@ uint32 QuestMgr::ActiveQuestsCount(ObjectPointer quest_giver, PlayerPointer plr)
 
 	if(!bValid)
 	{
-		DEBUG_LOG("QUESTS: Warning, invalid NPC "I64FMT" specified for ActiveQuestsCount. TypeId: %d.", quest_giver->GetGUID(), quest_giver->GetTypeId());
+		OUT_DEBUG("QUESTS: Warning, invalid NPC "I64FMT" specified for ActiveQuestsCount. TypeId: %d.", quest_giver->GetGUID(), quest_giver->GetTypeId());
 		return 0;
 	}
 
@@ -1062,7 +1062,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 			    ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_item[i]);
 			    if(!proto)
 			    {
-				    DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
+				    OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
 			    }
 			    else
 			    {   
@@ -1102,7 +1102,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		    ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_choiceitem[reward_slot]);
 		    if(!proto)
 		    {
-			    DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
+			    OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
 		    }
 		    else
 		    {
@@ -1166,7 +1166,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 			    ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_item[i]);
 			    if(!proto)
 			    {
-				    DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
+				    OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
 			    }
 			    else
 			    {   
@@ -1206,7 +1206,7 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 		    ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_choiceitem[reward_slot]);
 		    if(!proto)
 		    {
-			    DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
+			    OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
 		    }
 		    else
 		    {
@@ -1516,7 +1516,7 @@ void QuestMgr::SendQuestInvalid(INVALID_REASON reason, PlayerPointer plyr)
 	if(!plyr)
 		return;
 	plyr->GetSession()->OutPacket(SMSG_QUESTGIVER_QUEST_INVALID, 4, &reason);
-	DEBUG_LOG("WORLD:Sent SMSG_QUESTGIVER_QUEST_INVALID");
+	OUT_DEBUG("WORLD:Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
 void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, PlayerPointer plyr)
@@ -1529,7 +1529,7 @@ void QuestMgr::SendQuestFailed(FAILED_REASON failed, Quest * qst, PlayerPointer 
     data << uint32(qst->id);
     data << failed;
     plyr->GetSession()->SendPacket(&data);
-	DEBUG_LOG("WORLD:Sent SMSG_QUESTGIVER_QUEST_FAILED");
+	OUT_DEBUG("WORLD:Sent SMSG_QUESTGIVER_QUEST_FAILED");
 }
 
 void QuestMgr::SendQuestUpdateFailedTimer(Quest *pQuest, PlayerPointer plyr)
@@ -1538,7 +1538,7 @@ void QuestMgr::SendQuestUpdateFailedTimer(Quest *pQuest, PlayerPointer plyr)
 		return;
 
 	plyr->GetSession()->OutPacket(SMSG_QUESTUPDATE_FAILEDTIMER, 4, &pQuest->id);
-	DEBUG_LOG("WORLD:Sent SMSG_QUESTUPDATE_FAILEDTIMER");
+	OUT_DEBUG("WORLD:Sent SMSG_QUESTUPDATE_FAILEDTIMER");
 }
 
 void QuestMgr::SendQuestUpdateFailed(Quest *pQuest, PlayerPointer plyr)
@@ -1547,7 +1547,7 @@ void QuestMgr::SendQuestUpdateFailed(Quest *pQuest, PlayerPointer plyr)
 		return;
 
 	plyr->GetSession()->OutPacket(SMSG_QUESTUPDATE_FAILED, 4, &pQuest->id);
-	DEBUG_LOG("WORLD:Sent SMSG_QUESTUPDATE_FAILED");
+	OUT_DEBUG("WORLD:Sent SMSG_QUESTUPDATE_FAILED");
 }
 
 void QuestMgr::SendQuestLogFull(PlayerPointer plyr)
@@ -1556,7 +1556,7 @@ void QuestMgr::SendQuestLogFull(PlayerPointer plyr)
 		return;
 
 	plyr->GetSession()->OutPacket(SMSG_QUESTLOG_FULL);
-	DEBUG_LOG("WORLD:Sent QUEST_LOG_FULL_MESSAGE");
+	OUT_DEBUG("WORLD:Sent QUEST_LOG_FULL_MESSAGE");
 }
 
 uint32 QuestMgr::GetGameObjectLootQuest(uint32 GO_Entry)
@@ -1615,7 +1615,7 @@ bool QuestMgr::OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr)
 
 	if (questCount == 0) 
 	{
-		DEBUG_LOG("WORLD: Invalid NPC for CMSG_QUESTGIVER_HELLO.");
+		OUT_DEBUG("WORLD: Invalid NPC for CMSG_QUESTGIVER_HELLO.");
 		return false;
 	}
 	else if (questCount == 1)
@@ -1647,7 +1647,7 @@ bool QuestMgr::OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr)
 
 		if(!bValid)
 		{
-			DEBUG_LOG("QUESTS: Warning, invalid NPC "I64FMT" specified for OnActivateQuestGiver. TypeId: %d.", qst_giver->GetGUID(), qst_giver->GetTypeId());
+			OUT_DEBUG("QUESTS: Warning, invalid NPC "I64FMT" specified for OnActivateQuestGiver. TypeId: %d.", qst_giver->GetGUID(), qst_giver->GetTypeId());
 			return false;
 		}
 		
@@ -1666,27 +1666,27 @@ bool QuestMgr::OnActivateQuestGiver(ObjectPointer qst_giver, PlayerPointer plr)
 		{
 			sQuestMgr.BuildQuestDetails(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);		// 1 because we have 1 quest, and we want goodbye to function
 			plr->GetSession()->SendPacket(&data);
-			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
+			DEBUG_LOG( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_DETAILS." );
 		}
 		else if (status == QMGR_QUEST_FINISHED)
 		{
 			sQuestMgr.BuildOfferReward(&data, (*itr)->qst, qst_giver, 1, plr->GetSession()->language, plr);
 			plr->GetSession()->SendPacket(&data);
 			//ss
-			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_OFFER_REWARD." );
+			DEBUG_LOG( "WORLD"," Sent SMSG_QUESTGIVER_OFFER_REWARD." );
 		}
 		else if (status == QMGR_QUEST_NOT_FINISHED)
 		{
 			sQuestMgr.BuildRequestItems(&data, (*itr)->qst, qst_giver, status, plr->GetSession()->language);
 			plr->GetSession()->SendPacket(&data);
-			Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
+			DEBUG_LOG( "WORLD"," Sent SMSG_QUESTGIVER_REQUEST_ITEMS." );
 		}
 	}
 	else 
 	{
 		sQuestMgr.BuildQuestList(&data, qst_giver ,plr, plr->GetSession()->language);
 		plr->GetSession()->SendPacket(&data);
-		Log.Debug( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_LIST." );
+		DEBUG_LOG( "WORLD"," Sent SMSG_QUESTGIVER_QUEST_LIST." );
 	}
 	return true;
 }
@@ -1775,7 +1775,7 @@ bool QuestMgr::CanStoreReward(PlayerPointer plyr, Quest *qst, uint32 reward_slot
             slotsrequired++;
             ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_item[i]);
             if(!proto)
-                DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
+                OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_item[i], qst->id);
             else if(plyr->GetItemInterface()->CanReceiveItem(proto, qst->reward_itemcount[i], NULL))
 				return false;
         }
@@ -1787,7 +1787,7 @@ bool QuestMgr::CanStoreReward(PlayerPointer plyr, Quest *qst, uint32 reward_slot
         slotsrequired++;
         ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(qst->reward_choiceitem[reward_slot]);
         if(!proto)
-            DEBUG_LOG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
+            OUT_DEBUG("Invalid item prototype in quest reward! ID %d, quest %d", qst->reward_choiceitem[reward_slot], qst->id);
         else if(plyr->GetItemInterface()->CanReceiveItem(proto, qst->reward_choiceitemcount[reward_slot], NULL))
 			return false;
     }
@@ -1808,7 +1808,7 @@ void QuestMgr::LoadExtraQuestStuff()
 
 	lootmgr.LoadLoot();
 	lootmgr.FillObjectLootMap(&loot_map);
-	Log.Debug("QuestMgr","Creating gameobject involved quest map...");
+	DEBUG_LOG("QuestMgr","Creating gameobject involved quest map...");
 
 	while(!it->AtEnd())
 	{

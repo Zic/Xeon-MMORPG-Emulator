@@ -229,7 +229,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 	uint32 queueSlot = plr->GetBGQueueSlot();
 	if(queueSlot == 0xFFFFFFFF)
 	{
-		DEBUG_LOG("WARNING: queueSlot is 0xFFFFFFFF in %s\n", __FUNCTION__);
+		OUT_DEBUG("WARNING: queueSlot is 0xFFFFFFFF in %s\n", __FUNCTION__);
 		m_queueLock.Release();
 		return;
 	}
@@ -248,7 +248,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 
 	if( plr->m_bg && plr->m_bg->GetType() == bgtype )
 	{
-		DEBUG_LOG("Player has queued from already in a BG for itself.");
+		OUT_DEBUG("Player has queued from already in a BG for itself.");
 		m_queueLock.Release();
 		return;
 	}
@@ -725,7 +725,7 @@ void CBattlegroundManager::RemovePlayerFromQueues(PlayerPointer plr)
 			itr2++;
 			if((*itr) == plr->GetLowGUID())
 			{
-				DEBUG_LOG("BattlegroundManager", "Removing player %u from queue instance %u type %u", plr->GetLowGUID(), plr->m_bgQueueInstanceId[i], plr->m_bgQueueType[i]);
+				OUT_DEBUG("BattlegroundManager", "Removing player %u from queue instance %u type %u", plr->GetLowGUID(), plr->m_bgQueueInstanceId[i], plr->m_bgQueueType[i]);
 				m_queuedPlayers[plr->m_bgQueueType[i]][lgroup].erase(itr);
 			}
 

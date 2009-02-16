@@ -493,7 +493,7 @@ void GameObject::UseFishingNode(PlayerPointer player)
 	FishingZoneEntry *entry = FishingZoneStorage.LookupEntry( zone );
 	if( entry == NULL ) // No fishing information found for area or zone, log an error, and end fishing
 	{
-		DEBUG_LOG( "ERROR: Fishing zone information for zone %d not found!", zone );
+		OUT_DEBUG( "ERROR: Fishing zone information for zone %d not found!", zone );
 		EndFishing( player, true );
 		return;
 	}
@@ -634,7 +634,7 @@ UnitPointer GameObject::CreateTemporaryGuardian(uint32 guardian_entry,uint32 dur
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(guardian_entry);
 	if(!proto || !info)
 	{
-		DEBUG_LOG("Warning : Missing summon creature template %u !",guardian_entry);
+		OUT_DEBUG("Warning : Missing summon creature template %u !",guardian_entry);
 		return NULLUNIT;
 	}
 	uint32 lvl = u_caster->getLevel();

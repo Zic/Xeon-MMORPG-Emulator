@@ -147,7 +147,7 @@ void WorldSession::HandleSwapItemOpcode(WorldPacket& recv_data)
 	
 	recv_data >> DstInvSlot >> DstSlot >> SrcInvSlot >> SrcSlot;
 
-	DEBUG_LOG("ITEM: swap, DstInvSlot %i DstSlot %i SrcInvSlot %i SrcSlot %i", DstInvSlot, DstSlot, SrcInvSlot, SrcSlot);
+	OUT_DEBUG("ITEM: swap, DstInvSlot %i DstSlot %i SrcInvSlot %i SrcSlot %i", DstInvSlot, DstSlot, SrcInvSlot, SrcSlot);
 
 	if(DstInvSlot == SrcSlot && SrcInvSlot == -1) // player trying to add self container to self container slots
 	{
@@ -374,7 +374,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 	if(!GetPlayer())
 		return;
 
-	DEBUG_LOG("ITEM: swap, src slot: %u dst slot: %u", (uint32)srcslot, (uint32)dstslot);
+	OUT_DEBUG("ITEM: swap, src slot: %u dst slot: %u", (uint32)srcslot, (uint32)dstslot);
 
 	if(dstslot == srcslot) // player trying to add item to the same slot
 	{
@@ -494,7 +494,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
 	recv_data >> SrcInvSlot >> SrcSlot;
 
-	DEBUG_LOG( "ITEM: destroy, SrcInv Slot: %i Src slot: %i", SrcInvSlot, SrcSlot );
+	OUT_DEBUG( "ITEM: destroy, SrcInv Slot: %i Src slot: %i", SrcInvSlot, SrcSlot );
 	ItemPointer it = _player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
 	if(it)
@@ -591,7 +591,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
 	recv_data >> SrcInvSlot >> SrcSlot;
 
-	DEBUG_LOG("ITEM: autoequip, Inventory slot: %i Source Slot: %i", SrcInvSlot, SrcSlot); 
+	OUT_DEBUG("ITEM: autoequip, Inventory slot: %i Source Slot: %i", SrcInvSlot, SrcSlot); 
 
 	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
@@ -744,7 +744,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	ItemPrototype *itemProto = ItemPrototypeStorage.LookupEntry(itemid);
 	if(!itemProto)
 	{
-		Log.Debug( "WORLD"," Unknown item id 0x%.8X", itemid );
+		DEBUG_LOG( "WORLD"," Unknown item id 0x%.8X", itemid );
 		return;
 	} 
 
@@ -867,7 +867,7 @@ void WorldSession::HandleBuyBackOpcode( WorldPacket & recv_data )
 	AddItemResult result;
 	uint8 error;
 
-	Log.Debug( "WORLD"," Received CMSG_BUYBACK_ITEM" );
+	DEBUG_LOG( "WORLD"," Received CMSG_BUYBACK_ITEM" );
 
 	recv_data >> guid >> stuff;
 	stuff -= 74;
@@ -949,7 +949,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 17);
-	Log.Debug( "WORLD"," Received CMSG_SELL_ITEM" );
+	DEBUG_LOG( "WORLD"," Received CMSG_SELL_ITEM" );
 	if(!GetPlayer())
 		return;
 
@@ -1046,7 +1046,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 	data << vendorguid << itemguid << uint8(0); 
 	SendPacket( &data );
 
-	Log.Debug( "WORLD"," Sent SMSG_SELL_ITEM" );
+	DEBUG_LOG( "WORLD"," Sent SMSG_SELL_ITEM" );
 
 	_player->SaveToDB(false);
 }
@@ -1058,7 +1058,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	CHECK_PACKET_SIZE( recv_data, 22 );
 
-	Log.Debug( "WORLD"," Received CMSG_BUY_ITEM_IN_SLOT" );
+	DEBUG_LOG( "WORLD"," Received CMSG_BUY_ITEM_IN_SLOT" );
 
 	if( GetPlayer() == NULL )
 		return;
@@ -1106,7 +1106,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	if( it->MaxCount > 0 && ci.amount*amount > it->MaxCount)
 	{
-//		DEBUG_LOG( "SUPADBG can't carry #1 (%u>%u)" , ci.amount*amount , it->MaxCount );
+//		OUT_DEBUG( "SUPADBG can't carry #1 (%u>%u)" , ci.amount*amount , it->MaxCount );
 		_player->GetItemInterface()->BuildInventoryChangeError( NULLITEM, NULLITEM, INV_ERR_CANT_CARRY_MORE_OF_THIS );
 		return;
 	}
@@ -1197,7 +1197,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 		if((oldItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + count_per_stack) > it->MaxCount)
 		{
-//			DEBUG_LOG( "SUPADBG can't carry #2" );
+//			OUT_DEBUG( "SUPADBG can't carry #2" );
 			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_CANT_CARRY_MORE_OF_THIS);
 			return;
 		}
@@ -1223,7 +1223,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 		{
 			pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, count_per_stack);
 			pItem->m_isDirty = true;
-//			DEBUG_LOG( "SUPADBG bagslot=%u, slot=%u" , bagslot, slot );
+//			OUT_DEBUG( "SUPADBG bagslot=%u, slot=%u" , bagslot, slot );
 			if(!_player->GetItemInterface()->SafeAddItem(pItem, bagslot, slot))
 			{
 				pItem->Destructor();
@@ -1242,7 +1242,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 	data << uint32(itemid) << uint32(amount);
  
 	SendPacket( &data );
-	Log.Debug( "WORLD"," Sent SMSG_BUY_ITEM" );
+	DEBUG_LOG( "WORLD"," Sent SMSG_BUY_ITEM" );
 
 	_player->GetItemInterface()->BuyItem(it,amount,unit, ci.extended_cost);
 	if(ci.max_amount)
@@ -1260,7 +1260,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 14);
-	Log.Debug( "WORLD"," Received CMSG_BUY_ITEM" );
+	DEBUG_LOG( "WORLD"," Received CMSG_BUY_ITEM" );
 
 	if(!GetPlayer())
 		return;
@@ -1409,7 +1409,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 		return;
 
 	CHECK_PACKET_SIZE(recv_data, 8);
-	Log.Debug( "WORLD"," Recvd CMSG_LIST_INVENTORY" );
+	DEBUG_LOG( "WORLD"," Recvd CMSG_LIST_INVENTORY" );
 	uint64 guid;
 
 	recv_data >> guid;
@@ -1475,12 +1475,12 @@ void WorldSession::SendInventoryList(CreaturePointer unit)
 	const_cast<uint8*>(data.contents())[8] = (uint8)counter;	// set count
 
 	SendPacket( &data );
-	Log.Debug( "WORLD"," Sent SMSG_LIST_INVENTORY" );
+	DEBUG_LOG( "WORLD"," Sent SMSG_LIST_INVENTORY" );
 }
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
 	CHECK_PACKET_SIZE(recv_data, 3);
-	Log.Debug( "WORLD"," Recvd CMSG_AUTO_STORE_BAG_ITEM" );
+	DEBUG_LOG( "WORLD"," Recvd CMSG_AUTO_STORE_BAG_ITEM" );
 	
 	if(!GetPlayer())
 		return;
@@ -1606,7 +1606,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket &recvPacket)
 		return;
 
 	ItemPointer item = _player->GetItemInterface()->GetInventoryItem(uslot, slot);
-	Log.Debug("WorldSession","Received CMSG_READ_ITEM %d", slot);
+	DEBUG_LOG("WorldSession","Received CMSG_READ_ITEM %d", slot);
 
 	if(item)
 	{
@@ -1617,7 +1617,7 @@ void WorldSession::HandleReadItemOpcode(WorldPacket &recvPacket)
 			WorldPacket data(SMSG_READ_ITEM_OK, 4);
 			data << item->GetGUID();
 			SendPacket(&data);
-			Log.Debug("WorldSession","Sent SMSG_READ_OK %d", item->GetGUID());
+			DEBUG_LOG("WorldSession","Sent SMSG_READ_OK %d", item->GetGUID());
 		}	
 	}
 }
@@ -1627,14 +1627,14 @@ HEARTHSTONE_INLINE uint32 RepairItemCost(PlayerPointer pPlayer, ItemPointer pIte
 	DurabilityCostsEntry * dcosts = dbcDurabilityCosts.LookupEntry(pItem->GetProto()->ItemLevel);
 	if(!dcosts)
 	{
-		DEBUG_LOG("Repair: Unknown item level (%u)", dcosts);
+		OUT_DEBUG("Repair: Unknown item level (%u)", dcosts);
 		return 0;
 	}
 
 	DurabilityQualityEntry * dquality = dbcDurabilityQuality.LookupEntry((pItem->GetProto()->Quality + 1) * 2);
 	if(!dquality)
 	{
-		DEBUG_LOG("Repair: Unknown item quality (%u)", dquality);
+		OUT_DEBUG("Repair: Unknown item quality (%u)", dquality);
 		return 0;
 	}
 
@@ -1743,7 +1743,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket &recvPacket)
 			}
 		}
 	}
-	Log.Debug("WorldSession","Received CMSG_REPAIR_ITEM %d", itemguid);
+	DEBUG_LOG("WorldSession","Received CMSG_REPAIR_ITEM %d", itemguid);
 }
 
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket) 
@@ -1752,12 +1752,12 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 	//CHECK_PACKET_SIZE(recvPacket, 12);
 	uint32 bytes,slots;
 	int32 price;
-	Log.Debug("WorldSession","Received CMSG_BUY_bytes_SLOT");
+	DEBUG_LOG("WorldSession","Received CMSG_BUY_bytes_SLOT");
 
 	bytes = GetPlayer()->GetUInt32Value(PLAYER_BYTES_2);
 	slots =(uint8) (bytes >> 16);
 
-	Log.Debug("WorldSession","HandleBuyBankSlotOpcode: slot number = %d", slots);
+	DEBUG_LOG("WorldSession","HandleBuyBankSlotOpcode: slot number = %d", slots);
 	BankSlotPrice* bsp = dbcBankSlotPrices.LookupEntry(slots+1);
 	if(!bsp) return;
 	price = (bsp != NULL ) ? bsp->Price : 99999999;
@@ -1774,7 +1774,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recvPacket, 2);
-	Log.Debug("WorldSession","Received CMSG_AUTO_BANK_ITEM");
+	DEBUG_LOG("WorldSession","Received CMSG_AUTO_BANK_ITEM");
 
 	//WorldPacket data;
 
@@ -1786,7 +1786,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
 
 	recvPacket >> SrcInvSlot >> SrcSlot;
 
-	Log.Debug("WorldSession","HandleAutoBankItemOpcode: Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
+	DEBUG_LOG("WorldSession","HandleAutoBankItemOpcode: Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
 
 	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
@@ -1808,7 +1808,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket &recvPacket)
         eitem = _player->GetItemInterface()->SafeRemoveAndRetreiveItemFromSlot(SrcInvSlot,SrcSlot, false);
 		if(!_player->GetItemInterface()->SafeAddItem(eitem, slotresult.ContainerSlot, slotresult.Slot))
 		{
-			DEBUG_LOG("[ERROR]AutoBankItem: Error while adding item to bank bag!\n");
+			OUT_DEBUG("[ERROR]AutoBankItem: Error while adding item to bank bag!\n");
             if( !_player->GetItemInterface()->SafeAddItem(eitem, SrcInvSlot, SrcSlot) )
 			{
 				eitem->Destructor();
@@ -1822,7 +1822,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket &recvPacket)
 {
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recvPacket, 2);
-	DEBUG_LOG("WORLD: CMSG_AUTOSTORE_BANK_ITEM");
+	OUT_DEBUG("WORLD: CMSG_AUTOSTORE_BANK_ITEM");
 
 	//WorldPacket data;
 
@@ -1833,7 +1833,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket &recvPacket)
 
 	recvPacket >> SrcInvSlot >> SrcSlot;
 
-	DEBUG_LOG("ITEM: AutoStore Bank Item, Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
+	OUT_DEBUG("ITEM: AutoStore Bank Item, Inventory slot: %u Source Slot: %u", (uint32)SrcInvSlot, (uint32)SrcSlot);
 
 	ItemPointer eitem=_player->GetItemInterface()->GetInventoryItem(SrcInvSlot,SrcSlot);
 
@@ -1855,7 +1855,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket &recvPacket)
         eitem = _player->GetItemInterface()->SafeRemoveAndRetreiveItemFromSlot(SrcInvSlot, SrcSlot, false);
 		if (!_player->GetItemInterface()->AddItemToFreeSlot(eitem))
 		{
-			DEBUG_LOG("[ERROR]AutoStoreBankItem: Error while adding item from one of the bank bags to the player bag!\n");
+			OUT_DEBUG("[ERROR]AutoStoreBankItem: Error while adding item from one of the bank bags to the player bag!\n");
 			if( !_player->GetItemInterface()->SafeAddItem(eitem, SrcInvSlot, SrcSlot) )
 			{
 				eitem->Destructor();

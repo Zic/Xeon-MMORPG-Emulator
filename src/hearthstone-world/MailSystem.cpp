@@ -22,7 +22,14 @@ initialiseSingleton(MailSystem);
 
 void MailSystem::StartMailSystem()
 {
-
+	QueryResult * result = CharacterDatabase.Query("SELECT MAX(message_id) FROM mailbox");
+	if(result)
+	{
+		max_id = result->Fetch()[0].GetUInt32();
+		delete result;
+	}
+	else
+		max_id = 0;
 }
 
 MailError MailSystem::DeliverMessage(uint64 recipent, MailMessage* message)
@@ -454,6 +461,9 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
 	if(message == 0) return;
 
+	if( message->read_flag ) // no point re-executing.
+		return;
+
 	// mark the message as read
 	message->read_flag = 1;
 
@@ -462,7 +472,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 		message->expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
 
 	// update it in sql
-	CharacterDatabase.WaitExecute("UPDATE mailbox SET read_flag = 1, expiry_time = %u WHERE message_id = %u", message->message_id, message->expire_time);
+	CharacterDatabase.Execute("UPDATE mailbox SET read_flag = 1, expiry_time = %u WHERE message_id = %u", message->message_id, message->expire_time);
 }
 
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
@@ -651,7 +661,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 	message->money = 0;
 
 	// update in sql!
-	CharacterDatabase.WaitExecute("UPDATE mailbox SET money = 0 WHERE message_id = %u", message->message_id);
+	CharacterDatabase.Execute("UPDATE mailbox SET money = 0 WHERE message_id = %u", message->message_id);
 
 	// send result
 	data << uint32(MAIL_OK);
@@ -742,7 +752,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 		message->copy_made = true;
 
 		// update in sql
-		CharacterDatabase.WaitExecute("UPDATE mailbox SET copy_made = 1 WHERE message_id = %u", message_id);
+		CharacterDatabase.Execute("UPDATE mailbox SET copy_made = 1 WHERE message_id = %u", message_id);
 
 		data << uint32(MAIL_OK);
 		SendPacket(&data);
@@ -861,19 +871,8 @@ void MailSystem::SendAutomatedMessage(uint32 type, uint64 sender, uint64 receive
 
 uint32 MailSystem::Generate_Message_Id()
 {
-	/** I know this is horrible. But when you have external mail sources unfortunately this is the only way to do this.
-	 * - Burlex
-	 */
-
-	uint32 id = 1;
-	QueryResult * result = CharacterDatabase.Query("SELECT MAX(message_id) FROM mailbox");
-	if(result)
-	{
-		id = result->Fetch()[0].GetUInt32()+1;
-		delete result;
-	}
-
-	return id;
+	max_id++;
+	return max_id;
 }
 
 void Mailbox::Load(QueryResult * result)

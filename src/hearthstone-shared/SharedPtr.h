@@ -1,6 +1,7 @@
 #ifndef _SHARED_PTR_H
 #define _SHARED_PTR_H
 
+#define USING_SHARED_PTRS
 //#define SHAREDPTR_DEBUGMODE // devs only, or prepare for spam, seriously.
 
 // Meh

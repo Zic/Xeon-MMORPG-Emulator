@@ -340,7 +340,7 @@ void LogonCommClientSocket::CompressAndSend(ByteBuffer & uncompressed)
 
 	if(deflateInit(&stream, 1) != Z_OK)
 	{
-		DEBUG_LOG("deflateInit failed.");
+		OUT_DEBUG("deflateInit failed.");
 		return;
 	}
 
@@ -354,21 +354,21 @@ void LogonCommClientSocket::CompressAndSend(ByteBuffer & uncompressed)
 	if(deflate(&stream, Z_NO_FLUSH) != Z_OK ||
 		stream.avail_in != 0)
 	{
-		DEBUG_LOG("deflate failed.");
+		OUT_DEBUG("deflate failed.");
 		return;
 	}
 
 	// finish the deflate
 	if(deflate(&stream, Z_FINISH) != Z_STREAM_END)
 	{
-		DEBUG_LOG("deflate failed: did not end stream");
+		OUT_DEBUG("deflate failed: did not end stream");
 		return;
 	}
 
 	// finish up
 	if(deflateEnd(&stream) != Z_OK)
 	{
-		DEBUG_LOG("deflateEnd failed.");
+		OUT_DEBUG("deflateEnd failed.");
 		return;
 	}
 

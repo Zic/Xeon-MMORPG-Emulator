@@ -72,8 +72,6 @@ ObjectMgr::~ObjectMgr()
 	Log.Notice("ObjectMgr", "Deleting Trainers...");
 	for( TrainerMap::iterator i = mTrainers.begin( ); i != mTrainers.end( ); ++ i) {
 		Trainer * t = i->second;
-		if(t->UIMessage)
-			delete [] t->UIMessage;
 		delete t;
 	}
 
@@ -1435,7 +1433,6 @@ void ObjectMgr::LoadTrainers()
 	if(!result)
 		return;
 
-	const char * NormalTalkMessage = "What can I teach you $N?";
 
 	do 
 	{
@@ -1456,14 +1453,11 @@ void ObjectMgr::LoadTrainers()
 
 		temp = fields[5].GetString();
 		len=strlen(temp);
-		if(len)
-		{
-			tr->UIMessage = new char[len+1];
-			strcpy(tr->UIMessage, temp);
-			tr->UIMessage[len] = 0;
-		}
-		else
-			tr->UIMessage = (char*)NormalTalkMessage;
+		if(!len)
+			temp = "What can I teach you $N?";
+		tr->UIMessage = new char[len+1];
+		strcpy(tr->UIMessage, temp);
+		tr->UIMessage[len] = 0;
 
 		uint32 tmptxtid[2];
 		for( uint32 i = 0; i < 2; ++i)
@@ -1488,8 +1482,6 @@ void ObjectMgr::LoadTrainers()
 		if(!result2)
 		{
 			Log.Error("LoadTrainers", "Trainer with no spells, entry %u.", entry);
-			if(tr->UIMessage && tr->UIMessage != (char*)NormalTalkMessage)
-				delete [] tr->UIMessage;
 			delete tr;
 			continue;
 		}
@@ -1567,8 +1559,6 @@ void ObjectMgr::LoadTrainers()
 			//and now we insert it to our lookup table
 			if(!tr->SpellCount)
 			{
-				if(tr->UIMessage && tr->UIMessage != (char*)NormalTalkMessage)
-					delete [] tr->UIMessage;
 				delete tr;
 				continue;
 			}

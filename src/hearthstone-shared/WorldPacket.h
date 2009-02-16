@@ -23,6 +23,8 @@ public:
     __inline uint16 GetOpcode() const { return m_opcode; }
     __inline void SetOpcode(uint16 opcode) { m_opcode = opcode; }
 
+	static WorldPacket* Create() { return new WorldPacket(); }
+
 protected:
     uint16 m_opcode;
 

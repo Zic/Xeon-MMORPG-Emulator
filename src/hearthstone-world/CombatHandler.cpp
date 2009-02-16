@@ -34,7 +34,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 	}
 
 	// AttackSwing
-	Log.Debug( "WORLD"," Recvd CMSG_ATTACKSWING Message" );
+	DEBUG_LOG( "WORLD"," Recvd CMSG_ATTACKSWING Message" );
 
 	if(GetPlayer()->IsPacified() || GetPlayer()->IsStunned() || GetPlayer()->IsFeared())
 		return;
@@ -45,7 +45,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
 	if(!pEnemy)
 	{
-		DEBUG_LOG("WORLD: "I64FMT" does not exist.", guid);
+		OUT_DEBUG("WORLD: "I64FMT" does not exist.", guid);
 		return;
 	}
 

@@ -647,10 +647,10 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 	}
 
 	// Force gossip to show in a menu, if there is only 1 option (client skips gossip otherwise)
-	if(	Text != 0 && menu_lines == 1)
+	/*if(	Text != 0 && menu_lines == 1)
 	{
 		Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
-	}
+	}*/
 
 	if(AutoSend)
 		Menu->SendTo(Plr);
@@ -751,7 +751,7 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 		}break;
 
 	default:
-		Log.Debug("GossipSelectOption","Unknown menuitem %u on npc %u", IntId, pCreature->GetEntry());
+		DEBUG_LOG("GossipSelectOption","Unknown menuitem %u on npc %u", IntId, pCreature->GetEntry());
 		break;
 	}	
 }

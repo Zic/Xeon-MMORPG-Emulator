@@ -922,7 +922,7 @@ AVNode::AVNode( AlteracValleyPointer parent, AVNodeTemplate *tmpl, uint32 nodeid
 		CreatureInfo *ci = CreatureNameStorage.LookupEntry(m_template->m_initialSpawnId);
 		CreatureProto *cp = CreatureProtoStorage.LookupEntry(m_template->m_initialSpawnId);
 		CreaturePointer sp;
-		DEBUG_LOG("spawning guards at bunker %s of %s (%u)", m_template->m_name, ci->Name, ci->Id);
+		OUT_DEBUG("spawning guards at bunker %s of %s (%u)", m_template->m_name, ci->Name, ci->Id);
 
 		while(spi->x != 0.0f)
 		{
@@ -959,7 +959,7 @@ void AVNode::Assault(PlayerPointer plr)
 {
 	// player assaulted the control point.
 	// safety check
-	DEBUG_LOG("AVNode::Assault(%s) : entering", m_template->m_name);
+	OUT_DEBUG("AVNode::Assault(%s) : entering", m_template->m_name);
 	if( plr->GetTeam() == 0 && ( m_state == AV_NODE_STATE_ALLIANCE_ASSAULTING || m_state == AV_NODE_STATE_ALLIANCE_CONTROLLED ) )
 		return;
 
@@ -1014,13 +1014,13 @@ void AVNode::Assault(PlayerPointer plr)
 void AVNode::Spawn()
 {
 	// spawn control point (if we should have one)
-	DEBUG_LOG("AVNode::Spawn for %s, state = %u %s, old_state = %u %s", m_template->m_name, m_state, g_stateNames[m_state], m_lastState, g_stateNames[m_lastState]);
+	OUT_DEBUG("AVNode::Spawn for %s, state = %u %s, old_state = %u %s", m_template->m_name, m_state, g_stateNames[m_state], m_lastState, g_stateNames[m_lastState]);
 	if( m_template->m_flagLocation.id[m_state] == 0 )
 	{
 		// no flag should be spawned, despawn if one exists
 		if( m_flag != NULL )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : Despawning main flag", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : Despawning main flag", m_template->m_name);
 			m_flag->Despawn(0);
 			m_flag = NULLGOB;
 		}
@@ -1029,7 +1029,7 @@ void AVNode::Spawn()
 	{
 		// spawn the flag.
 		const AVGameObject* g = &m_template->m_flagLocation;
-		DEBUG_LOG("AVNode::Spawn(%s) : Spawning main flag", m_template->m_name);
+		OUT_DEBUG("AVNode::Spawn(%s) : Spawning main flag", m_template->m_name);
 		if( m_flag == NULL )
 		{
 			// initial spawn
@@ -1066,7 +1066,7 @@ void AVNode::Spawn()
 		// no flag should be spawned, despawn if one exists
 		if( m_aura != NULL )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : Despawning secondary flag", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : Despawning secondary flag", m_template->m_name);
 			m_aura->Despawn(0);
 			m_aura = NULLGOB;
 		}
@@ -1075,7 +1075,7 @@ void AVNode::Spawn()
 	{
 		// spawn the flag.
 		const AVGameObject* g = &m_template->m_auraLocation;
-		DEBUG_LOG("AVNode::Spawn(%s) : Spawning secondary flag", m_template->m_name);
+		OUT_DEBUG("AVNode::Spawn(%s) : Spawning secondary flag", m_template->m_name);
 		if( m_aura == NULL )
 		{
 			// initial spawn
@@ -1113,7 +1113,7 @@ void AVNode::Spawn()
 		// no flag should be spawned, despawn if one exists
 		if( m_glow != NULL )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : Despawning glow", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : Despawning glow", m_template->m_name);
 			m_glow->Despawn(0);
 			m_glow = NULLGOB;
 		}
@@ -1122,7 +1122,7 @@ void AVNode::Spawn()
 	{
 		// spawn the flag.
 		const AVGameObject* g = &m_template->m_glowLocation;
-		DEBUG_LOG("AVNode::Spawn(%s) : Spawning glow", m_template->m_name);
+		OUT_DEBUG("AVNode::Spawn(%s) : Spawning glow", m_template->m_name);
 		if( m_glow == NULL )
 		{
 			// initial spawn
@@ -1176,7 +1176,7 @@ void AVNode::Spawn()
 	// despawn/spawn guards
 	if( m_state == AV_NODE_STATE_ALLIANCE_CONTROLLED || m_state == AV_NODE_STATE_HORDE_CONTROLLED )
 	{
-		DEBUG_LOG("AVNode::Spawn(%s) : despawning guards", m_template->m_name);
+		OUT_DEBUG("AVNode::Spawn(%s) : despawning guards", m_template->m_name);
 		for(vector<CreaturePointer>::iterator itr = m_guards.begin(); itr != m_guards.end(); ++itr)
 			(*itr)->Despawn(0, 0);
 		
@@ -1186,7 +1186,7 @@ void AVNode::Spawn()
 		uint32 t = g_stateToGuardType[m_state];
 		if( t > 0 && m_template->m_guardId[t] != 0 )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : spawning %u guards of %u", m_template->m_name, m_template->m_guardCount, m_template->m_guardId[t]);
+			OUT_DEBUG("AVNode::Spawn(%s) : spawning %u guards of %u", m_template->m_name, m_template->m_guardCount, m_template->m_guardId[t]);
 			for(uint32 i = 0; i < m_template->m_guardCount; ++i)
 			{
 				float x = RandomUInt(10) * cos(RandomFloat(6.28f)) + m_template->m_flagLocation.x;
@@ -1215,7 +1215,7 @@ void AVNode::Spawn()
 		// should one be spawned
 		if( m_spiritGuide != NULL )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : despawning spirit guide", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : despawning spirit guide", m_template->m_name);
 			// move everyone in the revive queue to a different node
 			map<CreaturePointer, set<uint32> >::iterator itr = m_bg->m_resurrectMap.find(m_spiritGuide);
 			if( itr != m_bg->m_resurrectMap.end() )
@@ -1239,7 +1239,7 @@ void AVNode::Spawn()
 
 		if( m_state == AV_NODE_STATE_ALLIANCE_CONTROLLED )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : spawning spirit guide", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : spawning spirit guide", m_template->m_name);
 
 			// spawn new spirit guide
 			m_spiritGuide = m_bg->SpawnSpiritGuide(m_template->m_graveyardLocation.x, m_template->m_graveyardLocation.y, 
@@ -1250,7 +1250,7 @@ void AVNode::Spawn()
 		}
 		else if( m_state == AV_NODE_STATE_HORDE_CONTROLLED )
 		{
-			DEBUG_LOG("AVNode::Spawn(%s) : spawning spirit guide", m_template->m_name);
+			OUT_DEBUG("AVNode::Spawn(%s) : spawning spirit guide", m_template->m_name);
 
 			// spawn new spirit guide
 			m_spiritGuide = m_bg->SpawnSpiritGuide(m_template->m_graveyardLocation.x, m_template->m_graveyardLocation.y, 
@@ -1260,17 +1260,17 @@ void AVNode::Spawn()
 			m_bg->AddSpiritGuide(m_spiritGuide);
 		}
 	}
-	DEBUG_LOG("AVNode::Spawn(%s) : completed for state %u %s", m_template->m_name, m_state, g_stateNames[m_state]);
+	OUT_DEBUG("AVNode::Spawn(%s) : completed for state %u %s", m_template->m_name, m_state, g_stateNames[m_state]);
 }
 
 void AVNode::SpawnGuards(uint32 x)
 {
-	DEBUG_LOG("AVNode::SpawnGuards(%s) : spawning %u guards", m_template->m_name, m_template->m_guardCount);
+	OUT_DEBUG("AVNode::SpawnGuards(%s) : spawning %u guards", m_template->m_name, m_template->m_guardCount);
 }
 
 void AVNode::ChangeState(uint32 new_state)
 {
-	DEBUG_LOG("AVNode::ChangeState(%s) : changing to state %u %s, old state was %u %s", m_template->m_name, new_state, g_stateNames[new_state], m_state, g_stateNames[m_state]);
+	OUT_DEBUG("AVNode::ChangeState(%s) : changing to state %u %s, old state was %u %s", m_template->m_name, new_state, g_stateNames[new_state], m_state, g_stateNames[m_state]);
 	m_lastState = m_state;
 	m_state = new_state;
 
@@ -1283,7 +1283,7 @@ void AVNode::Capture()
 	if( m_destroyed )
 		return;
 
-	DEBUG_LOG("AVNode::Capture(%s) : entering", m_template->m_name);
+	OUT_DEBUG("AVNode::Capture(%s) : entering", m_template->m_name);
 
 	// sooo easy
 	sEventMgr.RemoveEvents(m_bg, EVENT_AV_CAPTURE_CP_0 + m_nodeId);
@@ -1301,7 +1301,7 @@ void AVNode::Capture()
 			const AVSpawnLocation *spi = g_fireLocations[m_nodeId];
 			GameObjectPointer go;
 
-			DEBUG_LOG("spawning fires at bunker %s", m_template->m_name);
+			OUT_DEBUG("spawning fires at bunker %s", m_template->m_name);
 			while(spi->x != 0.0f)
 			{
 				go = m_bg->SpawnGameObject(AV_GAMEOBJECT_FIRE, spi->x, spi->y, spi->z, spi->o, 0, 35, 1.0f);

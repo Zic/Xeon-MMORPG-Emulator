@@ -33,7 +33,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 	if(!pn)
 		return;
 
-	Log.Debug("WorldSession","Received CMSG_NAME_QUERY for: %s", pn->name );
+	DEBUG_LOG("WorldSession","Received CMSG_NAME_QUERY for: %s", pn->name );
 
 	uint8 databuffer[5000];
 	StackPacket data(SMSG_NAME_QUERY_RESPONSE, databuffer, 5000);
@@ -91,7 +91,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
 		if(lcn == NULL)
 		{
-			DEBUG_LOG("WORLD: CMSG_CREATURE_QUERY '%s'", ci->Name);
+			OUT_DEBUG("WORLD: CMSG_CREATURE_QUERY '%s'", ci->Name);
 			data << (uint32)entry;
 			data << ci->Name;
 			data << uint8(0) << uint8(0) << uint8(0);
@@ -99,7 +99,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 		}
 		else
 		{
-			DEBUG_LOG("WORLD: CMSG_CREATURE_QUERY '%s' (localized to %s)", ci->Name, lcn->Name);
+			OUT_DEBUG("WORLD: CMSG_CREATURE_QUERY '%s' (localized to %s)", ci->Name, lcn->Name);
 			data << (uint32)entry;
 			data << lcn->Name;
 			data << uint8(0) << uint8(0) << uint8(0);
@@ -142,7 +142,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 	recv_data >> entryID;
 	recv_data >> guid;
 
-	DEBUG_LOG("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", entryID);
+	OUT_DEBUG("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", entryID);
 
 	goinfo = GameObjectNameStorage.LookupEntry(entryID);
 	if(goinfo == NULL)
@@ -192,7 +192,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 {
-	DEBUG_LOG("WORLD: Received MSG_CORPSE_QUERY");
+	OUT_DEBUG("WORLD: Received MSG_CORPSE_QUERY");
 
 	CorpsePointer pCorpse;
 	//WorldPacket data(MSG_CORPSE_QUERY, 21);

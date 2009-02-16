@@ -81,7 +81,7 @@ void AuthSocket::HandleChallenge()
 	uint8 * ReceiveBuffer = (uint8*)GetReadBuffer().GetBufferStart();
 	uint16 full_size = *(uint16*)&ReceiveBuffer[2];
 
-	Log.Debug("AuthChallenge","got header, body is 0x%02X bytes", full_size);
+	DEBUG_LOG("AuthChallenge","got header, body is 0x%02X bytes", full_size);
 
 	if(GetReadBuffer().GetSize() < uint32(full_size+4))
 		return;
@@ -93,7 +93,7 @@ void AuthSocket::HandleChallenge()
 		return;
 	}
 
-	Log.Debug("AuthChallenge","got full packet.");
+	DEBUG_LOG("AuthChallenge","got full packet.");
 
 	GetReadBuffer().Read(&m_challenge, full_size + 4);
  
@@ -124,7 +124,7 @@ void AuthSocket::HandleChallenge()
 			return;
 		}
 
-		Log.Debug("Patch", "Selected patch %u%s for client.", m_patch->Version,m_patch->Locality);
+		DEBUG_LOG("Patch", "Selected patch %u%s for client.", m_patch->Version,m_patch->Locality);
 
 		BigNumber unk;
 		unk.SetRand(128);
@@ -177,7 +177,7 @@ void AuthSocket::HandleChallenge()
 	m_account = AccountMgr::getSingleton().GetAccount(AccountName);
 	if(m_account == 0)
 	{
-		Log.Debug("AuthChallenge","Invalid account.");
+		DEBUG_LOG("AuthChallenge","Invalid account.");
 
 		// Non-existant account
 		SendChallengeError(CE_NO_ACCOUNT);
@@ -258,7 +258,7 @@ void AuthSocket::HandleProof()
 	{
 		//RemoveReadBufferBytes(75,false);
 		GetReadBuffer().Remove(75);
-		Log.Debug("AuthLogonProof","Intitiating PatchJob");
+		DEBUG_LOG("AuthLogonProof","Intitiating PatchJob");
 		uint8 bytes[2] = {0x01,0x0a};
 		Send(bytes,2);
 		PatchMgr::getSingleton().InitiatePatch(m_patch, this);
@@ -268,7 +268,7 @@ void AuthSocket::HandleProof()
 	if(!m_account)
 		return;
 
-	Log.Debug("AuthLogonProof","Interleaving and checking proof...");
+	DEBUG_LOG("AuthLogonProof","Interleaving and checking proof...");
 
 	sAuthLogonProof_C lp;
 	GetReadBuffer().Read(&lp, sizeof(sAuthLogonProof_C));
@@ -348,17 +348,17 @@ void AuthSocket::HandleProof()
 		// Authentication failed.
 		//SendProofError(4, 0);
 		SendChallengeError(CE_NO_ACCOUNT);
-		Log.Debug("AuthLogonProof","M1 values don't match.");
+		DEBUG_LOG("AuthLogonProof","M1 values don't match.");
 		return;
 	}
 
 	// Store sessionkey
 	m_account->SetSessionKey(m_sessionkey.AsByteArray());
 
-//	DEBUG_LOG("========================\nSession key: ");
+//	OUT_DEBUG("========================\nSession key: ");
 //	for(uint32 z = 0; z < 40; ++z)
-//		DEBUG_LOG("%.2X ", m_account->SessionKey[z]);
-//	DEBUG_LOG("\n========================\n");
+//		OUT_DEBUG("%.2X ", m_account->SessionKey[z]);
+//	OUT_DEBUG("\n========================\n");
 
 
 	// let the client know
@@ -367,7 +367,7 @@ void AuthSocket::HandleProof()
 	sha.Finalize();
 
 	SendProofError(0, sha.GetDigest());
-	Log.Debug("AuthLogonProof","Authentication Success.");
+	DEBUG_LOG("AuthLogonProof","Authentication Success.");
 
 	// we're authenticated now :)
 	m_authenticated = true;
@@ -504,7 +504,7 @@ void AuthSocket::HandleReconnectChallenge()
 	// Check the rest of the packet is complete.
 	uint8 * ReceiveBuffer = (uint8*)GetReadBuffer().GetBufferStart();
 	uint16 full_size = *(uint16*)&ReceiveBuffer[2];
-	Log.Debug("ReconnectChallenge","got header, body is 0x%02X bytes", full_size);
+	DEBUG_LOG("ReconnectChallenge","got header, body is 0x%02X bytes", full_size);
 
 	if(GetReadBuffer().GetSize() < (uint32)full_size+4)
 		return;
@@ -516,7 +516,7 @@ void AuthSocket::HandleReconnectChallenge()
 		return;
 	}
 
-	Log.Debug("ReconnectChallenge","got full packet.");
+	DEBUG_LOG("ReconnectChallenge","got full packet.");
 
 	memcpy(&m_challenge, ReceiveBuffer, full_size + 4);
 	GetReadBuffer().Read(&m_challenge, full_size + 4);
@@ -562,7 +562,7 @@ void AuthSocket::HandleReconnectChallenge()
 	m_account = AccountMgr::getSingleton().GetAccount(AccountName);
 	if(m_account == 0)
 	{
-		Log.Debug("ReconnectChallenge","Invalid account.");
+		DEBUG_LOG("ReconnectChallenge","Invalid account.");
 
 		// Non-existant account
 		SendChallengeError(CE_NO_ACCOUNT);
@@ -584,7 +584,7 @@ void AuthSocket::HandleReconnectChallenge()
 		return;
 	}
 	else
-		Log.Debug("ReconnectChallenge","Account banned state = %u", m_account->Banned);
+		DEBUG_LOG("ReconnectChallenge","Account banned state = %u", m_account->Banned);
 
 	if(!m_account->SessionKey)
 	{
@@ -611,17 +611,17 @@ void AuthSocket::HandleReconnectProof()
 		return;
 
 	// Load sessionkey from account database.
-	QueryResult * result = sLogonSQL->Query ("SELECT SessionKey FROM accounts WHERE login = '%s'", AccountName.c_str());
+	QueryResult * result = sLogonSQL->Query ("SELECT SessionKey FROM accounts WHERE acct = %u", m_account->AccountId);
 	if(result)
 	{
 		Field * field = result->Fetch();
 		K.SetHexStr(field[0].GetString ());
-	    delete result;
+		delete result;
 	}
 	else
 	{
 	    // Disconnect if the sessionkey invalid or not found
-		Log.Debug("AuthReConnectProof","No matching SessionKey found while user %s tried to login.", AccountName.c_str());
+		DEBUG_LOG("AuthReConnectProof","No matching SessionKey found while user %s tried to login.", AccountName.c_str());
 		Disconnect();
 		return;
 	}
@@ -653,16 +653,16 @@ void AuthSocket::HandleReconnectProof()
 		// we're authenticated now :)
 		m_authenticated = true;
 
-		Log.Debug("AuthReConnectProof","Authentication Success.");
+		DEBUG_LOG("AuthReConnectProof","Authentication Success.");
 	}
 	else
-		Log.Debug("AuthReConnectProof","Authentication Failed.");
+		DEBUG_LOG("AuthReConnectProof","Authentication Failed.");
 
 }
 
 void AuthSocket::HandleTransferAccept()
 {
-	Log.Debug("AuthSocket","Accepted transfer");
+	DEBUG_LOG("AuthSocket","Accepted transfer");
 	if(!m_patch)
 		return;
 
@@ -672,7 +672,7 @@ void AuthSocket::HandleTransferAccept()
 
 void AuthSocket::HandleTransferResume()
 {
-	Log.Debug("AuthSocket","Resuming transfer");
+	DEBUG_LOG("AuthSocket","Resuming transfer");
 	if(!m_patch)
 		return;
 
