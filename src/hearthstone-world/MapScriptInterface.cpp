@@ -135,7 +135,10 @@ CreaturePointer MapScriptInterface::SpawnCreature(uint32 Entry, float cX, float 
 	p->spawnid = 0;
 	p->m_spawn = NULL;
 	delete sp;
-	p->PushToWorld(mapMgr);
+
+	if( AddToWorld )
+		p->PushToWorld(mapMgr);
+
 	return p;
 }
 
