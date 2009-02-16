@@ -69,7 +69,7 @@ WServer * ClusterMgr::CreateWorkerServer(WSSocket * s)
 	if(i == MAX_WORKER_SERVERS)
 		return 0;		// No spaces
 
-	DEBUG_LOG("ClusterMgr", "Allocating worker server %u to %s:%u", i, s->GetRemoteIP().c_str(), s->GetRemotePort());
+	Log.Debug("ClusterMgr", "Allocating worker server %u to %s:%u", i, s->GetRemoteIP().c_str(), s->GetRemotePort());
 	WorkerServers[i] = new WServer(i, s);
 	if(m_maxWorkerServer < i)
 		m_maxWorkerServer = i;
@@ -112,7 +112,7 @@ Instance * ClusterMgr::CreateInstance(uint32 MapId, WServer * server)
 	data << MapId << pInstance->InstanceId;
 	server->SendPacket(&data);
 	server->AddInstance(pInstance);
-	DEBUG_LOG("ClusterMgr", "Allocating instance %u on map %u to server %u", pInstance->InstanceId, pInstance->MapId, server->GetID());
+	Log.Debug("ClusterMgr", "Allocating instance %u on map %u to server %u", pInstance->InstanceId, pInstance->MapId, server->GetID());
 	return pInstance;
 }
 
@@ -162,7 +162,7 @@ Instance * ClusterMgr::CreateInstance(uint32 InstanceId, uint32 MapId)
 	data << MapId << InstanceId;
 	server->SendPacket(&data);
 	server->AddInstance(pInstance);
-	DEBUG_LOG("ClusterMgr", "Allocating instance %u on map %u to server %u", pInstance->InstanceId, pInstance->MapId, server->GetID());
+	Log.Debug("ClusterMgr", "Allocating instance %u on map %u to server %u", pInstance->InstanceId, pInstance->MapId, server->GetID());
 	return pInstance;
 }
 

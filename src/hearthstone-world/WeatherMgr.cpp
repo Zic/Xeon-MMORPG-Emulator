@@ -55,7 +55,7 @@ void BuildWeatherPacket(WorldPacket * data, uint32 Effect, float Density )
 		*data << Effect << float(0) << uint32(0) << uint8(0);		
 	else
 		*data << Effect << Density << GetSound(Effect,Density) << uint8(0) ;
-//	OUT_DEBUG("Send Weather Update %d, Density %f, Sound %d, unint8(0)", Effect,Density,GetSound(Effect,Density));
+//	DEBUG_LOG("Send Weather Update %d, Density %f, Sound %d, unint8(0)", Effect,Density,GetSound(Effect,Density));
 }
 
 uint32 GetSound(uint32 Effect, float Density)
@@ -199,7 +199,7 @@ void WeatherInfo::_GenerateWeather()
 	SendUpdate();
 
 	sEventMgr.AddEvent(CAST(WeatherInfo,shared_from_this()), &WeatherInfo::BuildUp, EVENT_WEATHER_UPDATE, (uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2), 0,0);
-	DEBUG_LOG("WeatherMgr", "Forecast for zone:%d new type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2));
+	Log.Debug("WeatherMgr", "Forecast for zone:%d new type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*2));
 }
 
 void WeatherInfo::BuildUp()
@@ -209,12 +209,12 @@ void WeatherInfo::BuildUp()
 	{
 		sEventMgr.RemoveEvents(shared_from_this(), EVENT_WEATHER_UPDATE);
 		sEventMgr.AddEvent(CAST(WeatherInfo,shared_from_this()), &WeatherInfo::Update, EVENT_WEATHER_UPDATE, (uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*4), 0,0);
-//		OUT_DEBUG("Weather starting random for zone:%d type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*4));
+//		DEBUG_LOG("Weather starting random for zone:%d type:%d new interval:%d ms",m_zoneId,m_currentEffect,(uint32)(m_totalTime/ceil(m_maxDensity/WEATHER_DENSITY_UPDATE)*4));
 	}
 	else
 	{
 		m_currentDensity += WEATHER_DENSITY_UPDATE;
-//		OUT_DEBUG("Weather increased for zone:%d type:%d density:%f",m_zoneId,m_currentEffect,m_currentDensity);
+//		DEBUG_LOG("Weather increased for zone:%d type:%d density:%f",m_zoneId,m_currentEffect,m_currentDensity);
 		SendUpdate();
 	}
 }
@@ -243,7 +243,7 @@ void WeatherInfo::Update()
 		}
 	}
 	SendUpdate();
-//	OUT_DEBUG("Weather Updated,zoneId:%d type:%d density:%f", m_zoneId, m_currentEffect, m_currentDensity);
+//	DEBUG_LOG("Weather Updated,zoneId:%d type:%d density:%f", m_zoneId, m_currentEffect, m_currentDensity);
 }
 
 void WeatherInfo::SendUpdate()

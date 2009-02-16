@@ -380,7 +380,7 @@ void WorldSession::LogoutPlayer(bool Save)
 			_player = NULLPLR;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);
-		DEBUG_LOG( "WorldSession","Sent SMSG_LOGOUT_COMPLETE Message" );
+		Log.Debug( "WorldSession","Sent SMSG_LOGOUT_COMPLETE Message" );
 	}
 	_loggingOut = false;
 
@@ -438,7 +438,7 @@ void WorldSession::LoadSecurity(std::string securitystring)
 	if(permissions[tmp.size()] != 0)
 		permissions[tmp.size()] = 0;
 
-	DEBUG_LOG("WorldSession","Loaded permissions for %u. (%u) : [%s]", this->GetAccountId(), permissioncount, securitystring.c_str());
+	Log.Debug("WorldSession","Loaded permissions for %u. (%u) : [%s]", this->GetAccountId(), permissioncount, securitystring.c_str());
 }
 
 void WorldSession::SetSecurity(std::string securitystring)

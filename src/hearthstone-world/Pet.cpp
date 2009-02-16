@@ -1154,7 +1154,7 @@ void Pet::ApplySummonLevelAbilities()
 
 	if(stat_index < 0)
 	{
-		OUT_DEBUG("PETSTAT: No stat index found for entry %u, `%s`!", GetEntry(), creature_info->Name);
+		DEBUG_LOG("PETSTAT: No stat index found for entry %u, `%s`!", GetEntry(), creature_info->Name);
 		return;
 	}
 
@@ -1487,9 +1487,9 @@ void Pet::ApplyPetLevelAbilities()
 	if(creature_info->Family > 35 || R_pet_mod_sta[creature_info->Family] == 0)
 	{
 		if( myFamily == NULL && myFamily->name != NULL )
-            OUT_DEBUG("PETSTAT: Creature family %u has missing data. Assuming to be 1.", creature_info->Family);
+            DEBUG_LOG("PETSTAT: Creature family %u has missing data. Assuming to be 1.", creature_info->Family);
 		else
-			OUT_DEBUG("PETSTAT: Creature family %u [%s] has missing data. Assuming to be 1.", creature_info->Family, myFamily->name);
+			DEBUG_LOG("PETSTAT: Creature family %u [%s] has missing data. Assuming to be 1.", creature_info->Family, myFamily->name);
 	}
 	else
 	{
@@ -1646,7 +1646,7 @@ void Pet::AddPetSpellToOwner(uint32 spellId)
 	
 	}
 	else
-		OUT_DEBUG("WORLD: Could not find teaching spell for spell %u", spellId);
+		DEBUG_LOG("WORLD: Could not find teaching spell for spell %u", spellId);
 }
 uint32 Pet::GetHighestRankSpell(uint32 spellId)
 {	

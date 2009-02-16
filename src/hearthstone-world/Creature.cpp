@@ -190,7 +190,7 @@ void Creature::OnRemoveCorpse()
 	if (IsInWorld() && (int32)m_mapMgr->GetInstanceID() == m_instanceId)
 	{
 
-		OUT_DEBUG("Removing corpse of "I64FMT"...", GetGUID());
+		DEBUG_LOG("Removing corpse of "I64FMT"...", GetGUID());
 	   
 			if((GetMapMgr()->GetMapInfo() && GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID && proto && proto->boss) || m_noRespawn)
 			{
@@ -217,7 +217,7 @@ void Creature::OnRemoveCorpse()
 
 void Creature::OnRespawn( MapMgrPointer m)
 {
-	OUT_DEBUG("Respawning "I64FMT"...", GetGUID());
+	DEBUG_LOG("Respawning "I64FMT"...", GetGUID());
 	SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 	SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0); // not tagging shiat
 	if(proto && m_spawn)
@@ -861,7 +861,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	SetFloatValue(OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))));
 
 	SetFloatValue( OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( spawn->displayid ))));
-	DEBUG_LOG("Creatures","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, spawn->displayid, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( spawn->displayid ))); 
+	Log.Debug("Creatures","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, spawn->displayid, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( spawn->displayid ))); 
 
 	SetUInt32Value(UNIT_NPC_EMOTESTATE, original_emotestate);
 	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,original_MountedDisplayID);
@@ -1066,7 +1066,7 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	setGender(gender);
 
 	SetFloatValue(OBJECT_FIELD_SCALE_X,( proto->Scale ? proto->Scale : GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))));
-	DEBUG_LOG("Creature","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, model, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))); 
+	Log.Debug("Creature","NPC %u (model %u) got scale %f, found in DBC %f", proto->Id, model, GetFloatValue(OBJECT_FIELD_SCALE_X), GetScale( dbcCreatureDisplayInfo.LookupEntry( model ))); 
 
 	SetUInt32Value(UNIT_FIELD_DISPLAYID,model);
 	SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,model);

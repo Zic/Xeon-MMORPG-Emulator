@@ -237,7 +237,7 @@ void WorldSession::HandlePetAction(WorldPacket & recv_data)
 void WorldSession::HandlePetInfo(WorldPacket & recv_data)
 {
 	//nothing
-	DEBUG_LOG("WorldSession","HandlePetInfo is called");
+	Log.Debug("WorldSession","HandlePetInfo is called");
 }
 
 void WorldSession::HandlePetNameQuery(WorldPacket & recv_data)
@@ -291,7 +291,7 @@ void WorldSession::HandleUnstablePet(WorldPacket & recv_data)
 	PlayerPet *pet = _player->GetPlayerPet(petnumber);
 	if(!pet)
 	{
-		OUT_DEBUG("PET SYSTEM: Player "I64FMT" tried to unstable non-existant pet %d", _player->GetGUID(), petnumber);
+		DEBUG_LOG("PET SYSTEM: Player "I64FMT" tried to unstable non-existant pet %d", _player->GetGUID(), petnumber);
 		return;
 	}
 	_player->SpawnPet(petnumber);
@@ -313,7 +313,7 @@ void WorldSession::HandleStableSwapPet(WorldPacket & recv_data)
 	PlayerPet *pet = _player->GetPlayerPet(petnumber);
 	if(!pet)
 	{
-		OUT_DEBUG("PET SYSTEM: Player "I64FMT" tried to unstable non-existant pet %d", _player->GetGUID(), petnumber);
+		DEBUG_LOG("PET SYSTEM: Player "I64FMT" tried to unstable non-existant pet %d", _player->GetGUID(), petnumber);
 		return;
 	}
 	PetPointer pPet = _player->GetSummon();

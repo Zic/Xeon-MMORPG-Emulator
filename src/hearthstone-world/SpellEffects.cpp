@@ -189,7 +189,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 
 void Spell::SpellEffectNULL(uint32 i)
 {
-	DEBUG_LOG("Spell","Unhandled spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
+	Log.Debug("Spell","Unhandled spell effect %u in spell %u.\n",m_spellInfo->Effect[i],m_spellInfo->Id);
 }
 
 void Spell::SpellEffectInstantKill(uint32 i)
@@ -3790,7 +3790,7 @@ void Spell::SpellEffectSummonWildOld(uint32 i)  // Summon Wild
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(cr_entry);
 	if(!proto || !info)
 	{
-		OUT_DEBUG("Warning : Missing summon creature template %u used by spell %u!",cr_entry,m_spellInfo->Id);
+		DEBUG_LOG("Warning : Missing summon creature template %u used by spell %u!",cr_entry,m_spellInfo->Id);
 		return;
 	}
 	for(int i=0;i<damage;i++)
@@ -5287,7 +5287,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	CreatureInfo* ci = CreatureNameStorage.LookupEntry(entry);
 	if(!ci)
 	{
-		OUT_DEBUG("Missing totem creature entry : %u \n",entry);
+		DEBUG_LOG("Missing totem creature entry : %u \n",entry);
 		return;
 	}
 
@@ -5295,7 +5295,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	SpellEntry * TotemSpell = ObjectMgr::getSingleton().GetTotemSpell(m_spellInfo->Id);
 	if(TotemSpell == 0) 
 	{
-		OUT_DEBUG("Totem %u does not have any spells to cast, exiting\n",entry);
+		DEBUG_LOG("Totem %u does not have any spells to cast, exiting\n",entry);
 		return;
 	}
 

@@ -135,7 +135,7 @@ void VoiceChatHandler::OnRead(WorldPacket* pck)
 			*pck >> request_id;
 			*pck >> error;
 
-			DEBUG_LOG("VoiceChatHandler", "Request ID %u, error %u", request_id, (int)error);
+			Log.Debug("VoiceChatHandler", "Request ID %u, error %u", request_id, (int)error);
 			for(vector<VoiceChatChannelRequest>::iterator itr = m_requests.begin(); itr != m_requests.end(); ++itr)
 			{
 				if(itr->id == request_id)
@@ -186,7 +186,7 @@ void VoiceChatHandler::SocketDisconnected()
 {
 	m_lock.Acquire();
 
-	DEBUG_LOG("VoiceChatHandler", "SocketDisconnected");
+	Log.Debug("VoiceChatHandler", "SocketDisconnected");
 	m_client = NULL;
 	m_requests.clear();
 
@@ -221,7 +221,7 @@ void VoiceChatHandler::CreateVoiceChannel(Channel * chn)
 	if(m_client == NULL)
 		return;
 
-	DEBUG_LOG("VoiceChatHandler", "CreateVoiceChannel %s", chn->m_name.c_str());
+	Log.Debug("VoiceChatHandler", "CreateVoiceChannel %s", chn->m_name.c_str());
 	VoiceChatChannelRequest req;
 
 	m_lock.Acquire();
@@ -244,7 +244,7 @@ void VoiceChatHandler::CreateGroupChannel(Group * pGroup)
 	if( m_client == NULL )
 		return;
 
-	DEBUG_LOG("VoiceChatHandler", "CreateGroupChannel for group %u", pGroup->GetID());
+	Log.Debug("VoiceChatHandler", "CreateGroupChannel for group %u", pGroup->GetID());
 	ByteBuffer buf(50);
 	VoiceChatChannelRequest req;
 
@@ -296,7 +296,7 @@ void VoiceChatHandler::ActivateChannelSlot(uint16 channel_id, uint8 slot_id)
 	if( m_client == NULL )
 		return;
 
-	DEBUG_LOG("VoiceChatHandler", "Channel %u activate slot %u", (int)channel_id, (int)slot_id);
+	Log.Debug("VoiceChatHandler", "Channel %u activate slot %u", (int)channel_id, (int)slot_id);
 
 	m_lock.Acquire();
 
@@ -313,7 +313,7 @@ void VoiceChatHandler::DeactivateChannelSlot(uint16 channel_id, uint8 slot_id)
 	if( m_client == NULL )
 		return;
 
-	DEBUG_LOG("VoiceChatHandler", "Channel %u deactivate slot %u", (int)channel_id, (int)slot_id);
+	Log.Debug("VoiceChatHandler", "Channel %u deactivate slot %u", (int)channel_id, (int)slot_id);
 
 	m_lock.Acquire();
 
@@ -328,7 +328,7 @@ void VoiceChatHandler::DeactivateChannelSlot(uint16 channel_id, uint8 slot_id)
 
 void VoiceChatHandler::DestroyVoiceChannel(Channel * chn)
 {
-	DEBUG_LOG("VoiceChatHandler", "DestroyVoiceChannel %s", chn->m_name.c_str());
+	Log.Debug("VoiceChatHandler", "DestroyVoiceChannel %s", chn->m_name.c_str());
 
 	if(chn->i_voice_channel_id != (uint16)-1 && m_client)
 	{

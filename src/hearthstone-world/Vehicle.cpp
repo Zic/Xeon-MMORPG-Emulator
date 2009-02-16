@@ -65,7 +65,7 @@ void Vehicle::InitSeats(uint32 vehicleEntry, PlayerPointer pRider)
 	VehicleEntry * ve = dbcVehicle.LookupEntry( vehicleEntry );
 	if(!ve)
 	{
-		OUT_DEBUG("Attempted to create non-existant vehicle %u.\n", vehicleEntry);
+		DEBUG_LOG("Attempted to create non-existant vehicle %u.\n", vehicleEntry);
 		return;
 	}
 
@@ -97,14 +97,14 @@ void Vehicle::Load(CreatureProto * proto_, float x, float y, float z, float o /*
 	else
 	{
 		m_vehicleEntry = 124;
-		OUT_DEBUG("Attempted to create vehicle %u with invalid vehicle_entry, defaulting to 124, check your creature_proto table.\n", proto->Id);
+		DEBUG_LOG("Attempted to create vehicle %u with invalid vehicle_entry, defaulting to 124, check your creature_proto table.\n", proto->Id);
 	}
 
 	m_maxPassengers = 0;
 	VehicleEntry * ve = dbcVehicle.LookupEntry( m_vehicleEntry );
 	if(!ve)
 	{
-		OUT_DEBUG("Attempted to create non-existant vehicle %u.\n", GetVehicleEntry());
+		DEBUG_LOG("Attempted to create non-existant vehicle %u.\n", GetVehicleEntry());
 		return;
 	}
 
@@ -135,14 +135,14 @@ bool Vehicle::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	else
 	{
 		m_vehicleEntry = 124;
-		OUT_DEBUG("Attempted to create vehicle %u with invalid vehicle_entry, defaulting to 124, check your creature_proto table.\n", proto->Id);
+		DEBUG_LOG("Attempted to create vehicle %u with invalid vehicle_entry, defaulting to 124, check your creature_proto table.\n", proto->Id);
 	}
 
 	m_maxPassengers = 0;
 	VehicleEntry * ve = dbcVehicle.LookupEntry( m_vehicleEntry );
 	if(!ve)
 	{
-		OUT_DEBUG("Attempted to create non-existant vehicle %u.\n", GetVehicleEntry());
+		DEBUG_LOG("Attempted to create non-existant vehicle %u.\n", GetVehicleEntry());
 		return false;
 	}
 

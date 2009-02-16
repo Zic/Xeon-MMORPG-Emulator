@@ -1038,7 +1038,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 				if( m_nextSpell == NULL || m_nextTarget == NULL )
 					return;  // this shouldnt happen
 
-				DEBUG_LOG("AiAgents","NextSpell %u by NPC %u",m_nextSpell->spell->Id, GetUnit()->GetGUID());
+				Log.Debug("AiAgents","NextSpell %u by NPC %u",m_nextSpell->spell->Id, GetUnit()->GetGUID());
 
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
 					TO_CREATURE(m_Unit)->SetSheatheForAttackType( 0 );
@@ -1120,7 +1120,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							m_nextSpell->procCounter++;
 					}
 					else
-						DEBUG_LOG("AIAgents","Spell failed: Result %u, NPC %u, spell %u, TargetType %u", ccr, m_Unit->GetEntry() , spellInfo->Id, targettype );
+						Log.Debug("AIAgents","Spell failed: Result %u, NPC %u, spell %u, TargetType %u", ccr, m_Unit->GetEntry() , spellInfo->Id, targettype );
 				}
 				else // Target out of Range/not in LOS -> Run to it
 				{
@@ -1770,9 +1770,9 @@ Comments: Some comments on the SMSG_MONSTER_MOVE packet:
 			there is no need to send  the next 3 uint32's as they are'nt used by the client
 	
 	the MoveFlags:
-	0x00000000 - Walk
-	0x00000100 - Run
-	0x00000200 - Fly
+		0x00000000 - Walk
+		0x00000100 - Run
+		0x00000200 - Fly
 		some comments on that 0x00000300 - Fly = 0x00000100 | 0x00000200
 
 	waypoints:
@@ -1960,7 +1960,7 @@ void AIInterface::UpdateMove()
 					{
 						//Destination is not on ground anymore
 						HandleEvent(EVENT_LEAVECOMBAT, m_Unit, 0); //follow
-						DEBUG_LOG("MOVEMENT","Can't fly, leaving combat");
+						Log.Debug("MOVEMENT","Can't fly, leaving combat");
 						return;
 					}
 				}
@@ -1988,11 +1988,11 @@ void AIInterface::UpdateMove()
 						if(m_moveFly)
 						{
 							m_destinationZ = wl + 2.5f;
-							DEBUG_LOG("MOVEMENT","flying 2.5f above water");
+							Log.Debug("MOVEMENT","flying 2.5f above water");
 						}
 						else
 						{
-							DEBUG_LOG("MOVEMENT","Can't swim, leaving combat");
+							Log.Debug("MOVEMENT","Can't swim, leaving combat");
 							HandleEvent(EVENT_LEAVECOMBAT, m_Unit, 0); //follow
 							return;
 						}
@@ -2828,7 +2828,7 @@ SpellEntry *AIInterface::getSpellEntry(uint32 spellId)
 
 	if(!spellInfo)
 	{
-		OUT_DEBUG("WORLD: unknown spell id %i\n", spellId);
+		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
 		return NULL;
 	}
 
@@ -3471,7 +3471,7 @@ void AIInterface::UpdateCivilian()
 			guardId = 3296; // Orgrimmar Grunt
 		else
 			guardId = 68; // Stormwind City Guard
-		DEBUG_LOG("ZoneGuards","No zone guard specified for zone %u, using default guardId %u", target->GetZoneId(), guardId);
+		Log.Debug("ZoneGuards","No zone guard specified for zone %u, using default guardId %u", target->GetZoneId(), guardId);
 	}
 
 	CreatureProto * cp = CreatureProtoStorage.LookupEntry( guardId );

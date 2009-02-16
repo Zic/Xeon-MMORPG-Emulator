@@ -343,7 +343,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 
 	if(plObj)
 	{
-		DEBUG_LOG("MapMgr","Creating player "I64FMT" for himself.", obj->GetGUID());
+		Log.Debug("MapMgr","Creating player "I64FMT" for himself.", obj->GetGUID());
 		count = plObj->BuildCreateUpdateBlockForPlayer(&m_createBuffer, plObj);
 		plObj->PushCreationData(&m_createBuffer, count);
 		m_createBuffer.clear();
@@ -1245,7 +1245,7 @@ void MapMgr::LoadAllCells()
 				// There is no spoon. Err... cell.
 				cellInfo = Create( x , y );
 				cellInfo->Init( x , y , _mapId , shared_from_this() );
-				OUT_DEBUG( "Created cell [%u,%u] on map %d (instance %d)." , x , y , _mapId , m_instanceID );
+				DEBUG_LOG( "Created cell [%u,%u] on map %d (instance %d)." , x , y , _mapId , m_instanceID );
 				cellInfo->SetActivity( true );
 				_map->CellGoneActive( x , y );
 				ASSERT( !cellInfo->IsLoaded() );
@@ -1259,13 +1259,13 @@ void MapMgr::LoadAllCells()
 				// Cell exists, but is inactive
 				if ( !cellInfo->IsActive() )
 				{
-					OUT_DEBUG("Activated cell [%u,%u] on map %d (instance %d).", x, y, _mapId, m_instanceID );
+					DEBUG_LOG("Activated cell [%u,%u] on map %d (instance %d).", x, y, _mapId, m_instanceID );
 					_map->CellGoneActive( x , y );
 					cellInfo->SetActivity( true );
 
 					if (!cellInfo->IsLoaded())
 					{
-						//OUT_DEBUG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
+						//DEBUG_LOG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
 						//	posX, posY, this->_mapId, m_instanceID);
 						spawns = _map->GetSpawnsList( x , y );
 						if( spawns )
@@ -1301,14 +1301,14 @@ void MapMgr::UpdateCellActivity(uint32 x, uint32 y, int radius)
 					objCell = Create(posX, posY);
 					objCell->Init(posX, posY, _mapId, shared_from_this());
 
-//					OUT_DEBUG("Cell [%d,%d] on map %d (instance %d) is now active.", 
+//					DEBUG_LOG("Cell [%d,%d] on map %d (instance %d) is now active.", 
 //						posX, posY, this->_mapId, m_instanceID);
 					objCell->SetActivity(true);
 					_map->CellGoneActive(posX, posY);
 
 					ASSERT(!objCell->IsLoaded());
 
-//					OUT_DEBUG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
+//					DEBUG_LOG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
 //						posX, posY, this->_mapId, m_instanceID);
 
 					sp = _map->GetSpawnsList(posX, posY);
@@ -1320,14 +1320,14 @@ void MapMgr::UpdateCellActivity(uint32 x, uint32 y, int radius)
 				//Cell is now active
 				if (_CellActive(posX, posY) && !objCell->IsActive())
 				{
-//					OUT_DEBUG("Cell [%d,%d] on map %d (instance %d) is now active.", 
+//					DEBUG_LOG("Cell [%d,%d] on map %d (instance %d) is now active.", 
 //						posX, posY, this->_mapId, m_instanceID);
 					_map->CellGoneActive(posX, posY);
 					objCell->SetActivity(true);
 
 					if (!objCell->IsLoaded())
 					{
-//						OUT_DEBUG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
+//						DEBUG_LOG("Loading objects for Cell [%d][%d] on map %d (instance %d)...", 
 //							posX, posY, this->_mapId, m_instanceID);
 						sp = _map->GetSpawnsList(posX, posY);
 						if(sp) objCell->LoadObjects(sp);
@@ -1336,7 +1336,7 @@ void MapMgr::UpdateCellActivity(uint32 x, uint32 y, int radius)
 				//Cell is no longer active
 				else if (!_CellActive(posX, posY) && objCell->IsActive())
 				{
-//					OUT_DEBUG("Cell [%d,%d] on map %d (instance %d) is now idle.", 
+//					DEBUG_LOG("Cell [%d,%d] on map %d (instance %d) is now idle.", 
 //						posX, posY, this->_mapId, m_instanceID);
 					_map->CellGoneIdle(posX, posY);
 					objCell->SetActivity(false);
@@ -1899,7 +1899,7 @@ void MapMgr::UnloadCell(uint32 x,uint32 y)
 	MapCell * c = GetCell(x,y);
 	if(c == NULL || c->HasPlayers() || _CellActive(x,y) || !c->IsUnloadPending()) return;
 
-	OUT_DEBUG("Unloading Cell [%d][%d] on map %d (instance %d)...", 
+	DEBUG_LOG("Unloading Cell [%d][%d] on map %d (instance %d)...", 
 		x,y,_mapId,m_instanceID);
 
 	c->Unload();

@@ -173,7 +173,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 	uint32 spellid = talentInfo->RankID[requested_rank];
 	if( spellid == 0 )
 	{
-		OUT_DEBUG("Talent: %u Rank: %u = 0", talent_id, requested_rank);
+		DEBUG_LOG("Talent: %u Rank: %u = 0", talent_id, requested_rank);
 	}
 	else
 	{

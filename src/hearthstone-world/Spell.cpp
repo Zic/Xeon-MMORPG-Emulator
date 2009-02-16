@@ -195,7 +195,7 @@ Spell::Spell(ObjectPointer Caster, SpellEntry *info, bool triggered, AuraPointer
 		    g_caster = TO_GAMEOBJECT( Caster );
         }break;
         default:
-            OUT_DEBUG("[DEBUG][SPELL] Incompatible object type, please report this to the dev's");
+            DEBUG_LOG("[DEBUG][SPELL] Incompatible object type, please report this to the dev's");
         break;
 	}
 
@@ -1250,7 +1250,7 @@ void Spell::cast(bool check)
 		return;
 	}
 
-	DEBUG_LOG("Spell","Cast %u, Unit: %u", m_spellInfo->Id, m_caster->GetLowGUID());
+	Log.Debug("Spell","Cast %u, Unit: %u", m_spellInfo->Id, m_caster->GetLowGUID());
 
 	if(check)
 		cancastresult = CanCast(true);
@@ -1306,7 +1306,7 @@ void Spell::cast(bool check)
 		{
 			if(!TakePower() && !m_triggeredSpell) //not enough mana
 			{
-				//OUT_DEBUG("Spell::Not Enough Mana");
+				//DEBUG_LOG("Spell::Not Enough Mana");
 				SendInterrupted(SPELL_FAILED_NO_POWER);
 				SendCastResult(SPELL_FAILED_NO_POWER);
 				finish();
@@ -1453,7 +1453,7 @@ void Spell::cast(bool check)
 						float tmpDistance = m_caster->CalcDistance(pTmpTarget);
 						float tmpTime = ( tmpDistance * 1000.0f ) / m_spellInfo->speed;
 
-						DEBUG_LOG("Spell projectile","dist: %.5f, time: %u speed: %f\n", tmpDistance, tmpTime, m_spellInfo->speed);
+						Log.Debug("Spell projectile","dist: %.5f, time: %u speed: %f\n", tmpDistance, tmpTime, m_spellInfo->speed);
 
 						if( tmpTime > 100.0f )
 						{
@@ -2361,7 +2361,7 @@ bool Spell::HasPower()
 		}
 	case POWER_TYPE_RUNIC:	{ powerField = UNIT_FIELD_POWER7; }break;
 	default:{
-		OUT_DEBUG("unknown power type %d", m_spellInfo->powerType);
+		DEBUG_LOG("unknown power type %d", m_spellInfo->powerType);
 		// we should'nt be here to return
 		return false;
 			}break;
@@ -2452,7 +2452,7 @@ bool Spell::TakePower()
 		}break;
 		default:
 		{
-			DEBUG_LOG("Spell","Unknown power type %u for spell %u", m_spellInfo->powerType, m_spellInfo->Id);
+			Log.Debug("Spell","Unknown power type %u for spell %u", m_spellInfo->powerType, m_spellInfo->Id);
 			// we shouldn't be here to return
 			return false;
 		}break;
@@ -2592,12 +2592,12 @@ void Spell::_SetTargets(const uint64& guid)
 void Spell::HandleEffects(uint32 i)
 {   
 	damage = CalculateEffect(i,unitTarget);  
-	DEBUG_LOG( "Spell","Handling Effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
+	Log.Debug( "Spell","Handling Effect id = %u, damage = %d", m_spellInfo->Effect[i], damage); 
 	
 	if( m_spellInfo->Effect[i]<TOTAL_SPELL_EFFECTS)
 		(*this.*SpellEffectsHandler[m_spellInfo->Effect[i]])(i);
 	else
-		DEBUG_LOG("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
+		Log.Debug("Spell","Unknown effect %u spellid %u",m_spellInfo->Effect[i], m_spellInfo->Id);
 }
 
 void Spell::HandleAddAura(uint64 guid)
@@ -2821,7 +2821,7 @@ uint8 Spell::CanCast(bool tolerate)
 	/* Spells for the zombie event */
 	if( p_caster && p_caster->GetShapeShift() == FORM_ZOMBIE && !( ((uint32)1 << (p_caster->GetShapeShift()-1)) & GetSpellProto()->RequiredShapeShift  ))
 	{
-		OUT_DEBUG("Invalid shapeshift: %u", GetSpellProto()->RequiredShapeShift);
+		DEBUG_LOG("Invalid shapeshift: %u", GetSpellProto()->RequiredShapeShift);
 		return SPELL_FAILED_SPELL_UNAVAILABLE;
 	}
 
@@ -2884,12 +2884,12 @@ uint8 Spell::CanCast(bool tolerate)
 				if ( p_caster->GetMapId() == 531 && ( m_spellInfo->Id == 25953 || m_spellInfo->Id == 26054 || m_spellInfo->Id == 26055 || m_spellInfo->Id == 26056 ) )
 					return SPELL_CANCAST_OK;
 
-				if (CollideInterface.IsIndoor( p_caster->GetMapId(), p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() + 2.0f ))
+				if (CollideInterface.IsIndoor( p_caster->GetMapId(), p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() ))
 					return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 			}
 			else if( m_spellInfo->Attributes & ATTRIBUTES_ONLY_OUTDOORS )
 			{
-				if( !CollideInterface.IsOutdoor( p_caster->GetMapId(),p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() + 2.0f ) )
+				if( !CollideInterface.IsOutdoor( p_caster->GetMapId(),p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() ) )
 					return SPELL_FAILED_ONLY_OUTDOORS;
 			}
 		}
@@ -3184,7 +3184,7 @@ uint8 Spell::CanCast(bool tolerate)
 
 				if(!info)
 				{
-					OUT_DEBUG("Warning: could not find info about game object %u",(*itr)->GetEntry());
+					DEBUG_LOG("Warning: could not find info about game object %u",(*itr)->GetEntry());
 					continue;
 				}
 

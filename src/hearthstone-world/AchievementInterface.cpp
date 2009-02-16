@@ -101,9 +101,6 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 	for(; itr != m_achivementDataMap.end(); ++itr)
 	{
 		AchievementData * ad = itr->second;
-		if( !ad->m_isDirty )
-			continue;
-
 		std::stringstream ss;
 		ss << "REPLACE INTO achievements (player,achievementid,progress,completed) VALUES (";
 		ss << m_player->GetLowGUID() << ",";
@@ -116,8 +113,6 @@ void AchievementInterface::SaveToDB(QueryBuffer * buffer)
 		ss << "',";
 		ss << ad->date << ")";
 		buffer->AddQueryStr( ss.str().c_str() );
-
-		ad->m_isDirty = false;
 	}
 
 	if( NewBuffer )
@@ -249,7 +244,6 @@ void AchievementInterface::EventAchievementEarned(AchievementData * pData)
 
 WorldPacket* AchievementInterface::BuildAchievementEarned(AchievementData * pData)
 {
-	pData->m_isDirty = true;
 	WorldPacket * data = new WorldPacket(SMSG_ACHIEVEMENT_EARNED, 40);
 	*data << m_player->GetNewGUID();
 	*data << pData->id;
@@ -343,7 +337,6 @@ AchievementData* AchievementInterface::GetAchievementDataByAchievementID(uint32 
 
 void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 {
-	ad->m_isDirty = true;
 	ad->date = (uint32)time(NULL);
 	WorldPacket data(SMSG_CRITERIA_UPDATE, 50);
 	AchievementEntry * ae = dbcAchievement.LookupEntry(ad->id);

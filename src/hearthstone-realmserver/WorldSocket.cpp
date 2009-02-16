@@ -308,7 +308,7 @@ void WorldSocket::OnRead()
 		mRemaining = mSize = mOpcode = 0;
 
 		// Check for packets that we handle
-		DEBUG_LOG("WorldSocket","Received Opcode: %u", Packet->GetOpcode());
+		Log.Debug("WorldSocket","Received Opcode: %u", Packet->GetOpcode());
 		switch(Packet->GetOpcode())
 		{
 		case CMSG_PING:

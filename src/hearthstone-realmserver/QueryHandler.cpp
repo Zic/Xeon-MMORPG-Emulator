@@ -43,7 +43,7 @@ void Session::HandleCreatureQueryOpcode(WorldPacket & pck)
 		ci = CreatureNameStorage.LookupEntry(entry);
 		if(ci == NULL)
 			return;
-		DEBUG_LOG("World", "CMSG_CREATURE_QUERY '%s'", ci->Name);
+		Log.Debug("World", "CMSG_CREATURE_QUERY '%s'", ci->Name);
 
 		data << (uint32)entry;
 		data << ci->Name;
@@ -74,7 +74,7 @@ void Session::HandleGameObjectQueryOpcode(WorldPacket & pck)
 
 	pck >> entryID;
 
-	DEBUG_LOG("World", "CMSG_GAMEOBJECT_QUERY '%u'", entryID);
+	Log.Debug("World", "CMSG_GAMEOBJECT_QUERY '%u'", entryID);
 
 	goinfo = GameObjectNameStorage.LookupEntry(entryID);
 	if(goinfo == 0)
@@ -118,7 +118,7 @@ void Session::HandleItemQuerySingleOpcode(WorldPacket & pck)
 	uint32 itemid;
 	pck >> itemid;
 
-	DEBUG_LOG("World", "CMSG_ITEM_QUERY_SINGLE for item id %d",	itemid );
+	Log.Debug("World", "CMSG_ITEM_QUERY_SINGLE for item id %d",	itemid );
 
 	ItemPrototype *itemProto = ItemPrototypeStorage.LookupEntry(itemid);
 	if(!itemProto)

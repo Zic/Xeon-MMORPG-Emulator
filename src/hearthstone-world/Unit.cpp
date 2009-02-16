@@ -3431,7 +3431,7 @@ else
 
 		//float r = ( 7.5f * dmg.full_damage / c + f * s ) / 2.0f;
 		//float p = ( 1 + ( plr_shared_from_this()->rageFromDamageDealt / 100.0f ) );
-		//OUT_DEBUG( "Rd(%i) d(%i) c(%f) f(%f) s(%f) p(%f) r(%f) rage = %f", realdamage, dmg.full_damage, c, f, s, p, r, val );
+		//DEBUG_LOG( "Rd(%i) d(%i) c(%f) f(%f) s(%f) p(%f) r(%f) rage = %f", realdamage, dmg.full_damage, c, f, s, p, r, val );
 
 		ModUnsigned32Value( UNIT_FIELD_POWER2, (int32)val );
 		if( GetUInt32Value( UNIT_FIELD_POWER2 ) > 1000 )
@@ -3452,7 +3452,7 @@ else
 		val = 2.5f * dmg.full_damage / c;
 		val *= 10;
 
-		//OUT_DEBUG( "Rd(%i) d(%i) c(%f) rage = %f", realdamage, dmg.full_damage, c, val );
+		//DEBUG_LOG( "Rd(%i) d(%i) c(%f) rage = %f", realdamage, dmg.full_damage, c, val );
 
 		pVictim->ModUnsigned32Value( UNIT_FIELD_POWER2, (int32)val );
 		if( pVictim->GetUInt32Value( UNIT_FIELD_POWER2) > 1000 )
@@ -3575,7 +3575,7 @@ void Unit::smsg_AttackStart(UnitPointer pVictim)
 	data << GetGUID();
 	data << pVictim->GetGUID();
 	SendMessageToSet(&data, true);
-	DEBUG_LOG( "WORLD"," Sent SMSG_ATTACKSTART" );
+	Log.Debug( "WORLD"," Sent SMSG_ATTACKSTART" );
 
 	// FLAGS changed so other players see attack animation
 	//	addUnitFlag(UNIT_FLAG_COMBAT);
@@ -5470,7 +5470,7 @@ void Unit::RemoveSoloAura(uint32 type)
 		}break;*/
 		default:
 			{
-			OUT_DEBUG("Warning: we are trying to remove a soloauratype that has no handle");
+			DEBUG_LOG("Warning: we are trying to remove a soloauratype that has no handle");
 			}break;
 	}
 }
@@ -5542,7 +5542,7 @@ bool Unit::GetSpeedDecrease()
 
 void Unit::EventCastSpell(UnitPointer Target, SpellEntry * Sp)
 {
-	SpellPointer pSpell(new Spell(obj_shared_from_this(), Sp, true, NULLAURA));
+	SpellPointer pSpell(new Spell(Target, Sp, true, NULLAURA));
 	SpellCastTargets targets(Target->GetGUID());
 	pSpell->prepare(&targets);
 }
@@ -5577,7 +5577,7 @@ UnitPointer Unit::CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,
 	CreatureInfo * info = CreatureNameStorage.LookupEntry(guardian_entry);
 	if(!proto || !info)
 	{
-		OUT_DEBUG("Warning : Missing summon creature template %u !",guardian_entry);
+		DEBUG_LOG("Warning : Missing summon creature template %u !",guardian_entry);
 		return NULLUNIT;
 	}
 	float m_fallowAngle=angle;

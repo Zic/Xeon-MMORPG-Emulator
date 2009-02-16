@@ -24,7 +24,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	CHECK_INWORLD_RETURN;
 	
 	PlayerPointer p_User = GetPlayer();
-	OUT_DEBUG("WORLD: got use Item packet, data length = %i",recvPacket.size());
+	DEBUG_LOG("WORLD: got use Item packet, data length = %i",recvPacket.size());
 	int8 tmp1,slot;
 	uint8 unk; // 3.0.2 added unk
 	uint64 item_guid;
@@ -87,7 +87,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
 	if(!spellInfo)
 	{
-		OUT_DEBUG("WORLD: unknown spell id %i\n", spellId);
+		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
 		return;
 	}
 
@@ -194,7 +194,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 	recvPacket >> cn >> spellId  >> unk;
 	if(!spellId)
 	{
-		OUT_DEBUG("WORLD: unknown spell id %i\n", spellId);
+		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
 		return;
 	}
 	// check for spell id
@@ -202,11 +202,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 	if(!spellInfo || !sHookInterface.OnCastSpell(_player, spellInfo))
 	{
-		OUT_DEBUG("WORLD: unknown spell id %i\n", spellId);
+		DEBUG_LOG("WORLD: unknown spell id %i\n", spellId);
 		return;
 	}
 
-	OUT_DEBUG("WORLD: got cast spell packet, spellId - %i (%s), data length = %i",
+	DEBUG_LOG("WORLD: got cast spell packet, spellId - %i (%s), data length = %i",
 		spellId, spellInfo->Name, recvPacket.size());
 	
 	// Cheat Detection only if player and not from an item
@@ -348,7 +348,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 		if(_player->m_auras[x] && _player->m_auras[x]->IsPositive() && _player->m_auras[x]->GetSpellId() == spellId)
 			_player->m_auras[x]->Remove();
 	}
-	DEBUG_LOG("Aura","Removing aura %u",spellId);
+	Log.Debug("Aura","Removing aura %u",spellId);
 }
 
 void WorldSession::HandleCancelChannellingOpcode( WorldPacket& recvPacket)
@@ -373,7 +373,7 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode(WorldPacket& recv_data)
 void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 {
 
-	DEBUG_LOG( "WORLD"," got CMSG_PET_CAST_SPELL." );
+	Log.Debug( "WORLD"," got CMSG_PET_CAST_SPELL." );
 	uint64 guid;
 	uint8 counter;
 	uint32 spellid;

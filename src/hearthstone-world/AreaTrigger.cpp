@@ -108,7 +108,7 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 
 void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 {		
-	DEBUG_LOG( "WorldSession","HandleAreaTriggerOpcode: %u", id);
+	Log.Debug( "WorldSession","HandleAreaTriggerOpcode: %u", id);
 
 	// Are we REALLY here?
 	if( !_player->IsInWorld() )
@@ -141,7 +141,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 
 	if( pAreaTrigger == NULL )
 	{
-		OUT_DEBUG("Missing AreaTrigger: %u", id);
+		DEBUG_LOG("Missing AreaTrigger: %u", id);
 		return;
 	}
 

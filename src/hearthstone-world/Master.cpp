@@ -289,7 +289,7 @@ bool Master::Run(int argc, char ** argv)
 	uint32 etime;
 
 	// Start Network Subsystem
-	DEBUG_LOG("Server","Starting network subsystem..." );
+	Log.Debug("Server","Starting network subsystem..." );
 	new SocketMgr;
 	new SocketGarbageCollector;
 	sSocketMgr.SpawnWorkerThreads();
@@ -302,7 +302,7 @@ bool Master::Run(int argc, char ** argv)
 		Log.Success("RemoteConsole", "Started and listening on port %i",Config.MainConfig.GetIntDefault("RemoteConsole", "Port", 8092));
 	}
 	else
-		DEBUG_LOG("RemoteConsole", "Not enabled or failed listen.");
+		Log.Debug("RemoteConsole", "Not enabled or failed listen.");
 
 	sLog.outString(""); 
 	LoadingTime = getMSTime() - LoadingTime;
@@ -533,7 +533,7 @@ bool Master::_StartDB()
 
 	if(result == false)
 	{
-		OUT_DEBUG( "sql: One or more parameters were missing from WorldDatabase directive." );
+		DEBUG_LOG( "sql: One or more parameters were missing from WorldDatabase directive." );
 		return false;
 	}
 
@@ -541,7 +541,7 @@ bool Master::_StartDB()
 	if( !WorldDatabase.Initialize(hostname.c_str(), (unsigned int)port, username.c_str(),
 		password.c_str(), database.c_str(), Config.MainConfig.GetIntDefault( "WorldDatabase", "ConnectionCount", 3 ), 16384 ) )
 	{
-		OUT_DEBUG( "sql: Main database initialization failed. Exiting." );
+		DEBUG_LOG( "sql: Main database initialization failed. Exiting." );
 		return false;
 	}
 
@@ -554,7 +554,7 @@ bool Master::_StartDB()
 
 	if(result == false)
 	{
-		OUT_DEBUG( "sql: One or more parameters were missing from Database directive." );
+		DEBUG_LOG( "sql: One or more parameters were missing from Database directive." );
 		return false;
 	}
 
@@ -562,7 +562,7 @@ bool Master::_StartDB()
 	if( !CharacterDatabase.Initialize( hostname.c_str(), (unsigned int)port, username.c_str(),
 		password.c_str(), database.c_str(), Config.MainConfig.GetIntDefault( "CharacterDatabase", "ConnectionCount", 5 ), 16384 ) )
 	{
-		OUT_DEBUG( "sql: Main database initialization failed. Exiting." );
+		DEBUG_LOG( "sql: Main database initialization failed. Exiting." );
 		return false;
 	}
 

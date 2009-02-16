@@ -56,7 +56,7 @@ string ClusterInterface::GenerateVersionString()
 
 void ClusterInterface::ForwardWoWPacket(uint16 opcode, uint32 size, const void * data, uint32 sessionid)
 {
-	OUT_DEBUG("ForwardWoWPacket", "Forwarding %s to server", LookupName(opcode, g_worldOpcodeNames));
+	DEBUG_LOG("ForwardWoWPacket", "Forwarding %s to server", LookupName(opcode, g_worldOpcodeNames));
 	bool rv;
 	uint32 size2 = 10 + size;
 	uint16 opcode2 = ICMSG_WOW_PACKET;
@@ -113,7 +113,7 @@ void ClusterInterface::HandleAuthRequest(WorldPacket & pck)
 {
 	uint32 x;
 	pck >> x;
-	OUT_DEBUG("ClusterInterface", "Incoming auth request from %s (RS build %u)", _clientSocket->GetRemoteIP().c_str(), x);
+	DEBUG_LOG("ClusterInterface", "Incoming auth request from %s (RS build %u)", _clientSocket->GetRemoteIP().c_str(), x);
 
 	WorldPacket data(ICMSG_AUTH_REPLY, 50);
 	data.append(key, 20);
@@ -129,7 +129,7 @@ void ClusterInterface::HandleAuthResult(WorldPacket & pck)
 {
 	uint32 res;
 	pck >> res;
-	OUT_DEBUG("ClusterInterface", "Auth Result: %u", res);
+	DEBUG_LOG("ClusterInterface", "Auth Result: %u", res);
 	if(!res)
 	{
 		Log.Error("ClusterInterface", "Authentication Failed");
@@ -151,14 +151,14 @@ void ClusterInterface::HandleRegisterResult(WorldPacket & pck)
 {
 	uint32 res;
 	pck >> res;
-	OUT_DEBUG("ClusterInterface", "Register Result: %u", res);
+	DEBUG_LOG("ClusterInterface", "Register Result: %u", res);
 }
 
 void ClusterInterface::HandleCreateInstance(WorldPacket & pck)
 {
 	uint32 mapid, instanceid;
 	pck >> mapid >> instanceid;
-	OUT_DEBUG("ClusterInterface", "Creating Instance %u on Map %u", instanceid, mapid);
+	DEBUG_LOG("ClusterInterface", "Creating Instance %u on Map %u", instanceid, mapid);
 	Map * pMap = sWorldCreator.GetMap(mapid);
 	pMap->CreateMapMgrInstance(instanceid);
 }
@@ -276,7 +276,7 @@ void ClusterInterface::HandleWoWPacket(WorldPacket & pck)
 		return;
 	}
 
-	OUT_DEBUG("HandleWoWPacket", "Forwarding %s to client", LookupName(opcode, g_worldOpcodeNames));
+	DEBUG_LOG("HandleWoWPacket", "Forwarding %s to client", LookupName(opcode, g_worldOpcodeNames));
 
 	WorldPacket * npck = new WorldPacket(opcode, size);
 	npck->resize(size);

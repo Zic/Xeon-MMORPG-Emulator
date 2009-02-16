@@ -49,11 +49,9 @@ std::string FormatOutputString(const char * Prefix, const char * Description, bo
 
 // log define
 #ifdef _DEBUG
-#define OUT_DEBUG sLog.outDebug
-#define DEBUG_LOG Log.Debug
+#define DEBUG_LOG sLog.outDebug
 #else
-#define OUT_DEBUG
-#define DEBUG_LOG
+#define DEBUG_LOG sLog.outDebug
 #endif
 
 class SERVER_DECL oLog : public Singleton< oLog > {
