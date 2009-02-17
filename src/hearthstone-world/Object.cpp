@@ -269,7 +269,6 @@ WorldPacket *Object::BuildFieldUpdatePacket( uint32 index,uint32 value)
 	packet->SetOpcode( SMSG_UPDATE_OBJECT );
 	
 	*packet << (uint32)1;//number of update/create blocks
-	*packet << (uint8)0;//unknown
 
 	*packet << (uint8) UPDATETYPE_VALUES;		// update type == update
 	*packet << GetNewGUID();
@@ -370,7 +369,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 	if(m_objectTypeId == TYPEID_PLAYER)
 	{
 		pThis = plr_shared_from_this();
-		if(target == shared_from_this())
+		if(target == pThis)
 		{
 			// Updating our last speeds.
 			pThis->UpdateLastSpeeds();
