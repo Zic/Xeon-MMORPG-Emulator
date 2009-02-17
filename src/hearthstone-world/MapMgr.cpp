@@ -135,10 +135,9 @@ void MapMgr::Destructor()
 	}
 
 	ObjectPointer pObject;
-	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end();)
+	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 	{
 		pObject = *itr;
-		++itr;
 		if(pObject->IsInWorld())
 			pObject->RemoveFromWorld(false);
 		
@@ -167,10 +166,9 @@ void MapMgr::Destructor()
 	//free(m_CreatureStorage);
 
 	CorpsePointer pCorpse;
-	for(set<CorpsePointer >::iterator itr = m_corpses.begin(); itr != m_corpses.end();)
+	for(set<CorpsePointer >::iterator itr = m_corpses.begin(); itr != m_corpses.end(); ++itr)
 	{
 		pCorpse = *itr;
-		++itr;
 
 		if(pCorpse->IsInWorld())
 			pCorpse->RemoveFromWorld(false);
