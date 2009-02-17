@@ -514,28 +514,28 @@ void WarsongGulch::OnCreate()
 
 	// Alliance Gates
 	GameObjectPointer gate = SpawnGameObject(179921, 1471.554688f, 1458.778076f, 362.633240f, 0, 33, 114, 2.33271f);
-	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	gate = SpawnGameObject(179919, 1492.477783f, 1457.912354f, 342.968933f, 0, 33, 114, 2.68149f);
-	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	gate = SpawnGameObject(179918, 1503.335327f, 1493.465820f, 352.188843f, 0, 33, 114, 2.26f);
-	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	// Horde Gates
 	gate = SpawnGameObject(179916, 949.1663208f, 1423.7717285f, 345.6241455f, 5.56f, 32, 114, 0.900901f);
-	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	gate = SpawnGameObject(179917, 953.0507202f, 1459.8424072f, 340.6525573f, 4.02f, 32, 114, 0.854700f);   
-	gate->SetByte(GAMEOBJECT_BYTES_1, 3, 100);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 

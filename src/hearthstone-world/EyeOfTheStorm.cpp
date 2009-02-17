@@ -576,6 +576,7 @@ void EyeOfTheStorm::OnCreate()
 		/*if( m_bubbles[i]->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != 29 )
 			m_bubbles[i]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, 29);*/
 		m_bubbles[i]->SetUInt32Value(GAMEOBJECT_FACTION, 1375);
+		m_bubbles[i]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 
 		m_bubbles[i]->PushToWorld( m_mapMgr );
 	}

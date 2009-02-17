@@ -35,6 +35,7 @@ Arena::Arena( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t, uint32 play
 	m_resurrectMap.clear();
 
 	m_started = false;
+	m_shadowsightspawned = false;
 	m_playerCountPerTeam = players_per_side;
 	switch(t)
 	{
@@ -191,10 +192,12 @@ void Arena::OnCreate()
 		{
 			obj = SpawnGameObject(185917, 1278.647705f, 1730.556641f, 31.605574f, 1.68f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			obj = SpawnGameObject(185918, 1293.560791f, 1601.937988f, 31.605574f, 4.86f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_LORDAERON_GREEN_PLAYER_COUNT;
@@ -207,18 +210,22 @@ void Arena::OnCreate()
 		{
 			obj = SpawnGameObject(183972, 6177.707520f, 227.348145f, 3.604374f, -2.260201f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(183973, 6189.546387f, 241.709854f, 3.101481f, 0.881392f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			obj = SpawnGameObject(183970, 6299.115723f, 296.549438f, 3.308032f, 0.881392f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(183971, 6287.276855f, 282.187714f, 3.810925f, -2.260201f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_BLADESEDGE_GREEN_PLAYER_COUNT;
@@ -231,18 +238,22 @@ void Arena::OnCreate()
 		{
 			obj = SpawnGameObject(183979, 4090.064453f, 2858.437744f, 10.236313f, 0.492805f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(183980, 4081.178955f, 2874.970459f, 12.391714f, 0.492805f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			obj = SpawnGameObject(183977, 4023.709473f, 2981.776611f, 10.701169f, -2.648788f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(183978, 4031.854248f, 2966.833496f, 12.646200f, -2.648788f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_NAGRAND_GREEN_PLAYER_COUNT;
@@ -254,10 +265,12 @@ void Arena::OnCreate()
 		{
 			obj = SpawnGameObject(192643, 1256.33996582031f, 770.06201171875f, 20.5f, 0.0f, 32, 1375, 2.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			obj = SpawnGameObject(192642, 1327.2099609375f, 813.239990234375f, 20.5f, 0.0f, 32, 1375, 2.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			// not rly blizzlike, should be spawn later, not on create, but who cares, will fix it later
@@ -302,10 +315,12 @@ void Arena::OnCreate()
 			//gates
 			obj = SpawnGameObject(192392, 763.93f, -295.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			obj = SpawnGameObject(192391, 763.93f, -274.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
 			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 			m_gates.insert(obj);
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_WOTLK_GREEN_PLAYER_COUNT;
@@ -616,6 +631,9 @@ bool Arena::HookHandleRepop(PlayerPointer plr)
 
 void Arena::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 {
+	if(!m_started)
+		return;
+
 	int32 buffslot = -1;
 
 	ASSERT(plr != NULL);
@@ -632,7 +650,15 @@ void Arena::HookOnAreaTrigger(PlayerPointer plr, uint32 id)
 		case 4697:
 			buffslot = 1;
 			break;
+		default:
+			{
+				Log.Error("Arena", "Encountered unhandled areatrigger id %u", id);
+				return;
+			}break;
 	}
+
+	if(!m_shadowsightspawned)
+		return;
 
 	if(buffslot >= 0)
 	{

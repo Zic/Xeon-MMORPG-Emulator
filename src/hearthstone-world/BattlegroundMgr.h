@@ -250,6 +250,7 @@ protected:
 	/* starting time */
 	uint32 m_startTime;
 	bool m_started;
+	bool m_shadowsightspawned;
 
 	/* countdown stuff */
 	uint32 m_countdownStage;

@@ -1486,11 +1486,13 @@ void AlteracValley::OnCreate()
 
 	// Alliance Gate
 	GameObjectPointer gate = SpawnGameObject(AV_GAMEOBJECT_GATE, 780.487f, -493.024f, 99.9553f, 3.0976f, 32, 114, 3.000000f);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 
 	// Horde gate
 	gate = SpawnGameObject(AV_GAMEOBJECT_GATE, -1375.73f, -538.966f, 55.3006f, 0.791198f, 32, 114, 3.000000f);
+	gate->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 	gate->PushToWorld(m_mapMgr);
 	m_gates.push_back(gate);
 

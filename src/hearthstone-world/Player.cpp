@@ -576,8 +576,11 @@ void Player::Destructor()
 	if(m_achievementInterface)
 		delete m_achievementInterface;
 
-	for(ReputationMap::iterator itr = m_reputation.begin(); itr != m_reputation.end(); ++itr)
-		delete itr->second;
+	if(m_reputation.size())
+	{
+		for(ReputationMap::iterator itr = m_reputation.begin(); itr != m_reputation.end(); ++itr)
+			delete itr->second;
+	}
 	m_objectTypeId = TYPEID_UNUSED;
 
 	if(m_playerInfo)
