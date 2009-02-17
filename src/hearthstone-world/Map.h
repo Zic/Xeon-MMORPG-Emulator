@@ -134,7 +134,7 @@ public:
 		}
 		else
 		{
-			return 999999.0f;
+			return NO_LAND_HEIGHT;
 		}
 	}
 
@@ -146,7 +146,7 @@ public:
 		}
 		else
 		{ 
-			return 999999.0f; 
+			return NO_LAND_HEIGHT; 
 		}
 	}
 

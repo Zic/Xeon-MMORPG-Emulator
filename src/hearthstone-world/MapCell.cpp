@@ -103,23 +103,23 @@ void MapCell::RemoveObjects()
 
 	/* delete objects in pending respawn state */
 	ObjectPointer pObject;
-	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end();)
+	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end(); ++itr)
 	{
 		pObject = *itr;
-		++itr;
-		switch((*itr)->GetTypeId())
+		
+		switch(pObject->GetTypeId())
 		{
 		case TYPEID_UNIT: {
-				if( (*itr)->IsVehicle() )
+				if( pObject->IsVehicle() )
 				{
-					_mapmgr->_reusable_guids_vehicle.push_back( (*itr)->GetUIdFromGUID() );
+					_mapmgr->_reusable_guids_vehicle.push_back( pObject->GetUIdFromGUID() );
 					TO_VEHICLE(pObject)->m_respawnCell=NULL;
 					TO_VEHICLE(pObject)->Destructor();
 					pObject = NULLOBJ;
 				}
-				else if( !(*itr)->IsPet() )
+				else if( !pObject->IsPet() )
 				{
-					_mapmgr->_reusable_guids_creature.push_back( (*itr)->GetUIdFromGUID() );
+					_mapmgr->_reusable_guids_creature.push_back( pObject->GetUIdFromGUID() );
 					TO_CREATURE(pObject)->m_respawnCell=NULL;
 					TO_CREATURE(pObject)->Destructor();
 					pObject = NULLOBJ;

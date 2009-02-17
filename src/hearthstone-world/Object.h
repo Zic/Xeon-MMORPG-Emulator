@@ -93,11 +93,15 @@ enum OBJECT_UPDATE_TYPE {
 	//  4 bytes - Count
 	//  Loop Count Times:
 	//  8 bytes - GUID
-	UPDATETYPE_OUT_OF_RANGE_OBJECTS = 4 // <- this is correct, not sure about 3
+	UPDATETYPE_OUT_OF_RANGE_OBJECTS = 4, // <- this is correct, not sure about 3
 	//  4 bytes - Count
 	//  Loop Count Times:
 	//  8 bytes - GUID
 
+	UPDATETYPE_NEAR_OBJECTS = 5,
+	//  4 bytes - Count
+	//  Loop Count Times:
+	//  8 bytes - GUID
 };
 
 typedef struct

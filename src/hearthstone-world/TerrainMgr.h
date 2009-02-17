@@ -31,6 +31,7 @@ typedef struct
 #define FL2UINT (uint32)
 #define TERRAIN_HEADER_SIZE 1048576	 // size of [512][512] array.
 #define MAP_RESOLUTION 256
+#define NO_LAND_HEIGHT 999999.0f
 
 /* @class TerrainMgr
    TerrainMgr maintains the MapCellInfo information for accessing water levels,

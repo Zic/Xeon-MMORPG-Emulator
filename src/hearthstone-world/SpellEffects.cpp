@@ -5299,24 +5299,19 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	pTotem->SetTotemOwner(p_caster);
 	pTotem->SetTotemSlot( int32(slot) );
 
-	float landh;
+	float landh = NO_WMO_HEIGHT;
 	if (p_caster->GetMapMgr() && p_caster->GetMapMgr()->IsCollisionEnabled())
 	{
 		landh = CollideInterface.GetHeight(p_caster->GetMapId(), x, y, p_caster->GetPositionZ());
-		if(landh == NO_WMO_HEIGHT)
-			landh = p_caster->GetMapMgr()->GetLandHeight(x,y);
 	}
-	else
+	if(landh == NO_WMO_HEIGHT)
 		landh = p_caster->GetMapMgr()->GetLandHeight(x,y);
 
-	if(landh == 0.0f)
+	if(landh == 0.0f || landh == NO_LAND_HEIGHT)
 	{
-		x = p_caster->GetPositionX();
-		y = p_caster->GetPositionY();
 		landh = p_caster->GetPositionZ();
 	}
-	else
-		landh += 1.5f;
+	landh += 1.5f;
 
 	pTotem->Create(ci->Name, p_caster->GetMapId(), x, y, landh, p_caster->GetOrientation());
 
