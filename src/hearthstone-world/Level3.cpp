@@ -2998,6 +2998,8 @@ bool ChatHandler::HandleClearBonesCommand(const char *args, WorldSession *m_sess
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); ++itr)
 	{
 		obj = *itr;
+		if(!obj)
+			continue;
 
 		if( obj->GetTypeId() == TYPEID_CORPSE && TO_CORPSE(obj)->GetCorpseState() == CORPSE_STATE_BONES )
 			TO_CORPSE(obj)->Despawn();
@@ -3018,6 +3020,8 @@ bool ChatHandler::HandleClearCorpsesCommand(const char *args, WorldSession *m_se
 	for( itr = p->GetInRangeSetBegin(); itr != p->GetInRangeSetEnd(); ++itr)
 	{
 		obj = *itr;
+		if(!obj)
+			continue;
 
 		if( obj->GetTypeId() == TYPEID_CORPSE && TO_CORPSE(obj)->GetCorpseState() == CORPSE_STATE_BODY )
 			TO_CORPSE(obj)->Despawn();

@@ -138,6 +138,9 @@ void MapMgr::Destructor()
 	for(set<ObjectPointer >::iterator itr = _mapWideStaticObjects.begin(); itr != _mapWideStaticObjects.end(); ++itr)
 	{
 		pObject = *itr;
+		if(!pObject)
+			continue;
+
 		if(pObject->IsInWorld())
 			pObject->RemoveFromWorld(false);
 		
@@ -169,6 +172,8 @@ void MapMgr::Destructor()
 	for(set<CorpsePointer >::iterator itr = m_corpses.begin(); itr != m_corpses.end(); ++itr)
 	{
 		pCorpse = *itr;
+		if(!pCorpse)
+			continue;
 
 		if(pCorpse->IsInWorld())
 			pCorpse->RemoveFromWorld(false);

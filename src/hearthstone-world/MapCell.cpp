@@ -98,7 +98,6 @@ void MapCell::SetActivity(bool state)
 void MapCell::RemoveObjects()
 {
 	ObjectSet::iterator itr;
-	uint32 count = 0;
 	//uint32 ltime = getMSTime();
 
 	/* delete objects in pending respawn state */
@@ -106,6 +105,8 @@ void MapCell::RemoveObjects()
 	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end(); ++itr)
 	{
 		pObject = *itr;
+		if(!pObject)
+			continue;
 		
 		switch(pObject->GetTypeId())
 		{
@@ -141,13 +142,10 @@ void MapCell::RemoveObjects()
 	_respawnObjects.clear();
 
 	//This time it's simpler! We just remove everything :)
-	for(itr = _objects.begin(); itr != _objects.end(); )
+	ObjectPointer obj; //do this outside the loop!
+	for(itr = _objects.begin(); itr != _objects.end(); itr++)
 	{
-		count++;
-
-		ObjectPointer obj = (*itr);
-
-		itr++;
+		obj = (*itr);
 
 		if(!obj)
 			continue;
@@ -188,6 +186,8 @@ void MapCell::LoadObjects(CellSpawns * sp)
 
 	if(sp->CreatureSpawns.size())//got creatures
 	{
+		VehiclePointer v;
+		CreaturePointer c;
 		for(CreatureSpawnList::iterator i=sp->CreatureSpawns.begin();i!=sp->CreatureSpawns.end();i++)
 		{
 			if(pInstance)
@@ -200,7 +200,7 @@ void MapCell::LoadObjects(CellSpawns * sp)
 			}
 			if((*i)->vehicle != 0)
 			{
-				VehiclePointer v=_mapmgr->CreateVehicle((*i)->entry);
+				v=_mapmgr->CreateVehicle((*i)->entry);
 
 				v->SetMapId(_mapmgr->GetMapId());
 				v->SetInstanceID(_mapmgr->GetInstanceID());
@@ -225,7 +225,7 @@ void MapCell::LoadObjects(CellSpawns * sp)
 			}
 			else
 			{
-				CreaturePointer c=_mapmgr->CreateCreature((*i)->entry);
+				c=_mapmgr->CreateCreature((*i)->entry);
 
 				c->SetMapId(_mapmgr->GetMapId());
 				c->SetInstanceID(_mapmgr->GetInstanceID());
@@ -253,9 +253,10 @@ void MapCell::LoadObjects(CellSpawns * sp)
 
 	if(sp->GOSpawns.size())//got GOs
 	{
+		GameObjectPointer go;
 		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
 		{
-			GameObjectPointer go = _mapmgr->CreateGameObject((*i)->entry);
+			go = _mapmgr->CreateGameObject((*i)->entry);
 			if(go->Load(*i))
 			{
 				//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
