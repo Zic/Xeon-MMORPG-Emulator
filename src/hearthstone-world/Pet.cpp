@@ -329,6 +329,8 @@ void Pet::Update(uint32 time)
 		}
 	}
 
+	//this was crashing... useless anyway
+	/*
 	if( m_Owner && m_Owner->IsPvPFlagged() && !IsPvPFlagged())
 		SetPvPFlag();
 	else if( m_Owner && !m_Owner->IsPvPFlagged() )
@@ -337,7 +339,7 @@ void Pet::Update(uint32 time)
 	if( m_Owner && m_Owner->IsFFAPvPFlagged() && !IsFFAPvPFlagged() ) 
 		SetFFAPvPFlag();
 	else if( m_Owner && !m_Owner->IsFFAPvPFlagged() )
-		RemoveFFAPvPFlag();
+		RemoveFFAPvPFlag();*/
 
 	if(bExpires)
 	{

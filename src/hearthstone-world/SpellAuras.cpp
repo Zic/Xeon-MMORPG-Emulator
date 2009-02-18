@@ -3164,6 +3164,9 @@ void Aura::EventPeriodicHeal( uint32 amount )
 			u_caster->SendAttackerStateUpdate(u_caster, &sdmg, add, 0, 0, 0, ATTACK);
 		}
 
+		if(m_target && m_target->IsInWorld() && u_caster && u_caster->IsInWorld())
+			u_caster->CombatStatus.WeHealed(m_target);
+
 		uint32 base_threat=Spell::GetBaseThreat(add);
 		int count = 0;
 		UnitPointer unit;
@@ -3199,9 +3202,6 @@ void Aura::EventPeriodicHeal( uint32 amount )
 				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
 			}
 		}
-
-		if(m_target && m_target->IsInWorld() && u_caster && u_caster->IsInWorld())
-			u_caster->CombatStatus.WeHealed(m_target);
 	}   
 }
 

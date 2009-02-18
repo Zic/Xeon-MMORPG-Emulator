@@ -467,7 +467,7 @@ void Unit::GiveGroupXP(UnitPointer pVictim, PlayerPointer PlayerInGroup)
 	if(!PlayerInGroup->InGroup()) 
 		return;
 	Group *pGroup = PlayerInGroup->GetGroup();
-	uint32 xp;
+	uint32 xp = 0;
 	if(!pGroup) 
 		return;
 
