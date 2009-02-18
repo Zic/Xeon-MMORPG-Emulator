@@ -57,7 +57,7 @@ public:
 		return c;
 	}
 
-	HEARTHSTONE_INLINE bool empty() const
+	HEARTHSTONE_INLINE bool empty()
 	{	// return true only if sequence is empty
 		mutex.Acquire();
 		bool isEmpty = queue.empty();
