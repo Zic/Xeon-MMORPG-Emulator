@@ -143,9 +143,10 @@ void MapCell::RemoveObjects()
 
 	//This time it's simpler! We just remove everything :)
 	ObjectPointer obj; //do this outside the loop!
-	for(itr = _objects.begin(); itr != _objects.end(); itr++)
+	for(itr = _objects.begin(); itr != _objects.end();)
 	{
 		obj = (*itr);
+		itr++;
 
 		if(!obj)
 			continue;

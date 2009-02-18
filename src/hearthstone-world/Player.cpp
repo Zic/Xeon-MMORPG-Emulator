@@ -586,10 +586,13 @@ void Player::Destructor()
 	if(m_playerInfo)
 		m_playerInfo->m_loggedInPlayer=NULLPLR;
 
-	while( delayedPackets.size() )
+	if( !delayedPackets.empty() )
 	{
-		WorldPacket * pck = delayedPackets.next();
-		delete pck;
+		while( delayedPackets.size() )
+			{
+				WorldPacket * pck = delayedPackets.next();
+				delete pck;
+			}
 	}
 
 	if (mSpellsUniqueTargets)

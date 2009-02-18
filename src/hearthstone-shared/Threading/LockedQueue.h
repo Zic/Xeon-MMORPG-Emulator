@@ -57,6 +57,14 @@ public:
 		return c;
 	}
 
+	HEARTHSTONE_INLINE bool empty() const
+	{	// return true only if sequence is empty
+		mutex.Acquire();
+		bool isEmpty = queue.empty();
+		mutex.Release();
+		return isEmpty;
+	}
+
 	HEARTHSTONE_INLINE TYPE get_first_element()
 	{
 		mutex.Acquire();
