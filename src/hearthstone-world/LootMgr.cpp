@@ -658,9 +658,6 @@ void LootMgr::AddLoot(Loot * loot, uint32 itemid, uint32 mincount, uint32 maxcou
 	}
 }
 
-#define NEED 1
-#define GREED 2
-
 LootRoll::LootRoll() : EventableObject()
 {
 }

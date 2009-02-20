@@ -1345,19 +1345,21 @@ GossipMenu::GossipMenu(uint64 Creature_Guid, uint32 Text_Id) : TextId(Text_Id), 
 
 }
 
-void GossipMenu::AddItem(uint8 Icon, const char* Text, int32 Id /* = -1 */, int8 Extra /* = 0 */)
+void GossipMenu::AddItem(uint8 Icon, const char* Text, int32 Id, bool Coded, uint32 BoxMoney, const char* BoxMessage)
 {
-	GossipMenuItem Item;
-	Item.Icon = Icon;
-	Item.Extra = Extra;
-	Item.Text = Text;
-	Item.Id = (uint32)Menu.size();
+	GossipMenuItem GossipItem;
+	GossipItem.Id = (uint32)Menu.size();
 	if(Id > 0)
-		Item.IntId = Id;
+		GossipItem.IntId = Id;
 	else
-		Item.IntId = Item.Id;		
+		GossipItem.IntId = GossipItem.Id;		
+	GossipItem.Icon = Icon;
+	GossipItem.Coded = Coded;
+	GossipItem.BoxMoney = BoxMoney;
+	GossipItem.Text = Text;
+	GossipItem.BoxMessage = BoxMessage;
 
-	Menu.push_back(Item);
+	Menu.push_back(GossipItem);
 }
 
 void GossipMenu::AddItem(GossipMenuItem* GossipItem)
@@ -1367,7 +1369,6 @@ void GossipMenu::AddItem(GossipMenuItem* GossipItem)
 
 void GossipMenu::BuildPacket(WorldPacket& Packet)
 {
-	std::string somestring = "";
 	Packet << uint64(CreatureGuid);
 	Packet << uint32(0);			// some new menu type in 2.4?
 	Packet << uint32(TextId);
@@ -1378,10 +1379,10 @@ void GossipMenu::BuildPacket(WorldPacket& Packet)
 	{
 		Packet << iter->Id;
 		Packet << iter->Icon;
-		Packet << iter->Extra;
-		Packet << uint32(0);	// something new in tbc. maybe gold requirement or smth?
-		Packet << iter->Text;
-		Packet << somestring; // ?
+		Packet << iter->Coded;		// makes pop up box password
+		Packet << iter->BoxMoney;	// money required to open menu, 2.0.3
+		Packet << iter->Text;		// text for gossip item
+		Packet << iter->BoxMessage;	// accept text (related to money) pop up box, 2.0.3
 	}
 }
 

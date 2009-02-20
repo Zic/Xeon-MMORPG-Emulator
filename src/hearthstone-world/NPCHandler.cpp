@@ -405,42 +405,42 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	std::set<uint32> ql;
 
 	recv_data >> guid;
-	CreaturePointer qst_giver = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
-	if(!qst_giver) 
+	CreaturePointer TalkingWith = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(guid));
+	if(!TalkingWith) 
 		return;
 
 	//stop when talked to for 3 min
-	if(qst_giver->GetAIInterface())
-		qst_giver->GetAIInterface()->StopMovement(180000);
+	if(TalkingWith->GetAIInterface())
+		TalkingWith->GetAIInterface()->StopMovement(180000);
  
 	// unstealth meh
 	if( _player->IsStealth() )
 		_player->RemoveAllAurasOfType( SPELL_AURA_MOD_STEALTH );
 
 	// reputation
-	_player->Reputation_OnTalk(qst_giver->m_factionDBC);
+	_player->Reputation_OnTalk(TalkingWith->m_factionDBC);
 
 	DEBUG_LOG( "WORLD"," Received CMSG_GOSSIP_HELLO from %u",GUID_LOPART(guid) );
 
-	GossipScript * Script = qst_giver->GetCreatureName() ? qst_giver->GetCreatureName()->gossip_script : NULL;
+	GossipScript * Script = TalkingWith->GetCreatureName() ? TalkingWith->GetCreatureName()->gossip_script : NULL;
 	if(!Script)
 		return;
 
-	if (qst_giver->isQuestGiver() && qst_giver->HasQuests())
+	if (TalkingWith->isQuestGiver() && TalkingWith->HasQuests())
 	{
 		WorldPacket data;
 		data.SetOpcode(SMSG_GOSSIP_MESSAGE);
-		Script->GossipHello(qst_giver, _player, false);
+		Script->GossipHello(TalkingWith, _player, false);
 		if(!_player->CurrentGossipMenu)
 			return;
 
 		_player->CurrentGossipMenu->BuildPacket(data);
-		uint32 count=0;//sQuestMgr.ActiveQuestsCount(qst_giver, GetPlayer());
+		uint32 count=0;//sQuestMgr.ActiveQuestsCount(TalkingWith, GetPlayer());
 		size_t pos=data.wpos();
 		data << uint32(count);
-		for (it = qst_giver->QuestsBegin(); it != qst_giver->QuestsEnd(); ++it)
+		for (it = TalkingWith->QuestsBegin(); it != TalkingWith->QuestsEnd(); ++it)
 		{
-			uint32 status = sQuestMgr.CalcQuestStatus(qst_giver, GetPlayer(), *it);
+			uint32 status = sQuestMgr.CalcQuestStatus(TalkingWith, GetPlayer(), *it);
 			if (status >= QMGR_QUEST_CHAT)
 			{
 				if (!ql.count((*it)->qst->id) )
@@ -448,8 +448,6 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 					ql.insert((*it)->qst->id);
 					count++;
 					data << (*it)->qst->id;
-					/*data << status;//sQuestMgr.CalcQuestStatus(qst_giver, GetPlayer(), *it);
-					data << uint32(0);*/
 					switch(status)
 					{
 					case QMGR_QUEST_NOT_FINISHED:
@@ -484,7 +482,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	}
 	else
 	{
-		Script->GossipHello(qst_giver, _player, true);
+		Script->GossipHello(TalkingWith, _player, true);
 	}
 }
 
@@ -498,7 +496,9 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	uint32 option;
 	uint32 unk24;
 	uint64 guid;
-	int8 extra=0;
+	bool Coded;
+	uint32 BoxMoney = 0;
+	std::string BoxMessage;
 
 	recv_data >> guid >> unk24 >> option;
 
@@ -527,13 +527,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	}
 	else if(guidtype==HIGHGUID_TYPE_GAMEOBJECT)
 	{
-        GameObjectPointer gobj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
+		GameObjectPointer gobj = _player->GetMapMgr()->GetGameObject(GET_LOWGUID_PART(guid));
 		if(!gobj)
 			return;
-        
+
 		qst_giver=gobj;
-        Script=gobj->GetInfo()->gossip_script;
-    }
+		Script=gobj->GetInfo()->gossip_script;
+	}
 
 	if(!Script||!qst_giver)
 		return;
@@ -543,16 +543,15 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	{
 		GossipMenuItem item = _player->CurrentGossipMenu->GetItem(option);
 		IntId = item.IntId;
-		extra = item.Extra;
+		Coded = item.Coded;
 	}
 
-	if(extra)
+	if(Coded)
 	{
-		string str;
 		if(recv_data.rpos()!=recv_data.wpos())
-			recv_data >> str;
+			recv_data >> BoxMessage;
 
-		Script->GossipSelectOption(qst_giver, _player, option, IntId, str.c_str());
+		Script->GossipSelectOption(qst_giver, _player, option, IntId, BoxMessage.c_str());
 	}
 	else
 		Script->GossipSelectOption(qst_giver, _player, option, IntId, NULL);

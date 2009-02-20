@@ -52,7 +52,7 @@ private:
 typedef vector<pair<RandomProps*, float> > RandomPropertyVector;
 typedef vector<pair<ItemRandomSuffixEntry*, float> > RandomSuffixVector;
 
-typedef struct
+typedef struct _LootItem
 {
 	ItemPrototype * itemproto;
 	uint32 displayid;
@@ -60,7 +60,7 @@ typedef struct
 
 typedef std::set<uint32> LooterSet;
 
-typedef struct
+typedef struct __LootItem
 {
 	_LootItem item;
 	uint32 iItemsCount;
@@ -73,7 +73,7 @@ typedef struct
 }__LootItem;
 
 
-typedef struct
+typedef struct StoreLootItem
 {
 	_LootItem item;
 	float chance;
@@ -84,7 +84,7 @@ typedef struct
 }StoreLootItem;
 
 
-typedef struct 
+typedef struct StoreLootList
 {
 	uint32 count;
 	StoreLootItem *items;
@@ -115,13 +115,19 @@ struct tempy
 
 typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;  
 
-#define PARTY_LOOT_FFA	  0
-#define PARTY_LOOT_MASTER   2
-#define PARTY_LOOT_RR	   1
-#define PARTY_LOOT_NBG	  4
-#define PARTY_LOOT_GROUP	3
-
-
+enum PARTY_LOOT
+{
+	PARTY_LOOT_FFA		= 0,
+	PARTY_LOOT_RR		= 1,
+	PARTY_LOOT_MASTER	= 2,
+	PARTY_LOOT_GROUP	= 3,
+	PARTY_LOOT_NBG		= 4,
+};
+enum PARTY_ROLL
+{
+	NEED	= 1,
+	GREED	= 2,
+};
 
 class SERVER_DECL LootMgr : public Singleton < LootMgr >
 {
