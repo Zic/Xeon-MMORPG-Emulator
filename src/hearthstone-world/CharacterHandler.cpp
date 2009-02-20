@@ -901,8 +901,10 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		}
 	}
 
-	// Send online status to people having this char in friendlist
-	_player->Social_TellFriendsOnline();
+	// Send online status to people having this char in friendlist (excluding GM's)
+	if(!HasGMPermissions())
+		_player->Social_TellFriendsOnline();
+
 	// send friend list (for ignores)
 	_player->Social_SendFriendList(7);
 
