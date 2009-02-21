@@ -510,7 +510,6 @@ void Player::Destructor()
 	if(m_session)
 	{
 		m_session->SetPlayer(NULLPLR);
-		SetSession(NULL);
 	}
 
 	PlayerPointer pTarget;
@@ -594,6 +593,8 @@ void Player::Destructor()
 				delete pck;
 			}
 	}
+
+	SetSession(NULL);
 
 	if (mSpellsUniqueTargets)
 	{

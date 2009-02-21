@@ -376,8 +376,6 @@ void WorldSession::LogoutPlayer(bool Save)
 		_player->ObjUnlock();
 
 		_player->Destructor();
-		if(_player)
-			_player = NULLPLR;
 
 		OutPacket(SMSG_LOGOUT_COMPLETE, 0, NULL);
 		DEBUG_LOG( "WorldSession","Sent SMSG_LOGOUT_COMPLETE Message" );
@@ -385,6 +383,8 @@ void WorldSession::LogoutPlayer(bool Save)
 	_loggingOut = false;
 
 	SetLogoutTimer(0);
+	if(_player)
+		_player = NULLPLR;
 }
 
 void WorldSession::SendBuyFailed(uint64 guid, uint32 itemid, uint8 error)

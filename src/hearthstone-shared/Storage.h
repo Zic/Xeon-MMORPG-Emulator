@@ -170,7 +170,6 @@ public:
 
 #ifndef STORAGE_ALLOCATION_POOLS
 		_array[Entry] = new T;
-		memset(_array[Entry], 0, sizeof(T));
 #else
 		_array[Entry] = _pool.Get();
 #endif
@@ -553,7 +552,7 @@ public:
 			switch(*p)
 			{
 			case 's':		// string is the only one we have to actually do anything for here
-					free((*(char**)structpointer));
+					//free((*(char**)structpointer));
 					structpointer += sizeof(char*);
 				break;
 
@@ -625,9 +624,11 @@ public:
 				break;
 
 			case 's':	// Null-terminated string
-				*(char**)&structpointer[offset] = strdup(f->GetString());
+				{
+				shared_ptr<char> s(strdup(f->GetString()), &free);
+				*(char**)&structpointer[offset] = s.get();
 				offset += sizeof(char*);
-				break;
+				}break;
 
 			case 'x':	// Skip
 				break;

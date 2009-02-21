@@ -324,8 +324,8 @@ void Unit::Destructor()
 		m_onAuraRemoveSpells = NULL;
 	}
 
-	CombatStatus.SetUnit( NULLUNIT );
 	CombatStatus.Vanished();
+	CombatStatus.SetUnit( NULLUNIT );
 
 	m_damageShields.clear();
 

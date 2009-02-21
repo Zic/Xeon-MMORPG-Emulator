@@ -570,7 +570,7 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 					break;
 				}
 			}
-			msg += "training, ";
+			msg += " training, ";
 			msg += name;
 			msg += ".";
 
