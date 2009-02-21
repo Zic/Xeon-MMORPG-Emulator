@@ -292,7 +292,7 @@ void Guild::CreateFromCharter(Charter * pCharter, WorldSession * pTurnIn)
 
 void Guild::PromoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 {
-	if(pClient->GetPlayer()->m_playerInfo->guild != this || pMember->guild != this)
+	if(pClient->GetPlayer()->m_playerInfo->guild != this || pMember->guild != this || pClient->GetPlayer()->m_playerInfo == pMember)
 		return;
 
 	if(!pClient->GetPlayer()->m_playerInfo->guildRank->CanPerformCommand(GR_RIGHT_PROMOTE))
@@ -301,10 +301,23 @@ void Guild::PromoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 		return;
 	}
 
+	//as wowwiki says, a global rule should be set too: 
+	// Members of the guild can only perform promote/demote/remove actions on those of lower ranks than themselves. 
+	if(pClient != NULL )
+	{
+		PlayerInfo * Initiator = pClient->GetPlayer()->m_playerInfo;
+		if( pMember->guildRank->iId <= Initiator->guildRank->iId+2 && Initiator->guildRank->iId != 0)
+		{
+			pClient->SystemMessage("You can\'t promote this character any further.");
+			return;
+		}
+	}
+
 	// need a proper command result for this
 	if(pMember->guildRank->iId == 1)
 	{
-		pClient->SystemMessage("You cannot promote this member any further.");
+		if(pClient != NULL )
+			pClient->SystemMessage("You can\'t promote this character any further.");
 		return;
 	}
 
@@ -322,7 +335,8 @@ void Guild::PromoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 	if(newRank==NULL)
 	{
 		m_lock.Release();
-		pClient->SystemMessage("Could not find a rank to promote this member to.");
+		if(pClient != NULL )
+			pClient->SystemMessage("Could not find a rank to promote this member to.");
 		return;
 	}
 
@@ -354,7 +368,7 @@ void Guild::PromoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 
 void Guild::DemoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 {
-	if(pClient->GetPlayer()->m_playerInfo->guild != this || pMember->guild != this)
+	if(pClient->GetPlayer()->m_playerInfo->guild != this || pMember->guild != this || pClient->GetPlayer()->m_playerInfo == pMember )
 		return;
 
 	if(!pClient->GetPlayer()->m_playerInfo->guildRank->CanPerformCommand(GR_RIGHT_DEMOTE) ||
@@ -363,6 +377,19 @@ void Guild::DemoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 		SendGuildCommandResult(pClient, GUILD_PROMOTE_S, "", GUILD_PERMISSIONS);
 		return;
 	}
+
+	//as wowwiki says, a global rule should be set too: 
+	// Members of the guild can only perform promote/demote/remove actions on those of lower ranks than themselves. 
+	if(pClient != NULL )
+	{
+		PlayerInfo * Initiator = pClient->GetPlayer()->m_playerInfo;
+		if( pMember->guildRank->iId <= Initiator->guildRank->iId && Initiator->guildRank->iId != 0)
+		{
+			pClient->SystemMessage("You can only demote lower ranks then yourself.");
+			return;
+		}
+	}
+
 
 	// find the next highest rank
 	uint32 nh = pMember->guildRank->iId + 1;
@@ -378,7 +405,8 @@ void Guild::DemoteGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 	if(newRank==NULL)
 	{
 		m_lock.Release();
-		pClient->SystemMessage("Could not find a rank to demote this member to.");
+		if(pClient != NULL )
+			pClient->SystemMessage("Could not find a rank to demote this member to.");
 		return;
 	}
 
@@ -752,24 +780,32 @@ void Guild::AddGuildMember(PlayerInfo * pMember, WorldSession * pClient, int32 F
 
 void Guild::RemoveGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 {
-	if(pMember->guild != this)
-		return;
-
-	if(pClient && pClient->GetPlayer()->m_playerInfo->guild != this)
-		return;
-
-	if(pClient && !pClient->GetPlayer()->m_playerInfo->guildRank->CanPerformCommand(GR_RIGHT_REMOVE) && pClient->GetPlayer()->m_playerInfo != pMember)
+	if(pMember->guildRank->iId==0)
 	{
-		Guild::SendGuildCommandResult(pClient, GUILD_CREATE_S, "", GUILD_PERMISSIONS);
+		if(pClient != NULL)
+			pClient->SystemMessage("You cannot remove the guild master.");
 		return;
 	}
 
-	if(pMember->guildRank->iId==0)
+	if(pClient != NULL )
 	{
-		if(pClient)
-			pClient->SystemMessage("You cannot remove the guild master.");
+		if( pClient->GetPlayer()->m_playerInfo->guild != this)
+			return;
 
-		return;
+		if( !pClient->GetPlayer()->m_playerInfo->guildRank->CanPerformCommand(GR_RIGHT_REMOVE) && pClient->GetPlayer()->m_playerInfo != pMember)
+		{
+			Guild::SendGuildCommandResult(pClient, GUILD_CREATE_S, "", GUILD_PERMISSIONS);
+			return;
+		}
+		//as wowwiki says, a global rule should be set too: 
+		// Members of the guild can only perform promote/demote/remove actions on those of lower ranks than themselves. 
+		PlayerInfo * Initiator = pClient->GetPlayer()->m_playerInfo;
+		if( pMember != Initiator && pMember->guildRank->iId <= Initiator->guildRank->iId && Initiator->guildRank->iId != 0 )
+		{
+			pClient->SystemMessage("You can only remove lower ranks then yourself.");
+			return;
+		}
+
 	}
 
 	CharacterDatabase.Execute("DELETE FROM guild_data WHERE playerid = %u", pMember->guid);
@@ -789,7 +825,7 @@ void Guild::RemoveGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 	}
 
 	LogGuildEvent(GUILD_EVENT_LEFT, 1, pMember->name);
-	if(pClient && pClient->GetPlayer()->m_playerInfo != pMember)
+	if(pClient != NULL && pClient->GetPlayer()->m_playerInfo != pMember)
 	{
 		AddGuildLogEntry(GUILD_LOG_EVENT_REMOVAL, 2, pClient->GetPlayer()->GetLowGUID(), pMember->guid);
 	}
