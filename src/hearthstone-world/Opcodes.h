@@ -1213,7 +1213,10 @@ enum Opcodes {
     UMSG_UNKNOWN_1185                               = 0x4A1,
     UMSG_UNKNOWN_1186                               = 0x4A2,
     UMSG_UNKNOWN_1187                               = 0x4A3,
-    NUM_MSG_TYPES                                   = 0x4A4
+    UMSG_UNKNOWN_1188                               = 0x4A4,
+    UMSG_UNKNOWN_1189                               = 0x4A5,
+    SMSG_CLIENTCACHE_VERSION                        = 0x4A6,
+    NUM_MSG_TYPES                                   = 0x4A7
 };
 
 extern NameTableEntry g_worldOpcodeNames[];
