@@ -291,6 +291,8 @@ void Vehicle::RemovePassenger(UnitPointer pPassenger)
 	VehiclePointer pThis = vehicle_shared_from_this();
 
 	uint8 slot = pPassenger->m_inVehicleSeatId;
+	if(slot >= 8)
+		return;
 	pPassenger->m_CurrentVehicle.reset();
 	pPassenger->m_inVehicleSeatId = 0xFF;
 

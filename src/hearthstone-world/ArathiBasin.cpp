@@ -259,7 +259,7 @@ void ArathiBasin::SpawnControlPoint(uint32 Id, uint32 Type)
 	if(m_controlPointAuras[Id] == NULL)
 	{
 		m_controlPointAuras[Id] = SpawnGameObject(gi_aura->ID, ControlPointCoordinates[Id][0], ControlPointCoordinates[Id][1],
-			ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 1.0f);
+			ControlPointCoordinates[Id][2], ControlPointCoordinates[Id][3], 0, 35, 5.0f);
 
 		m_controlPointAuras[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
 		m_controlPointAuras[Id]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, 6);
