@@ -5758,36 +5758,32 @@ void Spell::SpellEffectDisenchant(uint32 i)
 		return;
 	}
 
-	//Check for skill first, we can increase it upto 75 
-	uint32 skill=caster->_GetSkillLineCurrent( SKILL_ENCHANTING );
-	if(skill < 75)//can up skill
-	{
-		if(Rand(float(100-skill*100.0/75.0)))
-		{
-			caster->_AdvanceSkillLine(SKILL_ENCHANTING, float2int32( 1.0f * sWorld.getRate(RATE_SKILLRATE)));
-		}
-	}
-
 	if( !it->m_looted )
 	{
 		lootmgr.FillDisenchantingLoot(&it->m_loot, it->GetEntry());
 
-		// make sure loot actually exists
-		if( !it->m_loot.HasLoot() )
+		if( it->m_loot.items.size() > 0 )
 		{
+			//Check for skill, we can increase it upto 75 
+			uint32 skill=caster->_GetSkillLineCurrent( SKILL_ENCHANTING );
+			if(skill < 75)//can up skill
+			{
+				if(Rand(float(100-skill*100.0/75.0)))
+					caster->_AdvanceSkillLine(SKILL_ENCHANTING, float2int32( 1.0f * sWorld.getRate(RATE_SKILLRATE)));
+			}
+			OUT_DEBUG("SpellEffect","Succesfully disenchanted item %d", uint32(itemTarget->GetEntry()));
+			p_caster->SendLoot( itemTarget->GetGUID(), LOOT_DISENCHANTING );
+		} 
+		else
+		{
+			OUT_DEBUG("SpellEffect","Disenchanting failed, item %d has no loot", uint32(itemTarget->GetEntry()));
 			SendCastResult(SPELL_FAILED_CANT_BE_DISENCHANTED);
 			return;
 		}
-
 		// delete from db so it won't be re-saved
 		it->DeleteFromDB();
 		it->m_looted = true;
 	}
-
-	// set loot guid, send loot
-	caster->SetLootGUID(it->GetGUID());
-	p_caster->SendLoot( it->GetGUID(), LOOT_DISENCHANTING );
-
 	if(it==i_caster)
 		i_caster=NULLITEM;
 }
