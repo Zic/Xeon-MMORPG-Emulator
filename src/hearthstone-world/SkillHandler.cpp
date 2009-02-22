@@ -269,6 +269,9 @@ void WorldSession::HandleUnlearnSkillOpcode(WorldPacket& recv_data)
 	// Remove any spells within that line that the player has
 	_player->RemoveSpellsFromLine(skill_line);
 	
+	// Remove any quests finished and active for this skill
+	_player->RemoveQuestsFromLine(skill_line);
+
 	// Finally, remove the skill line.
 	_player->_RemoveSkillLine(skill_line);
 

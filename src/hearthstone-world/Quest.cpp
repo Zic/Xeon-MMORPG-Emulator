@@ -242,16 +242,19 @@ bool QuestLogEntry::LoadFromDB(Field *fields)
 	// playerguid,questid,timeleft,area0,area1,area2,area3,kill0,kill1,kill2,kill3
 	int f = 3;
 	ASSERT(m_plr && m_quest);
-	m_time_left = fields[f].GetUInt32();	f++;
+	m_time_left = fields[f].GetUInt32();
+	f++;
 	for(int i = 0; i < 4; ++i)
 	{
-		m_explored_areas[i] = fields[f].GetUInt32();	f++;
+		m_explored_areas[i] = fields[f].GetUInt32();
+		f++;
 		CALL_QUESTSCRIPT_EVENT(this, OnExploreArea)(m_explored_areas[i], m_plr, this);
 	}
 
 	for(int i = 0; i < 4; ++i)
 	{
-		m_mobcount[i] = fields[f].GetUInt32();	f++;
+		m_mobcount[i] = fields[f].GetUInt32();
+		f++;
 		if(GetQuest()->required_mobtype[i] == QUEST_MOB_TYPE_CREATURE)
 			CALL_QUESTSCRIPT_EVENT(this, OnCreatureKill)(GetQuest()->required_mob[i], m_plr, this);
 		else
@@ -310,7 +313,7 @@ bool QuestLogEntry::CanBeFinished()
 
 void QuestLogEntry::SubtractTime(uint32 value)
 {
-	if(this->m_time_left  <=value)
+	if(m_time_left <= value)
 		m_time_left = 0;
 	else
 		m_time_left-=value;
@@ -362,8 +365,7 @@ void QuestLogEntry::UpdatePlayerFields()
 	if(!m_plr)
 		return;
 
-	uint32 base = GetBaseField(m_slot);
-	m_plr->SetUInt32Value(base + 0, m_quest->id);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 0, m_quest->id);
 
 	// next field is kills and shit like that
 	uint32 field1 = 0;
@@ -393,17 +395,6 @@ void QuestLogEntry::UpdatePlayerFields()
 	// mob hunting
 	if(m_quest->count_required_mob)
 	{
-		/*uint8 cnt;
-		for(int i = 0; i < 4; ++i)
-		{
-			if(m_quest->required_mob[i] && m_mobcount[i] > 0)
-			{
-				// 1 << (offset * 6)
-				cnt = m_mobcount[i];
-				field1 |= (cnt << (i*8));
-			}
-		}*/
-
 		// optimized this - burlex
 		uint8 * p = (uint8*)&field1;
 		for(int i = 0; i < 4; ++i)
@@ -413,9 +404,13 @@ void QuestLogEntry::UpdatePlayerFields()
 		}
 	}
 
-	m_plr->SetUInt32Value(base + 1, 0);
-	m_plr->SetUInt32Value(base + 2, field1);
-	m_plr->SetUInt32Value(base + 3, m_time_left);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 1, 0);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 2, field1);
+	m_plr->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + m_slot*4 + 3, ( m_time_left ? static_cast<uint32>(time(NULL) + (m_time_left/1000)) : 0 ));
+
+	// Timed quest handler.
+	if(m_time_left && !sEventMgr.HasEvent( m_plr,EVENT_TIMED_QUEST_EXPIRE ))
+		m_plr->EventTimedQuestExpire(m_quest, this , m_slot, 1000);
 }
 
 void QuestLogEntry::SendQuestComplete()

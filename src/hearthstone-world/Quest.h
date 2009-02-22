@@ -246,6 +246,7 @@ public:
 	HEARTHSTONE_INLINE uint32 GetPlayerSlainCount() { return m_player_slain; }
 	HEARTHSTONE_INLINE uint32 GetMobCount(uint32 i) { return m_mobcount[i]; }
 	HEARTHSTONE_INLINE uint32 GetExploredAreas(uint32 i) { return m_explored_areas[i]; }
+	HEARTHSTONE_INLINE uint32 GetTimeLeft() { return m_time_left; }
 
 	HEARTHSTONE_INLINE uint32 GetBaseField(uint32 slot)
 	{

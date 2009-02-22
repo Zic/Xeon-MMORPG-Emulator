@@ -915,7 +915,7 @@ public:
 	HEARTHSTONE_INLINE uint32		GetFinishedDailiesCount() { return (uint32)m_finishedDailyQuests.size(); }
     void                AddToFinishedQuests(uint32 quest_id);
 	void				AddToFinishedDailyQuests(uint32 quest_id);
-    void                EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot);
+	void				EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot, uint32 interval);
 	
 	bool                HasFinishedQuest(uint32 quest_id);
 	bool				HasFinishedDailyQuest(uint32 quest_id);
@@ -925,22 +925,22 @@ public:
 	void                RemoveQuestSpell(uint32 spellid);
 	bool                HasQuestMob(uint32 entry);
 	void                RemoveQuestMob(uint32 entry);
+	void                RemoveQuestsFromLine(int skill_line);
 
-    //Quest related variables
+	//Quest related variables
 	uint32 m_questbarrier1[25];
-    QuestLogEntry*      m_questlog[25];
+	QuestLogEntry*		m_questlog[25];
 	uint32 m_questbarrier2[25];
-    std::set<uint32>    m_QuestGOInProgress;
-    std::set<uint32>    m_removequests;
-    std::set<uint32>    m_finishedQuests;
+	std::set<uint32>	m_QuestGOInProgress;
+	std::set<uint32>	m_removequests;
+	std::set<uint32>	m_finishedQuests;
 	std::set<uint32>	m_finishedDailyQuests;
-    uint32              m_questSharer;
-    uint32              timed_quest_slot;
-	std::set<uint32>    quest_spells;
-	std::set<uint32>    quest_mobs;
+	uint32				m_questSharer;
+	std::set<uint32>	quest_spells;
+	std::set<uint32>	quest_mobs;
 	Mutex				DailyMutex;
 
-    void EventPortToGM(uint32 guid);
+	void EventPortToGM(uint32 guid);
 	HEARTHSTONE_INLINE uint32 GetTeam() { return m_team; }
 	HEARTHSTONE_INLINE void SetTeam(uint32 t) { m_team = t; m_bgTeam=t; }
 	HEARTHSTONE_INLINE void ResetTeam() { m_team = myRace->team_id==7 ? 0 : 1; m_bgTeam=m_team; }

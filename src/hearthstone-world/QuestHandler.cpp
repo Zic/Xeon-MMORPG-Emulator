@@ -307,7 +307,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 		return;
 	}
 
-	int32 log_slot = GetPlayer()->GetOpenQuestSlot();
+	int32 log_slot = _player->GetOpenQuestSlot();
 
 	if (log_slot == -1)
 	{
@@ -323,10 +323,10 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	{
 		uint32 slots_required = qst->count_receiveitems;
 
-		if(GetPlayer()->GetItemInterface()->CalculateFreeSlots(NULL) < slots_required)
+		if(_player->GetItemInterface()->CalculateFreeSlots(NULL) < slots_required)
 		{
-			GetPlayer()->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_BAG_FULL);
-			sQuestMgr.SendQuestFailed(FAILED_REASON_INV_FULL, qst, GetPlayer());
+			_player->GetItemInterface()->BuildInventoryChangeError(NULLITEM, NULLITEM, INV_ERR_BAG_FULL);
+			sQuestMgr.SendQuestFailed(FAILED_REASON_INV_FULL, qst, _player);
 			return;
 		}
 	}	
@@ -344,7 +344,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 		if(qst->receive_items[i])
 		{
 			ItemPointer item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
-			if(!GetPlayer()->GetItemInterface()->AddItemToFreeSlot(item))
+			if(!_player->GetItemInterface()->AddItemToFreeSlot(item))
 			{
 				item->Destructor();
 				item = NULLITEM;
@@ -370,19 +370,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 		}
 	}
 
-	// Timed quest handler.
-	if(qst->time > 0)
-	{
-		//Start Quest Timer Event Here
-		//sEventMgr.AddEvent(GetPlayer(), &Player::EventTimedQuestExpire, qst, qle, static_cast<uint32>(log_slot), EVENT_TIMED_QUEST_EXPIRE, qst->time * 1000, 1);
-		//uint32 qtime = static_cast<uint32>(time(NULL) + qst->time);
-		//GetPlayer()->SetUInt32Value(log_slot+2, qtime);
-		//GetPlayer()->SetUInt32Value(PLAYER_QUEST_LOG_1_01 + (log_slot * 3), qtime);
-		//GetPlayer()->timed_quest_slot = log_slot;
-	}
-
 	if(qst->count_required_item || qst_giver->GetTypeId() == TYPEID_GAMEOBJECT)	// gameobject quests deactivate
-		GetPlayer()->UpdateNearbyGameObjects();
+		_player->UpdateNearbyGameObjects();
 
 	//ScriptSystem->OnQuestEvent(qst, TO_CREATURE( qst_giver ), _player, QUEST_EVENT_ON_ACCEPT);
 
@@ -403,36 +392,52 @@ void WorldSession::HandleQuestgiverCancelOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleQuestlogRemoveQuestOpcode(WorldPacket& recvPacket)
 {
-	DEBUG_LOG( "WORLD"," Received CMSG_QUESTLOG_REMOVE_QUEST" );
-    if(!_player) return;
-	if(!_player->IsInWorld()) return;
+	OUT_DEBUG( "QuestHandler","Received CMSG_QUESTLOG_REMOVE_QUEST" );
+	if(!_player || !_player->IsInWorld())
+		return;
 
 	uint8 quest_slot;
 	recvPacket >> quest_slot;
 	if(quest_slot >= 25)
 		return;
 
-	QuestLogEntry *qEntry = GetPlayer()->GetQuestLogInSlot(quest_slot);
+	QuestLogEntry *qEntry = _player->GetQuestLogInSlot(quest_slot);
 	if (!qEntry)
 	{
-		OUT_DEBUG("WORLD: No quest in slot %d.", quest_slot);
+		OUT_DEBUG("QuestHandler","No quest in slot %d.", quest_slot);
 		return;		
 	}
 	Quest *qPtr = qEntry->GetQuest();
-	CALL_QUESTSCRIPT_EVENT(qEntry, OnQuestCancel)(GetPlayer());
+
+	if (!qPtr)
+	{
+		OUT_DEBUG("QuestHandler","Quest %u does not exist in database", qPtr->id);
+		return;		
+	}
+
+	CALL_QUESTSCRIPT_EVENT(qEntry, OnQuestCancel)(_player);
+
 	qEntry->Finish();
 
 	// Remove all items given by the questgiver at the beginning
 	for(uint32 i = 0; i < 4; ++i)
 	{
 		if(qPtr->receive_items[i])
-			GetPlayer()->GetItemInterface()->RemoveItemAmt( qPtr->receive_items[i], 1 );
+			_player->GetItemInterface()->RemoveItemAmt( qPtr->receive_items[i], 1 );
 	}
+
+	// Remove source item
+	if(qPtr->srcitem)
+			_player->GetItemInterface()->RemoveItemAmt( qPtr->srcitem, 1 );
+
+	// Reset timed quests, remove timed event
 	if(qPtr->time > 0)
 	{
-		GetPlayer()->timed_quest_slot = 0;
+		if (sEventMgr.HasEvent(_player,EVENT_TIMED_QUEST_EXPIRE))
+			sEventMgr.RemoveEvents(_player, EVENT_TIMED_QUEST_EXPIRE); 	
 	}
-	GetPlayer()->UpdateNearbyGameObjects();
+
+	_player->UpdateNearbyGameObjects();
 
 	sHookInterface.OnQuestCancelled(_player, qPtr);
 
@@ -643,8 +648,8 @@ void WorldSession::HandleQuestgiverCompleteQuestOpcode( WorldPacket & recvPacket
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 {
-    if(!_player) return;
-	if(!_player->IsInWorld()) return;
+	if(!_player || !_player->IsInWorld())
+		return;
 	DEBUG_LOG( "WORLD"," Received CMSG_QUESTGIVER_CHOOSE_REWARD." );
 
 	uint64 guid;
@@ -721,15 +726,15 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 		qst_giver->BuildFieldUpdatePacket(GetPlayer(), UNIT_DYNAMIC_FLAGS, qst_giver->GetUInt32Value(UNIT_DYNAMIC_FLAGS));
 	}*/
 
-    //check for room in inventory for all items
-	if(!sQuestMgr.CanStoreReward(GetPlayer(),qst,reward_slot))
-    {
-        sQuestMgr.SendQuestFailed(FAILED_REASON_INV_FULL, qst, GetPlayer());
-        return;
-    }
+	//check for room in inventory for all items
+	if(!sQuestMgr.CanStoreReward(_player,qst,reward_slot))
+	{
+		sQuestMgr.SendQuestFailed(FAILED_REASON_INV_FULL, qst, _player);
+		return;
+	}
 
 	
-	sQuestMgr.OnQuestFinished(GetPlayer(), qst, qst_giver, reward_slot);
+	sQuestMgr.OnQuestFinished(_player, qst, qst_giver, reward_slot);
 	//if(qst_giver->GetTypeId() == TYPEID_UNIT) qst->LUA_SendEvent(TO_CREATURE( qst_giver ),GetPlayer(),ON_QUEST_COMPLETEQUEST);
 
 	if(qst->next_quest_id)
@@ -740,11 +745,6 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket)
 		data << qst->next_quest_id;
 		HandleQuestGiverQueryQuestOpcode(data);
 	}
-	if(qst->time > 0)
-	{
-		GetPlayer()->timed_quest_slot = 0;
-	}
-
 	_player->SaveToDB(false);
 }
 

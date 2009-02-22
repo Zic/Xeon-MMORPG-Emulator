@@ -248,7 +248,6 @@ void Player::Init()
 
 	m_AttackMsgTimer		= 0;
 
-	timed_quest_slot		= 0;
 	m_GM_SelectedGO		 = NULLGOB;
 
 	for(uint32 x = 0;x < 7; x++)
@@ -6056,13 +6055,51 @@ bool Player::removeSpell(uint32 SpellID, bool MoveToDeleted, bool SupercededSpel
 	return true;
 }
 
-void Player::EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot)
+void Player::EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot, uint32 interval)
 {
-	WorldPacket fail;
-	sQuestMgr.BuildQuestFailed(&fail, qst->id);
-	GetSession()->SendPacket(&fail);
-	CALL_QUESTSCRIPT_EVENT(qle, OnQuestCancel)(plr_shared_from_this());
-	qle->Finish();
+	qle->SubtractTime(interval);
+	DEBUG_LOG("QuestLogEntry","qle TimeLeft:%u[ms]",qle->GetTimeLeft());
+
+	if(qle->GetTimeLeft() == 0)
+	{
+		WorldPacket fail;
+		sQuestMgr.BuildQuestFailed(&fail, qst->id);
+		GetSession()->SendPacket(&fail);
+		sHookInterface.OnQuestCancelled(plr_shared_from_this(), qst);
+		CALL_QUESTSCRIPT_EVENT(qle, OnQuestCancel)(plr_shared_from_this());
+//		qle->Finish();
+	}
+	else
+		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventTimedQuestExpire, qst, qle, log_slot, interval, EVENT_TIMED_QUEST_EXPIRE, interval, 1, 0);
+}
+void Player::RemoveQuestsFromLine(int skill_line)
+{
+	for (int i = 0; i < 25; i++)
+	{
+		if (m_questlog[i])
+		{
+			Quest* qst = m_questlog[i]->GetQuest();
+			if (qst && qst->required_tradeskill == skill_line)
+			{
+				m_questlog[i]->Finish();
+	
+				// Remove all items given by the questgiver at the beginning
+				for(uint32 j = 0; j < 4; j++)
+					if(qst->receive_items[j])
+						GetItemInterface()->RemoveItemAmt(qst->receive_items[j], 1 );
+				delete qst;
+			}
+		}
+	}
+
+	for (set<uint32>::iterator itr = m_finishedQuests.begin(); itr != m_finishedQuests.end(); ++itr)
+	{
+		Quest * qst = QuestStorage.LookupEntry((*itr));
+		if (qst && qst->required_tradeskill == skill_line)
+			m_finishedQuests.erase(itr);
+	}
+
+	UpdateNearbyGameObjects();
 }
 
 void Player::SendInitialLogonPackets()

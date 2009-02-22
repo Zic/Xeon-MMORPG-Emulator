@@ -1236,61 +1236,65 @@ void QuestMgr::OnQuestFinished(PlayerPointer plr, Quest* qst, ObjectPointer qst_
 					add->SetCount(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + qst->reward_choiceitemcount[reward_slot]);
 					add->m_isDirty = true;
 				}
-		    }
-	    }
+			}
+		}
 
 
-	    // cast learning spell
-	    if(qst->reward_spell)
-	    {
-		    if(!plr->HasSpell(qst->reward_spell))
-		    {
-			    // "Teaching" effect
-			    WorldPacket data(SMSG_SPELL_START, 42);
-			    data << qst_giver->GetNewGUID() << qst_giver->GetNewGUID();
-			    data << uint32(7763);
+		// cast learning spell
+		if(qst->reward_spell)
+		{
+			if(!plr->HasSpell(qst->reward_spell))
+			{
+				// "Teaching" effect
+				WorldPacket data(SMSG_SPELL_START, 42);
+				data << qst_giver->GetNewGUID() << qst_giver->GetNewGUID();
+				data << uint32(7763);
 				data << uint8(0);
-			    data << uint16(0);
-			    data << uint32(0);
-			    data << uint16(2);
-			    data << plr->GetGUID();
-			    plr->GetSession()->SendPacket( &data );
+				data << uint16(0);
+				data << uint32(0);
+				data << uint16(2);
+				data << plr->GetGUID();
+				plr->GetSession()->SendPacket( &data );
 
-			    data.Initialize( SMSG_SPELL_GO );
-			    data << qst_giver->GetNewGUID() << qst_giver->GetNewGUID();
-			    data << uint32(7763);		   // spellID
-			    data << uint8(0) << uint8(1);   // flags
-			    data << uint8(1);			   // amount of targets
-			    data << plr->GetGUID();		 // target
-			    data << uint8(0);
-			    data << uint16(2);
-			    data << plr->GetGUID();
-			    plr->GetSession()->SendPacket( &data );
+				data.Initialize( SMSG_SPELL_GO );
+				data << qst_giver->GetNewGUID() << qst_giver->GetNewGUID();
+				data << uint32(7763);		   // spellID
+				data << uint8(0) << uint8(1);   // flags
+				data << uint8(1);			   // amount of targets
+				data << plr->GetGUID();		 // target
+				data << uint8(0);
+				data << uint16(2);
+				data << plr->GetGUID();
+				plr->GetSession()->SendPacket( &data );
 
-			    // Teach the spell
-			    plr->addSpell(qst->reward_spell);
-		    }
-	    }
+				// Teach the spell
+				plr->addSpell(qst->reward_spell);
+			}
+		}
 
-	    // cast Effect Spell
-	    if(qst->effect_on_player)
-	    {
-		    SpellEntry  * inf =dbcSpell.LookupEntry(qst->effect_on_player);
-		    if(inf)
-		    {
-			    SpellPointer spe(new Spell(qst_giver,inf,true,NULLAURA));
-			    SpellCastTargets tgt;
-			    tgt.m_unitTarget = plr->GetGUID();
-			    spe->prepare(&tgt);
-		    }
-	    }
-    }
+		// cast Effect Spell
+		if(qst->effect_on_player)
+		{
+			SpellEntry  * inf =dbcSpell.LookupEntry(qst->effect_on_player);
+			if(inf)
+			{
+				SpellPointer spe(new Spell(qst_giver,inf,true,NULLAURA));
+				SpellCastTargets tgt;
+				tgt.m_unitTarget = plr->GetGUID();
+				spe->prepare(&tgt);
+			}
+		}
+	}
 
-    //Add to finished quests
+	//Add to finished quests
 	if(qst->is_repeatable == REPEATABLE_DAILY)
 		plr->AddToFinishedDailyQuests(qst->id);
 	else if(!IsQuestRepeatable(qst))
 		plr->AddToFinishedQuests(qst->id);
+
+	//Remove any timed events
+	if (sEventMgr.HasEvent(plr,EVENT_TIMED_QUEST_EXPIRE))
+		sEventMgr.RemoveEvents(plr, EVENT_TIMED_QUEST_EXPIRE); 	
 
 	if(qst->zone_id)
 		plr->GetAchievementInterface()->HandleAchievementCriteriaCompleteQuestsInZone(qst->zone_id);
