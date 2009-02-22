@@ -552,7 +552,7 @@ public:
 			switch(*p)
 			{
 			case 's':		// string is the only one we have to actually do anything for here
-					//free((*(char**)structpointer));
+					free((*(char**)structpointer));
 					structpointer += sizeof(char*);
 				break;
 
@@ -625,8 +625,7 @@ public:
 
 			case 's':	// Null-terminated string
 				{
-				shared_ptr<char> s(strdup(f->GetString()), &free);
-				*(char**)&structpointer[offset] = s.get();
+				*(char**)&structpointer[offset] = strdup(f->GetString());
 				offset += sizeof(char*);
 				}break;
 
