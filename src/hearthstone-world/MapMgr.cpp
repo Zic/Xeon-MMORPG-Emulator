@@ -1837,8 +1837,8 @@ void MapMgr::_PerformObjectDuties()
 			{
 				continue;
 			}
-
-			if((result = session->Update(m_instanceID)))
+			result = session->Update(m_instanceID);
+			if(result)
 			{
 				if(result == 1)
 				{

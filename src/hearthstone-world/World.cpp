@@ -812,8 +812,8 @@ void World::UpdateSessions(uint32 diff)
 			Sessions.erase(it2);
 			continue;
 		}
-
-		if((result = session->Update(0)))
+		result = session->Update(0);
+		if(result)
 		{
 			if(result == 1)
 			{
