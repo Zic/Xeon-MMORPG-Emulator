@@ -815,7 +815,7 @@ void World::UpdateSessions(uint32 diff)
 		result = session->Update(0);
 		if(result)
 		{
-			if(result == 1)
+			if(result == 1)//socket don't exist anymore, delete from worldsessions.
 			{
 				// complete deletion
 				DeleteSession(session);

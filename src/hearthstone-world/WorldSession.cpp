@@ -125,24 +125,11 @@ int WorldSession::Update(uint32 InstanceID)
 	{
 		// Check if the player is in the process of being moved. We can't delete him
 		// if we are.
-		if(_player && _player->m_beingPushed)
-		{
-			// Abort..
+		if(_player && _player->m_beingPushed) // Abort
 			return 0;
-		}
 
 		if(!_logoutTime)
-			_logoutTime = m_currMsTime + PLAYER_LOGOUT_DELAY;
-
-/*
-				if(_player && _player->DuelingWith)
-					_player->EndDuel(DUEL_WINNER_RETREAT);
-		
-				bDeleted = true;
-				LogoutPlayer(true);
-				// 1 - Delete session completely.
-				return 1;*/
-		
+			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 
 	while ((packet = _recvQueue.Pop()))
@@ -221,7 +208,7 @@ int WorldSession::Update(uint32 InstanceID)
 		// if we are.
 		if(_player && _player->m_beingPushed)
 		{
-			// Abort..
+			// Abort
 			return 0;
 		}
 
@@ -234,7 +221,7 @@ int WorldSession::Update(uint32 InstanceID)
 
 		m_lastPing = (uint32)UNIXTIME;		// Prevent calling this code over and over.
 		if(!_logoutTime)
-			_logoutTime = m_currMsTime + PLAYER_LOGOUT_DELAY;
+			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 
 	return 0;
