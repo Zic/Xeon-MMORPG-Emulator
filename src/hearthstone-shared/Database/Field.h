@@ -33,7 +33,7 @@ public:
 	HEARTHSTONE_INLINE int8 GetInt8() { return mValue ? static_cast<int8>(atol(mValue)) : 0; }
 	HEARTHSTONE_INLINE uint16 GetUInt16() { return mValue ? static_cast<uint16>(atol(mValue)) : 0; }
 	HEARTHSTONE_INLINE uint32 GetUInt32() { return mValue ? static_cast<uint32>(atol(mValue)) : 0; }
-	HEARTHSTONE_INLINE uint32 GetInt32() { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
+	HEARTHSTONE_INLINE int32 GetInt32() { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
 	uint64 GetUInt64() 
 	{
 		if(mValue)

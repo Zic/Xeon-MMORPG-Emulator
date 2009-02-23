@@ -29,40 +29,38 @@ f = float
 s = string
 x = skip
 */
-const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
-const char * gCreatureNameFormat						= "usssuuuuuuuuuuffcc";
-const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
-const char * gCreatureProtoFormat						= "uuuuuuufuuuffuffuuuuuuuuuuuffsuuuufffuuic";
-const char * gAreaTriggerFormat							= "ucuusffffuu";
-const char * gItemPageFormat							= "usu";
-const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
-const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
-const char * gSpellExtraFormat							= "uuuu";
-const char * gGraveyardFormat							= "uffffuuuux";
-const char * gTeleportCoordFormat						= "uxufffx";
-const char * gPvPAreaFormat								= "ush";
-const char * gFishingFormat								= "uuu";
-const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
-const char * gZoneGuardsFormat							= "uuu";
 const char * gAchievementRewardFormat					= "uuuu";
-const char * gProfessionDiscoveryFormat					= "uuuu";
+const char * gAreaTriggerFormat							= "ucuusffffuu";
+const char * gCreatureNameFormat						= "usssuuuuuuuuuuffcc";
+const char * gCreatureProtoFormat						= "uuuuuuufuuuffuffuuuuuuuuuuuffsuuuufffuuic";
+const char * gFishingFormat								= "uuu";
+const char * gGameObjectNameFormat						= "uuusuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gGraveyardFormat							= "uffffuuuux";
+const char * gItemPageFormat							= "usu";
+const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
+const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuc";
+const char * gTeleportCoordFormat						= "uxufffx";
+const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
+const char * gProfessionDiscoveryFormat					= "uuuf";
+const char * gZoneGuardsFormat							= "uuu";
 
 /** SQLStorage symbols
  */
 SERVER_DECL SQLStorage<AchievementReward, HashMapStorageContainer<AchievementReward> >		AchievementRewardStorage;
-SERVER_DECL SQLStorage<ItemPrototype, ArrayStorageContainer<ItemPrototype> >				ItemPrototypeStorage;
-SERVER_DECL SQLStorage<CreatureInfo, HashMapStorageContainer<CreatureInfo> >				CreatureNameStorage;
-SERVER_DECL SQLStorage<GameObjectInfo, HashMapStorageContainer<GameObjectInfo> >			GameObjectNameStorage;
-SERVER_DECL SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >				CreatureProtoStorage;
 SERVER_DECL SQLStorage<AreaTrigger, HashMapStorageContainer<AreaTrigger> >					AreaTriggerStorage;
-SERVER_DECL SQLStorage<ItemPage, HashMapStorageContainer<ItemPage> >						ItemPageStorage;
-SERVER_DECL SQLStorage<Quest, HashMapStorageContainer<Quest> >								QuestStorage;
-SERVER_DECL SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					NpcTextStorage;
-SERVER_DECL SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >		GraveyardStorage;
-SERVER_DECL SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >			TeleportCoordStorage;
+SERVER_DECL SQLStorage<CreatureInfo, HashMapStorageContainer<CreatureInfo> >				CreatureNameStorage;
+SERVER_DECL SQLStorage<CreatureProto, HashMapStorageContainer<CreatureProto> >				CreatureProtoStorage;
 SERVER_DECL SQLStorage<FishingZoneEntry, HashMapStorageContainer<FishingZoneEntry> >		FishingZoneStorage;
-SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >	ProfessionDiscoveryStorage;
+SERVER_DECL SQLStorage<GameObjectInfo, HashMapStorageContainer<GameObjectInfo> >			GameObjectNameStorage;
+SERVER_DECL SQLStorage<GraveyardTeleport, HashMapStorageContainer<GraveyardTeleport> >		GraveyardStorage;
+SERVER_DECL SQLStorage<ItemPage, HashMapStorageContainer<ItemPage> >						ItemPageStorage;
+SERVER_DECL SQLStorage<ItemPrototype, ArrayStorageContainer<ItemPrototype> >				ItemPrototypeStorage;
+SERVER_DECL SQLStorage<GossipText, HashMapStorageContainer<GossipText> >					NpcTextStorage;
+SERVER_DECL SQLStorage<Quest, HashMapStorageContainer<Quest> >								QuestStorage;
+SERVER_DECL SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >			TeleportCoordStorage;
 SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							WorldMapInfoStorage;
+SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >	ProfessionDiscoveryStorage;
 SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
 
 SERVER_DECL set<string> ExtraMapCreatureTables;
@@ -185,8 +183,8 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				sp->procChance = fields[2].GetUInt32();
 				sp->procCount = fields[3].GetUInt32();
 				sp->spell = spe;
-				sp->spellType = fields[5].GetUInt32();
-				sp->spelltargetType = fields[6].GetUInt32();
+				sp->spellType = fields[5].GetUInt8();
+				sp->spelltargetType = fields[6].GetUInt8();
 				sp->cooldown = (tcd <0 ? 0 : tcd);
 				sp->floatMisc1 = fields[8].GetFloat();
 				sp->Misc2 = fields[9].GetUInt32();
@@ -353,7 +351,7 @@ void ObjectMgr::LoadExtraItemStuff()
 
 
 		// lowercase name, used for searches
-		pItemPrototype->lowercase_name = pItemPrototype->Name1;
+		pItemPrototype->lowercase_name = itr->Get()->Name1;
 		for(uint32 j = 0; j < pItemPrototype->lowercase_name.length(); ++j)
 			pItemPrototype->lowercase_name[j] = tolower(pItemPrototype->lowercase_name[j]);
 

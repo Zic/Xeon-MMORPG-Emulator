@@ -185,7 +185,7 @@ struct Quest
 	uint32 required_quest_and_or;
 	uint32 receive_items[4];
 	uint32 receive_itemcount[4];
-	int is_repeatable;
+	uint8 is_repeatable;
 
 	//Calculated variables (not in db)
 	uint32 count_required_mob;
