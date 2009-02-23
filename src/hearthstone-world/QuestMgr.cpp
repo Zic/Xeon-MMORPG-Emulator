@@ -1702,6 +1702,7 @@ QuestMgr::~QuestMgr()
 	list<QuestRelation*>::iterator itr3;
 	HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* >::iterator itr4;
 	std::list<QuestAssociation*>::iterator itr5;
+	std::list<uint32>::iterator itr6;
 
 	// clear relations
 	for(itr2 = m_obj_quests.begin(); itr2 != m_obj_quests.end(); ++itr2)
@@ -1763,6 +1764,15 @@ QuestMgr::~QuestMgr()
 		delete itr4->second;
 	}
 	m_quest_associations.clear();
+
+	for(itr6 = m_extraqueststuff_list.begin(); itr6 != m_extraqueststuff_list.end(); ++itr6)
+	{
+		GameObjectInfo *inf = GameObjectNameStorage.LookupEntry(*itr6);
+		if( inf == NULL )
+			continue;
+
+		delete [] inf->InvolvedQuestIds;
+	}
 }
 
 
@@ -1928,6 +1938,7 @@ void QuestMgr::LoadExtraQuestStuff()
 			continue;
 
 		inf->InvolvedQuestIds = new uint32[itr->second.size()];
+		m_extraqueststuff_list.push_back(itr->first);
 		set<uint32>::iterator vtr = itr->second.begin();
 		uint32 j = 0;
 

@@ -575,6 +575,11 @@ bool Database::_Reconnect(DatabaseConnection * conn)
 	return true;
 }
 
+void Database::CleanupLibs()
+{
+		mysql_library_end();
+}
+
 Database *Database::Create()
 {
 	return new Database();

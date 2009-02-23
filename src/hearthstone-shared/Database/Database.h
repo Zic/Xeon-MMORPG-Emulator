@@ -118,6 +118,7 @@ public:
 	void PerformQueryBuffer(QueryBuffer * b, DatabaseConnection *ccon);
 	void AddQueryBuffer(QueryBuffer * b);
 
+	static void CleanupLibs();
 	static Database *Create();
 
 	/* database is killed off manually. */

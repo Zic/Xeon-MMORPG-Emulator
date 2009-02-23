@@ -231,6 +231,7 @@ bool Master::Run(int argc, char ** argv)
 
 	if( !_StartDB() )
 	{
+		Database::CleanupLibs();
 		return false;
 	}
 
@@ -441,6 +442,7 @@ bool Master::Run(int argc, char ** argv)
 #endif
 
 	CloseConsoleListener();
+	delete ls;
 
 	Log.Notice( "Network", "Shutting down network subsystem." );
 #ifdef WIN32
@@ -474,6 +476,9 @@ bool Master::Run(int argc, char ** argv)
 
 	sScriptMgr.UnloadScripts();
 	delete ScriptMgr::getSingletonPtr();
+
+	Log.Notice( "ChatHandler", "~ChatHandler()" );
+	delete ChatHandler::getSingletonPtr();
 
 	Log.Notice( "EventMgr", "~EventMgr()" );
 	delete EventMgr::getSingletonPtr();

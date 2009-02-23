@@ -74,14 +74,7 @@ public:
 			socket->SetCompletionPort(m_cp);
 			socket->Accept(&m_tempAddress);
 		}
-		return true;
-		/*aSocket = WSAAccept(m_socket, (sockaddr*)&m_tempAddress, (socklen_t*)&len, NULL, NULL);
-		if(aSocket == INVALID_SOCKET)
-			return;
-
-		socket = new T(aSocket);
-		socket->SetCompletionPort(m_cp);
-		socket->Accept(&m_tempAddress);*/
+		return false;
 	}
 
 	void Close()

@@ -139,6 +139,7 @@ private:
 	HM_NAMESPACE::hash_map<uint32, list<QuestRelation *>* > m_npc_quests;
 	HM_NAMESPACE::hash_map<uint32, list<QuestRelation *>* > m_obj_quests;
 	HM_NAMESPACE::hash_map<uint32, list<QuestRelation *>* > m_itm_quests;
+	list<uint32> m_extraqueststuff_list;
 
 	HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* > m_quest_associations;
 	HM_NAMESPACE::hash_map<uint32, list<QuestAssociation *>* >& GetQuestAssociationList(){return m_quest_associations;}
