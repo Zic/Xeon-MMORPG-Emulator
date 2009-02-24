@@ -363,6 +363,7 @@ uint32 TimeStamp();
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2, PlayerPointer target )
 {
 	ByteBuffer *splinebuf = (m_objectTypeId == TYPEID_UNIT) ? target->GetAndRemoveSplinePacket(GetGUID()) : 0;
+	uint16 flag16 = 0;	// some other flag
 	*data << (uint8)flags;
 
 	PlayerPointer pThis = NULLPLR;
@@ -427,7 +428,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 
 		*data << (uint32)flags2;
 
-		*data << (uint16)0;
+		*data << (uint16)flag16;
 
 		*data << getMSTime(); // this appears to be time in ms but can be any thing
 
@@ -437,31 +438,21 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 		//   0x10 -> disables movement compensation and causes players to jump around all the place
 		//   0x40 -> disables movement compensation and causes players to jump around all the place
 
-		/*static uint8 fl = 0x04;
-		*data << uint8(fl);		// wtf? added in 2.3.0*/
-		/*if(target==this)
+		/* some old stuff
+		static uint8 fl = 0x04;
+		*data << uint8(fl);		// wtf? added in 2.3.0
+		if(target==this)
 			*data<<uint8(0x53);
 		else
-			*data<<uint8(0);*/
-		//*data << uint8(0x1);
-	}
+			*data<<uint8(0);
+		//*data << uint8(0x1);*/
 
-	if (flags & 0x40)
-	{
-		if(flags & 0x2)
-		{
-			*data << (float)m_position.x;
-			*data << (float)m_position.y;
-			*data << (float)m_position.z;
-			*data << (float)m_position.o;
-		}
-		else
-		{
-			*data << m_position;
-			*data << m_position.o;
-		}
+		*data << (float)m_position.x;
+		*data << (float)m_position.y;
+		*data << (float)m_position.z;
+		*data << (float)m_position.o;
 
-		if(flags & 0x20 && flags2 & 0x0200)
+		if ( flags2 & 0x0200 )	//BYTE1(flags2) & 2
 		{
 			if (IsUnit() && unit_shared_from_this()->m_CurrentVehicle != NULL)
 			{
@@ -502,25 +493,29 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 				*data << creature_shared_from_this()->m_transportPosition->x << creature_shared_from_this()->m_transportPosition->y << 
 					creature_shared_from_this()->m_transportPosition->z << creature_shared_from_this()->m_transportPosition->o;
 				*data << float(0.0f);
+				*data << uint32(0);
+				*data << uint8(0);
 			}
 		}
-	}
 
-	if (flags & 0x20)
-	{
+		if(flags2 & 0x2200000 || flag16 & 0x20)
+		{
+			// unknown float
+		}
 		*data << (uint32)0;
-	}
 
-	if (flags & 0x20 && flags2 & 0x2000)
-	{
-		*data << (float)0;
-		*data << (float)1.0;
-		*data << (float)0;
-		*data << (float)0;
-	}
+		if(flags2 & 0x1000) // BYTE1(flags2) & 0x10
+		{
+			*data << (float)0;
+			*data << (float)1.0;
+			*data << (float)0;
+			*data << (float)0;
+		}
+		if( flags2 & 0x4000000 )
+		{
+			//unknown float
+		}
 
-	if (flags & 0x20)
-	{
 		*data << m_walkSpeed;	 // walk speed
 		*data << m_runSpeed;	  // run speed
 		*data << m_backWalkSpeed; // backwards walk speed
@@ -530,12 +525,20 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 		*data << m_backFlySpeed;	// back fly speed
 		*data << m_turnRate;	  // turn rate
 		*data << float(7);
-	}
 
-	if(splinebuf)
+		if(splinebuf)	// client expects that (*(char(flags2) + 3) & 0x8) != 0 in this case
+		{
+			data->append(*splinebuf);
+			delete splinebuf;
+		}
+	}
+	else if (flags & 0x40)
 	{
-		data->append(*splinebuf);
-		delete splinebuf;
+		// some 4 floats. may be position
+		*data << (float)m_position.x;
+		*data << (float)m_position.y;
+		*data << (float)m_position.z;
+		*data << (float)m_position.o;
 	}
 
 	if(flags & 0x8)
@@ -547,23 +550,28 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 	else if(flags & 0x10)
 		*data << GetUInt32Value(OBJECT_FIELD_GUID);
 
+	if(flags & 0x4)
+	{
+		// unknown NewGUID
+	}
+
 	if(flags & 0x2)
 	{
-		if(target)
+		/*if(target)
 		{
-			/*int32 m_time = TimeStamp() - target->GetSession()->m_clientTimeDelay;
+			int32 m_time = TimeStamp() - target->GetSession()->m_clientTimeDelay;
 			m_time += target->GetSession()->m_moveDelayTime;
-			*data << m_time;*/
+			*data << m_time;
 			*data << getMSTime();
 		}
-		else
-            *data << getMSTime();
+		else*/
+        *data << getMSTime();
 	}
 	
-	if (flags & 0x80)
+	/*if (flags & 0x80)
 	{
 			*data << vehicle_shared_from_this()->GetVehicleEntry() << float(0.0f); //facing adjustment
-	}
+	}*/
 }
 
 //=======================================================================================

@@ -1784,7 +1784,6 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 {
 	//this should NEVER be called directly !!!!!!
 	//use MoveTo()
-
 	//WorldPacket data(SMSG_MONSTER_MOVE, 60);
 	uint8 buffer[100];
 	StackPacket data(SMSG_MONSTER_MOVE, buffer, 100);
@@ -2015,7 +2014,14 @@ void AIInterface::SendCurrentMove(PlayerPointer plyr/*uint64 guid*/)
 {
 	if(m_destinationX == 0.0f && m_destinationY == 0.0f && m_destinationZ == 0.0f) return; //invalid move 
 	ByteBuffer *splineBuf = new ByteBuffer(20*4);
-	*splineBuf << uint32(0); // spline flags
+	uint32 flags = 0;
+	*splineBuf << uint32(flags); // spline flags
+	/*if(flags & 0x10000)
+		; // 3 unk floats
+	if(flags & 0x20000)
+		; // unknown int64
+	if(flags & 0x40000)
+		; // unknown float*/
 	*splineBuf << uint32((m_totalMoveTime - m_timeToMove)+m_moveTimer); //Time Passed (start Position) //should be generated/save 
 	*splineBuf << uint32(m_totalMoveTime); //Total Time //should be generated/save
 	*splineBuf << uint32(0); //Unknown
@@ -2025,8 +2031,8 @@ void AIInterface::SendCurrentMove(PlayerPointer plyr/*uint64 guid*/)
 	*splineBuf << m_Unit->GetPositionX() << m_Unit->GetPositionY() << m_Unit->GetPositionZ();
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
-	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
-	*splineBuf << uint8(0); // Pguid
+	*splineBuf << uint8(0); // Pguid?
+	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;	// 3 floats after all the spline points
 
 	plyr->AddSplinePacket(m_Unit->GetGUID(), splineBuf);
 
