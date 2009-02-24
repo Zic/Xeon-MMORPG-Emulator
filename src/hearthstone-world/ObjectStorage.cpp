@@ -157,6 +157,11 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 		{
 			do
 			{
+				sp = NULL;
+				spe = NULL;
+				entry = 0;
+				spellID = 0;
+				agent = 0;
 				Field *fields = result->Fetch();
 				entry = fields[0].GetUInt32();
 				agent = fields[1].GetUInt16();
@@ -204,6 +209,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 							sp->spell->Effect[2] == SPELL_EFFECT_LEARN_SPELL)
 						{
 							Log.Warning("AIAgent","SpellId %u skipped in ai_agent for NPC %u, it is a teaching spell", spellID, sp->entryId);
+							delete sp;
 							sp = NULL;
 							continue;
 						}
@@ -251,6 +257,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						cn->m_canRangedAttack = true;
 						cn->m_RangedAttackSpell = (spellID?spellID:15620);
 						cn->m_SpellSoundid = sp->Misc2;
+						delete sp;
 						sp = NULL;
 						counter += 1;
 					}break;
@@ -269,6 +276,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						else
 							cn->m_fleeDuration = 10000;
 
+						delete sp;
 						sp = NULL;
 						counter += 1;
 					}break;
@@ -281,6 +289,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						else
 							cn->m_callForHelpHealth = 0.2f;
 
+						delete sp;
 						sp = NULL;
 						counter += 1;
 					}break;
@@ -289,12 +298,13 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 					default:
 					{
 						Log.Warning("AIAgent","Skipping in-valid  entry %u for ai_type %u.", sp->entryId, sp->agent );
+						delete sp;
 						sp = NULL;
 					}break;
 				}
 				//Valid; add to list
 				if(sp != NULL)
-					cn->spells.push_back(sp);\
+					cn->spells.push_back(sp);
 				sp = NULL;
 			}while( result->NextRow() );
 		}
@@ -303,6 +313,8 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 		else
 			Log.Warning("AIAgent","No ai_agents found in database");
 	}
+	if(result)
+		delete result;
 }
 
 void ObjectMgr::LoadExtraItemStuff()
@@ -547,6 +559,60 @@ void Storage_Cleanup()
 	AreaTriggerStorage.Cleanup();
 	ItemPageStorage.Cleanup();
 	ProfessionDiscoveryStorage.Cleanup();
+
+	{
+		StorageContainerIterator<Quest> * itr = QuestStorage.MakeIterator();
+		Quest * q;
+		while(!itr->AtEnd())
+		{
+			q = itr->Get();
+
+			if (q->title)
+			{
+				free(q->title);
+				q->title = NULL;
+			}
+			if (q->details)
+			{
+				free(q->details);
+				q->details = NULL;
+			}
+			if (q->objectives)
+			{
+				free(q->objectives);
+				q->objectives = NULL;
+			}
+			if (q->completiontext)
+			{
+				free(q->completiontext);
+				q->completiontext = NULL;
+			}
+			if (q->incompletetext)
+			{
+				free(q->incompletetext);
+				q->incompletetext = NULL;
+			}
+			if (q->endtext)
+			{
+				free(q->endtext);
+				q->endtext = NULL;
+			}
+			for(uint8 x = 0; x < 4; x++)
+			{
+				if (q->objectivetexts[x])
+				{
+					free(q->objectivetexts[x]);
+					q->objectivetexts[x] = NULL;
+				}
+			}
+
+			if(!itr->Inc())
+				break;
+		}
+		itr->Destruct();
+	}
+
+
 	QuestStorage.Cleanup();
 	GraveyardStorage.Cleanup();
 	TeleportCoordStorage.Cleanup();

@@ -4629,6 +4629,10 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			}
 		}
 
+		// check for spell id
+		if( spellId == 0 )
+			return;
+
 		if( spellId != GetSpellId() )
 		{
 			if( TO_PLAYER( m_target )->m_ShapeShifted )
@@ -4641,10 +4645,6 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, modelId );
 
 		TO_PLAYER( m_target )->SetShapeShift( mod->m_miscValue );
-
-		// check for spell id
-		if( spellId == 0 )
-			return;
 
 		SpellEntry* spellInfo = dbcSpell.LookupEntry(spellId );
 		

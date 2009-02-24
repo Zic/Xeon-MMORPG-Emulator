@@ -5527,9 +5527,7 @@ void ApplyNormalFixes()
 	}
 
 	sp = dbcSpell.LookupEntryForced( 26659 );
-	SpellEntry * sp2 = new SpellEntry;
-	memset(sp2, 0, sizeof(SpellEntry));
-	sp2 = sp;
+	SpellEntry * sp2 = sp;
 	sp2->Id = 62388;
 	sp2->Name = "Dummy Shit";
 	sp2->DurationIndex = 41;
