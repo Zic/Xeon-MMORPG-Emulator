@@ -305,13 +305,12 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	BigNumber BNK;
 	BNK.SetBinary(K, 40);
 	
-	uint8 *key = new uint8[20];
+	uint8 key[20];
 	AutheticationPacketKey::GenerateKey(key, K);
 	
 	// Initialize crypto.
 	_crypt.SetKey(key, 20);
 	_crypt.Init();
-	delete key;
 
 	//checking if player is already connected
 	//disconnect current player and login this one(blizzlike)
