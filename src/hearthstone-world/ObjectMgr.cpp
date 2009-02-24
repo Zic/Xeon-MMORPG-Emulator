@@ -254,6 +254,7 @@ void ObjectMgr::LoadAchievements()
 			thisSet->insert( pQuest );
 		}
 	}
+	itr->Destruct();
 }
 
 //

@@ -47,6 +47,7 @@ class WeatherInfo : public EventableObject, public std::tr1::enable_shared_from_
 public:
 	WeatherInfo();
 	~WeatherInfo();
+	void Destructor();
 
 	void BuildUp();
 	void Update();	
