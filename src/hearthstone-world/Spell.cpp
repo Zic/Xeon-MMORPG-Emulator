@@ -3524,10 +3524,16 @@ uint8 Spell::CanCast(bool tolerate)
 				case 36314: //The Seer's Presence
 				{
 					// this spell can be cast only on socrethar. Otherwife cool exploit
-					if(target->IsPlayer() || !target->IsUnit())
+					// this spell should be used only for a specific quest on specific monster.
+					if(u_caster->IsPlayer() && !p_caster->HasQuest(10507) && target->GetEntry()!=20132)
 						return SPELL_FAILED_BAD_TARGETS;
-					// this spell should be used only for a specific quest on specific monster = "Socrethar"
-					if(target->GetEntry()!=20132) //nasty fixed numbers :(
+				}break;
+
+				case 41291: //Soul Cannon
+				{
+					// this spell can be cast only on Reth'hedron the Subduer. Otherwife cool exploit
+					// this spell should be used only for a specific quest on specific monster.
+					if(u_caster->IsPlayer() && !p_caster->HasQuest(11090) && target->GetEntry() != 22357 )
 						return SPELL_FAILED_BAD_TARGETS;
 				}break;
 
