@@ -1071,6 +1071,10 @@ void ObjectMgr::LoadVendors()
 				itm.extended_cost = dbcItemExtendedCost.LookupEntryForced(ec);
 				if( itm.extended_cost == NULL )
 				{
+					if(Config.MainConfig.GetBoolDefault("Server", "CleanDatabase", false))
+					{
+						WorldDatabase.Query("UPDATE vendors set extendedcost = '0' where item = '%u' AND entry = '%u'", itm.itemid, fields[0].GetUInt32());
+					}
 					Log.Warning("ObjectMgr","Item %u at vendor %u has extended cost %u which is invalid. Skipping.", itm.itemid, fields[0].GetUInt32(), ec);
 					continue;
 				}
@@ -1138,16 +1142,25 @@ void ObjectMgr::LoadAIThreatToSpellId()
 		return;
 	}
 
+	uint32 spellid;
 	SpellEntry * sp;
 
 	do
 	{
 		Field *fields = result->Fetch();
-		sp = dbcSpell.LookupEntryForced( fields[0].GetUInt32() );
+		spellid = fields[0].GetUInt32();
+		sp = dbcSpell.LookupEntryForced( spellid );
 		if( sp != NULL )
 			sp->ThreatForSpell = fields[1].GetUInt32();
 		else
-			Log.Warning("AIThreatSpell", "Cannot apply to spell %u; spell is nonexistant.", fields[0].GetUInt32());
+		{
+			if(Config.MainConfig.GetBoolDefault("Server", "CleanDatabase", false))
+			{
+				WorldDatabase.Query( "DELETE FROM ai_threattospellid where spell = '%u'", spellid);
+			}
+			Log.Warning("AIThreatSpell", "Cannot apply to spell %u; spell is nonexistant.", spellid);
+		}
+		spellid = 0;
 
 	} while( result->NextRow() );
 
@@ -1476,6 +1489,11 @@ void ObjectMgr::LoadTrainers()
 				text = NpcTextStorage.LookupEntry(tmptxtid[i]);
 				if(text == 0)
 				{
+					if(Config.MainConfig.GetBoolDefault("Server", "CleanDatabase", false))
+					{
+						std::string columnname = (i == 0 ? "can_train_gossip_textid" : "cannot_train_gossip_textid");
+						WorldDatabase.Query("UPDATE trainer_defs SET %s = '0' where entry = '%u'", columnname.c_str(), entry);
+					}
 					Log.Warning("Trainers", "Trainer %u contains an invalid npc_gossip_id %d.", entry, tmptxtid[i] );
 					tmptxtid[i] = 0;
 				}
@@ -1544,6 +1562,11 @@ void ObjectMgr::LoadTrainers()
 
 				if( ts.pCastSpell == NULL && ts.pLearnSpell == NULL )
 				{
+					//PEPSI1x1: TODO add conf option for database cleaner
+					if(ts.pCastSpell == NULL)
+						WorldDatabase.Query("DELETE FROM trainer_spells where entry='%u' AND learn_spell='%u'",entry, LearnSpellID);
+					else
+						WorldDatabase.Query("DELETE FROM trainer_spells where entry='%u' AND cast_spell='%u'",entry, CastSpellID);
 					Log.Warning("ObjectMgr", "Trainer %u skipped invalid spell (%u/%u).", entry, CastSpellID, LearnSpellID);
 					continue; //omg a bad spell !
 				}

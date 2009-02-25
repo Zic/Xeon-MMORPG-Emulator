@@ -5462,18 +5462,27 @@ void ApplyNormalFixes()
 	QueryResult * resultx = WorldDatabase.Query("SELECT * FROM spell_coef_override");
 	if( resultx != NULL )
 	{
+		uint32 spellid;
 		do 
 		{
 			Field * f;
 			f = resultx->Fetch();
-			SpellEntry * sp = dbcSpell.LookupEntryForced( f[0].GetUInt32() );
+			spellid = f[0].GetUInt32();
+			SpellEntry * sp = dbcSpell.LookupEntryForced( spellid );
 			if( sp != NULL )
 			{
 				sp->Dspell_coef_override = f[2].GetFloat();
 				sp->OTspell_coef_override = f[3].GetFloat();
 			}
 			else
-				Log.Warning("SpellCoefOverride", "Has nonexistant spell %u.", f[0].GetUInt32());
+			{
+				if(Config.MainConfig.GetBoolDefault("Server", "CleanDatabase", false))
+				{
+					WorldDatabase.Query("DELETE FROM spell_coef_override where id = '%u'", spellid);
+				}
+				Log.Warning("SpellCoefOverride", "Has nonexistant spell %u.", spellid);
+			}
+			spellid = 0;
 		} while( resultx->NextRow() );
 		delete resultx;
 	}
