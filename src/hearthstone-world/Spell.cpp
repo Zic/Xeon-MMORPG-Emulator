@@ -3395,7 +3395,7 @@ uint8 Spell::CanCast(bool tolerate)
 	if(m_targets.m_unitTarget)
 	{
 		if( m_targets.m_unitTarget == m_caster->GetGUID() && m_caster->IsUnit() )
-			target = TO_UNIT(target);
+			target = TO_UNIT(m_caster);
 		else
 			target = (m_caster->IsInWorld()) ? m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget) : NULLUNIT;
 
