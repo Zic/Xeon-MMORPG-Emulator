@@ -110,7 +110,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 		data << ci->Type;
 		data << ci->Family;
 		data << ci->Rank;
-		data << ci->Unknown1;
+		//data << ci->Unknown1;
 		data << ci->SpellDataID;
 		data << ci->Male_DisplayID;
 		data << ci->Female_DisplayID;

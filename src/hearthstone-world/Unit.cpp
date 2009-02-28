@@ -1003,7 +1003,12 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						// warlock - Improved Drain Soul
 						case 18371:
 							{
-								//null check was made before like 2 times already :P
+								if( !IsPlayer() )
+									continue;
+								PlayerPointer plr = player_shared_from_this();
+								if(!plr->m_currentSpell || !plr->m_currentSpell->GetSpellProto() || 
+									plr->m_currentSpell->GetSpellProto()->NameHash != SPELL_HASH_DRAIN_SOUL)
+										continue;
 								dmg_overwrite = ( ospinfo->EffectBasePoints[2] + 1 ) * GetUInt32Value( UNIT_FIELD_MAXPOWER1 ) / 100;
 							}break;
 						// warlock - Unstable Affliction
@@ -1889,7 +1894,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									continue;
 								if( CastingSpell->NameHash != SPELL_HASH_POWER_WORD__SHIELD )
 									continue;
-							};
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
@@ -6492,16 +6497,15 @@ void Unit::Dismount()
 		PlayerPointer plr = plr_shared_from_this();
 		if( plr->m_MountSpellId )
 		{
-			RemoveAura( plr->m_MountSpellId );
+			RemoveAllAurasBySpellIDOrGUID( plr->m_MountSpellId, 0 );
 			plr->m_MountSpellId = 0;
 		}
 		if( plr->m_FlyingAura )
 		{
-			RemoveAura( plr->m_FlyingAura );
+			RemoveAllAurasBySpellIDOrGUID( plr->m_FlyingAura, 0 );
 			plr->m_FlyingAura = 0;
 			plr->SetUInt32Value( UNIT_FIELD_DISPLAYID, plr->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		}
-		plr->SetPlayerSpeed(RUN, m_runSpeed);
 	}
 	SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
 	RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNTED_TAXI );

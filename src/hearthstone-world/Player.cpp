@@ -1132,8 +1132,7 @@ void Player::Update( uint32 p_time )
 					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
 				else if( CollideInterface.IsIndoor( m_mapId, m_position.x, m_position.y, m_position.z ) )
 				{
-					TO_UNIT(shared_from_this())->Dismount();
-					SetPlayerSpeed(RUN, m_runSpeed);
+					unit_shared_from_this()->Dismount();
 				}
 				else
 					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
@@ -2325,7 +2324,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << "','";
 	
 	// Add player action bars
-	for(uint32 i = 0; i < 120; ++i)
+	for(uint32 i = 0; i < PLAYER_ACTION_BUTTON_COUNT; ++i)
 	{
 		ss << uint32(mActions[i].Action) << ","
 			<< uint32(mActions[i].Type) << ","
@@ -3028,7 +3027,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	// Load saved actionbars
 	start =  (char*)get_next_field.GetString();
 	Counter =0;
-	while(Counter < 120)
+	while(Counter < PLAYER_ACTION_BUTTON_COUNT)
 	{
 		end = strchr(start,',');
 		if(!end)break;

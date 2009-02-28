@@ -1155,6 +1155,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->Flags3 &=	~FLAGS3_REQ_BEHIND_TARGET;	//Doesn't	require	to be	behind target
 				}break;
+            case 1329: // (mutilate rank 1)
+            case 34411: // 2
+            case 34412: // 3
+            case 34413: // 4
+            case 48663: // 5
+            case 48666: // 6
+                {
+						sp->Flags3 &=   ~FLAGS3_REQ_BEHIND_TARGET;  //Doesn't   require to be   behind target
+                }break;
 
 			//rogue	-	Camouflage.
 			case  13975:
@@ -3572,8 +3581,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 		
 			// Insert	druid	spell	fixes	here
 			case 22570:
+			case 49802:	// Maim
 				{
-						sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN;
+						sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_UNUSED2;
 						sp->Attributes |=	ATTRIBUTES_STOP_ATTACK;
 				}break;
 		
@@ -3770,6 +3780,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Attributes = ATTRIBUTES_IGNORE_INVULNERABILITY;
 				}break;
 
+			case 47245://warlock - Molten Core
+			case 47246:
+			case 47247:
+				{
+					sp->procFlags	=	PROC_ON_CAST_SPELL;
+				}break;
 			//Force	debuff's	 
 			// Hypothermia
 			case  41425:	 

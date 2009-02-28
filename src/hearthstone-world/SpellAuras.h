@@ -269,11 +269,10 @@ enum MOD_TYPES
 };
 enum AuraTickFlags
 {
-    FLAG_PERIODIC_DAMAGE            = 2,
-    FLAG_PERIODIC_TRIGGER_SPELL     = 4,
-    FLAG_PERIODIC_HEAL              = 8,
-    FLAG_PERIODIC_LEECH             = 16,
-    FLAG_PERIODIC_ENERGIZE          = 32,
+    FLAG_PERIODIC_DAMAGE            = 3,	// also 89
+    FLAG_PERIODIC_HEAL              = 8,	// also 20
+    FLAG_PERIODIC_ENERGIZE          = 21,	// also 24
+	FLAG_PERIODIC_LEECH             = 64,
 };
 enum AuraFlags
 {

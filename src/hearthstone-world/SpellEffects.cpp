@@ -5307,7 +5307,7 @@ void Spell::SummonTotem(uint32 i) // Summon Totem
 	if(landh == NO_WMO_HEIGHT)
 		landh = p_caster->GetMapMgr()->GetLandHeight(x,y);
 
-	if(landh == 0.0f || landh == NO_LAND_HEIGHT)
+	if(landh == 0.0f || landh == NO_LAND_HEIGHT || landh < p_caster->GetPositionZ())
 	{
 		landh = p_caster->GetPositionZ();
 	}
@@ -6311,7 +6311,7 @@ void Spell::SpellEffectDummyMelee( uint32 i ) // Normalized Weapon damage +
 	//rogue - mutilate ads dmg if target is poisoned
 	uint32 pct_dmg_mod = 100;
 	if(	m_spellInfo->NameHash == SPELL_HASH_MUTILATE && unitTarget->IsPoisoned() )
-		pct_dmg_mod = 150;
+		pct_dmg_mod = 120;
 
 	uint32 _type;
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
