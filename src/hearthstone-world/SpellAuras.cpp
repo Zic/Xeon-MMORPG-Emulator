@@ -1695,6 +1695,8 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 void Aura::EventPeriodicDamage(uint32 amount)
 {
 	//DOT
+	if(!m_target)
+		return;
 	if(!m_target->isAlive())
 		return;
 	if(m_target->SchoolImmunityList[GetSpellProto()->School])
@@ -1802,27 +1804,29 @@ void Aura::EventPeriodicDamage(uint32 amount)
 	SpellEntry * sp = m_spellProto;
 	UnitPointer mtarget = m_target;
 	uint64 cguid = m_casterGuid;
-
-	if(mtarget->GetGUID()!=cguid && c)//don't use resist when cast on self-- this is some internal stuff
+	if(mtarget)
 	{
-		uint32 aproc = PROC_ON_ANY_HOSTILE_ACTION;
-		uint32 vproc = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_ANY_DAMAGE_VICTIM;
-		c->HandleProc(aproc, mtarget, sp, float2int32(res));
-		c->m_procCounter = 0;
+		if(mtarget->GetGUID()!=cguid && c)//don't use resist when cast on self-- this is some internal stuff
+		{
+			uint32 aproc = PROC_ON_ANY_HOSTILE_ACTION;
+			uint32 vproc = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_ANY_DAMAGE_VICTIM;
+			c->HandleProc(aproc, mtarget, sp, float2int32(res));
+			c->m_procCounter = 0;
 		
-		mtarget->HandleProc(vproc,c,sp, float2int32(res));
-		mtarget->m_procCounter = 0;
-	}
+			mtarget->HandleProc(vproc,c,sp, float2int32(res));
+			mtarget->m_procCounter = 0;
+		}
 
-	if( m_target->m_damageSplitTarget.active)
-	{
-		res = (float)m_target->DoDamageSplitTarget((uint32)res, GetSpellProto()->School, false);
-	}
+		if( mtarget->m_damageSplitTarget.active)
+		{
+			res = (float)mtarget->DoDamageSplitTarget((uint32)res, GetSpellProto()->School, false);
+		}
 
-	if(c)
-		c->DealDamage(m_target, float2int32(res), 2, 0, GetSpellId ());
-	else
-		m_target->DealDamage(m_target, float2int32(res), 2, 0, GetSpellId ());
+		if(c)
+			c->DealDamage(mtarget, float2int32(res), 2, 0, GetSpellId ());
+		else
+			mtarget->DealDamage(mtarget, float2int32(res), 2, 0, GetSpellId ());
+	}
 }
 
 void Aura::SpellAuraDummy(bool apply)
