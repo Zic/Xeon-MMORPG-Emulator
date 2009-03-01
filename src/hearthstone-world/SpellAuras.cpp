@@ -1407,7 +1407,7 @@ void Aura::EventUpdatePlayerAA(float r)
 
 		// Check if the target is 'valid'.
 		PlayerPointer iplr = NULLPLR;
-		if(m_target->IsInWorld())
+		if(m_target && m_target->IsInWorld())
 			iplr = m_target->GetMapMgr()->GetPlayer(*it2);
 		
 		if( iplr == NULL )
@@ -1459,7 +1459,7 @@ void Aura::RemoveAA()
 	{
 		// Check if the target is 'valid'.
 		PlayerPointer iplr;
-		if(m_target->IsInWorld())
+		if(m_target && m_target->IsInWorld())
 			iplr = m_target->GetMapMgr()->GetPlayer((uint32)*itr);
 		else
 			iplr = objmgr.GetPlayer((uint32)*itr);
@@ -1470,7 +1470,7 @@ void Aura::RemoveAA()
 		if( !iplr && !caster->IsPlayer() )
 		{
 			CreaturePointer icrt;
-			if( m_target->IsInWorld() )
+			if( m_target && m_target->IsInWorld() )
 				icrt = m_target->GetMapMgr()->GetCreature((uint32)*itr);
 
 			if(icrt)
