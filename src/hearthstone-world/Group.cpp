@@ -616,13 +616,11 @@ void Group::ExpandToRaid()
 
 void Group::SetLooter(PlayerPointer pPlayer, uint8 method, uint16 threshold)
 { 
-	if( pPlayer != NULL )
-	{
-		m_LootMethod = method;
-		m_Looter = pPlayer->m_playerInfo;
-		m_LootThreshold  = threshold;
-		m_dirty = true;
-	}
+	m_LootMethod = method;
+	m_Looter = pPlayer ? pPlayer->m_playerInfo : NULL;
+	m_LootThreshold  = threshold;
+	m_dirty = true;
+		
 	Update();
 }
 

@@ -872,6 +872,7 @@ public:
 	void RemoveAllAreaAuras();
 	AuraPointer FindPositiveAuraByNameHash(uint32 namehash);
 	AuraPointer FindNegativeAuraByNameHash(uint32 namehash);
+	AuraPointer FindActiveAura(uint32 spellId);
 	AuraPointer FindAura(uint32 spellId);
 	AuraPointer FindAura(uint32 spellId, uint64 guid);
 	uint32 GetAuraCount(uint32 spellId);

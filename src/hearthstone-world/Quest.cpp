@@ -182,7 +182,7 @@ void QuestLogEntry::Init(Quest* quest, PlayerPointer plr, uint32 slot)
 	memset(m_explored_areas, 0, 4*4);
 
 	if(m_quest->time)
-		m_time_left = m_quest->time * 1000;
+		m_time_left = m_quest->time;
 	else
 		m_time_left = 0;
 

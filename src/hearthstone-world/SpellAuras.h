@@ -462,6 +462,10 @@ public:
 		return (GetDuration() - n);
 	}
 
+	uint32 procCharges;
+	uint32 GetMaxProcCharges(UnitPointer caster);
+	uint32 stackSize;
+
 		// Aura Handlers
 	void SpellAuraNULL(bool apply);
 	void SpellAuraBindSight(bool apply);

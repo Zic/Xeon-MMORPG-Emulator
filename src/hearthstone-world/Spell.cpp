@@ -2684,26 +2684,12 @@ void Spell::HandleAddAura(uint64 guid)
 				return;
 			}
 
-			//charges
-			int32 procCharges = itr->second->GetSpellProto()->procCharges;
-			if( u_caster && itr->second->GetSpellProto()->SpellGroupType )
+			if( itr->second->procCharges > 0)
 			{
-				SM_FIValue(u_caster->SM[SMT_CHARGES][0],&procCharges, itr->second->GetSpellProto()->SpellGroupType);
-				SM_PIValue(u_caster->SM[SMT_CHARGES][1],&procCharges, itr->second->GetSpellProto()->SpellGroupType);
-			}
-
-			if( procCharges >0)
-			{
-				AuraPointer aur=NULLAURA;
-				for(int i=0;i< procCharges-1;i++)
-				{
-					aur = AuraPointer(new Aura(itr->second->GetSpellProto(),itr->second->GetDuration(),itr->second->GetCaster(),itr->second->GetTarget()));
-					Target->AddAura(aur, NULLAURA);
-				}
 				if(!(itr->second->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
 				{
 					SpellCharge charge;
-					charge.count=procCharges;
+					charge.count=itr->second->procCharges;
 					charge.spellId=itr->second->GetSpellId();
 					charge.ProcFlag=itr->second->GetSpellProto()->procFlags;
 					charge.lastproc = 0;

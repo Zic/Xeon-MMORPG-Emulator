@@ -669,7 +669,7 @@ struct SpellEntry
 	uint32 ChannelInterruptFlags;           //30
 	uint32 procFlags;                       //31
 	uint32 procChance;                      //32
-	int32 procCharges;                      //33
+	uint32 procCharges;                     //33
 	uint32 maxLevel;                        //34
 	uint32 baseLevel;                       //35
 	uint32 spellLevel;                      //36

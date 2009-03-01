@@ -761,7 +761,17 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				}
 				//since we did not allow to remove auras like these with interrupt flag we have to remove them manually.
 				if( itr2->procFlags & PROC_REMOVEONUSE )
-					RemoveAura( origId );
+				{
+					AuraPointer aura = FindActiveAura(origId);
+					if(aura)
+					{
+						aura->procCharges--;
+						if(aura->procCharges > 0)
+							aura->BuildAuraUpdate();
+						else
+							aura->Remove();
+					}
+				}
 				int dmg_overwrite = 0;
 
 				//these are player talents. Fuckem they pull the emu speed down 
@@ -1987,24 +1997,20 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						}
 					}
 				}
-				if(iter2->second.lastproc!=0)
+				if(iter2->second.lastproc ==0 || iter2->second.procdiff>3000)
 				{
-					if(iter2->second.procdiff>3000)
-					{
-						//--(iter2->second.count);
-						RemoveAura(iter2->second.spellId);
-					}
-				}
-				else
-				{
-					//--(iter2->second.count);		// done in Aura::Remove
-					this->RemoveAura(iter2->second.spellId);
+						--(iter2->second.count);
+						AuraPointer aura = FindActiveAura(iter2->second.spellId);
+						if(aura)
+						{
+							aura->procCharges--;
+							if(aura->procCharges > 0)
+								aura->BuildAuraUpdate();
+							if(!iter2->second.count)
+								aura->Remove();
+						}
 				}
 			}
-		}
-		if(!iter2->second.count)
-		{
-			m_chargeSpells.erase(iter2);
 		}
 	}
 
@@ -2013,10 +2019,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 		iter = m_chargeSpells.find(m_chargeSpellRemoveQueue.front());
 		if(iter != m_chargeSpells.end())
 		{
-			if(iter->second.count>1)
-				--iter->second.count;
-			else
-				m_chargeSpells.erase(iter);
+			m_chargeSpells.erase(iter);
 		}
 		m_chargeSpellRemoveQueue.pop_front();
 	}
@@ -3601,24 +3604,14 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		return;
 	}*/
 	uint32 x;
-
+	UnitPointer pCaster = aur->GetUnitCaster();
     if( !aur->IsPassive() )
 	{
 		//uint32 aurName = aur->GetSpellProto()->Name;
 		//uint32 aurRank = aur->GetSpellProto()->Rank;
 		uint32 maxStack = aur->GetSpellProto()->maxstack;
-		if( aur->GetSpellProto()->procCharges > (int32)maxStack )
-			maxStack=aur->GetSpellProto()->procCharges;
 		if( IsPlayer() && plr_shared_from_this()->stack_cheat )
 			maxStack = 999;
-
-		if( aur->m_spellProto->SpellGroupType )
-		{
-			int32 add_maxstack = 0;
-			SM_FIValue( SM[SMT_CHARGES][0],&add_maxstack, aur->m_spellProto->SpellGroupType);
-			SM_PIValue( SM[SMT_CHARGES][1],&add_maxstack, aur->m_spellProto->SpellGroupType);
-			maxStack += add_maxstack;
-		}
 
 		SpellEntry * info = aur->GetSpellProto();
 		//uint32 flag3 = aur->GetSpellProto()->Flags3;
@@ -3670,6 +3663,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 							//update duration,the same aura (update the whole stack whenever we cast a new one)
 							m_auras[x]->SetDuration(aur->GetDuration());
 							m_auras[x]->SetTimeLeft(aur->GetDuration());
+							m_auras[x]->procCharges = m_auras[x]->GetMaxProcCharges(pCaster);
 							m_auras[x]->UpdateModifiers();
 						}
 						if(maxStack <= f)
@@ -3797,7 +3791,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 	// Reaction from enemy AI
 	if(!aur->IsPositive() /*&& aur->IsCombatStateAffecting() && */)
 	{
-		UnitPointer pCaster = aur->GetUnitCaster();
 		if(pCaster && isAlive())
 		{
 			pCaster->CombatStatus.OnDamageDealt(unit_shared_from_this(), 1);
@@ -3809,7 +3802,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 
 	if (aur->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_ON_INVINCIBLE)
 	{
-		UnitPointer pCaster = aur->GetUnitCaster();
 		if(pCaster)
 		{
 			pCaster->RemoveStealth();
@@ -4122,6 +4114,21 @@ AuraPointer Unit::FindNegativeAuraByNameHash(uint32 namehash)
 		if(m_auras[x])
 		{
 			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
+			{
+				return m_auras[x];
+			}
+		}
+	}
+	return NULLAURA;
+}
+
+AuraPointer Unit::FindActiveAura(uint32 spellId)
+{
+	for(uint32 x=0;x<MAX_AURAS;x++)
+	{
+		if(m_auras[x])
+		{
+			if(m_auras[x]->GetSpellId()==spellId)
 			{
 				return m_auras[x];
 			}

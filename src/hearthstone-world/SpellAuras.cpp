@@ -623,6 +623,8 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	m_spellProto = proto;
 	m_duration = duration;
 	m_positive = 0; //we suppose spell will have positive impact on target
+	stackSize = 1;
+	procCharges = GetSpellProto()->procCharges;
 	m_deleted = false;
 	m_tmpAuradeleted = false;
 #ifdef SHAREDPTR_DEBUGMODE
@@ -664,6 +666,11 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 		{
 			TO_PLAYER(caster )->RemoveSpellTargets( m_spellProto->buffIndexType);
 			TO_PLAYER(caster )->SetSpellTargetType( m_spellProto->buffIndexType, target);
+		}
+		if(m_spellProto->SpellGroupType)
+		{
+			SM_FIValue(TO_UNIT(caster)->SM[SMT_CHARGES][0], (int32*)&procCharges, m_spellProto->SpellGroupType);
+			SM_PIValue(TO_UNIT(caster)->SM[SMT_CHARGES][1], (int32*)&procCharges, m_spellProto->SpellGroupType);
 		}
 
 		if( isAttackable( TO_UNIT(caster), target, false ) )
@@ -777,7 +784,7 @@ void Aura::Remove()
 		}
 	}
 
-	if( m_spellProto->procCharges > 0 && m_spellProto->proc_interval == 0 )
+	if( m_spellProto->procCharges > 0 && !(GetSpellProto()->procFlags & PROC_REMOVEONUSE) )
 	{
 		if( m_target->m_chargeSpellsInUse )
 		{
@@ -789,10 +796,7 @@ void Aura::Remove()
 			iter = m_target->m_chargeSpells.find( GetSpellId() );
 			if( iter != m_target->m_chargeSpells.end() )
 			{
-				if( iter->second.count > 1 )
-					--iter->second.count;
-				else
-					m_target->m_chargeSpells.erase(iter);
+				m_target->m_chargeSpells.erase(iter);
 			}
 		}
 	}
@@ -1083,8 +1087,10 @@ void Aura::BuildAuraUpdate()
     FastGUIDPack(data, m_target->GetGUID());
 	
     data << uint8(m_visualSlot);
-
+	
 	uint8 stack = m_target->m_auraStackCount[m_visualSlot];
+	if(procCharges > stack && stack != 0)
+		stack = procCharges;
 
     if(stack == 0)
     {
@@ -9102,4 +9108,15 @@ void Aura::SpellAuraNoReagent(bool apply)
 
 	for(uint32 x=0;x<3;x++)
 		p_target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+x, ClassMask[x]);
+}
+
+uint32 Aura::GetMaxProcCharges(UnitPointer caster)
+{
+	uint32 charges = GetSpellProto()->procCharges;
+	if(caster)
+	{
+		SM_FIValue(caster->SM[SMT_CHARGES][0], (int32*)&charges, GetSpellProto()->SpellGroupType);
+		SM_PIValue(caster->SM[SMT_CHARGES][1], (int32*)&charges, GetSpellProto()->SpellGroupType);
+	}
+	return charges;
 }
