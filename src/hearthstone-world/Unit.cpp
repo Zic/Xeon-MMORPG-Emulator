@@ -3579,70 +3579,71 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		AuraCheckResponse acr;
 		WorldPacket data( 21 );
 		bool deleteAur = false;
-
+		AuraPointer curAura = NULLAURA;
 		//check if we already have this aura by this caster -> update duration
 		// Nasty check for Blood Fury debuff (spell system based on namehashes is bs anyways)
 		if( !info->always_apply )
 		{
 			for( x = 0; x < MAX_AURAS; x++ )
 			{
-				if( m_auras[x] )
+				curAura = m_auras[x];
+				if( curAura && !curAura->m_deleted )
 				{
-					if(	m_auras[x]->GetSpellProto()->Id != aur->GetSpellId() && 
-						( aur->pSpellId != m_auras[x]->GetSpellProto()->Id ) //if this is a proc spell then it should not remove it's mother : test with combustion later
+					if(	curAura->GetSpellProto()->Id != aur->GetSpellId() && 
+						( aur->pSpellId != curAura->GetSpellProto()->Id ) //if this is a proc spell then it should not remove it's mother : test with combustion later
 						)
 					{
 						// Check for auras by specific type.
 						// Check for auras with the same name and a different rank.
 						
-						if(info->buffType > 0 && m_auras[x]->GetSpellProto()->buffType & info->buffType && maxStack == 0)
+						if(info->buffType > 0 && curAura->GetSpellProto()->buffType & info->buffType && maxStack == 0)
 							deleteAur = HasAurasOfBuffType(info->buffType, aur->m_casterGuid,0);
 						else
 						{
-							acr = AuraCheck(info->NameHash, info->RankNumber, m_auras[x],aur->GetCaster());
+							acr = AuraCheck(info->NameHash, info->RankNumber, curAura,aur->GetCaster());
 							if(acr.Error == AURA_CHECK_RESULT_HIGHER_BUFF_PRESENT)
 								deleteAur = true;
 							else if(acr.Error == AURA_CHECK_RESULT_LOWER_BUFF_PRESENT)
 							{
 								// remove the lower aura
-								m_auras[x]->Remove();
+								curAura->Remove();
 
 								// no more checks on bad ptr
 								continue;
 							}
 						}					   
 					}
-					else if( m_auras[x]->GetSpellId() == aur->GetSpellId() )
+					else if( curAura->GetSpellId() == aur->GetSpellId() )
 					{
-						if( !aur->IsPositive() && m_auras[x]->m_casterGuid != aur->m_casterGuid && maxStack == 0)
+						if( !aur->IsPositive() && curAura->m_casterGuid != aur->m_casterGuid && maxStack == 0)
 							continue;
 						// target already has this aura. Update duration, time left, procCharges
-						m_auras[x]->SetDuration(aur->GetDuration());
-						m_auras[x]->SetTimeLeft(aur->GetDuration());
-						m_auras[x]->procCharges = m_auras[x]->GetMaxProcCharges(pCaster);
-						m_auras[x]->UpdateModifiers();
-						if(m_auras[x]->stackSize < maxStack)
+						curAura->SetDuration(aur->GetDuration());
+						curAura->SetTimeLeft(aur->GetDuration());
+						curAura->procCharges = curAura->GetMaxProcCharges(pCaster);
+						curAura->UpdateModifiers();
+						if(curAura->stackSize < maxStack)
 						{	// stack is not full, add 1 more to it
-							m_auras[x]->stackSize++;
-							m_auras[x]->BuildAuraUpdate();
+							curAura->stackSize++;
+							curAura->BuildAuraUpdate();
 							// now need to update amount and reapply modifiers
-							m_auras[x]->ApplyModifiers(false);
-							m_auras[x]->UpdateModAmounts();
-							sEventMgr.RemoveEvents( m_auras[x] );
-							if(m_auras[x]->GetDuration() > 0)
+							curAura->ApplyModifiers(false);
+							curAura->UpdateModAmounts();
+							sEventMgr.RemoveEvents( curAura );
+							if(curAura->GetDuration() > 0)
 							{
 								uint32 addTime = 500;
 								for(uint32 spx = 0; spx < 3; spx++)
-									if( m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_STUN ||
-										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_FEAR ||
-										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_ROOT ||
-										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_CHARM )
+									if( curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_STUN ||
+										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_FEAR ||
+										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_ROOT ||
+										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_CHARM )
 										addTime = 50;
 
-								sEventMgr.AddEvent(m_auras[x], &Aura::Remove, EVENT_AURA_REMOVE, m_auras[x]->GetDuration() + addTime, 1,
+								sEventMgr.AddEvent(curAura, &Aura::Remove, EVENT_AURA_REMOVE, curAura->GetDuration() + addTime, 1,
 									EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_DELETES_OBJECT);
 							}
-							m_auras[x]->ApplyModifiers(true);
+							curAura->ApplyModifiers(true);
 						}
 						deleteAur = true;
 						break;
