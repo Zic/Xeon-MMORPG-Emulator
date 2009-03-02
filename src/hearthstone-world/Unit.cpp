@@ -181,7 +181,6 @@ Unit::Unit()
 	memset(m_diminishAuraCount, 0, DIMINISH_GROUPS);
 	memset(m_diminishCount, 0, DIMINISH_GROUPS*sizeof(uint16));
 	memset(m_diminishTimer, 0, DIMINISH_GROUPS*sizeof(uint16));
-	memset(m_auraStackCount, 0, (MAX_AURAS)*sizeof(uint8));
 
 	m_diminishActive = false;
 	pLastSpell = 0;
@@ -1990,11 +1989,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
 								continue;
 						}break;
-					case 53817:	//shaman - Maelstrom Weapon
-						{
-							RemoveAllAurasBySpellIDOrGUID(53817, 0);	// Remove whole stack 
-							continue;
-						}
 					}
 				}
 				if(iter2->second.lastproc ==0 || iter2->second.procdiff>3000)
@@ -3259,49 +3253,15 @@ else
 			}
 		}
 
-		// refresh judgements
-		// TODO: find the opcode to refresh the aura or just remove it and re add it
-		// rather than fuck with duration
-		// DONE: Remove + readded it :P
-		for( uint32 x = MAX_POSITIVE_AURAS; x <= MAX_AURAS; x++ )
+		//ugly hack for shadowfiend restoring mana
+		if( GetUInt64Value(UNIT_FIELD_SUMMONEDBY) != 0 && GetUInt32Value(OBJECT_FIELD_ENTRY) == 19668 )
 		{
-			if( pVictim->m_auras[x] != NULL && pVictim->m_auras[x]->GetUnitCaster() != NULL && pVictim->m_auras[x]->GetUnitCaster()->GetGUID() == GetGUID() && pVictim->m_auras[x]->GetSpellProto()->buffIndexType == SPELL_TYPE_INDEX_JUDGEMENT )
-			{
-				AuraPointer aur = pVictim->m_auras[x];
-				SpellEntry * spinfo = aur->GetSpellProto();
-				aur->Remove();
-				SpellPointer sp(new Spell( unit_shared_from_this() , spinfo , true , NULLAURA ));
-				SpellCastTargets tgt;
-				tgt.m_unitTarget = pVictim->GetGUID();
-				sp->prepare( &tgt );
-				/*pVictim->m_auras[x]->SetDuration( 20000 ); // 20 seconds?
-				sEventMgr.ModifyEventTimeLeft( pVictim->m_auras[x], EVENT_AURA_REMOVE, 20000 );
-			
-				// We have to tell the target that the aura has been refreshed.
-				if( pVictim->IsPlayer() )
-				{
-					WorldPacket data( 5 );
-					data.SetOpcode( SMSG_UPDATE_AURA_DURATION );
-					data << (uint8)pVictim->m_auras[x]->GetAuraSlot() << 20000;
-					TO_PLAYER( pVictim )->GetSession()->SendPacket( &data );
-				}
-				*/
-				// However, there is also an opcode that tells the caster that the aura has been refreshed.
-				// This isn't implemented anywhere else in the source, so I can't work on that part :P
-				// (The 'cooldown' meter on the target frame that shows how long the aura has until expired does not get reset)=
-				// I would say break; here, but apparently in Ascent, one paladin can have multiple judgements on the target. No idea if this is blizzlike or not.
-
-				//ugly hack for shadowfiend restoring mana
-				if( GetUInt64Value(UNIT_FIELD_SUMMONEDBY) != 0 && GetUInt32Value(OBJECT_FIELD_ENTRY) == 19668 )
-				{
-					PlayerPointer owner = GetMapMgr()->GetPlayer((uint32)GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
-					if ( owner != NULL )
-						this->Energize(owner, 34433, uint32(2.5f*realdamage + 0.5f), POWER_TYPE_MANA );
-				}
-			}
+			PlayerPointer owner = GetMapMgr()->GetPlayer((uint32)GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
+			if ( owner != NULL )	// restore 4% of max mana on each hit
+				this->Energize(owner, 34433, owner->GetUInt32Value(UNIT_FIELD_MAXPOWER1) / 25, POWER_TYPE_MANA );
 		}
-
 	}
+	
 	
 //==========================================================================================
 //==============================Data Sending================================================
@@ -3624,7 +3584,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		// Nasty check for Blood Fury debuff (spell system based on namehashes is bs anyways)
 		if( !info->always_apply )
 		{
-			uint32 f = 0;
 			for( x = 0; x < MAX_AURAS; x++ )
 			{
 				if( m_auras[x] )
@@ -3657,20 +3616,36 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 					{
 						if( !aur->IsPositive() && m_auras[x]->m_casterGuid != aur->m_casterGuid && maxStack == 0)
 							continue;
-						f++;
-						//if(maxStack > 1)
-						{
-							//update duration,the same aura (update the whole stack whenever we cast a new one)
-							m_auras[x]->SetDuration(aur->GetDuration());
-							m_auras[x]->SetTimeLeft(aur->GetDuration());
-							m_auras[x]->procCharges = m_auras[x]->GetMaxProcCharges(pCaster);
-							m_auras[x]->UpdateModifiers();
+						// target already has this aura. Update duration, time left, procCharges
+						m_auras[x]->SetDuration(aur->GetDuration());
+						m_auras[x]->SetTimeLeft(aur->GetDuration());
+						m_auras[x]->procCharges = m_auras[x]->GetMaxProcCharges(pCaster);
+						m_auras[x]->UpdateModifiers();
+						if(m_auras[x]->stackSize < maxStack)
+						{	// stack is not full, add 1 more to it
+							m_auras[x]->stackSize++;
+							m_auras[x]->BuildAuraUpdate();
+							// now need to update amount and reapply modifiers
+							m_auras[x]->ApplyModifiers(false);
+							m_auras[x]->UpdateModAmounts();
+							sEventMgr.RemoveEvents( m_auras[x] );
+							if(m_auras[x]->GetDuration() > 0)
+							{
+								uint32 addTime = 500;
+								for(uint32 spx = 0; spx < 3; spx++)
+									if( m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_STUN ||
+										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_FEAR ||
+										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_ROOT ||
+										m_auras[x]->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_CHARM )
+										addTime = 50;
+
+								sEventMgr.AddEvent(m_auras[x], &Aura::Remove, EVENT_AURA_REMOVE, m_auras[x]->GetDuration() + addTime, 1,
+									EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_DELETES_OBJECT);
+							}
+							m_auras[x]->ApplyModifiers(true);
 						}
-						if(maxStack <= f)
-						{
-							deleteAur = true;
-							break;
-						}
+						deleteAur = true;
+						break;
 					}
 				}
 			}
@@ -3722,10 +3697,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 				sLog.outString("Aura error in active aura. removing. SpellId: %u", aur->GetSpellProto()->Id);
 				aur->Remove();
 				return;
-			} 
-
-			// add visual
-			AddAuraVisual(aur->GetSpellId(), 1, aur->IsPositive());
+			}
 		}
 		else
 		{
@@ -4165,19 +4137,6 @@ AuraPointer Unit::FindAura(uint32 spellId, uint64 guid)
 		}
 	}
 	return NULLAURA;
-}
-
-uint32 Unit::GetAuraCount(uint32 spellId)
-{
-	uint32 count = 0;
-	for(uint32 x = 0; x < MAX_AURAS; ++x)
-	{
-		if(m_auras[x] && m_auras[x]->GetSpellProto()->Id == spellId)
-		{
-			++count;
-		}
-	}
-	return count;
 }
 
 void Unit::_UpdateSpells( uint32 time )
@@ -5246,45 +5205,6 @@ bool Unit::IsPoisoned()
 	}
 
 	return false;
-}
-
-uint32 Unit::AddAuraVisual(uint32 SpellId, uint32 count, bool positive)
-{
-	int32 free = -1;
-	uint32 start = positive ? 0 : MAX_POSITIVE_AURAS;
-	uint32 end_  = positive ? MAX_POSITIVE_AURAS : MAX_AURAS;
-
-	for(uint32 x = start; x < end_; ++x)
-	{
-		if(free == -1 && m_auraStackCount[x] == 0)
-			free = x;
-
-		if(m_auras[x] != 0 && m_auras[x]->GetSpellId() == SpellId)
-		{
-			// Increase count of this aura.
-			ModAuraStackCount(m_auras[x]->m_visualSlot, count);
-			return m_auras[x]->m_visualSlot;
-		}
-	}
-
-	if(free == -1) return 0xFF;
-
-	ModAuraStackCount(free, count);
-	return free;
-}
-
-uint32 Unit::ModAuraStackCount(uint32 slot, int32 count)
-{
-	// We won't ever have enough stacks to go beyond int32's range, so fuck it.
-	if( int32(m_auraStackCount[slot]) + count <= 0)
-	{
-		m_auraStackCount[slot] = 0;
-	}
-	else
-	{
-		m_auraStackCount[slot] += count;
-	}
-	return m_auraStackCount[slot];
 }
 
 void Unit::RemoveAurasOfSchool(uint32 School, bool Positive, bool Immune)

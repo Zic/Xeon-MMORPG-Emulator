@@ -3253,13 +3253,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 
 		
-			// Shaman	-	Grounding	totem
-			case  8178:
-					{
-						sp->area_aura_update_interval	=	10000;
-				}break;
-
-		
 			/**********************************************************
 			*	Misc stuff (questfixes etc)
 			**********************************************************/
@@ -3815,10 +3808,22 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procChance = 100;
 				}break;
 		
-			case 53733:
-			case 31803:
-			case 53742:
-			case 31804:
+			case 31801: // Seal of Vengeance
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0] = 31803;
+					sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;
+			case 53736:	// Seal of Corruption
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0] = 53742;
+					sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;
+			case 31803: // Holy Vengeance
+			case 53742: // Blood Corruption
+			case 53733:	// Judgement of Corruption
+			case 31804: // Judgement of Vengeance
 				{
 					sp->Dspell_coef_override = 0.0f;
 					sp->OTspell_coef_override	=	0.0f;
@@ -4381,10 +4386,9 @@ void ApplyNormalFixes()
 			sp->buffIndexType = SPELL_TYPE_INDEX_HIBERNATE;
 			break;
 
-//		removed by Zack Earth shield stacks 10 times. Current code does not support it
-//		case SPELL_HASH_EARTH_SHIELD:		// Earth Shield
-//			sp->buffIndexType = SPELL_TYPE_INDEX_EARTH_SHIELD;
-//			break;
+		case SPELL_HASH_EARTH_SHIELD:		// Earth Shield
+			sp->buffIndexType = SPELL_TYPE_INDEX_EARTH_SHIELD;
+			break;
 
 		case SPELL_HASH_CYCLONE:			// Cyclone
 			sp->buffIndexType = SPELL_TYPE_INDEX_CYCLONE;

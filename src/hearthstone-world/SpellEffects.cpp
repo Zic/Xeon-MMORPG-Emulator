@@ -1297,28 +1297,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if(heal32)
 				Heal(heal32);
 		}break;
-	case 28730: //Arcane Torrent (Mana)
-		{
-			// for each mana tap, gives you (2.17*level+9.136) mana
-			if( !unitTarget || !p_caster) 
-				return;
-
-			if(!unitTarget->isAlive() || unitTarget->getClass()==WARRIOR || unitTarget->getClass() == ROGUE)
-				return;
-
-			uint32 count = 0;
-			for(uint32 x = 0; x < MAX_AURAS; ++x)
-			{
-				if(unitTarget->m_auras[x] && unitTarget->m_auras[x]->GetSpellId() == 28734)
-				{
-					unitTarget->m_auras[x]->Remove();
-					++count;
-				}
-			}
-
-			uint32 gain = (uint32)(count * (2.17*p_caster->getLevel()+9.136));
-			p_caster->Energize(unitTarget,28730,gain,POWER_TYPE_MANA);
-		}break;
 	case 39610://Mana Tide
 		{
 			if(unitTarget == NULL || unitTarget->isDead() || unitTarget->getClass() == WARRIOR || unitTarget->getClass() == ROGUE)
@@ -1831,14 +1809,14 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			//FIXME:Cure a sickly animal afflicted by the taint of poisoning
             if(unitTarget->GetEntry() == 12298 && unitTarget->HasActiveAura(19502))
             {    
-				unitTarget->AddAuraVisual(19502, -1, true);
+				//unitTarget->AddAuraVisual(19502, -1, true);
                 unitTarget->SetUInt32Value(UNIT_FIELD_DISPLAYID, 347);
                 sQuestMgr.OnPlayerKill(p_caster, TO_CREATURE(unitTarget));
                 TO_CREATURE(unitTarget)->Despawn(5000, 360000);
             }else
                 if(unitTarget->GetEntry() == 12296 && unitTarget->HasActiveAura(19502))
                 {
-                    unitTarget->AddAuraVisual(19502, -1, true);
+                    //unitTarget->AddAuraVisual(19502, -1, true);
                     unitTarget->SetUInt32Value(UNIT_FIELD_DISPLAYID, 1547);
                     sQuestMgr.OnPlayerKill(p_caster, TO_CREATURE(unitTarget));
                     TO_CREATURE(unitTarget)->Despawn(5000, 360000);
@@ -2892,6 +2870,7 @@ void Spell::SummonCreature(uint32 i) // Summon
 			pCreature->GetAIInterface()->SetFollowDistance(3.0f);
 			pCreature->SetUInt32Value(UNIT_FIELD_LEVEL, p_caster->getLevel());
 			pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+			pCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, p_caster->GetGUID());
 			pCreature->_setFaction();
 			p_caster->SetUInt64Value(UNIT_FIELD_SUMMON, pCreature->GetGUID());
 			if( m_summonProperties->slot < 7 )
@@ -6253,25 +6232,7 @@ void Spell::SpellEffectDummyMelee( uint32 i ) // Normalized Weapon damage +
 			return; //no damage = no joy
 		damage = damage*sunder_count;
 	}
-	else if( m_spellInfo->NameHash == SPELL_HASH_CRUSADER_STRIKE ) // Crusader Strike - refreshes *all* judgements, not just your own
-	{
-		for( int x = MAX_POSITIVE_AURAS ; x <= MAX_AURAS ; x ++ ) // there are only debuff judgements anyway :P
-		{
-			if( unitTarget->m_auras[x] && unitTarget->m_auras[x]->GetSpellProto()->buffIndexType == SPELL_TYPE_INDEX_JUDGEMENT )
-			{
-				// Refresh it!
-				// oh noes, they don't stack...
-				AuraPointer aur = unitTarget->m_auras[x];
-				SpellEntry * spinfo = aur->GetSpellProto();
-				aur->Remove();
-				SpellPointer sp = CREATESPELL( this->u_caster , spinfo , true , NULLAURA );
-				
-				SpellCastTargets tgt;
-				tgt.m_unitTarget = unitTarget->GetGUID();
-				sp->prepare( &tgt );
-			}
-		}
-	}
+	
 	//Hemorrhage
 	if( p_caster != NULL && m_spellInfo->NameHash == SPELL_HASH_HEMORRHAGE )
 		p_caster->AddComboPoints(p_caster->GetSelection(), 1);
@@ -6360,12 +6321,13 @@ void Spell::SpellEffectSpellSteal( uint32 i )
 				data << aur->GetSpellId();
 				m_caster->SendMessageToSet(&data,true);
 				AuraPointer aura(new Aura(aur->GetSpellProto(), (aur->GetDuration()>120000) ? 120000 : aur->GetDuration(), u_caster, u_caster));
+				aura->stackSize = aur->stackSize;
 
 				// copy the mods across
 				for( m = 0; m < aur->GetModCount(); ++m )
 				{
 					Modifier *mod = aur->GetMod(m);
-					aura->AddMod(mod->m_type, mod->m_amount, mod->m_miscValue, mod->i);
+					aura->AddMod(mod->m_type, mod->m_baseAmount, mod->m_miscValue, mod->i);
 				}
 
 				u_caster->AddAura(aura, NULLAURA);

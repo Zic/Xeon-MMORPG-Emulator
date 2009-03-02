@@ -605,6 +605,9 @@ protected:
 	void HandlePetAbandon(WorldPacket & recv_data);
 	void HandlePetUnlearn(WorldPacket & recv_data);
 
+	// Totems
+	void HandleTotemDestroyed(WorldPacket & recv_data);
+
 	// Battleground
 	void HandleBattlefieldPortOpcode(WorldPacket &recv_data);
 	void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);

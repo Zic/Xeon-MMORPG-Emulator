@@ -318,7 +318,8 @@ struct Modifier
 {
 //    uint32 m_actamt;       // actual amt, for percent and stuff
     uint32 m_type;           // What does it modify? (str,int,hp)
-    int32 m_amount;          // By how much does it mod?
+    int32 m_amount;          // By how much does it mod?	always should be m_baseAmount * stackSize
+	int32 m_baseAmount;		// amount per one stack
     int32 m_miscValue;       // Misc Value
     uint32 i;
 
@@ -431,7 +432,6 @@ public:
 	void ApplyModifiers(bool apply);
 	void UpdateModifiers();
 	void AddAuraVisual();
-	void RemoveAuraVisual();
 	void BuildAuraUpdate();
 	void EventUpdateCreatureAA(float r);
 	void EventUpdatePlayerAA(float r);
@@ -465,6 +465,7 @@ public:
 	uint32 procCharges;
 	uint32 GetMaxProcCharges(UnitPointer caster);
 	uint32 stackSize;
+	HEARTHSTONE_INLINE void UpdateModAmounts();
 
 		// Aura Handlers
 	void SpellAuraNULL(bool apply);
@@ -711,7 +712,6 @@ public:
 
 	uint32 m_castedItemId;
 	bool m_areaAura;		// Area aura stuff -> never passive.
-	uint8 m_visualSlot;
 	uint8 m_auraFlags;
 	uint8 m_auraLevel;
 	uint32 pSpellId; //this represents the triggering spell id

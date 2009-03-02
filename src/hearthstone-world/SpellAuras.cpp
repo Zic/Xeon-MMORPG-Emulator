@@ -708,7 +708,6 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	}
 
 	m_castedItemId = 0;
-	m_visualSlot = 0xFF;
 	pSpellId = 0;
 	periodic_target = 0;
 	DEBUG_LOG("Aura","Constructor %u (%s) from %u.", m_spellProto->Id, m_spellProto->Name, m_target->GetLowGUID());
@@ -752,9 +751,9 @@ void Aura::Remove()
 		m_target->tmpAura.erase(m_spellProto->Id);
 		m_tmpAuradeleted = true;
 	}
-
+	stackSize = 0;
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
-		RemoveAuraVisual();
+		BuildAuraUpdate();
 
 	if( m_target->m_auras[m_auraSlot] == pThis )
 		m_target->m_auras[m_auraSlot] = NULLAURA;
@@ -887,7 +886,8 @@ void Aura::AddMod( uint32 t, int32 a, uint32 miscValue, uint32 i )
 		return;
 	}
 	m_modList[m_modcount].m_type = t;
-	m_modList[m_modcount].m_amount = a;
+	m_modList[m_modcount].m_amount = a * stackSize;
+	m_modList[m_modcount].m_baseAmount = a;
 	m_modList[m_modcount].m_miscValue = miscValue;
 	m_modList[m_modcount].i = i;
 	m_modcount++;
@@ -1066,29 +1066,22 @@ void Aura::AddAuraVisual()
 	{
 		return;
 	}
-	m_visualSlot = m_target->AddAuraVisual(GetSpellId(), 1, IsPositive());
 	m_auraSlot = slot;
 	BuildAuraUpdate();
-}
-
-void Aura::RemoveAuraVisual()
-{
-	m_target->ModAuraStackCount(this->m_visualSlot, -1);
-	this->BuildAuraUpdate();
 }
 
 void Aura::BuildAuraUpdate()
 {
 	uint32 spellid = m_spellProto->Id;
-	if(!m_target || !spellid || m_visualSlot >= MAX_AURAS)
+	if(!m_target || !spellid)
 		return;
 
     WorldPacket data(SMSG_AURA_UPDATE, 50);
     FastGUIDPack(data, m_target->GetGUID());
 	
-    data << uint8(m_visualSlot);
+    data << uint8(m_auraSlot);
 	
-	uint8 stack = m_target->m_auraStackCount[m_visualSlot];
+	uint8 stack = stackSize;
 	if(procCharges > stack && stack != 0)
 		stack = procCharges;
 
@@ -1117,7 +1110,7 @@ void Aura::BuildAuraUpdate()
 	if( flags & AFLAG_HAS_DURATION )
 	{
 		data << GetDuration();
-		data << GetTimeLeft(); //GetMSExpiryTime();
+		data << GetTimeLeft();
 	}
 
 	m_target->SendMessageToSet(&data, true);
@@ -9119,4 +9112,10 @@ uint32 Aura::GetMaxProcCharges(UnitPointer caster)
 		SM_PIValue(caster->SM[SMT_CHARGES][1], (int32*)&charges, GetSpellProto()->SpellGroupType);
 	}
 	return charges;
+}
+
+void Aura::UpdateModAmounts()
+{
+	for(uint32 i=0; i<m_modcount; i++)
+		m_modList[i].m_amount = m_modList[i].m_baseAmount * stackSize;
 }

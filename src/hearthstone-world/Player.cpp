@@ -5360,16 +5360,15 @@ void Player::AddInRangeObject(ObjectPointer pObj)
 				aur = pUnit->m_auras[i];
 				if (aur != NULL)
 				{
-					data << uint8( aur->m_visualSlot );
+					data << uint8( aur->m_auraSlot );
 					data << uint32( aur->GetSpellId() );
-					uint8 flags = aur->GetAuraFlags();
+					uint16 flags = aur->GetAuraFlags();
 					if( aur->IsPositive() )
 						flags |= AFLAG_POSITIVE;
 					else
 						flags |= AFLAG_NEGATIVE;
 					data << flags;
-					data << aur->GetAuraLevel();
-					data << pUnit->m_auraStackCount[ aur->m_visualSlot ];
+					data << uint8(aur->procCharges > aur->stackSize ? aur->procCharges : aur->stackSize);
 					if(!(aur->GetAuraFlags() & AFLAG_NOT_GUID))
 					{
 						FastGUIDPack(data, aur->GetCasterGUID());
@@ -5378,7 +5377,7 @@ void Player::AddInRangeObject(ObjectPointer pObj)
 					if( aur->GetAuraFlags() & AFLAG_HAS_DURATION )
 					{
 						data << aur->GetDuration();
-						data << aur->GetTimeLeft(); //GetMSExpiryTime();
+						data << aur->GetTimeLeft();
 					}
 				}
 			}
@@ -8467,7 +8466,7 @@ void Player::CompleteLoading()
         }
 
 		if( a )
-			AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg
+			AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg, stackSize
 
 		
 	}

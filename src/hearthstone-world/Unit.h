@@ -869,13 +869,11 @@ public:
 	bool RemoveAllAurasByMechanic( uint32 MechanicType , uint32 MaxDispel , bool HostileOnly ); // Removes all (de)buffs on unit of a specific mechanic type.
 	
 	void RemoveAllNegativeAuras();
-	void RemoveAllAreaAuras();
 	AuraPointer FindPositiveAuraByNameHash(uint32 namehash);
 	AuraPointer FindNegativeAuraByNameHash(uint32 namehash);
 	AuraPointer FindActiveAura(uint32 spellId);
 	AuraPointer FindAura(uint32 spellId);
 	AuraPointer FindAura(uint32 spellId, uint64 guid);
-	uint32 GetAuraCount(uint32 spellId);
 	bool SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration);
 	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();
@@ -1147,10 +1145,6 @@ public:
 	uint32 AddAuraVisual(uint32 SpellId, uint32 count, bool positive);
 
 	bool HasVisibleAura(uint32 spellid);
-
-	//! returns: aura stack count
-	uint32 ModAuraStackCount(uint32 slot, int32 count);
-	uint8 m_auraStackCount[MAX_AURAS];
 
 	void RemoveAurasOfSchool(uint32 School, bool Positive, bool Immune);
 	SpellEntry * pLastSpell;

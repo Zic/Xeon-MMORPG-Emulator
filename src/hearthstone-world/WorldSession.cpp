@@ -815,6 +815,9 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_PET_RENAME].handler								= &WorldSession::HandlePetRename;
 	WorldPacketHandlers[CMSG_PET_ABANDON].handler							   = &WorldSession::HandlePetAbandon;
 	WorldPacketHandlers[CMSG_PET_UNLEARN].handler								= &WorldSession::HandlePetUnlearn;
+
+	// Totems
+	WorldPacketHandlers[CMSG_TOTEM_DESTROYED].handler							= &WorldSession::HandleTotemDestroyed;
 	
 	// Battlegrounds
 	WorldPacketHandlers[CMSG_BATTLEFIELD_PORT].handler						  = &WorldSession::HandleBattlefieldPortOpcode;
