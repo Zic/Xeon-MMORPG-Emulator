@@ -1098,7 +1098,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 						}
 					}
 
-					if( ccr = SPELL_CANCAST_OK )
+					if( ccr == SPELL_CANCAST_OK )
 					{
 						//Did we give it a sound ID?	
 						if( m_nextSpell && m_nextSpell->Misc2 )
