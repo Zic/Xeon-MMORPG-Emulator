@@ -3565,12 +3565,12 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 	}*/
 	uint32 x;
 	UnitPointer pCaster = NULLUNIT;
-	if(aur->m_target)
-		pCaster = aur->GetUnitCaster()
-	else if( m_casterGuid == GetGUID() )
+	if(aur->GetTarget())
+		pCaster = aur->GetUnitCaster();
+	else if( aur->m_casterGuid == GetGUID() )
 		pCaster = unit_shared_from_this();
 	else if( GetMapMgr() )
-		pCaster = GetMapMgr()->GetUnit( m_casterGuid );
+		pCaster = GetMapMgr()->GetUnit( aur->m_casterGuid );
     if( !aur->IsPassive() )
 	{
 		//uint32 aurName = aur->GetSpellProto()->Name;

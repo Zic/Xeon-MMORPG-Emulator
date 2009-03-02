@@ -596,6 +596,8 @@ HEARTHSTONE_INLINE void ApplyFloatPSM(float ** m,int32 v,uint32 mask, float def)
 
 UnitPointer Aura::GetUnitCaster()
 {
+	if( !m_target )
+		return NULLUNIT;
 	if( m_casterGuid == m_target->GetGUID() )
 		return m_target;
 	if( m_target->GetMapMgr() )
