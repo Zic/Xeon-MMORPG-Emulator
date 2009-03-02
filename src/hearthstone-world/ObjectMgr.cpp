@@ -2287,7 +2287,7 @@ void Charter::Destroy()
 
 		p = objmgr.GetPlayerInfo(Signatures[i]);
 		if( p != NULL )
-			p->charterId[CharterType] = NULL;
+			p->charterId[CharterType] = 0;
 	}
 
 	// click, click, boom!

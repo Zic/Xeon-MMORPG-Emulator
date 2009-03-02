@@ -2479,7 +2479,7 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 				CreaturePointer farsight = p_target->GetMapMgr()->GetCreature(p_target->GetUInt32Value(PLAYER_FARSIGHT));
 				p_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
-				p_target->GetMapMgr()->ChangeFarsightLocation(p_target, NULL, NULL, false);
+				p_target->GetMapMgr()->ChangeFarsightLocation(p_target, 0, 0, false);
 				if(farsight)
 				{
 					farsight->RemoveFromWorld(false,true);
@@ -5961,7 +5961,7 @@ void Aura::SpellAuraAddFarSight(bool apply)
 	else
 	{
 		caster->SetUInt64Value(PLAYER_FARSIGHT, 0);
-		caster->GetMapMgr()->ChangeFarsightLocation(caster, NULL, NULL, false);
+		caster->GetMapMgr()->ChangeFarsightLocation(caster, 0, 0, false);
 	}
 }
 

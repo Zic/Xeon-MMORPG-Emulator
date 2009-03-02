@@ -4356,7 +4356,11 @@ void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 	if(!unitTarget )
 		return;
 
-	SpellPointer sp=CREATESPELL(m_caster,dbcSpell.LookupEntry(m_spellInfo->EffectTriggerSpell[i]),true,NULLAURA);
+	SpellEntry *spe = dbcSpell.LookupEntryForced(m_spellInfo->EffectTriggerSpell[i]);
+	if(!spe)
+		return;
+
+	SpellPointer sp=CREATESPELL(m_caster,spe,true,NULLAURA);
 	SpellCastTargets tgt(unitTarget->GetGUID());
 	sp->prepare(&tgt);
 }

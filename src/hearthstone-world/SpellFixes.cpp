@@ -36,7 +36,7 @@ void CreateDummySpell(uint32 id)
 	sp->procChance=75;
 	sp->rangeIndex=13;
 	sp->EquippedItemClass=uint32(-1);
-	sp->Effect[0]=3;
+	sp->Effect[0]=SPELL_EFFECT_DUMMY;
 	sp->EffectImplicitTargetA[0]=25;
 	sp->NameHash=crc32((const unsigned char*)name, (unsigned int)strlen(name));
 	sp->dmg_multiplier[0]=1.0f;
@@ -2400,7 +2400,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA;
 					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 					sp->EffectTriggerSpell[0]	=	30294;
-					sp->procChance = float(sp->RankNumber) * 10.0f;
+					sp->procChance = sp->RankNumber * 10;
 					sp->procFlags	=	PROC_ON_SPELL_LAND;
 				}break;
 		
@@ -3708,7 +3708,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 					sp->EffectTriggerSpell[0]	=	48108;
 					sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
-					sp->procChance = float(sp->RankNumber) * 330.0f;
+					sp->procChance = sp->RankNumber * 33;
 					sp->EffectSpellClassMask[0][0] = 0x100013;
 				}break;
 
@@ -3971,7 +3971,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 			case 50475:
 				{
-					sp->Effect[0] = NULL;
+					sp->Effect[0] = SPELL_EFFECT_NULL;
 				}break;
 			case 48263://Frost Presence
 				{
@@ -5560,6 +5560,8 @@ void ApplyNormalFixes()
 		}
 		ApplySingleSpellFixes(sp);
 	}
+	for(list<SpellEntry*>::iterator itr = sWorld.dummyspells.begin(); itr != sWorld.dummyspells.end(); ++itr)
+		ApplySingleSpellFixes(*itr);
 
 	sp = dbcSpell.LookupEntryForced( 26659 );
 	SpellEntry * sp2 = sp;

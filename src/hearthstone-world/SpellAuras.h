@@ -465,7 +465,7 @@ public:
 	uint32 procCharges;
 	uint32 GetMaxProcCharges(UnitPointer caster);
 	uint32 stackSize;
-	HEARTHSTONE_INLINE void UpdateModAmounts();
+	void UpdateModAmounts();
 
 		// Aura Handlers
 	void SpellAuraNULL(bool apply);

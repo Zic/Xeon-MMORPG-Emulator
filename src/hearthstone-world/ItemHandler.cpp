@@ -571,7 +571,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 				if(gc != NULL)
 					gc->Destroy();
 
-				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_3V3] = NULL;
+				_player->m_playerInfo->charterId[CHARTER_TYPE_ARENA_3V3] = 0;
 			}
 		}
 

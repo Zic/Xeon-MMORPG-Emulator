@@ -905,7 +905,7 @@ bool Player::Create(WorldPacket& data )
 	if( GetSession()->HasGMPermissions() && sWorld.gm_force_robes )
 	{
 		// Force GM robes on GM's except 'az' status (if set to 1 in world.conf)
-		if( strchr(GetSession()->GetPermissions(),'az')==NULL)
+		if( strstr(GetSession()->GetPermissions(), "az") == NULL)
 		{
 			//We need to dupe this
 			PlayerCreateInfo *GMinfo = new PlayerCreateInfo;

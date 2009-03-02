@@ -271,7 +271,7 @@ RegType<Unit> UnitMethods[] = {
 	{ "GetPlayerRace", &luaUnit_GetPlayerRace },
 	{ "RemoveAurasByMechanic", &luaUnit_RemoveAurasByMechanic },
 	{ "RemoveAurasType", &luaUnit_RemoveAurasType },
-	{ "AddAuraVisual", &luaUnit_AddAuraVisual },
+	//{ "AddAuraVisual", &luaUnit_AddAuraVisual },
 
 	{ NULL, NULL },
 };
@@ -4048,6 +4048,7 @@ int luaUnit_RemoveAurasType(lua_State * L, UnitPointer  ptr)
 	}
 	return 0;
 }
+/*
 int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
@@ -4059,7 +4060,7 @@ int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 		ptr->AddAuraVisual(spellid, count,((positive > 0)? true : false));
 	}
 	return 0;
-}
+}*/
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
