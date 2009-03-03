@@ -2013,13 +2013,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
 							continue;
 					}break;
-				case 55166:
+				case 55166:	// Tidal Force
 					{
 						// Aura gets removed when last stack is removed
 						aura->ModStackSize(-1);
 						continue;
 					}break;
 				}
+				if(spe->NameHash == SPELL_HASH_FLURRY)
+					continue;  // only removed on auto attack swings not abilities
 			}
 			aura->ModProcCharges(-1);
 		}
