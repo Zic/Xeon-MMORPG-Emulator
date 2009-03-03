@@ -216,7 +216,7 @@ Unit::Unit()
 	trigger_on_chill_chance = 100;
 
 	memset(&m_damageSplitTarget, 0, sizeof(DamageSplitTarget));
-	m_damageSplitTarget.active = 0;
+	m_damageSplitTarget.active = false;
 
 	m_extrastriketarget = 0;
 	m_extrastriketargetc = 0;
