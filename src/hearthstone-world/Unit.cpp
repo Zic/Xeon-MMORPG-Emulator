@@ -197,7 +197,6 @@ Unit::Unit()
 	m_damgeShieldsInUse = false;
 	m_extraAttackCounter = false;
 	m_temp_summon=false;
-	m_chargeSpellsInUse=false;
 	m_interruptedRegenTime = 0;
 	m_hasVampiricEmbrace = m_hasVampiricTouch = 0;
 	mAngerManagement = false;
@@ -1240,6 +1239,30 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell->NameHash != SPELL_HASH_HEALING_WAVE ) //healing wave
 									continue;
 							}break;
+						case 16180:
+						case 16196:
+						case 16198: // Improved Water Shield
+							{
+								// Proc for Lesser Healing Wave is 60% of base one
+								if(!CastingSpell || 
+									(CastingSpell->NameHash == SPELL_HASH_LESSER_HEALING_WAVE && Rand(40)))
+									continue;
+								AuraPointer shield = FindPositiveAuraByNameHash(SPELL_HASH_WATER_SHIELD);
+								if(!shield)
+									continue;
+								spellId = shield->m_spellProto->EffectTriggerSpell[0];
+								shield->ModProcCharges(-1);
+							}break;
+						case 51525:
+						case 51526:
+						case 51527:	// Static Shock
+							{
+								AuraPointer shield = FindPositiveAuraByNameHash(SPELL_HASH_LIGHTNING_SHIELD);
+								if(!shield)
+									continue;
+								spellId = shield->m_spellProto->EffectTriggerSpell[0];
+								shield->ModProcCharges(-1);
+							}break;
 						//shaman - Elemental Devastation
 						case 29177:
 						case 29178:
@@ -1933,92 +1956,89 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 		}
 	}
 
-	m_chargeSpellsInUse=true;
-	std::map<uint32,struct SpellCharge>::iterator iter,iter2;
-	iter=m_chargeSpells.begin();
-	while(iter!= m_chargeSpells.end())
-	{
-		iter2=iter++;
-		if(iter2->second.count)
-		{
-			if((iter2->second.ProcFlag & flag))
-			{
-				//Fixes for spells that dont lose charges when dmg is absorbd
-				if(iter2->second.ProcFlag==680&&dmg==0) continue;
-				if(CastingSpell)
-				{
-					SpellEntry * spe = iter2->second.spell;
-					uint32 *SpellClassMask = NULL;
-					if(spe)
-						SpellClassMask = spe->EffectSpellClassMask[0];
+	// Proc charges removal
 
-					if (SpellClassMask && (SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2])) {
-						if (!Spell::EffectAffectsSpell(spe, 0, CastingSpell))
-							continue;
-					}
-					SpellCastTime *sd = dbcSpellCastTime.LookupEntry(CastingSpell->CastingTimeIndex);
-					if(!sd) continue; // this shouldnt happen though :P
-					//if we did not proc these then we should not remove them
-					if( CastingSpell->Id == iter2->second.spellId)
+	m_chargeSpellsInUse=true;
+	AuraPointer aura = NULLAURA;
+	std::list<AuraPointer>::iterator iter;
+	
+	for(iter = m_chargeSpells.begin(); iter != m_chargeSpells.end(); iter++)
+	{
+		aura = *iter;
+		
+		if(aura && !aura->m_deleted && aura->procCharges > 0 && aura->m_spellProto &&
+			aura->m_spellProto->procFlags & flag)
+		{
+			//Fixes for spells that dont lose charges when dmg is absorbd
+			if(aura->m_spellProto->procFlags == 680 && dmg==0) continue;
+			if(CastingSpell)
+			{
+				SpellEntry * spe = aura->m_spellProto;
+				uint32 *SpellClassMask = spe->EffectSpellClassMask[0];
+
+				if (SpellClassMask && (SpellClassMask[0] || SpellClassMask[1] || SpellClassMask[2])) {
+					if (!Spell::EffectAffectsSpell(spe, 0, CastingSpell))
 						continue;
-					switch(iter2->second.spellId)
-					{
-					case 12043:
-						{
-							//Presence of Mind and Nature's Swiftness should only get removed
-							//when a non-instant and bellow 10 sec. Also must be nature :>
-//							if(!sd->CastTime||sd->CastTime>10000) continue;
-							if(sd->CastTime==0)
-								continue;
-						}break;
-					case 17116: //Shaman - Nature's Swiftness
-					case 16188:
-						{
-//							if( CastingSpell->School!=SCHOOL_NATURE||(!sd->CastTime||sd->CastTime>10000)) continue;
-							if( CastingSpell->School!=SCHOOL_NATURE||(sd->CastTime==0)) continue;
-						}break;
-					case 16166:
-						{
-							if(!(CastingSpell->School==SCHOOL_FIRE||CastingSpell->School==SCHOOL_FROST||CastingSpell->School==SCHOOL_NATURE))
-								continue;
-						}break;
-					case 14177: //cold blood will get removed on offensive spell
-						{
-							// This is part 1 of mutilate. Since Mutilate is TWO spells, we skip this. :P
-							// Instead, the second Strike will remove Cold Blood while they both reap the benefits.
-							if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
-								continue;
-						}break;
-					}
 				}
-				if(iter2->second.lastproc ==0 || iter2->second.procdiff>3000)
+				SpellCastTime *sd = dbcSpellCastTime.LookupEntry(CastingSpell->CastingTimeIndex);
+				if(!sd) continue; // this shouldnt happen though :P
+				//if we did not proc these then we should not remove them
+				if( CastingSpell->Id == spe->Id)
+					continue;
+				switch(spe->Id)
 				{
-						--(iter2->second.count);
-						AuraPointer aura = FindActiveAura(iter2->second.spellId);
-						if(aura)
-						{
-							aura->procCharges--;
-							if(aura->procCharges > 0)
-								aura->BuildAuraUpdate();
-							if(!iter2->second.count)
-								aura->Remove();
-						}
+				case 12043:
+					{
+						//Presence of Mind and Nature's Swiftness should only get removed
+						//when a non-instant and bellow 10 sec. Also must be nature :>
+						//							if(!sd->CastTime||sd->CastTime>10000) continue;
+						if(sd->CastTime==0)
+							continue;
+					}break;
+				case 17116: //Shaman - Nature's Swiftness
+				case 16188:
+					{
+						//							if( CastingSpell->School!=SCHOOL_NATURE||(!sd->CastTime||sd->CastTime>10000)) continue;
+						if( CastingSpell->School!=SCHOOL_NATURE||(sd->CastTime==0)) continue;
+					}break;
+				case 16166:
+					{
+						if(!(CastingSpell->School==SCHOOL_FIRE||CastingSpell->School==SCHOOL_FROST||CastingSpell->School==SCHOOL_NATURE))
+							continue;
+					}break;
+				case 14177: //cold blood will get removed on offensive spell
+					{
+						// This is part 1 of mutilate. Since Mutilate is TWO spells, we skip this. :P
+						// Instead, the second Strike will remove Cold Blood while they both reap the benefits.
+						if(CastingSpell->Id == 34419 || CastingSpell->Id == 48665 || CastingSpell->Id == 48662)
+							continue;
+					}break;
+				case 55166:
+					{
+						// Aura gets removed when last stack is removed
+						aura->ModStackSize(-1);
+						continue;
+					}break;
 				}
 			}
+			aura->ModProcCharges(-1);
 		}
 	}
-
-	for(;!m_chargeSpellRemoveQueue.empty();)
+	if(can_delete)
 	{
-		iter = m_chargeSpells.find(m_chargeSpellRemoveQueue.front());
-		if(iter != m_chargeSpells.end())
+		for(;!m_chargeSpellRemoveQueue.empty();)
 		{
-			m_chargeSpells.erase(iter);
+			iter = std::find(m_chargeSpells.begin(), m_chargeSpells.end(), m_chargeSpellRemoveQueue.front());
+			if(iter != m_chargeSpells.end())
+			{
+				m_chargeSpells.erase(iter);
+			}
+			m_chargeSpellRemoveQueue.pop_front();
 		}
-		m_chargeSpellRemoveQueue.pop_front();
 	}
 
 	m_chargeSpellsInUse=false;
+
 	if(can_delete) //are we the upper level of nested procs ? If yes then we can remove the lock
 		bProcInUse = false;
 
@@ -3628,29 +3648,7 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 						curAura->SetTimeLeft(aur->GetDuration());
 						curAura->procCharges = curAura->GetMaxProcCharges(pCaster);
 						curAura->UpdateModifiers();
-						if(curAura->stackSize < maxStack)
-						{	// stack is not full, add 1 more to it
-							curAura->stackSize++;
-							curAura->BuildAuraUpdate();
-							// now need to update amount and reapply modifiers
-							curAura->ApplyModifiers(false);
-							curAura->UpdateModAmounts();
-							sEventMgr.RemoveEvents( curAura );
-							if(curAura->GetDuration() > 0)
-							{
-								uint32 addTime = 500;
-								for(uint32 spx = 0; spx < 3; spx++)
-									if( curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_STUN ||
-										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_FEAR ||
-										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_ROOT ||
-										curAura->GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_CHARM )
-										addTime = 50;
-
-								sEventMgr.AddEvent(curAura, &Aura::Remove, EVENT_AURA_REMOVE, curAura->GetDuration() + addTime, 1,
-									EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_DELETES_OBJECT);
-							}
-							curAura->ApplyModifiers(true);
-						}
+						curAura->ModStackSize(1);	// increment stack size
 						deleteAur = true;
 						break;
 					}
@@ -3765,6 +3763,12 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		data << uint64(0);
 
 		target->SendMessageToSet(&data, true);
+	}
+
+	if( aur->procCharges > 0 && 
+		!(aur->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
+	{
+		m_chargeSpells.push_back(aur);
 	}
 
 	// Reaction from enemy AI

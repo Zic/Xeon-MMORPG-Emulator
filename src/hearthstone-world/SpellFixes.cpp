@@ -3523,12 +3523,31 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break; 
 			case 55198:	// Tidal Force
 				{
-					sp->Effect[0] = SPELL_EFFECT_TRIGGER_SPELL;
+					sp->Effect[0] = SPELL_EFFECT_DUMMY;
+					sp->EffectApplyAuraName[0] = 0;
 					sp->EffectTriggerSpell[0] = 55166;
 				}break;
-			case 55166:
+			case 55166: 
 				{
 					sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+				}break;
+			case 51525:
+			case 51526:
+			case 51527:	// Static Shock
+				{
+					sp->procFlags = PROC_ON_MELEE_ATTACK;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0] = sp->Id;
+				}break;
+			case 16180:
+			case 16196:
+			case 16198: // Improved Water Shield
+				{
+					sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectSpellClassMask[0][0] = 0x000000C0; // Healing Wave and Lesser Healing Wave
+					sp->EffectSpellClassMask[0][2] = 0x00000010; //Riptide
+					sp->EffectTriggerSpell[0] = sp->Id;
 				}break;
 			case 16187:
 			case 16205:

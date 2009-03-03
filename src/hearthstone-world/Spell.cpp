@@ -2684,19 +2684,6 @@ void Spell::HandleAddAura(uint64 guid)
 				return;
 			}
 
-			if( itr->second->procCharges > 0)
-			{
-				if(!(itr->second->GetSpellProto()->procFlags & PROC_REMOVEONUSE))
-				{
-					SpellCharge charge;
-					charge.count=itr->second->procCharges;
-					charge.spellId=itr->second->GetSpellId();
-					charge.ProcFlag=itr->second->GetSpellProto()->procFlags;
-					charge.lastproc = 0;
-					charge.spell = itr->second->GetSpellProto();
-					Target->m_chargeSpells.insert(make_pair(itr->second->GetSpellId(),charge));
-				}
-			}
 			Target->AddAura(itr->second, NULLAURA); // the real spell is added last so the modifier is removed last
 			Target->tmpAura.erase(itr);
 		}

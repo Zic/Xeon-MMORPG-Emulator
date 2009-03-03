@@ -789,12 +789,12 @@ void Aura::Remove()
 	{
 		if( m_target->m_chargeSpellsInUse )
 		{
-			m_target->m_chargeSpellRemoveQueue.push_back( GetSpellId() );
+			m_target->m_chargeSpellRemoveQueue.push_back( pThis );
 		}
 		else
 		{
-			std::map< uint32, struct SpellCharge >::iterator iter;
-			iter = m_target->m_chargeSpells.find( GetSpellId() );
+			std::list<AuraPointer>::iterator iter = 
+				std::find(m_target->m_chargeSpells.begin(), m_target->m_chargeSpells.end(), pThis);
 			if( iter != m_target->m_chargeSpells.end() )
 			{
 				m_target->m_chargeSpells.erase(iter);
@@ -9120,4 +9120,55 @@ void Aura::UpdateModAmounts()
 {
 	for(uint32 i=0; i<m_modcount; i++)
 		m_modList[i].m_amount = m_modList[i].m_baseAmount * stackSize;
+}
+
+void Aura::ModStackSize(int32 mod)
+{
+	if(mod == 0)
+		return;
+	uint32 maxStack = GetSpellProto()->maxstack;
+	if( p_target && p_target->stack_cheat )
+		maxStack = 999;
+	int32 newStack = (int32) stackSize + mod;
+	if(newStack <= 0)	// stack became empty, removing the aura
+	{
+		stackSize = 0;
+		Remove();
+		return;
+	}	
+	if((uint32)newStack >= maxStack && (stackSize == maxStack || maxStack == 0))
+		return;	// already have maximum
+	// stack is not full can add more to it
+	stackSize = std::min((uint32) newStack, maxStack);
+	BuildAuraUpdate();
+	// now need to update amount and reapply modifiers
+	ApplyModifiers(false);
+	UpdateModAmounts();
+	sEventMgr.RemoveEvents( shared_from_this() );
+	if(GetDuration() > 0)
+	{
+		uint32 addTime = 500;
+		for(uint32 spx = 0; spx < 3; spx++)
+			if( GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_STUN ||
+				GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_FEAR ||
+				GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_ROOT ||
+				GetSpellProto()->EffectApplyAuraName[spx] == SPELL_AURA_MOD_CHARM )
+				addTime = 50;
+
+		sEventMgr.AddEvent(shared_from_this(), &Aura::Remove, EVENT_AURA_REMOVE, GetTimeLeft() + addTime, 1,
+			EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT | EVENT_FLAG_DELETES_OBJECT);
+	}
+	ApplyModifiers(true);
+}
+
+void Aura::ModProcCharges(int32 mod)
+{
+	if(mod == 0)
+		return;
+	// could also check that procCharges + mod <= GetMaxProcCharges()
+	procCharges = (uint32) std::max((int32)procCharges + mod, 0);
+	if(procCharges > 0)
+		BuildAuraUpdate();
+	else
+		Remove();
 }

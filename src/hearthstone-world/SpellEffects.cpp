@@ -1076,6 +1076,12 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	 * NO SPELLS
 	 *  --------------------------------------------
 	 *************************/
+	case 55198:	// Tidal Force
+		{
+			SpellEffectTriggerSpell(i);
+			SpellEffectTriggerSpell(i);
+			SpellEffectTriggerSpell(i);	// want stack of 3 so cast it 3 times. hacky :/
+		}break;
 
 	/*************************
 	 * WARLOCK SPELLS

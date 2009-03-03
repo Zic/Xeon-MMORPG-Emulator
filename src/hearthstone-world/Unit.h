@@ -903,10 +903,9 @@ public:
 	std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
  
 	std::list<struct ProcTriggerSpell> m_procSpells;
-//	std::map<uint32,ProcTriggerSpellOnSpellList> m_procSpellonSpell; //index is namehash
-	std::map<uint32,struct SpellCharge> m_chargeSpells;
-	deque<uint32> m_chargeSpellRemoveQueue;
 	bool m_chargeSpellsInUse;
+	std::deque<AuraPointer> m_chargeSpellRemoveQueue;
+	std::list<AuraPointer> m_chargeSpells;
 	HEARTHSTONE_INLINE void SetOnMeleeSpell(uint32 spell, uint8 cast_number ) { m_meleespell = spell; m_meleespell_cn = cast_number; }
 	HEARTHSTONE_INLINE uint32 GetOnMeleeSpell() { return m_meleespell; }
 

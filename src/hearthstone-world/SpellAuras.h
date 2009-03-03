@@ -371,17 +371,6 @@ struct ProcTriggerSpell
 	bool deleted;
 };
 
-struct SpellCharge
-{
-    uint32 spellId;
-    uint32 count;
-    uint32 ProcFlag;
-    uint32 lastproc;
-    uint32 procdiff;
-	SpellEntry *spell;
-};
-
-
 typedef set<uint32> AreaAuraList;
 
 class SERVER_DECL Aura : public EventableObject, public std::tr1::enable_shared_from_this<Aura>
@@ -464,7 +453,9 @@ public:
 
 	uint32 procCharges;
 	uint32 GetMaxProcCharges(UnitPointer caster);
+	void ModProcCharges(int32 mod);
 	uint32 stackSize;
+	void ModStackSize(int32 mod);
 	void UpdateModAmounts();
 
 		// Aura Handlers

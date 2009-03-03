@@ -1831,7 +1831,7 @@ void AIInterface::StopMovement(uint32 time)
 	m_timeMoved = 0;
 	m_timeToMove = 0;
 
-	SendMoveToPacket(m_Unit->GetPositionX(), m_Unit->GetPositionY(), m_Unit->GetPositionZ(), m_Unit->GetOrientation(), 0, 0 );
+	SendMoveToPacket(m_Unit->GetPositionX(), m_Unit->GetPositionY(), m_Unit->GetPositionZ(), m_Unit->GetOrientation(), 0, getMoveFlags());
 }
 
 void AIInterface::MoveTo(float x, float y, float z, float o)
