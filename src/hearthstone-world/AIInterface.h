@@ -335,7 +335,7 @@ public:
 	size_t GetWayPointsCount()
 	{
 		if(m_waypoints && !m_waypoints->empty())
-			return m_waypoints->size()-1;	/* ignore 0 */
+			return m_waypoints->size();
 		else
 			return 0;
 	}

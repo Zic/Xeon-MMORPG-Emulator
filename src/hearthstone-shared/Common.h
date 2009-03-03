@@ -580,8 +580,8 @@ struct WayPoint
 	uint32 backwardStandState;
 	uint32 forwardSpellToCast;
 	uint32 backwardSpellToCast;
-	const char * forwardSayText;
-	const char * backwardSayText;
+	std::string forwardSayText;
+	std::string backwardSayText;
 
 };
 

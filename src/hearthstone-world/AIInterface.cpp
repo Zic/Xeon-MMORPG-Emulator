@@ -2000,7 +2000,7 @@ void AIInterface::UpdateMove()
 			}*/
 		}
 	}
-	SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, m_Unit->GetOrientation(), moveTime, getMoveFlags());
+	SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, m_Unit->GetOrientation(), moveTime + UNIT_MOVEMENT_INTERPOLATE_INTERVAL, getMoveFlags());
 
 	m_timeToMove = moveTime;
 	m_timeMoved = 0;
@@ -2087,12 +2087,12 @@ bool AIInterface::addWayPoint(WayPoint* wp)
 	if(wp->id <= 0)
 		return false; //not valid id
 
-	if(m_waypoints->size() <= wp->id)
-		m_waypoints->resize(wp->id+1);
+	if(m_waypoints->size() < wp->id)
+		m_waypoints->resize(wp->id);
 
-	if((*m_waypoints)[wp->id] == NULL)
+	if((*m_waypoints)[wp->id-1] == NULL)
 	{
-		(*m_waypoints)[wp->id] = wp;
+		(*m_waypoints)[wp->id-1] = wp;
 		return true;
 	}
 	return false;
@@ -2121,8 +2121,8 @@ void AIInterface::changeWayPointID(uint32 oldwpid, uint32 newwpid)
 
 	oldwp->id = newwpid;
 	originalwp->id = oldwpid;
-	(*m_waypoints)[oldwp->id] = oldwp;
-	(*m_waypoints)[originalwp->id] = originalwp;
+	(*m_waypoints)[oldwp->id-1] = oldwp;
+	(*m_waypoints)[originalwp->id-1] = originalwp;
 
 	//SaveAll to db
 	saveWayPoints();
@@ -2267,13 +2267,10 @@ bool AIInterface::saveWayPoints()
 	WayPoint* wp = NULL;
 	std::stringstream ss;
 
-	for (itr = m_waypoints->begin(); itr != m_waypoints->end(); itr++)
+	for (itr = m_waypoints->begin(); itr != m_waypoints->end();)
 	{
-		if((*itr) == NULL) 
-			continue;
-
 		wp = (*itr);
-
+		itr++;
 		//Save
 		ss.str("");
 		ss << "REPLACE INTO creature_waypoints ";
@@ -2296,8 +2293,8 @@ bool AIInterface::saveWayPoints()
 		ss << wp->backwardStandState << ", ";
 		ss << wp->forwardSpellToCast << ", ";
 		ss << wp->backwardSpellToCast << ",'";
-		ss << wp->forwardSayText << "','";
-		ss << wp->backwardSayText << "')\0";
+		ss << WorldDatabase.EscapeString(wp->forwardSayText) << "','";
+		ss << WorldDatabase.EscapeString(wp->backwardSayText) << "')\0";
 		WorldDatabase.Query( ss.str().c_str() );
 	}
 	return true;
@@ -2318,14 +2315,15 @@ void AIInterface::deleteWaypoints()
 
 WayPoint* AIInterface::getWayPoint(uint32 wpid)
 {
-	if(!m_waypoints)return NULL;
-	if(wpid >= m_waypoints->size()) 
+	if(!m_waypoints)
+		return NULL;
+	if(wpid > m_waypoints->size()) 
 		return NULL; //not valid id
 
 	/*WayPointMap::const_iterator itr = m_waypoints->find( wpid );
 	if( itr != m_waypoints->end( ) )
 		return itr->second;*/
-	return m_waypoints->at(wpid);
+	return m_waypoints->at(wpid-1);
 }
 
 void AIInterface::_UpdateMovement(uint32 p_time)
@@ -2400,8 +2398,8 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 								GetUnit()->SetStandState(wp->forwardStandState);
 							if (wp->forwardSpellToCast)
 								GetUnit()->CastSpell(GetUnit(),wp->forwardSpellToCast,false);
-//							if (wp->forwardSayText != "")
-//								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->forwardSayText );
+							if (wp->forwardSayText != "")
+								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->forwardSayText.c_str() );
 						}
 						else
 						{
@@ -2420,8 +2418,8 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 								GetUnit()->SetStandState(wp->backwardStandState);
 							if (wp->backwardSpellToCast)
 								GetUnit()->CastSpell(GetUnit(),wp->backwardSpellToCast,false);
-//							if (wp->backwardSayText != "")
-//								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->backwardSayText );
+							if (wp->backwardSayText != "")
+								GetUnit()->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, wp->backwardSayText.c_str() );
 						}
 					}
 					else
@@ -2536,16 +2534,18 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 			}																																						  
 			else //we do have waypoints
 			{
+				uint32 wpcount = uint32(GetWayPointsCount());
 				if(m_moveType == MOVEMENTTYPE_RANDOMWP) //is random move on if so move to a random waypoint
 				{
-					if(GetWayPointsCount() > 1)
-						destpoint = RandomUInt((uint32)GetWayPointsCount());
+					if(wpcount > 1)
+						destpoint = RandomUInt(wpcount-1)+1;
 				}
 				else if (m_moveType == MOVEMENTTYPE_CIRCLEWP) //random move is not on lets follow the path in circles
 				{
 					// 1 -> 10 then 1 -> 10
 					m_currentWaypoint++;
-					if (m_currentWaypoint > GetWayPointsCount()) m_currentWaypoint = 1; //Happens when you delete last wp seems to continue ticking
+					if (m_currentWaypoint > wpcount) 
+						m_currentWaypoint = 1; //Happens when you delete last wp seems to continue ticking
 					destpoint = m_currentWaypoint;
 					m_moveBackward = false;
 				}
@@ -2553,7 +2553,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 				{
 					if(m_currentWaypoint)
 					{
-						if(GetWayPointsCount() > 0)
+						if( wpcount > 0)
 						{
 							destpoint = m_currentWaypoint;
 						}
@@ -2564,7 +2564,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 				else if(m_moveType == MOVEMENTTYPE_FORWARDTHANSTOP)// move to end, then stop
 				{
 					++m_currentWaypoint;
-					if(m_currentWaypoint > GetWayPointsCount())
+					if(m_currentWaypoint > wpcount)
 					{
 						//hmm maybe we should stop being path walker since we are waiting here anyway
 						destpoint = -1;
@@ -2575,8 +2575,9 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 				else if(m_moveType != MOVEMENTTYPE_QUEST && m_moveType != MOVEMENTTYPE_DONTMOVEWP)//4 Unused
 				{
 					// 1 -> 10 then 10 -> 1
-					if (m_currentWaypoint > GetWayPointsCount()) m_currentWaypoint = 1; //Happens when you delete last wp seems to continue ticking
-					if (m_currentWaypoint == GetWayPointsCount()) // Are we on the last waypoint? if so walk back
+					if (m_currentWaypoint > wpcount)
+						m_currentWaypoint = 1; //Happens when you delete last wp seems to continue ticking
+					if (m_currentWaypoint == wpcount) // Are we on the last waypoint? if so walk back
 						m_moveBackward = true;
 					if (m_currentWaypoint == 1) // Are we on the first waypoint? if so lets goto the second waypoint
 						m_moveBackward = false;

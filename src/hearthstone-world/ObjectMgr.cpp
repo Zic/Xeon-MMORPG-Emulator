@@ -1996,8 +1996,9 @@ void ObjectMgr::SetVendorList(uint32 Entry, std::vector<CreatureItem>* list_)
 
 void ObjectMgr::LoadCreatureWaypoints()
 {
-	QueryResult *result = WorldDatabase.Query("SELECT * FROM creature_waypoints");
-	if(!result)return;
+	QueryResult *result = WorldDatabase.Query("SELECT * FROM creature_waypoints ORDER BY spawnid,waypointid");
+	if(!result)
+		return;
 
 	do
 	{
@@ -2029,16 +2030,16 @@ void ObjectMgr::LoadCreatureWaypoints()
 		if(i==m_waypoints.end())
 		{
 			WayPointMap* m=new WayPointMap;
-			if(m->size() <= wp->id)
-				m->resize(wp->id+1);
-			(*m)[wp->id]=wp;
+			if(m->size() < wp->id )
+				m->resize(wp->id);
+			(*m)[wp->id-1]=wp;
 			m_waypoints[spawnid]=m;		
 		}else
 		{
-			if(i->second->size() <= wp->id)
-				i->second->resize(wp->id+1);
+			if(i->second->size() < wp->id)
+				i->second->resize(wp->id);
 
-			(*(i->second))[wp->id]=wp;
+			(*(i->second))[wp->id-1]=wp;
 		}
 	}while( result->NextRow() );
 

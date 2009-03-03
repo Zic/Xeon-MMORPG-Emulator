@@ -583,7 +583,7 @@ bool ChatHandler::HandleWaypointForwardTextCommand(const char* args, WorldSessio
 			char pAnnounce[1024];
 			snprintf(pAnnounce, 1024, "%s", args);
 
-			wp->forwardSayText = pAnnounce;
+			wp->forwardSayText = string(pAnnounce);
 			ss << "Forward SayText for Waypoint " << wpid << " is now " << string(pAnnounce);
 
 			//save wp
@@ -631,7 +631,7 @@ bool ChatHandler::HandleWaypointBackwardTextCommand(const char* args, WorldSessi
 			char pAnnounce[1024];
 			snprintf(pAnnounce, 1024, "%s", args);
 
-			wp->backwardSayText = pAnnounce;
+			wp->backwardSayText = string(pAnnounce);
 			ss << "Backward SayText for Waypoint " << wpid << " is now " << string(pAnnounce);
 			//save wp
 			ai->saveWayPoints();
@@ -1161,7 +1161,7 @@ bool ChatHandler::HandleWaypointAddFlyCommand(const char * args, WorldSession * 
 	}
 
 	char* pWaitTime = strtok((char*)args, " ");
-	uint32 WaitTime = (pWaitTime)? atoi(pWaitTime) : 10000;
+	uint32 WaitTime = (pWaitTime)? atoi(pWaitTime) : 0;
 	char* pForwardEmoteId = strtok(NULL, " ");
 	uint32 ForwardEmoteId = (pForwardEmoteId)? atoi(pForwardEmoteId) : 0;
 	char* pBackwardEmoteId = strtok(NULL, " ");
