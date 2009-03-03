@@ -486,6 +486,9 @@ Player::~Player ( )
 void Player::Destructor()
 {
 	PlayerPointer pThis = player_shared_from_this(); //prevent us going feeefee
+
+	sEventMgr.RemoveEvents(player_shared_from_this());
+
 	Unit::Destructor();
 
 #ifdef SHAREDPTR_DEBUGMODE
@@ -551,8 +554,6 @@ void Player::Destructor()
 
 	CleanupGossipMenu();
 	ASSERT(!IsInWorld());
-
-	sEventMgr.RemoveEvents(player_shared_from_this());
 
 	// delete m_talenttree
 
