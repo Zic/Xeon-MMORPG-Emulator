@@ -204,6 +204,15 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 		}
 	}
 
+	if(pItem->IsContainer())
+	{
+		if( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems() )
+		{
+			_player->GetItemInterface()->BuildInventoryChangeError( pItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
+			pItem == NULLITEM;
+		}
+	}
+
 	_player->mTradeItems[TradeSlot] = pItem;
 	_player->SendTradeUpdate();
 }
