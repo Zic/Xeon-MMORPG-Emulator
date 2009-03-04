@@ -487,8 +487,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 			SetNextTarget(NULLUNIT);
 		
-			//reset waypoint to 0
-			m_currentWaypoint = 0;
+			//reset waypoint to 1
+			m_currentWaypoint = 1;
 			
 			// There isn't any need to do any attacker checks here, as
 			// they should all be taken care of in DealDamage
@@ -2317,12 +2317,10 @@ WayPoint* AIInterface::getWayPoint(uint32 wpid)
 {
 	if(!m_waypoints)
 		return NULL;
-	if(wpid > m_waypoints->size()) 
-		return NULL; //not valid id
 
-	/*WayPointMap::const_iterator itr = m_waypoints->find( wpid );
-	if( itr != m_waypoints->end( ) )
-		return itr->second;*/
+	//make sure wpid is valid, return 1st/last if out of boundaries.
+	wpid = ( wpid > m_waypoints->size() ? m_waypoints->size() : ( !wpid?  1 : wpid ));
+
 	return m_waypoints->at(wpid-1);
 }
 

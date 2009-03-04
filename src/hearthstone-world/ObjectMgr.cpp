@@ -2004,7 +2004,13 @@ void ObjectMgr::LoadCreatureWaypoints()
 	{
 		Field *fields = result->Fetch();
 		WayPoint* wp = new WayPoint;
+		uint32 spawnid=fields[0].GetUInt32();
 		wp->id = fields[1].GetUInt32();
+		if(!wp->id || !spawnid)
+		{
+			DEBUG_LOG("Waypoints","Waypoint can't be 0, counting starts at 1 (spawn %u)", spawnid);
+			continue;
+		}
 		wp->x = fields[2].GetFloat();
 		wp->y = fields[3].GetFloat();
 		wp->z = fields[4].GetFloat();
@@ -2025,7 +2031,6 @@ void ObjectMgr::LoadCreatureWaypoints()
 		wp->backwardSayText = fields[19].GetString();
 
 		HM_NAMESPACE::hash_map<uint32,WayPointMap*>::const_iterator i;
-		uint32 spawnid=fields[0].GetUInt32();
 		i=m_waypoints.find(spawnid);
 		if(i==m_waypoints.end())
 		{
