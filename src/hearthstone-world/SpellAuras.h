@@ -663,6 +663,7 @@ public:
 	void SpellAuraVehiclePassenger(bool apply);
 	void SpellAuraReduceEffectDuration(bool apply);
 	void SpellAuraNoReagent(bool apply);
+	void SpellAuraCastFilter(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 

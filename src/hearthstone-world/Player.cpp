@@ -363,10 +363,12 @@ void Player::Init()
 		UpdateLastSpeeds();
 
 		m_resist_critical[0]=m_resist_critical[1]=0;
+		m_castFilterEnabled = false;
 		for (uint32 x =0;x<3;x++)
 		{
 			m_resist_hit[x]=0;
 			m_skipCastCheck[x] = 0;
+			m_castFilter[x] = 0;
 		}
 		for(int i = 0; i < 6; ++i)
 		{
@@ -2478,7 +2480,8 @@ bool Player::canCast(SpellEntry *m_spellInfo)
 				{
 					if (m_spellInfo->EquippedItemSubClass != 173555 && m_spellInfo->EquippedItemSubClass != 96 && m_spellInfo->EquippedItemSubClass != 262156)
 					{
-						if (pow(2.0,(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))
+						if (!((1 << GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->SubClass) 
+							& m_spellInfo->EquippedItemSubClass))
 							return false;
 					}
 				}
@@ -2495,7 +2498,9 @@ bool Player::canCast(SpellEntry *m_spellInfo)
 				{
 					if (m_spellInfo->EquippedItemSubClass != 173555 && m_spellInfo->EquippedItemSubClass != 96 && m_spellInfo->EquippedItemSubClass != 262156)
 					{
-						if (pow(2.0,(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->SubClass) != m_spellInfo->EquippedItemSubClass))							return false;
+						if (!((1 << GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)->GetProto()->SubClass) 
+							& m_spellInfo->EquippedItemSubClass))
+							return false;
 					}
 				}
 			}

@@ -681,25 +681,28 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !u_caster || !u_caster->IsInWorld() || !unitTarget || !unitTarget->IsInWorld() || !m_spellInfo)
 				return;
 			int32 value = m_spellInfo->EffectBasePoints[i]+1 + p_caster->GetAP() / 5;
-			int32 currentRage = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
+			int32 rageUsed = p_caster->GetUInt32Value(UNIT_FIELD_POWER2);
+
+			int32 rageLeft = 0; // We use all available rage by default
+			AuraPointer suddenDeath = u_caster->FindActiveAura(52437);
+
+			if(suddenDeath && unitTarget->GetHealthPct() > 20)
+			{		
+				SpellEntry * sd = dbcSpell.LookupEntry(suddenDeath->pSpellId);
+				if(sd)
+					rageLeft = sd->RankNumber > 1 ? sd->RankNumber * 30 + 10 : sd->RankNumber * 30;
+				suddenDeath->Remove(); // Sudden Death is removed after 1 execute
+				// With Sudden Death can only use up to 30 total rage. so 30-15 = 15 goes to execute damage
+				rageLeft = std::max(rageLeft, rageUsed - 150);
+				rageUsed = std::min(rageUsed, 150);
+			}
+
 			if(u_caster->HasAura(58367))
-				currentRage += 100; //Your Execute ability deals damage as if you had 10 additional rage.
-			value += (int32) (currentRage * m_spellInfo->dmg_multiplier[0]); 
+				rageUsed += 100; //Your Execute ability deals damage as if you had 10 additional rage.
+			value += (int32) (rageUsed * m_spellInfo->dmg_multiplier[0]); 
+			u_caster->SetPower(POWER_TYPE_RAGE, rageLeft);
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647 );
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
-			uint32 rageLeft = 0; // We use all available rage by default
-			for(uint32 x = 0; x < MAX_POSITIVE_AURAS; ++x)
-			{ // Look for Sudden Death
-				if(u_caster->m_auras[x] && u_caster->m_auras[x]->GetSpellProto()->Id == 52437)
-				{
-					SpellEntry * sd = dbcSpell.LookupEntry(u_caster->m_auras[x]->pSpellId);
-					if(sd)
-						rageLeft = sd->RankNumber > 1 ? sd->RankNumber * 30 + 10 : sd->RankNumber * 30;
-					u_caster->m_auras[x]->Remove(); // Sudden Death is removed after 1 execute
-					break;
-				}
-			}
-			u_caster->SetPower(POWER_TYPE_RAGE, rageLeft);
 		}break;
 
 

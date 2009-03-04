@@ -283,7 +283,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//260
 		&Aura::SpellAuraSetPhase,//261
 		&Aura::SpellAuraSkipCanCastCheck,//262
-		&Aura::SpellAuraNULL,//263
+		&Aura::SpellAuraCastFilter,//263
 		&Aura::SpellAuraNULL,//264
 		&Aura::SpellAuraNULL,//265
 		&Aura::SpellAuraNULL,//266
@@ -8856,6 +8856,30 @@ void Aura::SpellAuraSkipCanCastCheck(bool apply)
 				caster->m_frozenTargetId = 0;
 			}
 		}break;
+	}
+}
+
+void Aura::SpellAuraCastFilter(bool apply)
+{
+	// cannot perform any abilities (other than those in EffectMask)
+	if (!p_target) return;	// currently only works on players
+
+	// Generic
+	if(apply)
+	{
+		p_target->m_castFilterEnabled = true;
+		for(uint32 x=0;x<3;x++)
+			p_target->m_castFilter[x] |= m_spellProto->EffectSpellClassMask[mod->i][x];
+	}
+	else
+	{
+		p_target->m_castFilterEnabled = false;	// check if we can turn it off
+		for(uint32 x=0;x<3;x++)
+		{
+			p_target->m_castFilter[x] &= ~m_spellProto->EffectSpellClassMask[mod->i][x];
+			if(p_target->m_castFilter[x])
+				p_target->m_castFilterEnabled = true;
+		}
 	}
 }
 

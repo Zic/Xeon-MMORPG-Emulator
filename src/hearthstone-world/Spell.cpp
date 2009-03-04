@@ -2822,6 +2822,12 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 		}
 
+		if(p_caster->m_castFilterEnabled && 
+			!((m_spellInfo->SpellGroupType[0] & p_caster->m_castFilter[0]) || 
+			(m_spellInfo->SpellGroupType[1] & p_caster->m_castFilter[1]) ||
+			(m_spellInfo->SpellGroupType[2] & p_caster->m_castFilter[2])))
+			return SPELL_FAILED_SPELL_IN_PROGRESS;	// Need to figure the correct message
+
 		uint32 self_rez = p_caster->GetUInt32Value(PLAYER_SELF_RES_SPELL);
 		// if theres any spells that should be cast while dead let me know
 		if( !p_caster->isAlive() && self_rez != m_spellInfo->Id)

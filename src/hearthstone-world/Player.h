@@ -2067,6 +2067,8 @@ public:
 
 	PlayerInfo * m_playerInfo;
 	uint32 m_skipCastCheck[3];  // spell group relation of spell types that should ignore some cancast checks
+	bool m_castFilterEnabled;
+	uint32 m_castFilter[3];	// spell group relation of only spells that player can currently cast 
 	uint32 m_outStealthDamageBonusPct;
 	uint32 m_outStealthDamageBonusPeriod;
 	uint32 m_outStealthDamageBonusTimer;
