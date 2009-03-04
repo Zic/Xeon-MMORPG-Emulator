@@ -473,7 +473,7 @@ void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 
 					// can we join?
 					bg = iitr->second;
-					if(bg->CanPlayerJoin(plr))
+					if(bg && bg->CanPlayerJoin(plr))
 					{
 						bg->AddPlayer(plr, plr->GetTeam());
 						m_queuedPlayers[i][j].erase(it4);
@@ -514,20 +514,23 @@ void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 				else
 				{
 					bg = iitr->second;
-					int size = (int)min(tempPlayerVec[0].size(),tempPlayerVec[1].size());
-					for(int counter = 0; (counter < size) && (bg->IsFull() == false); counter++)
+					if(bg)
 					{
-						AddPlayerToBgTeam(bg, &tempPlayerVec[0], i, j, 0);
-						AddPlayerToBgTeam(bg, &tempPlayerVec[1], i, j, 1);
-					}
+						int size = (int)min(tempPlayerVec[0].size(),tempPlayerVec[1].size());
+						for(int counter = 0; (counter < size) && (bg->IsFull() == false); counter++)
+						{
+							AddPlayerToBgTeam(bg, &tempPlayerVec[0], i, j, 0);
+							AddPlayerToBgTeam(bg, &tempPlayerVec[1], i, j, 1);
+						}
 
-					while (tempPlayerVec[0].size() > 0 && bg->HasFreeSlots(0))
-					{
-						AddPlayerToBgTeam(bg, &tempPlayerVec[0], i, j, 0);
-					}
-					while (tempPlayerVec[1].size() > 0 && bg->HasFreeSlots(1))
-					{
-						AddPlayerToBgTeam(bg, &tempPlayerVec[1], i, j, 1);
+						while (tempPlayerVec[0].size() > 0 && bg->HasFreeSlots(0))
+						{
+							AddPlayerToBgTeam(bg, &tempPlayerVec[0], i, j, 0);
+						}
+						while (tempPlayerVec[1].size() > 0 && bg->HasFreeSlots(1))
+						{
+							AddPlayerToBgTeam(bg, &tempPlayerVec[1], i, j, 1);
+						}
 					}
 				}
 			}

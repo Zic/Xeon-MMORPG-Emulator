@@ -596,6 +596,12 @@ HEARTHSTONE_INLINE void ApplyFloatPSM(float ** m,int32 v,uint32 mask, float def)
 
 UnitPointer Aura::GetUnitCaster()
 {
+	if( !m_target && GET_TYPE_FROM_GUID(m_casterGuid) == HIGHGUID_TYPE_PLAYER)
+	{
+		UnitPointer unit = objmgr.GetPlayer( (uint32)m_casterGuid );
+		if(unit)
+			return unit;
+	}
 	if( !m_target )
 		return NULLUNIT;
 	if( m_casterGuid == m_target->GetGUID() )
@@ -608,6 +614,14 @@ UnitPointer Aura::GetUnitCaster()
 
 ObjectPointer Aura::GetCaster()
 {
+	if( !m_target && GET_TYPE_FROM_GUID(m_casterGuid) == HIGHGUID_TYPE_PLAYER)
+	{
+		ObjectPointer obj = objmgr.GetPlayer( (uint32)m_casterGuid );
+		if(obj)
+			return obj;
+	}
+	if( !m_target )
+		return NULLOBJ;
 	if( m_casterGuid == m_target->GetGUID() )
 		return m_target;
 	if( m_target->GetMapMgr() )
@@ -6292,7 +6306,7 @@ void Aura::SpellAuraSplitDamage(bool apply)
 	if( !m_target || !m_target->IsUnit() )
 		return;
 
-	caster = TO_UNIT( GetCaster() );
+	caster = GetUnitCaster();
 	if(!caster)
 		return;
 
@@ -7680,7 +7694,7 @@ void Aura::SpellAuraSplitDamageFlat(bool apply)
 	if( !m_target || !m_target->IsUnit() )
 		return;
 
-	caster = TO_UNIT( GetCaster() );
+	caster = GetUnitCaster();
 	if(!caster)
 		return;
 
@@ -7691,7 +7705,7 @@ void Aura::SpellAuraSplitDamageFlat(bool apply)
 		ds->m_spellId = GetSpellProto()->Id;
 		ds->m_pctDamageSplit = 0;
 		ds->damage_type = mod->m_type;
-		ds->m_target = GetCaster()->GetGUID();
+		ds->m_target = m_casterGuid;
 //		printf("registering dmg split %u, amout= %u \n",ds->m_spellId, mod->m_amount, mod->m_miscValue, mod->m_type);
 	}
 
