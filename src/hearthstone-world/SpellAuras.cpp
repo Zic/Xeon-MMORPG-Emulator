@@ -4390,7 +4390,6 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			m_target->RemoveAura( p_target->m_MountSpellId ); // these spells are not compatible
 
 	uint32 spellId = 0;
-	uint32 spellId2 = 0;
 	uint32 modelId = 0;
 
 	bool freeMovements = false;
@@ -4633,6 +4632,11 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			}
 		}
 
+		if( modelId != 0 )
+			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, modelId );
+
+		TO_PLAYER( m_target )->SetShapeShift( mod->m_miscValue );
+
 		// check for spell id
 		if( spellId == 0 )
 			return;
@@ -4645,24 +4649,12 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			TO_PLAYER( m_target )->m_ShapeShifted = GetSpellId();
 		}
 
-		if( modelId != 0 )
-			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, modelId );
-
-		TO_PLAYER( m_target )->SetShapeShift( mod->m_miscValue );
-
 		SpellEntry* spellInfo = dbcSpell.LookupEntry(spellId );
 		
 		SpellPointer sp(new Spell( m_target, spellInfo, true, NULLAURA ));
 		SpellCastTargets tgt;
 		tgt.m_unitTarget = m_target->GetGUID();
 		sp->prepare( &tgt );
-
-		if( spellId2 != 0 )
-		{
-			spellInfo = dbcSpell.LookupEntry(spellId2);
-			sp = SpellPointer(new Spell( m_target, spellInfo, true, NULLAURA ));
-			sp->prepare(&tgt);
-		}
 		
 		// remove the caster from imparing movements
 		if( freeMovements )
@@ -4671,7 +4663,7 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			{
 				if( m_target->m_auras[x] != NULL )
 				{
-					if( m_target->m_auras[x]->GetSpellProto()->MechanicsType == 7 || m_target->m_auras[x]->GetSpellProto()->MechanicsType == 11 ) // Remove roots and slow spells
+					if( m_target->m_auras[x]->HasMechanic(MECHANIC_ROOTED) || m_target->m_auras[x]->HasMechanic(MECHANIC_ENSNARED) ) // Remove roots and slow spells
 					{
 						m_target->m_auras[x]->Remove();
 					}
@@ -4698,13 +4690,9 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		//execute before changing shape back
 		TO_PLAYER( m_target )->EventTalentHearthOfWildChange( false );
 		m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );				
-		if( spellId != GetSpellId() )
+		if( spellId != GetSpellId() && spellId )
 		{
-			if( spellId )
-				m_target->RemoveAura( spellId );
-
-			if( spellId2 )
-				m_target->RemoveAura( spellId2 );
+			m_target->RemoveAura( spellId );
 		}
 		TO_PLAYER( m_target )->m_ShapeShifted = 0;
 
