@@ -2831,6 +2831,8 @@ void Spell::SummonCreature(uint32 i) // Summon
 		summon->AddSpell(dbcSpell.LookupEntry(33395), true);
 		summon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, p_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 		summon->_setFaction();
+		if(p_caster->IsPvPFlagged())
+			summon->SetPvPFlag();
 		if( m_summonProperties->slot < 7 )
 			p_caster->m_SummonSlots[ m_summonProperties->slot ] = summon;
 	}

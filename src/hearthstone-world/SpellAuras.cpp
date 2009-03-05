@@ -858,14 +858,6 @@ void Aura::Remove()
 	if( m_spellProto->AdditionalAura )
 		m_target->RemoveAura( m_spellProto->AdditionalAura );
 
-	//Probably not necessary but wont hurt to ensure m_target is clear
-	if(m_target)
-		m_target = NULLUNIT;
-	
-	//Probably not necessary but wont hurt to ensure p_target is clear
-	if(p_target)
-		p_target = NULLPLR;
-
 /*
 #ifdef SHAREDPTR_DEBUGMODE
 	if(deleting)
