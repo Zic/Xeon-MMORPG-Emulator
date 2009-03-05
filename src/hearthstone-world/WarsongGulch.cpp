@@ -243,6 +243,8 @@ void WarsongGulch::DropFlag(PlayerPointer plr)
 	if(!plr->m_bgHasFlag || m_dropFlags[plr->GetTeam()]->IsInWorld())
 		return;
 
+	plr->m_bgHasFlag = false;	// don't want to get here second time when doing RemoveAura
+
 	plr->RemoveAura(23333+(plr->GetTeam() * 2));
 
 	/* drop the flag! */
@@ -254,7 +256,6 @@ void WarsongGulch::DropFlag(PlayerPointer plr)
 	m_dropFlags[plr->GetTeam()]->PushToWorld(m_mapMgr);
 	m_flagHolders[plr->GetTeam()] = 0;
 	m_mapMgr->GetStateManager().UpdateWorldState(plr->GetTeam() ? WORLDSTATE_WSG_ALLIANCE_FLAG_DISPLAY : WORLDSTATE_WSG_HORDE_FLAG_DISPLAY, 1);
-	plr->m_bgHasFlag = false;
 
 	plr->CastSpell(plr, BG_RECENTLY_DROPPED_FLAG, true);
 
@@ -382,7 +383,7 @@ void WarsongGulch::HookFlagStand(PlayerPointer plr, GameObjectPointer obj)
 		m_homeFlags[plr->GetTeam()]->RemoveFromWorld(false);
 
 	plr->m_bgHasFlag = true;
-	m_flagAtBase[plr->GetTeam() ? 0 : 1] = false;
+	m_flagAtBase[plr->GetTeam()] = false;
 
 	if( plr->GetTeam() == 1 )
 		SendChatMessage( CHAT_MSG_BG_SYSTEM_HORDE, plr->GetGUID(), "The Alliance flag was picked up by %s!", plr->GetName() );
