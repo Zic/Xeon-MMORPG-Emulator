@@ -2608,28 +2608,12 @@ void Aura::SpellAuraDummy(bool apply)
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_DAMAGE);
 		}break;
 
-	case 33763:		// lifebloom
+	case 33763:
+	case 48450:
+	case 48451:// lifebloom
 		{
-			if(apply)
-			{
-				// evil hackfix.
-				// do we have any other lifeblooms? if so, do not apply the end tick.
-				uint32 x;
-				AuraPointer pAura;
-				for( x = 0; x < MAX_POSITIVE_AURAS; ++x )
-				{
-					pAura = m_target->m_auras[x];
-					if( pAura != NULL && pAura->GetSpellProto() == m_spellProto && pAura != shared_from_this() )
-					{
-						mod->m_amount = 0;
-						return;
-					}
-				}
 
-				return;
-			}
-
-			if( mod->m_amount <= 0 )
+			if( apply || stackSize != 0 )	// don't activate if we have not removed aura completely
 				return;
 
 			UnitPointer pCaster = GetUnitCaster();
@@ -2639,7 +2623,7 @@ void Aura::SpellAuraDummy(bool apply)
 			// this is an ugly hack because i don't want to copy/paste code ;P
 			SpellPointer spell(new Spell(pCaster, m_spellProto, true, NULLAURA));
 			spell->SetUnitTarget( m_target );
-			spell->Heal( mod->m_amount );			
+			spell->Heal( mod->m_baseAmount );			
 			spell->Destructor();
 			spell = NULLSPELL;
 			//pCaster->Heal( m_target, m_spellProto->Id, mod->m_amount );
@@ -3102,10 +3086,6 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		{
 			for(uint32 a = 0; a < 6; a++)
 				bonus += float2int32( TO_PLAYER( c )->SpellHealDoneByAttribute[a][m_spellProto->School] * TO_PLAYER( c )->GetUInt32Value( UNIT_FIELD_STAT0 + a) );
-
-			//Druid Tree of Life form. it should work not like this, but it's better then nothing. 
-			if( TO_PLAYER( c )->IsInFeralForm() && TO_PLAYER( c )->GetShapeShift() == FORM_TREE)
-				bonus += float2int32( 0.25f * TO_PLAYER( c )->GetUInt32Value( UNIT_FIELD_STAT4 ) );
 		}
 		//Spell Coefficient
 		float coefficient = 0.0f;
@@ -3156,6 +3136,8 @@ void Aura::EventPeriodicHeal( uint32 amount )
 		if (m_spellProto->SpellGroupType)
 			SM_PIValue(c->SM[SMT_SPELL_VALUE_PCT][1],&add,m_spellProto->SpellGroupType);
 	}
+
+	add = (int32)(add * m_target->HealTakenPctMod[m_spellProto->School]);
 
 	if((m_target->GetUInt32Value( UNIT_FIELD_HEALTH )+add) > m_target->GetUInt32Value( UNIT_FIELD_MAXHEALTH ))
 	{
@@ -4454,7 +4436,6 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		modelId  = 864;
 		freeMovements=true;
 		spellId = 5420;//3122;
-		spellId2 = 34123;
 		} break;
 	case FORM_TRAVEL:
 		{//druid
@@ -6848,6 +6829,8 @@ void Aura::SpellAuraHover( bool apply )
 
 void Aura::SpellAuraAddPctMod( bool apply )
 {
+	if(!m_target)
+		return;
 	int32 val = apply ? mod->m_amount : -mod->m_amount;
 	uint32* AffectedGroups = GetSpellProto()->EffectSpellClassMask[mod->i];
 	if( AffectedGroups == 0 )
@@ -7229,21 +7212,16 @@ void Aura::SpellAuraModHealingPCT(bool apply)
 	else
 		SetPositive();
 
-	// This shit is also multiplicative, guys.
-	// Ex: -50%
-
-	float baseMod = (mod->m_amount / 100.0f);
 	for(uint32 x=0; x<7; x++)
 	{
 		if (mod->m_miscValue & (((uint32)1)<<x) )
 		{
 			if( apply )
 			{
-				mod->fixed_float_amount[x] = m_target->HealTakenPctMod[x] * baseMod;
-				m_target->HealTakenPctMod[x] += mod->fixed_float_amount[x];
+				m_target->HealTakenPctMod[x] *= (mod->m_amount/100.0f + 1);
 			}
 			else
-				m_target->HealTakenPctMod[x] -= mod->fixed_float_amount[x];
+				m_target->HealTakenPctMod[x] /= (mod->m_amount/100.0f + 1);
 			
 		}
 	}
@@ -8078,6 +8056,8 @@ void Aura::SpellAuraIncreaseHealingByAttribute(bool apply)
 
 void Aura::SpellAuraAddFlatModifier(bool apply)
 {
+	if(!m_target)
+		return;
 	int32 val = apply?mod->m_amount:-mod->m_amount;
 	uint32* AffectedGroups = GetSpellProto()->EffectSpellClassMask[mod->i];
 	if( AffectedGroups[0] == 0 && AffectedGroups[1] == 0 && AffectedGroups[2] == 0 )
@@ -8141,19 +8121,16 @@ void Aura::SpellAuraModHealingDonePct(bool apply)
 	else 
 		val=-mod->m_amount;
 
-	float baseMod = (mod->m_amount / 100.0f);
-
 	for(uint32 x=0; x<7; x++)
 	{
 		if (mod->m_miscValue & (((uint32)1)<<x) )
 		{
 			if( apply )
 			{
-				mod->fixed_float_amount[x] = m_target->HealTakenPctMod[x] * baseMod;
-				m_target->HealDonePctMod[x] += mod->fixed_float_amount[x];
+				m_target->HealDonePctMod[x] *= (mod->m_amount/100.0f + 1);
 			}
 			else
-				m_target->HealDonePctMod[x] -= mod->fixed_float_amount[x];
+				m_target->HealDonePctMod[x] /= (mod->m_amount/100.0f + 1);
 			
 		}
 	}

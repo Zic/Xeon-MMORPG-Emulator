@@ -888,7 +888,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if (!u_caster->IsPlayer())
 				return;
 			SpellPointer spell(new Spell(u_caster,dbcSpell.LookupEntry(34123),true,NULLAURA));
-			spell->forced_basepoints[0] = (u_caster->GetUInt32Value( UNIT_FIELD_STAT4 )) / 4;
 			SpellCastTargets targets;
 			targets.m_unitTarget = unitTarget->GetGUID();
 			spell->prepare(&targets);

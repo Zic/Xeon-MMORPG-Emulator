@@ -5305,6 +5305,10 @@ void ApplyNormalFixes()
 		case SPELL_HASH_DRAIN_SOUL:
 			sp->fixed_hotdotcoef = 1.15f;
 			break;
+		case SPELL_HASH_LIFEBLOOM:
+			sp->fixed_dddhcoef = 0.3544f;
+			sp->fixed_hotdotcoef = 0.343f;
+			break;
 		}
 
 		//////////////////////////////////////////////////////
