@@ -373,7 +373,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 		return;
 	}
    
-	uint32 dmg;
+	uint32 dmg = 0;
 	bool static_damage=false;
 
 	if(m_spellInfo->EffectChainTarget[i])//chain
@@ -567,6 +567,11 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 			{
 				if( p_caster && p_caster->HasAura(34258) )
 					p_caster->CastSpell(TO_UNIT(p_caster),34260,true);
+			}break;
+		case SPELL_HASH_INTERCEPT:
+			{
+				if( u_caster )
+					dmg = float2int32( u_caster->GetAP() * 0.12f );
 			}break;
 		}
 	}

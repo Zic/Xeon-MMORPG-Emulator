@@ -4624,6 +4624,14 @@ void Aura::SpellAuraModShapeshift(bool apply)
 			}
 		}
 
+		if( spellId != GetSpellId() )
+		{
+			if( TO_PLAYER( m_target )->m_ShapeShifted )
+				TO_PLAYER( m_target )->RemoveAura( TO_PLAYER( m_target )->m_ShapeShifted );
+
+			TO_PLAYER( m_target )->m_ShapeShifted = GetSpellId();
+		}
+
 		if( modelId != 0 )
 			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, modelId );
 
@@ -4632,14 +4640,6 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		// check for spell id
 		if( spellId == 0 )
 			return;
-
-		if( spellId != GetSpellId() )
-		{
-			if( TO_PLAYER( m_target )->m_ShapeShifted )
-				TO_PLAYER( m_target )->RemoveAura( TO_PLAYER( m_target )->m_ShapeShifted );
-
-			TO_PLAYER( m_target )->m_ShapeShifted = GetSpellId();
-		}
 
 		SpellEntry* spellInfo = dbcSpell.LookupEntry(spellId );
 		
