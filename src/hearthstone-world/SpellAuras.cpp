@@ -2212,6 +2212,8 @@ void Aura::SpellAuraDummy(bool apply)
 	case 974:
 	case 32593:
 	case 32594:
+	case 49283:
+	case 49284: //Earth Shield
 		{
 			if(apply)
 			{

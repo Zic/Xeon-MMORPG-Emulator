@@ -1942,7 +1942,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				spell->forced_basepoints[0] = dmg_overwrite;
 				spell->ProcedOnSpell = CastingSpell;
 				//SpellPointer spell(new Spell(unit_shared_from_this(),spellInfo,false,NULLAURA));
-				if(spellId==974||spellId==32593||spellId==32594) // Earth Shield handler
+				if(spellId==974||spellId==32593||spellId==32594||spellId==49283||spellId==49284) // Earth Shield handler
 				{
 					spell->pSpellId=itr2->spellId;
 					spell->SpellEffectDummy(0);

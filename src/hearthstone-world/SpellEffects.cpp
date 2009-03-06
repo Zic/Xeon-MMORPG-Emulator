@@ -1301,6 +1301,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	case 974:
 	case 32593:
 	case 32594:
+	case 49283:
+	case 49284:
 		{
 			if(!pSpellId) return;
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(pSpellId);
