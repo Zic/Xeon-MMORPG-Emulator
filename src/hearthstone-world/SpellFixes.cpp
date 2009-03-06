@@ -605,7 +605,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectAmplitude[0] = 0;
 					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
 					sp->EffectMiscValue[0] = 127;
-				}
+				}break;
 			
 			case 30824:
 				{

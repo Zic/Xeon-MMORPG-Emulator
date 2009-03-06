@@ -1603,7 +1603,7 @@ void CBattleground::EventCountdown()
 	{
 		m_countdownStage = 3;
 		SendChatMessage( CHAT_MSG_BG_SYSTEM_NEUTRAL, 0, "Thirty seconds until the battle for %s begins!", GetName() );
-		sEventMgr.ModifyEventTimeLeft(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 15000);
+		sEventMgr.ModifyEventTimeAndTimeLeft(shared_from_this(), EVENT_BATTLEGROUND_COUNTDOWN, 15000);
 	}
 	else if(m_countdownStage == 3)
 	{

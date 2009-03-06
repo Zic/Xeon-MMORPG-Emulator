@@ -1800,7 +1800,8 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		if( pVictim->IsPlayer() )
 		{
 			// let's see if we have shadow of death
-			if( !pVictim->FindPositiveAuraByNameHash(SPELL_HASH_SHADOW_OF_DEATH) && TO_PLAYER( pVictim)->HasSpell( 49157 ) ) //check for shadow of death
+			if( !pVictim->FindPositiveAuraByNameHash(SPELL_HASH_SHADOW_OF_DEATH) && TO_PLAYER( pVictim)->HasSpell( 49157 )  && 
+				!(TO_PLAYER(pVictim)->m_bg && TO_PLAYER(pVictim)->m_bg->IsArena())) //check for shadow of death
 			{
 				SpellEntry* sorInfo = dbcSpell.LookupEntry(54223);
 				if( sorInfo != NULL )
@@ -1910,21 +1911,26 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 
 		if(pVictim->IsPlayer())
 		{
-			uint32 self_res_spell = TO_PLAYER( pVictim )->SoulStone;
-			TO_PLAYER( pVictim )->SoulStone = TO_PLAYER( pVictim )->SoulStoneReceiver = 0;
-
-			if( !self_res_spell && TO_PLAYER( pVictim )->bReincarnation )
+			uint32 self_res_spell = 0;
+			PlayerPointer plrVictim = TO_PLAYER(pVictim);
+			if(!(plrVictim->m_bg && plrVictim->m_bg->IsArena())) // Can't self res in Arena
 			{
-				SpellEntry* m_reincarnSpellInfo = dbcSpell.LookupEntry( 20608 );
-				if( TO_PLAYER( pVictim )->Cooldown_CanCast( m_reincarnSpellInfo ) )
+				self_res_spell = plrVictim->SoulStone;
+				plrVictim->SoulStone = plrVictim->SoulStoneReceiver = 0;
+
+				if( !self_res_spell && plrVictim->bReincarnation )
 				{
-					uint32 ankh_count = TO_PLAYER( pVictim )->GetItemInterface()->GetItemCount( 17030 );
-					if( ankh_count )
-						self_res_spell = 21169;
+					SpellEntry* m_reincarnSpellInfo = dbcSpell.LookupEntry( 20608 );
+					if( plrVictim->Cooldown_CanCast( m_reincarnSpellInfo ) )
+					{
+						uint32 ankh_count = plrVictim->GetItemInterface()->GetItemCount( 17030 );
+						if( ankh_count )
+							self_res_spell = 21169;
+					}
 				}
 			}
 			pVictim->SetUInt32Value( PLAYER_SELF_RES_SPELL, self_res_spell );
-			TO_UNIT(pVictim)->Dismount();
+			pVictim->Dismount();
 		}
 
 		// Wipe our attacker set on death
