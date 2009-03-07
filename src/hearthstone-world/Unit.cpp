@@ -1230,6 +1230,28 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 spell->prepare(&targets);
                                 continue;
                             }break;
+						case 974:
+						case 32593:
+						case 32594:
+						case 49283:
+						case 49284: // Earth Shield
+							{
+								SpellEntry *spellInfo = dbcSpell.LookupEntry( 379 );
+								UnitPointer caster = NULLUNIT;
+								if(GET_TYPE_FROM_GUID(itr2->caster) == HIGHGUID_TYPE_PLAYER && IsInWorld())
+								{
+									caster = GetMapMgr()->GetPlayer( GUID_LOPART(itr2->caster) );
+								}
+								if(!caster)
+									caster = unit_shared_from_this();
+								targets.m_unitTarget = GetGUID();
+								SpellPointer spell(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
+								spell->forced_basepoints[0] = ospinfo->EffectBasePoints[0] + 1;
+								spell->ProcedOnSpell = CastingSpell;
+								spell->pSpellId=origId;
+								spell->prepare(&targets);
+								continue;
+							}break;
 						//shaman - Healing Way
 						case 29203:
 							{
@@ -1358,18 +1380,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						//rogue - Relentless Strikes
 						case 14181:
 							{
-								if( CastingSpell == NULL || !IsPlayer() )
+								if( CastingSpell == NULL || !IsPlayer() || unit_shared_from_this() != victim)	// to prevent it proccing 2 times
 									continue;//this should not ocur unless we made a fuckup somewhere
 
 								if( !(CastingSpell->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE) )
 									continue;
 
-								int32 procChance = 20 * plr_shared_from_this()->m_comboPoints;
+								int32 procChance = ospinfo->EffectPointsPerComboPoint[0] * plr_shared_from_this()->m_comboPoints;
 								if(!Rand(procChance))
 									continue;
-
-								dmg_overwrite = 25;
-
 							}break;
 						//rogue - Find Weakness
 						case 31234:
@@ -1941,15 +1960,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				SpellPointer spell(new Spell(unit_shared_from_this(), spellInfo ,true, NULLAURA));
 				spell->forced_basepoints[0] = dmg_overwrite;
 				spell->ProcedOnSpell = CastingSpell;
-				//SpellPointer spell(new Spell(unit_shared_from_this(),spellInfo,false,NULLAURA));
-				if(spellId==974||spellId==32593||spellId==32594||spellId==49283||spellId==49284) // Earth Shield handler
-				{
-					spell->pSpellId=itr2->spellId;
-					spell->SpellEffectDummy(0);
-					spell->Destructor();
-					spell = NULLSPELL;
-					continue;
-				}
 				spell->pSpellId=origId;
 				spell->prepare(&targets);
 			}//not always we have a spell to cast

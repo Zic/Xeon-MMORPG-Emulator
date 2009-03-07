@@ -749,7 +749,7 @@ public:
 	void Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
 
 	uint32 m_procCounter;
-	uint32 HandleProc(uint32 flag, UnitPointer Victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0, uint32 weapon_damage_type=0);
+	uint32 HandleProc(uint32 flag, UnitPointer victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0, uint32 weapon_damage_type=0);
 	void HandleProcDmgShield(uint32 flag, UnitPointer attacker);//almost the same as handleproc :P
 
 	void RemoveExtraStrikeTarget(SpellEntry *spell_info);

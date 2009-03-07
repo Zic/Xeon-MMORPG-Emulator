@@ -2591,12 +2591,14 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 		
 			//Relentless Strikes
-			case  14179:
+			case 14179:
+			case 58422:
+			case 58423:
+			case 58424:
+			case 58425:
 				{
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;//proc	spell
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
-						sp->procChance = 100;
-						sp->EffectBasePoints[1]	=	20;	//client showes	20%	chance but whe do	not	have it	?	:O
 				}break;
 		
 			//priest - surge of	light
@@ -3836,6 +3838,22 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_CAST_SPELL;
 					sp->procChance = 100;
 				}break;
+			case 49143:
+			case 51416:
+			case 51417:
+			case 51418:
+			case 51419:
+			case 55268: // Frost Strike
+				{
+					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
+				}
+			case 55090:
+			case 55265:
+			case 55270:
+			case 55271: // Scourge Strike
+				{
+					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
+				}
 		
 			case 31801: // Seal of Vengeance
 				{
@@ -5318,6 +5336,9 @@ void ApplyNormalFixes()
 		case SPELL_HASH_LIFEBLOOM:
 			sp->fixed_dddhcoef = 0.3544f;
 			sp->fixed_hotdotcoef = 0.343f;
+			break;
+		case SPELL_HASH_RAIN_OF_FIRE:
+			sp->fixed_dddhcoef = 0.083f;
 			break;
 		}
 

@@ -1805,9 +1805,9 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 				!(TO_PLAYER(pVictim)->m_bg && TO_PLAYER(pVictim)->m_bg->IsArena())) //check for shadow of death
 			{
 				SpellEntry* sorInfo = dbcSpell.LookupEntry(54223);
-				if( sorInfo != NULL )
+				if( sorInfo != NULL && TO_PLAYER(pVictim)->Cooldown_CanCast( sorInfo ))
 				{
-					SpellPointer sor(new Spell( pVictim, sorInfo, true, NULLAURA ));
+					SpellPointer sor(new Spell( pVictim, sorInfo, false, NULLAURA ));
 					SpellCastTargets targets;
 					targets.m_unitTarget = pVictim->GetGUID();
 					sor->prepare(&targets);
