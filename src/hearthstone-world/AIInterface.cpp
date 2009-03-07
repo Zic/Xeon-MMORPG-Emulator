@@ -1366,6 +1366,7 @@ UnitPointer AIInterface::FindTarget()
 				continue;
 
 		pUnit = TO_UNIT(pObj);
+		// Don't agro on invincibility
 		if( pUnit->bInvincible )
 			continue;
 
@@ -3435,6 +3436,9 @@ void AIInterface::UpdateCivilian()
 			continue;
 
 		if( !pOpp->IsInLineOfSight( m_Unit ) )
+			continue;
+
+		if( pOpp->bInvincible)
 			continue;
 
 		target = pOpp;
