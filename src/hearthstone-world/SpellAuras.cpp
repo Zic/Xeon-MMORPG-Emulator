@@ -2209,42 +2209,6 @@ void Aura::SpellAuraDummy(bool apply)
 			m_target->ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, -mod->realamount);
 		m_target->CalcDamage();
 	}break;
-	case 974:
-	case 32593:
-	case 32594:
-	case 49283:
-	case 49284: //Earth Shield
-		{
-			if(apply)
-			{
-			ProcTriggerSpell pts;
-			memset(&pts,0,sizeof(ProcTriggerSpell));
-			pts.origId = GetSpellProto()->Id;
-			pts.caster = m_casterGuid;
-			pts.spellId=GetSpellProto()->Id;
-			if(!pts.spellId)
-				return;
-			pts.procChance = GetSpellProto()->procChance;
-			pts.procFlags = GetSpellProto()->procFlags;
-			pts.procCharges = GetSpellProto()->procCharges;
-			pts.LastTrigger = 0;
-			pts.deleted = false;
-			pts.weapon_damage_type = 0;
-			m_target->m_procSpells.push_front(pts);
-			}
-			else
-			{
-			for(std::list<struct ProcTriggerSpell>::iterator itr = m_target->m_procSpells.begin();itr != m_target->m_procSpells.end();itr++)
-			{
-				if(itr->origId == GetSpellId() && itr->caster == m_casterGuid && !itr->deleted)
-				{
-					//m_target->m_procSpells.erase(itr);
-					itr->deleted = true;
-					break;
-				}
-			}
-			}
-		}break;
 	case 126: //Eye of Killrog
 		{
 			/*if(m_target->IsInWorld() == false)

@@ -1797,6 +1797,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 				owner_participe = true;
 		}
 		/* victim died! */
+		UnitPointer pKiller = pVictim->CombatStatus.GetKiller();
 		if( pVictim->IsPlayer() )
 		{
 			// let's see if we have shadow of death
@@ -1934,7 +1935,6 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		}
 
 		// Wipe our attacker set on death
-		UnitPointer pKiller = pVictim->CombatStatus.GetKiller();
 		pVictim->CombatStatus.Vanished();
 
 		//		 sent to set. don't send it to the party, becuase if they're out of
@@ -1990,30 +1990,22 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			if( pVictim->IsPlayer() )
 			{
 				sHookInterface.OnKillPlayer( plr, TO_PLAYER( pVictim ) );
-				if(plr->getLevel() > pVictim->getLevel())
-				{
-					unsigned int diff = plr->getLevel() - pVictim->getLevel();
-					if( diff <= 8 )
-					{
-						HonorHandler::OnPlayerKilledUnit(plr, pVictim);
-						plr->SetFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_LASTKILLWITHHONOR );
-					}
-					else
-						plr->RemoveFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_LASTKILLWITHHONOR );
-				}
-				else
-				{
-					HonorHandler::OnPlayerKilledUnit( plr, pVictim );
-					plr->SetFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_LASTKILLWITHHONOR );
-				}
+				HonorHandler::OnPlayerKilledUnit( plr, pVictim );
 			}
 			else
 			{
 				// REPUTATION
 				if( !isCritter )
 					plr->Reputation_OnKilledUnit( pVictim, false );
+			}
 
-				plr->RemoveFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_LASTKILLWITHHONOR );
+			if(plr->getLevel() <= (pVictim->getLevel() + 8) && plr->getClass() == WARRIOR)
+			{	// currently only warriors seem to use it (Victory Rush)
+				plr->SetFlag( UNIT_FIELD_AURASTATE, AURASTATE_FLAG_VICTORIOUS );
+				if( !sEventMgr.HasEvent(TO_UNIT(plr), EVENT_VICTORIOUS_FLAG_EXPIRE ) )
+					sEventMgr.AddEvent( TO_UNIT(plr), &Unit::EventAurastateExpire, (uint32)AURASTATE_FLAG_VICTORIOUS, EVENT_VICTORIOUS_FLAG_EXPIRE, 20000, 1, 0 );
+				else
+					sEventMgr.ModifyEventTimeLeft( TO_UNIT(plr), EVENT_VICTORIOUS_FLAG_EXPIRE, 20000 , false );
 			}
 		}
 		/* -------------------------------- HONOR + BATTLEGROUND CHECKS END------------------------ */

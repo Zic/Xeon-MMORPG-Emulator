@@ -1144,7 +1144,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 
 		// aura state removal
 		if( m_spellInfo->CasterAuraState )
-			u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, m_spellInfo->CasterAuraState );
+			u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, uint32(1) << (m_spellInfo->CasterAuraState - 1) );
 	}
 
 	m_spellState = SPELL_STATE_PREPARING;
@@ -1324,6 +1324,16 @@ void Spell::cast(bool check)
 			{
 				finish();
 				return;
+			}
+
+			if(m_magnetTarget){ // Spell was redirected
+				// Grounding Totem gets destroyed after redirecting 1 spell
+				if ( m_magnetTarget && m_magnetTarget->IsCreature()){
+					CreaturePointer MagnetCreature = TO_CREATURE(m_magnetTarget);
+					if(MagnetCreature->IsTotem()){
+						sEventMgr.ModifyEventTimeLeft(MagnetCreature, EVENT_TOTEM_EXPIRE, 0);
+					}
+				}
 			}
 
 			if(p_caster && m_spellInfo->c_is_flags & SPELL_FLAG_ON_ONLY_ONE_TARGET &&
@@ -1526,7 +1536,7 @@ void Spell::cast(bool check)
 			{
 				// aura state
 				if( m_spellInfo->TargetAuraState )
-					unitTarget->RemoveFlag(UNIT_FIELD_AURASTATE, m_spellInfo->TargetAuraState);
+					unitTarget->RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1) << (m_spellInfo->TargetAuraState - 1) );
 
 				// proc!
 				if(!m_triggeredSpell)

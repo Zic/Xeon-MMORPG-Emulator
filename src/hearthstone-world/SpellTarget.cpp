@@ -347,19 +347,7 @@ void Spell::SpellTargetSingleTargetEnemy(uint32 i, uint32 j)
 	// magnet!!!!!
 	if( pTarget->IsPlayer() && TO_PLAYER(pTarget)->m_magnetAura != NULL && m_magnetTarget == NULL )
 	{
-		uint32 x;
-		for( x = 0; x < 3; ++x )
-		{
-			if( m_spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MOD_POSSESS || 
-				m_spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MOD_FEAR ||
-				m_spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MOD_CONFUSE || 
-				m_spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MOD_STUN )
-			{
-				break;
-			}
-		}
-
-		if( x == 3 && !m_spellInfo->is_melee_spell && GetType() == SPELL_DMG_TYPE_MAGIC )
+		if(!m_spellInfo->is_melee_spell && GetType() == SPELL_DMG_TYPE_MAGIC )
 		{
 			// redirect it to the magnet
 			m_magnetTarget = TO_PLAYER(pTarget)->m_magnetAura->GetUnitCaster();

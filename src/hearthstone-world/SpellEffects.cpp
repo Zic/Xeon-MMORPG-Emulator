@@ -1298,20 +1298,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			damage = damage * (100 + playerTarget->m_lifetapbonus) / 100;	// Apply improved life tap
 			p_caster->Energize(playerTarget, pSpellId ? pSpellId : m_spellInfo->Id, damage, POWER_TYPE_MANA);
 		}break;
-	case 974:
-	case 32593:
-	case 32594:
-	case 49283:
-	case 49284:
-		{
-			if(!pSpellId) return;
-			SpellEntry *spellInfo = dbcSpell.LookupEntry(pSpellId);
-			if(!spellInfo) return;
-			uint32 heal32 = CalculateEffect(i,u_caster);
-			unitTarget=u_caster; // Should heal caster :p
-			if(heal32)
-				Heal(heal32);
-		}break;
 	case 39610://Mana Tide
 		{
 			if(unitTarget == NULL || unitTarget->isDead() || unitTarget->getClass() == WARRIOR || unitTarget->getClass() == ROGUE)

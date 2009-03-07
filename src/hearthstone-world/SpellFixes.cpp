@@ -582,6 +582,16 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->spell_can_crit = false;
 					sp->logsId = sp->Id;
 				}break;
+			case 974:
+			case 32593:
+			case 32594:
+			case 49283:
+			case 49284: //Earth Shield
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->procFlags = PROC_ON_ANY_DAMAGE_VICTIM | PROC_REMOVEONUSE;
+					sp->EffectTriggerSpell[0] = sp->Id;
+				}break;
 			// shaman	-	Maelstrom	Weapon
 			case 51528:
 			case 51529:

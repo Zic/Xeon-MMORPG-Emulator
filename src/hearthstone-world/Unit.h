@@ -986,7 +986,7 @@ public:
 	HEARTHSTONE_INLINE void setEmoteState(uint8 emote) { m_emoteState = emote; };
 	HEARTHSTONE_INLINE uint32 GetOldEmote() { return m_oldEmote; }
 	void EventSummonPetExpire();
-	void EventAurastateExpire(uint32 aurastateflag){RemoveFlag(UNIT_FIELD_AURASTATE,aurastateflag);} //hmm this looks like so not necesary :S
+	void EventAurastateExpire(uint32 aurastateflag){RemoveFlag(UNIT_FIELD_AURASTATE,aurastateflag);}
 	void EventHealthChangeSinceLastUpdate();
 
 	void SetStandState (uint8 standstate);
