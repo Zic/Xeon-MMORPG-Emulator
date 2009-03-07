@@ -188,7 +188,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 		{
 		case EVENT_ENTERCOMBAT:
 			{
-				if( pUnit == NULL ) return;
+				if( pUnit == NULL ) 
+					return;
 
 				/* send the message */
 				if( m_Unit->GetTypeId() == TYPEID_UNIT )
@@ -226,18 +227,17 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 				m_AIState = STATE_ATTACKING;
 				firstLeaveCombat = true;
-				if(pUnit && pUnit->GetInstanceID() == m_Unit->GetInstanceID())
-				{
+
+				if(pUnit->GetInstanceID() == m_Unit->GetInstanceID())
 					m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, pUnit->GetGUID());
-				}
-				if(m_Unit->GetMapMgr()->GetMapInfo() && m_Unit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
+
+				//Mark raid as combat in progress if it concerns a boss 
+				if(pUnit->GetMapMgr() && pUnit->GetMapMgr()->GetMapInfo() && pUnit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
 				{
-					if(m_Unit->GetTypeId() == TYPEID_UNIT)
+					if(m_Unit->GetTypeId() == TYPEID_UNIT && m_Unit->m_loadedFromDB )
 					{
-						if(TO_CREATURE(m_Unit)->GetCreatureName() && TO_CREATURE(m_Unit)->GetCreatureName()->Rank == 3)
-						{
-							 m_Unit->GetMapMgr()->AddCombatInProgress(m_Unit->GetGUID());
-						}
+						if(TO_CREATURE(m_Unit)->GetCreatureName() && TO_CREATURE(m_Unit)->GetCreatureName()->Rank == ELITE_WORLDBOSS)
+							 pUnit->GetMapMgr()->AddCombatInProgress(m_Unit->GetGUID());
 					}
 				}
 			}break;
