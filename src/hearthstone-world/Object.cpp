@@ -2832,7 +2832,7 @@ bool Object::PhasedCanInteract(ObjectPointer pObj)
 		pObjII = TO_PET(pObj)->GetPetOwner();
 
 	// Hack for Acherus: Horde/Alliance can't see each other!
-	if( pObjI && pObjII && GetMapId() == 609 && ( TO_PLAYER(pObj)->GetTeam() != plr_shared_from_this()->GetTeam() ) )
+	if( pObjI && pObjII && GetMapId() == 609 && pObjI->GetTeam() != pObjII->GetTeam() )
 	{
 		return false;
 	}
