@@ -3783,6 +3783,8 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		m_chargeSpells.push_back(aur);
 	}
 
+	aur->m_added = true;
+
 	// Reaction from enemy AI
 	if(!aur->IsPositive() /*&& aur->IsCombatStateAffecting() && */)
 	{

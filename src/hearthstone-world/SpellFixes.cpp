@@ -3854,6 +3854,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
 				}
+			case 1843:	// Disarm
+				{
+					sp->Effect[0] = 0;	// to prevent abuse at Arathi
+				}
 		
 			case 31801: // Seal of Vengeance
 				{
@@ -5516,9 +5520,11 @@ void ApplyNormalFixes()
 
 		if( sp->NameHash == SPELL_HASH_FROSTBITE )
 		{
-			sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ROOT;
 			sp->EffectTriggerSpell[0] = 12494;
 			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->School = SCHOOL_FROST;
+			sp->c_is_flags |= SPELL_FLAG_CANNOT_PROC_ON_SELF;
 		}
 
 		//////////////////////////////////////////

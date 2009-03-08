@@ -63,7 +63,7 @@ Arena::Arena( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t, uint32 play
 	m_playersAlive = hashmap_new();
 	m_players2[0] = hashmap_new();
 	m_players2[1] = hashmap_new();
-	m_teams[0] = m_teams[1] = NULL;
+	m_teams[0] = m_teams[1] = -1;
 }
 
 void Arena::Init()
@@ -360,8 +360,9 @@ void Arena::OnStart()
 			/* update arena team stats */
 			if(rated_match && plr->m_playerInfo && plr->m_playerInfo->arenaTeam[m_arenateamtype] != NULL)
 			{
-				m_teams[i] = plr->m_playerInfo->arenaTeam[m_arenateamtype];
-				ArenaTeamMember * tp = m_teams[i]->GetMember(plr->m_playerInfo);
+				ArenaTeam * t = plr->m_playerInfo->arenaTeam[m_arenateamtype];
+				m_teams[i] = t->m_id;
+				ArenaTeamMember * tp = t->GetMember(plr->m_playerInfo);
 				if(tp != NULL)
 				{
 					tp->Played_ThisWeek++;
@@ -438,36 +439,37 @@ uint32 Arena::CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outc
 void Arena::Finish()
 {
 	m_ended = true;
-
-	/* update arena team stats */
+	ArenaTeam * teams[2] = {NULL, NULL};
 	if(rated_match)
+	{
+		teams[0] = objmgr.GetArenaTeamById(m_teams[0]);
+		teams[1] = objmgr.GetArenaTeamById(m_teams[1]);
+	}
+	/* update arena team stats */
+	if(rated_match && teams[0] && teams[1])
 	{
 		m_deltaRating[0] = m_deltaRating[1] = 0;
 		for (uint32 i = 0; i < 2; ++i) {
 			uint32 j = i ? 0 : 1; // opposing side
-			bool outcome;
-
-			if (m_teams[i] == NULL || m_teams[j] == NULL) continue;
-
-			outcome = (i != m_losingteam);
+			bool outcome = (i != m_losingteam);
 			if (outcome) {
-				m_teams[i]->m_stat_gameswonseason++;
-				m_teams[i]->m_stat_gameswonweek++;
+				teams[i]->m_stat_gameswonseason++;
+				teams[i]->m_stat_gameswonweek++;
 			}
 
-			m_deltaRating[i] = CalcDeltaRating(m_teams[i]->m_stat_rating, m_teams[j]->m_stat_rating, outcome);
-			m_teams[i]->m_stat_rating += m_deltaRating[i];
-			if (m_teams[i]->m_stat_rating < 0) m_teams[i]->m_stat_rating = 0;
+			m_deltaRating[i] = CalcDeltaRating(teams[i]->m_stat_rating, teams[j]->m_stat_rating, outcome);
+			teams[i]->m_stat_rating += m_deltaRating[i];
+			if (teams[i]->m_stat_rating < 0) teams[i]->m_stat_rating = 0;
 
 			for (int x=0; x<hashmap_length(m_players2[i]); x++) {
 				uint32 key;
 				if (MAP_OK == hashmap_get_index(m_players2[i], x, (int*)&key, (any_t*) NULL)) {
 					PlayerInfo * info = objmgr.GetPlayerInfo(key);
 					if (info) {
-						ArenaTeamMember * tp = m_teams[i]->GetMember(info);
+						ArenaTeamMember * tp = teams[i]->GetMember(info);
 
 						if(tp != NULL) {
-							tp->PersonalRating += CalcDeltaRating(tp->PersonalRating, m_teams[j]->m_stat_rating, outcome);
+							tp->PersonalRating += CalcDeltaRating(tp->PersonalRating, teams[j]->m_stat_rating, outcome);
 							if (tp->PersonalRating < 0) tp->PersonalRating = 0;
 
 							if(outcome) {
@@ -479,7 +481,7 @@ void Arena::Finish()
 				}
 			}
 
-			m_teams[i]->SaveToDB();
+			teams[i]->SaveToDB();
 		}
 	}
 

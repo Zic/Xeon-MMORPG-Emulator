@@ -27,7 +27,7 @@ class Arena : public CBattleground
 
 	uint32 m_pcWorldStates[2];
 	GameObjectPointer m_buffs[2];
-	ArenaTeam * m_teams[2];
+	int32 m_teams[2]; // Ids of teams fighting in rated match
 
 	uint32 m_playersCount[2];
 	map_t m_players2[2];

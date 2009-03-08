@@ -773,6 +773,7 @@ protected:
 	void SendChannelUpdate(uint32 time, ObjectPointer m_caster);
 public:
 	bool m_deleted;
+	bool m_added;
 	bool m_tmpAuradeleted;
 #ifdef SHAREDPTR_DEBUGMODE
 	bool deleting;

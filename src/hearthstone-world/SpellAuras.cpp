@@ -642,6 +642,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 	stackSize = 1;
 	procCharges = GetSpellProto()->procCharges;
 	m_deleted = false;
+	m_added = false; // so that we don't try to Remove() it until it was actually added by AddAura
 	m_tmpAuradeleted = false;
 #ifdef SHAREDPTR_DEBUGMODE
 	deleting = true;
@@ -768,10 +769,14 @@ void Aura::Remove()
 		m_tmpAuradeleted = true;
 	}
 	stackSize = 0;
+
+	if(!m_added)
+		return;
+
 	if( !IsPassive() || m_spellProto->AttributesEx & 1024 )
 		BuildAuraUpdate();
 
-	if( m_target->m_auras[m_auraSlot] == pThis )
+	if( m_auraSlot < MAX_AURAS+MAX_PASSIVE_AURAS && m_target->m_auras[m_auraSlot] == pThis )
 		m_target->m_auras[m_auraSlot] = NULLAURA;
 
 	ApplyModifiers( false );
@@ -2451,6 +2456,8 @@ void Aura::SpellAuraDummy(bool apply)
 	case 24125:
 	case 21171:
 		{
+				if(!p_target || !p_target->IsInWorld())
+					return;
 				CreaturePointer farsight = p_target->GetMapMgr()->GetCreature(p_target->GetUInt32Value(PLAYER_FARSIGHT));
 				p_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
 				p_target->GetMapMgr()->ChangeFarsightLocation(p_target, 0, 0, false);
@@ -2487,7 +2494,7 @@ void Aura::SpellAuraDummy(bool apply)
 		{
 			UnitPointer caster = GetUnitCaster();
 			if(caster && caster->IsPlayer())
-				TO_PLAYER(caster)->SetTriggerStunOrImmobilize(12494,mod->m_amount);
+				TO_PLAYER(caster)->SetTriggerChill(12494,mod->m_amount);
 		}break;
 	//mage Magic Absorption
 	case 29441:
@@ -4018,7 +4025,7 @@ void Aura::SpellAuraModRoot(bool apply)
 		if(m_target->GetTypeId() == TYPEID_UNIT)
 			m_target->GetAIInterface()->AttackReaction(GetUnitCaster(), 1, 0);
 
-		if (m_spellProto->NameHash == SPELL_HASH_FROST_NOVA)
+		if (m_spellProto->NameHash == SPELL_HASH_FROST_NOVA || m_spellProto->NameHash == SPELL_HASH_FROSTBITE)
 			m_target->RemoveFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_FROZEN);
 	}
 }

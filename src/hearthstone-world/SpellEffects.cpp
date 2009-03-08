@@ -573,6 +573,11 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 				if( u_caster )
 					dmg = float2int32( u_caster->GetAP() * 0.12f );
 			}break;
+		case SPELL_HASH_HEROIC_THROW:
+			{
+				if( u_caster )
+					dmg += float2int32( u_caster->GetAP() * 0.50f );
+			}break;
 		}
 	}
 
