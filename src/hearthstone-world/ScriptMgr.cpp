@@ -808,10 +808,10 @@ bool HookInterface::OnRepop(PlayerPointer pPlayer)
 	OUTER_LOOP_END_COND
 }
 
-void HookInterface::OnEmote(PlayerPointer pPlayer, uint32 Emote)
+void HookInterface::OnEmote(PlayerPointer pPlayer, uint32 Emote, UnitPointer pUnit)
 {
 	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_EMOTE, tOnEmote)
-		(call)(pPlayer, Emote);
+		(call)(pPlayer, Emote, pUnit);
 	OUTER_LOOP_END
 }
 
@@ -843,10 +843,10 @@ void HookInterface::OnLogout(PlayerPointer pPlayer)
 	OUTER_LOOP_END
 }
 
-void HookInterface::OnQuestAccept(PlayerPointer pPlayer, Quest * pQuest)
+void HookInterface::OnQuestAccept(PlayerPointer pPlayer, Quest * pQuest, ObjectPointer pObject)
 {
 	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_QUEST_ACCEPT, tOnQuestAccept)
-		(call)(pPlayer, pQuest);
+		(call)(pPlayer, pQuest, pObject);
 	OUTER_LOOP_END
 }
 
@@ -878,10 +878,10 @@ void HookInterface::OnQuestCancelled(PlayerPointer pPlayer, Quest * pQuest)
 	OUTER_LOOP_END
 }
 
-void HookInterface::OnQuestFinished(PlayerPointer pPlayer, Quest * pQuest)
+void HookInterface::OnQuestFinished(PlayerPointer pPlayer, Quest * pQuest, ObjectPointer pObject)
 {
 	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_QUEST_FINISHED, tOnQuestFinished)
-		(call)(pPlayer, pQuest);
+		(call)(pPlayer, pQuest, pObject);
 	OUTER_LOOP_END
 }
 
