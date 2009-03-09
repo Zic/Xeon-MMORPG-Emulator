@@ -3173,7 +3173,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procChance = 20;
 						sp->proc_interval	=	3000;
 						sp->maxstack = 1;
-						sp->always_apply = true; //	so that	we can apply 2 wf	auras	while	dual-wielding
+						// Current proc system doesn't support common proc_interval for 2
+						// procs making dual wielding WF overpowered. So it is disabled for now
+						//sp->always_apply = true; //	so that	we can apply 2 wf	auras	while	dual-wielding
 				}break;
 		
 			//for	test only
@@ -4940,12 +4942,12 @@ void ApplyNormalFixes()
 			}
 		}
 		//some procs trigger at intervals
-		else if( strstr( sp->Name, "Water Shield"))
+		else if(sp->NameHash == SPELL_HASH_WATER_SHIELD)
 		{
 			sp->proc_interval = 3000; //few seconds
 			sp->procFlags |= PROC_TARGET_SELF;
 		}
-		else if( strstr( sp->Name, "Earth Shield"))
+		else if(sp->NameHash == SPELL_HASH_EARTH_SHIELD)
 			sp->proc_interval = 3000; //few seconds
 		else if( strstr( sp->Name, "Shadowguard"))
 			sp->proc_interval = 3000; //few seconds
@@ -5522,7 +5524,6 @@ void ApplyNormalFixes()
 		{
 			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ROOT;
 			sp->EffectTriggerSpell[0] = 12494;
-			sp->procFlags = PROC_ON_CAST_SPELL;
 			sp->School = SCHOOL_FROST;
 			sp->c_is_flags |= SPELL_FLAG_CANNOT_PROC_ON_SELF;
 		}

@@ -4509,7 +4509,7 @@ void Spell::Heal(int32 amount)
 	}
 	if( p_caster != NULL )  
 	{
-		p_caster->m_bgScore.HealingDone += amount;
+		p_caster->m_bgScore.HealingDone += amount - overheal;
 		if( p_caster->m_bg != NULL )
 			p_caster->m_bg->UpdatePvPData();
 	}
