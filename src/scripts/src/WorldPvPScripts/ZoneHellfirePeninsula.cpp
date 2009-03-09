@@ -448,7 +448,22 @@ void SpawnObjects(shared_ptr<MapMgr> pmgr)
 		p = &godata[i];
 		p2 = &godata_banner[i];
 
+		goi = GameObjectNameStorage.LookupEntry( p->entry );
+		if( goi == NULL )
+		{
+			Log.Warning("Scripting", "ZoneHellfirepeninsula is being created and you are missing gameobjects. skipping go %u",p->entry);
+			continue;
+		}
+		goi2 = GameObjectNameStorage.LookupEntry( p->entry );
+		if( goi2 == NULL )
+		{
+			Log.Warning("Scripting", "ZoneHellfirepeninsula is being created and you are missing gameobjects. skipping go %u",p2->entry);
+			continue;
+		}
+
 		GameObjectPointer pGo = NULLGOB;
+		GameObjectPointer pGo2 = NULLGOB;
+
 		pGo = pmgr->GetInterface()->SpawnGameObject(p->entry, p->posx, p->posy, p->posz, p->facing, false, 0, 0);
 		if( !pGo )
 		{
@@ -457,7 +472,6 @@ void SpawnObjects(shared_ptr<MapMgr> pmgr)
 			continue;
 		}
 
-		GameObjectPointer pGo2 = NULLGOB;
 		pGo2 = pmgr->GetInterface()->SpawnGameObject(p2->entry, p2->posx, p2->posy, p2->posz, p2->facing, false, 0, 0);
 		if( !pGo2 )
 		{
