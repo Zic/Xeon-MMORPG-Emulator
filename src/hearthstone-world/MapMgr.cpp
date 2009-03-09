@@ -2080,6 +2080,14 @@ CreaturePointer MapMgr::CreateCreature(uint32 entry)
 
 GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 {
+	//Validate the entry
+	goi = GameObjectNameStorage.LookupEntry( entry );
+	if( goi == NULL )
+	{
+		Log.Warning("MapMgr", "Skipping CreateGameObject for entry %u due to missing data.", entry);
+		return NULLGOB;
+	}
+
 	uint64 new_guid = ( (uint64)HIGHGUID_TYPE_GAMEOBJECT << 32 ) | ( (uint64)entry << 24 );
 	m_GOHighGuid &= 0x00FFFFFF;
 	new_guid |= (uint64)(++m_GOHighGuid);
