@@ -687,8 +687,8 @@ void SetupPvPZangarmarsh(ScriptMgr *mgr)
 	ZMCityOwners = atoi(City.c_str());
 	mgr->register_hook(SERVER_HOOK_EVENT_ON_KILL_PLAYER, (void*)Tokens);
 	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, ZMZoneHook);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTIENT_CREATE, ZMSpawnObjects);
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTIENT_CREATE, SetGrave);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, ZMSpawnObjects);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, SetGrave);
 }
 
 

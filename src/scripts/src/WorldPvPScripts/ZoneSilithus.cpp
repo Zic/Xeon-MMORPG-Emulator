@@ -151,7 +151,7 @@ void SetupPvPSilithus(ScriptMgr *mgr)
 	mgr->register_gameobject_script(SILITHYST_GEYSER, &SilithystPickup::Create);
 	mgr->register_gameobject_script(SILITHYST_MOUND, &SilithystPickup::Create);
 	
-	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTIENT_CREATE, InitWorldStates);
+	mgr->register_hook(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, InitWorldStates);
 	mgr->register_hook(SERVER_HOOK_EVENT_ON_ZONE, SilithusZoneHook);
 	mgr->register_hook(SERVER_HOOK_EVENT_ON_AREATRIGGER, AreatriggerHook);
 	mgr->register_hook(SERVER_HOOK_EVENT_ON_AURA_REMOVE, DropFlag);

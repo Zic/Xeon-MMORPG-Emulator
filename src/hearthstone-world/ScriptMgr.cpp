@@ -901,7 +901,7 @@ void HookInterface::OnArenaFinish(PlayerPointer pPlayer, uint32 type, ArenaTeam*
 
 void HookInterface::OnContinentCreate(MapMgrPointer pMgr)
 {
-	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_CONTIENT_CREATE, tOnContinentCreate)
+	OUTER_LOOP_BEGIN(SERVER_HOOK_EVENT_ON_CONTINENT_CREATE, tOnContinentCreate)
 		(call)(pMgr);
 	OUTER_LOOP_END
 }
