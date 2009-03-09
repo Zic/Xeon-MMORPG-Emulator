@@ -2081,7 +2081,7 @@ CreaturePointer MapMgr::CreateCreature(uint32 entry)
 GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 {
 	//Validate the entry
-	goi = GameObjectNameStorage.LookupEntry( entry );
+	GameObjectInfo *goi = GameObjectNameStorage.LookupEntry( entry );
 	if( goi == NULL )
 	{
 		Log.Warning("MapMgr", "Skipping CreateGameObject for entry %u due to missing data.", entry);
