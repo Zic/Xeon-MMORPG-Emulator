@@ -258,6 +258,8 @@ void MapCell::LoadObjects(CellSpawns * sp)
 		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
 		{
 			go = _mapmgr->CreateGameObject((*i)->entry);
+			if(!go)
+				continue;
 			if(go->Load(*i))
 			{
 				//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
