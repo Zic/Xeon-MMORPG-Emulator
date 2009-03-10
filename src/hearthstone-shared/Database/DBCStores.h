@@ -727,8 +727,8 @@ struct SpellEntry
 	//char * BuffDescription[15];			//191-205 not used
 	//uint32 buffdescflags;                 //206 not used
 	uint32 ManaCostPercentage;              //207
-	uint32 StartRecoveryTime;               //208
-	uint32 StartRecoveryCategory;           //209
+	uint32 StartRecoveryCategory;           //208
+	uint32 StartRecoveryTime;               //209
 	uint32 MaxTargetLevel;                  //210
 	uint32 SpellFamilyName;                 //211
 	uint32 SpellGroupType[3];				//212-214

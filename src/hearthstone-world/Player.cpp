@@ -3157,6 +3157,9 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	case SHAMAN:
 		armor_proficiency|=(1<<9);//TOTEM
 		break;
+	case DEATHKNIGHT: 
+		armor_proficiency|=(1<<10);//SIGILS
+		break;
 	case WARLOCK:
 	case HUNTER:
 		_LoadPet(results[5].result);
@@ -10494,16 +10497,22 @@ void Player::Cooldown_AddStart(SpellEntry * pSpell)
 	else
 		atime = float2int32( float(pSpell->StartRecoveryTime) * m_floatValues[UNIT_MOD_CAST_SPEED] );
 
+	if( pSpell->SpellGroupType )
+	{
+		SM_FIValue(SM[SMT_GLOBAL_COOLDOWN][0], &atime, pSpell->SpellGroupType);
+		SM_PIValue(SM[SMT_GLOBAL_COOLDOWN][1], &atime, pSpell->SpellGroupType);
+	}
+
 	if( atime <= 0 )
 		return;
 
-	if( pSpell->StartRecoveryCategory )		// if we have a different cool category to the actual spell category - only used by few spells
+	if( pSpell->StartRecoveryCategory && pSpell->StartRecoveryCategory != 133 )		// if we have a different cool category to the actual spell category - only used by few spells
 		_Cooldown_Add( COOLDOWN_TYPE_CATEGORY, pSpell->StartRecoveryCategory, mstime + atime, pSpell->Id, 0 );
 	/*else if( pSpell->Category )				// cooldowns are grouped
 		_Cooldown_Add( COOLDOWN_TYPE_CATEGORY, pSpell->Category, mstime + pSpell->StartRecoveryTime, pSpell->Id, 0 );*/
 	else									// no category, so it's a gcd
 	{
-		OUT_DEBUG("Global cooldown adding: %u ms", atime );
+		//OUT_DEBUG("Global cooldown adding: %u ms", atime );
 		m_globalCooldown = mstime + atime;
 	}
 }

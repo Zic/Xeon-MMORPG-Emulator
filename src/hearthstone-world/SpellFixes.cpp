@@ -627,7 +627,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			
 			case 51479:
 			case 51478:
-			case 51474:
+			case 51474: // Astral Shift
 				{
 					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 					sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM;
@@ -715,36 +715,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 60572:
 			case 37575:
 				{
-					sp->procFlags	=	PROC_ON_CAST_SPELL;
-					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 					sp->EffectSpellClassMask[0][0] = 0x00100000	|	0x10000000 | 0x80000000; //Earth + Flame + Frost Shocks
 					sp->EffectSpellClassMask[0][1] = 0x08000000;	// Wind	Shock
 				}break;
 			case 60567:
 				{
 					sp->EffectImplicitTargetA[1] = EFF_TARGET_SELF;
-				}break;
-			
-			// Totem of	Indomitability,	Totem	of Dueling (proc on	Stormstrike)
-			case 43859:
-			case 46096:
-			case 43857:
-			case 43858:
-			case 60765:
-				{
-					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-					sp->procFlags	=	PROC_ON_CAST_SPELL;
-					sp->EffectSpellClassMask[0][1] = 0x00000010;	// Stormstrike
-				}break;
-			
-			// Totem of	Indomitability (proc on	Lava Lash)
-			case 60543:
-			case 60546:
-			case 60548:
-				{
-					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-					sp->procFlags	=	PROC_ON_CAST_SPELL;
-					sp->EffectSpellClassMask[0][2] = 0x00000004;	// Lava	Lash
 				}break;
 			
 			// Totem of	Third	Wind
@@ -1118,16 +1094,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	PROC_ON_CRIT_HIT_VICTIM;
 				}break;
-
-			//shaman - Healing Way
-			case  29202:
-			case  29205:
-			case  29206:	
-				{
-						sp->procFlags	=	PROC_ON_CAST_SPELL;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-				}break;
-
 		
 			//shaman - Elemental Devastation
 			case  29179:
@@ -2667,19 +2633,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  20501:
 				{
 						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
-				}break;
-
-		
-			//warrior	-	Blood	Frenzy
-			case  29836:
-				{
-						sp->procFlags	=	PROC_ON_CAST_SPELL;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-				}break;
-			case  29859:
-				{
-						sp->procFlags	=	PROC_ON_CAST_SPELL;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 				}break;
 		
 			// warrior - Spell Reflection
@@ -5266,6 +5219,13 @@ void ApplyNormalFixes()
 					if( strstr( desc, "ranged"))
 						sp->AuraInterruptFlags |= AURA_INTERRUPT_ON_START_ATTACK;*/
 //				}
+
+				// Aura 109 fix
+				if(sp->EffectApplyAuraName[y] == SPELL_AURA_ADD_TARGET_TRIGGER)
+				{
+					sp->EffectApplyAuraName[y] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					pr = PROC_ON_CAST_SPELL;
+				}
 			}//end "if aura"
 		}//end "for each effect"
 		sp->procFlags = pr;

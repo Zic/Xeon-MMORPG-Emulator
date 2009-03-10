@@ -3086,7 +3086,7 @@ uint8 Spell::CanCast(bool tolerate)
 					return SPELL_FAILED_NO_CHARGES_REMAIN;
 
 				// for items that combine to create a new item, check if we have the required quantity of the item
-				if(i_caster->GetProto()->ItemId == m_spellInfo->Reagent[0])
+				if(i_caster->GetProto()->ItemId == m_spellInfo->Reagent[0] && (i_caster->GetProto()->Flags != 268435520))
 					if(p_caster->GetItemInterface()->GetItemCount(m_spellInfo->Reagent[0]) < 1 + m_spellInfo->ReagentCount[0])
 						return SPELL_FAILED_ITEM_GONE;
 			}
@@ -3115,7 +3115,7 @@ uint8 Spell::CanCast(bool tolerate)
 		}
 
 		// check if we have the required reagents
-		if( CheckReagents )
+		if( CheckReagents && (!i_caster || (i_caster->GetProto() && i_caster->GetProto()->Flags != 268435520)) )
 			for(i=0; i<8 ;i++)
 			{
 				if( m_spellInfo->Reagent[i] == 0 || m_spellInfo->ReagentCount[i] == 0)
