@@ -4195,7 +4195,10 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 			plus_damage += float2int32(TO_PLAYER(caster)->SpellDmgDoneByAttribute[a][school] * float(caster->GetUInt32Value(UNIT_FIELD_STAT0 + a)));
 	}
 //------------------------------by school---------------------------------------------------
-	plus_damage += caster->GetDamageDoneMod(school);
+	if(caster->IsPlayer() && TO_PLAYER(caster)->getClass() == DEATHKNIGHT)	// DK abilities should scale with AP
+		plus_damage += caster->GetAP();
+	else		
+		plus_damage += caster->GetDamageDoneMod(school);
 	plus_damage += pVictim->DamageTakenMod[school];
 //------------------------------by victim type----------------------------------------------
 	if(TO_CREATURE(pVictim)->GetCreatureName() && caster->IsPlayer()&& !pVictim->IsPlayer())

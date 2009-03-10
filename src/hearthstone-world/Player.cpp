@@ -8702,6 +8702,7 @@ void Player::ModifyBonuses(uint32 type,int32 val)
 		case ATTACK_POWER:
 			{
 				ModUnsigned32Value( UNIT_FIELD_ATTACK_POWER_MODS, val );
+				ModUnsigned32Value( UNIT_FIELD_RANGED_ATTACK_POWER_MODS, val );
 			}break;
 		case RANGED_ATTACK_POWER:
 			{

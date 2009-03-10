@@ -3800,6 +3800,8 @@ uint8 Spell::CanCast(bool tolerate)
 					if( u_caster->m_special_state & (UNIT_STATE_FEAR | UNIT_STATE_CHARM | UNIT_STATE_SLEEP))
 						break;
 				}break;
+				case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
+					break;
 
 				default:
 					return SPELL_FAILED_PACIFIED;
@@ -4407,7 +4409,10 @@ void Spell::Heal(int32 amount)
 	if( u_caster != NULL )
 	{
 		//Basic bonus
-		bonus += (u_caster->HealDoneMod[m_spellInfo->School]);
+		if(p_caster && p_caster->getClass() == DEATHKNIGHT)	// DK abilities should scale with AP
+			bonus += u_caster->GetAP();
+		else
+			bonus += u_caster->HealDoneMod[m_spellInfo->School];
 		bonus += unitTarget->HealTakenMod[m_spellInfo->School];
 
 		//Bonus from Intellect & Spirit
@@ -4433,7 +4438,6 @@ void Spell::Heal(int32 amount)
 		}
 
 		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
-		
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
 		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);

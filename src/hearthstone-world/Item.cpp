@@ -778,7 +778,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 						
 						if( Entry->spell[c] != 0 )
 						{
-							sp = dbcSpell.LookupEntry( Entry->spell[c] );
+							sp = dbcSpell.LookupEntryForced( Entry->spell[c] );
 							if( sp == NULL )
 								continue;
 

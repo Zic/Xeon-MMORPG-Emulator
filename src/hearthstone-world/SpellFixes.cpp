@@ -3986,6 +3986,13 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	55000;
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 				}break;
+			// Sonic Booster
+			case 54707:
+				{
+						sp->ProcsPerMinute = 1.0f;
+						sp->proc_interval	=	60000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;	
 		
 			// shadow	of death
 			case 54223:
@@ -4061,6 +4068,443 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
 				}break;
+
+			// FIXES FOR WARLOCK GRIMOIRES BEGIN
+			case 20270:// Imp spells
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7799;
+				}break;
+			case 20312:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7800;
+				}break;
+			case 20313:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7801;
+				}break;
+			case 20314:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7802;
+				}break;
+			case 20315:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11762;
+				}break;
+			case 20316:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11763;
+				}break;
+			case 20322:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 2947;
+				}break;
+			case 20323:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 8316;
+				}break;
+			case 20324:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 8317;
+				}break;
+			case 20326:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11770;
+				}break;
+			case 20327:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11771;
+				}break;
+			case 20329:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 4511;
+				}break;
+			case 27487:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27267;
+				}break;
+			case 27489:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27269;
+				}break;
+			case 47965:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47964;
+				}break;
+			case 47998:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47983;
+				}break;
+			// Voidwalker spells
+			case 20317:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7809;
+				}break;
+			case 20377:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7810;
+				}break;
+			case 20378:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7811;
+				}break;
+			case 20379:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11774;
+				}break;
+			case 20380:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11775;
+				}break;
+			case 20381:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7812;
+				}break;
+			case 20382:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19438;
+				}break;
+			case 20383:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19440;
+				}break;
+			case 20384:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19441;
+				}break;
+			case 20385:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19442;
+				}break;
+			case 20386:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19443;
+				}break;
+			case 20387:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17767;
+				}break;
+			case 20388:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17850;
+				}break;
+			case 20389:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17851;
+				}break;
+			case 20390:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17852;
+				}break;
+			case 20391:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17853;
+				}break;
+			case 20392:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17854;
+				}break;
+			case 20393:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17735;
+				}break;
+			case 20394:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17750;
+				}break;
+			case 20395:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17751;
+				}break;
+			case 20396:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 17752;
+				}break;
+			case 27490:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27270;
+				}break;
+			case 27491:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27272;
+				}break;
+			case 27492:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27273;
+				}break;
+			case 27500:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27271;
+				}break;
+			case 33703:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 33701;
+				}break;
+			case 48000:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47984;
+				}break;
+			case 48001:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47985;
+				}break;
+			case 48002:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47986;
+				}break;
+			case 48003:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47987;
+				}break;
+			case 48004:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47988;
+				}break;
+			case 48005:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47989;
+				}break;
+			case 48006:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 47990;
+				}break;
+			// Succubus spells
+			case 20398:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7815;
+				}break;
+			case 20399:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7816;
+				}break;
+			case 20400:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11778;
+				}break;
+			case 20401:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11779;
+				}break;
+			case 20402:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11780;
+				}break;
+			case 20403:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 6360;
+				}break;
+			case 20404:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7813;
+				}break;
+			case 20405:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11784;
+				}break;
+			case 20406:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 11785;
+				}break;
+			case 20407:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 6358;
+				}break;
+			case 20408:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 7870;
+				}break;
+			case 27493:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27274;
+				}break;
+			case 27494:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27275;
+				}break;
+			// Felhunter spells
+			case 20426:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19731;
+				}break;
+			case 20427:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19734;
+				}break;
+			case 20428:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19736;
+				}break;
+			case 20429:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19478;
+				}break;
+			case 20430:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19655;
+				}break;
+			case 20431:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19656;
+				}break;
+			case 20432:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19660;
+				}break;
+			case 20433:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19244;
+				}break;
+			case 20434:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19647;
+				}break;
+			case 20435:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 19480;
+				}break;
+			case 27495:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27276;
+				}break;
+			case 27496:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27277;
+				}break;
+			case 27497:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 27280;
+				}break;
+			// Felguard spells
+			case 30154:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30151;
+				}break;
+			case 30199:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30194;
+				}break;
+			case 30200:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30198;
+				}break;
+			case 30214:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30213;
+				}break;
+			case 30222:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30219;
+				}break;
+			case 30224:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 30223;
+				}break;
+			case 32234:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 32233;
+				}break;
+			case 32852:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 32850;
+				}break;
+			case 33704:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 33698;
+				}break;
+			case 33705:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 33699;
+				}break;
+			case 33706:
+				{
+					sp->Effect[0] = SPELL_EFFECT_LEARN_PET_SPELL;
+					sp->EffectTriggerSpell[0] = 33700;
+				}break;
+			// FIXES FOR WARLOCK GRIMOIRES END
 			}
 		}
 	}
@@ -5303,6 +5747,9 @@ void ApplyNormalFixes()
 		///	SPELLS CAN CRIT ///
 		sp->spell_can_crit = true; // - except in special cases noted in this section
 
+		if(sp->SpellFamilyName == 15)	// Death Knight
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.0f; // Don't want to use SP coefficient for them
+
 		// Spells Coefficient Exceptions based on http://www.wowwiki.com/Spell_power
 		switch (sp->NameHash)
 		{
@@ -5345,6 +5792,48 @@ void ApplyNormalFixes()
 			break;
 		case SPELL_HASH_RAIN_OF_FIRE:
 			sp->fixed_dddhcoef = 0.083f;
+			break;
+
+		// Death Knight Attack Power coefficients
+		case SPELL_HASH_BLOOD_BOIL:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.04f;
+			break;
+		case SPELL_HASH_BLOOD_PLAGUE:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.055f;
+			break;
+		case SPELL_HASH_BLOODWORMS:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.006f;
+			break;
+		case SPELL_HASH_CORPSE_EXPLOSION:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.0475f;
+			break;
+		case SPELL_HASH_DEATH_AND_DECAY:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.475f;	// Per whole duration
+			break;
+		case SPELL_HASH_DEATH_COIL:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.15f;
+			break;
+		case SPELL_HASH_FROST_FEVER:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.055f;
+			break;
+		case SPELL_HASH_HOWLING_BLAST:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.1f;
+			break;
+		case SPELL_HASH_SUMMON_GARGOYLE:
+		case SPELL_HASH_GARGOYLE_STRIKE:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.4f;
+			break;
+		case SPELL_HASH_ICY_TOUCH:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.1f;
+			break;
+		case SPELL_HASH_PESTILENCE:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.04f;
+			break;
+		case SPELL_HASH_STRANGULATE:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.06f;
+			break;
+		case SPELL_HASH_UNHOLY_BLIGHT:
+			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.013f;
 			break;
 		}
 

@@ -344,15 +344,18 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 		if(qst->receive_items[i])
 		{
 			ItemPointer item = objmgr.CreateItem( qst->receive_items[i], GetPlayer());
-			if(!_player->GetItemInterface()->AddItemToFreeSlot(item))
+			if(item)
 			{
-				item->Destructor();
-				item = NULLITEM;
+				if(!_player->GetItemInterface()->AddItemToFreeSlot(item))
+				{
+					item->Destructor();
+					item = NULLITEM;
+				}
+				else
+					SendItemPushResult(item, false, true, false, true, 
+					_player->GetItemInterface()->LastSearchItemBagSlot(), _player->GetItemInterface()->LastSearchItemSlot(),
+					1);
 			}
-			else
-				SendItemPushResult(item, false, true, false, true, 
-				_player->GetItemInterface()->LastSearchItemBagSlot(), _player->GetItemInterface()->LastSearchItemSlot(),
-				1);
 		}
 	}
 
