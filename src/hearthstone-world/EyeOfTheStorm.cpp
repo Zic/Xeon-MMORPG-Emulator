@@ -117,6 +117,9 @@ static int extraHonorDiv = 12;
 #define EOTS_BANNER_ALLIANCE 184381
 #define EOTS_BANNER_HORDE 184380
 
+#define EOTS_STANDFLAG 184141
+#define EOTS_DROPFLAG 184141
+
 #define EOTS_MARK_ID 29024
 #define EOTS_CAPTURE_DISTANCE 900 /*30*/
 const uint32 EOTSTowerIds[EOTS_TOWER_COUNT] = { EOTS_GO_BE_TOWER, EOTS_GO_FELREAVER, EOTS_GO_MAGE_TOWER, EOTS_GO_DRAENEI_TOWER };
@@ -450,7 +453,6 @@ void EyeOfTheStorm::EventResetFlag()
 
 void EyeOfTheStorm::OnCreate()
 {
-	GameObjectInfo* goi;
 	uint32 i;
 
 	WorldStateManager& sm = m_mapMgr->GetStateManager();
@@ -532,28 +534,22 @@ void EyeOfTheStorm::OnCreate()
 	/* create gameobjects */
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
-		goi = GameObjectNameStorage.LookupEntry( EOTSTowerIds[i] );
-		if( goi == NULL )
+		m_CPStatusGO[i] = m_mapMgr->CreateGameObject(EOTSTowerIds[i]);
+		if(m_CPStatusGO[i]!=NULL || !m_CPStatusGO[i]->CreateFromProto( EOTSTowerIds[i], m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
 		{
-			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects. Terminating.");
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u.", EOTSTowerIds[i]);
 			abort();
 			return;
 		}
-
-		m_CPStatusGO[i] = m_mapMgr->CreateGameObject(goi->ID);
-		m_CPStatusGO[i]->CreateFromProto( goi->ID, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0);
 		m_CPStatusGO[i]->PushToWorld( m_mapMgr );
 
-		goi = GameObjectNameStorage.LookupEntry( EOTS_BANNER_NEUTRAL );
-		if( goi == NULL )
+		m_CPBanner[i] = m_mapMgr->CreateGameObject(EOTS_BANNER_NEUTRAL);
+		if( m_CPBanner[i]!= NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
 		{
-			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects. Terminating.");
+			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects %u",EOTS_BANNER_NEUTRAL);
 			abort();
 			return;
 		}
-
-		m_CPBanner[i] = m_mapMgr->CreateGameObject(goi->ID);
-		m_CPBanner[i]->CreateFromProto( goi->ID, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0);
 		m_CPBanner[i]->PushToWorld( m_mapMgr );
 	}
 
@@ -561,7 +557,7 @@ void EyeOfTheStorm::OnCreate()
 	for( i = 0; i < 2; ++i )
 	{
 		m_bubbles[i] = m_mapMgr->CreateGameObject((uint32)EOTSBubbleLocations[i][0]);
-		if( !m_bubbles[i]->CreateFromProto( (uint32)EOTSBubbleLocations[i][0], m_mapMgr->GetMapId(), EOTSBubbleLocations[i][1], EOTSBubbleLocations[i][2], EOTSBubbleLocations[i][3], EOTSBubbleLocations[i][4] ) )
+		if( m_bubbles[i] == NULL || !m_bubbles[i]->CreateFromProto( (uint32)EOTSBubbleLocations[i][0], m_mapMgr->GetMapId(), EOTSBubbleLocations[i][1], EOTSBubbleLocations[i][2], EOTSBubbleLocations[i][3], EOTSBubbleLocations[i][4] ) )
 		{
 			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects. Terminating.");
 			abort();
@@ -571,10 +567,6 @@ void EyeOfTheStorm::OnCreate()
 		m_bubbles[i]->SetFloatValue(OBJECT_FIELD_SCALE_X,0.1f);
 		m_bubbles[i]->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 1);
 		m_bubbles[i]->SetUInt32Value(GAMEOBJECT_FLAGS,32);
-
-		// FUCKING SHIT DB
-		/*if( m_bubbles[i]->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) != 29 )
-			m_bubbles[i]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_TYPE_ID, 29);*/
 		m_bubbles[i]->SetUInt32Value(GAMEOBJECT_FACTION, 1375);
 		m_bubbles[i]->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 
@@ -588,13 +580,23 @@ void EyeOfTheStorm::OnCreate()
 	SpawnBuff(EOTS_TOWER_BE);
 
 	/* Flag */
-	m_standFlag = m_mapMgr->CreateGameObject(184141);
-	m_standFlag->CreateFromProto( 184141, m_mapMgr->GetMapId(), 2174.782227f, 1569.054688f, 1160.361938f, -1.448624f );
+	m_standFlag = m_mapMgr->CreateGameObject(EOTS_STANDFLAG);
+	if( m_standFlag == NULL ||!	m_standFlag->CreateFromProto( EOTS_STANDFLAG, m_mapMgr->GetMapId(), 2174.782227f, 1569.054688f, 1160.361938f, -1.448624f ))
+	{
+		Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u",EOTS_STANDFLAG);
+		abort();
+		return;
+	}
 	m_standFlag->SetFloatValue( OBJECT_FIELD_SCALE_X, 2.5f );
 	m_standFlag->PushToWorld( m_mapMgr );
 
-	m_dropFlag = m_mapMgr->CreateGameObject(184142);
-	m_dropFlag->CreateFromProto( 184142, m_mapMgr->GetMapId(), 2174.782227f, 1569.054688f, 1160.361938f, -1.448624f );
+	m_dropFlag = m_mapMgr->CreateGameObject(EOTS_DROPFLAG);
+	if( m_dropFlag == NULL || !m_dropFlag->CreateFromProto( EOTS_DROPFLAG, m_mapMgr->GetMapId(), 2174.782227f, 1569.054688f, 1160.361938f, -1.448624f ))
+	{
+		Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u",EOTS_DROPFLAG);
+		abort();
+		return;
+	}
 	m_dropFlag->SetFloatValue( OBJECT_FIELD_SCALE_X, 2.5f );
 }
 

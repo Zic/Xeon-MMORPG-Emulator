@@ -7672,7 +7672,8 @@ void Player::RequestDuel(PlayerPointer pTarget)
 
 	//Create flag/arbiter
 	GameObjectPointer pGameObj = GetMapMgr()->CreateGameObject(21680);
-	pGameObj->CreateFromProto(21680,GetMapId(), x, y, z, GetOrientation());
+	if( pGameObj == NULL || !pGameObj->CreateFromProto(21680,GetMapId(), x, y, z, GetOrientation()))
+		return;
 	pGameObj->SetInstanceID(GetInstanceID());
 
 	//Spawn the Flag

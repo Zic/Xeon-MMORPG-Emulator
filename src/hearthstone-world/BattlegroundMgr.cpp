@@ -1260,8 +1260,8 @@ void CBattlegroundManager::DeleteBattleground(BattlegroundPointer bg)
 GameObjectPointer CBattleground::SpawnGameObject(uint32 entry,float x, float y, float z, float o, uint32 flags, uint32 faction, float scale)
 {
 	GameObjectPointer go = m_mapMgr->CreateGameObject(entry);
-
-	go->CreateFromProto(entry, m_mapMgr->GetMapId(), x, y, z, o);
+	if(go == NULL || !go->CreateFromProto(entry, m_mapMgr->GetMapId(), x, y, z, o))
+		return NULLGOB;
 
 	go->SetUInt32Value(GAMEOBJECT_FACTION,faction);
 	go->SetFloatValue(OBJECT_FIELD_SCALE_X,scale);	

@@ -702,25 +702,17 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 	if (pSave)
 		Save = (atoi(pSave)>0?true:false);
 
-	/*if( Save && !m_session->CanUseCommand('z') )
-	{
-		SystemMessage(m_session, "You are not allowed to save spawns.");
-		return true;
-	}*/
-
-	GameObjectInfo* goi = GameObjectNameStorage.LookupEntry(EntryID);
-	if(!goi)
-	{
-		sstext << "GameObject Info '" << EntryID << "' Not Found" << '\0';
-		SystemMessage(m_session, sstext.str().c_str());
-		return true;
-	}
-
 	OUT_DEBUG("Spawning GameObject By Entry '%u'", EntryID);
 	sstext << "Spawning GameObject By Entry '" << EntryID << "'" << '\0';
 	SystemMessage(m_session, sstext.str().c_str());
 
 	GameObjectPointer go = m_session->GetPlayer()->GetMapMgr()->CreateGameObject(EntryID);
+	if(go == NULL)
+	{
+		sstext << "GameObject Info '" << EntryID << "' Not Found" << '\0';
+		SystemMessage(m_session, sstext.str().c_str());
+		return true;
+	}
 	
 	PlayerPointer chr = m_session->GetPlayer();
 	uint32 mapid = chr->GetMapId();

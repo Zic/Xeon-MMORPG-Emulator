@@ -1525,6 +1525,8 @@ bool MapMgr::Do()
 	for(GOSpawnList::iterator itr = _map->staticSpawns.GOSpawns.begin(); itr != _map->staticSpawns.GOSpawns.end(); ++itr)
 	{
 		GameObjectPointer obj = CreateGameObject((*itr)->entry);
+		if(obj == NULL)
+			continue;
 		obj->Load((*itr));
 		_mapWideStaticObjects.insert(obj);
 	}
@@ -2084,7 +2086,7 @@ GameObjectPointer MapMgr::CreateGameObject(uint32 entry)
 	GameObjectInfo *goi = GameObjectNameStorage.LookupEntry( entry );
 	if( goi == NULL )
 	{
-		Log.Warning("MapMgr", "Skipping CreateGameObject for entry %u due to missing data.", entry);
+		Log.Warning("MapMgr", "Skipping CreateGameObject for entry %u due to incomplete database.", entry);
 		return NULLGOB;
 	}
 

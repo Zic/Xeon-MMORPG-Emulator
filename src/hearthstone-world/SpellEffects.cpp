@@ -4059,8 +4059,9 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		spell->SendSpellGo ();*/
 
 		GameObjectPointer go = u_caster->GetMapMgr()->CreateGameObject(GO_FISHING_BOBBER);
+		if( go == NULL || !go->CreateFromProto( GO_FISHING_BOBBER, mapid, posx, posy, posz, orient ))
+			return;
 
-		go->CreateFromProto( GO_FISHING_BOBBER, mapid, posx, posy, posz, orient );
 		go->SetUInt32Value( GAMEOBJECT_FLAGS, 0 );
 		go->SetByte(GAMEOBJECT_BYTES_1, 0, 0 );
 		go->SetUInt64Value( OBJECT_FIELD_CREATED_BY, m_caster->GetGUID() );
@@ -4092,7 +4093,9 @@ void Spell::SpellEffectSummonObject(uint32 i)
 			return;
 		}
 		GameObjectPointer go=u_caster->GetMapMgr()->CreateGameObject(entry);
-		
+		if( go == NULL)
+			return;
+	
 		go->SetInstanceID(m_caster->GetInstanceID());
 		go->CreateFromProto(entry,mapid,posx,posy,pz,orient);
 		go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
@@ -4585,17 +4588,11 @@ void Spell::SpellEffectSummonObjectWild(uint32 i)
 {
 	if(!u_caster)
 		return;
-  
 
 	// spawn a new one
 	GameObjectPointer GoSummon = u_caster->GetMapMgr()->CreateGameObject(m_spellInfo->EffectMiscValue[i]);
-	if(!GoSummon->CreateFromProto(m_spellInfo->EffectMiscValue[i],
-		m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() ))
-	{
-		GoSummon->Destructor();
-		GoSummon = NULLGOB;
+	if( GoSummon == NULL || !GoSummon->CreateFromProto(m_spellInfo->EffectMiscValue[i],	m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() ))
 		return;
-	}
 	
 	GoSummon->SetInstanceID(m_caster->GetInstanceID());
 	GoSummon->SetUInt32Value(GAMEOBJECT_LEVEL, u_caster->getLevel());
@@ -5866,13 +5863,8 @@ void Spell::SpellEffectSummonObjectSlot(uint32 i)
    
 	// spawn a new one
 	GoSummon = u_caster->GetMapMgr()->CreateGameObject(m_spellInfo->EffectMiscValue[i]);
-   if(! GoSummon->CreateFromProto(m_spellInfo->EffectMiscValue[i],
-		m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() ))
-   {
-	   GoSummon->Destructor();
-	   GoSummon = NULLGOB;
+	if( GoSummon == NULL || !GoSummon->CreateFromProto(m_spellInfo->EffectMiscValue[i], m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() ))
 		return;
-   }
 	
 	GoSummon->SetUInt32Value(GAMEOBJECT_LEVEL, u_caster->getLevel());
 	GoSummon->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUID()); 
