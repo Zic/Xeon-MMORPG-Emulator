@@ -181,7 +181,15 @@ void AIInterface::Init(UnitPointer un, AIType at, MovementType mt, UnitPointer o
 void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 {
 	if( m_Unit == NULL ) return;
-	
+
+	CreaturePointer cr = NULLCREATURE;
+	if( m_Unit->GetTypeId() == TYPEID_UNIT )
+	{
+		cr = TO_CREATURE( m_Unit );
+		if(cr == NULL)
+			return;
+	}
+
 	if(m_AIState != STATE_EVADE)
 	{
 		switch(event)
@@ -192,17 +200,25 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					return;
 
 				/* send the message */
-				if( m_Unit->GetTypeId() == TYPEID_UNIT )
+				if( cr != NULL )
 				{
-					if( TO_CREATURE( m_Unit )->has_combat_text )
-						objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ENTER_COMBAT );
+					if( cr->has_combat_text )
+						objmgr.HandleMonsterSayEvent( cr, MONSTER_SAY_EVENT_ENTER_COMBAT );
 
 					CALL_SCRIPT_EVENT(m_Unit, OnCombatStart)(pUnit);
 
-					if( TO_CREATURE( m_Unit )->m_spawn && ( TO_CREATURE( m_Unit )->m_spawn->channel_target_go || TO_CREATURE( m_Unit )->m_spawn->channel_target_creature))
+					if( cr->m_spawn && ( cr->m_spawn->channel_target_go || cr->m_spawn->channel_target_creature))
 					{
 						m_Unit->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
 						m_Unit->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
+					}
+
+					if( UnitToFollow != NULL )
+					{
+						//we stopped following, use proto speed again
+						m_flySpeed = cr->proto->fly_speed;
+						m_runSpeed = cr->proto->run_speed;
+						m_walkSpeed = cr->proto->walk_speed;
 					}
 				}
 				
@@ -236,7 +252,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				{
 					if(m_Unit->GetTypeId() == TYPEID_UNIT && m_Unit->m_loadedFromDB )
 					{
-						if(TO_CREATURE(m_Unit)->GetCreatureName() && TO_CREATURE(m_Unit)->GetCreatureName()->Rank == ELITE_WORLDBOSS)
+						if(cr->GetCreatureName() && cr->GetCreatureName()->Rank == ELITE_WORLDBOSS)
 							 pUnit->GetMapMgr()->AddCombatInProgress(m_Unit->GetGUID());
 					}
 				}
@@ -251,23 +267,23 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				//cancel spells that we are casting. Should remove bug where creatures cast a spell after they died
 //				CancelSpellCast();
 				// restart emote
-				if(m_Unit->GetTypeId() == TYPEID_UNIT)
+				if(cr != NULL)
 				{
-					TO_CREATURE(m_Unit)->SetSheatheForAttackType(0); // sheathe yuor weapons!
+					cr->SetSheatheForAttackType(0); // sheathe yuor weapons!
 
-					if( TO_CREATURE( m_Unit )->has_combat_text )
-						objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ON_COMBAT_STOP );
+					if( cr->has_combat_text )
+						objmgr.HandleMonsterSayEvent( cr, MONSTER_SAY_EVENT_ON_COMBAT_STOP );
 
-					if(TO_CREATURE(m_Unit)->original_emotestate)
-						m_Unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, TO_CREATURE( m_Unit )->original_emotestate);
+					if(cr->original_emotestate)
+						m_Unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, cr->original_emotestate);
 					
-					if(TO_CREATURE(m_Unit)->m_spawn && (TO_CREATURE( m_Unit )->m_spawn->channel_target_go || TO_CREATURE( m_Unit )->m_spawn->channel_target_creature ) )
+					if(cr->m_spawn && (cr->m_spawn->channel_target_go || cr->m_spawn->channel_target_creature ) )
 					{
-						if(TO_CREATURE(m_Unit)->m_spawn->channel_target_go)
-							sEventMgr.AddEvent( TO_CREATURE( m_Unit ), &Creature::ChannelLinkUpGO, TO_CREATURE( m_Unit )->m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
+						if(cr->m_spawn->channel_target_go)
+							sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpGO, cr->m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
 
-						if(TO_CREATURE(m_Unit)->m_spawn->channel_target_creature)
-							sEventMgr.AddEvent( TO_CREATURE( m_Unit ), &Creature::ChannelLinkUpCreature, TO_CREATURE( m_Unit )->m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
+						if(cr->m_spawn->channel_target_creature)
+							sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpCreature, cr->m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
 					}
 				}
 
@@ -303,9 +319,17 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					CALL_SCRIPT_EVENT(m_Unit, OnCombatStop)(UnitToFollow);
 					m_AIState = STATE_EVADE;
 
-					UnitToFollow = NULLUNIT;
-					FollowDistance = 0.0f;
-					m_lastFollowX = m_lastFollowY = 0;
+					if( UnitToFollow != NULL && cr != NULL )
+					{
+						UnitToFollow = NULLUNIT;
+						FollowDistance = 0.0f;
+						m_lastFollowX = m_lastFollowY = 0;
+
+						//we stopped following leader, use proto speed again
+						m_flySpeed = cr->proto->fly_speed;
+						m_runSpeed = cr->proto->run_speed;
+						m_walkSpeed = cr->proto->walk_speed;
+					}
 
 					if(m_Unit->isAlive())
 					{
@@ -320,33 +344,28 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 						}
 
 						// clear tagger
-						TO_CREATURE(m_Unit)->ClearTag();
+						cr->ClearTag();
 					}
 				}
 
-				if(m_Unit->GetMapMgr() && m_Unit->GetMapMgr()->GetMapInfo() && m_Unit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
+				if( cr!= NULL )
 				{
-					if(m_Unit->GetTypeId() == TYPEID_UNIT)
+					if(m_Unit->GetMapMgr() && m_Unit->GetMapMgr()->GetMapInfo() && m_Unit->GetMapMgr()->GetMapInfo()->type == INSTANCE_RAID)
 					{
-						if(TO_CREATURE(m_Unit)->GetCreatureName() && TO_CREATURE(m_Unit)->GetCreatureName()->Rank == 3)
-						{
+						if(cr->GetCreatureName() && cr->GetCreatureName()->Rank == 3)
 							  m_Unit->GetMapMgr()->RemoveCombatInProgress(m_Unit->GetGUID());
-						}
 					}
 				}
 
 				// Remount if mounted
-				if(m_Unit->GetTypeId() == TYPEID_UNIT)
-				{
-					if( TO_CREATURE( m_Unit )->m_spawn )
-						m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, TO_CREATURE( m_Unit )->m_spawn->MountedDisplayID );
-				}
+				if( cr!= NULL && cr->m_spawn )
+						m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, cr->m_spawn->MountedDisplayID );
 			}break;
 		case EVENT_DAMAGETAKEN:
 			{
 				if( pUnit == NULL ) return;
 
-				if( TO_CREATURE( m_Unit )->has_combat_text )
+				if( cr!= NULL && cr->has_combat_text )
 					objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ON_DAMAGE_TAKEN );
 
 				CALL_SCRIPT_EVENT(m_Unit, OnDamageTaken)(pUnit, float(misc1));
@@ -385,11 +404,18 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				m_AIState = STATE_FEAR;
 				StopMovement(1);
 
-				UnitToFollow_backup = UnitToFollow;
-				UnitToFollow = NULLUNIT;
-				m_lastFollowX = m_lastFollowY = 0;
-				FollowDistance_backup = FollowDistance;
-				FollowDistance = 0.0f;
+				if(cr!= NULL && UnitToFollow != NULL)
+				{
+					UnitToFollow_backup = UnitToFollow;
+					UnitToFollow = NULLUNIT;
+					m_lastFollowX = m_lastFollowY = 0;
+					FollowDistance_backup = FollowDistance;
+					FollowDistance = 0.0f;
+					//we stopped following leader, use proto speed again
+					m_flySpeed = cr->proto->fly_speed;
+					m_runSpeed = cr->proto->run_speed;
+					m_walkSpeed = cr->proto->walk_speed;
+				}
 
 				m_aiTargets.clear(); // we'll get a new target after we are unfeared
 				m_fleeTimer = 0;
@@ -406,8 +432,19 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 		case EVENT_UNFEAR:
 			{
-				UnitToFollow = UnitToFollow_backup;
-				FollowDistance = FollowDistance_backup;
+				if(cr!= NULL && UnitToFollow_backup != NULL)
+				{
+					UnitToFollow = UnitToFollow_backup;
+					UnitToFollow_backup == NULLUNIT;
+					FollowDistance = FollowDistance_backup;
+					FollowDistance_backup = 0.0f;
+
+					// synchronise speed with leader.
+					m_flySpeed = UnitToFollow->m_flySpeed;
+					m_runSpeed = UnitToFollow->m_runSpeed;
+					m_walkSpeed = UnitToFollow->m_walkSpeed;
+				}
+
 				m_AIState = STATE_IDLE; // we need this to prevent permanent fear, wander, and other problems
 
 				SetUnitToFear(NULLUNIT);
@@ -420,15 +457,22 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 				m_WanderTimer = 0;
 
+				if(cr!= NULL && UnitToFollow != NULL)
+				{
+					UnitToFollow_backup = UnitToFollow;
+					UnitToFollow = NULLUNIT;
+					m_lastFollowX = m_lastFollowY = 0;
+					FollowDistance_backup = FollowDistance;
+					FollowDistance = 0.0f;
+					//we stopped following leader, use proto speed again
+					m_flySpeed = cr->proto->fly_speed;
+					m_runSpeed = cr->proto->run_speed;
+					m_walkSpeed = cr->proto->walk_speed;
+				}
+
 				//CALL_SCRIPT_EVENT(m_Unit, OnWander)(pUnit, 0); FIXME
 				m_AIState = STATE_WANDER;
 				StopMovement(1);
-
-				UnitToFollow_backup = UnitToFollow;
-				UnitToFollow = NULLUNIT;
-				m_lastFollowX = m_lastFollowY = 0;
-				FollowDistance_backup = FollowDistance;
-				FollowDistance = 0.0f;
 
 				m_aiTargets.clear(); // we'll get a new target after we are unwandered
 				m_fleeTimer = 0;
@@ -445,8 +489,19 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 		case EVENT_UNWANDER:
 			{
-				UnitToFollow = UnitToFollow_backup;
-				FollowDistance = FollowDistance_backup;
+				if(cr!= NULL && UnitToFollow_backup != NULL)
+				{
+					UnitToFollow = UnitToFollow_backup;
+					UnitToFollow_backup == NULLUNIT;
+					FollowDistance = FollowDistance_backup;
+					FollowDistance_backup = 0.0f;
+
+					// synchronise speed with leader.
+					m_flySpeed = UnitToFollow->m_flySpeed;
+					m_runSpeed = UnitToFollow->m_runSpeed;
+					m_walkSpeed = UnitToFollow->m_walkSpeed;
+				}
+
 				m_AIState = STATE_IDLE; // we need this to prevent permanent fear, wander, and other problems
 
 				StopMovement(1);
@@ -468,16 +523,29 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			if( pUnit->m_CurrentVehicle )
 				pUnit->m_CurrentVehicle->RemovePassenger(pUnit);
 
-			if( TO_CREATURE( m_Unit )->has_combat_text )
-				objmgr.HandleMonsterSayEvent( TO_CREATURE( m_Unit ), MONSTER_SAY_EVENT_ON_DIED );
+			if( cr != NULL )
+			{
+				if( cr->has_combat_text )
+					objmgr.HandleMonsterSayEvent( cr, MONSTER_SAY_EVENT_ON_DIED );
+
+				if(UnitToFollow_backup != NULL)
+				{
+					UnitToFollow = NULLUNIT;
+					m_lastFollowX = m_lastFollowY = 0;
+
+					// synchronise speed with leader.
+					m_flySpeed = UnitToFollow->m_flySpeed;
+					m_runSpeed = UnitToFollow->m_runSpeed;
+					m_walkSpeed = UnitToFollow->m_walkSpeed;
+				}
+			}
 
 			CALL_SCRIPT_EVENT(m_Unit, OnDied)(pUnit);
 			m_AIState = STATE_IDLE;
 
+
 			StopMovement(0);
 			m_aiTargets.clear();
-			UnitToFollow = NULLUNIT;
-			m_lastFollowX = m_lastFollowY = 0;
 			UnitToFear = NULLUNIT;
 			FollowDistance = 0.0f;
 			m_fleeTimer = 0;
@@ -493,18 +561,17 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			// There isn't any need to do any attacker checks here, as
 			// they should all be taken care of in DealDamage
 
-			if(m_Unit->GetMapMgr())
+			if(cr != NULL && !m_Unit->IsPet())
 			{
-				if(m_Unit->GetTypeId() == TYPEID_UNIT && !m_Unit->IsPet())
+				//only save creature which exist in db (don't want to save 0 values in db) 
+				if( m_Unit->m_loadedFromDB && cr->m_spawn != NULL )
 				{
-					if( m_Unit->GetMapMgr()->pInstance && m_Unit->GetMapMgr()->GetMapInfo()->type != INSTANCE_PVP )
+					MapMgrPointer GMap = m_Unit->GetMapMgr();
+					if(GMap != NULL)
+					if( GMap && GMap->pInstance && GMap->GetMapInfo()->type != INSTANCE_PVP )
 					{
-						//only save creature which exist in db (don't want to save 0 values in db) 
-						if( m_Unit->m_loadedFromDB && TO_CREATURE(m_Unit)->m_spawn != NULL )
-						{
-							m_Unit->GetMapMgr()->pInstance->m_killedNpcs.insert( TO_CREATURE(m_Unit)->GetSQL_id() );
-							m_Unit->GetMapMgr()->pInstance->SaveToDB();
-						}
+						GMap->pInstance->m_killedNpcs.insert( cr->GetSQL_id() );
+						GMap->pInstance->SaveToDB();
 					}
 				}
 			}
@@ -2480,7 +2547,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 		// do we have a formation?
 		if(m_formationLinkSqlId != 0)
 		{
-			if(!m_formationLinkTarget)
+			if( m_formationLinkTarget != NULL)
 			{
 				// haven't found our target yet
 				CreaturePointer c = TO_CREATURE(m_Unit);
@@ -2498,6 +2565,11 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 				UnitToFollow = m_formationLinkTarget;
 				FollowDistance = m_formationFollowDistance;
 				m_fallowAngle = m_formationFollowAngle;
+				//copy leaders speed to prevent stop/go hickups. 
+				UnitToFollow->m_flySpeed = m_flySpeed;
+				UnitToFollow->m_runSpeed = m_runSpeed;
+				UnitToFollow->m_walkSpeed = m_walkSpeed;
+
 			}
 		}
 		if(UnitToFollow == 0)
