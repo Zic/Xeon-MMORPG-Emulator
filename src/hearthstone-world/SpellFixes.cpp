@@ -3954,24 +3954,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectApplyAuraName[2] = SPELL_AURA_DUMMY;
 						sp->Flags4 |=	CAN_PERSIST_AND_CASTED_WHILE_DEAD;
 				}break;
-			case 31579:
-			case 31582:
-			case 31583://Arcane Empowerment	
-				{
-					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
-					/* -- commented until i will be able to finish it - that means never ;)
-					//this field is fucked, first mistake
-					sp->EffectSpellClassMask[0][0] = 0x20000000;
-					//there is no effect for first part of description, Arcane Missiles, second mistake
-					//we have to copy effect, nice
-					sp->Effect[1] = sp->Effect[0];
-					sp->EffectBasePoints[1] = 44;
-					sp->EffectImplicitTargetA[1] = sp->EffectImplicitTargetA[0];
-					sp->EffectApplyAuraName[1] = sp->EffectApplyAuraName[0];
-					sp->EffectMiscValue[1] = sp->EffectMiscValue[0];
-					//this is strange but EffectSpellClassMask for second effect is correct
-					//i think someone was drunk while making this spell ;)*/
-				}break;
 			case 54749://Burning Determination
 			case 54747:
 				{
@@ -4857,6 +4839,9 @@ void ApplyNormalFixes()
 
 		case SPELL_HASH_REPENTANCE:
 			sp->buffIndexType = SPELL_TYPE_INDEX_REPENTANCE;
+			break;
+		case SPELL_HASH_SLOW:
+			sp->buffIndexType = SPELL_TYPE_INDEX_SLOW;
 			break;
 		}
 
@@ -5753,47 +5738,58 @@ void ApplyNormalFixes()
 		case SPELL_HASH_RAIN_OF_FIRE:
 			sp->fixed_dddhcoef = 0.083f;
 			break;
+		case SPELL_HASH_ARCANE_MISSILES:
+			sp->fixed_dddhcoef = 0.2857f; // per second
+			break;
+		case SPELL_HASH_BLIZZARD:
+			sp->fixed_dddhcoef = 0.1437f; // per tick
+			break;
 
 		// Death Knight Attack Power coefficients
 		case SPELL_HASH_BLOOD_BOIL:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.04f;
+			sp->fixed_apcoef = 0.04f;
 			break;
 		case SPELL_HASH_BLOOD_PLAGUE:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.055f;
+			sp->fixed_apcoef = 0.055f;
 			break;
 		case SPELL_HASH_BLOODWORMS:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.006f;
+			sp->fixed_apcoef = 0.006f;
 			break;
 		case SPELL_HASH_CORPSE_EXPLOSION:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.0475f;
+			sp->fixed_apcoef = 0.0475f;
 			break;
 		case SPELL_HASH_DEATH_AND_DECAY:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.475f;	// Per whole duration
+			sp->fixed_apcoef = 0.475f;	// Per whole duration
 			break;
 		case SPELL_HASH_DEATH_COIL:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.15f;
+			sp->fixed_apcoef = 0.15f;
 			break;
 		case SPELL_HASH_FROST_FEVER:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.055f;
+			sp->fixed_apcoef = 0.055f;
 			break;
 		case SPELL_HASH_HOWLING_BLAST:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.1f;
+			sp->fixed_apcoef = 0.1f;
 			break;
 		case SPELL_HASH_SUMMON_GARGOYLE:
 		case SPELL_HASH_GARGOYLE_STRIKE:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.4f;
+			sp->fixed_apcoef = 0.4f;
 			break;
 		case SPELL_HASH_ICY_TOUCH:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.1f;
+			sp->fixed_apcoef = 0.1f;
 			break;
 		case SPELL_HASH_PESTILENCE:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.04f;
+			sp->fixed_apcoef = 0.04f;
 			break;
 		case SPELL_HASH_STRANGULATE:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.06f;
+			sp->fixed_apcoef = 0.06f;
 			break;
 		case SPELL_HASH_UNHOLY_BLIGHT:
-			sp->fixed_dddhcoef = sp->fixed_hotdotcoef = 0.013f;
+			sp->fixed_apcoef = 0.013f;
+			break;
+		// Paladin coefficients
+		case SPELL_HASH_AVENGER_S_SHIELD:
+			sp->fixed_apcoef = 0.07f;
+			sp->fixed_dddhcoef = 0.07f;
 			break;
 		}
 

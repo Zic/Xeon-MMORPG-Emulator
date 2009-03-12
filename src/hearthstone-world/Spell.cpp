@@ -1043,7 +1043,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 			p_caster->cannibalize = false;
 		}
 
-		if( GetGameObjectTarget() )
+		if( GetGameObjectTarget() || GetSpellProto()->Id == 21651)
 		{
 			if( p_caster->IsStealth() )
 			{
@@ -4409,10 +4409,7 @@ void Spell::Heal(int32 amount)
 	if( u_caster != NULL )
 	{
 		//Basic bonus
-		if(p_caster && p_caster->getClass() == DEATHKNIGHT)	// DK abilities should scale with AP
-			bonus += u_caster->GetAP();
-		else
-			bonus += u_caster->HealDoneMod[m_spellInfo->School];
+		bonus += u_caster->HealDoneMod[m_spellInfo->School];
 		bonus += unitTarget->HealTakenMod[m_spellInfo->School];
 
 		//Bonus from Intellect & Spirit
@@ -4439,6 +4436,8 @@ void Spell::Heal(int32 amount)
 
 		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
+		if(m_spellInfo->fixed_apcoef > 0)
+			amount += float2int32(u_caster->GetAP() * m_spellInfo->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
 		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
 		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
 

@@ -264,18 +264,25 @@ void Arena::OnCreate()
 	case 617:
 		{
 			obj = SpawnGameObject(192643, 1256.33996582031f, 770.06201171875f, 20.5f, 0.0f, 32, 1375, 2.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-			m_gates.insert(obj);
-
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+				m_gates.insert(obj);
+			}
+			
 			obj = SpawnGameObject(192642, 1327.2099609375f, 813.239990234375f, 20.5f, 0.0f, 32, 1375, 2.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-			m_gates.insert(obj);
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+				m_gates.insert(obj);
+			}
 
 			// not rly blizzlike, should be spawn later, not on create, but who cares, will fix it later
 			obj = SpawnGameObject(191877, 1291.974487f, 791.844666f, 9.339742f, 3.116816f, 32, 1375, 1.0f);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+				obj->PushToWorld(m_mapMgr);
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_WOTLK_GREEN_PLAYER_COUNT;
 			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_WOTLK_GOLD_PLAYER_COUNT;
@@ -292,36 +299,52 @@ void Arena::OnCreate()
 
 			//elevators
 			obj = SpawnGameObject(194030, 763.93f, -295.0f, 26.0f/*0.0f*/, 0.0f, 40, 1375, 1.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
+				obj->PushToWorld(m_mapMgr);
+			}
 
 			obj = SpawnGameObject(194031, 763.93f, -274.0f, 26.0f/*0.0f*/, 0.0f, 40, 1375, 1.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID, 5);
+				obj->PushToWorld(m_mapMgr);
+			}
 		
 			//moving 'things'
 			obj = SpawnGameObject(193458, 763.630f, -261.783f, 26.0f, 0.0f, 40, 1375, 1.0f);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+				obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(193459, 763.761f, -306.230f, 26.0f, 0.0f, 40, 1375, 1.0f);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+				obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(193460, 802.313f, -284.349f, 24.6f, 0.0f, 40, 1375, 1.0f);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)
+				obj->PushToWorld(m_mapMgr);
 
 			obj = SpawnGameObject(193461, 723.522f, -284.428f, 24.6f, 0.0f, 40, 1375, 1.0f);
-			obj->PushToWorld(m_mapMgr);
+			if(obj)	
+				obj->PushToWorld(m_mapMgr);
 
 			//gates
 			obj = SpawnGameObject(192392, 763.93f, -295.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-			m_gates.insert(obj);
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+				m_gates.insert(obj);
+			}
 
 			obj = SpawnGameObject(192391, 763.93f, -274.0f, 27.0f, 0.0f, 32, 1375, 1.0f);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-			obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
-			m_gates.insert(obj);
+			if(obj)
+			{
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
+				obj->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
+				m_gates.insert(obj);
+			}
 
 			m_pcWorldStates[GREEN_TEAM] = WORLDSTATE_ARENA_WOTLK_GREEN_PLAYER_COUNT;
 			m_pcWorldStates[GOLD_TEAM] = WORLDSTATE_ARENA_WOTLK_GOLD_PLAYER_COUNT;

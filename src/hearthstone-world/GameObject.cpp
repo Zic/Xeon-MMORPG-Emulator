@@ -110,7 +110,7 @@ void GameObject::Destructor()
 
 bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, float z, float ang)
 {
-	GameObjectInfo *pInfo= GameObjectNameStorage.LookupEntry(entry);
+	pInfo= GameObjectNameStorage.LookupEntry(entry);
 	if(!pInfo)
 		return false;
 

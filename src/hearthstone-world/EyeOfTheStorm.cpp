@@ -535,7 +535,7 @@ void EyeOfTheStorm::OnCreate()
 	for(i = 0; i < EOTS_TOWER_COUNT; ++i)
 	{
 		m_CPStatusGO[i] = m_mapMgr->CreateGameObject(EOTSTowerIds[i]);
-		if(m_CPStatusGO[i]!=NULL || !m_CPStatusGO[i]->CreateFromProto( EOTSTowerIds[i], m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
+		if(m_CPStatusGO[i] == NULL || !m_CPStatusGO[i]->CreateFromProto( EOTSTowerIds[i], m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
 		{
 			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobject %u.", EOTSTowerIds[i]);
 			abort();
@@ -544,7 +544,7 @@ void EyeOfTheStorm::OnCreate()
 		m_CPStatusGO[i]->PushToWorld( m_mapMgr );
 
 		m_CPBanner[i] = m_mapMgr->CreateGameObject(EOTS_BANNER_NEUTRAL);
-		if( m_CPBanner[i]!= NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
+		if( m_CPBanner[i] == NULL || !m_CPBanner[i]->CreateFromProto( EOTS_BANNER_NEUTRAL, m_mapMgr->GetMapId(), EOTSCPLocations[i][0], EOTSCPLocations[i][1], EOTSCPLocations[i][2], 0))
 		{
 			Log.LargeErrorMessage(LARGERRORMESSAGE_ERROR, "EOTS is being created and you are missing gameobjects %u",EOTS_BANNER_NEUTRAL);
 			abort();
@@ -634,7 +634,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 		for(; itr != itrend; ++itr)
 		{ 
-			if( !(*itr)->IsPvPFlagged() || (*itr)->IsStealth() || (*itr)->m_invisible || (*itr)->SchoolImmunityList[0] )
+			if( !(*itr)->IsPvPFlagged() || (*itr)->IsStealth() || (*itr)->m_invisible || (*itr)->SchoolImmunityList[0] || (*itr)->m_bgFlagIneligible )
 				is_valid = false;
 			else
 				is_valid = true;

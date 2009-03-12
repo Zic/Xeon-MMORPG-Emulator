@@ -2940,6 +2940,9 @@ else
 			else
 				dmg.full_damage = CalculateDamage( unit_shared_from_this(), pVictim, weapon_damage_type, ability );
 
+			if(ability && ability->fixed_apcoef)
+				dmg.full_damage += float2int32(GetAP() * ability->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
+
 			if(ability && ability->SpellGroupType)
 			{	
 				SM_FIValue(SM[SMT_DAMAGE_DONE][0],&dmg.full_damage,ability->SpellGroupType);
@@ -4238,17 +4241,6 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	if( spellInfo->SpellGroupType )	// apply coefficient modifier
 	{
 		float modifier = 0;
-		if( caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ] )
-		{
-			if( spellInfo->NameHash == SPELL_HASH_ARCANE_MISSILES )
-			{
-				modifier += 15 * caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ];
-			}
-			else if( spellInfo->NameHash == SPELL_HASH_ARCANE_BLAST )
-			{
-				modifier += 3 * caster->m_DummyAuras[ DUMMY_AURA_ARCANE_EMPOWERMENT ];
-			}
-		}
 		SM_FFValue( caster->SM[SMT_SPD_BONUS][0], &modifier, spellInfo->SpellGroupType );
 		coefficient += modifier / 100.0f;
 		SM_PFValue( caster->SM[SMT_SPD_BONUS][1], &coefficient, spellInfo->SpellGroupType );
@@ -4258,6 +4250,9 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 		coefficient += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
 
 	plus_damage = float2int32( float( plus_damage ) * coefficient );
+
+	if(spellInfo->fixed_apcoef > 0)
+		plus_damage += float2int32(caster->GetAP() * spellInfo->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
 
 	int32 bonus_damage = plus_damage;
 

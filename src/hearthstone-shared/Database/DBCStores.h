@@ -771,6 +771,7 @@ struct SpellEntry
 	uint32 spell_coef_flags;                                //!!! CUSTOM, store flags for spell coefficient calculations
 	float fixed_dddhcoef;                                   //!!! CUSTOM, fixed DD-DH coefficient for some spells
 	float fixed_hotdotcoef;                                 //!!! CUSTOM, fixed HOT-DOT coefficient for some spells
+	float fixed_apcoef;										//!!! CUSTOM, fixed Attack Power coefficient for some spells
 	float Dspell_coef_override;                             //!!! CUSTOM, overrides any spell coefficient calculation and use this value in DD&DH
 	float OTspell_coef_override;							//!!! CUSTOM, overrides any spell coefficient calculation and use this value in HOT&DOT
 

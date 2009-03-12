@@ -2758,10 +2758,6 @@ void Aura::SpellAuraDummy(bool apply)
 				{
 					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_POTENCY] = apply ? mod->m_amount : 0;
 				}break;
-			case SPELL_HASH_ARCANE_EMPOWERMENT:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_EMPOWERMENT] = apply ? GetSpellProto()->RankNumber : 0;
-				}break;
 			case SPELL_HASH_GLYPH_OF_FIREBALL:
 				{
 					m_target->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] = apply;

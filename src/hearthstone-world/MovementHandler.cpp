@@ -490,6 +490,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 			// calculate distance fallen
 			uint32 falldistance = float2int32( _player->z_axisposition - movement_info.z );
+			if(movement_info.z > _player->z_axisposition)
+				falldistance = 0;
 
 			/*if player is a rogue or druid(in cat form), then apply -17 modifier to fall distance.
 			these checks need improving, low level rogue/druid should not receive this benefit*/
