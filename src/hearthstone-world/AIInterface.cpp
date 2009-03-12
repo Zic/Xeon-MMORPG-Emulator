@@ -2547,7 +2547,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 		// do we have a formation?
 		if(m_formationLinkSqlId != 0)
 		{
-			if( m_formationLinkTarget != NULL)
+			if( m_formationLinkTarget == NULL)
 			{
 				// haven't found our target yet
 				CreaturePointer c = TO_CREATURE(m_Unit);
@@ -2866,7 +2866,7 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 						float delta_x = UnitToFollow->GetPositionX();
 						float delta_y = UnitToFollow->GetPositionY();
 						float d = 3;
-						if(m_formationLinkTarget)
+						if(m_formationLinkTarget != NULL)
 							d = m_formationFollowDistance;
 
 						MoveTo(delta_x+(d*(cosf(m_fallowAngle+UnitToFollow->GetOrientation()))),
