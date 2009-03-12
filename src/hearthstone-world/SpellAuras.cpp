@@ -301,6 +301,8 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraNULL,//278
 		&Aura::SpellAuraNULL,//279
 		&Aura::SpellAuraModIgnoreArmorPct,//280
+		&Aura::SpellAuraNULL,//279
+		&Aura::SpellAuraModBaseHealth,//282
 };
 
 const char* SpellAuraNames[TOTAL_SPELL_AURAS] = {
@@ -2260,6 +2262,10 @@ void Aura::SpellAuraDummy(bool apply)
 	case 2096://MindVision
 		{
 		}break;
+	case 54518:	// Penance
+		{
+			;	// TODO
+		}
 	case 6196://FarSight
 		{
 			if(apply)
@@ -5978,7 +5984,7 @@ void Aura::SpellAuraMechanicImmunity(bool apply)
 				m_target->RemoveAllAurasByMechanic( (uint32)mod->m_miscValue , -1 , false );
 			}
 
-			if(m_spellProto->Id==42292)	// PvP Trinket
+			if(m_spellProto->Id == 42292 || m_spellProto->Id == 59752)	// PvP Trinket
 			{
 				// insignia of the A/H
 				for(uint32 x= MAX_POSITIVE_AURAS; x < MAX_AURAS; ++x)
@@ -9067,6 +9073,18 @@ void Aura::SpellAuraNoReagent(bool apply)
 
 	for(uint32 x=0;x<3;x++)
 		p_target->SetUInt32Value(PLAYER_NO_REAGENT_COST_1+x, ClassMask[x]);
+}
+
+void Aura::SpellAuraModBaseHealth(bool apply)
+{
+	if(!p_target) 
+		return;
+	mod->fixed_amount[0] = p_target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH);
+	int32 amt = mod->fixed_amount[0] * mod->m_amount / 100;
+	if(!apply)
+		amt *= -1;
+	p_target->SetHealthFromSpell(p_target->GetHealthFromSpell() + amt);
+	p_target->UpdateStats();
 }
 
 uint32 Aura::GetMaxProcCharges(UnitPointer caster)

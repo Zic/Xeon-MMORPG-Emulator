@@ -1728,13 +1728,13 @@ void ObjectMgr::GenerateLevelUpInfo()
 					}
 				case WARRIOR:
 					{
-						BaseHP = uint32(107.7625f * Level);
+						BaseHP = uint32(101.5125f * Level);
 						NORMALIZATION
 						break;
 					}
 				case DEATHKNIGHT:
 					{
-						BaseHP = uint32(107.7625f * Level);
+						BaseHP = uint32(101.5125f * Level);
 						NORMALIZATION
 						break;
 					}

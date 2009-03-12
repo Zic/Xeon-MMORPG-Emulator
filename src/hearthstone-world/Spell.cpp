@@ -3747,6 +3747,7 @@ uint8 Spell::CanCast(bool tolerate)
 					// {Insignia|Medallion} of the {Horde|Alliance}
 					case 0xC7C45478: //Immune Movement Impairment and Loss of Control
 					case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
+					case SPELL_HASH_EVERY_MAN_FOR_HIMSELF:
 						{
 							break;
 						}
@@ -3801,6 +3802,7 @@ uint8 Spell::CanCast(bool tolerate)
 						break;
 				}break;
 				case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
+				case SPELL_HASH_EVERY_MAN_FOR_HIMSELF:
 					break;
 
 				default:
@@ -3828,6 +3830,7 @@ uint8 Spell::CanCast(bool tolerate)
 					break;
 
 				case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
+				case SPELL_HASH_EVERY_MAN_FOR_HIMSELF:
 					break;
 
 				case SPELL_HASH_BLINK:

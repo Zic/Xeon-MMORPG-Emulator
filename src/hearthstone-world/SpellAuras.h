@@ -265,7 +265,8 @@ enum MOD_TYPES
 	SPELL_AURA_INCREASE_AP_BY_ATTRIBUTE=268,
 	SPELL_AURA_INCREASE_SPELL_DOT_DAMAGE_PCT = 271,
 	SPELL_AURA_IGNORE_ARMOR_PCT=280,
-    TOTAL_SPELL_AURAS = 281,
+	SPELL_AURA_MOD_BASE_HEALTH = 282,
+    TOTAL_SPELL_AURAS = 283,
 };
 enum AuraTickFlags
 {
@@ -664,6 +665,7 @@ public:
 	void SpellAuraReduceEffectDuration(bool apply);
 	void SpellAuraNoReagent(bool apply);
 	void SpellAuraCastFilter(bool apply);
+	void SpellAuraModBaseHealth(bool apply);
 
 	void UpdateAuraModDecreaseSpeed();
 

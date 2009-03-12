@@ -905,6 +905,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
 						sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
 				}break;
+			case 53007: // Penance
+				{
+					/*sp->Effect[0] = SPELL_EFFECT_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0] = 54518;*/
+				}
 
 			//paladin	-	Reckoning
 			case  20177:
