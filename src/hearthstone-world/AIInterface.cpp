@@ -3498,7 +3498,7 @@ void AIInterface::UpdateCivilian()
 	for(; itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
 	{
 		PlayerPointer pOpp = *itr;
-		if(!pOpp->isAlive() || !TO_CREATURE(m_Unit)->CanSee( pOpp ) )
+		if( pOpp == NULL || !pOpp->isAlive() || !TO_CREATURE(m_Unit)->CanSee( pOpp ) )
 			continue;
 
 		if( !isAttackable( m_Unit, pOpp ) )
@@ -3521,7 +3521,7 @@ void AIInterface::UpdateCivilian()
 	if( !target )
 		return;
 
-	if( m_summonedGuard && m_summonedGuard->isAlive() )
+	if( m_summonedGuard != NULL && m_summonedGuard->isAlive() )
 	{
 		// Do this so we don't spam "Guards!" every second
 		if( !m_summonedGuard->GetAIInterface()->GetMostHated() && m_guardCallTimer < UNIXTIME )
@@ -3538,7 +3538,7 @@ void AIInterface::UpdateCivilian()
 		return;
 	}
 
-	if( m_summonedGuard )
+	if( m_summonedGuard != NULL )
 	{
 		m_summonedGuard->SummonExpire();
 		m_summonedGuard = NULLCREATURE;
@@ -3556,7 +3556,8 @@ void AIInterface::UpdateCivilian()
 	}
 
 	CreatureProto * cp = CreatureProtoStorage.LookupEntry( guardId );
-	if(!cp) return;
+	if(!cp) 
+		return;
 
 	m_summonedGuard = m_Unit->GetMapMgr()->CreateCreature( guardId );
 	m_summonedGuard->Load( cp, m_Unit->GetPositionX(), m_Unit->GetPositionY(), m_Unit->GetPositionZ(), 0.0f);
