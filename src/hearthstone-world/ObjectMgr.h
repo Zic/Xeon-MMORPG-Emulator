@@ -302,7 +302,7 @@ public:
 };
 
 typedef std::map<uint32, std::list<SpellEntry*>* >                  OverrideIdMap;
-typedef HM_NAMESPACE::hash_map<uint32, PlayerPointer  >                     PlayerStorageMap;
+typedef HM_NAMESPACE::hash_map<uint32, PlayerPointer  >             PlayerStorageMap;
 typedef std::list<GM_Ticket*>                                       GmTicketList;
 
 #ifndef WIN32
@@ -347,7 +347,7 @@ public:
 	// other objects
     
     // Set typedef's
-	typedef HM_NAMESPACE::hash_map<uint32, Group*>						GroupMap;
+	typedef std::set<AchievementCriteriaEntry*>							AchievementCriteriaSet;
 	
     // HashMap typedef's
     typedef HM_NAMESPACE::hash_map<uint64, ItemPointer >                ItemMap;
@@ -362,6 +362,7 @@ public:
 	typedef HM_NAMESPACE::hash_map<uint32, std::vector<TrainerSpell*> > TrainerSpellMap;
     typedef HM_NAMESPACE::hash_map<uint32, ReputationModifier*>         ReputationModMap;
     typedef HM_NAMESPACE::hash_map<uint32, CorpsePointer >              CorpseMap;
+	typedef HM_NAMESPACE::hash_map<uint32, Group*>						GroupMap;
     
     // Map typedef's
     typedef std::map<uint32, LevelInfo*>                                LevelMap;
@@ -371,7 +372,6 @@ public:
 	typedef std::map<uint32, set<SpellEntry*> >                         PetDefaultSpellMap;
 	typedef std::map<uint32, uint32>                                    PetSpellCooldownMap;
 	typedef std::map<uint32, SpellEntry*>                               TotemSpellMap;
-	typedef std::set<AchievementCriteriaEntry*>							AchievementCriteriaSet;
 	typedef std::map<uint32, AchievementCriteriaSet*>					AchievementCriteriaMap;
 
     // object holders
