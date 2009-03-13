@@ -5869,6 +5869,9 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_AIMED_SHOT)
 			sp->maxstack = 1; // Healing reduction shouldn't stack
 
+		if( sp->NameHash == SPELL_HASH_EXPLOSIVE_SHOT )
+			sp->EffectApplyAuraName[0] = SPELL_AURA_PERIODIC_DAMAGE;
+
 		//////////////////////////////////////////
 		// ROGUE								//
 		//////////////////////////////////////////

@@ -1604,6 +1604,16 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 	{
 		int32 dmg	= mod->m_amount;
 		UnitPointer c = GetUnitCaster();
+		if( c )
+		{
+			switch( m_spellProto->NameHash )
+			{//alter dmg
+			case SPELL_HASH_EXPLOSIVE_SHOT:
+				{
+					dmg += float2int32(c->GetRAP() * 0.16f);
+				}break;
+			}
+		}
 		switch(m_spellProto->Id)
 		{
 			case 703:
