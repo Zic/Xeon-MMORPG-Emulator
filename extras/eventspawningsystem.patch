@@ -96,8 +96,8 @@ Index: sql/world_updates/events.sql
 +/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 +/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 +
-+alter table `gameobject_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL  COMMENT 'relates to events table' after `phase`
-+alter table `creature_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL  COMMENT 'relates to events table' after `vehicle`
++alter table `gameobject_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL after `phase` COMMENT 'relates to events table';
++alter table `creature_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL  after `vehicle` COMMENT 'relates to events table';
 Index: src/hearthstone-shared/Database/Field.h
 ===================================================================
 --- src/hearthstone-shared/Database/Field.h	(revision 1158)
@@ -159,7 +159,17 @@ Index: src/hearthstone-world/DayWatcherThread.cpp
  }
  
  void DayWatcherThread::terminate()
-@@ -82,12 +86,24 @@
+@@ -57,7 +61,8 @@
+ void DayWatcherThread::update_settings()
+ {
+ 	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_arena_update_time\", %u)", last_arena_time);
+-	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_dailies_reset_time\", %u)", last_arena_time);
++	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_dailies_reset_time\", %u)", last_daily_reset_time);
++	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_eventid_time\", %u)", last_eventid_time);
+ }
+ 
+ void DayWatcherThread::load_settings()
+@@ -82,12 +87,24 @@
  	}
  	else
  		last_daily_reset_time = 0;
@@ -184,7 +194,7 @@ Index: src/hearthstone-world/DayWatcherThread.cpp
  }
  
  uint32 DayWatcherThread::get_timeout_from_string(const char * string, uint32 def)
-@@ -131,11 +147,14 @@
+@@ -131,11 +148,14 @@
  bool DayWatcherThread::run()
  {
  	Log.Notice("DayWatcherThread", "Started.");
@@ -199,7 +209,7 @@ Index: src/hearthstone-world/DayWatcherThread.cpp
  #ifdef WIN32
  	m_abortEvent = CreateEvent(NULL, NULL, FALSE, NULL);
  #else
-@@ -156,8 +175,136 @@
+@@ -156,8 +176,136 @@
  			update_arena();
  
  		if(has_timeout_expired(&local_currenttime, &local_last_daily_reset_time, DAILY))
@@ -253,11 +263,11 @@ Index: src/hearthstone-world/DayWatcherThread.cpp
 +						continue;
 +					}
 +				}
-+				_firstrun[0] = false;
-+				last_eventid_time = UNIXTIME;
-+				dupe_tm_pointer(localtime(&last_eventid_time), &local_last_eventid_time);
-+				m_dirty = true;
 +			}
++			_firstrun[0] = false;
++			last_eventid_time = UNIXTIME;
++			dupe_tm_pointer(localtime(&last_eventid_time), &local_last_eventid_time);
++			m_dirty = true;
 +		}
 +		
 +		if(runEvents = true)
@@ -337,7 +347,7 @@ Index: src/hearthstone-world/DayWatcherThread.cpp
  		if(m_dirty)
  			update_settings();
  
-@@ -316,5 +463,4 @@
+@@ -316,5 +464,4 @@
  	last_daily_reset_time = UNIXTIME;
  	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
  	m_dirty = true;
