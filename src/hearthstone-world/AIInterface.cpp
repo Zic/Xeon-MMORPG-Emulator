@@ -319,7 +319,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					CALL_SCRIPT_EVENT(m_Unit, OnCombatStop)(UnitToFollow);
 					m_AIState = STATE_EVADE;
 
-					if( UnitToFollow != NULL && cr != NULL )
+					if( cr != NULL && UnitToFollow != NULL)
 					{
 						UnitToFollow = NULLUNIT;
 						FollowDistance = 0.0f;
@@ -435,7 +435,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				if(cr!= NULL && UnitToFollow_backup != NULL)
 				{
 					UnitToFollow = UnitToFollow_backup;
-					UnitToFollow_backup == NULLUNIT;
+					UnitToFollow_backup = NULLUNIT;
 					FollowDistance = FollowDistance_backup;
 					FollowDistance_backup = 0.0f;
 
@@ -492,7 +492,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				if(cr!= NULL && UnitToFollow_backup != NULL)
 				{
 					UnitToFollow = UnitToFollow_backup;
-					UnitToFollow_backup == NULLUNIT;
+					UnitToFollow_backup = NULLUNIT;
 					FollowDistance = FollowDistance_backup;
 					FollowDistance_backup = 0.0f;
 
@@ -528,26 +528,29 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				if( cr->has_combat_text )
 					objmgr.HandleMonsterSayEvent( cr, MONSTER_SAY_EVENT_ON_DIED );
 
-				if(UnitToFollow_backup != NULL)
+				if(UnitToFollow != NULL)
 				{
 					UnitToFollow = NULLUNIT;
-					m_lastFollowX = m_lastFollowY = 0;
 
-					// synchronise speed with leader.
-					m_flySpeed = UnitToFollow->m_flySpeed;
-					m_runSpeed = UnitToFollow->m_runSpeed;
-					m_walkSpeed = UnitToFollow->m_walkSpeed;
+					//we stopped following, reset speed to default
+					m_flySpeed = cr->proto->fly_speed;
+					m_runSpeed = cr->proto->run_speed;
+					m_walkSpeed = cr->proto->walk_speed;
 				}
+
+				if(UnitToFollow_backup != NULL)
+					UnitToFollow_backup = NULLUNIT;
+
+				m_lastFollowX = m_lastFollowY = 0;
+				FollowDistance = 0.0f;
 			}
 
 			CALL_SCRIPT_EVENT(m_Unit, OnDied)(pUnit);
 			m_AIState = STATE_IDLE;
 
-
 			StopMovement(0);
 			m_aiTargets.clear();
 			UnitToFear = NULLUNIT;
-			FollowDistance = 0.0f;
 			m_fleeTimer = 0;
 			m_hasFled = false;
 			m_hasCalledForHelp = false;
