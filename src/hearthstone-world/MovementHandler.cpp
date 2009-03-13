@@ -131,6 +131,7 @@ void WorldSession::HandleMoveTeleportAckOpcode( WorldPacket & recv_data )
 
 		if(GetPlayer()->GetSummon() != NULL)		// move pet too
 			GetPlayer()->GetSummon()->SetPosition((GetPlayer()->GetPositionX() + 2), (GetPlayer()->GetPositionY() + 2), GetPlayer()->GetPositionZ(), float(M_PI));
+		m_isFalling = false;
 		if(_player->m_sentTeleportPosition.x != 999999.0f)
 		{
 			_player->m_position = _player->m_sentTeleportPosition;
@@ -432,6 +433,13 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 		}
 	}
 
+	//Water walk hack
+	if (movement_info.flags & MOVEFLAG_WATER_WALK && !GetPlayer()->m_isWaterWalking)
+	{
+		sCheatLog.writefromsession(this, "Used water walk hack");
+		Disconnect();
+	}
+
 	/************************************************************************/
 	/* Calculate the timestamp of the packet we have to send out            */
 	/************************************************************************/
@@ -481,6 +489,16 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 	}
 	else
 	{
+		if (movement_info.flags & MOVEFLAG_FALLING)
+			m_isFalling = true;
+
+		if (recv_data.GetOpcode() == MSG_MOVE_JUMP)
+		{
+			if (m_isFalling)
+				Disconnect();
+			m_isFalling = true;
+		}
+
 		if( recv_data.GetOpcode() == MSG_MOVE_FALL_LAND )
 		{
 			// player has finished falling
@@ -489,23 +507,18 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 				_player->z_axisposition = movement_info.z;
 
 			// calculate distance fallen
-			uint32 falldistance = float2int32( _player->z_axisposition - movement_info.z );
+			int32 falldistance = float2int32( _player->z_axisposition - movement_info.z );
 			if(movement_info.z > _player->z_axisposition)
 				falldistance = 0;
 
 			/*if player is a rogue or druid(in cat form), then apply -17 modifier to fall distance.
 			these checks need improving, low level rogue/druid should not receive this benefit*/
 			if( ( _player->getClass() == ROGUE ) || ( _player->GetShapeShift() == FORM_CAT ) )
-			{
-				if( falldistance > 17 ) 
-					falldistance -=17;
-				else
-					falldistance = 1;
-			}
+				falldistance -=17;
 
 			//checks that player has fallen more than 12 units, otherwise no damage will be dealt
-			//falltime check is also needed here, otherwise sudden changes in Z axis position, such as using !recall, may result in death			
-			if( _player->isAlive() && !_player->GodModeCheat && falldistance > 12 && ( UNIXTIME >= _player->m_fallDisabledUntil ) && movement_info.FallTime > 1000 )
+			//falltime check is also needed here, otherwise sudden changes in Z axis position, such as using !recall, may result in death
+			if( _player->isAlive() && !_player->GodModeCheat && falldistance > 12 && ( UNIXTIME >= _player->m_fallDisabledUntil ) )
 			{
 				// 1.7% damage for each unit fallen on Z axis over 13
 				UnitPointer toDamage = TO_UNIT(_player);
@@ -528,14 +541,17 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			}
 			_player->z_axisposition = 0.0f;
 		}
-		else
-			//whilst player is not falling, continuosly update Z axis position.
-			//once player lands this will be used to determine how far he fell.
-			if( _player->z_axisposition == 0.0f )
-				_player->DelaySpeedHack(20000);
-
-			if( !( movement_info.flags & MOVEFLAG_FALLING ) )
-				_player->z_axisposition = movement_info.z;
+		//Opcodes that remove falling flag
+		switch (recv_data.GetOpcode())
+		{
+		case MSG_MOVE_START_ASCEND:
+		case MSG_MOVE_START_SWIM:
+		case MSG_MOVE_FALL_LAND:
+			m_isFalling = false;
+		}
+		
+		if(!m_isFalling)
+			_player->z_axisposition = movement_info.z;
 	}
 
 	/************************************************************************/

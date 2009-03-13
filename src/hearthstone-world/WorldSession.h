@@ -720,7 +720,9 @@ private:
 	/* Preallocated buffers for movement handlers */
 	MovementInfo movement_info;
 	uint8 movement_packet[90];
-	
+
+	bool m_isFalling;
+
 	uint32 _accountId;
 	uint32 _accountFlags;
 	string _accountName;

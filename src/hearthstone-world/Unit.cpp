@@ -257,6 +257,9 @@ void Unit::Destructor()
 
 	RemoveAllAuras();
 
+	if (IsInWorld())
+		RemoveFromWorld(true);
+
 	for(uint32 x=0;x<SPELL_MODIFIERS;x++)
 		for(uint32 y=0;y<2;y++)
 			if(SM[x][y]) delete [] SM[x][y] ;
