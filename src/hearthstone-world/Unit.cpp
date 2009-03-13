@@ -2766,9 +2766,16 @@ else
 	if (this->IsPlayer())
 	{
 		hitmodifier += (weapon_damage_type == RANGED) ? plr_shared_from_this()->CalcRating( PLAYER_RATING_MODIFIER_RANGED_HIT ) : plr_shared_from_this()->CalcRating( PLAYER_RATING_MODIFIER_MELEE_HIT );
-		dodge -=plr_shared_from_this()->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		
+		float expertise_bonus = plr_shared_from_this()->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		if(weapon_damage_type == MELEE)
+			expertise_bonus += plr_shared_from_this()->GetUInt32Value(PLAYER_EXPERTISE);
+		else if(weapon_damage_type == OFFHAND)
+			expertise_bonus += plr_shared_from_this()->GetUInt32Value(PLAYER_OFFHAND_EXPERTISE);
+		expertise_bonus *= 0.25f;
+		dodge -= expertise_bonus;
 		if(dodge<0) dodge=0.0f;
-		parry -=plr_shared_from_this()->CalcRating( PLAYER_RATING_MODIFIER_EXPERTISE );
+		parry -= expertise_bonus;
 		if(parry<0) parry=0.0f;
 	}
 	

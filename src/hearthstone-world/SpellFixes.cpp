@@ -3798,6 +3798,19 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_CAST_SPELL;
 					sp->procChance = 100;
 				}break;
+			case 51130:
+			case 51129:
+			case 51128:
+			case 51127:
+			case 51123:// Killing Machine
+				{
+					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
+					sp->ProcsPerMinute = sp->RankNumber;
+				}break;
+			case 48743:	// Death Pact
+				{
+					sp->Effect[1] = SPELL_EFFECT_NULL;	// Incorrect targetting makes it kill everyone around
+				}break;
 			case 49143:
 			case 51416:
 			case 51417:
