@@ -6600,8 +6600,7 @@ void Spell::SpellEffectMegaJump(uint32 i)
 	// Time formula is derived from andy's logs, 271ms to move ~14.5 units
 	float distance = u_caster->GetDistanceSq( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ );
 	uint32 moveTime = FL2UINT((distance * 271.0f) / 212.65f);
-
-	u_caster->GetAIInterface()->SendMoveToPacket( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, moveTime, 0x200 );
+	u_caster->GetAIInterface()->SendMoveToPacket( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, moveTime, u_caster->GetAIInterface()->getMoveFlags() );
 
 	u_caster->SetPosition( m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, false );
 	if( p_caster )

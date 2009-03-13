@@ -6296,11 +6296,8 @@ void Aura::SpellAuraDrinkNew(bool apply)
 
 	if( apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
-		sEventMgr.RemoveEvents( m_target, EVENT_AURA_PERIODIC_TRIGGERSPELL );
-		m_target->Root();
 		mod->fixed_amount[0] = 0;
 		sEventMgr.AddEvent( shared_from_this(), &Aura::EventPeriodicSpeedModify, int32(10), EVENT_AURA_PERIODIC_ENERGIZE, 1000, 10, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-		sEventMgr.AddEvent( m_target, &Unit::UnRoot, EVENT_AURA_PERIODIC_TRIGGERSPELL, 1000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 	else if( !apply && m_spellProto->NameHash == SPELL_HASH_CHAINS_OF_ICE )
 	{
@@ -6408,11 +6405,10 @@ void Aura::SpellAuraChannelDeathItem(bool apply)
 					PlayerPointer pCaster = m_target->GetMapMgr()->GetPlayer((uint32)m_casterGuid);
 					if(!pCaster)
 						return;
-					/*int32 delta=pCaster->getLevel()-m_target->getLevel();
-					if(abs(delta)>5)
-						return;*/
 				
 					uint32 itemid = GetSpellProto()->EffectItemType[mod->i];
+					if(itemid == 6265 && pCaster->getLevel() - m_target->getLevel() > 9)
+						return;
 
 					ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(itemid);
 					if(pCaster->GetItemInterface()->CalculateFreeSlots(proto) > 0)

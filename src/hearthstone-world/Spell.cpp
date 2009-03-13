@@ -2681,21 +2681,23 @@ void Spell::HandleAddAura(uint64 guid)
 	std::map<uint32,AuraPointer >::iterator itr=Target->tmpAura.find(m_spellInfo->Id);
 	if(itr!=Target->tmpAura.end())
 	{
-		if(itr->second != NULL)
+		AuraPointer aura = itr->second;
+		if(aura != NULL)
 		{
 			// did our effects kill the target?
 			if( Target->isDead() && !(m_spellInfo->Flags4 & CAN_PERSIST_AND_CASTED_WHILE_DEAD))
 			{
 				// free pointer
-				itr->second->m_tmpAuradeleted = true;
-				itr->second->Remove();
+				aura->m_tmpAuradeleted = true;
+				aura->Remove();
 				itr->second = NULLAURA;
 				Target->tmpAura.erase(itr);
 				return;
 			}
 
-			Target->AddAura(itr->second, NULLAURA); // the real spell is added last so the modifier is removed last
-			Target->tmpAura.erase(itr);
+			Target->AddAura(aura, NULLAURA);
+			if(!aura->m_tmpAuradeleted)
+				Target->tmpAura.erase(itr);
 		}
 	}
 }
