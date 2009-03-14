@@ -6579,12 +6579,10 @@ void Aura::SpellAuraGhost(bool apply)
 		if(apply)
 		{
 			SetNegative();
-			TO_PLAYER( m_target )->SetMovement(MOVE_WATER_WALK, 4);
 			TO_PLAYER( m_target )->m_isWaterWalking = true;
 		}
 		else
 		{
-			TO_PLAYER( m_target )->SetMovement(MOVE_LAND_WALK, 7);
 			TO_PLAYER( m_target )->m_isWaterWalking = false;
 		} 
 	}
