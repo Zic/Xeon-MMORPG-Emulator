@@ -722,7 +722,7 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 	float o = chr->GetOrientation();
 
 	go->SetInstanceID(chr->GetInstanceID());
-	go->CreateFromProto(EntryID,mapid,x,y,z,o);
+	go->CreateFromProto(EntryID,mapid,x,y,z,o,0.0f,0.0f,0.0f,0.0f);
 	
 	go->SetRotation(o);
 	go->PushToWorld(m_session->GetPlayer()->GetMapMgr());
@@ -734,10 +734,10 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 	gs->faction = go->GetUInt32Value(GAMEOBJECT_FACTION);
 	gs->flags = go->GetUInt32Value(GAMEOBJECT_FLAGS);
 	gs->id = objmgr.GenerateGameObjectSpawnID();
-	gs->o = go->GetFloatValue(GAMEOBJECT_ROTATION);
-	gs->o1 = go->GetFloatValue(GAMEOBJECT_ROTATION_01);
-	gs->o2 = go->GetFloatValue(GAMEOBJECT_ROTATION_02);
-	gs->o3 = go->GetFloatValue(GAMEOBJECT_ROTATION_03);
+	gs->orientation1 = go->GetFloatValue(GAMEOBJECT_ROTATION);
+	gs->orientation2 = go->GetFloatValue(GAMEOBJECT_ROTATION_01);
+	gs->orientation3 = go->GetFloatValue(GAMEOBJECT_ROTATION_02);
+	gs->orientation4 = go->GetFloatValue(GAMEOBJECT_ROTATION_03);
 	gs->scale = go->GetFloatValue(OBJECT_FIELD_SCALE_X);
 	gs->x = go->GetPositionX();
 	gs->y = go->GetPositionY();

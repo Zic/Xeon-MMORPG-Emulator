@@ -257,15 +257,15 @@ void Map::LoadSpawns(bool reload)
 				gspawn->y=fields[4].GetFloat();
 				gspawn->z=fields[5].GetFloat();
 				gspawn->facing=fields[6].GetFloat();
-				gspawn->o =fields[7].GetFloat();
-				gspawn->o1=fields[8].GetFloat();
-				gspawn->o2=fields[9].GetFloat();
-				gspawn->o3=fields[10].GetFloat();
+				gspawn->orientation1 =fields[7].GetFloat();
+				gspawn->orientation2=fields[8].GetFloat();
+				gspawn->orientation3=fields[9].GetFloat();
+				gspawn->orientation4=fields[10].GetFloat();
 				gspawn->state=fields[11].GetUInt32();
 				gspawn->flags=fields[12].GetUInt32();
 				gspawn->faction=fields[13].GetUInt32();
 				gspawn->scale = fields[14].GetFloat();
-				//gspawn->stateNpcLink = fields[15].GetUInt32();
+				gspawn->MountDisplayID = 0; //gameobjects don't mount
 				staticSpawns.GOSpawns.push_back(gspawn);
 				++GameObjectSpawnCount;
 			}while(result->NextRow());
@@ -290,19 +290,16 @@ void Map::LoadSpawns(bool reload)
 					gspawn->y=fields[4].GetFloat();
 					gspawn->z=fields[5].GetFloat();
 					gspawn->facing=fields[6].GetFloat();
-					gspawn->o =fields[7].GetFloat();
-					gspawn->o1=fields[8].GetFloat();
-					gspawn->o2=fields[9].GetFloat();
-					gspawn->o3=fields[10].GetFloat();
+					gspawn->orientation1 =fields[7].GetFloat();
+					gspawn->orientation2=fields[8].GetFloat();
+					gspawn->orientation3=fields[9].GetFloat();
+					gspawn->orientation4=fields[10].GetFloat();
 					gspawn->state=fields[11].GetUInt32();
 					gspawn->flags=fields[12].GetUInt32();
 					gspawn->faction=fields[13].GetUInt32();
 					gspawn->scale = fields[14].GetFloat();
 					gspawn->phase = fields[15].GetInt32();
-					//gspawn->stateNpcLink = fields[15].GetUInt32();
-
-					//uint32 cellx=float2int32(((_maxX-gspawn->x)/_cellSize));
-					//uint32 celly=float2int32(((_maxY-gspawn->y)/_cellSize));
+					gspawn->MountDisplayID = 0; //gameobjects don't mount
 					uint32 cellx=CellHandler<MapMgr>::GetPosX(gspawn->x);
 					uint32 celly=CellHandler<MapMgr>::GetPosY(gspawn->y);
 					if(spawns[cellx]==NULL)

@@ -23,8 +23,8 @@ uint32 m_transportGuidMax = 50;
 
 bool Transporter::CreateAsTransporter(uint32 EntryID, const char* Name)
 {
-	// Lookup GameobjectInfo
-	if(!CreateFromProto(EntryID,0,0,0,0,0))
+	// Try to spawn the Gameobject, no need for locations.
+	if(!CreateFromProto(EntryID,0,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.0f))
 		return false;
 	
 	SetUInt32Value(GAMEOBJECT_FLAGS,40);

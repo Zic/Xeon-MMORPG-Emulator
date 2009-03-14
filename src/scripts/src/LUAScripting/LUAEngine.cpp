@@ -1430,11 +1430,8 @@ int luaItem_GossipMenuAddItem(lua_State * L, Item * ptr)
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
 	int IntId = luaL_checkint(L, 3);
-	bool Coded = luaL_checkint(L, 4)?true:false;
-	int BoxMoney = luaL_checkint(L, 5);
-	const char * BoxMessage = luaL_checkstring(L, 6);
 
-	Menu->AddItem(icon, menu_text, IntId, Coded, BoxMoney, BoxMessage);
+	Menu->AddItem(icon, menu_text, IntId);
 	return 1;
 }
 
@@ -1490,11 +1487,8 @@ int luaUnit_GossipMenuAddItem(lua_State * L, UnitPointer  ptr)
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
 	int IntId = luaL_checkint(L, 3);
-	bool Coded = luaL_checkint(L, 4)?true:false;
-	int BoxMoney = luaL_checkint(L, 5);
-	const char * BoxMessage = luaL_checkstring(L, 6);
 
-	Menu->AddItem(icon, menu_text, IntId, Coded, BoxMoney, BoxMessage);
+	Menu->AddItem(icon, menu_text, IntId);
 	return 1;
 }
 
@@ -1549,11 +1543,8 @@ int luaGameObject_GossipMenuAddItem(lua_State * L, GameObjectPointer  ptr)
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
 	int IntId = luaL_checkint(L, 3);
-	bool Coded = luaL_checkint(L, 4)?true:false;
-	int BoxMoney = luaL_checkint(L, 5);
-	const char * BoxMessage = luaL_checkstring(L, 6);
 
-	Menu->AddItem(icon, menu_text, IntId, Coded, BoxMoney, BoxMessage);
+	Menu->AddItem(icon, menu_text, IntId);
 	return 1;
 }
 int luaGameObject_GossipSendMenu(lua_State * L, GameObjectPointer  ptr)
@@ -4274,7 +4265,7 @@ int luaGameObject_SpawnGameObject(lua_State * L, GameObjectPointer  ptr)
 	if (goi == NULL) return 0;
     GameObjectPointer pC = ptr->GetMapMgr()->CreateGameObject(entry_id);
     pC->m_spawn=0;
-    pC->CreateFromProto(entry_id, ptr->GetMapId(), (float)x, (float)y, (float)z, (float)o);
+    pC->CreateFromProto(entry_id, ptr->GetMapId(), (float)x, (float)y, (float)z, (float)o, 0.0f, 0.0f, 0.0f, 0.0f);
     pC->SetMapId(ptr->GetMapId());
     pC->SetInstanceID(ptr->GetInstanceID());
 	pC->Spawn(ptr->GetMapMgr());
@@ -4581,11 +4572,8 @@ int luaItem_GossipMenuAddItem(lua_State * L, ItemPointer ptr)
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
 	int IntId = luaL_checkint(L, 3);
-	bool Coded = luaL_checkint(L, 4)?true:false;
-	int BoxMoney = luaL_checkint(L, 5);
-	const char * BoxMessage = luaL_checkstring(L, 6);
 
-	Menu->AddItem(icon, menu_text, IntId, Coded, BoxMoney, BoxMessage);
+	Menu->AddItem(icon, menu_text, IntId);
 	return 1;
 }
 

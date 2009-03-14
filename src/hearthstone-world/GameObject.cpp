@@ -108,7 +108,7 @@ void GameObject::Destructor()
 	Object::Destructor();
 }
 
-bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, float z, float ang)
+bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, float z, float ang, float orientation1, float orientation2, float orientation3, float orientation4)
 {
 	pInfo= GameObjectNameStorage.LookupEntry(entry);
 	if(!pInfo)
@@ -123,6 +123,11 @@ bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, fl
 	SetFloatValue( GAMEOBJECT_FACING, ang );
 
 	SetRotation(ang);
+
+	SetFloatValue(GAMEOBJECT_PARENTROTATION, orientation1);
+    SetFloatValue(GAMEOBJECT_PARENTROTATION_1, orientation2);
+    SetFloatValue(GAMEOBJECT_PARENTROTATION_2, orientation3);
+    SetFloatValue(GAMEOBJECT_PARENTROTATION_3, orientation4);
 
 	SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 1);
 	SetUInt32Value( GAMEOBJECT_DISPLAYID, pInfo->DisplayID );
@@ -436,7 +441,7 @@ void GameObject::InitAI()
 
 bool GameObject::Load(GOSpawn *spawn)
 {
-	if(!CreateFromProto(spawn->entry,0,spawn->x,spawn->y,spawn->z,spawn->facing))
+	if(!CreateFromProto(spawn->entry,0,spawn->x,spawn->y,spawn->z,spawn->facing,spawn->orientation1,spawn->orientation2,spawn->orientation3,spawn->orientation4))
 		return false;
 
 	m_phaseMode = spawn->phase;

@@ -1370,7 +1370,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 
 			/* Create the summoning portal */
 			GameObjectPointer pGo = _player->GetMapMgr()->CreateGameObject(179944);
-			if( pGo == NULL || !pGo->CreateFromProto(179944, _player->GetMapId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), 0))
+			if( pGo == NULL || !pGo->CreateFromProto(179944, _player->GetMapId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f))
 				return;
 
 			pGo->m_ritualcaster = _player->GetLowGUID();

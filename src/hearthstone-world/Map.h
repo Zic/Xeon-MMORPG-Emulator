@@ -67,10 +67,10 @@ typedef struct GOSpawn
 	float	x;
 	float	y;
 	float	z;
-	float	o;
-	float	o1;
-	float	o2;
-	float	o3;
+	float	orientation1;
+	float	orientation2;
+	float	orientation3;
+	float	orientation4;
 	float	facing;
 	uint32	flags;
 	uint32	state;
