@@ -2805,7 +2805,30 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					{
 						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 					}break;
-
+			case 57345: // Darkmoon Card: Greatness
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->proc_interval = 45000;
+					sp->EffectTriggerSpell[0] = 60229;
+				}break;
+			case 60063: // Sundial of the Exiled
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->proc_interval = 45000;
+				}break;
+			case 57351: // Darkmoon Card: Berserker!
+				{
+					sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK | PROC_ON_ANY_DAMAGE_VICTIM;;	// when you strike, or are struck in combat
+				}break;
+			case 60196:
+				{
+					sp->EffectImplicitTargetA[0] = EFF_TARGET_SELF;
+				}break;
+			case 60493: //Dying Curse
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->proc_interval = 45000;
+				}
 		
 			// Ashtongue Talisman	of Shadows 
 			case  40478:

@@ -1949,6 +1949,29 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell->NameHash != SPELL_HASH_POWER_WORD__SHIELD )
 									continue;
 							}break;
+						case 60064: // Sundial of the Exiled
+							{
+								if(!victim || !isAttackable(shared_from_this(), victim, false))	// harmful spells
+									continue;
+							}break;
+						case 60229: // Darkmoon Card: Greatness
+							{
+								if(!CastingSpell || !(CastingSpell->c_is_flags & (SPELL_FLAG_IS_DAMAGING | SPELL_FLAG_IS_HEALING) ))
+									continue;
+								// find the maximum stat and proc appropriate spell
+								static const uint32 greatness[4] = {60229, 60233, 60234, 60235};
+								uint32 stats[4], maxstat = 0;
+								stats[0] = GetUInt32Value(UNIT_FIELD_STRENGTH);
+								stats[1] = GetUInt32Value(UNIT_FIELD_AGILITY);
+								stats[2] = GetUInt32Value(UNIT_FIELD_INTELLECT);
+								stats[3] = GetUInt32Value(UNIT_FIELD_SPIRIT);
+								for(uint32 i=0; i<4; i++)
+								{
+									if(stats[i] > stats[maxstat])
+										maxstat = i;
+								}
+								spellId = greatness[maxstat];
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
