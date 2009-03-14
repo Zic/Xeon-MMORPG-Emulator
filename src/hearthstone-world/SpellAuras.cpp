@@ -6573,6 +6573,7 @@ void Aura::SpellAuraGhost(bool apply)
 {
 	if(m_target->GetTypeId() == TYPEID_PLAYER)
 	{
+		SpellAuraWaterWalk( apply );
 		m_target->m_invisible = apply;
 
 		if(apply)
