@@ -488,6 +488,12 @@ void ObjectMgr::LoadPlayerCreateInfo()
 		return;
 	}
 
+	 if( result->GetFieldCount() != 24 )
+	 {
+		 Log.Error("PlayerCreateInfo", "Incorrect number of columns in playercreateinfo found %u, should be 24. check for sql updates", result->GetFieldCount());
+		 return;
+	 }
+
 	PlayerCreateInfo *pPlayerCreateInfo;
 
 	do
