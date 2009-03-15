@@ -23,7 +23,6 @@
 AIInterface::AIInterface()
 {
 	m_ChainAgroSet = NULL;
-	m_summonedGuard = NULLCREATURE;
 	m_waypoints=NULL;
 	m_canMove = true;
 	m_destinationX = m_destinationY = m_destinationZ = 0;
@@ -152,7 +151,6 @@ AIInterface::~AIInterface()
 	m_formationLinkTarget = NULLCREATURE;
 	m_Unit = NULLUNIT;
 	m_PetOwner = NULLUNIT;
-	m_summonedGuard = NULLCREATURE;
 	soullinkedWith = NULLUNIT;
 	UnitToFollow_backup = NULLUNIT;
 }
@@ -729,9 +727,6 @@ void AIInterface::Update(uint32 p_time)
 			SetNextTarget(FindTargetForSpell(m_nextSpell));
 		}
 	}
-
-	if( m_Unit->IsCreature() && TO_CREATURE(m_Unit)->GetCreatureInfo() && TO_CREATURE(m_Unit)->GetCreatureInfo()->Civilian )
-		UpdateCivilian();
 
 	//Pet Dismiss after a certian ditance away
 	/*if(m_AIType == AITYPE_PET && m_PetOwner != NULL)
@@ -1632,8 +1627,6 @@ bool AIInterface::FindFriends(float dist)
 	unordered_set<ObjectPointer >::iterator itr;
 	UnitPointer pUnit;
 
-	
-
 	for( itr = m_Unit->GetInRangeSetBegin(); itr != m_Unit->GetInRangeSetEnd(); itr++ )
 	{
 		if((*itr) == NULL || !(*itr)->IsInWorld() || (*itr)->GetTypeId() != TYPEID_UNIT)
@@ -1677,6 +1670,11 @@ bool AIInterface::FindFriends(float dist)
 			}
 		}
 	}
+
+	// check if we're a civillan, in which case summon guards on a despawn timer
+	CreatureInfo * ci = TO_CREATURE(m_Unit)->GetCreatureName();
+	if( ci && ci->Type == HUMANOID && ci->Civilian )
+		CallGuards();	
 
 	return result;
 }
@@ -3491,91 +3489,89 @@ void AIInterface::Event_Summon_FE_totem(uint32 summon_duration)
 	}
 }
 
-void AIInterface::UpdateCivilian()
+void AIInterface::CallGuards()
 {
 	if( m_Unit->isDead() || !m_Unit->isAlive() || m_Unit->GetInRangePlayersCount() == 0 )
 		return;
 
-	PlayerPointer target = NULLPLR;
-	unordered_set<PlayerPointer  >::iterator itr = m_Unit->GetInRangePlayerSetBegin();
-	for(; itr != m_Unit->GetInRangePlayerSetEnd(); ++itr)
+	if(  getMSTime() > m_guardTimer && !IS_INSTANCE(m_Unit->GetMapId()))
 	{
-		PlayerPointer pOpp = *itr;
-		if( pOpp == NULL || !pOpp->isAlive() || !TO_CREATURE(m_Unit)->CanSee( pOpp ) )
-			continue;
+		m_guardTimer = getMSTime() + 15000;
+		uint16 AreaId = m_Unit->GetMapMgr()->GetAreaID(m_Unit->GetPositionX(),m_Unit->GetPositionY());
+		AreaTable * at = dbcArea.LookupEntry(AreaId);
+		if(!at)
+			return;
 
-		if( !isAttackable( m_Unit, pOpp ) )
-			continue;
+		ZoneGuardEntry * zoneSpawn = ZoneGuardStorage.LookupEntry(at->ZoneId);
+		if(!zoneSpawn) 
+			return;
 
-		if( pOpp->GetDistance2dSq( m_Unit ) > 900 )
-			continue;
+		uint32 team = isAlliance(m_Unit) ? 0 : 1; // Set team
+		uint32 guardId = 0;
+		guardId = team ? zoneSpawn->HordeEntry : zoneSpawn->AllianceEntry;
+		guardId = guardId ? guardId : team ? 3296 : 68;
 
-		if( !pOpp->IsInLineOfSight( m_Unit ) )
-			continue;
+		CreatureProto * cp = CreatureProtoStorage.LookupEntry( guardId );
+		if(!cp) 
+			return;
 
-		if( pOpp->bInvincible)
-			continue;
+		float x = m_Unit->GetPositionX() + (float(rand() % 150 + 100) / 1000.0f );
+		float y = m_Unit->GetPositionY() + (float(rand() % 150 + 100) / 1000.0f );
+#ifdef COLLISION
+		float z = CollideInterface.GetHeight(m_Unit->GetMapId(), x, y, m_Unit->GetPositionZ() + 2.0f);
+		if( z == NO_WMO_HEIGHT )
+			z = m_Unit->GetMapMgr()->GetLandHeight(x, y);
 
-		target = pOpp;
-		break;
-	}
+		if( fabs( z - m_Unit->GetPositionZ() ) > 10.0f )
+			z = m_Unit->GetPositionZ();
+#else
+		float z = m_Unit->GetPositionZ();
+		float adt_z = m_Unit->GetMapMgr()->GetLandHeight(x, y);
+		if(fabs(z - adt_z) < 3)
+			z = adt_z;
+#endif
 
-	// We can't find an enemy!
-	if( !target )
-		return;
+		// "Guards!"
+		m_Unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, team ? LANG_ORCISH : LANG_COMMON, "Guards!");
 
-	if( m_summonedGuard != NULL && m_summonedGuard->isAlive() )
-	{
-		// Do this so we don't spam "Guards!" every second
-		if( !m_summonedGuard->GetAIInterface()->GetMostHated() && m_guardCallTimer < UNIXTIME )
+		uint8 spawned = 0;
+	
+		unordered_set<PlayerPointer>::iterator hostileItr = m_Unit->GetInRangePlayerSetBegin();
+		for(; hostileItr != m_Unit->GetInRangePlayerSetEnd(); hostileItr++)
 		{
-			m_Unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, target->GetTeam() ? LANG_COMMON : LANG_ORCISH, "Guards!");
-			m_summonedGuard->GetAIInterface()->AttackReaction( target, 1 );
-			m_guardCallTimer = uint32(UNIXTIME + 15);
+			if(spawned >= 3)
+				break;
+
+			if(!isHostile(*hostileItr, m_Unit))
+				continue;
+
+			CreaturePointer guard = m_Unit->GetMapMgr()->CreateCreature(guardId);
+			guard->Load(cp, x, y, z);
+			guard->SetInstanceID(m_Unit->GetInstanceID());
+			guard->SetZoneId(m_Unit->GetZoneId());
+			guard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); /* shitty DBs */
+			guard->m_noRespawn=true;
+		
+			if(!guard->CanAddToWorld())
+			{
+				guard->SafeDelete();
+				return;
+			}
+
+			uint32 t = spawned ? 0 : RandomUInt(8)*1000;
+			if( t == 0 )
+					guard->PushToWorld(m_Unit->GetMapMgr());
+				else
+					sEventMgr.AddEvent(guard,&Creature::AddToWorld, m_Unit->GetMapMgr(), EVENT_UNK, t, 1, 0);
+
+			//despawn after 5 minutes.
+			sEventMgr.AddEvent(guard, &Creature::SafeDelete, EVENT_CREATURE_SAFE_DELETE, 60*5*1000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			//Start patrolling if nithing else to do.
+			sEventMgr.AddEvent(guard, &Creature::SetGuardWaypoints, EVENT_UNK, 10000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+
+			spawned++;
 		}
-		else if( !(m_summonedGuard->GetAIInterface()->getThreatByPtr( target ) > 0))
-		{
-			// Spread the agro around :)
-			m_summonedGuard->GetAIInterface()->AttackReaction( target, 1 );
-		}
-		return;
 	}
-
-	if( m_summonedGuard != NULL )
-	{
-		m_summonedGuard->SummonExpire();
-		m_summonedGuard = NULLCREATURE;
-	}
-
-	ZoneGuardEntry * zg = ZoneGuardStorage.LookupEntry( target->GetZoneId() );
-	uint32 guardId = zg ? ( target->GetTeam() ? zg->AllianceEntry : zg->HordeEntry ) : 0;
-	if(guardId == 0)
-	{
-		if( target->GetTeam() )
-			guardId = 3296; // Orgrimmar Grunt
-		else
-			guardId = 68; // Stormwind City Guard
-		DEBUG_LOG("ZoneGuards","No zone guard specified for zone %u, using default guardId %u", target->GetZoneId(), guardId);
-	}
-
-	CreatureProto * cp = CreatureProtoStorage.LookupEntry( guardId );
-	if(!cp) 
-		return;
-
-	m_summonedGuard = m_Unit->GetMapMgr()->CreateCreature( guardId );
-	m_summonedGuard->Load( cp, m_Unit->GetPositionX(), m_Unit->GetPositionY(), m_Unit->GetPositionZ(), 0.0f);
-	m_summonedGuard->SetInstanceID( m_Unit->GetInstanceID() );
-	m_summonedGuard->PushToWorld( m_Unit->GetMapMgr() );
-	m_summonedGuard->SetPvPFlag();
-	
-	// "Guards!"
-	m_Unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, target->GetTeam() ? LANG_ORCISH : LANG_COMMON, "Guards!");
-
-	// initiate combat
-	m_summonedGuard->GetAIInterface()->AttackReaction( target, 1 );
-	
-	sEventMgr.AddEvent( m_summonedGuard, &Creature::SummonExpire, EVENT_SUMMON_EXPIRE, 300000, 1, 0);
-	
 }
 
 bool isGuard(uint32 id)

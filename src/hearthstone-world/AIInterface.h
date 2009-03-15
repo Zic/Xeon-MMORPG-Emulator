@@ -280,7 +280,6 @@ public:
 
 	// Update
 	void Update(uint32 p_time);
-	void UpdateCivilian();
 
 	// Movement
 	void SendMoveToPacket(float toX, float toY, float toZ, float toO, uint32 time, uint32 MoveFlags);
@@ -415,8 +414,9 @@ public:
 
 	HEARTHSTONE_INLINE void SetWaypointMap(WayPointMap * m) { m_waypoints = m; }
 	bool m_isGuard;
-//	bool m_fastMove;
+	void CallGuards();
 	void setGuardTimer(uint32 timer) { m_guardTimer = timer; }
+	uint32 m_guardCallTimer;
 	void _UpdateCombat(uint32 p_time);
 
 protected:
@@ -446,8 +446,7 @@ protected:
 
 	UnitPointer m_Unit;
 	UnitPointer m_PetOwner;
-	CreaturePointer m_summonedGuard;
-	uint32 m_guardCallTimer;
+
 	float FollowDistance;
 	float FollowDistance_backup;
 	float m_fallowAngle;
