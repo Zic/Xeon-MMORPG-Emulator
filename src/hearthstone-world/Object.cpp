@@ -1514,23 +1514,16 @@ void Object::_setFaction()
 	FactionTemplateDBC* factT = NULL;
 
 	if(GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
-	{
 		factT = dbcFactionTemplate.LookupEntry(GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-	}
-	else
-	if(GetTypeId() == TYPEID_GAMEOBJECT)
-	{
+	else if(GetTypeId() == TYPEID_GAMEOBJECT)
 		factT = dbcFactionTemplate.LookupEntry(GetUInt32Value(GAMEOBJECT_FACTION));
-	}
 
-	if(!factT)
+	if(factT)
 	{
-		return;
+		m_faction = factT;
+		m_factionDBC = dbcFaction.LookupEntry(factT->Faction);
 	}
-	m_faction = factT;
-	m_factionDBC = dbcFaction.LookupEntry(factT->Faction);
 }
-
 void Object::UpdateOppFactionSet()
 {
 	m_oppFactsInRange.clear();

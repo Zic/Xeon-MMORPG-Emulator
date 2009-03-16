@@ -210,14 +210,6 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 						m_Unit->SetUInt32Value(UNIT_CHANNEL_SPELL, 0);
 						m_Unit->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, 0);
 					}
-
-					if( UnitToFollow != NULL )
-					{
-						//we stopped following, use proto speed again
-						m_flySpeed = cr->proto->fly_speed;
-						m_runSpeed = cr->proto->run_speed;
-						m_walkSpeed = cr->proto->walk_speed;
-					}
 				}
 				
 				// Stop the emote
@@ -317,17 +309,9 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					CALL_SCRIPT_EVENT(m_Unit, OnCombatStop)(UnitToFollow);
 					m_AIState = STATE_EVADE;
 
-					if( cr != NULL && UnitToFollow != NULL)
-					{
-						UnitToFollow = NULLUNIT;
-						FollowDistance = 0.0f;
-						m_lastFollowX = m_lastFollowY = 0;
-
-						//we stopped following leader, use proto speed again
-						m_flySpeed = cr->proto->fly_speed;
-						m_runSpeed = cr->proto->run_speed;
-						m_walkSpeed = cr->proto->walk_speed;
-					}
+					UnitToFollow = NULLUNIT;
+					FollowDistance = 0.0f;
+					m_lastFollowX = m_lastFollowY = 0;
 
 					if(m_Unit->isAlive())
 					{
@@ -402,18 +386,11 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				m_AIState = STATE_FEAR;
 				StopMovement(1);
 
-				if(cr!= NULL && UnitToFollow != NULL)
-				{
-					UnitToFollow_backup = UnitToFollow;
-					UnitToFollow = NULLUNIT;
-					m_lastFollowX = m_lastFollowY = 0;
-					FollowDistance_backup = FollowDistance;
-					FollowDistance = 0.0f;
-					//we stopped following leader, use proto speed again
-					m_flySpeed = cr->proto->fly_speed;
-					m_runSpeed = cr->proto->run_speed;
-					m_walkSpeed = cr->proto->walk_speed;
-				}
+				UnitToFollow_backup = UnitToFollow;
+				UnitToFollow = NULLUNIT;
+				m_lastFollowX = m_lastFollowY = 0;
+				FollowDistance_backup = FollowDistance;
+				FollowDistance = 0.0f;
 
 				m_aiTargets.clear(); // we'll get a new target after we are unfeared
 				m_fleeTimer = 0;
@@ -430,19 +407,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 		case EVENT_UNFEAR:
 			{
-				if(cr!= NULL && UnitToFollow_backup != NULL)
-				{
-					UnitToFollow = UnitToFollow_backup;
-					UnitToFollow_backup = NULLUNIT;
-					FollowDistance = FollowDistance_backup;
-					FollowDistance_backup = 0.0f;
-
-					// synchronise speed with leader.
-					m_flySpeed = UnitToFollow->m_flySpeed;
-					m_runSpeed = UnitToFollow->m_runSpeed;
-					m_walkSpeed = UnitToFollow->m_walkSpeed;
-				}
-
+				UnitToFollow = UnitToFollow_backup;
+				FollowDistance = FollowDistance_backup;
 				m_AIState = STATE_IDLE; // we need this to prevent permanent fear, wander, and other problems
 
 				SetUnitToFear(NULLUNIT);
@@ -454,19 +420,6 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				if( pUnit == NULL ) return;
 
 				m_WanderTimer = 0;
-
-				if(cr!= NULL && UnitToFollow != NULL)
-				{
-					UnitToFollow_backup = UnitToFollow;
-					UnitToFollow = NULLUNIT;
-					m_lastFollowX = m_lastFollowY = 0;
-					FollowDistance_backup = FollowDistance;
-					FollowDistance = 0.0f;
-					//we stopped following leader, use proto speed again
-					m_flySpeed = cr->proto->fly_speed;
-					m_runSpeed = cr->proto->run_speed;
-					m_walkSpeed = cr->proto->walk_speed;
-				}
 
 				//CALL_SCRIPT_EVENT(m_Unit, OnWander)(pUnit, 0); FIXME
 				m_AIState = STATE_WANDER;
@@ -487,19 +440,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 
 		case EVENT_UNWANDER:
 			{
-				if(cr!= NULL && UnitToFollow_backup != NULL)
-				{
-					UnitToFollow = UnitToFollow_backup;
-					UnitToFollow_backup = NULLUNIT;
-					FollowDistance = FollowDistance_backup;
-					FollowDistance_backup = 0.0f;
-
-					// synchronise speed with leader.
-					m_flySpeed = UnitToFollow->m_flySpeed;
-					m_runSpeed = UnitToFollow->m_runSpeed;
-					m_walkSpeed = UnitToFollow->m_walkSpeed;
-				}
-
+				UnitToFollow = UnitToFollow_backup;
+				FollowDistance = FollowDistance_backup;
 				m_AIState = STATE_IDLE; // we need this to prevent permanent fear, wander, and other problems
 
 				StopMovement(1);
@@ -516,7 +458,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 	{
 		case EVENT_UNITDIED:
 		{
-			if( pUnit == NULL ) return;
+			if( pUnit == NULL ) 
+				return;
 
 			if( pUnit->m_CurrentVehicle )
 				pUnit->m_CurrentVehicle->RemovePassenger(pUnit);
@@ -527,14 +470,7 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					objmgr.HandleMonsterSayEvent( cr, MONSTER_SAY_EVENT_ON_DIED );
 
 				if(UnitToFollow != NULL)
-				{
 					UnitToFollow = NULLUNIT;
-
-					//we stopped following, reset speed to default
-					m_flySpeed = cr->proto->fly_speed;
-					m_runSpeed = cr->proto->run_speed;
-					m_walkSpeed = cr->proto->walk_speed;
-				}
 
 				if(UnitToFollow_backup != NULL)
 					UnitToFollow_backup = NULLUNIT;
@@ -973,9 +909,9 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
+						FollowDistance = 0.0f;
 					}
 				
-					FollowDistance = 0.0f;
 					if(m_Unit->isAttackReady(false) && !m_fleeTimer)
 					{
 						m_creatureState = ATTACKING;
@@ -1053,10 +989,9 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 					{
 						UnitToFollow = NULLUNIT; //we shouldn't be following any one
 						m_lastFollowX = m_lastFollowY = 0;
-						//m_Unit->setAttackTarget(NULL);  // remove ourselves from any target that might have been followed
+						FollowDistance = 0.0f;
 					}
 					
-					FollowDistance = 0.0f;
 
 					//FIXME: offhand shit
 					if(m_Unit->isAttackReady(false) && !m_fleeTimer)
@@ -2566,14 +2501,9 @@ void AIInterface::_UpdateMovement(uint32 p_time)
 				UnitToFollow = m_formationLinkTarget;
 				FollowDistance = m_formationFollowDistance;
 				m_fallowAngle = m_formationFollowAngle;
-				//copy leaders speed to prevent stop/go hickups. 
-				UnitToFollow->m_flySpeed = m_flySpeed;
-				UnitToFollow->m_runSpeed = m_runSpeed;
-				UnitToFollow->m_walkSpeed = m_walkSpeed;
-
 			}
 		}
-		if(UnitToFollow == 0)
+		if(UnitToFollow == NULL)
 		{
 			// no formation, use waypoints
 			int destpoint = -1;
@@ -3566,7 +3496,7 @@ void AIInterface::CallGuards()
 
 			//despawn after 5 minutes.
 			sEventMgr.AddEvent(guard, &Creature::SafeDelete, EVENT_CREATURE_SAFE_DELETE, 60*5*1000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-			//Start patrolling if nithing else to do.
+			//Start patrolling if nothing else to do.
 			sEventMgr.AddEvent(guard, &Creature::SetGuardWaypoints, EVENT_UNK, 10000, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 
 			spawned++;

@@ -492,12 +492,15 @@ void Creature::AddToWorld(MapMgrPointer pMapMgr)
 
 bool Creature::CanAddToWorld()
 {
+	if(creature_info == 0 || proto == 0)
+		return false;
+
 	if(m_factionDBC == 0 || m_faction == 0)
 		_setFaction();
 
-	if(creature_info == 0 || m_faction == 0 || m_factionDBC == 0 || proto == 0)
+	if(m_factionDBC == 0 || m_faction == 0)
 		return false;
-	
+
 	return true;
 }
 
@@ -760,8 +763,9 @@ void Creature::FormationLinkUp(uint32 SqlId)
 	if(!m_mapMgr)		// shouldnt happen
 		return;
 
-	CreaturePointer creature = m_mapMgr->GetSqlIdCreature(SqlId);
-	if(creature != 0)
+	CreaturePointer creature = NULLCREATURE;
+	creature = m_mapMgr->GetSqlIdCreature(SqlId);
+	if( creature != NULL )
 	{
 		m_aiInterface->m_formationLinkTarget = creature;
 		haslinkupevent = false;
