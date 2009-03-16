@@ -194,9 +194,9 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			data << uint32(0);					//Added in 3.0.2
 			data << fields[14].GetUInt8();		// Rest State
 
-			if(Class==9 || Class==3)
+			if( Class == WARLOCK || Class == HUNTER )
 			{
-				res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid="I64FMTD" AND active=1", guid);
+				res = CharacterDatabase.Query("SELECT entry FROM playerpets WHERE ownerguid="I64FMTD" AND ( active MOD 10 ) =1", guid);
 
 				if(res)
 				{
