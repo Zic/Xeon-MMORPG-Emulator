@@ -2553,12 +2553,15 @@ void ObjectMgr::LoadInstanceReputationModifiers()
 		InstanceReputationMod mod;
 		mod.mapid = fields[0].GetUInt32();
 		mod.mob_rep_reward = fields[1].GetInt32();
-		mod.mob_rep_limit = fields[2].GetUInt32();
-		mod.boss_rep_reward = fields[3].GetInt32();
-		mod.boss_rep_limit = fields[4].GetUInt32();
-		mod.faction[0] = fields[5].GetUInt32();
-		mod.faction[1] = fields[6].GetUInt32();
-
+		mod.mob_rep_reward_heroic = fields[2].GetInt32();
+		mod.mob_rep_limit = fields[3].GetUInt32();
+		mod.mob_rep_limit_heroic = fields[4].GetUInt32();
+		mod.boss_rep_reward = fields[5].GetInt32();
+		mod.boss_rep_reward_heroic = fields[6].GetInt32();
+		mod.boss_rep_limit = fields[7].GetUInt32();
+		mod.boss_rep_limit_heroic = fields[8].GetUInt32();
+		mod.faction[0] = fields[9].GetUInt32();
+		mod.faction[1] = fields[10].GetUInt32();
 		HM_NAMESPACE::hash_map<uint32, InstanceReputationModifier*>::iterator itr = m_reputation_instance.find(mod.mapid);
 		if(itr == m_reputation_instance.end())
 		{
@@ -2578,7 +2581,7 @@ void ObjectMgr::LoadInstanceReputationModifiers()
 bool ObjectMgr::HandleInstanceReputationModifiers(PlayerPointer pPlayer, UnitPointer pVictim)
 {
 	uint32 team = pPlayer->GetTeam();
-	bool is_boss;
+	bool is_boss, is_heroic;
 	if(pVictim->GetTypeId() != TYPEID_UNIT)
 		return false;
 
@@ -2586,9 +2589,8 @@ bool ObjectMgr::HandleInstanceReputationModifiers(PlayerPointer pPlayer, UnitPoi
 	if(itr == m_reputation_instance.end())
 		return false;
 
-	is_boss = 0;//TO_CREATURE( pVictim )->GetCreatureName() ? TO_CREATURE(pVictim)->GetCreatureName()->Rank : 0;
-	if( !is_boss && TO_CREATURE( pVictim )->proto && TO_CREATURE( pVictim )->proto->boss )
-		is_boss = 1;
+	is_boss = (TO_CREATURE( pVictim )->proto && TO_CREATURE( pVictim )->proto->boss) ? true : false;
+	is_heroic = (pPlayer->IsInWorld() && pPlayer->iInstanceType == MODE_HEROIC && pPlayer->GetMapMgr()->GetMapInfo()->type != INSTANCE_NULL) ? true : false;
 
 	// Apply the bonuses as normal.
 	int32 replimit;
@@ -2601,13 +2603,13 @@ bool ObjectMgr::HandleInstanceReputationModifiers(PlayerPointer pPlayer, UnitPoi
 
 		if(is_boss)
 		{
-			value = i->boss_rep_reward;
-			replimit = i->boss_rep_limit;
+			value = is_heroic ? i->boss_rep_reward_heroic : i->boss_rep_reward;
+			replimit = is_heroic ? i->boss_rep_limit_heroic : i->boss_rep_limit;
 		}
 		else
 		{
-			value = i->mob_rep_reward;
-			replimit = i->mob_rep_reward;
+			value =  is_heroic ? i->mob_rep_reward_heroic : i->mob_rep_reward;
+			replimit = is_heroic ? i->mob_rep_limit_heroic : i->mob_rep_limit;
 		}
 
 		if(!value || (replimit && pPlayer->GetStanding(i->faction[team]) >= replimit))
