@@ -2081,6 +2081,8 @@ void Spell::SendSpellGo()
 
 	ItemPrototype* ip = NULL;
 	uint32 flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
+	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana))
+		flags |= 0x800;
 	SpellTargetList::iterator itr;
 	uint32 counter;
 
@@ -2172,6 +2174,9 @@ void Spell::SendSpellGo()
 	}
 
 	m_targets.write( data ); // this write is included the target flag
+
+	if (flags & 0x800) //send new mana
+		data << uint32( u_caster ? u_caster->GetUInt32Value(UNIT_FIELD_POWER1 + u_caster->GetPowerType()) : 0);
 
 	if( ip != NULL)
 		data << ip->DisplayInfoID << ip->InventoryType;
@@ -2411,7 +2416,10 @@ bool Spell::HasPower()
 	}
 
 	if (cost <=0)
+	{
+		m_usesMana = false; // no mana regen interruption for free spells
 		return true;
+	}
 
 	//FIXME:DK:if field value < cost what happens
 	if(powerField == UNIT_FIELD_HEALTH)
@@ -2498,7 +2506,10 @@ bool Spell::TakePower()
 	}
 
 	if (cost <=0)
+	{
+		m_usesMana = false; // no mana regen interruption for free spells
 		return true;
+	}
 
 	//FIXME:DK:if field value < cost what happens
 	if(powerField == UNIT_FIELD_HEALTH)
@@ -2879,7 +2890,7 @@ uint8 Spell::CanCast(bool tolerate)
 			}
 			else if( m_spellInfo->Attributes & ATTRIBUTES_ONLY_OUTDOORS )
 			{
-				if( !CollideInterface.IsOutdoor( p_caster->GetMapId(),p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() + 2.0f ) )
+				if( CollideInterface.IsIndoor( p_caster->GetMapId(),p_caster->GetPositionX(), p_caster->GetPositionY(), p_caster->GetPositionZ() + 2.0f ) )
 					return SPELL_FAILED_ONLY_OUTDOORS;
 			}
 		}

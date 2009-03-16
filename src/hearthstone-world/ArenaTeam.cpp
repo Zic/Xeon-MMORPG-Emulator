@@ -222,7 +222,7 @@ void ArenaTeam::Roster(WorldPacket & data)
 	data.Initialize(SMSG_ARENA_TEAM_ROSTER);
 	data.reserve(m_memberCount * 81 + 9);
 	data << m_id;
-	data << uint8(0); //3.0.8, played?
+	data << uint8(0); //3.0.8, played? Specifies whether we are sending 2 extra floats for each member
 	data << m_memberCount;
 	data << GetPlayersPerTeam();
 
@@ -243,6 +243,7 @@ void ArenaTeam::Roster(WorldPacket & data)
 			data << m_members[i].Played_ThisSeason;
 			data << m_members[i].Won_ThisSeason;
 			data << m_members[i].PersonalRating;
+			// if uint8 flag at the beginning is not 0, 2 unknown floats are expected here
 		}
 	}
 }

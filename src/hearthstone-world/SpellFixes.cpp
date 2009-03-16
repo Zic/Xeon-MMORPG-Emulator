@@ -2828,7 +2828,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->procFlags = PROC_ON_CAST_SPELL;
 					sp->proc_interval = 45000;
-				}
+				}break;
 		
 			// Ashtongue Talisman	of Shadows 
 			case  40478:

@@ -64,6 +64,7 @@ Arena::Arena( MapMgrPointer mgr, uint32 id, uint32 lgroup, uint32 t, uint32 play
 	m_players2[0] = hashmap_new();
 	m_players2[1] = hashmap_new();
 	m_teams[0] = m_teams[1] = -1;
+	m_deltaRating[0] = m_deltaRating[1] = 0;
 }
 
 void Arena::Init()
@@ -135,6 +136,15 @@ void Arena::OnAddPlayer(PlayerPointer plr)
 	plr->SetFFAPvPFlag();
 
 	hashmap_put(m_playersAlive, plr->GetLowGUID(), (any_t)1);
+	if(Rated())
+	{
+		// Store the players who join so that we can change their rating even if they leave before arena finishes
+		hashmap_put(m_players2[plr->GetTeam()], plr->GetLowGUID(), (any_t)1);
+		if(!m_teams[plr->GetTeam()] && plr->m_playerInfo && plr->m_playerInfo->arenaTeam[m_arenateamtype] != NULL)
+		{
+			m_teams[plr->GetTeam()] = plr->m_playerInfo->arenaTeam[m_arenateamtype]->m_id;
+		}
+	}
 }
 
 void Arena::OnRemovePlayer(PlayerPointer plr)
@@ -378,20 +388,6 @@ void Arena::OnStart()
 		for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr) {
 			PlayerPointer plr = *itr;
 			plr->RemoveAura(ARENA_PREPARATION);
-			hashmap_put(m_players2[i], plr->GetLowGUID(), (any_t)1);
-
-			/* update arena team stats */
-			if(rated_match && plr->m_playerInfo && plr->m_playerInfo->arenaTeam[m_arenateamtype] != NULL)
-			{
-				ArenaTeam * t = plr->m_playerInfo->arenaTeam[m_arenateamtype];
-				m_teams[i] = t->m_id;
-				ArenaTeamMember * tp = t->GetMember(plr->m_playerInfo);
-				if(tp != NULL)
-				{
-					tp->Played_ThisWeek++;
-					tp->Played_ThisSeason++;
-				}
-			}
 		}
 	}
 
@@ -435,7 +431,7 @@ void Arena::UpdatePlayerCounts()
 	Finish();
 }
 
-uint32 Arena::CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome) 
+int32 Arena::CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome) 
 {
 	// ---- Elo Rating System ----
 	// Expected Chance to Win for Team A vs Team B
@@ -471,7 +467,6 @@ void Arena::Finish()
 	/* update arena team stats */
 	if(rated_match && teams[0] && teams[1])
 	{
-		m_deltaRating[0] = m_deltaRating[1] = 0;
 		for (uint32 i = 0; i < 2; ++i) {
 			uint32 j = i ? 0 : 1; // opposing side
 			bool outcome = (i != m_losingteam);
@@ -482,7 +477,7 @@ void Arena::Finish()
 
 			m_deltaRating[i] = CalcDeltaRating(teams[i]->m_stat_rating, teams[j]->m_stat_rating, outcome);
 			teams[i]->m_stat_rating += m_deltaRating[i];
-			if (teams[i]->m_stat_rating < 0) teams[i]->m_stat_rating = 0;
+			if ((int32)teams[i]->m_stat_rating < 0) teams[i]->m_stat_rating = 0;
 
 			for (int x=0; x<hashmap_length(m_players2[i]); x++) {
 				uint32 key;
@@ -493,7 +488,7 @@ void Arena::Finish()
 
 						if(tp != NULL) {
 							tp->PersonalRating += CalcDeltaRating(tp->PersonalRating, teams[j]->m_stat_rating, outcome);
-							if (tp->PersonalRating < 0) tp->PersonalRating = 0;
+							if ((int32)tp->PersonalRating < 0) tp->PersonalRating = 0;
 
 							if(outcome) {
 								tp->Won_ThisWeek++;
@@ -503,12 +498,15 @@ void Arena::Finish()
 					}
 				}
 			}
-
+			
 			teams[i]->SaveToDB();
+			// send arena team stats update
+			WorldPacket data(256);
+			teams[i]->Stat(data);
+			teams[i]->SendPacket(&data);
 		}
+		objmgr.UpdateArenaTeamRankings();
 	}
-
-	objmgr.UpdateArenaTeamRankings();
 
 	m_nextPvPUpdateTime = 0;
 	UpdatePvPData();

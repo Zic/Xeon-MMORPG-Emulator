@@ -6579,12 +6579,7 @@ void Aura::SpellAuraGhost(bool apply)
 		if(apply)
 		{
 			SetNegative();
-			TO_PLAYER( m_target )->m_isWaterWalking = true;
 		}
-		else
-		{
-			TO_PLAYER( m_target )->m_isWaterWalking = false;
-		} 
 	}
 	m_target->SendPowerUpdate();
 }
@@ -6752,13 +6747,15 @@ void Aura::SpellAuraWaterWalk( bool apply )
 			SetPositive();
 			data.SetOpcode( SMSG_MOVE_WATER_WALK );
 			data << m_target->GetNewGUID();
-			data << uint32( 8 );	   
+			data << uint32( 8 );
+			TO_PLAYER( m_target )->m_isWaterWalking++;
 		}
 		else
 		{
 			data.SetOpcode( SMSG_MOVE_LAND_WALK );
 			data << m_target->GetNewGUID();
 			data << uint32( 4 );		
+			TO_PLAYER( m_target )->m_isWaterWalking--;
 		}
 		TO_PLAYER( m_target )->GetSession()->SendPacket( &data );
 	}

@@ -865,29 +865,22 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 	*data << uint8(IsArena());
 	if(IsArena())
 	{	// send arena teams info
+		ArenaPointer arena= TO_ARENA(shared_from_this());
 		ArenaTeam * teams[2] = {NULL,NULL};
 		uint32 ratingNegativeChange[2] = {0,0}, ratingPositiveChange[2] = {0,0};	// Value in ratingNegativeChange is displayed with minus sign in the client
-		if(Rated()){
-			// Grab some arena teams
-			for(uint32 i = 0; i < 2; ++i)
-			{
-				for(set<PlayerPointer  >::iterator itr = m_players[i].begin(); itr != m_players[i].end(); ++itr)
-				{
-					teams[i] = (*itr)->m_playerInfo->arenaTeam[ CAST(Arena, shared_from_this())->GetArenaTeamType() ];
-					if(teams[i])
-						break;
-				}
-			}
-
-			if(teams[0])
-			{
-				// todo - rating change
-			}
-			if(teams[1])
-			{
-				// todo - rating change
-			}
+		if(Rated())
+		{
+			teams[0] = objmgr.GetArenaTeamById(arena->m_teams[0]);
+			teams[1] = objmgr.GetArenaTeamById(arena->m_teams[1]);
 		}
+
+		for(uint32 i=0; i<2; i++)
+		{
+			if(m_deltaRating[i] >= 0)
+				ratingPositiveChange[i] = m_deltaRating[i];
+			else
+				ratingNegativeChange[i] = -m_deltaRating[i];
+		}		
 		*data << ratingNegativeChange[0];
 		*data << ratingPositiveChange[0];
 		*data << ratingNegativeChange[1];
@@ -906,7 +899,12 @@ void CBattleground::BuildPvPUpdateDataPacket(WorldPacket * data)
 
 	*data << uint8(m_ended);
 	if(m_ended)
-		*data << uint8(m_losingteam);
+	{
+		if(IsArena())	// Looks like for arena it should be winning team and not losing
+			*data << uint8(m_losingteam > 0 ? 0 : 1);
+		else
+			*data << uint8(m_losingteam);
+	}
 
 	size_t pos = data->wpos();
 	*data << uint32(0); //will be set to correct number later //uint32(m_players[0].size() + m_players[1].size());

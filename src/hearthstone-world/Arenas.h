@@ -27,7 +27,6 @@ class Arena : public CBattleground
 
 	uint32 m_pcWorldStates[2];
 	GameObjectPointer m_buffs[2];
-	int32 m_teams[2]; // Ids of teams fighting in rated match
 
 	uint32 m_playersCount[2];
 	map_t m_players2[2];
@@ -89,5 +88,6 @@ public:
 	bool SupportsPlayerLoot() { return false; }
 	void HookGenerateLoot(PlayerPointer plr, CorpsePointer pCorpse) {}
 
-	uint32 CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome);
+	int32 CalcDeltaRating(uint32 oldRating, uint32 opponentRating, bool outcome);
+	int32 m_teams[2]; // Ids of teams fighting in rated match
 };

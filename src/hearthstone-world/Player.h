@@ -1263,7 +1263,7 @@ public:
 	float GetPlayerSpeed(){return m_runSpeed;}
 	uint8 m_currentMovement;
 	bool m_isMoving;
-	bool m_isWaterWalking;
+	uint8 m_isWaterWalking;
 	//Invisibility stuff
 	bool m_isGmInvisible;
 	

@@ -73,6 +73,7 @@ void Player::Init()
 	m_walkSpeed			= 2.5f;
 	m_runSpeed			  = PLAYER_NORMAL_RUN_SPEED;
 	m_isMoving			  = false;
+	m_isWaterWalking	  = 0;
 	m_ShapeShifted		  = 0;
 	m_curSelection		  = 0;
 	m_lootGuid			  = 0;
@@ -1126,20 +1127,26 @@ void Player::Update( uint32 p_time )
 
 	if (GetMapMgr() && GetMapMgr()->IsCollisionEnabled())
 	{
-		if(IsMounted())
+		if( mstime >= m_mountCheckTimer )
 		{
-			if( mstime >= m_mountCheckTimer )
+			if( CollideInterface.IsIndoor( m_mapId, m_position.x, m_position.y, m_position.z ) )
 			{
-				// Qiraj battletanks work everywhere on map 531
-				if ( m_mapId == 531 && ( m_MountSpellId == 25953 || m_MountSpellId == 26054 || m_MountSpellId == 26055 || m_MountSpellId == 26056 ) )
-					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
-				else if( CollideInterface.IsIndoor( m_mapId, m_position.x, m_position.y, m_position.z ) )
+				if(IsMounted())
 				{
-					unit_shared_from_this()->Dismount();
+					// Qiraj battletanks work everywhere on map 531
+					if (! (m_mapId == 531 && ( m_MountSpellId == 25953 || m_MountSpellId == 26054 || m_MountSpellId == 26055 || m_MountSpellId == 26056 )) )
+						unit_shared_from_this()->Dismount();
 				}
-				else
-					m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
+				// Now remove all auras that are only usable outdoors (e.g. Travel form)
+				for(uint32 x=0;x<MAX_AURAS;x++)
+				{
+					if(m_auras[x] && m_auras[x]->m_spellProto && (m_auras[x]->m_spellProto->Attributes & ATTRIBUTES_ONLY_OUTDOORS))
+					{
+						m_auras[x]->Remove();
+					}
+				}
 			}
+			m_mountCheckTimer = mstime + COLLISION_MOUNT_CHECK_INTERVAL;
 		}
 	}
 

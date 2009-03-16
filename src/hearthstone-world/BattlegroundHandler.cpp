@@ -351,16 +351,26 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
 		team = player->m_playerInfo->arenaTeam[i];
 		if( team != NULL )
 		{
+			ArenaTeamMember * tp = team->GetMember(player->m_playerInfo);
 			uint8 buf[100];
 			StackPacket data( MSG_INSPECT_ARENA_TEAMS, buf, 100 );
 			data << player->GetGUID();
 			data << uint8(team->m_type);
 			data << team->m_id;
 			data << team->m_stat_rating;
-			data << team->m_stat_gamesplayedweek;
-			data << team->m_stat_gameswonweek;
-			data << team->m_stat_gamesplayedseason;
-			data << uint32(0);
+			if(tp) // send personal stats
+			{
+				data << tp->Played_ThisSeason;
+				data << tp->Won_ThisSeason;
+				data << tp->Played_ThisWeek;
+				data << tp->PersonalRating;
+			} else // send team stats
+			{
+				data << team->m_stat_gamesplayedweek;
+				data << team->m_stat_gameswonweek;
+				data << team->m_stat_gamesplayedseason;
+				data << uint32(0);
+			}
 			SendPacket( &data );
 		}
     }
