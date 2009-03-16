@@ -1346,13 +1346,11 @@ public:
 	//Base stats calculations
 	//void CalcBaseStats();
 	// Rest
-	void AddRestXP(uint32 amount);
 	uint32 SubtractRestXP(uint32 amount);
-	uint32 CalculateRestXP(uint32 seconds);
-	uint32 m_lastRestUpdate;
-	void EventPlayerRest();
+	void AddCalculatedRestXP(uint32 seconds);
 	void ApplyPlayerRestState(bool apply);
 	void UpdateRestState();
+
 	bool m_noFallDamage;
 	float z_axisposition;
 	int32 m_safeFall;

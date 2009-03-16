@@ -167,8 +167,6 @@ void Player::Init()
 	for ( int aX = 0 ; aX < 8 ; aX++ )
 		m_Tutorials[ aX ] = 0x00;
 
-	m_lastRestUpdate		= 0;
-
 	m_lootGuid			  = 0;
 	m_banned				= false;
 
@@ -180,14 +178,14 @@ void Player::Init()
 	m_bind_zoneid		   = 0;
 
 	// Rest
-	m_timeLogoff			= 0;
-	m_isResting			 = 0;
-	m_restState			 = 0;
-	m_restAmount			= 0;
-	m_afk_reason			= "";
-	m_playedtime[0]		 = 0;
-	m_playedtime[1]		 = 0;
-	m_playedtime[2]		 = (uint32)UNIXTIME;
+	m_timeLogoff		= 0;
+	m_isResting			= 0;
+	m_restState			= 0;
+	m_restAmount		= 0;
+	m_afk_reason		= "";
+	m_playedtime[0]		= 0;
+	m_playedtime[1]		= 0;
+	m_playedtime[2]		= (uint32)UNIXTIME;
 
 	m_AllowAreaTriggerPort  = true;
 
@@ -1492,7 +1490,8 @@ void Player::_EventExploration()
 
 	if (rest_on)
 	{
-		if(!m_isResting) ApplyPlayerRestState(true);
+		if(!m_isResting)
+			ApplyPlayerRestState(true);
 	}
 	else
 	{
@@ -1551,6 +1550,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid, bool allowbonus)
 
 	uint32 restxp = xp;
 
+	//add reststate bonus
 	if(m_restState == RESTSTATE_RESTED && allowbonus)
 	{
 		restxp = SubtractRestXP(xp);
@@ -5037,66 +5037,60 @@ void Player::UpdateStats()
 	CalcDamage();
 }
 
-void Player::AddRestXP(uint32 amount)
-{
-	if(GetUInt32Value(UNIT_FIELD_LEVEL) >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))		// Save CPU, don't waste time on this if you're >= 60
-		return;
-	m_restAmount += amount;
-	SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, (uint32)(m_restAmount*0.5));
-	UpdateRestState();
-}
-
 uint32 Player::SubtractRestXP(uint32 amount)
 {
-	if(GetUInt32Value(UNIT_FIELD_LEVEL) >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))		// Save CPU, don't waste time on this if you're >= 70
-		return 0;
-	uint32 amt = amount;
-	int32 tmp = m_restAmount - amount;
-	int32 pos = m_restAmount - (amount*2);
-	if(pos < 0) pos = 0;
+	if(GetUInt32Value(UNIT_FIELD_LEVEL) >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))		// Save CPU, don't waste time on this if you've reached max_level
+		amount = 0;
 
-	if(tmp < 0)
-	{
-		amt = m_restAmount;
+	int32 restAmount = m_restAmount - (amount << 1);									// remember , we are dealing with xp without restbonus, so multiply by 2
+
+	if( restAmount < 0)
 		m_restAmount = 0;
-	}
 	else
-		m_restAmount -= amount;
+		m_restAmount = restAmount;
 
-	
-	SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, pos);
+	DEBUG_LOG("REST","Subtracted %d rest XP to a total of %d", amount, m_restAmount);
+	UpdateRestState();																	// Update clients interface with new values.
+	return amount;
+}
+
+void Player::AddCalculatedRestXP(uint32 seconds)
+{
+	// When a player rests in a city or at an inn they will gain rest bonus at a very slow rate. 
+	// Eight hours of rest will be needed for a player to gain one "bubble" of rest bonus. 
+	// At any given time, players will be able to accumulate a maximum of 30 "bubbles" worth of rest bonus which 
+	// translates into approximately 1.5 levels worth of rested play (before your character returns to normal rest state).
+	// Thanks to the comforts of a warm bed and a hearty meal, players who rest or log out at an Inn will 
+	// accumulate rest credit four times faster than players logged off outside of an Inn or City. 
+	// Players who log out anywhere else in the world will earn rest credit four times slower.
+	// http://www.worldofwarcraft.com/info/basics/resting.html
+
+
+	// Define xp for a full bar ( = 20 bubbles)
+	uint32 xp_to_lvl = uint32(lvlinfo->XPToNextLevel);
+
+	// get RestXP multiplier from config.
+	float bubblerate = sWorld.getRate(RATE_RESTXP);
+
+	// One bubble (5% of xp_to_level) for every 8 hours logged out.
+	// if multiplier RestXP (from ascent.config) is f.e 2, you only need 4hrs/bubble.
+	uint32 rested_xp = uint32(0.05f * xp_to_lvl * ( seconds / (3600 * ( 8 / bubblerate))));
+
+	// if we are at a resting area rest_XP goes 4 times faster (making it 1 bubble every 2 hrs)
+	if (m_isResting)
+		rested_xp <<= 2;
+
+	// Add result to accumulated rested XP
+	m_restAmount += uint32(rested_xp);
+
+	// and set limit to be max 1.5 * 20 bubbles * multiplier (1.5 * xp_to_level * multiplier)
+	if (m_restAmount > xp_to_lvl + (uint32)((float)( xp_to_lvl >> 1 ) * bubblerate ))
+		m_restAmount = xp_to_lvl + (uint32)((float)( xp_to_lvl >> 1 ) * bubblerate );
+
+	Log.Debug("REST","Add %d rest XP to a total of %d, RestState %d", rested_xp, m_restAmount,m_isResting);
+
+	// Update clients interface with new values.
 	UpdateRestState();
-	return amt;
-}
-
-uint32 Player::CalculateRestXP(uint32 seconds)
-{
-	float rate = sWorld.getRate(RATE_RESTXP);
-	float xp = 0;
-	if(seconds < 60)
-	{
-		xp = 1 * rate;
-	}
-	else
-	{
-		xp = ((seconds / 60) * rate);
-	}
-	return uint32(xp);
-}
-
-void Player::EventPlayerRest()
-{
-	if(GetUInt32Value(UNIT_FIELD_LEVEL) >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))		// Save CPU, don't waste time on this if you're >= 70
-	{
-		EventMgr::getSingleton().RemoveEvents(plr_shared_from_this(), EVENT_PLAYER_REST);
-		return;
-	}
-	// Rest timer
-	uint32 diff = (uint32)UNIXTIME - m_lastRestUpdate;
-	m_lastRestUpdate = (uint32)UNIXTIME;
-	uint32 RestXP = CalculateRestXP((uint32)diff);
-	OUT_DEBUG("REST: Adding %d rest XP for %d seconds of rest time", RestXP, diff);
-	AddRestXP(RestXP);
 }
 
 void Player::UpdateRestState()
@@ -5106,8 +5100,11 @@ void Player::UpdateRestState()
 	else
 		m_restState = RESTSTATE_NORMAL;
 
-	// Update needle position
+	// Update RestState 100%/200%
 	SetUInt32Value(PLAYER_BYTES_2, ((GetUInt32Value(PLAYER_BYTES_2) & 0x00FFFFFF) | (m_restState << 24)));
+
+	//update needle (weird, works at 1/2 rate)
+	SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, m_restAmount >> 1);
 }
 
 void Player::ApplyPlayerRestState(bool apply)
@@ -5116,23 +5113,14 @@ void Player::ApplyPlayerRestState(bool apply)
 	{
 		m_restState = RESTSTATE_RESTED;
 		m_isResting = true;
-
 		SetFlag(PLAYER_FLAGS, PLAYER_FLAG_RESTING);	//put zzz icon
-
-		UpdateRestState();
-		m_lastRestUpdate = (uint32)UNIXTIME;
-
-		if(GetUInt32Value(UNIT_FIELD_LEVEL) >= GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))		// Save CPU, don't waste time on this if you're >= 70
-			return;
-		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventPlayerRest, EVENT_PLAYER_REST, (uint32)60000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 	else
 	{
 		m_isResting = false;
 		RemoveFlag(PLAYER_FLAGS,PLAYER_FLAG_RESTING);	//remove zzz icon
-		sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_PLAYER_REST);
-		UpdateRestState();
 	}
+	UpdateRestState();
 }
 
 #define CORPSE_VIEW_DISTANCE 1600 // 40*40
