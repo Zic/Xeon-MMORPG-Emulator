@@ -1556,6 +1556,9 @@ UnitPointer AIInterface::FindHealTargetForSpell(AI_Spell *sp)
 
 bool AIInterface::FindFriends(float dist)
 {
+	if( m_Unit->IsPet() ) //pet's do not have friends; Players are exploiting this :-/
+		return false;
+
 	bool result = false;
 	TargetMap::iterator it;
 

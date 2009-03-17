@@ -1512,7 +1512,7 @@ void ObjectMgr::LoadTrainers()
 		result2 = WorldDatabase.Query("SELECT * FROM trainer_spells where entry='%u'",entry);
 		if(!result2)
 		{
-			Log.Error("LoadTrainers", "Trainer with no spells, entry %u.", entry);
+			Log.Error("LoadTrainers", "Trainer without spells, entry %u.", entry);
 			if(tr->UIMessage)
 				delete [] tr->UIMessage;
 			delete tr;

@@ -783,8 +783,8 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 								continue;
 
 							SpellPointer spell = NULLSPELL;
-							//Really hard to find out what's wrong here
-							//But this Blade of Life's Inevitability only must be castedby the item, not owner.
+							//Never found out why, 
+							//but this Blade of Life's Inevitability spell must be casted by the item, not owner.
 							if( m_itemProto->ItemId != 34349  )
 								spell = SpellPointer(new Spell( m_owner, sp, true, NULLAURA ));
 							else
