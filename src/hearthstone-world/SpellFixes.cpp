@@ -6015,7 +6015,10 @@ void ApplyNormalFixes()
 			sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
 
 		if( sp->NameHash == SPELL_HASH_IMPROVED_COUNTERSPELL )
+		{
 			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectSpellClassMask[0][0] = 0x00004000;	// Proc on counterspell only
+		}
 
 		if( sp->NameHash == SPELL_HASH_FROSTBITE )
 		{
