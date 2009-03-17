@@ -1913,6 +1913,8 @@ void Player::SpawnPet(uint32 pet_number)
 	PetPointer pPet = objmgr.CreatePet();
 	pPet->SetInstanceID(GetInstanceID());
 	pPet->LoadFromDB(plr_shared_from_this(), itr->second);
+	if( IsPvPFlagged() )
+		pPet->SetPvPFlag();
 }
 
 void Player::_LoadPetSpells(QueryResult * result)

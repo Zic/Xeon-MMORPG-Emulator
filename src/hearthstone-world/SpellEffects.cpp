@@ -4282,6 +4282,8 @@ void Spell::SpellEffectSummonPet(uint32 i) //summon - pet
 		PetPointer summon = objmgr.CreatePet();
 		summon->SetInstanceID(m_caster->GetInstanceID());
 		summon->CreateAsSummon(m_spellInfo->EffectMiscValue[i], ci, NULLCREATURE, u_caster, m_spellInfo, 1, 0);
+		if( u_caster->IsPvPFlagged() )
+			summon->SetPvPFlag();
 	}
 }
 

@@ -211,7 +211,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraReduceEnemyRCritChance,//missing = 188 //used //Apply Aura: Reduces Attacker Chance to Crit with Ranged (Melee?) //http://www.thottbot.com/?sp=30893
 		&Aura::SpellAuraIncreaseRating,//missing = 189 //Apply Aura: Increases Rating
 		&Aura::SpellAuraIncreaseRepGainPct,//SPELL_AURA_MOD_FACTION_REPUTATION_GAIN //used // Apply Aura: Increases Reputation Gained by % //http://www.thottbot.com/?sp=30754
-		&Aura::SpellAuraLimitSpeed,//missing = 191 //used // noname //http://www.thottbot.com/?sp=29894
+		&Aura::SpellAuraUseNormalMovementSpeed,//missing = 191 //used // noname //http://www.thottbot.com/?sp=29894
 		&Aura::SpellAuraNULL,//192 Apply Aura: Melee Slow %
 		&Aura::SpellAuraIncreaseTimeBetweenAttacksPCT,//193 Apply Aura: Increase Time Between Attacks (Melee, Ranged and Spell) by %
 		&Aura::SpellAuraNULL,//194 //&Aura::SpellAuraIncreaseSpellDamageByInt,//194 Apply Aura: Increase Spell Damage by % of Intellect (All)
@@ -6407,7 +6407,7 @@ void Aura::SpellAuraChannelDeathItem(bool apply)
 						return;
 				
 					uint32 itemid = GetSpellProto()->EffectItemType[mod->i];
-					if(itemid == 6265 && pCaster->getLevel() - m_target->getLevel() > 9)
+					if(itemid == 6265 && int32(pCaster->getLevel() - m_target->getLevel()) > 9)
 						return;
 
 					ItemPrototype *proto = ItemPrototypeStorage.LookupEntry(itemid);
@@ -8285,7 +8285,7 @@ void Aura::SpellAuraReduceEnemyRCritChance(bool apply)
 	}
 }
 
-void Aura::SpellAuraLimitSpeed( bool apply )
+void Aura::SpellAuraUseNormalMovementSpeed( bool apply )
 {
 	int32 amount = ( apply ) ? mod->m_amount : -mod->m_amount;
 	m_target->m_maxSpeed += (float)amount;

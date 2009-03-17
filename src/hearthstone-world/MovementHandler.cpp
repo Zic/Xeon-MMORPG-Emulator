@@ -436,8 +436,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 	//Water walk hack
 	if (movement_info.flags & MOVEFLAG_WATER_WALK && !GetPlayer()->m_isWaterWalking)
 	{
+		/* Need to check if aura has just been dispelled recently and client didn't have time to update
 		sCheatLog.writefromsession(this, "Used water walk hack");
-		Disconnect();
+		Disconnect();*/
 	}
 
 	/************************************************************************/

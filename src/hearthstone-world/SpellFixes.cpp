@@ -717,6 +717,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->EffectSpellClassMask[0][0] = 0x00100000	|	0x10000000 | 0x80000000; //Earth + Flame + Frost Shocks
 					sp->EffectSpellClassMask[0][1] = 0x08000000;	// Wind	Shock
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectImplicitTargetA[1] = EFF_TARGET_SELF;
 				}break;
 			case 60567:
 				{
@@ -3986,6 +3988,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->ProcsPerMinute = 1.0f;
 						sp->proc_interval	=	60000;
 						sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;	
+			// Meteorite Whetstone
+			case 60301:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
 				}break;	
 		
 			// shadow	of death
