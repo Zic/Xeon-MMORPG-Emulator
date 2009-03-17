@@ -3680,11 +3680,17 @@ void Spell::SpellEffectLearnPetSpell(uint32 i)
 
 	if(unitTarget && unitTarget->IsPet() && p_caster)
 	{
-		PetPointer pPet = TO_PET( unitTarget );
-		if(pPet->IsSummon())
-			p_caster->AddSummonSpell(unitTarget->GetEntry(), m_spellInfo->EffectTriggerSpell[i]);
+		for(uint32 i=0;i<3;i++)
+		{
+			if (m_spellInfo->EffectTriggerSpell[i])
+			{
+				PetPointer pPet = TO_PET( unitTarget );
+				if(pPet->IsSummon())
+					p_caster->AddSummonSpell(unitTarget->GetEntry(), m_spellInfo->EffectTriggerSpell[i]);
 		
-		pPet->AddSpell( dbcSpell.LookupEntry( m_spellInfo->EffectTriggerSpell[i] ), true );
+				pPet->AddSpell( dbcSpell.LookupEntry( m_spellInfo->EffectTriggerSpell[i] ), true );
+			}
+		}
 	}
 }
 

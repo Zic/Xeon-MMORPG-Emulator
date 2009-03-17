@@ -4483,7 +4483,11 @@ void Unit::EmoteExpire()
 
 uint32 Unit::GetResistance(uint32 type)
 {
-	return GetUInt32Value(UNIT_FIELD_RESISTANCES+type);
+	if( type <= 6)
+		return GetUInt32Value(UNIT_FIELD_RESISTANCES+type);
+
+	OUT_DEBUG("Database","Creature_proto has illegal values in field \"AttackBase\" (value > 6)");
+	return GetUInt32Value(UNIT_FIELD_RESISTANCES);
 }
 
 void Unit::MoveToWaypoint(uint32 wp_id)
@@ -4494,7 +4498,7 @@ void Unit::MoveToWaypoint(uint32 wp_id)
 		WayPoint *wp = ai->getWayPoint(wp_id);
 		if(!wp)
 		{
-			sLog.outString("WARNING: Invalid WP specified in MoveToWaypoint.");
+			OUT_DEBUG("Database","Invalid WP %u specified for spawnid %u.", wp_id, TO_CREATURE(shared_from_this())->GetSQL_id());
 			return;
 		}
 
