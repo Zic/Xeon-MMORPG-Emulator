@@ -9540,12 +9540,12 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 		addSpell(2842);
 
 	// hackfix for runeforging
-	if(SkillLine==SKILL_RUNEFORGING(
+	if(SkillLine==SKILL_RUNEFORGING)
 	{
 		if(!HasSpell(53341))
-			addSpell( 53341 ); // Rune of Cinderglacier
+			addSpell(53341); // Rune of Cinderglacier
 		if(!HasSpell(53343))
-			addSpell( 53343 ); // Rune of Razorice
+			addSpell(53343); // Rune of Razorice
 	}
 }
 
