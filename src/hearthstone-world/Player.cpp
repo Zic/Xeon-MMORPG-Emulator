@@ -9538,6 +9538,15 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 	// hackfix for poisons
 	if(SkillLine==SKILL_POISONS && !HasSpell(2842))
 		addSpell(2842);
+
+	// hackfix for runeforging
+	if(SkillLine==SKILL_RUNEFORGING(
+	{
+		if(!HasSpell(53341))
+			addSpell( 53341 ); // Rune of Cinderglacier
+		if(!HasSpell(53343))
+			addSpell( 53343 ); // Rune of Razorice
+	}
 }
 
 void Player::_UpdateSkillFields()
