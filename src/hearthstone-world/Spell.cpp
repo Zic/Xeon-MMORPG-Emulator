@@ -2349,14 +2349,18 @@ void Spell::SendResurrectRequest(PlayerPointer target)
 
 bool Spell::HasPower()
 {
-	int32 powerField;
-	if( u_caster != NULL )
-		if(u_caster->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
-			return true;
-
+	//trainers can always cast
+	if( u_caster != NULL && u_caster->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) )
+		return true;
+	//Powercheaters too
 	if(p_caster && p_caster->PowerCheat)
 		return true;
+	//Seems to be an issue since 3.0.9, as many elixers/potions got powertype 4 
+	//Haven't found any items taking power, so guess it's safe to skip them.
+	if(i_caster) 
+		return true; 
 
+	int32 powerField;
 	switch(m_spellInfo->powerType)
 	{
 	case POWER_TYPE_HEALTH:	{ powerField = UNIT_FIELD_HEALTH; }break;
@@ -2376,7 +2380,7 @@ bool Spell::HasPower()
 		}
 	case POWER_TYPE_RUNIC:	{ powerField = UNIT_FIELD_POWER7; }break;
 	default:{
-		OUT_DEBUG("unknown power type %d", m_spellInfo->powerType);
+		DEBUG_LOG("Spell","unknown power type %d", m_spellInfo->powerType);
 		// we should'nt be here to return
 		return false;
 			}break;
@@ -2439,11 +2443,16 @@ bool Spell::HasPower()
 
 bool Spell::TakePower()
 {
-	// Don't use mana
-	if(p_caster && p_caster->PowerCheat)
-		return true;
+	//trainers can always cast
 	if( u_caster != NULL && u_caster->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) )
 		return true;
+	//Powercheaters too
+	if(p_caster && p_caster->PowerCheat)
+		return true;
+	//Seems to be an issue since 3.0.9, as many elixers/potions got powertype 4 
+	//Haven't found any items taking power, so guess it's safe to skip them.
+	if(i_caster) 
+		return true; 
 
 	int32 powerField;
 	switch(m_spellInfo->powerType)

@@ -24,7 +24,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 	CHECK_INWORLD_RETURN;
 	
 	PlayerPointer p_User = GetPlayer();
-	OUT_DEBUG("WORLD: got use Item packet, data length = %i",recvPacket.size());
+	DEBUG_LOG("WORLD","Received use Item packet, data length = %i",recvPacket.size());
 	int8 tmp1,slot;
 	uint8 unk; // 3.0.2 added unk
 	uint64 item_guid;
