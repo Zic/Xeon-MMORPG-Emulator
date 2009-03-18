@@ -5113,10 +5113,10 @@ void Spell::SpellEffectSanctuary(uint32 i) // Stop all attacks made to you
 	Object::InRangeSet::iterator itr_end = u_caster->GetInRangeOppFactsSetBegin();
 	UnitPointer pUnit;
 
-	for( ; itr != itr_end; ++itr ) {
+	for( ; itr != itr_end; ++itr )
+	{
 		pUnit = TO_UNIT(*itr);
-		++itr;
-
+		
 		if( pUnit->GetTypeId() == TYPEID_UNIT )
 			pUnit->GetAIInterface()->RemoveThreatByPtr( u_caster );
 	}

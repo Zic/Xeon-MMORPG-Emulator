@@ -534,9 +534,9 @@ void InformationCore::TimeoutSockets()
 		{
 			// ping timeout
 			s->removed = true;
-			set<uint32>::iterator itr = s->server_ids.begin();
-			for(; itr != s->server_ids.end(); ++itr)
-				SetRealmOffline(*itr, s);
+			set<uint32>::iterator idItr = s->server_ids.begin();
+			for(; idItr != s->server_ids.end(); ++idItr)
+				SetRealmOffline(*idItr, s);
 			m_serverSockets.erase(it2);
 
 			s->Disconnect();

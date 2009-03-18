@@ -715,28 +715,6 @@ void Spell::SpellTargetDummyTarget(uint32 i, uint32 j)
 		//FIXME:this ll be immortal targets
 		FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
 	}
-	if(m_spellInfo->Id == 30427)
-	{
-		uint32 cloudtype;
-		CreaturePointer creature = NULLCREATURE;
-
-		if(!p_caster)
-			return;
-
-		for(Object::InRangeSet::iterator itr = p_caster->GetInRangeSetBegin(); itr != p_caster->GetInRangeSetEnd(); ++itr)
-		{
-			if((*itr)->GetTypeId() == TYPEID_UNIT && p_caster->GetDistance2dSq((*itr)) < 400)
-			{
-				creature= TO_CREATURE(*itr);
-				cloudtype=creature->GetEntry();
-				if(cloudtype == 24222 || cloudtype == 17408 || cloudtype == 17407 || cloudtype == 17378)
-				{
-					p_caster->SetSelection(creature->GetGUID());
-					return;
-				}
-			}
-		}
-	}
 	_AddTargetForced(m_caster->GetGUID(), i);
 }
 
