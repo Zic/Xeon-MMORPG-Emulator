@@ -197,7 +197,9 @@ void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
 		msg.player_guid = m_player->m_playerInfo->guid;
 		msg.delivery_time = (uint32)UNIXTIME;
 		msg.expire_time = 0; // This message NEVER expires.
-		sMailSystem.DeliverMessage(m_player->m_playerInfo->guid, &msg);
+		
+		DEBUG_LOG("AchievementInterface","GiveRewardsForAchievement disabled until properly fixed");
+//		sMailSystem.DeliverMessage(m_player->m_playerInfo->guid, &msg);
 
 		pItem->Destructor();
 		pItem = NULLITEM;
