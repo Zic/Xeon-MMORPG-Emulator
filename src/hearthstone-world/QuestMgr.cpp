@@ -776,7 +776,7 @@ void QuestMgr::OnPlayerSlain(PlayerPointer plr, PlayerPointer victim)
 	uint32 i;
 	for(i = 0; i < 25; ++i)
 	{
-		if((qle = plr->GetQuestLogInSlot(i)) && qle->m_player_slain)
+		if((qle = plr->GetQuestLogInSlot(i)) && qle->m_quest->required_kill_player)
 		{
 			qle->SetPlayerSlainCount(qle->m_player_slain + 1);
 			if(qle->CanBeFinished())

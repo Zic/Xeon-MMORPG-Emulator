@@ -308,6 +308,9 @@ bool QuestLogEntry::CanBeFinished()
 	if(m_plr->GetFinishedDailiesCount() >= 25)
 		return false;
 
+	if(m_quest->time && !m_time_left)
+		return false;
+
 	return true;
 }
 
