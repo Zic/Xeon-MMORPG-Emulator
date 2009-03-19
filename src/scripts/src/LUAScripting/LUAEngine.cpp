@@ -2090,7 +2090,7 @@ int luaUnit_GetClosestPlayer(lua_State * L, UnitPointer  ptr)
 		return 0;
 
 	float dist, d2;
-	PlayerPointer  ret=NULLPLR;
+	UnitPointer ret;
 
 	for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 	{
@@ -2105,7 +2105,7 @@ int luaUnit_GetClosestPlayer(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,TO_UNIT(ret),false);
+		Lunar<Unit>::push(L, ret ,false);
 
 	return 1;
 }
@@ -2116,14 +2116,17 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 
 	int flag = luaL_checkint( L, 1 );
 
-	PlayerPointer ret = NULLPLR;
+	UnitPointer ret;
+	UnitPointer obj;
+	uint32 count;
+	uint32 r;
 
 	switch( flag )
 	{
 	case RANDOM_ANY:
 		{
-			uint32 count = (uint32)ptr->GetInRangePlayersCount();
-			uint32 r = RandomUInt(count-1);
+			count = (uint32)ptr->GetInRangePlayersCount();
+			r = RandomUInt(count-1);
 			count=0;
 
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
@@ -2139,10 +2142,10 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_IN_SHORTRANGE:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
-				PlayerPointer obj = TO_PLAYER(*itr);
+				obj = (*itr);
 				if (obj && obj->CalcDistance(obj,ptr)<=8)
 					++count;
 			}
@@ -2152,8 +2155,11 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj->CalcDistance(obj,ptr)<=8 && count==r)
+					obj = (*itr);
+					if (!obj || !(obj->CalcDistance(obj,ptr)<=8))
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2165,10 +2171,10 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_IN_MIDRANGE:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
-				PlayerPointer obj = TO_PLAYER(*itr);
+				obj = (*itr);
 				if (!obj)
 					continue;
 				float distance = obj->CalcDistance(obj,ptr);
@@ -2181,11 +2187,14 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
+					obj = (*itr);
 					if (!obj)
 						continue;
 					float distance = obj->CalcDistance(obj,ptr);
-					if (distance<20 && distance>8 && count==r)
+					if (!(distance<20 && distance>8))
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2197,7 +2206,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_IN_LONGRANGE:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
 				PlayerPointer obj = TO_PLAYER(*itr);
@@ -2210,8 +2219,11 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj->CalcDistance(obj,ptr)>=20 && count==r)
+					obj = (*itr);
+					if (!obj || !(obj->CalcDistance(obj,ptr)>=20))
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2223,10 +2235,10 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_WITH_MANA:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
-				PlayerPointer obj = TO_PLAYER(*itr);
+				obj = (*itr);
 				if (obj && obj->GetPowerType() == POWER_TYPE_MANA)
 					++count;
 			}
@@ -2236,8 +2248,11 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj->GetPowerType() == POWER_TYPE_MANA && count==r)
+					obj = (*itr);
+					if (!obj || obj->GetPowerType() != POWER_TYPE_MANA)
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2249,10 +2264,10 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_WITH_ENERGY:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
-				PlayerPointer obj = TO_PLAYER(*itr);
+				obj = (*itr);
 				if (obj && obj->GetPowerType() == POWER_TYPE_ENERGY)
 					++count;
 			}
@@ -2262,8 +2277,11 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj->GetPowerType() == POWER_TYPE_ENERGY && count==r)
+					obj = (*itr);
+					if (!obj || obj->GetPowerType() != POWER_TYPE_ENERGY)
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2275,10 +2293,10 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_WITH_RAGE:
 		{
-			uint32 count = 0;
+			count = 0;
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
-				PlayerPointer obj = TO_PLAYER(*itr);
+				obj = (*itr);
 				if (obj && obj->GetPowerType() == POWER_TYPE_RAGE)
 					++count;
 			}
@@ -2288,8 +2306,11 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				count=0;
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj->GetPowerType() == POWER_TYPE_RAGE && count==r)
+					obj = (*itr);
+					if (!obj || obj->GetPowerType() != POWER_TYPE_RAGE)
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
@@ -2301,32 +2322,29 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 		break;
 	case RANDOM_NOT_MAINTANK:
 		{
-			uint32 count = 0;
+			count = 0;
 			UnitPointer mt = ptr->GetAIInterface()->GetMostHated();
-			if (!mt || !mt->IsPlayer())
-				return 0;
 
-			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
-			{
-				PlayerPointer obj = TO_PLAYER(*itr);
-				if (obj != mt)
-					++count;
-			}
-			if (count)
-			{
-				uint32 r = RandomUInt(count-1);
-				count=0;
+			count = (uint32)ptr->GetInRangePlayersCount();
+			if(mt)
+				r = RandomUInt(count-2);
+			else
+				r = RandomUInt(count-1);
+			count=0;
+			
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
-					PlayerPointer obj = TO_PLAYER(*itr);
-					if (obj && obj != mt && count==r)
+					obj = (*itr);
+					if (!obj || (mt && obj == mt))
+						continue;
+					
+					if(count==r)
 					{
 						ret=obj;
 						break;
 					}
 					++count;
 				}
-			}
 		}
 		break;
 	}
@@ -2334,7 +2352,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,TO_UNIT(ret),false);
+		Lunar<Unit>::push(L, ret ,false);
 
 	return 1;
 }
@@ -2343,12 +2361,13 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 	if(!ptr)
 		return 0;
 
-	UnitPointer  ret=NULLUNIT;
+	UnitPointer ret;
+	ObjectPointer obj;
 	uint32 count = 0;
 
 	for(unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); ++itr)
 	{
-		ObjectPointer obj = TO_OBJECT(*itr);
+		obj = (*itr);
 		if (obj->IsUnit() && isFriendly(obj,ptr))
 			++count;
 	}
@@ -2359,8 +2378,11 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 		count=0;
 		for(unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); ++itr)
 		{
-			ObjectPointer obj = TO_OBJECT(*itr);
-			if (obj->IsUnit() && isFriendly(obj,ptr) && count==r)
+			obj = (*itr);
+			if (!obj->IsUnit() || !isFriendly(obj,ptr))
+				continue;
+
+			if(count==r)
 			{
 				ret= TO_UNIT(obj);
 				break;
@@ -2371,7 +2393,7 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,(ret),false);
+		Lunar<Unit>::push(L, ret,false);
 	return 1;
 }
 
@@ -2417,17 +2439,19 @@ int luaUnit_Despawn(lua_State * L, UnitPointer  ptr)
 }
 int luaUnit_GetInRangeFriends(lua_State * L, UnitPointer  ptr)
 {
-	ObjectPointer  pC = NULLOBJ;
+	ObjectPointer pC;
 	uint32 count = 0;
 	lua_newtable(L);
 	for( unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); itr++)
 	{
 		if( (*itr) ->IsUnit() )
+		{
 			count++,
 			pC = *itr;
 			lua_pushinteger(L,count);
 			Lunar<Unit>::push(L,TO_UNIT(pC),false);
 			lua_rawset(L,-3);
+		}
 	}
 	return 1;
 }
