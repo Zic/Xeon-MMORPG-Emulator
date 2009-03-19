@@ -929,7 +929,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( it != NULL && it->GetProto() )
 								{
 									//class 2 means weapons ;)
-									if( it->GetProto()->Class != 2 )
+									if( it->GetProto()->Class != ITEM_CLASS_WEAPON )
 										continue;
 								}
 								else continue; //no weapon no joy
@@ -6090,9 +6090,9 @@ bool Unit::HasAurasOfNameHashWithCaster(uint32 namehash, UnitPointer caster)
 	return false;
 }
 
-void Creature::UpdateLootAnimation()
+void Creature::UpdateLootAnimation(PlayerPointer Looter)
 {
-	if( m_loot.HasItems() )
+	if( m_loot.HasLoot(Looter) )
 	{
 		// update players with lootable flags
 		for(unordered_set<PlayerPointer  >::iterator itr = m_inRangePlayers.begin(); itr != m_inRangePlayers.end(); ++itr)
@@ -6141,7 +6141,7 @@ void Creature::ClearTag()
 
 		// if we are alive, means that we left combat
 		if( IsInWorld() )
-			UpdateLootAnimation();
+			UpdateLootAnimation(NULLPLR);
 	}
 	// dead, don't clear tag
 }
@@ -6181,7 +6181,7 @@ void Creature::Tag(PlayerPointer plr)
 		m_lootMethod = plr->GetGroup()->GetMethod();
 
 	// update tag visual
-	UpdateLootAnimation();
+	UpdateLootAnimation(plr);
 }
 
 void Unit::SetPower(uint32 type, int32 value)

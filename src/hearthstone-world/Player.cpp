@@ -4859,7 +4859,7 @@ void Player::UpdateAttackSpeed()
 	SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, uint32(( speed * m_meleeattackspeedmod ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ));
 	
 	weap = GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-	if( weap != NULL && weap->GetProto()->Class == 2 )// 2 is a weapon
+	if( weap != NULL && weap->GetProto()->Class == ITEM_CLASS_WEAPON )
 	{
 		speed = weap->GetProto()->Delay;
 		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME + 1, uint32(( speed * m_meleeattackspeedmod ) * ( ( 100.0f - CalcRating( PLAYER_RATING_MODIFIER_MELEE_HASTE ) ) / 100.0f ) ));

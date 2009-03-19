@@ -1886,7 +1886,7 @@ void QuestMgr::LoadExtraQuestStuff()
 								if( itr->second.items[xx].item.itemproto == NULL )
 									continue; 
 
-								if( itr->second.items[xx].item.itemproto->Class != 12 )
+								if( itr->second.items[xx].item.itemproto->Class != ITEM_CLASS_QUEST )
 								{
 									has_other = true;
 									break;

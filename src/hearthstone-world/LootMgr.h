@@ -95,8 +95,8 @@ struct Loot
 	std::vector<__LootItem> items;
 	uint32 gold;
 	LooterSet looters;
-	bool HasItems();
-	bool HasLoot() { return (gold > 0) || HasItems(); }
+	bool HasItems(PlayerPointer Looter);
+	bool HasLoot(PlayerPointer Looter);
 };
 
 struct tempy

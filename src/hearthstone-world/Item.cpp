@@ -704,7 +704,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 						/* This needs to be modified based on the attack speed of the weapon.
 						 * Secondly, need to assign some static chance for instant attacks (ss,
 						 * gouge, etc.) */
-						if( !Entry->min[c] && GetProto()->Class == 2 )
+						if( !Entry->min[c] && GetProto()->Class == ITEM_CLASS_WEAPON )
 						{
 							float speed = (float)GetProto()->Delay;
 							/////// procChance calc ///////

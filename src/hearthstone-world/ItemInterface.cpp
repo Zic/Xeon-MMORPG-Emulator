@@ -1670,14 +1670,14 @@ int8 ItemInterface::CanEquipItemInSlot(int8 DstInvSlot, int8 slot, ItemPrototype
 		if(proto->RequiredLevel>m_pOwner->GetUInt32Value(UNIT_FIELD_LEVEL))
 			return INV_ERR_YOU_MUST_REACH_LEVEL_N;
 
-		if(proto->Class == 4)
+		if(proto->Class == ITEM_CLASS_ARMOR)
 		{
 
 			if(!(m_pOwner->GetArmorProficiency()&(((uint32)(1))<<proto->SubClass)))
 				return INV_ERR_NO_REQUIRED_PROFICIENCY;
 
 		}
-		else if(proto->Class == 2)
+		else if(proto->Class == ITEM_CLASS_WEAPON)
 		{
 			if(!(m_pOwner->GetWeaponProficiency()&(((uint32)(1))<<proto->SubClass)))
 				return INV_ERR_NO_REQUIRED_PROFICIENCY;

@@ -593,7 +593,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
 				(pThis->m_taggingPlayer == target->GetLowGUID()) )
 			{
 				m_uint32Values[UNIT_DYNAMIC_FLAGS] |= U_DYN_FLAG_TAPPED_BY_PLAYER;
-				if( pThis->m_loot.HasItems() )
+				if( pThis->m_loot.HasLoot(target) )
 					m_uint32Values[UNIT_DYNAMIC_FLAGS] |= U_DYN_FLAG_LOOTABLE;
 			}
 			else
@@ -2012,7 +2012,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			TO_CREATURE(pVictim)->GenerateLoot();
 
 			// update visual.
-			TO_CREATURE(pVictim)->UpdateLootAnimation();
+			TO_CREATURE(pVictim)->UpdateLootAnimation(plr);
 		}
 
 		// player loot for battlegrounds

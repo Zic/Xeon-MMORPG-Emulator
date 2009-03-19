@@ -629,7 +629,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 
 				if(it)
 				{
-					if(it->GetProto()->Class == 2) //weapon
+					if(it->GetProto()->Class == ITEM_CLASS_WEAPON) //weapon
 					{
 						if(it->GetProto()->InventoryType == INVTYPE_2HWEAPON) wspeed = 3300;
 						else if(it->GetProto()->SubClass == 15) wspeed = 1700;

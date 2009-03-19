@@ -2012,7 +2012,7 @@ void WorldSession::HandleWrapItemOpcode( WorldPacket& recv_data )
 	if( !src || !dst )
 		return;
 
-	if(src == dst || !(src->GetProto()->Class == 0 && src->GetProto()->SubClass == 8))
+	if(src == dst || !(src->GetProto()->Class == ITEM_CLASS_CONSUMABLE && src->GetProto()->SubClass == ITEM_SUBCLASS_CONSUMABLE_OTHER))
 	{
 		_player->GetItemInterface()->BuildInventoryChangeError( src, dst, INV_ERR_WRAPPED_CANT_BE_WRAPPED );
 		return;

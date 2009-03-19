@@ -579,7 +579,7 @@ public:
 	int8 m_lootMethod;
 
 	// updates the loot state, whether it is tagged or lootable, or no longer has items
-	void UpdateLootAnimation();
+	void UpdateLootAnimation(PlayerPointer Looter);
 
 	// clears tag, clears "tagged" visual grey
 	void ClearTag();

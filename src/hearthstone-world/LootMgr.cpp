@@ -485,8 +485,10 @@ void LootMgr::FillCreatureLoot(Loot * loot,uint32 loot_id, bool heroic)
 	loot->gold =0;
 	
 	LootStore::iterator tab =CreatureLoot.find(loot_id);
-	if( CreatureLoot.end()==tab)return;
-	else PushLoot(&tab->second,loot, heroic, false);
+	if( CreatureLoot.end()==tab)
+		return;
+	else 
+		PushLoot(&tab->second,loot, heroic, false);
 }
 
 void LootMgr::FillGOLoot(Loot * loot,uint32 loot_id, bool heroic)
@@ -964,17 +966,26 @@ void LootMgr::FillObjectLootMap(map<uint32, vector<uint32> > *dest)
 
 }
 
-bool Loot::HasItems()
+bool Loot::HasLoot(PlayerPointer Looter)
 {
 	// check gold
 	if( gold > 0 )
 		return true;
 
+	return HasItems(Looter);
+}
+bool Loot::HasItems(PlayerPointer Looter)
+{
 	// check items
 	for(vector<__LootItem>::iterator itr = items.begin(); itr != items.end(); ++itr)
 	{
-		if( itr->iItemsCount > 0 && itr->item.itemproto->Class != 12 )
-			return true;
+		if( itr->iItemsCount > 0 )
+		{
+			if( itr->item.itemproto->Class != ITEM_CLASS_QUEST )
+				return true;
+			if( Looter != NULL && Looter->HasQuestForItem( itr->item.itemproto->ItemId ) )
+				return true;
+		}
 	}
 
 	return false;				

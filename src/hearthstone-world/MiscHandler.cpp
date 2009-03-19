@@ -359,7 +359,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                                 if( pLock->lockmisc[i] == LOCKTYPE_MINING || pLock->lockmisc[i] == LOCKTYPE_HERBALISM )
                                 {
                                     //we still have loot inside.
-                                    if( pGO->m_loot.HasLoot() )
+                                    if( pGO->m_loot.HasItems(_player) )
                                     {
                                         pGO->SetByte(GAMEOBJECT_BYTES_1, 0, 1 );
 										// TODO : redo this temporary fix, because for some reason hasloot is true even when we loot everything
@@ -383,7 +383,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                                 }
                                 else //other type of locks that i dont bother to split atm ;P
                                 {
-                                    if(pGO->m_loot.HasLoot())
+                                    if(pGO->m_loot.HasItems(_player))
                                     {
                                         pGO->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
                                         return;
@@ -406,7 +406,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                 }
                 else
                 {
-                    if( pGO->m_loot.HasLoot() )
+                    if( pGO->m_loot.HasItems(_player) )
                     {
                         pGO->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
                         return;
@@ -434,7 +434,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 		ItemPointer pItem = _player->GetItemInterface()->GetItemByGUID(guid);
 		if( pItem != NULL )
 		{
-			if( !pItem->m_loot.HasLoot() )
+			if( !pItem->m_loot.HasItems(_player) )
 				_player->GetItemInterface()->SafeFullRemoveItemByGuid(guid);
 		}
 
@@ -447,9 +447,9 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 		if( pLootTarget != NULL )
 		{
 			pLootTarget->m_loot.looters.erase(_player->GetLowGUID());
-			if( !pLootTarget->m_loot.HasLoot() )
+			if( !pLootTarget->m_loot.HasLoot(_player) )
 			{
-				TO_CREATURE(pLootTarget)->UpdateLootAnimation();
+				TO_CREATURE(pLootTarget)->UpdateLootAnimation(_player);
 
 				// skinning
 				if( lootmgr.IsSkinnable( pLootTarget->GetEntry() ) )
@@ -463,7 +463,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 	else if( GET_TYPE_FROM_GUID(guid) == HIGHGUID_TYPE_CORPSE )
 	{
 		CorpsePointer pCorpse = objmgr.GetCorpse((uint32)guid);
-		if( pCorpse != NULL && !pCorpse->m_loot.HasLoot() )
+		if( pCorpse != NULL && !pCorpse->m_loot.HasLoot(_player) )
 			pCorpse->Despawn();
 	}
 }
