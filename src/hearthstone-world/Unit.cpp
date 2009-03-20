@@ -2464,15 +2464,10 @@ uint32 Unit::GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_typ
 	else if(this->IsPlayer())
 	{
 		it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-		if( it != NULL && it->GetProto()->InventoryType == INVTYPE_WEAPON && !ability )//dualwield to-hit penalty
+		if( it != NULL && (it->GetProto()->InventoryType == INVTYPE_WEAPON ||
+			it->GetProto()->InventoryType == INVTYPE_2HWEAPON) && !ability )//dualwield to-hit penalty
 		{
 			hitmodifier -= 19.0f;
-		}
-		else
-		{
-			it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-			if( it != NULL && it->GetProto()->InventoryType == INVTYPE_2HWEAPON )//2 handed weapon to-hit penalty
-				hitmodifier -= 4.0f;
 		}
 	}
 
@@ -2484,15 +2479,20 @@ uint32 Unit::GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_typ
 	if( block )
 		block = std::max( 0.0f, block - vsk * 0.04f );
 
-	if( vsk > 0 )
-		hitchance = std::max( hitchance, 95.0f + vsk * 0.02f + hitmodifier );
-	else
+	if( pVictim->IsPlayer() )
 	{
-		if( pVictim->IsPlayer() )
-			hitchance = std::max( hitchance, 95.0f + vsk * 0.1f + hitmodifier ); //wowwiki multiplier - 0.04 but i think 0.1 more balanced
+		if( vsk > 0 )
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.02f);
 		else
-			hitchance = std::max( hitchance, 100.0f + vsk * 0.6f + hitmodifier ); //not wowwiki but more balanced
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.04f);
+	} else 
+	{
+		if(vsk >= -10 && vsk <= 10)
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.1f);
+		else
+			hitchance = std::max( hitchance, 93.0f + (vsk - 10.0f) * 0.4f);
 	}
+	hitchance += hitmodifier;
 
 	if( ability && ability->SpellGroupType )
 	{
@@ -2763,28 +2763,18 @@ else
 
 	crit += pVictim->IsPlayer() ? vsk * 0.04f : min( vsk * 0.2f, 0.0f ); 
 
-	if(vsk>0)
-			hitchance = std::max(hitchance,95.0f+vsk*0.02f+hitmodifier);
-	else
+	if( pVictim->IsPlayer() )
 	{
-		if(pVictim->IsPlayer())
-			hitchance = std::max(hitchance,95.0f+vsk*0.04f+hitmodifier);
+		if( vsk > 0 )
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.02f);
 		else
-			hitchance = std::max(hitchance,100.0f+vsk*0.6f+hitmodifier); //not wowwiki but more balanced
-	}
-
-	if(ability && ability->SpellGroupType)
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.04f);
+	} else 
 	{
-		SM_FFValue(SM[SMT_CRITICAL][0],&crit,ability->SpellGroupType);
-		SM_PFValue(SM[SMT_CRITICAL][1],&crit,ability->SpellGroupType);
-		SM_FFValue(SM[SMT_HITCHANCE][0],&hitchance,ability->SpellGroupType);
-		SM_PFValue(SM[SMT_HITCHANCE][1],&hitchance,ability->SpellGroupType);
-#ifdef COLLECTION_OF_UNTESTED_STUFF_AND_TESTERS
-		float spell_flat_modifers=0;
-		SM_FFValue(SM[SMT_CRITICAL][1],&spell_flat_modifers,ability->SpellGroupType);
-		if(spell_flat_modifers!=0)
-			printf("!!!!spell critchance mod flat %f ,spell group %u\n",spell_flat_modifers,ability->SpellGroupType);
-#endif
+		if(vsk >= -10 && vsk <= 10)
+			hitchance = std::max( hitchance, 95.0f + vsk * 0.1f);
+		else
+			hitchance = std::max( hitchance, 93.0f + (vsk - 10.0f) * 0.4f);
 	}
 //--------------------------------by ratings------------------------------------------------
 	crit -= pVictim->IsPlayer() ? TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE ) : 0.0f;
@@ -2813,19 +2803,25 @@ else
 		parry=0.0f;
 		glanc=0.0f;
 	}
-	else
-		if(this->IsPlayer())
+	else if(this->IsPlayer())
+	{
+		it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
+		if( it != NULL && (it->GetProto()->InventoryType == INVTYPE_WEAPON ||
+			it->GetProto()->InventoryType == INVTYPE_2HWEAPON) && !ability )//dualwield to-hit penalty
 		{
-			it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-			if( it != NULL && it->GetProto() &&  it->GetProto()->InventoryType == INVTYPE_WEAPON && !ability )//dualwield to-hit penalty
-				hitmodifier -= 19.0f;
-			else
-			{
-				it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
-				if( it != NULL  && it->GetProto() && it->GetProto()->InventoryType == INVTYPE_2HWEAPON )//2 handed weapon to-hit penalty
-					hitmodifier -= 4.0f;
-			}
+			hitmodifier -= 19.0f;
 		}
+	}
+
+	hitchance += hitmodifier;
+
+	if(ability && ability->SpellGroupType)
+	{
+		SM_FFValue(SM[SMT_CRITICAL][0],&crit,ability->SpellGroupType);
+		SM_PFValue(SM[SMT_CRITICAL][1],&crit,ability->SpellGroupType);
+		SM_FFValue(SM[SMT_HITCHANCE][0],&hitchance,ability->SpellGroupType);
+		SM_PFValue(SM[SMT_HITCHANCE][1],&hitchance,ability->SpellGroupType);
+	}
 
 	//Hackfix for Surprise Attacks
 	if(  IsPlayer() && ability && plr_shared_from_this()->m_finishingmovesdodge && ability->c_is_flags & SPELL_FLAG_IS_FINISHING_MOVE)

@@ -140,7 +140,7 @@ void Arena::OnAddPlayer(PlayerPointer plr)
 	{
 		// Store the players who join so that we can change their rating even if they leave before arena finishes
 		hashmap_put(m_players2[plr->GetTeam()], plr->GetLowGUID(), (any_t)1);
-		if(!m_teams[plr->GetTeam()] && plr->m_playerInfo && plr->m_playerInfo->arenaTeam[m_arenateamtype] != NULL)
+		if(m_teams[plr->GetTeam()] == -1 && plr->m_playerInfo && plr->m_playerInfo->arenaTeam[m_arenateamtype] != NULL)
 		{
 			m_teams[plr->GetTeam()] = plr->m_playerInfo->arenaTeam[m_arenateamtype]->m_id;
 		}

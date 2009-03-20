@@ -2787,14 +2787,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	10000;
 				}break;
 		
-			//Thunderfury
-			case  21992:
-				{
-						sp->Effect[2]	=	SPELL_EFFECT_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[2]	=	27648;
-						sp->EffectImplicitTargetA[2] = EFF_TARGET_SELF;
-				}break;
-		
 			//Energized	
 			case  43750:	
 					{
@@ -3994,7 +3986,76 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->proc_interval	=	45000;
 						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
-				}break;	
+				}break;
+			// Bandit's Insignia
+			case 60442:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+				}break;
+			// Fury of the Five Flights
+			case 60313:
+				{
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+				}break;
+			// Grim Toll
+			case 60436:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+				}break;
+			// Illustration of the Dragon Soul
+			case 60485:
+				{
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Soul of the Dead
+			case 60537:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+				}break;
+			// Anvil of Titans
+			case 62115:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+				}break;
+			// Embrace of the Spider
+			case 60490:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Flow of Knowledge
+			case 62114:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Majestic Dragon Figurine
+			case 60524:
+				{
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Mirror of Truth
+			case 33648:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_CRIT_ATTACK;
+				}break;
+			// Forge Ember
+			case 60473:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Vestige of Haldor
+			case 60306:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+				}break;
 		
 			// shadow	of death
 			case 54223:

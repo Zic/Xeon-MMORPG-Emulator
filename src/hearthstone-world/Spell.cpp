@@ -2081,7 +2081,8 @@ void Spell::SendSpellGo()
 
 	ItemPrototype* ip = NULL;
 	uint32 flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
-	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana))
+	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
+		!(m_spellInfo->NameHash == SPELL_HASH_SHADOWFURY || m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
 		flags |= 0x800;
 	SpellTargetList::iterator itr;
 	uint32 counter;

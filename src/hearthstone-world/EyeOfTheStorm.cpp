@@ -373,7 +373,8 @@ bool EyeOfTheStorm::HookSlowLockOpen( GameObjectPointer pGo, PlayerPointer pPlay
 	if( m_flagHolder != 0 )
 		return false;
 
-	m_standFlag->RemoveFromWorld(false);
+	if(m_standFlag->IsInWorld())
+		m_standFlag->RemoveFromWorld(false);
 	pPlayer->CastSpell( pPlayer->GetGUID(), EOTS_NETHERWING_FLAG_SPELL, true );
 	pPlayer->m_bgHasFlag = true;
 
