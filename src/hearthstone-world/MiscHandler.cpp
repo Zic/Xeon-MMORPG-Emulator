@@ -1226,6 +1226,9 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 			// Questgiver
 			if(obj->HasQuests())
 				sQuestMgr.OnActivateQuestGiver(obj, plyr);
+			// Gossip Script
+			else if(obj->GetInfo()->gossip_script)
+				obj->GetInfo()->gossip_script->GossipHello(obj, plyr, true);
 
 		}break;
 		case GAMEOBJECT_TYPE_SPELLCASTER:

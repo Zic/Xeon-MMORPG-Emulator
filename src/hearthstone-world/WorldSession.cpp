@@ -241,6 +241,8 @@ void WorldSession::LogoutPlayer(bool Save)
 
 		sHookInterface.OnLogout( _player );
 
+		sEventMgr.RemoveEvents(_player);
+
 		//Duel Cancel on Leave
 		if( _player->DuelingWith != NULL )
 			_player->EndDuel( DUEL_WINNER_RETREAT );
@@ -1026,7 +1028,7 @@ void WorldSession::SendItemPushResult(ItemPointer pItem, bool Created, bool Rece
 
 void WorldSession::Delete()
 {
-	deleteMutex.Acquire();
+	//deleteMutex.Acquire();
 	delete this;
 }
 

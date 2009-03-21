@@ -448,7 +448,7 @@ void WorldSocket::Authenticate()
 	mQueued = false;
 
 	if(!pSession) return;
-	pSession->deleteMutex.Acquire();
+	//pSession->deleteMutex.Acquire();
 
 	if(pSession->HasFlag(ACCOUNT_FLAG_XPACK_02))
 		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x02");
@@ -476,7 +476,7 @@ void WorldSocket::Authenticate()
 			sWorld.gmList.insert(pSession);
 	}
 
-	pSession->deleteMutex.Release();
+	//pSession->deleteMutex.Release();
 }
 
 void WorldSocket::UpdateQueuePosition(uint32 Position)
