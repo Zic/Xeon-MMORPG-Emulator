@@ -157,7 +157,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		PlayerPointer plr;
 		for(LooterSet::iterator itr = pLootObj->m_loot.looters.begin(); itr != pLootObj->m_loot.looters.end(); ++itr)
 		{
-			if((plr = _player->GetMapMgr()->GetPlayer(*itr)))
+			if( plr != NULL && plr == _player->GetMapMgr()->GetPlayer(*itr))
 				plr->GetSession()->SendPacket(&data);
 		}
 	}
