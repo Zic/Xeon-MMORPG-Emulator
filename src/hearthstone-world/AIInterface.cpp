@@ -326,7 +326,8 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 						}
 
 						// clear tagger
-						cr->ClearTag();
+						if(cr != NULL)
+							cr->ClearTag();
 					}
 				}
 

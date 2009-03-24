@@ -78,7 +78,7 @@ void WorldSession::HandleBeginTrade(WorldPacket & recv_data)
 		return;
 	}
 	// We're too far from target now?
-	if( _player->CalcDistance( objmgr.GetPlayer(_player->mTradeTarget) ) > 10.0f )
+	if( _player->CalcDistance( plr ) > 10.0f )
 	TradeStatus = TRADE_STATUS_TOO_FAR_AWAY;
 
 	WorldPacket data(SMSG_TRADE_STATUS, 8);
