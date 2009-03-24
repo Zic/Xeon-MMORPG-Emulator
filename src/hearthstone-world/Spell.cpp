@@ -1937,22 +1937,30 @@ void Spell::SendCastResult(uint8 result)
 // uint16 0xFFFF
 enum SpellStartFlags
 {
-    //0x01
-    SPELL_START_FLAG_DEFAULT = 0x02, // atm set as default flag
-    //0x04
-    //0x08
-    //0x10
-    SPELL_START_FLAG_RANGED = 0x20,
-    //0x40
-    //0x80
-    //0x100
-    //0x200
-    //0x400
-    //0x800
-    //0x1000
-    //0x2000
-    //0x4000
-    //0x8000
+	SPELL_START_FLAGS_NONE				= 0x00000000,
+	SPELL_START_FLAGS_UNKNOWN0			= 0x00000001,	// may be pending spell cast
+	SPELL_START_FLAG_DEFAULT			= 0x00000002,	// atm set as default flag
+	SPELL_START_FLAGS_UNKNOWN2			= 0x00000004,
+	SPELL_START_FLAGS_UNKNOWN3			= 0x00000008,
+	SPELL_START_FLAGS_UNKNOWN4			= 0x00000010,
+	SPELL_START_FLAG_RANGED				= 0x00000020,
+	SPELL_START_FLAGS_UNKNOWN6			= 0x00000040,
+	SPELL_START_FLAGS_UNKNOWN7			= 0x00000080,
+	SPELL_START_FLAGS_UNKNOWN8			= 0x00000100,
+	SPELL_START_FLAGS_UNKNOWN9			= 0x00000200,
+	SPELL_START_FLAGS_UNKNOWN10			= 0x00000400, //TARGET MISSES AND OTHER MESSAGES LIKE "Resist"
+	SPELL_START_FLAGS_POWER_UPDATE		= 0x00000800,
+	SPELL_START_FLAGS_UNKNOWN12			= 0x00001000,
+	SPELL_START_FLAGS_UNKNOWN13			= 0x00002000,
+	SPELL_START_FLAGS_UNKNOWN14			= 0x00004000,
+	SPELL_START_FLAGS_UNKNOWN15			= 0x00008000,
+	SPELL_START_FLAGS_UNKNOWN16			= 0x00010000,
+	SPELL_START_FLAGS_UNKNOWN17			= 0x00020000,
+	SPELL_START_FLAGS_UNKNOWN18			= 0x00040000,
+	SPELL_START_FLAGS_UNKNOWN19			= 0x00080000,
+	SPELL_START_FLAGS_UNKNOWN20			= 0x00100000,
+	SPELL_START_FLAGS_RUNE_UPDATE		= 0x00200000,
+    SPELL_START_FLAGS_UNKNOWN21			= 0x00400000,
 };
 
 void Spell::SendSpellStart()
@@ -1965,15 +1973,16 @@ void Spell::SendSpellStart()
 	uint8 buf[1000];			// should be more than enough
 	StackPacket data(SMSG_SPELL_START, buf, 1000);
 
-	uint32 cast_flags = 2;
+	uint32 cast_flags = SPELL_START_FLAG_DEFAULT;
 	cast_flags |= 0x200800;
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
-		cast_flags |= 0x20;
+		cast_flags |= SPELL_START_FLAG_RANGED;
 
-    // hacky yeaaaa
-    if( m_spellInfo->Id == 8326 ) // death
-        cast_flags = 0x0F;
+
+	// hacky yeaaaa
+	if( m_spellInfo->Id == 8326 ) // death
+		cast_flags = 0x0F;
 
 	if( i_caster != NULL )
 		data << i_caster->GetNewGUID() << u_caster->GetNewGUID();
@@ -1987,10 +1996,9 @@ void Spell::SendSpellStart()
 		
 	m_targets.write( data );
 
-	if (cast_flags & 0x800) //send new mana
+	if (cast_flags & SPELL_START_FLAGS_POWER_UPDATE) //send new mana
 		data << uint32( u_caster ? u_caster->GetUInt32Value(UNIT_FIELD_POWER1 + u_caster->GetPowerType()) : 0);
-
-	if (cast_flags & 0x200000 && p_caster) //send new runes
+	if (cast_flags & SPELL_START_FLAGS_RUNE_UPDATE && p_caster) //send new runes
 	{
 		SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
 		uint8 theoretical = p_caster->TheoreticalUseRunes(runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost);
@@ -2007,14 +2015,14 @@ void Spell::SendSpellStart()
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 	{
 		ItemPrototype* ip = NULL;
-        if( m_spellInfo->Id == SPELL_RANGED_THROW ) // throw
-        {
+		if( m_spellInfo->Id == SPELL_RANGED_THROW ) // throw
+		{
 			if( p_caster != NULL )
 			{
 				ItemPointer itm = p_caster->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_RANGED );
 				if( itm != NULL )
 				{
-	                ip = itm->GetProto();
+					ip = itm->GetProto();
 					/* Throwing Weapon Patch by Supalosa
 					p_caster->GetItemInterface()->RemoveItemAmt(it->GetEntry(),1);
 					(Supalosa: Instead of removing one from the stack, remove one from durability)
@@ -2024,7 +2032,7 @@ void Spell::SendSpellStart()
 					// burlex - added a check here anyway (wpe suckers :P)
 					if( itm->GetDurability() > 0 )
 					{
-	                    itm->SetDurability( itm->GetDurability() - 1 );
+						itm->SetDurability( itm->GetDurability() - 1 );
 						if( itm->GetDurability() == 0 )
 							p_caster->ApplyItemMods( itm, EQUIPMENT_SLOT_RANGED, false, true );
 					}
@@ -2033,15 +2041,15 @@ void Spell::SendSpellStart()
 				{
 					ip = ItemPrototypeStorage.LookupEntry( 2512 );	/*rough arrow*/
 				}
-            }
-        }
-        else if( m_spellInfo->Flags4 & FLAGS4_PLAYER_RANGED_SPELLS )
-        {
+			}
+		}
+		else if( m_spellInfo->Flags4 & FLAGS4_PLAYER_RANGED_SPELLS )
+		{
 			if( p_caster != NULL )
 				ip = ItemPrototypeStorage.LookupEntry( p_caster->GetUInt32Value( PLAYER_AMMO_ID ) );
 			else
 				ip = ItemPrototypeStorage.LookupEntry( 2512 );	/*rough arrow*/
-        }
+		}
 		
 		if( ip != NULL )
 			data << ip->DisplayInfoID << ip->InventoryType;
@@ -2055,22 +2063,30 @@ void Spell::SendSpellStart()
 /************************************************************************/
 enum SpellGoFlags
 {
-    //0x01
-    //0x02
-    //0x04
-    //0x08
-    //0x10
-    SPELL_GO_FLAGS_RANGED           = 0x20,
-    //0x40
-    //0x80
-    SPELL_GO_FLAGS_ITEM_CASTER      = 0x100,
-    //0x200
-    SPELL_GO_FLAGS_EXTRA_MESSAGE    = 0x400, //TARGET MISSES AND OTHER MESSAGES LIKE "Resist"
-    //0x800
-    //0x1000
-    //0x2000
-    //0x4000
-    //0x8000
+	SPELL_GO_FLAGS_NONE					= 0x00000000,
+	SPELL_GO_FLAGS_UNKNOWN0				= 0x00000001,              // may be pending spell cast
+	SPELL_GO_FLAGS_UNKNOWN1				= 0x00000002,
+	SPELL_GO_FLAGS_UNKNOWN2				= 0x00000004,
+	SPELL_GO_FLAGS_UNKNOWN3				= 0x00000008,
+	SPELL_GO_FLAGS_UNKNOWN4				= 0x00000010,
+	SPELL_GO_FLAGS_RANGED				= 0x00000020,
+	SPELL_GO_FLAGS_UNKNOWN6				= 0x00000040,
+	SPELL_GO_FLAGS_UNKNOWN7				= 0x00000080,
+	SPELL_GO_FLAGS_ITEM_CASTER			= 0x00000100,
+	SPELL_GO_FLAGS_UNKNOWN9				= 0x00000200,
+	SPELL_GO_FLAGS_EXTRA_MESSAGE		= 0x00000400, //TARGET MISSES AND OTHER MESSAGES LIKE "Resist"
+	SPELL_GO_FLAGS_POWER_UPDATE			= 0x00000800,
+	SPELL_GO_FLAGS_UNKNOWN12			= 0x00001000,
+	SPELL_GO_FLAGS_UNKNOWN13			= 0x00002000,
+	SPELL_GO_FLAGS_UNKNOWN14			= 0x00004000,
+	SPELL_GO_FLAGS_UNKNOWN15			= 0x00008000,
+	SPELL_GO_FLAGS_UNKNOWN16			= 0x00010000,
+    SPELL_GO_FLAGS_UNKNOWN17			= 0x00020000,
+	SPELL_GO_FLAGS_UNKNOWN18			= 0x00040000,
+	SPELL_GO_FLAGS_UNKNOWN19			= 0x00080000,
+	SPELL_GO_FLAGS_UNKNOWN20			= 0x00100000,
+	SPELL_GO_FLAGS_RUNE_UPDATE			= 0x00200000,
+	SPELL_GO_FLAGS_UNKNOWN22			= 0x00400000,
 };
 
 void Spell::SendSpellGo()
@@ -2080,23 +2096,23 @@ void Spell::SendSpellGo()
         return;
 
 	ItemPrototype* ip = NULL;
-	uint32 flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
+	uint32 cast_flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
 	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
 		!(m_spellInfo->NameHash == SPELL_HASH_SHADOWFURY || m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
-		flags |= 0x800;
+		cast_flags |= SPELL_GO_FLAGS_POWER_UPDATE;
 	SpellTargetList::iterator itr;
 	uint32 counter;
 
 	if( i_caster != NULL )
-		flags |= SPELL_GO_FLAGS_ITEM_CASTER; // 0x100 ITEM CASTER
+		cast_flags |= SPELL_GO_FLAGS_ITEM_CASTER; // 0x100 ITEM CASTER
 
 	// hacky..
 	if( m_spellInfo->Id == 8326 ) // death
-		flags = SPELL_GO_FLAGS_ITEM_CASTER | 0x0D;
+		cast_flags = SPELL_GO_FLAGS_ITEM_CASTER | 0x0D;
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 	{
-		flags |= 0x20; // 0x20 RANGED
+		cast_flags |=SPELL_GO_FLAGS_RANGED;
 		if( m_spellInfo->Id == SPELL_RANGED_THROW )
 		{
 			if( p_caster != NULL )
@@ -2133,7 +2149,7 @@ void Spell::SendSpellGo()
 
 	data << extra_cast_number;
 	data << m_spellInfo->Id;
-	data << flags;
+	data << cast_flags;
 	data << getMSTime();
 
 	/************************************************************************/
@@ -2176,7 +2192,7 @@ void Spell::SendSpellGo()
 
 	m_targets.write( data ); // this write is included the target flag
 
-	if (flags & 0x800) //send new mana
+	if (cast_flags & SPELL_GO_FLAGS_POWER_UPDATE) //send new power
 		data << uint32( u_caster ? u_caster->GetUInt32Value(UNIT_FIELD_POWER1 + u_caster->GetPowerType()) : 0);
 
 	if( ip != NULL)
@@ -2939,7 +2955,7 @@ uint8 Spell::CanCast(bool tolerate)
 				return SPELL_FAILED_ONLY_STEALTHED;
 
 			ItemPointer pMainHand = p_caster->GetItemInterface()->GetInventoryItem( INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_MAINHAND );
-			if( !pMainHand || pMainHand->GetProto()->Class != 2 || pMainHand->GetProto()->SubClass != 15 )
+			if( !pMainHand || pMainHand->GetProto()->Class != ITEM_CLASS_WEAPON || pMainHand->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_DAGGER )
 				return SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND;
 		}
 
