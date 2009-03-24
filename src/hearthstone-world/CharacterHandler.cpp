@@ -1007,7 +1007,9 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		plr->AddToWorld();
 	}
 
-	objmgr.AddPlayer(_player);
+	//Only add player to objmgr if we are actualy Added To World
+	if(_player->GetMapMgr())
+		objmgr.AddPlayer(_player);
 }
 
 bool ChatHandler::HandleRenameCommand(const char * args, WorldSession * m_session)

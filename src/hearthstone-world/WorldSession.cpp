@@ -126,8 +126,17 @@ int WorldSession::Update(uint32 InstanceID)
 		// Check if the player is in the process of being moved. We can't delete him
 		// if we are.
 		if(_player && _player->m_beingPushed) // Abort
+		{
+			//Timeout client, in case AddToWorld failed (f.e. client crash)
+			if( m_lastPing + WORLDSOCKET_TIMEOUT - (uint32)UNIXTIME > WORLDSOCKET_TIMEOUT)
+			{
+				DEBUG_LOG("WorldSession","Removing pending player due to socket timeout.");
+				objmgr.RemovePlayer(_player);
+				_player = NULLPLR;
+				bDeleted = true;
+			}
 			return 0;
-
+		}
 		if(!_logoutTime)
 			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}

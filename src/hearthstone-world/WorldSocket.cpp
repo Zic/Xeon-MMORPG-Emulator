@@ -322,6 +322,12 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	session = sWorld.FindSession( AccountID );
 	if( session != NULL )
 	{
+		if(session->_player != NULL && session->_player->GetMapMgr() == NULL)
+		{
+			DEBUG_LOG("WorldSocket","_player found without m_mapmgr during logon, trying to remove him [player %s, map %d, instance %d].", session->_player->GetName(), session->_player->GetMapId(), session->_player->GetInstanceID() );
+			objmgr.RemovePlayer(session->_player);
+			session->_player = NULLPLR;
+		}
 		// AUTH_FAILED = 0x0D
 		session->Disconnect();
 		
