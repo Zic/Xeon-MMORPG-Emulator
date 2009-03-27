@@ -1,2 +1,0 @@
--Thanks to Wcell for figuring out the method of encryption that was implemented into 2.4.3
--Thanks to Aziel, Kitto, Xzipup, Marcelo for their patchs for EOTS

@@ -18,7 +18,7 @@
 #include "StdAfx.h"
 #include "Setup.h"
 
-bool ColdSnap(uint32 i, Spell * pSpell)
+bool ColdSnap(uint32 i, SpellPointer pSpell)
 {
     if(!pSpell->p_caster) return true;
     pSpell->p_caster->ClearCooldownsOnLine(6, pSpell->m_spellInfo->Id);

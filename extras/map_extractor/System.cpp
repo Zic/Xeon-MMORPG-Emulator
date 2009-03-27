@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_DEPRECATE
+//#define GENERATE_EQUIPINFO
 
 #include <stdio.h>
 #include <vector>
@@ -11,7 +12,15 @@
 #include <map>
 #include <Windows.h>
 #include <mmsystem.h>
+#include <mysql/mysql.h>
 using namespace std;
+
+#define SFIELD_EQUIP_1 "equipmodel1"
+#define SFIELD_EQUIP_2 "equipmodel2"
+#define SFIELD_EQUIP_3 "equipmodel3"
+#define FIELD_EQUIP_1 18
+#define FIELD_EQUIP_2 21
+#define FIELD_EQUIP_3 24
 
 extern unsigned int iRes;
 bool ConvertADT(uint32 x, uint32 y, FILE * out_file, char* name);
@@ -226,6 +235,19 @@ int main(int argc, char * arg[])
 		new MPQArchive(tmp);
 	}
 
+	new MPQArchive("Data/common-2.MPQ");
+
+	for( size_t i = 0; localeNames[i] != 0; i++ )
+	{
+		sprintf(tmp, "Data/%s/locale-%s.MPQ", localeNames[i], localeNames[i]);
+		tf = fopen(tmp, "r");
+		if (!tf)
+			continue;
+		fclose(tf);
+		locale = i;
+		new MPQArchive(tmp);
+	}
+
 	tf = fopen("Data/expansion.MPQ", "r");
 	if (tf)
 	{
@@ -234,6 +256,18 @@ int main(int argc, char * arg[])
 		if ( -1 != locale )
 		{
 			sprintf(tmp, "Data/%s/expansion-locale-%s.MPQ", localeNames[locale], localeNames[locale]);
+			new MPQArchive(tmp);
+		}
+	}
+
+	tf = fopen("Data/lichking.MPQ", "r");
+	if (tf)
+	{
+		fclose(tf);
+		new MPQArchive("Data/lichking.MPQ");
+		if ( -1 != locale )
+		{
+			sprintf(tmp, "Data/%s/lichking-locale-%s.MPQ", localeNames[locale], localeNames[locale]);
 			new MPQArchive(tmp);
 		}
 	}
@@ -272,6 +306,79 @@ int main(int argc, char * arg[])
 			}
 		}
 	}
+
+#ifdef GENERATE_EQUIPINFO
+	DBCFile * itemDBC = new DBCFile("DBFilesClient\\Item.dbc");
+	itemDBC->open();
+
+	FILE* sql = fopen("Update.sql", "w");
+	if(sql == NULL )
+	{
+		printf("Unable to open Update.sql");
+		exit(-1);
+	}
+
+	std::map<uint32,uint32> mapforquickness;
+	for(uint32 i = 0; i < itemDBC->getRecordCount(); ++i)
+	{
+		mapforquickness.insert(std::make_pair<uint32, uint32>(itemDBC->getRecord(i).getUInt(5), itemDBC->getRecord(i).getUInt(0)));
+	}
+
+	MYSQL* con;
+	MYSQL* startup = mysql_init(NULL);
+	con = mysql_real_connect(startup, "localhost", "root", "yourpw", "yourworlddb", 3306, NULL, 0); // fill in the connect info yourself, lazy
+	if(con == NULL)
+	{
+		printf("Error connecting to mySQL.");
+		exit(-1);
+	}
+
+	uint32 pie = mysql_query(con, "SELECT * FROM creature_proto;");
+	if( pie == 0 )
+	{
+		MYSQL_RES* res = mysql_store_result(con);
+		while(MYSQL_ROW r = mysql_fetch_row(res))
+		{
+			if( r == NULL) // wtfbbq
+				break;
+
+			uint32 entry = atol(r[0]);
+			uint32 model = 0;
+			std::map<uint32,uint32>::iterator itr;
+			model = atol(r[FIELD_EQUIP_1 - 1]);
+			itr = mapforquickness.find( model );
+
+			if( itr != mapforquickness.end() )
+			{
+				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_1, itr->second, entry);
+			}
+
+			model = atol(r[FIELD_EQUIP_2 - 1]);
+			itr = mapforquickness.find( model );
+
+			if( itr != mapforquickness.end() )
+			{
+				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_2, itr->second, entry);
+			}
+
+			model = atol(r[FIELD_EQUIP_3 - 1]);
+			itr = mapforquickness.find( model );
+
+			if( itr != mapforquickness.end() )
+			{
+				fprintf(sql, "UPDATE creature_proto SET `%s` = %u WHERE `entry` = %u;\r\n", SFIELD_EQUIP_3, itr->second, entry);
+			}
+		}
+	}
+	else
+	{
+		printf("MySQL error: %s (%u)", mysql_error(con), pie);
+		exit(-1);
+	}
+	delete itemDBC;
+	fclose(sql);
+	printf("Done generating EquipInfo!");
+#endif
 
 	//map.dbc
 	DBCFile * dbc= new DBCFile("DBFilesClient\\Map.dbc");

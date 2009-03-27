@@ -53,6 +53,16 @@ enum QuestEvents
 	QUEST_EVENT_COUNT,
 };
 
+/** Gossip Events
+*/
+enum GossipEvents
+{
+	GOSSIP_EVENT_ON_TALK			= 1,
+	GOSSIP_EVENT_ON_SELECT_OPTION	= 2,
+	GOSSIP_EVENT_ON_END             = 3,
+	GOSSIP_EVENT_COUNT,
+};
+
 /** Creature Events
  */
 enum CreatureEvents
@@ -79,15 +89,6 @@ enum GameObjectEvents
 	GAMEOBJECT_EVENT_COUNT,
 };
 
-/** Gossip Events
-*/
-enum GossipEvents
-{
-	GOSSIP_EVENT_ON_TALK			= 1,
-	GOSSIP_EVENT_ON_SELECT_OPTION	= 2,
-	GOSSIP_EVENT_ON_END             = 3,
-	GOSSIP_EVENT_COUNT,
-};
 
 enum RandomFlags
 {
@@ -114,13 +115,13 @@ public:
 	void Shutdown();
 	void Restart();
 	void RegisterCoreFunctions();
-	ASCENT_INLINE Mutex& GetLock() { return m_Lock; }
+	HEARTHSTONE_INLINE Mutex& GetLock() { return m_Lock; }
 
-	void OnUnitEvent(Unit * pUnit, const char * FunctionName, uint32 EventType, Unit * pMiscUnit, uint32 Misc);
-	void OnQuestEvent(Player * QuestOwner, const char * FunctionName, uint32 QuestID, uint32 EventType, Object * QuestStarter);
-	void OnGameObjectEvent(GameObject * pGameObject, const char * FunctionName, uint32 EventType, Unit * pMiscUnit);
-	void OnGossipEvent(Object * pObject, const char * FunctionName, uint32 EventType, Player * mPlayer, uint32 Id, uint32 IntId, const char *Code);
-	void CallFunction(Unit * pUnit, const char * FuncName);
+	void OnUnitEvent(UnitPointer  pUnit, const char * FunctionName, uint32 EventType, UnitPointer  pMiscUnit, uint32 Misc);
+	void OnQuestEvent(PlayerPointer  QuestOwner, const char * FunctionName, uint32 QuestID, uint32 EventType, ObjectPointer  QuestStarter);
+	void OnGameObjectEvent(GameObjectPointer  pGameObject, const char * FunctionName, uint32 EventType, UnitPointer  pMiscUnit);
+	void OnGossipEvent(ObjectPointer pObject, const char * FunctionName, uint32 EventType, PlayerPointer mPlayer, uint32 Id, uint32 IntId, const char *Code);
+	void CallFunction(UnitPointer  pUnit, const char * FuncName);
 };
 
 struct LuaUnitBinding { const char * Functions[CREATURE_EVENT_COUNT]; };
@@ -139,6 +140,7 @@ private:
 	typedef HM_NAMESPACE::hash_map<uint32, LuaUnitGossipBinding> GossipUnitScriptsBindingMap;
 	typedef HM_NAMESPACE::hash_map<uint32, LuaItemGossipBinding> GossipItemScriptsBindingMap;
 	typedef HM_NAMESPACE::hash_map<uint32, LuaGOGossipBinding> GossipGOScriptsBindingMap;
+
 	UnitBindingMap m_unitBinding;
 	QuestBindingMap m_questBinding;
 	GameObjectBindingMap m_gameobjectBinding;
@@ -154,10 +156,10 @@ public:
 	void RegisterUnitEvent(uint32 Id, uint32 Event, const char * FunctionName);
 	void RegisterQuestEvent(uint32 Id, uint32 Event, const char * FunctionName);
 	void RegisterGameObjectEvent(uint32 Id, uint32 Event, const char * FunctionName);
-    void RegisterUnitGossipEvent(uint32 Id, uint32 Event, const char * FunctionName);
+	void RegisterUnitGossipEvent(uint32 Id, uint32 Event, const char * FunctionName);
     void RegisterItemGossipEvent(uint32 Id, uint32 Event, const char * FunctionName);
     void RegisterGOGossipEvent(uint32 Id, uint32 Event, const char * FunctionName);
-
+ 
 	LuaUnitBinding * GetUnitBinding(uint32 Id)
 	{
 		UnitBindingMap::iterator itr = m_unitBinding.find(Id);
@@ -175,6 +177,7 @@ public:
 		GameObjectBindingMap::iterator itr =m_gameobjectBinding.find(Id);
 		return (itr == m_gameobjectBinding.end()) ? NULL : &itr->second;
 	}
+
     // Gossip Stuff
     LuaUnitGossipBinding * GetLuaUnitGossipBinding(uint32 Id)
 	{
@@ -193,9 +196,8 @@ public:
 		GossipGOScriptsBindingMap::iterator itr = m_go_gossipBinding.find(Id);
 		return (itr == m_go_gossipBinding.end()) ? NULL : &itr->second;
 	}
+
 };
 
 #endif
-
-
 

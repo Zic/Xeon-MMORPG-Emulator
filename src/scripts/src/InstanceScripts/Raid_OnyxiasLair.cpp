@@ -74,7 +74,7 @@ class OnyxiaAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(OnyxiaAI);
-    OnyxiaAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    OnyxiaAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
         m_phase = 1;
         m_entry = pCreature->GetEntry();
@@ -114,7 +114,7 @@ public:
         m_Cleave = false;
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         m_phase = 1;
         m_eFlamesCooldown = 1;
@@ -132,7 +132,7 @@ public:
 		_unit->GetAIInterface()->skip_reset_hp=true;
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setMoveType(0);
         _unit->GetAIInterface()->setWaypointToMove(0);
@@ -148,7 +148,7 @@ public:
             RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
         if(m_useSpell)
             RemoveAIUpdateEvent();
@@ -339,13 +339,13 @@ public:
         m_whelpCooldown--;
         if(!m_whelpCooldown)
         {
-            Creature *cre = NULL;
+            CreaturePointer cre = NULLCREATURE;
             for(int i = 0; i < 6; i++)
             {
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[i].x, whelpCoords[i].y,
                     whelpCoords[i].z, whelpCoords[i].o,
-                    true);
+                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(14.161, -177.874, -85.649, 0.23);
@@ -354,7 +354,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[5-i].x, whelpCoords[5-i].y,
                     whelpCoords[5-i].z, whelpCoords[5-i].o,
-                    true);
+                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(27.133, -232.030, -84.188, 0.44);
@@ -379,13 +379,13 @@ public:
         m_aoeFearCooldown--;
         if(!m_whelpCooldown)
         {
-            Creature *cre = NULL;
+            CreaturePointer cre = NULLCREATURE;
             for(int i = 0; i < 6; i++)
             {
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[i].x, whelpCoords[i].y,
                     whelpCoords[i].z, whelpCoords[i].o,
-                    true);
+                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(14.161, -177.874, -85.649, 0.23);
@@ -394,7 +394,7 @@ public:
                 cre = _unit->GetMapMgr()->GetInterface()->SpawnCreature(CN_ONYXIAN_WHELP, 
                     whelpCoords[5-i].x, whelpCoords[5-i].y,
                     whelpCoords[5-i].z, whelpCoords[5-i].o,
-                    true);
+                    true, false, _unit->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), 50);
                 if(cre)
                 {
                     cre->GetAIInterface()->MoveTo(27.133, -232.030, -84.188, 0.44);

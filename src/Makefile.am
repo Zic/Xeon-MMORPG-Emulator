@@ -1,1 +1,1 @@
-SUBDIRS = ascent-shared ascent-logonserver ascent-world ascent-voicechat ascent-realmserver scripts
+SUBDIRS = hearthstone-shared hearthstone-logonserver hearthstone-world hearthstone-voicechat scripts

@@ -1,0 +1,1 @@
+AlTER TABLE achievements DROP idx;

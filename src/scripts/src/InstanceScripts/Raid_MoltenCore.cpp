@@ -15,7 +15,7 @@ class FirewalkerAI : public CreatureAIScript
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FirewalkerAI);
 
-    FirewalkerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FirewalkerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_meltarmor = m_inciteflame = true;
 
@@ -23,19 +23,19 @@ public:
 		infoinciteflame = dbcSpell.LookupEntry(INCITE_FLAME);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
         RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -96,7 +96,7 @@ class FlameguardAI : public CreatureAIScript
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FlameguardAI);
 
-    FlameguardAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FlameguardAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_flamethrower = m_fireshield = m_flames =true;
 
@@ -105,19 +105,19 @@ public:
 		infoflames = dbcSpell.LookupEntry(FLAMES);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -182,7 +182,7 @@ class LavaelementalAI : public CreatureAIScript
 public:
     ADD_CREATURE_FACTORY_FUNCTION(LavaelementalAI);
 
-    LavaelementalAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    LavaelementalAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_strike = m_pyroclast = true;
 
@@ -190,19 +190,19 @@ public:
 		infopyroclast = dbcSpell.LookupEntry(PYROCLAST_BARRAGE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -260,26 +260,26 @@ class LavaReaverAI : public CreatureAIScript
 public:
     ADD_CREATURE_FACTORY_FUNCTION(LavaReaverAI);
 
-    LavaReaverAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    LavaReaverAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_cleave =true;
 
         infocleave = dbcSpell.LookupEntry(CLEAVE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -325,26 +325,26 @@ class FlameImpAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FlameImpAI);
-    FlameImpAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FlameImpAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_firenova =true;
 
         infofirenova = dbcSpell.LookupEntry(FIRENOVA);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -390,26 +390,26 @@ class LavaSurgerAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(LavaSurgerAI);
-    LavaSurgerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    LavaSurgerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_surge =true;
 
         infosurge = dbcSpell.LookupEntry(SURGE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -456,7 +456,7 @@ class FireLordAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FireLordAI);
-    FireLordAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FireLordAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_lavaspawn = m_soulburn = true;
 
@@ -464,19 +464,19 @@ public:
 		infosoulburn = dbcSpell.LookupEntry(SOUL_BURN);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -534,26 +534,26 @@ class MoltenDestroyerAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(MoltenDestroyerAI);
-    MoltenDestroyerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MoltenDestroyerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_knockdown = true;
 
         infoknockdown = dbcSpell.LookupEntry(KNOCKDOWN);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -600,7 +600,7 @@ class MoltenGiantAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(MoltenGiantAI);
-    MoltenGiantAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MoltenGiantAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_stomp = m_knockback = true;
 
@@ -608,19 +608,19 @@ public:
 		infoknockback = dbcSpell.LookupEntry(KNOCKBACK);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -681,7 +681,7 @@ class LucifronAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(LucifronAI);
-    LucifronAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    LucifronAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_impedingdoom = m_lucifroncurse = m_shadowshock = true;
 
@@ -690,19 +690,19 @@ public:
 		infoshadowshock =  dbcSpell.LookupEntry(SHADOW_SHOCK);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -773,7 +773,7 @@ class MagmadarAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(MagmadarAI);
-    MagmadarAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MagmadarAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_magmaspit = m_lavabreath = m_panic = true;
 
@@ -782,19 +782,19 @@ public:
 		infopanic =  dbcSpell.LookupEntry(PANIC);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -866,7 +866,7 @@ class GehennasAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(GehennasAI);
-    GehennasAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    GehennasAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_shadowbolt = m_gehennascurse = m_rainoffire = true;
 
@@ -875,19 +875,19 @@ public:
 		inforainoffire =  dbcSpell.LookupEntry(RAIN_OF_FIRE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -902,7 +902,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_shadowbolt)
             {
                 _unit->CastSpell(target, infoshadowbolt, true);
@@ -960,7 +960,7 @@ class FlamewakerAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FlamewakerAI);
-    FlamewakerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FlamewakerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_sunderarmor = m_fistofragnaros = m_strike = true;
 
@@ -969,19 +969,19 @@ public:
 		infostrike =  dbcSpell.LookupEntry(FSTRIKE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -996,7 +996,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_sunderarmor)
             {
                 _unit->CastSpell(target, infosunderarmor, false);
@@ -1053,7 +1053,7 @@ class GarrAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(GarrAI);
-    GarrAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    GarrAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_antimagic = m_magmashackes = true;
 
@@ -1061,19 +1061,19 @@ public:
 		infomagmashackes = dbcSpell.LookupEntry(MAGMA_SHACKES);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1088,7 +1088,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			//Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			//UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_antimagic)
             {
                 _unit->CastSpell(_unit, infoantimagic, false);
@@ -1133,7 +1133,7 @@ class FireSwornAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(FireSwornAI);
-    FireSwornAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    FireSwornAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_immolate = m_eruption = true;
 
@@ -1141,19 +1141,19 @@ public:
 		infoeruption = dbcSpell.LookupEntry(ERUPTION);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1168,7 +1168,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			//Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			//UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_immolate)
             {
                 _unit->CastSpell(_unit, infoimmolate, false);
@@ -1214,7 +1214,7 @@ class BaronGeddonAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(BaronGeddonAI);
-    BaronGeddonAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    BaronGeddonAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_inferno = m_ignitemana = m_livingbomb = true;
 
@@ -1223,19 +1223,19 @@ public:
 		infolivingbomb = dbcSpell.LookupEntry(LIVING_BOMB);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1250,7 +1250,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_inferno)
             {
                 _unit->CastSpell(_unit, infoinferno, false);
@@ -1308,7 +1308,7 @@ class ShazzrahAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(ShazzrahAI);
-    ShazzrahAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    ShazzrahAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_arcaneexplosion = m_shazzrahcurse = m_deadenmagic = m_counterspell = m_blink = true;
 
@@ -1319,19 +1319,19 @@ public:
 		info_blink = dbcSpell.LookupEntry(BLINK);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1346,7 +1346,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			//Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			//UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_arcaneexplosion)
             {
                 _unit->CastSpell(_unit, info_arcaneexplosion, false);
@@ -1429,7 +1429,7 @@ class GolemaggAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(GolemaggAI);
-    GolemaggAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    GolemaggAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_golemaggtrust = m_magmasplash = true;
 
@@ -1437,20 +1437,20 @@ public:
 		info_magmasplash = dbcSpell.LookupEntry(MAGMA_SPLASH);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		_unit->CastSpell(_unit, info_golemaggtrust, false);
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1465,7 +1465,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
            
             if(m_magmasplash)
             {
@@ -1497,26 +1497,26 @@ class CoreRagerAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(GolemaggAI);
-    CoreRagerAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    CoreRagerAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_mangle = true;
 
         info_mangle = dbcSpell.LookupEntry(MANGLE);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1531,7 +1531,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			//Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			//UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
             if(m_mangle)
             {
                 _unit->CastSpell(_unit, info_mangle, false);
@@ -1565,7 +1565,7 @@ class SulfuronAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(SulfuronAI);
-    SulfuronAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    SulfuronAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_demoralizingshout = m_inspire = m_flamespear = true;
 
@@ -1574,19 +1574,19 @@ public:
 		info_flamespear = dbcSpell.LookupEntry(FLAME_SPEAR);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1601,7 +1601,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			//Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			//UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
                       
             if(m_demoralizingshout)
             {
@@ -1683,7 +1683,7 @@ class RagnarosAI : public CreatureAIScript
 {
 public:
     ADD_CREATURE_FACTORY_FUNCTION(RagnarosAI);
-    RagnarosAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    RagnarosAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
 		m_elementalfire = m_wrath = m_hammer = m_meltweapon = m_summonsons = true;
 
@@ -1694,26 +1694,26 @@ public:
 		info_summonsons = dbcSpell.LookupEntry(SUMMON_SONS_OF_FLAMES);
     }
     
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
 		RegisterAIUpdateEvent(_unit->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME));
 		_unit->GetAIInterface()->skip_reset_hp=true;
     }
 
-    void OnCombatStop(Unit *mTarget)
+    void OnCombatStop(UnitPointer mTarget)
     {
         _unit->GetAIInterface()->setCurrentAgent(AGENT_NULL);
         _unit->GetAIInterface()->SetAIState(STATE_IDLE);
        RemoveAIUpdateEvent();
     }
     
-    void OnTargetDied(Unit* mTarget)
+    void OnTargetDied(UnitPointer mTarget)
     {
         _unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "DIE, INSECT!");
         _unit->PlaySoundToSet(8051);
     }
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
        RemoveAIUpdateEvent();
     }
@@ -1728,7 +1728,7 @@ public:
     {
         if(_unit->GetCurrentSpell() == NULL && _unit->GetAIInterface()->GetNextTarget())//_unit->getAttackTarget())
         {
-			Unit *target = _unit->GetAIInterface()->GetNextTarget();
+			UnitPointer target = _unit->GetAIInterface()->GetNextTarget();
 			                      
             if(m_elementalfire)
             {

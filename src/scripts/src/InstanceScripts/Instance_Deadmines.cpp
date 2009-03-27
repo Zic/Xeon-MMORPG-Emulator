@@ -6,24 +6,24 @@
 class RhahkZorAI : public CreatureAIScript
 {
 public:
-    RhahkZorAI(Creature* pCreature) : CreatureAIScript(pCreature) {}
+    RhahkZorAI(CreaturePointer pCreature) : CreatureAIScript(pCreature) {}
 
-    void OnDied(Unit * mKiller)
+    void OnDied(UnitPointer  mKiller)
     {
         // Find "Factory Door"
         // GetGameObjectNearestCoords works here too.
 
-        GameObject *pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
+        GameObjectPointer pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
             13965, -190.860092f, -456.332184f, 54.496822f);
         if(pDoor == 0)
             return;
 
         // Open the door
         pDoor->SetUInt32Value(GAMEOBJECT_FLAGS, 33);
-        pDoor->SetUInt32Value(GAMEOBJECT_STATE, 0);
+        pDoor->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
     }
 
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         _unit->SendChatMessage(CHAT_MSG_MONSTER_YELL, LANG_UNIVERSAL, "Van Cleef pay big for your heads!");
         _unit->PlaySoundToSet(5774);
@@ -34,30 +34,30 @@ public:
         delete (RhahkZorAI*)this;
     }
 
-    static CreatureAIScript *Create(Creature * c) { return new RhahkZorAI(c); }
+    static CreatureAIScript *Create(CreaturePointer  c) { return new RhahkZorAI(c); }
 };
 
-CreatureAIScript * create_rhakzor(Creature * c) { return new RhahkZorAI(c); }
+CreatureAIScript * create_rhakzor(CreaturePointer  c) { return new RhahkZorAI(c); }
 
 // Sneeds Shredder -> Opens Mast Room door on death.
 
 class SneedsShredderAI : public CreatureAIScript
 {
 public:
-    SneedsShredderAI(Creature* pCreature) : CreatureAIScript(pCreature) {}
-    void OnDied(Unit * mKiller)
+    SneedsShredderAI(CreaturePointer pCreature) : CreatureAIScript(pCreature) {}
+    void OnDied(UnitPointer  mKiller)
     {
         // Find "Mast Room Door"
         // GetGameObjectNearestCoords works here too.
 
-        GameObject *pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
+        GameObjectPointer pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
             16400, -289.691650f, -535.988953f, 49.440678f);
         if(pDoor == 0)
             return;
 
         // Open the door
         pDoor->SetUInt32Value(GAMEOBJECT_FLAGS, 33);
-        pDoor->SetUInt32Value(GAMEOBJECT_STATE, 0);
+        pDoor->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
     }
 
     void Destroy()
@@ -65,7 +65,7 @@ public:
         delete (SneedsShredderAI*)this;
     }
 
-    static CreatureAIScript * Create(Creature * c) { return new SneedsShredderAI(c); }
+    static CreatureAIScript * Create(CreaturePointer  c) { return new SneedsShredderAI(c); }
 };
 
 // Gilnid -> Opens Foundary door on death.
@@ -73,20 +73,20 @@ public:
 class GilnidAI : public CreatureAIScript
 {
 public:
-    GilnidAI(Creature* pCreature) : CreatureAIScript(pCreature) {}
-    void OnDied(Unit * mKiller)
+    GilnidAI(CreaturePointer pCreature) : CreatureAIScript(pCreature) {}
+    void OnDied(UnitPointer  mKiller)
     {
         // Find "Foundry Door"
         // GetGameObjectNearestCoords works here too.
 
-        GameObject *pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
+        GameObjectPointer pDoor = _unit->GetMapMgr()->GetInterface()->GetObjectNearestCoords<GameObject, TYPEID_GAMEOBJECT>(
             16399, -176.569f, -577.640991f, 19.311600f);
         if(pDoor == 0)
             return;
 
         // Open the door
         pDoor->SetUInt32Value(GAMEOBJECT_FLAGS, 33);
-        pDoor->SetUInt32Value(GAMEOBJECT_STATE, 0);
+        pDoor->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);
     }
 
     void Destroy()
@@ -94,36 +94,36 @@ public:
         delete (GilnidAI*)this;
     }
 
-    static CreatureAIScript * Create(Creature * c) { return new GilnidAI(c); }
+    static CreatureAIScript * Create(CreaturePointer  c) { return new GilnidAI(c); }
 };
 
 class VanCleefAI : public CreatureAIScript
 {
 public:
-    VanCleefAI(Creature *pCreature) : CreatureAIScript(pCreature)
+    VanCleefAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
         mPhase = 0;
     }
 
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         _unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, "None may challenge the brotherhood.");
         _unit->PlaySoundToSet(5780);    // EdwinVanCleefAggro01.wav
     }
 
-    void OnTargetDied(Unit* mTarget)
+    void OnTargetDied(UnitPointer mTarget)
     {
         char msg[200];
         if(mTarget->GetTypeId() == TYPEID_PLAYER)
-            sprintf(msg, "And stay down, %s.", static_cast<Player*>(mTarget)->GetName());
+            sprintf(msg, "And stay down, %s.", TO_PLAYER(mTarget)->GetName());
         else if (mTarget->IsPet())
-            sprintf(msg, "And stay down, %s.", static_cast<Pet*>(mTarget)->GetName().c_str());
+            sprintf(msg, "And stay down, %s.", TO_PET(mTarget)->GetName().c_str());
 
         _unit->SendChatMessage(CHAT_MSG_MONSTER_SAY, LANG_UNIVERSAL, msg);
         _unit->PlaySoundToSet(5781);    // EdwinVanCleefSlay01.wav
     }
 
-    void OnDamageTaken(Unit* mAttacker, float fAmount)
+    void OnDamageTaken(UnitPointer mAttacker, float fAmount)
     {
         if(fAmount < 5) return;
 
@@ -178,7 +178,7 @@ public:
         delete (VanCleefAI*)this;
     }
 
-    static CreatureAIScript * Create(Creature * c) { return new VanCleefAI(c); }
+    static CreatureAIScript * Create(CreaturePointer  c) { return new VanCleefAI(c); }
 
 protected:
     uint32 mPhase;  // NPC has 3 phases
@@ -187,12 +187,12 @@ protected:
 class MrSmiteAI : public CreatureAIScript
 {
 public:
-    MrSmiteAI(Creature* pCreature) : CreatureAIScript(pCreature)
+    MrSmiteAI(CreaturePointer pCreature) : CreatureAIScript(pCreature)
     {
         mPhase = 0;
     }
 
-    void OnCombatStart(Unit* mTarget)
+    void OnCombatStart(UnitPointer mTarget)
     {
         // This guy has 2 messages he can say upon entering combat. Let's
         // make a 50/50 chance of using one.
@@ -216,7 +216,7 @@ public:
     }
     
     // 2 phases, someone needs to script the combat changes
-    void OnDamageTaken(Unit* mAttacker, float fAmount)
+    void OnDamageTaken(UnitPointer mAttacker, float fAmount)
     {
         if(fAmount < 5) return;
 

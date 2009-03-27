@@ -24,7 +24,7 @@ minizip/    by Gilles Vollant <info@winimage.com>
 iostream/   by Kevin Ruland <kevin@rodin.wustl.edu>
         A C++ I/O streams interface to the zlib gz* functions
 
-iostream2/  by Tyge Løvset <Tyge.Lovset@cmr.no>
+iostream2/  by Tyge Lï¿½vset <Tyge.Lovset@cmr.no>
 	Another C++ I/O streams interface
 
 untgz/      by "Pedro A. Aranda Guti\irrez" <paag@tid.es>

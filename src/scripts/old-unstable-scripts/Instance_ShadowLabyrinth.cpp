@@ -1581,7 +1581,7 @@ protected:
 #define CN_MURMUR 18708
 
 #define SONIC_BOOM 33666// 33666 or 38795 (I think it's dummy (33923); it should be connected with Murmur's Touch; Murmur should say 
-						// “Murmur draws energy from the air…” then use Murmur's Touch (33711), Sonic Boom (33923) and
+						// ï¿½Murmur draws energy from the airï¿½ï¿½ then use Murmur's Touch (33711), Sonic Boom (33923) and
 						// release Sonic Boom (38052); it also shouldn't attack during all those casts;
 #define RESONANCE 33657	// should be applied only when no target in melee combat range (each 5 sec)
 #define SHOCKWAVE 33686

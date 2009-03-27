@@ -423,7 +423,11 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames) {
     printf("Opening data files from data directory.\n");
     sprintf(path, "%sexpansion.mpq", input_path);
     pArchiveNames.push_back(path);
+    sprintf(path, "%slichking.mpq", input_path);
+    pArchiveNames.push_back(path);
     sprintf(path, "%scommon.mpq", input_path);
+    pArchiveNames.push_back(path);
+    sprintf(path, "%scommon-2.mpq", input_path);
     pArchiveNames.push_back(path);
     printf("\n");
 
@@ -433,6 +437,8 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames) {
     {
         printf("Locale: %s\n", i->c_str());
         sprintf(path, "%s%s\\expansion-locale-%s.mpq", input_path, i->c_str(), i->c_str());
+        pArchiveNames.push_back(path);
+        sprintf(path, "%s%s\\lichking-locale-%s.mpq", input_path, i->c_str(), i->c_str());
         pArchiveNames.push_back(path);
         sprintf(path, "%s%s\\locale-%s.mpq", input_path, i->c_str(), i->c_str());
         pArchiveNames.push_back(path);
@@ -503,12 +509,13 @@ int main(int argc, char ** argv)
 //    char szMpqName[MAX_PATH] = "";
 //    char szListFile[MAX_PATH] = "";
     int nError = ERROR_SUCCESS;
-    char *versionString = "V2.4 2007_07_12";
+    char *versionString = "V3.0 2008_11_03";
 
     // Use command line arguments, when some
     if(!processArgv(argc, argv, versionString)) 
         return 1;
  
+	printf("3.0.1+ VMAP extractor (Ascent)\n");
     printf("Extract %s. Beginning work ....\n",versionString);
     // Set the lowest priority to allow running in the background
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);

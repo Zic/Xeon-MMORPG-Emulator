@@ -1,0 +1,5 @@
+1) Please verify you have the dependencies installed. They are in /extras/dependencies/. If you are on *nix, ./configure will inform you of any missing ones.
+
+2) Compile away at the main core files win/ for Windows users or run the standard autoreconf, sh make_precompiled_header.sh, and make install if you are on *nix.
+
+3) If you are on windows, you will need to now navigate to src/scripts/ and compile the scripts project.

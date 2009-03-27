@@ -4,6 +4,23 @@
 #include <cassert>
 #include <algorithm>
 
+//to get skin file from m2 file
+void replace(std::string &str, char* find, char* rep, uint32 limit)
+{
+	uint32 i=0;
+	std::string::size_type pos=0;
+	while((pos=str.find(find, pos)) != std::string::npos)
+	{
+		str.erase(pos, strlen(find));
+		str.insert(pos, rep);
+		pos+=strlen(rep);
+
+		++i;
+		if (limit != 0 && i == limit)
+			break;
+	}
+}
+
 //int globalTime = 0;
 
 Model::Model(std::string &filename) : filename(filename)
@@ -35,7 +52,8 @@ bool Model::open()
         }
 #endif
         trans = 1.0f;
-        origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
+
+		origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
 
         vertices = new Vec3D[header.nVertices];
         normals = new Vec3D[header.nVertices];
@@ -48,18 +66,31 @@ bool Model::open()
             normals[i] = origVertices[i].normal.normalize();	
         }
 
-        ModelView *view = (ModelView*)(f.getBuffer() + header.ofsViews);
+		//try to open the skin file
+		std::string skin = filename;
+		replace(skin, ".m2", "00.skin", 1);
+		MPQFile skinf(skin.c_str());
 
-        uint16 *indexLookup = (uint16*)(f.getBuffer() + view->ofsIndex);
-        uint16 *triangles = (uint16*)(f.getBuffer() + view->ofsTris);
+		if (skinf.isEof())
+		{
+			printf("Failed to open extra data for %s\n", filename.c_str());
+			return false;
+		}
 
-        nIndices = view->nTris;
+		SkinHeader skinheader;
+		memcpy(&skinheader, skinf.getBuffer(), sizeof(SkinHeader));
+
+		uint16* indexLookup = (uint16*)(skinf.getBuffer() + skinheader.ofsIndices);
+        uint16* triangles = (uint16*)(skinf.getBuffer() + skinheader.ofsTriangles);
+
+		nIndices = skinheader.nIndices;
         indices = new uint16[nIndices];
         for (size_t i = 0; i<nIndices; i++) 
         {
             indices[i] = indexLookup[triangles[i]];
         }
         f.close();
+		skinf.close();
     } else {
         //printf("not included %s\n", filename.c_str());
         return false;

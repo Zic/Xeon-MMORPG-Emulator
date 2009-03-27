@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#include "../../../ascent-shared/svn_revision.h"
+#include "../../../hearthstone-shared/svn_revision.h"
 
 #define SKIP_ALLOCATOR_SHARING 1
 #include <ScriptSetup.h>
@@ -55,7 +55,7 @@ public:
 StatDumper dumper;
 
 // Thread Wrapper for StatDumper
-struct StatDumperThread : public ThreadBase
+struct StatDumperThread : public ThreadContext
 {
 #ifdef WIN32
 	HANDLE hEvent;
@@ -63,7 +63,6 @@ struct StatDumperThread : public ThreadBase
 	pthread_cond_t cond;
 	pthread_mutex_t mutex;
 #endif
-	bool running;
 public:
 	StatDumperThread();
 	~StatDumperThread();
@@ -73,7 +72,7 @@ public:
 
 void StatDumperThread::OnShutdown()
 {
-	running = false;
+	m_threadRunning = false;
 #ifdef WIN32
 	SetEvent( hEvent );
 #else
@@ -83,6 +82,7 @@ void StatDumperThread::OnShutdown()
 
 StatDumperThread::StatDumperThread()
 {
+	m_threadRunning = true;
 }
 
 StatDumperThread::~StatDumperThread()
@@ -123,7 +123,7 @@ bool StatDumperThread::run()
 	pthread_cond_init( &cond, NULL );
 #endif
 
-	running = true;
+	m_threadRunning = true;
 	for(;;)
 	{
 
@@ -139,7 +139,7 @@ bool StatDumperThread::run()
 		pthread_cond_timedwait( &cond, &mutex, &tv );
 		pthread_mutex_unlock( &mutex );
 #endif
-		if( !running )
+		if( !m_threadRunning )
 			break;
 	}
 
@@ -292,13 +292,13 @@ void FillOnlineTime(uint32 Time, char * Dest)
 
 void StatDumper::DumpStats()
 {
-    if( Filename[0] == NULL )
+    if( Filename[0] == '\0' )
         return;
     FILE* f = fopen( Filename, "w" );
     if( !f )
         return;
 
-	Log.Debug( "StatDumper", "Writing %s", Filename );
+	//Log.Debug( "StatDumper", "Writing %s", Filename );
 
     // Dump Header
     fprintf(f, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -310,14 +310,15 @@ void StatDumper::DumpStats()
 	uint32 classes[DRUID+1];
 	memset(&races[0], 0, sizeof(uint32)*(RACE_DRAENEI+1));
 	memset(&classes[0], 0, sizeof(uint32)*(RACE_DRAENEI+1));
-    std::deque<Player*> gms;
+    std::deque<PlayerPointer> gms;
     {
         // Dump server information.
 #ifdef WIN32
-		fprintf(f, "    <platform>AspireCore %s r%u/%s-Win-%s (www.aspiredev.org)</platform>\n", BUILD_TAG, BUILD_REVISION, CONFIG, ARCH);		
+		fprintf(f, "    <platform>Hearthstone r%u %s-Win-%s</platform>\n", BUILD_REVISION, CONFIG, ARCH);		
 #else
-		fprintf(f, "    <platform>AspireCore %s r%u/%s-%s (www.aspiredev.org)</platform>\n", BUILD_TAG, BUILD_REVISION, PLATFORM_TEXT, ARCH);
+		fprintf(f, "    <platform>Hearthstone r%u %s-%s </platform>\n", BUILD_REVISION, PLATFORM_TEXT, ARCH);
 #endif
+		//fprintf(f, "    <buildhost>%s on %s by %s@%s</buildhost>", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 
         char uptime[80];
         GenerateUptimeString(uptime);
@@ -329,7 +330,7 @@ void StatDumper::DumpStats()
         // lock players reader
         objmgr._playerslock.AcquireReadLock();
 
-        HM_NAMESPACE::hash_map<uint32, Player*>::const_iterator itr;
+        HM_NAMESPACE::hash_map<uint32, PlayerPointer>::const_iterator itr;
         for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
         {
             if(itr->second->GetSession() && itr->second->IsInWorld())
@@ -351,7 +352,7 @@ void StatDumper::DumpStats()
         GMCount = gm;
 
         fprintf(f, "    <uptime>%s</uptime>\n", uptime);
-        fprintf(f, "    <oplayers>%u</oplayers>\n", (unsigned int)(sWorld.AlliancePlayers + sWorld.HordePlayers));
+        fprintf(f, "    <oplayers>%u</oplayers>\n", (unsigned int)sWorld.GetSessionCount());
         fprintf(f, "    <cpu>%2.2f</cpu>\n", GetCPUUsage());
         fprintf(f, "    <qplayers>%u</qplayers>\n", (unsigned int)sWorld.GetQueueCount());
         fprintf(f, "    <ram>%.3f</ram>\n", GetRAMUsage());
@@ -368,6 +369,7 @@ void StatDumper::DumpStats()
 		fprintf(f, "    <wdbquerysize>%u</wdbquerysize>\n", WorldDatabase.GetQueueSize());
 		fprintf(f, "    <cdbquerysize>%u</cdbquerysize>\n", CharacterDatabase.GetQueueSize());
     }
+
     fprintf(f, "  </status>\n");
 	static const char * race_names[RACE_DRAENEI+1] = {
 		NULL,
@@ -414,8 +416,9 @@ void StatDumper::DumpStats()
 	}
 	fprintf(f, "  </statsummary>\n");
 
-    Player * plr;
+    PlayerPointer  plr;
     uint32 t = (uint32)time(NULL);
+
     char otime[100];
     {
         fprintf(f, "  <instances>\n");
@@ -430,7 +433,8 @@ void StatDumper::DumpStats()
         fprintf(f, buf);
         fprintf(f, "  </instances>\n");
     }
-    {
+
+  {
         // GM Information
         fprintf(f, "  <gms>\n");
         while(!gms.empty())
@@ -461,7 +465,7 @@ void StatDumper::DumpStats()
     fprintf(f, "  <sessions>\n");
         // Dump Player Information
         objmgr._playerslock.AcquireReadLock();
-        HM_NAMESPACE::hash_map<uint32, Player*>::const_iterator itr;
+        HM_NAMESPACE::hash_map<uint32, PlayerPointer>::const_iterator itr;
 
         for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
         {
@@ -489,6 +493,7 @@ void StatDumper::DumpStats()
                     gms.push_back(plr);
             }
         }
+
         objmgr._playerslock.ReleaseReadLock();
         fprintf(f, "  </sessions>\n");
 

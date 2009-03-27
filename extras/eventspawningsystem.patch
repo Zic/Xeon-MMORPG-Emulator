@@ -1,0 +1,1367 @@
+Index: sql/character_updates/events_settings.sql
+===================================================================
+--- sql/character_updates/events_settings.sql	(revision 0)
++++ sql/character_updates/events_settings.sql	(revision 0)
+@@ -0,0 +1,27 @@
++/*
++SQLyog Community Edition- MySQL GUI v5.32
++Host - 6.0.7-alpha-community : Database - char
++*********************************************************************
++Server version : 6.0.7-alpha-community
++*/+
++
++/*!40101 SET NAMES utf8 */;
++
++/*!40101 SET SQL_MODE=''*/;
++
++/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
++/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
++
++/*Table structure for table `events_settings` */
++
++DROP TABLE IF EXISTS `events_settings`;
++
++CREATE TABLE `events_settings` (
++  `eventid` tinyint(2) unsigned NOT NULL,
++  `lastactivated` bigint(20) unsigned NOT NULL DEFAULT '0',
++  PRIMARY KEY (`eventid`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8;
++
++/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
++/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+Index: sql/world_updates/events.sql
+===================================================================
+--- sql/world_updates/events.sql	(revision 0)
++++ sql/world_updates/events.sql	(revision 0)
+@@ -0,0 +1,65 @@
++/*
++SQLyog Community Edition- MySQL GUI v5.32
++Host - 6.0.7-alpha-community : Database - ncdbnew
++*********************************************************************
++Server version : 6.0.7-alpha-community
++*/+
++
++/*!40101 SET NAMES utf8 */;
++
++/*!40101 SET SQL_MODE=''*/;
++
++/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
++/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
++
++/*Table structure for table `events` */
++
++DROP TABLE IF EXISTS `events`;
++
++CREATE TABLE `events` (
++  `eventid` tinyint(3) unsigned NOT NULL COMMENT 'Id of event you want to trigger',
++  `daynumber` tinyint(3) unsigned NOT NULL COMMENT '1 - 31 day of the month you want to trigger event',
++  `monthnumber` tinyint(3) unsigned DEFAULT '0' COMMENT '1 - 12 month of the year you want to trigger event',
++  `eventname` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'Just for human readable purposes, this is not used by the server at all',
++  `activedays` tinyint(3) unsigned DEFAULT NULL COMMENT 'Number of days the event will remain active',
++  `ishourlyevent` tinyint(1) DEFAULT NULL COMMENT 'Is this an hourly event? This cannot be used in conjunction with daily events',
++  `starthour` tinyint(3) unsigned DEFAULT NULL COMMENT '0 - 23 the hour that the event begins',
++  `endhour` tinyint(3) unsigned DEFAULT NULL COMMENT '0 - 23 the hour that the event ends, if this is smaller that the starthour, it will end on the next day',
++  PRIMARY KEY (`eventid`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
++
++/*Table structure for table `events_creature` */
++
++DROP TABLE IF EXISTS `events_creature`;
++
++CREATE TABLE `events_creature` (
++  `eventid` tinyint(3) unsigned NOT NULL COMMENT 'Relates to creature_spawn eventid',
++  `id` tinyint(3) unsigned NOT NULL COMMENT 'Relates to creature_spawn id',
++  `changesflag` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'See enum in the core for permissable flags in World.h',
++  `phase` tinyint(3) DEFAULT NULL COMMENT 'This is the phase the creature is in when the event is active',
++  `displayid` int(10) unsigned DEFAULT NULL COMMENT 'This is the displayid to change to while the event is active',
++  `item1` int(10) unsigned DEFAULT NULL COMMENT 'This is the id of equip slot 1 to change while the event is active',
++  `item2` int(10) unsigned DEFAULT NULL COMMENT 'This is the id of equip slot 2 to change while the event is active',
++  `item3` int(10) unsigned DEFAULT NULL COMMENT 'This is the id of equip slot 3 to change while the event is active',
++  PRIMARY KEY (`eventid`,`id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
++
++/*Table structure for table `events_gameobject` */
++
++DROP TABLE IF EXISTS `events_gameobject`;
++
++CREATE TABLE `events_gameobject` (
++  `eventid` tinyint(3) unsigned NOT NULL COMMENT 'This relates to gameobject_spawns eventid',
++  `id` int(11) unsigned NOT NULL COMMENT 'Relates to gameobject_spawn id',
++  `changesflag` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'See enum in core for permissable flags in World.h',
++  `phase` tinyint(3) DEFAULT NULL COMMENT 'Phase the go is in when the event is active',
++  `displayid` int(10) unsigned DEFAULT NULL COMMENT 'This is the displayid to change to while the event is active',
++  PRIMARY KEY (`eventid`,`id`)
++) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
++
++/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
++/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
++
++alter table `gameobject_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL after `phase` COMMENT 'relates to events table';
++alter table `creature_spawns` add column `eventid` tinyint (3)UNSIGNED  DEFAULT '0' NOT NULL  after `vehicle` COMMENT 'relates to events table';
+Index: src/hearthstone-shared/Database/Field.h
+===================================================================
+--- src/hearthstone-shared/Database/Field.h	(revision 1158)
++++ src/hearthstone-shared/Database/Field.h	(working copy)
+@@ -32,6 +32,7 @@
+ 	HEARTHSTONE_INLINE uint8 GetUInt8() { return mValue ? static_cast<uint8>(atol(mValue)) : 0; }
+ 	HEARTHSTONE_INLINE int8 GetInt8() { return mValue ? static_cast<int8>(atol(mValue)) : 0; }
+ 	HEARTHSTONE_INLINE uint16 GetUInt16() { return mValue ? static_cast<uint16>(atol(mValue)) : 0; }
++	HEARTHSTONE_INLINE int16 GetInt16() { return mValue ? static_cast<int16>(atol(mValue)) : 0; }
+ 	HEARTHSTONE_INLINE uint32 GetUInt32() { return mValue ? static_cast<uint32>(atol(mValue)) : 0; }
+ 	HEARTHSTONE_INLINE int32 GetInt32() { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
+ 	uint64 GetUInt64() 
+Index: src/hearthstone-world/Creature.cpp
+===================================================================
+--- src/hearthstone-world/Creature.cpp	(revision 1158)
++++ src/hearthstone-world/Creature.cpp	(working copy)
+@@ -320,7 +320,7 @@
+ 		ss << "0,0,0,";
+ 
+ 	ss << uint32(GetStandState()) << "," << ( m_spawn ? m_spawn->MountedDisplayID : original_MountedDisplayID ) << "," << m_phaseMode << ",";
+-	ss << (IsVehicle() ? vehicle_shared_from_this()->GetVehicleEntry() : 0) << ")";
++	ss << (IsVehicle() ? vehicle_shared_from_this()->GetVehicleEntry() : 0) << "," << (m_spawn ? m_spawn->eventid : 0) << ")";
+ 	WorldDatabase.Execute(ss.str().c_str());
+ }
+ 
+Index: src/hearthstone-world/Creature.h
+===================================================================
+--- src/hearthstone-world/Creature.h	(revision 1158)
++++ src/hearthstone-world/Creature.h	(working copy)
+@@ -516,6 +516,7 @@
+ 	CreatureProto * proto;
+ 	HEARTHSTONE_INLINE CreatureProto *GetProto() { return proto; }
+ 	CreatureSpawn * m_spawn;
++	EventIdInfo * m_event;
+ 	void OnPushToWorld();
+ 	void Despawn(uint32 delay, uint32 respawntime);
+ 	void TriggerScriptEvent(string func);
+Index: src/hearthstone-world/DayWatcherThread.cpp
+===================================================================
+--- src/hearthstone-world/DayWatcherThread.cpp	(revision 1158)
++++ src/hearthstone-world/DayWatcherThread.cpp	(working copy)
+@@ -22,6 +22,9 @@
+  */
+ 
+ #include "StdAfx.h"
++
++initialiseSingleton( DayWatcherThread );
++
+ #ifdef WIN32
+ static HANDLE m_abortEvent = INVALID_HANDLE_VALUE;
+ #else
+@@ -36,7 +39,8 @@
+ 
+ DayWatcherThread::~DayWatcherThread()
+ {
+-
++	m_creatureEventSpawnMaps.clear();
++	m_gameobjectEventSpawnMaps.clear();
+ }
+ 
+ void DayWatcherThread::terminate()
+@@ -57,7 +61,8 @@
+ void DayWatcherThread::update_settings()
+ {
+ 	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_arena_update_time\", %u)", last_arena_time);
+-	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_dailies_reset_time\", %u)", last_arena_time);
++	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_dailies_reset_time\", %u)", last_daily_reset_time);
++	CharacterDatabase.Execute("REPLACE INTO server_settings VALUES(\"last_eventid_time\", %u)", last_eventid_time);
+ }
+ 
+ void DayWatcherThread::load_settings()
+@@ -82,12 +87,24 @@
+ 	}
+ 	else
+ 		last_daily_reset_time = 0;
++
++	result = CharacterDatabase.Query("SELECT setting_value FROM server_settings WHERE setting_id = \"last_eventid_time\"");
++	if(result)
++	{
++		last_eventid_time = result->Fetch()[0].GetUInt32();
++		delete result;
++	}
++	else
++		last_eventid_time = 0;
++
++	LoadEventIdSettings();
+ }
+ 
+ void DayWatcherThread::set_tm_pointers()
+ {
+ 	dupe_tm_pointer(localtime(&last_arena_time), &local_last_arena_time);
+ 	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
++	dupe_tm_pointer(localtime(&last_eventid_time), &local_last_eventid_time);
+ }
+ 
+ uint32 DayWatcherThread::get_timeout_from_string(const char * string, uint32 def)
+@@ -131,11 +148,14 @@
+ bool DayWatcherThread::run()
+ {
+ 	Log.Notice("DayWatcherThread", "Started.");
++	_loaded = false;
+ 	currenttime = UNIXTIME;
+ 	dupe_tm_pointer(localtime(&currenttime), &local_currenttime);
+ 	load_settings();
+ 	set_tm_pointers();
+ 	m_busy = false;
++	_firstrun[0] = true;
++	_firstrun[1] = true;
+ #ifdef WIN32
+ 	m_abortEvent = CreateEvent(NULL, NULL, FALSE, NULL);
+ #else
+@@ -156,8 +176,136 @@
+ 			update_arena();
+ 
+ 		if(has_timeout_expired(&local_currenttime, &local_last_daily_reset_time, DAILY))
++		{
+ 			update_daily();
+-        
++			runEvents = true;
++		}
++
++		if(has_timeout_expired(&local_currenttime, &local_last_eventid_time, HOURLY))
++		{
++			Log.Notice("DayWatcherThread", "Running Hourly In Game Events checks...");
++			for(EventsList::iterator itr = m_eventIdList.begin(); itr != m_eventIdList.end(); itr++)
++			{
++				if(!(*itr)->eventbyhour)
++					continue;
++				
++				if((*itr)->isactive)
++				{
++					if((*itr)->lastactivated && !CheckHourlyEvent(&local_currenttime, (*itr)->starthour, (*itr)->endhour))
++					{
++						(*itr)->isactive = false;
++						SpawnEventId((*itr)->eventId, false);
++						update_event_settings((*itr)->eventId,0);
++					}
++					else
++					{
++						if((*itr)->lastactivated && _firstrun[0])
++						{
++							if(!SpawnEventId((*itr)->eventId))
++									break;
++						}
++						if(!(*itr)->lastactivated)
++						{
++						time_t activated = (*itr)->lastactivated = UNIXTIME;
++						update_event_settings((*itr)->eventId, activated);
++						runEvents = true;
++						}
++						continue;
++					}
++				}
++				else
++				{
++					if(CheckHourlyEvent(&local_currenttime, (*itr)->starthour, (*itr)->endhour))
++					{
++						if(!SpawnEventId((*itr)->eventId))
++							break;
++						(*itr)->isactive = true;
++						time_t activated = (*itr)->lastactivated = UNIXTIME;
++						update_event_settings((*itr)->eventId, activated);
++						continue;
++					}
++				}
++			}
++			_firstrun[0] = false;
++			last_eventid_time = UNIXTIME;
++			dupe_tm_pointer(localtime(&last_eventid_time), &local_last_eventid_time);
++			m_dirty = true;
++		}
++		
++		if(runEvents = true)
++		{
++			if(_loaded)
++			{
++				runEvents = false;
++				bool monthexpired = false;
++				Log.Notice("DayWatcherThread", "Running Daily In Game Events checks...");
++				for(EventsList::iterator itr = m_eventIdList.begin(); itr != m_eventIdList.end(); itr++)
++				{
++					if((*itr)->eventbyhour)
++						continue;
++					if((*itr)->isactive)
++					{
++						if((*itr)->lastactivated && has_eventid_expired((*itr)->activedays, (*itr)->lastactivated))
++						{
++							(*itr)->isactive = false;
++							SpawnEventId((*itr)->eventId, false);
++							update_event_settings((*itr)->eventId,0);
++						}
++						else
++						{
++							if((*itr)->lastactivated && _firstrun[1])
++							{
++								if(!SpawnEventId((*itr)->eventId))
++										break;
++							}
++
++							if(!(*itr)->lastactivated)
++							{
++							time_t activated = (*itr)->lastactivated = UNIXTIME;
++							update_event_settings((*itr)->eventId, activated);
++							runEvents = true;
++							}
++							continue;
++						}
++					}
++					else
++					{
++						if((*itr)->monthnumber)
++						{
++							if(has_eventid_timeout_expired(&local_currenttime, ((*itr)->monthnumber - 1), MONTHLY))
++							{
++								if(!(*itr)->daynumber)
++								{
++									if(!SpawnEventId((*itr)->eventId))
++											break;
++									(*itr)->isactive = true;
++									time_t activated = (*itr)->lastactivated = UNIXTIME;
++									update_event_settings((*itr)->eventId, activated);
++									continue;
++								}
++								monthexpired = true;
++							}
++						}
++						if(monthexpired && (*itr)->daynumber && has_eventid_timeout_expired(&local_currenttime, (*itr)->daynumber, DAILY))
++						{
++							monthexpired = false;
++							time_t activated = (*itr)->lastactivated = UNIXTIME;
++							update_event_settings((*itr)->eventId, activated);
++							continue;
++						}
++						if((*itr)->daynumber && !(*itr)->monthnumber && has_eventid_timeout_expired(&local_currenttime, (*itr)->daynumber, DAILY))
++						{
++							if(!SpawnEventId((*itr)->eventId))
++								break;
++							(*itr)->isactive = true;
++							time_t activated = (*itr)->lastactivated = UNIXTIME;
++							update_event_settings((*itr)->eventId, activated);
++						}
++					}
++				}
++				_firstrun[1] = false;
++			}
++		}
+ 		if(m_dirty)
+ 			update_settings();
+ 
+@@ -316,5 +464,4 @@
+ 	last_daily_reset_time = UNIXTIME;
+ 	dupe_tm_pointer(localtime(&last_daily_reset_time), &local_last_daily_reset_time);
+ 	m_dirty = true;
+-}
+-
++}
+\ No newline at end of file
+Index: src/hearthstone-world/DayWatcherThread.h
+===================================================================
+--- src/hearthstone-world/DayWatcherThread.h	(revision 1158)
++++ src/hearthstone-world/DayWatcherThread.h	(working copy)
+@@ -28,10 +28,32 @@
+ 	HOURLY		= 4,
+ };
+ 
+-class DayWatcherThread : public ThreadContext
++struct Events
+ {
++	uint8 eventId;
++	uint8 daynumber;
++	uint8 monthnumber;
++	uint8 activedays;
++	time_t lastactivated;
++	bool isactive;
++	bool eventbyhour;
++	uint8 starthour;
++	uint8 endhour;
++};
++
++typedef std::vector<Events*>								EventsList;
++
++// Multimap typedef's
++typedef std::multimap<uint8, uint16>						CreatureEventSpawnMaps;
++typedef std::multimap<uint8, uint16>						GameobjectEventSpawnMaps;
++
++class SERVER_DECL DayWatcherThread : public Singleton<DayWatcherThread>, public ThreadContext
++{
+ 	bool m_busy;
+ 	bool m_dirty;
++	bool _loaded;
++	bool runEvents;
++	bool _firstrun[1];
+ 
+ 	static const time_t timeout = 120;		/* check every 2 minutes */
+ 	time_t currenttime;
+@@ -40,6 +62,8 @@
+ 	tm local_last_arena_time;
+ 	time_t last_daily_reset_time;
+ 	tm local_last_daily_reset_time;
++	time_t last_eventid_time;
++	tm local_last_eventid_time;
+ 
+ 	uint32 arena_period;
+ 
+@@ -58,6 +82,20 @@
+ 	bool has_timeout_expired(tm * now_time, tm * last_time, uint32 timeoutval);
+ 	void update_arena();
+ 	void update_daily();
++
++	//ING Events
++	CreatureEventSpawnMaps m_creatureEventSpawnMaps;
++	GameobjectEventSpawnMaps m_gameobjectEventSpawnMaps;
++	EventsList m_eventIdList;
++
++	void update_event_settings(uint8 eventid, time_t activated);
++	void LoadEventIdSettings();
++	bool CheckHourlyEvent(tm * now_time, uint8 starthour, uint8 endhour);
++	bool has_eventid_timeout_expired(tm * nowtime, int updatetime, uint8 timeoutval);
++	bool has_eventid_expired(int activedays, time_t lastactivated);
++	bool SpawnEventId(uint8 eventId, bool activate = true);
++	uint8 eventToDespawn;
+ };
++#define sDayWatcher DayWatcherThread::getSingleton()
+ 
+ #endif
+Index: src/hearthstone-world/GameObject.cpp
+===================================================================
+--- src/hearthstone-world/GameObject.cpp	(revision 1158)
++++ src/hearthstone-world/GameObject.cpp	(working copy)
+@@ -293,7 +293,8 @@
+ 		<< GetUInt32Value(GAMEOBJECT_FLAGS) << ","
+ 		<< GetUInt32Value(GAMEOBJECT_FACTION) << ","
+ 		<< GetFloatValue(OBJECT_FIELD_SCALE_X) << ","
+-		<< m_phaseMode <<")";
++		<< m_phaseMode << ","
++		<< (m_spawn ? m_spawn->eventid : 0) << ")";
+ 	WorldDatabase.Execute(ss.str().c_str());
+ }
+ 
+Index: src/hearthstone-world/INGEvents.cpp
+===================================================================
+--- src/hearthstone-world/INGEvents.cpp	(revision 0)
++++ src/hearthstone-world/INGEvents.cpp	(revision 0)
+@@ -0,0 +1,454 @@
++/*
++ * Aspire Hearthstone
++ * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU Affero General Public License as published by
++ * the Free Software Foundation, either version 3 of the License, or
++ * any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU Affero General Public License for more details.
++ *
++ * You should have received a copy of the GNU Affero General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ */
++
++#include "StdAfx.h"
++
++void MapMgr::DespawnEvent(uint8 eventToRemove)
++{
++	if(_cells)
++	{
++		for (uint32 i = 0; i < _sizeX; i++)
++		{
++			if(_cells[i] != 0)
++			{
++				for (uint32 j = 0; j < _sizeY; j++)
++				{
++					if(_cells[i][j] != 0)
++					{
++						_cells[i][j]->_unloadpending=false;
++						_cells[i][j]->RemoveEventIdObjects(eventToRemove);
++						_cells[i][j]->ModifyEventIdSetting(false, eventToRemove);
++					}
++				}
++			}
++		}
++	}
++}
++
++void MapMgr::SpawnEvent(uint8 eventId)
++{
++	CellSpawns * sp;
++	if(_cells)
++	{
++		for (uint32 i = 0; i < _sizeX; i++)
++		{
++			if(_cells[i] != 0)
++			{
++				for (uint32 j = 0; j < _sizeY; j++)
++				{
++					if(_cells[i][j] != 0)
++					{
++						sp = _map->GetSpawnsList(i, j);
++						_cells[i][j]->LoadEventIdObjects(sp, eventId);
++						_cells[i][j]->ModifyEventIdSetting(true, eventId);
++					}
++				}
++			}
++		}
++	}
++}
++
++void DayWatcherThread::LoadEventIdSettings()
++{
++	QueryResult * result = WorldDatabase.Query("SELECT * FROM events");
++	if (!result)
++		return;
++
++	QueryResult * result2;
++	Field * fields;
++	Events * events;
++	do 
++	{
++		fields = result->Fetch();
++		events = new Events;
++		events->eventId = fields[0].GetUInt8();
++		events->daynumber = fields[1].GetUInt8();
++		events->monthnumber = fields[2].GetUInt8();
++		events->activedays = fields[4].GetUInt8();
++		result2 = CharacterDatabase.Query("SELECT lastactivated FROM events_settings WHERE eventid = %u", events->eventId);
++		if(result2)
++		{
++			events->lastactivated = result2->Fetch()[0].GetUInt64();
++			events->isactive = true;
++			delete result2;
++		}
++		events->starthour = fields[5].GetUInt8();
++		events->endhour = fields[6].GetUInt8();
++		m_eventIdList.push_back(events);
++	} while(result->NextRow());
++
++	m_creatureEventSpawnMaps.clear();
++	m_gameobjectEventSpawnMaps.clear();
++	uint8 eventid;
++
++	result = WorldDatabase.Query("SELECT eventid FROM events");
++	do
++	{
++		eventid = result->Fetch()[0].GetUInt8();
++		result2 = WorldDatabase.Query("SELECT DISTINCT mapid FROM creature_spawns WHERE eventid = '%u'", eventid);
++		do
++		{
++			m_creatureEventSpawnMaps.insert(pair<uint8, uint16>(eventid, result2->Fetch()[0].GetUInt16()));
++		}while(result2->NextRow());
++		result2 = WorldDatabase.Query("SELECT DISTINCT mapid FROM gameobject_spawns WHERE eventid = '%u'", eventid);
++		do
++		{
++			m_gameobjectEventSpawnMaps.insert(pair<uint8, uint16>(eventid, result2->Fetch()[0].GetUInt16()));
++		}while(result2->NextRow());
++	}while(result->NextRow());
++	delete result;
++	delete result2;
++	_loaded = true;
++}
++
++void MapCell::LoadEventIdObjects(CellSpawns * sp, uint8 eventId)
++{
++	Instance * pInstance = _mapmgr->pInstance;
++
++	if(sp->CreatureSpawns.size())//got creatures
++	{
++		VehiclePointer v;
++		CreaturePointer c;
++		for(CreatureSpawnList::iterator i=sp->CreatureSpawns.begin();i!=sp->CreatureSpawns.end();i++)
++		{
++			if(pInstance)
++			{
++				if(pInstance->m_killedNpcs.find((*i)->id) != pInstance->m_killedNpcs.end())
++					continue;
++			}
++			if((*i)->eventid && (*i)->eventid == eventId)
++			{
++				if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++				if((*i)->vehicle != 0)
++				{
++					v=_mapmgr->CreateVehicle((*i)->entry);
++
++					v->SetMapId(_mapmgr->GetMapId());
++					v->SetInstanceID(_mapmgr->GetInstanceID());
++					v->m_loadedFromDB = true;
++
++					if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
++					{
++						if(!v->CanAddToWorld())
++						{
++							v->Destructor();
++							continue;
++						}
++
++						v->PushToWorld(_mapmgr);
++					}
++					else
++					{
++						v->Destructor();
++					}
++				}
++				else
++				{
++					c=_mapmgr->CreateCreature((*i)->entry);
++
++					c->SetMapId(_mapmgr->GetMapId());
++					c->SetInstanceID(_mapmgr->GetInstanceID());
++					c->m_loadedFromDB = true;
++
++					if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
++					{
++						if(!c->CanAddToWorld())
++						{
++							c->Destructor();
++							continue;
++						}
++
++						c->PushToWorld(_mapmgr);
++					}
++					else
++					{
++						c->Destructor();
++					}
++				}
++			}
++		}
++	}
++
++	if(sp->GOSpawns.size())//got GOs
++	{
++		GameObjectPointer go;
++		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
++		{
++			if((*i)->eventid && (*i)->eventid == eventId)
++			{
++				if(!((*i)->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++				go = _mapmgr->CreateGameObject((*i)->entry);
++				if(go == NULL)
++					continue;
++				if(go->Load(*i))
++				{
++					go->m_loadedFromDB = true;
++					go->PushToWorld(_mapmgr);
++					CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
++				}
++				else
++				{
++					go->Destructor();
++					go = NULLGOB;
++				}
++			}
++		}
++	}
++}
++
++void MapCell::ModifyEventIdSetting(bool active, uint8 eventId)
++{
++	ObjectSet::iterator itr;
++	ObjectPointer pObject; //do this outside the loop!
++	for(itr = _objects.begin(); itr != _objects.end();)
++	{
++		pObject = (*itr);
++		itr++;
++
++		if(!pObject)
++			continue;
++
++		switch(pObject->GetTypeId())
++		{
++		case TYPEID_UNIT: 
++			{
++				if( pObject->IsPet() )
++					continue;
++
++				if(!TO_CREATURE(pObject)->m_spawn->eventinfo)
++					continue;
++
++				if(TO_CREATURE(pObject)->m_spawn->eventid != eventId)
++					continue;
++
++				if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_MODELID)
++					TO_CREATURE(pObject)->SetUInt32Value(UNIT_FIELD_DISPLAYID, active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventdisplayid : TO_CREATURE(pObject)->m_spawn->displayid);
++
++				if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_PHASE)
++					TO_CREATURE(pObject)->SetPhase(active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventphase : TO_CREATURE(pObject)->m_spawn->phase);
++
++				if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_EQUIP)
++				{
++					if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem1)
++						TO_CREATURE(pObject)->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem1 : TO_CREATURE(pObject)->proto->Item1);
++					if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem2)
++						TO_CREATURE(pObject)->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID_1, active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem2 : TO_CREATURE(pObject)->proto->Item2);
++					if(TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem3)
++						TO_CREATURE(pObject)->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID_2, active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventitem3 : TO_CREATURE(pObject)->proto->Item3);
++				}
++			}break;
++		case TYPEID_GAMEOBJECT:
++			{
++				if(TO_GAMEOBJECT(pObject)->m_spawn->eventid != eventId)
++					continue;
++
++				if(!TO_GAMEOBJECT(pObject)->m_spawn->eventinfo)
++					continue;
++
++				if(TO_GAMEOBJECT(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_MODELID)
++				{
++					if(active)
++					{
++						TO_GAMEOBJECT(pObject)->SetUInt32Value(GAMEOBJECT_DISPLAYID, TO_GAMEOBJECT(pObject)->m_spawn->eventinfo->eventdisplayid);
++					}
++					else
++					{
++						GameObjectInfo * pInfo = GameObjectNameStorage.LookupEntry(pObject->GetEntry());
++						TO_GAMEOBJECT(pObject)->SetUInt32Value(GAMEOBJECT_DISPLAYID, pInfo->DisplayID);
++					}
++				}
++
++				if(TO_GAMEOBJECT(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_PHASE)
++					TO_CREATURE(pObject)->SetPhase(active ? TO_CREATURE(pObject)->m_spawn->eventinfo->eventphase : TO_CREATURE(pObject)->m_spawn->phase);
++			}break;
++		default:
++			{
++				continue;
++			}break;
++		}
++	}
++}
++
++void MapCell::RemoveEventIdObjects(uint8 eventToRemove)
++{
++	if(!eventToRemove)
++		return;
++
++	ObjectSet::iterator itr;
++
++	/* delete objects in pending respawn state */
++	ObjectPointer pObject;
++	for(itr = _respawnObjects.begin(); itr != _respawnObjects.end(); ++itr)
++	{
++		pObject = *itr;
++		if(!pObject)
++			continue;
++		
++		switch(pObject->GetTypeId())
++		{
++		case TYPEID_UNIT: 
++			{
++				if(!(TO_CREATURE(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++				if(TO_CREATURE(pObject)->m_spawn->eventid == eventToRemove)
++				{
++					if( pObject->IsVehicle())
++					{
++						_mapmgr->_reusable_guids_vehicle.push_back( pObject->GetUIdFromGUID() );
++						TO_VEHICLE(pObject)->m_respawnCell=NULL;
++						TO_VEHICLE(pObject)->Destructor();
++						_respawnObjects.erase(pObject);
++					}
++					else if( !pObject->IsPet() )
++					{
++						_mapmgr->_reusable_guids_creature.push_back( pObject->GetUIdFromGUID() );
++						TO_CREATURE(pObject)->m_respawnCell=NULL;
++						TO_CREATURE(pObject)->Destructor();
++						_respawnObjects.erase(pObject);
++					}
++				}
++			}break;
++
++		case TYPEID_GAMEOBJECT:
++			{
++				if(!(TO_GAMEOBJECT(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++
++				if(TO_GAMEOBJECT(pObject)->m_spawn->eventid == eventToRemove)
++				{
++					TO_GAMEOBJECT(pObject)->m_respawnCell=NULL;
++					TO_GAMEOBJECT(pObject)->Destructor();
++					_respawnObjects.erase(pObject);
++				}break;
++			}
++		}
++	}
++
++	for(itr = _objects.begin(); itr != _objects.end();)
++	{
++		pObject = (*itr);
++		itr++;
++
++		if(!pObject)
++			continue;
++
++		switch(pObject->GetTypeId())
++		{
++		case TYPEID_UNIT: 
++			{
++				if( pObject->IsPet() )
++					continue;
++
++				if(TO_CREATURE(pObject)->m_spawn->eventid != eventToRemove)
++					continue;
++
++				if(!(TO_CREATURE(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++			}break;
++		case TYPEID_GAMEOBJECT:
++			{
++				if(TO_GAMEOBJECT(pObject)->m_spawn->eventid != eventToRemove)
++					continue;
++
++				if(!(TO_GAMEOBJECT(pObject)->m_spawn->eventinfo->eventchangesflag & EVENTID_FLAG_SPAWN))
++					continue;
++			}break;
++		default:
++			{
++				continue;
++			}break;
++		}
++
++		if( _unloadpending )
++		{			
++			if(!pObject->m_loadedFromDB)
++				continue;
++		}
++
++		if( pObject->Active )
++			pObject->Deactivate( _mapmgr );
++
++		if( pObject->IsInWorld() )
++			pObject->RemoveFromWorld( true );
++
++		pObject->Destructor();
++
++	}
++}
++
++bool DayWatcherThread::has_eventid_timeout_expired(tm * now_time, int updatetime, uint8 timeoutval)
++{
++	switch(timeoutval)
++	{
++		case MONTHLY:
++			return (now_time->tm_mon == updatetime);
++
++		case DAILY:
++			return (now_time->tm_mday == updatetime);
++	}
++	return false;
++}
++
++bool DayWatcherThread::CheckHourlyEvent(tm * now_time, uint8 starthour, uint8 endhour)
++{
++	if(starthour < endhour)
++		return( now_time->tm_hour >= starthour || (now_time->tm_hour > 0 &&  now_time->tm_hour <= endhour) );
++	else
++		return( now_time->tm_hour >= endhour);
++}
++
++bool DayWatcherThread::has_eventid_expired(int activedays, time_t lastactivated)
++{
++	return ( UNIXTIME >= lastactivated + (TIME_DAY * activedays) );
++}
++
++void DayWatcherThread::update_event_settings(uint8 eventid, time_t activated)
++{
++	if(activated)
++		CharacterDatabase.Execute("REPLACE INTO events_settings VALUES('%u','%u')", eventid, activated);
++	else
++		CharacterDatabase.Execute("DELETE FROM events_settings where eventid = '%u')", eventid);
++}
++
++bool DayWatcherThread::SpawnEventId(uint8 eventId, bool activate)
++{
++	MapMgrPointer mgr;
++	CreatureEventSpawnMaps::iterator itr = m_creatureEventSpawnMaps.find(eventId);
++	if(itr != m_creatureEventSpawnMaps.end())
++	{
++		do
++		{
++			mgr = sInstanceMgr.GetMapMgr(itr->second);
++			if(mgr)
++				if(activate)
++					sEventMgr.AddEvent(mgr, &MapMgr::SpawnEvent, eventId, EVENT_UNK, 10000, 0, 0);
++				else
++					mgr->DespawnEvent(eventId);
++			else
++			{
++				runEvents = true;
++				return false;
++			}
++			itr++;
++		}while(itr != m_creatureEventSpawnMaps.upper_bound(eventId));
++	}
++	return true;
++}
+\ No newline at end of file
+Index: src/hearthstone-world/Map.cpp
+===================================================================
+--- src/hearthstone-world/Map.cpp	(revision 1158)
++++ src/hearthstone-world/Map.cpp	(working copy)
+@@ -93,7 +93,7 @@
+ bool first_table_warning = true;
+ bool CheckResultLengthCreatures(QueryResult * res)
+ {
+-	if( res->GetFieldCount() != 22 )
++	if( res->GetFieldCount() != 23 )
+ 	{
+ 		if( first_table_warning )
+ 		{
+@@ -112,7 +112,7 @@
+ bool first_table_warningg = true;
+ bool CheckResultLengthGameObject(QueryResult * res)
+ {
+-	if( res->GetFieldCount() != 16 )
++	if( res->GetFieldCount() != 17 )
+ 	{
+ 		if( first_table_warningg )
+ 		{
+@@ -148,6 +148,7 @@
+ 		}
+ 
+ 	QueryResult * result;
++	QueryResult * result2;
+ 	set<string>::iterator tableiterator;
+ 	for(tableiterator=ExtraMapCreatureTables.begin(); tableiterator!=ExtraMapCreatureTables.end();++tableiterator)
+ 	{
+@@ -181,6 +182,20 @@
+ 					cspawn->MountedDisplayID = fields[19].GetUInt32();
+ 					cspawn->phase = fields[20].GetInt32();
+ 					cspawn->vehicle = fields[21].GetInt32();
++					cspawn->eventid = fields[22].GetUInt8();
++					if(cspawn->eventid)
++					{
++						result2 = WorldDatabase.Query("SELECT * FROM creature_events WHERE id = '%u' AND eventid = '%u'", cspawn->id, cspawn->eventid);
++						cspawn->eventinfo = new EventIdInfo;
++						Field * fields2 = result2->Fetch();
++						cspawn->eventinfo->eventid = fields2[0].GetUInt8();
++						cspawn->eventinfo->eventchangesflag = fields2[2].GetUInt8();
++						cspawn->eventinfo->eventphase = fields2[3].GetUInt32();
++						cspawn->eventinfo->eventdisplayid = fields2[4].GetUInt32();
++						cspawn->eventinfo->eventitem1 = fields2[5].GetUInt32();
++						cspawn->eventinfo->eventitem2 = fields2[6].GetUInt32();
++						cspawn->eventinfo->eventitem3 = fields2[7].GetUInt32();
++					}						
+ 
+ 					uint32 cellx=CellHandler<MapMgr>::GetPosX(cspawn->x);
+ 					uint32 celly=CellHandler<MapMgr>::GetPosY(cspawn->y);
+@@ -299,6 +314,17 @@
+ 					gspawn->faction=fields[13].GetUInt32();
+ 					gspawn->scale = fields[14].GetFloat();
+ 					gspawn->phase = fields[15].GetInt32();
++					gspawn->eventid = fields[16].GetUInt8();
++					if(gspawn->eventid)
++					{
++						result2 = WorldDatabase.Query("SELECT * FROM gameobject_events WHERE id = '%u' AND eventid = '%u'", gspawn->id, gspawn->eventid);
++						gspawn->eventinfo = new EventIdInfo;
++						Field * fields2 = result2->Fetch();
++						gspawn->eventinfo->eventid = fields2[0].GetUInt8();
++						gspawn->eventinfo->eventchangesflag = fields2[2].GetUInt8();
++						gspawn->eventinfo->eventphase = fields2[3].GetUInt32();
++						gspawn->eventinfo->eventdisplayid = fields2[4].GetUInt32();
++					}
+ 					//gspawn->stateNpcLink = fields[15].GetUInt32();
+ 
+ 					//uint32 cellx=float2int32(((_maxX-gspawn->x)/_cellSize));
+Index: src/hearthstone-world/Map.h
+===================================================================
+--- src/hearthstone-world/Map.h	(revision 1158)
++++ src/hearthstone-world/Map.h	(working copy)
+@@ -33,6 +33,17 @@
+ 
+ struct Formation;
+ 
++typedef struct EventIdInfo
++{
++	uint8  eventid;
++	uint8  eventchangesflag;
++	uint32 eventdisplayid;
++	int32  eventphase;
++	uint32 eventitem1;
++	uint32 eventitem2;
++	uint32 eventitem3;
++}EventIdInfo;
++
+ typedef struct CreatureSpawn
+ {
+ 	uint32	id;//spawn ID
+@@ -42,22 +53,24 @@
+ 	float	z;
+ 	float	o;
+ 	Formation* form;
+-	uint8 movetype;
+-	uint32 displayid;
+-	uint32 factionid;
+-	uint32 flags;
+-	uint32 bytes;
+-	uint32 bytes1;
+-	uint32 bytes2;
+-	uint32 emote_state;
++	uint8   movetype;
++	uint32  displayid;
++	uint32  factionid;
++	uint32  flags;
++	uint32  bytes;
++	uint32  bytes1;
++	uint32  bytes2;
++	uint32  emote_state;
+ 	//uint32 respawnNpcLink;
+-	uint16 channel_spell;
+-	uint32 channel_target_go;
+-	uint32 channel_target_creature;
+-	uint16 stand_state;
+-	uint32 MountedDisplayID;
+-	int32 phase;
+-	uint32 vehicle;
++	uint16  channel_spell;
++	uint32  channel_target_go;
++	uint32  channel_target_creature;
++	uint16  stand_state;
++	uint32  MountedDisplayID;
++	int32   phase;
++	uint32  vehicle;
++	uint8   eventid;
++	EventIdInfo * eventinfo;
+ }CreatureSpawn;
+ 
+ typedef struct GOSpawn
+@@ -74,10 +87,12 @@
+ 	float	facing;
+ 	uint32	flags;
+ 	uint32	state;
+-	uint32 MountDisplayID;
++	uint32  MountDisplayID;
+ 	uint32	faction;
+-	float scale;
+-	int32 phase;
++	float   scale;
++	int32   phase;
++	uint8   eventid;
++	EventIdInfo * eventinfo;
+ } GOSpawn;
+ 
+ typedef std::vector<CreatureSpawn*> CreatureSpawnList;
+Index: src/hearthstone-world/MapCell.cpp
+===================================================================
+--- src/hearthstone-world/MapCell.cpp	(revision 1158)
++++ src/hearthstone-world/MapCell.cpp	(working copy)
+@@ -21,7 +21,6 @@
+ // MapCell.cpp
+ //
+ #include "StdAfx.h"
+-
+ MapCell::MapCell()
+ {
+ 	_forcedActive = false;
+@@ -179,7 +178,6 @@
+ 	_loaded = false;
+ }
+ 
+-
+ void MapCell::LoadObjects(CellSpawns * sp)
+ {
+ 	_loaded = true;
+@@ -199,55 +197,58 @@
+ /*				if((*i)->respawnNpcLink && pInstance->m_killedNpcs.find((*i)->respawnNpcLink) != pInstance->m_killedNpcs.end())
+ 					continue;*/
+ 			}
+-			if((*i)->vehicle != 0)
++			if(!(*i)->eventid)
+ 			{
+-				v=_mapmgr->CreateVehicle((*i)->entry);
++				if((*i)->vehicle != 0)
++				{
++					v=_mapmgr->CreateVehicle((*i)->entry);
+ 
+-				v->SetMapId(_mapmgr->GetMapId());
+-				v->SetInstanceID(_mapmgr->GetInstanceID());
+-				v->m_loadedFromDB = true;
++					v->SetMapId(_mapmgr->GetMapId());
++					v->SetInstanceID(_mapmgr->GetInstanceID());
++					v->m_loadedFromDB = true;
+ 
+-				if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+-				{
+-					if(!v->CanAddToWorld())
++					if(v->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+ 					{
++						if(!v->CanAddToWorld())
++						{
++							v->Destructor();
++							v = NULLVEHICLE;
++							continue;
++						}
++
++						v->PushToWorld(_mapmgr);
++					}
++					else
++					{
+ 						v->Destructor();
+ 						v = NULLVEHICLE;
+-						continue;
+ 					}
+-
+-					v->PushToWorld(_mapmgr);
+ 				}
+ 				else
+ 				{
+-					v->Destructor();
+-					v = NULLVEHICLE;
+-				}
+-			}
+-			else
+-			{
+-				c=_mapmgr->CreateCreature((*i)->entry);
++					c=_mapmgr->CreateCreature((*i)->entry);
+ 
+-				c->SetMapId(_mapmgr->GetMapId());
+-				c->SetInstanceID(_mapmgr->GetInstanceID());
+-				c->m_loadedFromDB = true;
++					c->SetMapId(_mapmgr->GetMapId());
++					c->SetInstanceID(_mapmgr->GetInstanceID());
++					c->m_loadedFromDB = true;
+ 
+-				if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+-				{
+-					if(!c->CanAddToWorld())
++					if(c->Load(*i, _mapmgr->iInstanceMode, _mapmgr->GetMapInfo()))
+ 					{
++						if(!c->CanAddToWorld())
++						{
++							c->Destructor();
++							c = NULLCREATURE;
++							continue;
++						}
++
++						c->PushToWorld(_mapmgr);
++					}
++					else
++					{
+ 						c->Destructor();
+ 						c = NULLCREATURE;
+-						continue;
+ 					}
+-
+-					c->PushToWorld(_mapmgr);
+ 				}
+-				else
+-				{
+-					c->Destructor();
+-					c = NULLCREATURE;
+-				}
+ 			}
+ 		}
+ 	}
+@@ -257,29 +258,32 @@
+ 		GameObjectPointer go;
+ 		for(GOSpawnList::iterator i=sp->GOSpawns.begin();i!=sp->GOSpawns.end();i++)
+ 		{
+-			go = _mapmgr->CreateGameObject((*i)->entry);
+-			if(go == NULL )
+-				continue;
+-			if(go->Load(*i))
++			if(!(*i)->eventid)
+ 			{
+-				//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
++				go = _mapmgr->CreateGameObject((*i)->entry);
++				if(go == NULL)
++					continue;
++				if(go->Load(*i))
++				{
++					//uint32 state = go->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE);
+ 
+-				// FIXME - burlex
+-				/*
+-				if(pInstance && pInstance->FindObject((*i)->stateNpcLink))
++					// FIXME - burlex
++					/*
++					if(pInstance && pInstance->FindObject((*i)->stateNpcLink))
++					{
++						go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, (state ? 0 : 1));
++					}*/			   
++
++					go->m_loadedFromDB = true;
++					go->PushToWorld(_mapmgr);
++					CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
++				}
++				else
+ 				{
+-					go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, (state ? 0 : 1));
+-				}*/			   
+-
+-				go->m_loadedFromDB = true;
+-				go->PushToWorld(_mapmgr);
+-				CALL_GO_SCRIPT_EVENT(go, OnSpawn)();
++					go->Destructor();
++					go = NULLGOB;
++				}
+ 			}
+-			else
+-			{
+-				go->Destructor();
+-				go = NULLGOB;
+-			}
+ 		}
+ 	}
+ }
+Index: src/hearthstone-world/MapCell.h
+===================================================================
+--- src/hearthstone-world/MapCell.h	(revision 1158)
++++ src/hearthstone-world/MapCell.h	(working copy)
+@@ -61,6 +61,11 @@
+ 	void LoadObjects(CellSpawns * sp);
+ 	HEARTHSTONE_INLINE uint32 GetPlayerCount() { return _playerCount; }
+ 
++	//ING Events
++	void RemoveEventIdObjects(uint8 eventToRemove);
++	void ModifyEventIdSetting(bool active, uint8 eventId);
++	void LoadEventIdObjects(CellSpawns * sp, uint8 eventId);
++
+ 	HEARTHSTONE_INLINE bool IsUnloadPending() { return _unloadpending; }
+ 	HEARTHSTONE_INLINE void SetUnloadPending(bool up) { _unloadpending = up; }
+ 	void QueueUnloadPending();
+Index: src/hearthstone-world/MapMgr.cpp
+===================================================================
+--- src/hearthstone-world/MapMgr.cpp	(revision 1158)
++++ src/hearthstone-world/MapMgr.cpp	(working copy)
+@@ -1561,6 +1561,7 @@
+ 	while(m_threadRunning)
+ 	{
+ 		exec_start=getMSTime();
++
+ 		//first push to world new objects
+ 		m_objectinsertlock.Acquire();//<<<<<<<<<<<<<<<<
+ 		if(m_objectinsertpool.size())
+Index: src/hearthstone-world/MapMgr.h
+===================================================================
+--- src/hearthstone-world/MapMgr.h	(revision 1158)
++++ src/hearthstone-world/MapMgr.h	(working copy)
+@@ -250,6 +250,9 @@
+ 	void LoadAllCells();
+ 	HEARTHSTONE_INLINE size_t GetPlayerCount() { return m_PlayerStorage.size(); }
+ 
++	void DespawnEvent(uint8 eventToRemove);
++	void SpawnEvent(uint8 eventId);
++
+ 	void _PerformObjectDuties();
+ 	uint32 mLoopCounter;
+ 	uint32 lastGameobjectUpdate;
+Index: src/hearthstone-world/Master.cpp
+===================================================================
+--- src/hearthstone-world/Master.cpp	(revision 1158)
++++ src/hearthstone-world/Master.cpp	(working copy)
+@@ -44,7 +44,6 @@
+ SessionLogWriter* GMCommand_Log;
+ SessionLogWriter* Anticheat_Log;
+ SessionLogWriter* Player_Log;
+-extern DayWatcherThread * dw;
+ extern CharacterLoaderThread * ctl;
+ 
+ void Master::_OnSignal(int s)
+@@ -434,8 +433,8 @@
+ 	CleanupRandomNumberGenerators();
+ 
+ 	Log.Notice( "DayWatcherThread", "Exiting..." );
+-	dw->terminate();
+-	dw = NULL;
++	sDayWatcher.terminate();
++	delete DayWatcherThread::getSingletonPtr();
+ 
+ #ifndef CLUSTERING
+ 	ls->Close();
+@@ -473,7 +472,6 @@
+ 	//delete World::getSingletonPtr();
+ 	World::getSingletonPtr()->Destructor();
+ 
+-
+ 	sScriptMgr.UnloadScripts();
+ 	delete ScriptMgr::getSingletonPtr();
+ 
+Index: src/hearthstone-world/World.cpp
+===================================================================
+--- src/hearthstone-world/World.cpp	(revision 1158)
++++ src/hearthstone-world/World.cpp	(working copy)
+@@ -21,7 +21,6 @@
+ 
+ initialiseSingleton( World );
+ 
+-DayWatcherThread* dw = NULL;
+ CharacterLoaderThread* ctl = NULL;
+ 
+ float World::m_movementCompressThreshold;
+@@ -456,6 +455,8 @@
+ 	new WorldLog;
+ 	new ChatHandler;
+ 
++	ThreadPool.ExecuteTask( new DayWatcherThread() );
++
+ 	// grep: this only has to be done once between version updates
+ 	// to re-fill the table.
+ 
+@@ -584,9 +585,6 @@
+ 	BattlegroundMgrPointer BattlegroundMgr(new CBattlegroundManager);
+ 	BattlegroundMgr->Init();
+ 
+-	dw = new DayWatcherThread();
+-	ThreadPool.ExecuteTask( dw );
+-
+ 	ctl = new CharacterLoaderThread();
+ 	ThreadPool.ExecuteTask( ctl );
+ 	ThreadPool.ExecuteTask( new NewsAnnouncer() );
+Index: src/hearthstone-world/World.h
+===================================================================
+--- src/hearthstone-world/World.h	(revision 1158)
++++ src/hearthstone-world/World.h	(working copy)
+@@ -71,6 +71,14 @@
+ 	MAX_INTRATES
+ };
+ 
++enum EventIdFlags
++{
++	EVENTID_FLAG_NONE = 0,
++	EVENTID_FLAG_PHASE = 1,
++	EVENTID_FLAG_MODELID = 2,
++	EVENTID_FLAG_EQUIP = 4, //this obviously cannot be used for gameobjects
++	EVENTID_FLAG_SPAWN = 8
++};
+ 
+ enum EnviromentalDamage
+ {
+Index: win/VC90/hearthstone-world.vcproj
+===================================================================
+--- win/VC90/hearthstone-world.vcproj	(revision 1158)
++++ win/VC90/hearthstone-world.vcproj	(working copy)
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="Windows-1252"?>
+ <VisualStudioProject
+ 	ProjectType="Visual C++"
+-	Version="9,00"
++	Version="9.00"
+ 	Name="hearthstone-world"
+ 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
+ 	RootNamespace="game"
+@@ -775,6 +775,10 @@
+ 				>
+ 			</File>
+ 			<File
++				RelativePath="..\..\src\hearthstone-world\INGEvents.cpp"
++				>
++			</File>
++			<File
+ 				RelativePath="..\..\src\hearthstone-world\Map.cpp"
+ 				>
+ 			</File>
+@@ -1240,10 +1244,6 @@
+ 			</File>
+ 		</Filter>
+ 		<File
+-			RelativePath=".\ClassDiagram1.cd"
+-			>
+-		</File>
+-		<File
+ 			RelativePath="..\..\src\hearthstone-world\EventMgr.cpp"
+ 			>
+ 		</File>

@@ -1,9 +1,9 @@
 ## Process this file with autoconf to produce a configure script.
 
-AC_INIT([Ascent],
+AC_INIT([Hearthstone],
         [3.6],
-        [www.ascentemu.com],
-        [ascent])
+        [www.hearthstone.ws],
+        [hearthstone])
 
 AC_PREREQ(2.5)
 
@@ -25,12 +25,10 @@ AC_PROG_LIBTOOL
 # autoheader templates
 AH_TEMPLATE([USE_EPOLL], Define if you want to use the epoll socket engine module.)
 AH_TEMPLATE([USE_KQUEUE], Define if you want to use the kqueue socket engine module.)
+AH_TEMPLATE([USE_KQUEUE_DFLY], Define if you want to use the kqueue socket engine module for DFLY.)
 AH_TEMPLATE([HAVE_DARWIN], Define if you have MacOSX Darwin, to include the correct headers for kevent)
 AH_TEMPLATE([ENABLE_CLUSTERING], Define if you want to enable clustering, this is experimental.)
-AH_TEMPLATE([ENABLE_COLLISION], Define if you want to enable collision calculation, warning. this can cause. a heavy load)
 AH_TEMPLATE([ENABLE_VOICECHAT], Define this if you want to enable voice chat system)
-AH_TEMPLATE([USING_BIG_ENDIAN], Define this if you are on a big-endian system.)
-AH_TEMPLATE([USING_LITTLE_ENDIAN], Define this if you are on a non-big-endian system.)
 AH_TEMPLATE([X64], Define this if you are under an X64-based operating system.)
 AH_TEMPLATE([X86], Define this if you are under an X86-based 32bit operating system.)
 AH_TEMPLATE([NO_DBLAYER_MYSQL], Define this if you want to disable mysql support.)
@@ -51,6 +49,11 @@ case "$OSNAME" in
 		dnl FreeBSD Owns !
 		AC_MSG_RESULT(FreeBSD Owns your hd)
 		FREEBSD=yes
+	;;
+	DragonFly*)
+		dnl DragonFlyBSD OMG, it works? 
+		AC_MSG_RESULT(DragonFlyBSD Rocks)
+		DRAGONFLY=yes
 	;;
 	Linux*)
 		dnl Linux...
@@ -89,16 +92,14 @@ case "$ARCH" in
 	;;
 esac
 
-AC_C_BIGENDIAN([AC_DEFINE(USING_BIG_ENDIAN)],[AC_DEFINE(USING_LITTLE_ENDIAN)],[])
-
 AC_CHECK_PROG([SVN], [svn], yes)
 if test -z "$SVN"; then AC_MSG_ERROR(Subversion not found); fi
 
 # Checks for libraries.
 
 # Reset 
-CFLAGS="$INCLUDES -Wall -fno-strict-aliasing"
-CXXFLAGS="$INCLUDES -Wall -fno-strict-aliasing"
+CFLAGS="$INCLUDES"
+CXXFLAGS="$INCLUDES"
 
 # Check for pthread
 ACX_PTHREAD( [
@@ -131,14 +132,6 @@ AC_ARG_ENABLE(clustering,
      ],
 )
 
-AC_ARG_ENABLE(collision,
-     AC_HELP_STRING([--enable-collision],enable collision calculation. warning this can cause a high load),
-     [ if test "x$enable_collision" = "xyes" ; then
-   	AC_DEFINE(ENABLE_COLLISION)
-       fi
-     ],
-)
-
 AC_ARG_ENABLE(gcov,
      AC_HELP_STRING([--enable-gcov],[enable codecovering]),
      [ if test "x$enable_gcov" = "xyes" ; then
@@ -150,8 +143,8 @@ AC_ARG_ENABLE(gcov,
 AC_ARG_ENABLE(debug,
      AC_HELP_STRING([--enable-debug],[enable debug]),
      [ if test "x$enable_debug" = "xyes" ; then
-           CFLAGS="$CFLAGS -g"
-           CXXFLAGS="$CXXFLAGS -g"
+           CFLAGS="$CFLAGS -g -D_DEBUG"
+           CXXFLAGS="$CXXFLAGS -g -D_DEBUG"
        fi
      ],
 )
@@ -234,6 +227,15 @@ if test "x$OSNAME" = "xFreeBSD" ; then
 	AC_CHECK_HEADER(sys/event.h, , AC_MSG_ERROR([Cannot find sys/event.h for socket engine]))
 	AC_DEFINE(USE_KQUEUE)
 	AC_SUBST(NETWORKING, "kqueue (FreeBSD)")
+
+fi
+
+if test "x$OSNAME" = "xDragonFly" ; then
+	AC_MSG_RESULT(kqueue)
+	AC_CHECK_FUNC(kevent, , AC_MSG_ERROR([Cannot find kevent() function for socket engine]))
+	AC_CHECK_HEADER(sys/event.h, , AC_MSG_ERROR([Cannot find sys/event.h for socket engine]))
+ 	AC_DEFINE(USE_KQUEUE_DFLY)
+	AC_SUBST(NETWORKING, "kqueue (DragonFly)")
 fi
 
 if test "x$OSNAME" = "xDarwin" ; then
@@ -275,28 +277,43 @@ AC_DEFINE_UNQUOTED([SVN_REVISION_DONE], `sh ./extract_svn_revision.sh`, [SVN rev
 AC_CONFIG_FILES([
    ./Makefile
    src/Makefile
-   src/ascent-shared/Makefile
-   src/ascent-world/Makefile
-   src/ascent-logonserver/Makefile
-   src/ascent-voicechat/Makefile
-   src/ascent-realmserver/Makefile
+   src/hearthstone-shared/Makefile
+   src/hearthstone-world/Makefile
+   src/hearthstone-logonserver/Makefile
+   src/hearthstone-voicechat/Makefile
+   src/hearthstone-realmserver/Makefile
    src/scripts/Makefile
    src/scripts/src/Makefile
    src/scripts/src/GossipScripts/Makefile
-   src/scripts/src/InstanceScripts/Makefile
    src/scripts/src/ServerStatusPlugin/Makefile
    src/scripts/src/SpellHandlers/Makefile
    src/scripts/src/LUAScripting/Makefile
-   extras/Makefile
-   extras/collision/Makefile
-   extras/collision/collision_dll/Makefile
+   src/scripts/src/InstanceScripts/Makefile
+   src/scripts/src/Events/Makefile
+   ])
+
+AC_ARG_ENABLE(sunplusplus,
+   [ --enable-sunplusplus Enable SunPlusPlus scripts],
+   [ AC_CONFIG_FILES([
+      src/sun++/src/Makefile
+      src/sun++/src/EventScripts/Makefile
+      src/sun++/src/ExtraScripts/Makefile
+      src/sun++/src/GossipScripts/Makefile
+      src/sun++/src/InstanceScripts/Makefile
+      src/sun++/src/LUAScripting/Makefile
+      src/sun++/src/MiscScripts/Makefile
+      src/sun++/src/QuestScripts/Makefile
+      src/sun++/src/ServerStatusPlugin/Makefile
+      src/sun++/src/SpellHandlers/Makefile
+      src/sun++/src/WorldPvPScripts/Makefile
+   ])
 ])
 
 AC_OUTPUT
 
 echo
 echo "===================================="
-echo "Ascent configure report:"
+echo "Hearthstone configure report:"
 echo
 echo " Core:" 
 echo "             os: ${OSNAME}"
@@ -327,6 +344,13 @@ fi
 
 echo -n "    collision: "
 if test "x$enable_collision" = "xyes" ; then
+  echo "enabled"
+else
+  echo "disabled"
+fi
+
+echo -n "        sun++: "
+if test "x$enable_sunplusplus" = "xyes" ; then
   echo "enabled"
 else
   echo "disabled"

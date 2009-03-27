@@ -23,8 +23,8 @@ struct ModelHeader {
 	uint32 ofsAnimations;
 	uint32 nC;
 	uint32 ofsC;
-	uint32 nD;
-	uint32 ofsD;
+	//uint32 nD;
+	//uint32 ofsD;
 	uint32 nBones;
 	uint32 ofsBones;
 	uint32 nF;
@@ -33,7 +33,7 @@ struct ModelHeader {
 	uint32 nVertices;
 	uint32 ofsVertices;
 	uint32 nViews;
-	uint32 ofsViews;
+	//uint32 ofsViews;
 
 	uint32 nColors;
 	uint32 ofsColors;
@@ -43,8 +43,8 @@ struct ModelHeader {
 
 	uint32 nTransparency; // H
 	uint32 ofsTransparency;
-	uint32 nI;   // always unused ?
-	uint32 ofsI;
+	//uint32 nI;   // always unused ?
+	//uint32 ofsI;
 	uint32 nTexAnims;	// J
 	uint32 ofsTexAnims;
 	uint32 nK;
@@ -295,6 +295,21 @@ struct ModelRibbonEmitterDef {
 	int16 s1, s2;
 	AnimationBlock unk1;
 	AnimationBlock unk2;
+};
+
+struct SkinHeader {
+	uint32 Padding;
+	uint32 nIndices;
+	uint32 ofsIndices;
+	uint32 nTriangles;
+	uint32 ofsTriangles;
+	uint32 nProperties;
+	uint32 ofsProperties;
+	uint32 nSubmeshes;
+	uint32 ofsSubmeshes;
+	uint32 nTextureUnits;
+	uint32 ofsTextureUnits;
+	uint32 LODDistance;
 };
 
 

@@ -1,3 +1,0 @@
-insert into `worldmap_info` (`entry`, `screenid`, `type`, `maxplayers`, `minlevel`, `repopx`, `repopy`, `repopz`, `repopentry`, `area_name`, `flags`, `cooldown`, `lvl_mod_a`, `required_quest`, `required_item`, `heroic_keyid_1`, `heroic_keyid_2`, `viewingDistance`, `required_checkpoint`) values('572','572','3','10','10','0','0','0','0','Arena 2','0','0','0','0','0','0','0','120','0');
-
-insert into `worldmap_info` (`entry`, `screenid`, `type`, `maxplayers`, `minlevel`, `repopx`, `repopy`, `repopz`, `repopentry`, `area_name`, `flags`, `cooldown`, `lvl_mod_a`, `required_quest`, `required_item`, `heroic_keyid_1`, `heroic_keyid_2`, `viewingDistance`, `required_checkpoint`) values('559','559','3','10','10','0','0','0','0','Arena 3','0','0','0','0','0','0','0','120','0');
