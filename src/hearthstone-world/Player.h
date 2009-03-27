@@ -642,9 +642,16 @@ enum TRADE_STATUS
 	TRADE_STATUS_TOO_FAR_AWAY	    = 0x0A,
 	TRADE_STATUS_WRONG_FACTION	    = 0x0B,
 	TRADE_STATUS_FAILED			    = 0x0C,
-	TRADE_STATUS_DEAD			    = 0x0D,
-	TRADE_STATUS_PETITION		    = 0x0E,
-	TRADE_STATUS_PLAYER_IGNORED	    = 0x0F,
+	TRADE_STATUS_UNK2			    = 0x0D,
+	TRADE_STATUS_PLAYER_IGNORED	    = 0x0E,
+	TRADE_STATUS_YOU_STUNNED		= 0x0F,
+	TRADE_STATUS_TARGET_STUNNED		= 0x10,
+	TRADE_STATUS_DEAD				= 0x11,
+	TRADE_STATUS_TARGET_DEAD		= 0x12,
+	TRADE_STATUS_YOU_LOGOUT			= 0x13,
+	TRADE_STATUS_TARGET_LOGOUT		= 0x14,
+	TRADE_STATUS_TRIAL_ACCOUNT		= 0x15,
+	TRADE_STATUS_ONLY_CONJURED		= 0x16,
 };
 enum TRADE_DATA
 {
@@ -1131,7 +1138,7 @@ public:
 	void         ResetTradeVariables()
 	{
 		mTradeGold = 0;
-		for(uint8 i = 0; i < 8; ++i)
+		for(uint8 i = 0; i < 7; ++i)
 			mTradeItems[i] = NULLITEM;
 
 		mTradeStatus = 0;
@@ -1909,10 +1916,11 @@ protected:
 	/************************************************************************/
 	/* Trade																*/
 	/************************************************************************/
-	ItemPointer mTradeItems[8];
+	ItemPointer mTradeItems[7];
 	uint32 mTradeGold;
 	uint32 mTradeTarget;
 	uint32 mTradeStatus;
+	uint32 m_tradeSequence;
 
     /************************************************************************/
     /* Player Class systems, info and misc things                           */
@@ -2031,7 +2039,6 @@ public:
 	void _FlyhackCheck();
 
 	bool m_passOnLoot;
-	uint32 m_tradeSequence;
 	bool m_changingMaps;
 
 	/************************************************************************/

@@ -694,7 +694,7 @@ protected:
 	void HandleSpellClick( WorldPacket & recv_data );
 
 public:
-
+	void SendTradeStatus(uint8 TradeStatus);
 	void SendInventoryList(CreaturePointer pCreature);
 	void SendTrainerList(CreaturePointer pCreature);
 	void SendCharterRequest(CreaturePointer pCreature);

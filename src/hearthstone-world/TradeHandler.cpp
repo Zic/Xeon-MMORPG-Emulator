@@ -18,37 +18,47 @@
  */
 
 #include "StdAfx.h"
+void WorldSession::SendTradeStatus(uint8 TradeStatus)
+{
+	OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+};
 
 void WorldSession::HandleInitiateTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
+	if(!_player->IsInWorld()) 
+		return;
+
 	CHECK_PACKET_SIZE(recv_data, 8);
+
 	uint64 guid;
 	recv_data >> guid;
-	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer((uint32)guid);
+
 	uint32 TradeStatus = TRADE_STATUS_PROPOSED;
-	WorldPacket data(SMSG_TRADE_STATUS, 12);
 
-	if(pTarget == 0)
-	{
+	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer((uint32)guid);
+	if(pTarget == NULL || !pTarget->IsInWorld())
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
-		OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-		return;
+	else
+	{
+		// Handle possible error outcomes
+		if(_player->isDead())
+			TradeStatus = TRADE_STATUS_DEAD;
+		if(pTarget->isDead())
+			TradeStatus = TRADE_STATUS_TARGET_DEAD;
+		else if(pTarget->mTradeTarget != 0)
+			TradeStatus = TRADE_STATUS_ALREADY_TRADING;
+		else if(pTarget->GetTeam() != _player->GetTeam() && GetPermissionCount() == 0)
+			TradeStatus = TRADE_STATUS_WRONG_FACTION;
+		else if(_player->CalcDistance(pTarget) > 10.0f)		// This needs to be checked
+			TradeStatus = TRADE_STATUS_TOO_FAR_AWAY;
+	}	
+
+	if(TradeStatus != TRADE_STATUS_PROPOSED)
+	{
+		_player->ResetTradeVariables();
+		SendTradeStatus(TradeStatus);
 	}
-
-	// Handle possible error outcomes
-	if(pTarget->CalcDistance(_player) > 10.0f)		// This needs to be checked
-		TradeStatus = TRADE_STATUS_TOO_FAR_AWAY;
-	else if(pTarget->isDead())
-		TradeStatus = TRADE_STATUS_DEAD;
-	else if(pTarget->mTradeTarget != 0)
-		TradeStatus = TRADE_STATUS_ALREADY_TRADING;
-	else if(pTarget->GetTeam() != _player->GetTeam() && GetPermissionCount() == 0)
-		TradeStatus = TRADE_STATUS_WRONG_FACTION;
-
-	data << TradeStatus;
-
-	if(TradeStatus == TRADE_STATUS_PROPOSED)
+	else
 	{
 		_player->ResetTradeVariables();
 		pTarget->ResetTradeVariables();
@@ -59,127 +69,144 @@ void WorldSession::HandleInitiateTrade(WorldPacket & recv_data)
 		pTarget->mTradeStatus = TradeStatus;
 		_player->mTradeStatus = TradeStatus;
 
+		WorldPacket data(SMSG_TRADE_STATUS, 12);
+		data << TradeStatus;
 		data << _player->GetGUID();
-	}
 
-	pTarget->m_session->SendPacket(&data);
+		if(pTarget->m_session && pTarget->m_session->GetSocket())
+			pTarget->m_session->SendPacket(&data);
+	}
 }
 
 void WorldSession::HandleBeginTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
+	PlayerPointer pTarget = NULLPLR;
 	uint32 TradeStatus = TRADE_STATUS_INITIATED;
 
-	PlayerPointer plr = _player->GetTradeTarget();
-	if(_player->mTradeTarget == 0 || plr == 0)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
+		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+	else
+	{
+		pTarget = _player->GetTradeTarget();
+		if(pTarget == NULL || !pTarget->IsInWorld() )
+			TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+		else if( _player->CalcDistance( pTarget ) > 10.0f )
+			TradeStatus = TRADE_STATUS_TOO_FAR_AWAY;
+	}
+
+	//Abort if not ok
+	if( TradeStatus != TRADE_STATUS_INITIATED)	
 	{
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
-		OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-		return;
+		_player->ResetTradeVariables();
+		SendTradeStatus(TradeStatus);
 	}
-	// We're too far from target now?
-	if( _player->CalcDistance( plr ) > 10.0f )
-	TradeStatus = TRADE_STATUS_TOO_FAR_AWAY;
+	else
+	{
+		//Update status
+		WorldPacket data(SMSG_TRADE_STATUS, 8);
+		data << TradeStatus << uint32(0x19);
 
-	WorldPacket data(SMSG_TRADE_STATUS, 8);
-	data << TradeStatus << uint32(0x19);
-	plr->m_session->SendPacket(&data);
-	SendPacket(&data);
+		SendPacket(&data);
+		if(pTarget->m_session && pTarget->m_session->GetSocket())
+			pTarget->m_session->SendPacket(&data);
 
-	plr->mTradeStatus = TradeStatus;
-	_player->mTradeStatus = TradeStatus;
+		_player->mTradeStatus = TradeStatus;
+		pTarget->mTradeStatus = TradeStatus;
+	}
 }
 
 void WorldSession::HandleBusyTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
+		return;
+
 	uint32 TradeStatus = TRADE_STATUS_PLAYER_BUSY;
 
-	PlayerPointer plr = _player->GetTradeTarget();
-	if(_player->mTradeTarget == 0 || plr == 0)
-	{
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld())
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
-		OutPacket(TRADE_STATUS_PLAYER_NOT_FOUND, 4, &TradeStatus);
-		return;
-	}
 
-	OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-	plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+	_player->ResetTradeVariables();
 
-	plr->mTradeStatus = TradeStatus;
-	_player->mTradeStatus = TradeStatus;
-
-	plr->mTradeTarget = 0;
-	_player->mTradeTarget = 0;
+	SendTradeStatus(TradeStatus);
 }
 
 void WorldSession::HandleIgnoreTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
+		return;
+
 	uint32 TradeStatus = TRADE_STATUS_PLAYER_IGNORED;
 
-	PlayerPointer plr = _player->GetTradeTarget();
-	if(_player->mTradeTarget == 0 || plr == 0)
-	{
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld())
 		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
-		OutPacket(TRADE_STATUS_PLAYER_NOT_FOUND, 4, &TradeStatus);
-		return;
-	}
 
-	OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-	plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+	_player->ResetTradeVariables();
 
-	plr->mTradeStatus = TradeStatus;
-	_player->mTradeStatus = TradeStatus;
-
-	plr->mTradeTarget = 0;
-	_player->mTradeTarget = 0;
+	SendTradeStatus(TradeStatus);
 }
 
 void WorldSession::HandleCancelTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
-	if(_player->mTradeTarget == 0 || _player->mTradeStatus == TRADE_STATUS_COMPLETE)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
-    uint32 TradeStatus = TRADE_STATUS_CANCELLED;
-    OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+	if( _player->mTradeStatus == TRADE_STATUS_COMPLETE)
+	{
+		_player->ResetTradeVariables();
+		return;
+	}
 
-	PlayerPointer plr = _player->GetTradeTarget();
-    if(plr)
-    {
-        if(plr->m_session && plr->m_session->GetSocket())
-		plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+	uint32 TradeStatus = TRADE_STATUS_CANCELLED;
+
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld())
+	{
+		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+		_player->ResetTradeVariables();
+		SendTradeStatus(TradeStatus);
+	}
+	else
+	{
+		pTarget->ResetTradeVariables();
+		_player->ResetTradeVariables();
 	
-	    plr->mTradeTarget = 0;
-		plr->ResetTradeVariables();
-    }
-	
-	_player->mTradeTarget = 0;
-	_player->ResetTradeVariables();
+		SendTradeStatus(TradeStatus);
+		if(pTarget->m_session && pTarget->m_session->GetSocket())
+			pTarget->m_session->SendTradeStatus(TradeStatus);
+	}
 }
 
 void WorldSession::HandleUnacceptTrade(WorldPacket & recv_data)
 {
-	if(!_player->IsInWorld()) return;
-	PlayerPointer plr = _player->GetTradeTarget();
-	_player->ResetTradeVariables();
-
-	if(_player->mTradeTarget == 0 || plr == 0)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
 	uint32 TradeStatus = TRADE_STATUS_UNACCEPTED;
-	OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-	plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
 
-	plr->mTradeTarget = 0;
-	_player->mTradeTarget = 0;
-	plr->ResetTradeVariables();
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld())
+	{
+		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+		_player->ResetTradeVariables();
+		SendTradeStatus(TradeStatus);
+	}
+	else
+	{
+		pTarget->mTradeStatus = TradeStatus;
+		_player->mTradeStatus = TradeStatus;
+
+		SendTradeStatus(TradeStatus);
+		if( pTarget->m_session && pTarget->m_session->GetSocket())
+			pTarget->m_session->SendTradeStatus(TradeStatus);
+	}
 }
 
 void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 {
-	if(_player->mTradeTarget == 0)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
 	CHECK_PACKET_SIZE(recv_data, 3);
@@ -187,28 +214,36 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 	uint8 TradeSlot = recv_data.contents()[0];
 	int8 SourceBag = recv_data.contents()[1];
 	uint8 SourceSlot = recv_data.contents()[2];
-	PlayerPointer pTarget = _player->GetMapMgr()->GetPlayer( _player->mTradeTarget );
 
-	ItemPointer pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
-	if( pTarget == NULL || pItem == 0 || TradeSlot > 6 )
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld() || TradeSlot > 6)
 		return;
 
-	for(uint32 i = 0; i < 8; ++i)
-	{
-		// duping little shits
-		if(_player->mTradeItems[i] == pItem || pTarget->mTradeItems[i] == pItem)
-		{
-			sCheatLog.writefromsession(this, "tried to dupe an item through trade");
-			Disconnect();
-			return;
-		}
-	}
+	ItemPointer pItem = _player->GetItemInterface()->GetInventoryItem(SourceBag, SourceSlot);
+	if( pItem == NULL )
+		return;
 
 	if(pItem->IsContainer())
 	{
 		if( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems() )
 		{
 			_player->GetItemInterface()->BuildInventoryChangeError( pItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
+			return;
+		}
+	}
+
+	for(uint32 i = 0; i < 7; ++i)
+	{
+		// duping little shits
+		if(_player->mTradeItems[i] == pItem || pTarget->mTradeItems[i] == pItem)
+		{
+			sCheatLog.writefromsession(this, "tried to dupe an item through trade");
+			Disconnect();
+
+			uint8 TradeStatus = TRADE_STATUS_CANCELLED;
+			if( pTarget->m_session && pTarget->m_session->GetSocket())
+				pTarget->m_session->SendTradeStatus(TradeStatus);
+			return;
 		}
 	}
 
@@ -218,7 +253,7 @@ void WorldSession::HandleSetTradeItem(WorldPacket & recv_data)
 
 void WorldSession::HandleSetTradeGold(WorldPacket & recv_data)
 {
-	if(_player->mTradeTarget == 0)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
 	uint32 Gold;
@@ -234,7 +269,7 @@ void WorldSession::HandleSetTradeGold(WorldPacket & recv_data)
 void WorldSession::HandleClearTradeItem(WorldPacket & recv_data)
 {
 	CHECK_PACKET_SIZE(recv_data, 1);
-	if(_player->mTradeTarget == 0)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
 	uint8 TradeSlot = recv_data.contents()[0];
@@ -247,152 +282,152 @@ void WorldSession::HandleClearTradeItem(WorldPacket & recv_data)
 
 void WorldSession::HandleAcceptTrade(WorldPacket & recv_data)
 {
-	PlayerPointer plr = _player->GetTradeTarget();
-	if(_player->mTradeTarget == 0 || !plr)
+	if(!_player->IsInWorld() || _player->mTradeTarget == 0)
 		return;
 
 	uint32 TradeStatus = TRADE_STATUS_ACCEPTED;
-	
+
+	PlayerPointer pTarget = _player->GetTradeTarget();
+	if(pTarget == NULL || !pTarget->IsInWorld())
+		TradeStatus = TRADE_STATUS_PLAYER_NOT_FOUND;
+
 	// Tell the other player we're green.
-	plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
+	if(pTarget->m_session && pTarget->m_session->GetSocket())
+		pTarget->m_session->SendTradeStatus(TradeStatus);
+
 	_player->mTradeStatus = TradeStatus;
 
-	if(plr->mTradeStatus == TRADE_STATUS_ACCEPTED)
+	//Both sides accepted? Let's trade!
+	if(_player->mTradeStatus == TRADE_STATUS_ACCEPTED && pTarget->mTradeStatus == TRADE_STATUS_ACCEPTED)
 	{
 		// Ready!
 		uint32 ItemCount = 0;
 		uint32 TargetItemCount = 0;
-		PlayerPointer pTarget = plr;
+		ItemPointer pItem;
 
-		// Calculate Item Count, check bags contends
-		for(uint32 Index = 0; Index < 7; ++Index)
+		// Count items on both sides, check if bags are empty.
+		for(uint32 Index = 0; Index < 6; ++Index)
 		{
-			if(_player->mTradeItems[Index] != 0)
+			if(_player->mTradeItems[Index] != NULL)
 			{
-				ItemPointer pItem = _player->mTradeItems[Index];
-				if( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems())
+				pItem = _player->mTradeItems[Index];
+				if( pItem != NULL && pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems())
 				{
-					sCheatLog.writefromsession(this, "%s involved in bag-trick trade.", _player->GetName());
+					sCheatLog.writefromsession(this, "%s involved in bag-trick trade with %s", _player->GetName(),pTarget->GetName());
 					_player->GetItemInterface()->BuildInventoryChangeError(	pItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
 					TradeStatus = TRADE_STATUS_CANCELLED;
+					break;
 				}
-				++ItemCount;
+				else
+					++ItemCount;
 			}
-			if(pTarget->mTradeItems[Index] != 0)
+			if(pTarget->mTradeItems[Index] != NULL)
 			{
-				ItemPointer tItem = pTarget->mTradeItems[Index];
-				if( tItem->IsContainer() && TO_CONTAINER(tItem)->HasItems() )
+				pItem = pTarget->mTradeItems[Index];
+				if( pItem != NULL && pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems() )
 				{
-					sCheatLog.writefromsession(this, "%s involved in bag-trick trade.", pTarget->GetName());
-					pTarget->GetItemInterface()->BuildInventoryChangeError(	tItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
+					sCheatLog.writefromsession(this, "%s involved in bag-trick trade with %s.", pTarget->GetName(),_player->GetName());
+					pTarget->GetItemInterface()->BuildInventoryChangeError(	pItem, NULLITEM, INV_ERR_CANT_TRADE_EQUIP_BAGS);
 					TradeStatus = TRADE_STATUS_CANCELLED;
+					break;
 				}
-				++TargetItemCount;
+				else
+					++TargetItemCount;
 			}
 		}
-
-		if( (_player->m_ItemInterface->CalculateFreeSlots(NULL) + ItemCount) < TargetItemCount ||
-			(pTarget->m_ItemInterface->CalculateFreeSlots(NULL) + TargetItemCount) < ItemCount )
-		{
-			// Not enough slots on one end.
+		//Do we have something to trade?
+		if( ItemCount == 0 && TargetItemCount == 0 && _player->mTradeGold == 0 && pTarget->mTradeGold == 0 )
 			TradeStatus = TRADE_STATUS_CANCELLED;
-		}
-		else
+		//Do we have enough free slots on both sides?
+		else if((_player->m_ItemInterface->CalculateFreeSlots(NULL) + ItemCount) < TargetItemCount || (pTarget->m_ItemInterface->CalculateFreeSlots(NULL) + TargetItemCount) < ItemCount )
+			TradeStatus = TRADE_STATUS_CANCELLED;
+		//Everything still ok?
+		else if(TradeStatus == TRADE_STATUS_ACCEPTED)
 		{
-			TradeStatus = TRADE_STATUS_COMPLETE;
 			uint64 Guid;
-			ItemPointer pItem;
 			
-			// Remove all items from the players inventory
+			//Swapp 6 itemslots (7th will not trade)
 			for(uint32 Index = 0; Index < 6; ++Index)
 			{
 				Guid = _player->mTradeItems[Index] ? _player->mTradeItems[Index]->GetGUID() : 0;
 				if(Guid != 0)
 				{
-					if( _player->mTradeItems[Index]->IsSoulbound() || ( _player->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && TO_CONTAINER(_player->mTradeItems[Index])->HasItems() ) )
-					{
-						_player->mTradeItems[Index] = NULLITEM;
-					}
+					if( _player->mTradeItems[Index]->IsSoulbound())
+						_player->GetItemInterface()->BuildInventoryChangeError(	_player->mTradeItems[Index], NULLITEM, INV_ERR_CANNOT_TRADE_THAT);
 					else
 					{
-						if(GetPermissionCount()>0)
-						{
-							sGMLog.writefromsession(this, "traded item %s to %s", _player->mTradeItems[Index]->GetProto()->Name1, pTarget->GetName());
-						}
+						//Remove from player
 						pItem = _player->m_ItemInterface->SafeRemoveAndRetreiveItemByGuidRemoveStats(Guid, true);
+
+						//and add to pTarget
+						if(pItem != NULL)
+						{
+							pItem->SetOwner(pTarget);
+							if( !pTarget->m_ItemInterface->AddItemToFreeSlot(pItem) )
+							{
+								pItem->Destructor();
+								pItem = NULLITEM;
+							}
+						}
+
+						if(GetPermissionCount()>0 || pTarget->GetSession()->GetPermissionCount()>0)
+							sGMLog.writefromsession(this, "trade item %s with %s (soulbound = %d)", _player->mTradeItems[Index]->GetProto()->Name1, pTarget->GetName());
 					}
 				}
 
 				Guid = pTarget->mTradeItems[Index] ? pTarget->mTradeItems[Index]->GetGUID() : 0;
 				if(Guid != 0)
 				{
-					if( pTarget->mTradeItems[Index]->IsSoulbound() || ( pTarget->mTradeItems[Index]->GetProto()->ContainerSlots > 0 && TO_CONTAINER(pTarget->mTradeItems[Index])->HasItems() ) )
-					{
-						pTarget->mTradeItems[Index] = NULLITEM;
-					}
+					if( pTarget->mTradeItems[Index]->IsSoulbound())
+						pTarget->GetItemInterface()->BuildInventoryChangeError(	pTarget->mTradeItems[Index], NULLITEM, INV_ERR_CANNOT_TRADE_THAT);
 					else
 					{
-						pTarget->m_ItemInterface->SafeRemoveAndRetreiveItemByGuidRemoveStats(Guid, true);
+						//Remove from pTarget
+						pItem = pTarget->m_ItemInterface->SafeRemoveAndRetreiveItemByGuidRemoveStats(Guid, true);
+
+						//and add to initiator
+						if(pItem != NULL)
+						{
+							pItem->SetOwner(_player);
+							if( !_player->m_ItemInterface->AddItemToFreeSlot(pItem) )
+							{
+								pItem->Destructor();
+								pItem = NULLITEM;
+							}
+
+						}
+
+						if(GetPermissionCount()>0 || pTarget->GetSession()->GetPermissionCount()>0)
+							sGMLog.writefromsession(this, "trade item %s with %s", pTarget->mTradeItems[Index]->GetProto()->Name1, _player->GetName());
 					}
 				}
 			}
 
-			// Dump all items back into the opposite players inventory
-			for(uint32 Index = 0; Index < 6; ++Index)
-			{
-				pItem = _player->mTradeItems[Index];
-				if(pItem != 0)
-				{
-					pItem->SetOwner(pTarget);
-					if( !pTarget->m_ItemInterface->AddItemToFreeSlot(pItem) )
-					{
-						pItem->Destructor();
-						pItem = NULLITEM;
-					}
-				}
-
-				pItem = pTarget->mTradeItems[Index];
-				if(pItem != 0)
-				{
-					pItem->SetOwner(_player);
-					if( !_player->m_ItemInterface->AddItemToFreeSlot(pItem) )
-					{
-						pItem->Destructor();
-						pItem = NULLITEM;
-					}
-				}
-			}
 
 			// Trade Gold
+			if(_player->mTradeGold)
+			{
+				pTarget->ModUnsigned32Value(PLAYER_FIELD_COINAGE, _player->mTradeGold);
+				_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -(int32)_player->mTradeGold);
+			}
 			if(pTarget->mTradeGold)
 			{
 				_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, pTarget->mTradeGold);
 				pTarget->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -(int32)pTarget->mTradeGold);
 			}
 
-			if(_player->mTradeGold)
-			{
-				pTarget->ModUnsigned32Value(PLAYER_FIELD_COINAGE, _player->mTradeGold);
-				_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -(int32)_player->mTradeGold);
-			}
-
-			// Close Window
-			TradeStatus = TRADE_STATUS_COMPLETE;
-			OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-			plr->m_session->OutPacket(SMSG_TRADE_STATUS, 4, &TradeStatus);
-
-			_player->mTradeStatus = TRADE_STATUS_COMPLETE;
-			plr->mTradeStatus = TRADE_STATUS_COMPLETE;
-
-			// Reset Trade Vars
-			_player->ResetTradeVariables();
-			pTarget->ResetTradeVariables();
-			
-			plr->mTradeTarget = 0;
-			_player->mTradeTarget = 0;
-
-			plr->SaveToDB(false);
+			pTarget->SaveToDB(false);
 			_player->SaveToDB(false);
+
+			TradeStatus = TRADE_STATUS_COMPLETE;
 		}
+
+		SendTradeStatus(TradeStatus);
+		if(pTarget->m_session && pTarget->m_session->GetSocket())
+			pTarget->m_session->SendTradeStatus(TradeStatus);
+
+		// Reset Trade Vars
+		_player->ResetTradeVariables();
+		pTarget->ResetTradeVariables();
 	}
 }

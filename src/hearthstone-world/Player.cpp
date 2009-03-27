@@ -7595,13 +7595,10 @@ void Player::ZoneUpdate(uint32 ZoneId)
 void Player::SendTradeUpdate()
 {
 	PlayerPointer pTarget = GetTradeTarget();
-	if(!pTarget)
+	if(pTarget == NULL)
 		return;
 
-	WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 500);
-	/*data << uint8(1);
-	data << uint32(2) << uint32(2);
-	data << mTradeGold << uint32(0);*/
+	WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, 100);
 	data << uint8(1);
 	data << uint32(0x19);
 	data << m_tradeSequence;
@@ -7611,13 +7608,12 @@ void Player::SendTradeUpdate()
 	// Items
 	for(uint32 Index = 0; Index < 7; ++Index)
 	{
+		data << uint8(Index);
 		ItemPointer pItem = mTradeItems[Index];
 		if(pItem != 0)
 		{
 			ItemPrototype * pProto = pItem->GetProto();
 			ASSERT(pProto != 0);
-
-			data << uint8(Index);
 
 			data << pProto->ItemId;
 			data << pProto->DisplayInfoID;
@@ -7633,11 +7629,16 @@ void Player::SendTradeUpdate()
 			data << pItem->GetUInt64Value(ITEM_FIELD_CREATOR);	  // item creator	 OK
 			data << pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT);  // Spell Charges	OK
 
-			data << uint32(0);									  // seems like time stamp or something like that
+			data << pItem->GetItemRandomSuffixFactor();
 			data << pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID);
 			data << pProto->LockId;								 // lock ID		  OK
 			data << pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
 			data << pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
+		}
+		else
+		{
+			for(uint8 j = 0; j < 18; j++)
+				data << uint32(0);
 		}
 	}
 
