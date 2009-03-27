@@ -3652,7 +3652,7 @@ void Spell::SpellEffectLearnSpell(uint32 i) // Learn Spell
 				SpellPointer sp = CREATESPELL(unitTarget, spellinfo, true, NULLAURA);
 				SpellCastTargets targets;
 				targets.m_unitTarget = unitTarget->GetGUID();
-				targets.m_targetMask = 0x02;
+				targets.m_targetMask = TARGET_FLAG_UNIT;
 				sp->prepare(&targets);
 				break;
 			}	  

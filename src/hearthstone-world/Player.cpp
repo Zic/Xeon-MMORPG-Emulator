@@ -8394,25 +8394,18 @@ void Player::CompleteLoading()
 	SpellSet::iterator itr;
 	SpellEntry *info;
 	SpellCastTargets targets;
-	targets.m_unitTarget = this->GetGUID();
-	targets.m_targetMask = 0x2;
+	targets.m_unitTarget = GetGUID();
+	targets.m_targetMask = TARGET_FLAG_UNIT;
 
 	// warrior has to have battle stance
 	if( getClass() == WARRIOR )
-	{
-		// battle stance passive
 		CastSpell(plr_shared_from_this(), dbcSpell.LookupEntry(2457), true);
-	}
-
 
 	for (itr = mSpells.begin(); itr != mSpells.end(); ++itr)
 	{
 		info = dbcSpell.LookupEntry(*itr);
 
-		if(	info  
-			&& (info->Attributes & ATTRIBUTES_PASSIVE)  // passive
-			&& !( info->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET ) //on pet summon talents
-			 ) 
+		if(	info  && (info->Attributes & ATTRIBUTES_PASSIVE) && !( info->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )) 
 		{
 			if( info->RequiredShapeShift )
 			{
@@ -8425,60 +8418,38 @@ void Player::CompleteLoading()
 		}
 	}
 
-   
 	std::list<LoginAura>::iterator i =  loginauras.begin();
 
-    for(;i!=loginauras.end(); i++)
+	for(;i!=loginauras.end(); i++)
 	{
-
-		//check if we already have this aura
-//		if(this->HasActiveAura((*i).id))
-//			continue;
-		//how many times do we intend to put this oura on us
-/*		uint32 count_appearence=0;
-		std::list<LoginAura>::iterator i2 =  i;
-		for(;i2!=loginauras.end();i2++)
-			if((*i).id==(*i2).id)
-			{
-				count_appearence++;
-			}
-*/
 
 		// this stuff REALLY needs to be fixed - Burlex
 		SpellEntry * sp = dbcSpell.LookupEntry((*i).id);
 
+		//do not load auras that only exist while pet exist. We should recast these when pet is created anyway
 		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
-			continue; //do not load auras that only exist while pet exist. We should recast these when pet is created anyway
+			continue;
 
-		AuraPointer a = NULLAURA;
-		if(sp->Id == 8326 || sp->Id == 9036 || sp->Id == 20584)		// death auras
+		AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
+		switch(sp->Id)
 		{
-			if(!isDead())
-				continue;
-
-			a = AuraPointer(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
-			a->SetNegative();
+			case 8326:
+			case 9036:
+			case 20584:
+				{
+					if(!isDead())
+						continue;
+				}break;
 		}
-		else
-		{
-			a = AuraPointer(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
-			if(sp->Id == 15007)//resurrection sickness
-				a->SetNegative();
-		}
-		
 
 		for(uint32 x =0;x<3;x++)
-        {
-		    if(sp->Effect[x]==SPELL_EFFECT_APPLY_AURA)
-		    {
-			    a->AddMod(sp->EffectApplyAuraName[x],sp->EffectBasePoints[x]+1,sp->EffectMiscValue[x],x);
-		    }
-        }
+		{
+			if(sp->Effect[x]==SPELL_EFFECT_APPLY_AURA)
+				a->AddMod(sp->EffectApplyAuraName[x],sp->EffectBasePoints[x]+1,sp->EffectMiscValue[x],x);
+		}
 
 		if( a )
 			AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg, stackSize
-
-		
 	}
 	loginauras.clear();
 
@@ -8490,17 +8461,15 @@ void Player::CompleteLoading()
 	// Banned
 	if(IsBanned())
 	{
-		Kick(10000);
-		BroadcastMessage("This character is not allowed to play.");
-		BroadcastMessage("You have been banned for: %s", GetBanReason().c_str());
+		const char * message = ("This character is banned for  %s.\n You will be kicked in 30 secs.", GetBanReason().c_str());
+
+		// Send warning after 30sec, as he might miss it if it's send inmedeately.
+		sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Warn, message, EVENT_UNIT_SENDMESSAGE, 30000, 1, 0);
+		sEventMgr.AddEvent( plr_shared_from_this(), &Player::_Kick, EVENT_PLAYER_KICK, 60000, 1, 0 );
 	}
 
 	if(m_playerInfo->m_Group)
-	{
 		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventGroupFullUpdate, EVENT_UNK, 100, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-
-		//m_playerInfo->m_Group->Update();
-	}
 
 	if(raidgrouponlysent)
 	{
@@ -8535,7 +8504,7 @@ void Player::OnWorldPortAck()
 			welcome_msg = "Welcome to ";
 			welcome_msg += pMapinfo->name;
 			welcome_msg += ". ";
-            if(pMapinfo->type != INSTANCE_NONRAID && m_mapMgr->pInstance)
+			if(pMapinfo->type != INSTANCE_NONRAID && m_mapMgr->pInstance)
 			{
 				/*welcome_msg += "This instance is scheduled to reset on ";
 				welcome_msg += asctime(localtime(&m_mapMgr->pInstance->m_expiration));*/

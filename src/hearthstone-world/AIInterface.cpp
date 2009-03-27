@@ -2862,26 +2862,26 @@ SpellCastTargets AIInterface::setSpellTargets(SpellEntry *spellInfo, UnitPointer
 
 	if(m_nextSpell->spelltargetType == TTYPE_SINGLETARGET)
 	{
-		targets.m_targetMask = 2;
+		targets.m_targetMask = TARGET_FLAG_UNIT;
 		targets.m_unitTarget = target->GetGUID();
 	}
 	else if(m_nextSpell->spelltargetType == TTYPE_SOURCE)
 	{
-		targets.m_targetMask = 32;
+		targets.m_targetMask = TARGET_FLAG_SOURCE_LOCATION;
 		targets.m_srcX = m_Unit->GetPositionX();
 		targets.m_srcY = m_Unit->GetPositionY();
 		targets.m_srcZ = m_Unit->GetPositionZ();
 	}
 	else if(m_nextSpell->spelltargetType == TTYPE_DESTINATION)
 	{
-		targets.m_targetMask = 64;
+		targets.m_targetMask = TARGET_FLAG_DEST_LOCATION;
 		targets.m_destX = target->GetPositionX();
 		targets.m_destY = target->GetPositionY();
 		targets.m_destZ = target->GetPositionZ();
 	}
 	else if(m_nextSpell->spelltargetType == TTYPE_CASTER)
 	{
-		targets.m_targetMask = 2;
+		targets.m_targetMask = TARGET_FLAG_UNIT;
 		targets.m_unitTarget = m_Unit->GetGUID();
 	}
 
