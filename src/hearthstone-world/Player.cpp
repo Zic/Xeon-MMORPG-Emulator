@@ -4261,7 +4261,7 @@ void Player::ResurrectPlayer(PlayerPointer pResurrector)
 	UpdateVisibility();
 	SetMovement(MOVE_LAND_WALK, 1);
 
-	if(pResurrector != NULL && IsInWorld())
+	if(IsInWorld() && pResurrector != NULL && pResurrector->IsInWorld())
 	{
 		if( m_resurrectLoction.x == 0.0f && m_resurrectLoction.y == 0.0f && m_resurrectLoction.z == 0.0f )
 		{
@@ -8451,7 +8451,7 @@ void Player::CompleteLoading()
 			continue; //do not load auras that only exist while pet exist. We should recast these when pet is created anyway
 
 		AuraPointer a = NULLAURA;
-		if(sp->Id == 8326 || sp->Id == 9036 || sp->Id == 20584 || sp->Id == 15007)		// death auras
+		if(sp->Id == 8326 || sp->Id == 9036 || sp->Id == 20584)		// death auras
 		{
 			if(!isDead())
 				continue;
@@ -8462,6 +8462,8 @@ void Player::CompleteLoading()
 		else
 		{
 			a = AuraPointer(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
+			if(sp->Id == 15007)//resurrection sickness
+				a->SetNegative();
 		}
 		
 

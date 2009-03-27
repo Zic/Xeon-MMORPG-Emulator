@@ -562,29 +562,39 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 {
-	if(!_player->IsInWorld() ||!_player->isDead()) return;
-	GetPlayer( )->DeathDurabilityLoss(0.25);
-	GetPlayer( )->ResurrectPlayer(NULLPLR);
+	if(!_player->IsInWorld() ||!_player->isDead())
+		return;
 
-	if(_player->getLevel() > 10)
+	//No nonsense for GM's
+	if(GetPermissionCount() == 0)
 	{
-		AuraPointer aur = GetPlayer()->FindAura(15007);
+		//25% duralbility loss
+		_player->DeathDurabilityLoss(0.25f);
+
+		//When revived by spirit healer, set health/mana at 50%
+		_player->m_resurrectHealth = _player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)/2;
+		_player->m_resurrectMana = _player->GetUInt32Value(UNIT_FIELD_MAXPOWER1)/2;
+
+		_player->ResurrectPlayer(NULLPLR);
+
+		if(_player->getLevel() > 10)
+		{
+			AuraPointer aur = _player->FindAura(15007);
 		
-		if(aur) // If the player already have the aura, just extend it.
-		{
-			GetPlayer()->SetAuraDuration(15007,aur->GetDuration());
-		}
-		else // else add him one, that fucker, he think he will get away!?
-		{
-			SpellEntry *spellInfo = dbcSpell.LookupEntry( 15007 );//resurrection sickness
-			SpellCastTargets targets;
-			targets.m_unitTarget = GetPlayer()->GetGUID();
-			SpellPointer sp(new Spell(_player,spellInfo,true,NULLAURA));
-			sp->prepare(&targets);
+			if(aur) // If the player already have the aura, just extend it.
+				_player->SetAuraDuration(15007,aur->GetDuration());
+			else // else add him one, that fucker, he think he will get away!?
+			{
+				SpellEntry *spellInfo = dbcSpell.LookupEntry( 15007 );//resurrection sickness
+				SpellCastTargets targets;
+				targets.m_unitTarget = _player->GetGUID();
+				SpellPointer sp(new Spell(_player,spellInfo,true,NULLAURA));
+				sp->prepare(&targets);
+			}
 		}
 	}
-
-	GetPlayer( )->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)/2);
+	else
+		_player->ResurrectPlayer(NULLPLR);
 }
 
 //////////////////////////////////////////////////////////////
