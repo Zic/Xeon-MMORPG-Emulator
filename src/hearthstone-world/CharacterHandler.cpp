@@ -960,7 +960,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		{
 			MapMgrPointer myMgr = sInstanceMgr.GetInstance(_player);
 			if( myMgr == NULL || (myMgr->GetMapInfo()->type != INSTANCE_NULL && myMgr->GetMapInfo()->type != INSTANCE_PVP)
-				|| (myMgr->GetMapId() == corpse->GetMapId()) )	
+				|| (myMgr->GetMapId() != corpse->GetMapId()) )	
 			{
 				// instance death, screw it, revive them
 				_player->ResurrectPlayer(NULLPLR);

@@ -8430,26 +8430,28 @@ void Player::CompleteLoading()
 		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
 			continue;
 
-		AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
-		switch(sp->Id)
+		if(!isDead())
 		{
-			case 8326:
-			case 9036:
-			case 20584:
+			AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
+			if( a )
+			{
+				for(uint32 x =0;x<3;x++)
 				{
-					if(!isDead())
-						continue;
-				}break;
+					if(sp->Effect[x]==SPELL_EFFECT_APPLY_AURA)
+						a->AddMod(sp->EffectApplyAuraName[x],sp->EffectBasePoints[x]+1,sp->EffectMiscValue[x],x);
+				}
+				AddAura(a, NULLAURA);
+			}
 		}
-
-		for(uint32 x =0;x<3;x++)
+		else
 		{
-			if(sp->Effect[x]==SPELL_EFFECT_APPLY_AURA)
-				a->AddMod(sp->EffectApplyAuraName[x],sp->EffectBasePoints[x]+1,sp->EffectMiscValue[x],x);
+			if(sp->Id == 8326|| sp->Id == 9036|| sp->Id == 20584 )
+			{
+				AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
+				if( a )
+					AddAura(a, NULLAURA);
+			}break;
 		}
-
-		if( a )
-			AddAura(a, NULLAURA);		//FIXME: must save amt,pos/neg, stackSize
 	}
 	loginauras.clear();
 

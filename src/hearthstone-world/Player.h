@@ -856,7 +856,7 @@ public:
 	void SetAFKReason(std::string reason) { m_afk_reason = reason; };
 	HEARTHSTONE_INLINE const char* GetName() { return m_name.c_str(); }
 	HEARTHSTONE_INLINE std::string* GetNameString() { return &m_name; }
-	void Die();
+
 	//void KilledMonster(uint32 entry, const uint64 &guid);
 	void GiveXP(uint32 xp, const uint64 &guid, bool allowbonus);   // to stop rest xp being given
 	void ModifyBonuses(uint32 type,int32 val);
