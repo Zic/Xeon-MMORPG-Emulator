@@ -6476,6 +6476,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	float mapchangex;
 	float mapchangey;
 	float mapchangez;
+	float orientation = 0;
 	uint32 cn = m_taxiMapChangeNode;
 
 	m_taxiMapChangeNode = 0;
@@ -6623,7 +6624,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	}
 	else
 	{
-		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventTeleport, (uint32)mapchangeid, mapchangex, mapchangey, mapchangez, EVENT_PLAYER_TELEPORT, traveltime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventTeleport, (uint32)mapchangeid, mapchangex, mapchangey, mapchangez, orientation, EVENT_PLAYER_TELEPORT, traveltime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
 

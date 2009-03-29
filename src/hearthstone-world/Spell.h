@@ -572,6 +572,7 @@ struct TeleportCoords
     float x;
     float y;
     float z;
+	float o;
 };
 #pragma pack(pop)
 

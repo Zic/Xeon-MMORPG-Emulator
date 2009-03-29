@@ -4262,7 +4262,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 
 	PlayerPointer pTarget = TO_PLAYER( Target );
    
-	float x,y,z;
+	float x,y,z,o;
 	uint32 mapid;
 	
     // predefined behavior 
@@ -4282,6 +4282,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 		x=TC->x;
 		y=TC->y;
 		z=TC->z;
+		o=TC->o;
 		mapid=TC->mapId;
 	}
 
@@ -4292,7 +4293,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 	// the game object set of the updater thread WILL Get messed up if we teleport from a gameobject
 	// caster.
 	if(!sEventMgr.HasEvent(pTarget, EVENT_PLAYER_TELEPORT))
-		sEventMgr.AddEvent(pTarget, &Player::EventTeleport, mapid, x, y, z, EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(pTarget, &Player::EventTeleport, mapid, x, y, z, o, EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Spell::CreateItem(uint32 itemId)
