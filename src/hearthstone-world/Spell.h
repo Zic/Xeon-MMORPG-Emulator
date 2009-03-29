@@ -412,7 +412,7 @@ enum AttributesEx
 	ATTRIBUTESEX_UNK2                         = 0x1, // pet summonings
 	ATTRIBUTESEX_DRAIN_WHOLE_MANA             = 0x2,
 	ATTRIBUTESEX_UNK4                         = 0x4,
-	ATTRIBUTESEX_UNK5                         = 0x8,
+	ATTRIBUTESEX_AREA_OF_EFFECT               = 0x8,
 	ATTRIBUTESEX_UNK6                         = 0x10, // stealth effects but Rockbiter wtf 0_0
 	ATTRIBUTESEX_NOT_BREAK_STEALTH            = 0x20,
 	ATTRIBUTESEX_UNK8                         = 0x40,
@@ -1091,39 +1091,72 @@ HEARTHSTONE_INLINE bool CanAgroHash(uint32 spellhashname)
 /************************************************************************/
 HEARTHSTONE_INLINE bool IsDamagingSpell(SpellEntry *sp)
 {
-	for(uint32 i = 0; i < 3; ++i)
+	for (int32 i = 0; i < 3; i++)
 	{
 		switch (sp->Effect[i])
 		{
-			case SPELL_EFFECT_SCHOOL_DAMAGE:
-			case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
-			case SPELL_EFFECT_HEALTH_LEECH:
-			case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-			case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
-			case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-			case SPELL_EFFECT_POWER_BURN:
-			case SPELL_EFFECT_ATTACK:
-				return true;
+		case SPELL_EFFECT_SCHOOL_DAMAGE:
+		case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+		case SPELL_EFFECT_HEALTH_LEECH:
+		case SPELL_EFFECT_HEALTH_FUNNEL:
+		case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+		case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
+		case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+		case SPELL_EFFECT_POWER_BURN:
+		case SPELL_EFFECT_ATTACK:
 
-			case SPELL_EFFECT_APPLY_AURA:
-			case SPELL_EFFECT_APPLY_AREA_AURA:
+			return true;
+
+		case SPELL_EFFECT_APPLY_AURA:
+		case SPELL_EFFECT_APPLY_AREA_AURA:
+			{
+				switch (sp->EffectApplyAuraName[i])
 				{
-					switch (sp->EffectApplyAuraName[i])
-					{
-						case 3://SPELL_AURA_PERIODIC_DAMAGE:
-						case 43://SPELL_AURA_PROC_TRIGGER_DAMAGE:
-						case 89://SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-						case 162://SPELL_AURA_POWER_BURN:
-							return true;
-					}
-				};
+				case 3://SPELL_AURA_PERIODIC_DAMAGE:
+				case 43://SPELL_AURA_PROC_TRIGGER_DAMAGE:
+				case 89://SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+				case 162://SPELL_AURA_POWER_BURN:
+				case 62://SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
+				case 53://SPELL_AURA_PERIODIC_LEECH:
+					return true;
+				case 23://SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+					SpellEntry * triggered = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[i]);
+					if(triggered && triggered != sp && IsDamagingSpell(triggered))
+						return true;
+					break;
+				}
+			}break;
 		}
 	}
-	return false;
+    return false;
 }
 
 HEARTHSTONE_INLINE bool IsHealingSpell(SpellEntry *sp)
 {
+	for (int32 i = 0; i < 3; i++)
+	{
+		switch (sp->Effect[i])
+		{
+        case SPELL_EFFECT_HEAL:
+        case SPELL_EFFECT_HEAL_MAX_HEALTH:
+            return true;
+		case SPELL_EFFECT_APPLY_AURA:
+		case SPELL_EFFECT_APPLY_AREA_AURA:
+			{
+				switch( sp->EffectApplyAuraName[0] )
+				{
+				case 8://SPELL_AURA_PERIODIC_HEAL:
+					return true;
+				case 23://SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+					SpellEntry * triggered = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[i]);
+					if(triggered && triggered != sp && IsHealingSpell(triggered))
+						return true;
+					break;
+				}
+			}break;
+		}
+    }
+
 	//flash of light, holy light uses scripted effect which is not neceserally heal spell
 	if( sp->NameHash == SPELL_HASH_HOLY_LIGHT || sp->NameHash == SPELL_HASH_FLASH_OF_LIGHT  )
 		return true;
@@ -1610,6 +1643,7 @@ public:
     void SpellEffectInstantKill(uint32 i);
     void SpellEffectSchoolDMG(uint32 i);
     void SpellEffectDummy(uint32 i);
+	void SpellEffectRestoreHealthPct(uint32 i);
 	void SpellEffectRestoreManaPct(uint32 i);
     void SpellEffectTeleportUnits(uint32 i);
     void SpellEffectApplyAura(uint32 i);

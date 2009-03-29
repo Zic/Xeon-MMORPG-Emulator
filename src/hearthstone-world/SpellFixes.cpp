@@ -909,9 +909,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 			case 53007: // Penance
 				{
-					/*sp->Effect[0] = SPELL_EFFECT_TRIGGER_SPELL;
-					sp->EffectTriggerSpell[0] = 54518;*/
-				}
+					CopyEffect(dbcSpell.LookupEntry(54518), 0, sp, 0);
+					CopyEffect(dbcSpell.LookupEntry(54518), 1, sp, 1);
+					sp->EffectTriggerSpell[1] = 52985;
+					sp->DurationIndex = dbcSpell.LookupEntry(54518)->DurationIndex;
+				}break;
+			case 52985: // Penance proc
+				{
+					sp->fixed_dddhcoef = 0.351f;	// needs check
+				}break;
 
 			//paladin	-	Reckoning
 			case  20177:
@@ -1091,6 +1097,14 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  33625:	
 				{
 						sp->DispelType = DISPEL_MAGIC;
+				}break;
+
+			case 57663: // Totem of Wrath
+				{
+					// doesn't work
+					/*CopyEffect(dbcSpell.LookupEntry(30708), 0, sp, 2);
+					sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_ENEMIES_AROUND_CASTER;
+					sp->Effect[2] = SPELL_EFFECT_APPLY_AREA_AURA;*/
 				}break;
 
 		
@@ -3824,6 +3838,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
 					sp->ProcsPerMinute = sp->RankNumber;
 				}break;
+			case 49175:
+			case 50031:
+			case 51456:	// Improved Icy Touch
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
+				}break;
 			case 48743:	// Death Pact
 				{
 					sp->Effect[1] = SPELL_EFFECT_NULL;	// Incorrect targetting makes it kill everyone around
@@ -3844,10 +3864,14 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
 				}
+			case 58631: // Glyph of Icy Touch
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
 			case 1843:	// Disarm
 				{
 					sp->Effect[0] = 0;	// to prevent abuse at Arathi
-				}
+				}break;
 		
 			case 31801: // Seal of Vengeance
 				{
@@ -5543,6 +5567,13 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_DIVINE_SHIELD || sp->NameHash == SPELL_HASH_DIVINE_PROTECTION || sp->NameHash == SPELL_HASH_BLESSING_OF_PROTECTION )
 			sp->MechanicsType = 25;
 
+		if(sp->NameHash == SPELL_HASH_DRINK && sp->EffectBasePoints[0] == -1 &&
+			sp->EffectApplyAuraName[1] == 226 && sp->EffectBasePoints[1] > 0)
+		{
+			sp->EffectBasePoints[0] = sp->EffectBasePoints[1];
+			sp->Effect[1] = SPELL_EFFECT_NULL;
+		}
+
 		/* hackfix for this - FIX ME LATER - Burlex */
 		if( namehash == SPELL_HASH_SEAL_FATE )
 			sp->procFlags = 0;
@@ -5854,6 +5885,9 @@ void ApplyNormalFixes()
 		case SPELL_HASH_BLIZZARD:
 			sp->fixed_dddhcoef = 0.1437f; // per tick
 			break;
+		case SPELL_HASH_POWER_WORD__SHIELD:
+			sp->Dspell_coef_override = 0.8068f;
+			break;
 
 		// Death Knight Attack Power coefficients
 		case SPELL_HASH_BLOOD_BOIL:
@@ -6083,6 +6117,7 @@ void ApplyNormalFixes()
 
 		if( sp->NameHash == SPELL_HASH_FROSTBITE )
 		{
+			sp->procFlags = PROC_NULL;
 			sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_ROOT;
 			sp->EffectTriggerSpell[0] = 12494;
 			sp->School = SCHOOL_FROST;

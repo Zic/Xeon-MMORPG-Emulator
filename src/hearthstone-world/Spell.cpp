@@ -1974,7 +1974,12 @@ void Spell::SendSpellStart()
 	StackPacket data(SMSG_SPELL_START, buf, 1000);
 
 	uint32 cast_flags = SPELL_START_FLAG_DEFAULT;
-	cast_flags |= 0x200800;
+
+	if(u_caster && !m_triggeredSpell && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_AREA_OF_EFFECT))
+		cast_flags |= SPELL_START_FLAGS_POWER_UPDATE;
+
+	if(p_caster && p_caster->getClass() == DEATHKNIGHT)
+		cast_flags |= SPELL_START_FLAGS_RUNE_UPDATE;
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 		cast_flags |= SPELL_START_FLAG_RANGED;
@@ -2097,8 +2102,8 @@ void Spell::SendSpellGo()
 
 	ItemPrototype* ip = NULL;
 	uint32 cast_flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
-	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
-		!(m_spellInfo->NameHash == SPELL_HASH_SHADOWFURY || m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
+	if(u_caster && !m_triggeredSpell && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
+		!(m_spellInfo->AttributesEx & ATTRIBUTESEX_AREA_OF_EFFECT))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
 		cast_flags |= SPELL_GO_FLAGS_POWER_UPDATE;
 	SpellTargetList::iterator itr;
 	uint32 counter;
@@ -3921,7 +3926,7 @@ void Spell::RemoveItems()
 			// if item has charges remaining -> remove 1 charge
 			if(((int32)i_caster->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) < -1)
 			{
-				i_caster->ModUnsigned32Value(ITEM_FIELD_SPELL_CHARGES, 1);
+				i_caster->ModSignedInt32Value(ITEM_FIELD_SPELL_CHARGES, 1);
 				i_caster->m_isDirty = true;
 			}
 			// if item has no charges remaining -> delete item
@@ -3937,7 +3942,7 @@ void Spell::RemoveItems()
 		// Non-Expendable Item -> remove 1 charge
 		else if(i_caster->GetProto()->Spells[0].Charges > 0)
 		{
-			i_caster->ModUnsigned32Value(ITEM_FIELD_SPELL_CHARGES, -1);
+			i_caster->ModSignedInt32Value(ITEM_FIELD_SPELL_CHARGES, -1);
 			i_caster->m_isDirty = true;
 		}
 	} 
@@ -4476,6 +4481,8 @@ void Spell::Heal(int32 amount)
 			coefficient += modifier / 100.0f;
 			SM_PFValue( u_caster->SM[SMT_SPD_BONUS][1], &coefficient, m_spellInfo->SpellGroupType );
 		}
+		if(i_caster != NULL)
+			coefficient = 0.0f;		// Spells casted by items don't get bonus
 
 		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
@@ -4549,7 +4556,7 @@ void Spell::Heal(int32 amount)
 	} else
 		unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH, amount);
 
-	if( m_caster && unitTarget->IsPlayer() )
+	if( m_caster)
 	{
 		SendHealSpellOnPlayer( m_caster, unitTarget, amount, critical, overheal, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id) );
 	}

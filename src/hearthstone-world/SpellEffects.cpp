@@ -161,7 +161,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,// SPELL_EFFECT_FORGET_SPECIALIZATION - 133 // http://www.thottbot.com/s36441 // I think this is a gm/npc spell
 		&Spell::SpellEffectNULL,// unknown - 134 // related to summoning objects and removing them, http://www.thottbot.com/s39161
 		&Spell::SpellEffectNULL,// unknown - 135 // no spells
-		&Spell::SpellEffectNULL,// unknown - 136 // http://www.thottbot.com/s41542 and http://www.thottbot.com/s39703
+		&Spell::SpellEffectRestoreHealthPct,// Restore Health % - 136 // http://www.wowhead.com/?spell=48982
 		&Spell::SpellEffectRestoreManaPct,// Restore Mana % - 137 // http://www.thottbot.com/s41542
 		&Spell::SpellEffectNULL,// unknown - 138 // related to superjump or even "*jump" spells http://www.thottbot.com/?e=Unknown%20138
 		&Spell::SpellEffectNULL,// unknown - 139 // no spells
@@ -4823,7 +4823,6 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			tgt.m_targetMask=TARGET_FLAG_UNIT;
 			sp->judgement = true;
 			sp->prepare(&tgt);
-			p_caster->RemoveAura(p_caster->Seal);
 		}break;
 	//warlock - Master Demonologist
 	case 23784:
@@ -6562,13 +6561,24 @@ void Spell::SpellEffectApplyAura128(uint32 i)
 
 void Spell::SpellEffectRestoreManaPct(uint32 i)
 {
-	if(!unitTarget || !unitTarget->isAlive())
+	if(!u_caster || !unitTarget || !unitTarget->isAlive())
 		return;
 
 	uint32 maxMana = (uint32)unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 	uint32 modMana = damage * maxMana / 100;	
 
 	u_caster->Energize(unitTarget, pSpellId ? pSpellId : m_spellInfo->Id, modMana, POWER_TYPE_MANA);
+}
+
+void Spell::SpellEffectRestoreHealthPct(uint32 i)
+{
+	if(!u_caster || !unitTarget || !unitTarget->isAlive())
+		return;
+
+	uint32 maxHp = (uint32)unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+	uint32 modHp = damage * maxHp / 100;
+
+	u_caster->Heal(unitTarget, m_spellInfo->Id, modHp);
 }
 
 void Spell::SpellEffectTriggerSpellWithValue(uint32 i)

@@ -3886,8 +3886,10 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 			this->Remove();
 			return;
 		}
-
-		if(pTarget != m_caster && !isAttackable(m_caster, pTarget))
+		
+		// make sure we can't damage friends or heal enemies
+		if(((spellInfo->c_is_flags & SPELL_FLAG_IS_DAMAGING) && pTarget != m_caster && !isAttackable(m_caster, pTarget)) || 
+			((spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING) && (isHostile(m_caster, pTarget) || isAttackable(m_caster, pTarget))))
 		{
 			SendInterrupted(SPELL_FAILED_BAD_TARGETS, m_caster);
 			SendChannelUpdate(0, m_caster);
