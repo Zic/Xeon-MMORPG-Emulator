@@ -559,6 +559,10 @@ public:
 	bool eots_disabled;
 	bool ab_disabled;
 
+	// Level Caps
+	uint32 LevelCap_Custom_All;
+	// could add configs for every expansion..
+
 	void CharacterEnumProc(QueryResultVector& results, uint32 AccountId);
 	void LoadAccountDataProc(QueryResultVector& results, uint32 AccountId);
 
