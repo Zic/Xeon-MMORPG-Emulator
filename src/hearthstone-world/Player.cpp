@@ -1977,7 +1977,7 @@ void Player::addSpell(uint32 spell_id)
 				break;
 			case SKILL_TYPE_CLASS:
 			case SKILL_TYPE_ARMOR:
-				if(skill->id == SKILL_LOCKPICKING || skill->id == SKILL_POISONS)
+				if(skill->id == SKILL_LOCKPICKING)
 					max=5*getLevel();
 				break;
 		};
@@ -9510,10 +9510,6 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 		m_session->OutPacket( SMSG_SET_PROFICIENCY, sizeof( packetSMSG_SET_PROFICICENCY ), &pr );
 	}
 
-	// hackfix for poisons
-	if(SkillLine==SKILL_POISONS && !HasSpell(2842))
-		addSpell(2842);
-
 	// hackfix for runeforging
 	if(SkillLine==SKILL_RUNEFORGING)
 	{
@@ -9614,7 +9610,7 @@ void Player::_UpdateMaxSkillCounts()
 	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end(); ++itr)
 	{
 
-		if( itr->second.Skill->id == SKILL_LOCKPICKING || itr->second.Skill->id == SKILL_POISONS)
+		if( itr->second.Skill->id == SKILL_LOCKPICKING )
 		{
 			new_max = 5 * getLevel();
 		}
