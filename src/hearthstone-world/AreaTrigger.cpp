@@ -38,10 +38,10 @@ enum AreaTriggerFailures
 	AREA_TRIGGER_FAILURE_NO_ATTUNE_I	= 6,
 	AREA_TRIGGER_FAILURE_LEVEL			= 7,
 	AREA_TRIGGER_FAILURE_NO_GROUP		= 8,
-	AREA_TRIGGER_FAILURE_NO_KEY         = 9,
-	AREA_TRIGGER_FAILURE_LEVEL_HEROIC	= 9,
-	AREA_TRIGGER_FAILURE_NO_CHECK		= 10,
-	AREA_TRIGGER_FAILURE_NO_WOTLK		= 11,
+	AREA_TRIGGER_FAILURE_NO_KEY			= 9,
+	AREA_TRIGGER_FAILURE_LEVEL_HEROIC	= 10,
+	AREA_TRIGGER_FAILURE_NO_CHECK		= 11,
+	AREA_TRIGGER_FAILURE_NO_WOTLK		= 12,
 };
 
 const char * AreaTriggerFailureMessages[] = {
@@ -50,12 +50,13 @@ const char * AreaTriggerFailureMessages[] = {
 	"You must have The Burning Crusade Expansion to access this content.",
 	"Heroic mode unavailable for this instance.",
 	"You must be in a raid group to pass through here.",
-	"You do not have the required attunement to pass through here.", //TODO: Replace attunment with real itemname
-	"You do not have the required attunement to pass through here.", //TODO: Replace attunment with real itemname
+	"You do not have complete a required quest (%s) to pass through here.",
+	"You do not have a required item (%s) to pass through here.",
 	"You must be at least level %u to pass through here.",
 	"You must be in a party to pass through here.",
-	"You do not have the required attunement to pass through here.", //TODO: Replace attunment with real itemname
-	"You must be level 70 to enter heroic mode.",
+	"You do not have a required key (%s) to pass through here.",
+	"You do not have the required level (%u) to enter heroic mode.",
+	"Did\'t have any idea why you can\'t pass through here lol.",
 	"You must have The Lich King Expansion to access this content.",
 };
 
@@ -94,13 +95,13 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 		return AREA_TRIGGER_FAILURE_NO_ATTUNE_I;
 
 	if (pPlayer->iInstanceType >= MODE_HEROIC && 
-		pMapInfo->type == INSTANCE_MULTIMODE && 
-		(pMapInfo->heroic_key_1 &&
-		!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_1, false)) || 
-		pMapInfo->heroic_key_2 && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_2, false))
+			pMapInfo->type == INSTANCE_MULTIMODE && 
+			(pMapInfo->heroic_key_1 && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_1, false)) || 
+			(pMapInfo->heroic_key_2 && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key_2, false)))
 		return AREA_TRIGGER_FAILURE_NO_KEY;
 
-	if(pPlayer->getLevel()<70 && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
+	if (pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type != INSTANCE_NULL && 
+			(pPlayer->getLevel() < 70 || pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) && pPlayer->getLevel() < 80))
 		return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
 
 	return AREA_TRIGGER_FAILURE_OK;
@@ -169,22 +170,38 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 						{
 							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
 							ItemPrototype * pItem = ItemPrototypeStorage.LookupEntry(pMi->required_item);
-							if(pItem)
-								snprintf(msg,200,"You must have the item, `%s` to pass through here.",pItem->Name1);
-							else
-								snprintf(msg,200,"You must have the item, UNKNOWN to pass through here.");
-
+							snprintf(msg, 200, pReason, pItem ? pItem->Name1 : "UNKNOWN");
 							data << msg;
 						}break;
 					case AREA_TRIGGER_FAILURE_NO_ATTUNE_Q:
 						{
 							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
 							Quest * pQuest = QuestStorage.LookupEntry(pMi->required_quest);
-							if(pQuest)
-								snprintf(msg,200,"You must have finished the quest, `%s` to pass through here.",pQuest->title);
-							else
-								snprintf(msg,200,"You must have finished the quest, UNKNOWN to pass through here.");
+							snprintf(msg, 200, pReason, pQuest ? pQuest->title : "UNKNOWN");
 
+							data << msg;
+						}break;
+					case AREA_TRIGGER_FAILURE_NO_KEY:
+						{
+							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+							std::stringstream temp_msg;
+							if (pMi->heroic_key_1 && _player->GetItemInterface()->GetItemCount(pMi->heroic_key_1, false))
+							{
+								ItemPrototype * pKey = ItemPrototypeStorage.LookupEntry(pMi->heroic_key_1);
+								temp_msg << pKey ? pKey->Name1 : "UNKNOWN";
+							}
+							if (pMi->heroic_key_2 && _player->GetItemInterface()->GetItemCount(pMi->heroic_key_2, false))
+							{
+								ItemPrototype * pKey = ItemPrototypeStorage.LookupEntry(pMi->heroic_key_2);
+								temp_msg << " and " << pKey ? pKey->Name1 : "UNKNOWN";
+							}
+							snprintf(msg, 200, pReason, temp_msg.str());
+							data << msg;
+						}break;
+					case AREA_TRIGGER_FAILURE_LEVEL_HEROIC:
+						{
+							MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+							snprintf(msg, 200, pReason, pMi->HasFlag(WMI_INSTANCE_XPACK_02) ? 80 : 70);
 							data << msg;
 						}break;
 					default:
