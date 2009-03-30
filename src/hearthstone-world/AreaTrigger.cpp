@@ -46,18 +46,18 @@ enum AreaTriggerFailures
 
 const char * AreaTriggerFailureMessages[] = {
 	"-",
-	"This instance is unavailable",
-	"You must have The Burning Crusade Expansion to access this content.",
-	"Heroic mode unavailable for this instance.",
-	"You must be in a raid group to pass through here.",
-	"You do not have complete a required quest (%s) to pass through here.",
-	"You do not have a required item (%s) to pass through here.",
-	"You must be at least level %u to pass through here.",
-	"You must be in a party to pass through here.",
-	"You do not have a required key (%s) to pass through here.",
-	"You do not have the required level (%u) to enter heroic mode.",
-	"Did\'t have any idea why you can\'t pass through here lol.",
-	"You must have The Lich King Expansion to access this content.",
+	"This instance is currently not available",                                         //AREA_TRIGGER_FAILURE_UNAVAILABLE	
+	"You must have the \"Burning Crusade\" expansion to access this content.",          //AREA_TRIGGER_FAILURE_NO_BC				
+	"Heroic mode currently not available for this instance.",                           //AREA_TRIGGER_FAILURE_NO_HEROIC		
+	"You must be in a raid group to pass through here.",                                //AREA_TRIGGER_FAILURE_NO_RAID			
+	"You must complete the quest \"%s\" to pass through here.",                         //AREA_TRIGGER_FAILURE_NO_ATTUNE_Q	
+	"You must have item \"%s\" to pass through here.",                                  //AREA_TRIGGER_FAILURE_NO_ATTUNE_I	
+	"You must have reached level %u before you can pass through here.",                 //AREA_TRIGGER_FAILURE_LEVEL				
+	"You must be in a party to pass through here.",                                     //AREA_TRIGGER_FAILURE_NO_GROUP			
+	"You do not have a required key \"%s\" to pass through here.",                      //AREA_TRIGGER_FAILURE_NO_KEY				
+	"You must have reached level %u before you can enter heroic mode.",                 //AREA_TRIGGER_FAILURE_LEVEL_HEROIC	
+	"Don\'t have any idea why you can\'t pass through here.",                           //AREA_TRIGGER_FAILURE_NO_CHECK			
+	"You must have the \"Wrath of the Lich King\" expansion to access this content.",   //AREA_TRIGGER_FAILURE_NO_WOTLK			
 };
 
 uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, PlayerPointer pPlayer, MapInfo * pMapInfo)
