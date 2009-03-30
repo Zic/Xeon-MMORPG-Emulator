@@ -934,27 +934,29 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 							//we require to know if strike was succesfull. If there was no dmg then target cannot be dazed by it
 							uint32 health_before_strike=m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
 #endif
-							m_Unit->Strike( m_nextTarget, MELEE, NULL, 0, 0, 0, false, false );
-#ifdef ENABLE_CREATURE_DAZE
-							//now if the target is facing his back to us then we could just cast dazed on him :P
-							//as far as i know dazed is casted by most of the creatures but feel free to remove this code if you think otherwise
-							if(m_nextTarget != NULL &&
-								!(m_Unit->m_factionDBC->RepListId == -1 && m_Unit->m_faction->FriendlyMask==0 && m_Unit->m_faction->HostileMask==0) /* neutral creature */
-								&& m_nextTarget->IsPlayer() && !m_Unit->IsPet() && health_before_strike>m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH)
-								&& Rand(m_Unit->CalculateDazeCastChance(m_nextTarget)))
+							if(m_nextTarget != NULL)
 							{
-								float our_facing=m_Unit->calcRadAngle(m_Unit->GetPositionX(),m_Unit->GetPositionY(),m_nextTarget->GetPositionX(),m_nextTarget->GetPositionY());
-								float his_facing=m_nextTarget->GetOrientation();
-								if(fabs(our_facing-his_facing)<CREATURE_DAZE_TRIGGER_ANGLE && !m_nextTarget->HasNegativeAura(CREATURE_SPELL_TO_DAZE))
+								m_Unit->Strike( m_nextTarget, MELEE, NULL, 0, 0, 0, false, false );
+#ifdef ENABLE_CREATURE_DAZE
+								//now if the target is facing his back to us then we could just cast dazed on him :P
+								//as far as i know dazed is casted by most of the creatures but feel free to remove this code if you think otherwise
+								if( !(m_Unit->m_factionDBC->RepListId == -1 && m_Unit->m_faction->FriendlyMask==0 && m_Unit->m_faction->HostileMask==0) /* neutral creature */
+										&& m_nextTarget->IsPlayer() && !m_Unit->IsPet() && health_before_strike>m_nextTarget->GetUInt32Value(UNIT_FIELD_HEALTH)
+										&& Rand(m_Unit->CalculateDazeCastChance(m_nextTarget)))
 								{
-									SpellEntry *info = dbcSpell.LookupEntry(CREATURE_SPELL_TO_DAZE);
-									SpellPointer sp(new Spell(m_Unit, info, false, NULLAURA));
-									SpellCastTargets targets;
-									targets.m_unitTarget = m_nextTarget->GetGUID();
-									sp->prepare(&targets);
+									float our_facing=m_Unit->calcRadAngle(m_Unit->GetPositionX(),m_Unit->GetPositionY(),m_nextTarget->GetPositionX(),m_nextTarget->GetPositionY());
+									float his_facing=m_nextTarget->GetOrientation();
+									if(fabs(our_facing-his_facing)<CREATURE_DAZE_TRIGGER_ANGLE && !m_nextTarget->HasNegativeAura(CREATURE_SPELL_TO_DAZE))
+									{
+										SpellEntry *info = dbcSpell.LookupEntry(CREATURE_SPELL_TO_DAZE);
+										SpellPointer sp(new Spell(m_Unit, info, false, NULLAURA));
+										SpellCastTargets targets;
+										targets.m_unitTarget = m_nextTarget->GetGUID();
+										sp->prepare(&targets);
+									}
 								}
-							}
 #endif
+							}
 						}
 					}	
 				}
