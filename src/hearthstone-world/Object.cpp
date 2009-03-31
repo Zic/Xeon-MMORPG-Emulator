@@ -1654,17 +1654,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			pVictim->SendPowerUpdate();
 		}
 
-	if( pVictim->IsPlayer() )
-	{
-		PlayerPointer pThis = TO_PLAYER(pVictim);
-		if(pThis->cannibalize)
-		{
-			sEventMgr.RemoveEvents(pVictim, EVENT_CANNIBALIZE);
-			pThis->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-			pThis->cannibalize = false;
-		}
-	}
-
+	
 	//* BATTLEGROUND DAMAGE COUNTER *//
 	if( pVictim != unit_shared_from_this() )
 	{

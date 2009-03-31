@@ -313,12 +313,10 @@ void Player::Init()
 		CurrentGossipMenu	   = NULL;
 
 		ResetHeartbeatCoords();
-		cannibalize			 = false;
 
 		m_AreaID				= 0;
 		m_areaDBC				= NULL;
 		m_actionsDirty		  = false;
-		cannibalizeCount		= 0;
 		rageFromDamageDealt	 = 0;
 
 		m_honorToday			= 0;
@@ -1254,18 +1252,7 @@ void Player::_EventAttack( bool offhand )
 		m_AttackMsgTimer = 0;
 		
 		// Set to weapon time.
-		setAttackTimer(0, offhand);
-
-		//pvp timeout reset
-		if(pVictim->IsPlayer())
-		{
-			if (TO_PLAYER(pVictim)->cannibalize)
-			{
-				sEventMgr.RemoveEvents(pVictim, EVENT_CANNIBALIZE);
-				pVictim->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-				TO_PLAYER(pVictim)->cannibalize = false;
-			}
-		}
+		setAttackTimer(0, offhand);		
 
 		if(IsStealth())
 		{
@@ -5476,23 +5463,6 @@ void Player::ClearInRangeSet()
 	Unit::ClearInRangeSet();
 }
 
-void Player::EventCannibalize(uint32 amount)
-{
-	uint32 amt = (GetUInt32Value(UNIT_FIELD_MAXHEALTH)*amount)/100;
-	
-	uint32 newHealth = GetUInt32Value(UNIT_FIELD_HEALTH) + amt;
-	
-	if(newHealth <= GetUInt32Value(UNIT_FIELD_MAXHEALTH))
-		SetUInt32Value(UNIT_FIELD_HEALTH, newHealth);
-	else
-		SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-
-	cannibalizeCount++;
-	if(cannibalizeCount == 5)
-		SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-
-	Aura::SendPeriodicAuraLog(GetGUID(), unit_shared_from_this(), dbcSpell.LookupEntry(20577), amt, 0, 0, FLAG_PERIODIC_HEAL);
-}
 
 void Player::EventReduceDrunk(bool full)
 {

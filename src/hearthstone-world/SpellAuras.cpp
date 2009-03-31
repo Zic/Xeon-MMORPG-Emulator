@@ -3680,6 +3680,8 @@ void Aura::SpellAuraModTotalHealthRegenPct(bool apply)
 		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHealPct,(float)mod->m_amount,
 			EVENT_AURA_PERIODIC_HEALPERC,	GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
+	else
+		TO_UNIT( m_target )->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
 }
 
 void Aura::EventPeriodicHealPct(float RegenPct)

@@ -1036,13 +1036,6 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	uint8 forced_cancast_failure = 0;
 	if( p_caster != NULL )
 	{
-		if( p_caster->cannibalize )
-		{
-			sEventMgr.RemoveEvents( p_caster, EVENT_CANNIBALIZE );
-			p_caster->SetUInt32Value( UNIT_NPC_EMOTESTATE, 0 );
-			p_caster->cannibalize = false;
-		}
-
 		if( GetGameObjectTarget() || GetSpellProto()->Id == 21651)
 		{
 			if( p_caster->IsStealth() )
@@ -3186,6 +3179,42 @@ uint8 Spell::CanCast(bool tolerate)
 		{
 			if( p_caster->CombatStatus.IsInCombat() )
 				return SPELL_FAILED_TARGET_IN_COMBAT;
+		}
+
+		if( m_spellInfo->NameHash == SPELL_HASH_CANNIBALIZE )
+		{
+			bool check;
+			float rad = GetRadius( 0 );
+			rad *= rad;
+			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
+			{
+				if(p_caster->GetDistance2dSq((*i)) < rad)
+				{
+					if((*i)->GetTypeId() == TYPEID_UNIT)
+					{
+						if(TO_CREATURE(*i)->getDeathState() == CORPSE)
+						{
+							CreatureInfo *cn = TO_CREATURE(*i)->GetCreatureName();
+							if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
+							{
+								check = true;
+							}
+						}
+					}
+					else if( (*i)->GetTypeId() == TYPEID_PLAYER )
+					{
+						if( TO_PLAYER(*i)->isAlive() == false )
+						{
+							check = true;
+						}
+					}
+					else
+						check  = false;
+				}
+			}
+
+			if(check != true)
+				return SPELL_FAILED_NO_EDIBLE_CORPSES;
 		}
 
 		// check if we have the required gameobject focus

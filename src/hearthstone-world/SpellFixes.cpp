@@ -4574,6 +4574,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectTriggerSpell[0] = 33700;
 				}break;
 			// FIXES FOR WARLOCK GRIMOIRES END
+			case 20578:
+				sp->AuraInterruptFlags = AURA_INTERRUPT_ON_MOVEMENT|AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN;
+				break;
 			}
 		}
 	}

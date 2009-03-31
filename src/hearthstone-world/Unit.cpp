@@ -3612,12 +3612,6 @@ void Unit::smsg_AttackStart(UnitPointer pVictim)
 	// FLAGS changed so other players see attack animation
 	//	addUnitFlag(UNIT_FLAG_COMBAT);
 	//	setUpdateMaskBit(UNIT_FIELD_FLAGS );
-	if(pThis->cannibalize)
-	{
-		sEventMgr.RemoveEvents(pThis, EVENT_CANNIBALIZE);
-		pThis->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-		pThis->cannibalize = false;
-	}
 }
 
 void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)

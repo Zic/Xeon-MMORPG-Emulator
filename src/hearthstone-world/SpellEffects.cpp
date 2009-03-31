@@ -1328,37 +1328,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if(!p_caster)
 				return;
-			bool check = false;
-			float rad = GetRadius(i);
-			rad *= rad;
-			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
-			{
-				if((*i)->GetTypeId() == TYPEID_UNIT)
-				{
-					if(TO_CREATURE(*i)->getDeathState() == CORPSE)
-					{
-						CreatureInfo *cn = TO_CREATURE(*i)->GetCreatureName();
-							if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
-							{
-								if(p_caster->GetDistance2dSq((*i)) < rad)
-								{
-									check = true;
-									break;
-								}
-							}
-						
-					}
-				}
-			}
-			
-			if(check)
-			{
-				p_caster->cannibalize = true;
-				p_caster->cannibalizeCount = 0;
-				sEventMgr.AddEvent(p_caster, &Player::EventCannibalize, uint32(7),
-					EVENT_CANNIBALIZE, 2000, 5,0);
-				p_caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CANNIBALIZE);
-			}
+			p_caster->CastSpell( p_caster, 20578, true);
+			p_caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CANNIBALIZE);
 		}break;
 	case 23074:// Arcanite Dragonling
 	case 23075:// Mithril Mechanical Dragonling

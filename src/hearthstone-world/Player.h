@@ -1411,7 +1411,6 @@ public:
 	float m_TransporterO;
 	float m_TransporterUnk;
 	// Misc
-	void EventCannibalize(uint32 amount);
 	void EventReduceDrunk(bool full);
 	bool m_AllowAreaTriggerPort;
 	void EventAllowTiggerPort(bool enable);
@@ -1534,8 +1533,6 @@ public:
 	map<uint32, WeaponModifier> tocritchance;
 	uint32 Seal;
 	uint32 judgespell;
-	bool cannibalize;
-	uint8 cannibalizeCount;
 	int32 rageFromDamageDealt;
 	// GameObject commands
 	GameObjectPointer m_GM_SelectedGO;
