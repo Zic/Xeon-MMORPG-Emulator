@@ -24,7 +24,8 @@
 //		Client opcodes are still uint32 as far as we know.
 //3.0.2 client opcodes
 
-enum Opcodes {
+enum Opcodes
+{
     MSG_NULL_ACTION                                 = 0x000,
     CMSG_BOOTME                                     = 0x001,
     CMSG_DBLOOKUP                                   = 0x002,
@@ -336,15 +337,15 @@ enum Opcodes {
     SMSG_SPELL_COOLDOWN                             = 0x134,
     SMSG_COOLDOWN_EVENT                             = 0x135,
     CMSG_CANCEL_AURA                                = 0x136,
-    SMSG_UPDATE_AURA_DURATION_OBSOLETE              = 0x137,
+    SMSG_EQUIPMENT_SET_SAVED                        = 0x137,
     SMSG_PET_CAST_FAILED                            = 0x138,
     MSG_CHANNEL_START                               = 0x139,
     MSG_CHANNEL_UPDATE                              = 0x13A,
     CMSG_CANCEL_CHANNELLING                         = 0x13B,
     SMSG_AI_REACTION                                = 0x13C,
     CMSG_SET_SELECTION                              = 0x13D,
-    CMSG_SET_TARGET_OBSOLETE                        = 0x13E,
-    CMSG_UNUSED                                     = 0x13F,
+    CMSG_EQUIPMENT_SET_DELETE                       = 0x13E,
+    CMSG_INSTANCE_LOCK_RESPONSE                     = 0x13F,
     CMSG_UNUSED2                                    = 0x140,
     CMSG_ATTACKSWING                                = 0x141,
     CMSG_ATTACKSTOP                                 = 0x142,
@@ -356,14 +357,14 @@ enum Opcodes {
     SMSG_ATTACKSWING_DEADTARGET                     = 0x148,
     SMSG_ATTACKSWING_CANT_ATTACK                    = 0x149,
     SMSG_ATTACKERSTATEUPDATE                        = 0x14A,
-    SMSG_VICTIMSTATEUPDATE_OBSOLETE                 = 0x14B,
+    SMSG_BATTLEFIELD_PORT_DENIED                    = 0x14B,
     SMSG_DAMAGE_DONE_OBSOLETE                       = 0x14C,
     SMSG_DAMAGE_TAKEN_OBSOLETE                      = 0x14D,
     SMSG_CANCEL_COMBAT                              = 0x14E,
     SMSG_SPELLBREAKLOG                              = 0x14F,
     SMSG_SPELLHEALLOG                               = 0x150,
     SMSG_SPELLENERGIZELOG                           = 0x151,
-    CMSG_SHEATHE_OBSOLETE                           = 0x152,
+    SMSG_BREAK_TARGET                               = 0x152,
     CMSG_SAVE_PLAYER                                = 0x153,
     CMSG_SETDEATHBINDPOINT                          = 0x154,
     SMSG_BINDPOINTUPDATE                            = 0x155,
@@ -722,8 +723,8 @@ enum Opcodes {
     SMSG_SCRIPT_MESSAGE                             = 0x2B6,
     SMSG_DUEL_COUNTDOWN                             = 0x2B7,
     SMSG_AREA_TRIGGER_MESSAGE                       = 0x2B8,
-    CMSG_TOGGLE_HELM                                = 0x2B9,
-    CMSG_TOGGLE_CLOAK                               = 0x2BA,
+    CMSG_SHOWING_HELM                               = 0x2B9,
+    CMSG_SHOWING_CLOAK                              = 0x2BA,
     SMSG_MEETINGSTONE_JOINFAILED                    = 0x2BB,
     SMSG_PLAYER_SKINNED                             = 0x2BC,
     SMSG_DURABILITY_DAMAGE_DEATH                    = 0x2BD,
@@ -740,7 +741,7 @@ enum Opcodes {
     SMSG_CHAR_RENAME                                = 0x2C8,
     CMSG_MOVE_SPLINE_DONE                           = 0x2C9,
     CMSG_MOVE_FALL_RESET                            = 0x2CA,
-    SMSG_UPDATE_LAST_INSTANCE_CREATED                      = 0x2CB,
+    SMSG_INSTANCE_SAVE_CREATED                      = 0x2CB,
     SMSG_RAID_INSTANCE_INFO                         = 0x2CC,
     CMSG_REQUEST_RAID_INFO                          = 0x2CD,
     CMSG_MOVE_TIME_SKIPPED                          = 0x2CE,
@@ -1120,8 +1121,8 @@ enum Opcodes {
     SMSG_CALENDAR_EVENT_UPDATED_ALERT               = 0x444,
     SMSG_CALENDAR_EVENT_MODERATOR_STATUS_ALERT      = 0x445,
     CMSG_CALENDAR_COMPLAIN                          = 0x446,
-    SMSG_CALENDAR_EVENT_RESERVED_2                  = 0x447,
-    SMSG_CALENDAR_EVENT_RESERVED_3                  = 0x448,
+    CMSG_CALENDAR_GET_NUM_PENDING                   = 0x447,
+    SMSG_CALENDAR_SEND_NUM_PENDING                  = 0x448,
     CMSG_SAVE_DANCE                                 = 0x449,
     SMSG_NOTIFY_DANCE                               = 0x44A,
     CMSG_PLAY_DANCE                                 = 0x44B,
@@ -1202,21 +1203,57 @@ enum Opcodes {
     SMSG_AURA_UPDATE                                = 0x496,
     CMSG_FLOOD_GRACE_CHEAT                          = 0x497,
     SMSG_SERVER_FIRST_ACHIEVEMENT                   = 0x498,
-    SMSG_PET_LEARNED_SPELL                          = 0x499,    // uint16 spellid, Your pet learned spell: %s
-    SMSG_PET_UNLEARNED_SPELL                        = 0x49A,    // uint16 spellid, Your pet unlearned %s
-    UMSG_UNKNOWN_1179                               = 0x49B,    // not found in client
-    CMSG_UNKNOWN_1180                               = 0x49C,    // lua: HearthAndResurrectFromArea
-    SMSG_CONTROL_VEHICLE                            = 0x49D,    // empty
-    SMSG_UNKNOWN_1182                               = 0x49E,    // uint32
-    SMSG_UNKNOWN_1183                               = 0x49F,    // uint32
-    UMSG_UNKNOWN_1184                               = 0x4A0,    // not found in client
-    UMSG_UNKNOWN_1185                               = 0x4A1,
-    UMSG_UNKNOWN_1186                               = 0x4A2,
-    UMSG_UNKNOWN_1187                               = 0x4A3,
-    UMSG_UNKNOWN_1188                               = 0x4A4,
-    UMSG_UNKNOWN_1189                               = 0x4A5,
-    SMSG_CLIENTCACHE_VERSION                        = 0x4A6,
-    NUM_MSG_TYPES                                   = 0x4A7
+    SMSG_PET_LEARNED_SPELL                          = 0x499,
+    SMSG_PET_REMOVED_SPELL                          = 0x49A,
+    CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE         = 0x49B,
+    CMSG_HEARTH_AND_RESURRECT                       = 0x49C, // not changed in 3.1
+    SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA       = 0x49D, // not changed 9626
+    SMSG_CRITERIA_DELETED                           = 0x49E, // not changed 9626
+    SMSG_ACHIEVEMENT_DELETED                        = 0x49F, // not changed 9626
+    CMSG_SERVER_INFO_QUERY                          = 0x4A0, // not found
+    SMSG_SERVER_INFO_RESPONSE                       = 0x4A1, // not found
+    CMSG_CHECK_LOGIN_CRITERIA                       = 0x4A2, // not found
+    SMSG_SERVER_BUCK_DATA_START                     = 0x4A3, // not found
+    CMSG_QUERY_VEHICLE_STATUS                       = 0x4A4, // not found
+    UMSG_UNKNOWN_1189                               = 0x4A5, // not found, old SMSG_PET_GUIDS
+    SMSG_UNKNOWN_1190                               = 0x4A6, // smsg unk, old SMSG_CLIENTCACHE_VERSION
+    SMSG_UNKNOWN_1191                               = 0x4A7, // smsg guid+uint32 (vehicle)
+    CMSG_UNKNOWN_1192                               = 0x4A8, // cmsg uint64
+    CMSG_EJECT_PASSENGER                            = 0x4A9, // cmsg uint64
+    SMSG_PET_GUIDS                                  = 0x4AA, // shifted+5
+    SMSG_CLIENTCACHE_VERSION                        = 0x4AB, // shifted+5
+    UMSG_UNKNOWN_1196                               = 0x4AC, // not found
+    UMSG_UNKNOWN_1197                               = 0x4AD, // not found
+    UMSG_UNKNOWN_1198                               = 0x4AE, // not found
+    UMSG_UNKNOWN_1199                               = 0x4AF, // not found
+    UMSG_UNKNOWN_1200                               = 0x4B0, // not found
+    UMSG_UNKNOWN_1201                               = 0x4B1, // not found
+    SMSG_UNKNOWN_1202                               = 0x4B2, // refund something
+    CMSG_UNKNOWN_1203                               = 0x4B3, // refund request?
+    CMSG_UNKNOWN_1204                               = 0x4B4, // lua: ContainerRefundItemPurchase
+    SMSG_UNKNOWN_1205                               = 0x4B5, // refund something
+    CMSG_UNKNOWN_1206                               = 0x4B6, // CMSG, uint32
+    SMSG_UNKNOWN_1207                               = 0x4B7, // SMSG, string+float
+    CMSG_LFG_SET_ROLES                              = 0x4B8, // CMSG, empty, lua: SetLFGRoles
+    UMSG_UNKNOWN_1209                               = 0x4B9, // not found
+    CMSG_UNKNOWN_1210                               = 0x4BA, // CMSG, uint64, lua: CalendarContextEventSignUp
+    SMSG_UNKNOWN_1211                               = 0x4BB, // SMSG, calendar related
+    SMSG_EQUIPMENT_SET_LIST                         = 0x4BC, // SMSG, equipment manager list?
+    CMSG_EQUIPMENT_SET_SAVE                         = 0x4BD, // CMSG, lua: SaveEquipmentSet
+    CMSG_UNKNOWN_1214                               = 0x4BE, // CMSG, missle?
+    SMSG_UNKNOWN_1215                               = 0x4BF, // SMSG, uint64, uint8, 3 x float
+    SMSG_TALENTS_INFO                               = 0x4C0, // SMSG, talents related
+    CMSG_LEARN_PREVIEW_TALENTS                      = 0x4C1, // CMSG, lua: LearnPreviewTalents (for player?)
+    CMSG_LEARN_PREVIEW_TALENTS_PET                  = 0x4C2, // CMSG, lua: LearnPreviewTalents (for pet?)
+    UMSG_UNKNOWN_1219                               = 0x4C3, // not found
+    UMSG_UNKNOWN_1220                               = 0x4C4, // not found
+    UMSG_UNKNOWN_1221                               = 0x4C5, // not found
+    UMSG_UNKNOWN_1222                               = 0x4C6, // not found
+    SMSG_UNKNOWN_1223                               = 0x4C7, // uint64, arena pet?
+    SMSG_UNKNOWN_1224                               = 0x4C8, // uint32 "Can't change arena team..."
+    UMSG_UNKNOWN_1225                               = 0x4C9, // not found
+    UMSG_UNKNOWN_1226                               = 0x4CA, // not found
+    NUM_MSG_TYPES                                   = 0x4CB
 };
 
 extern NameTableEntry g_worldOpcodeNames[];

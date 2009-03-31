@@ -458,8 +458,8 @@ void Vehicle::_AddToSlot(UnitPointer pPassenger, uint8 slot)
 		//pPlayer->ResetHeartbeatCoords();
 		pPlayer->SetUInt64Value(PLAYER_FARSIGHT, GetGUID());
 
-		WorldPacket data3(SMSG_CONTROL_VEHICLE, 0);
-		pPlayer->GetSession()->SendPacket(&data3);
+		//WorldPacket data3(SMSG_CONTROL_VEHICLE, 0);
+		//pPlayer->GetSession()->SendPacket(&data3);
 
 		pPlayer->SetPlayerStatus(TRANSFER_PENDING);
 		pPlayer->m_sentTeleportPosition.ChangeCoords(GetPositionX(), GetPositionY(), GetPositionZ());

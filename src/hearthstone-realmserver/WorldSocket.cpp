@@ -77,7 +77,7 @@ void WorldSocket::OutPacket(uint16 opcode, size_t len, const void* data)
 	ServerPktHeader Header;
 	Header.cmd = opcode;
 	Header.size = uint16(ntohs((u_short)len + 2));
-    _crypt.EncryptFourSend((uint8*)&Header);
+    _crypt.EncryptSend((uint8*)&Header, sizeof (ServerPktHeader));
 
 	// Pass the header to our send buffer
 	rv = BurstSend((const uint8*)&Header, 4);
@@ -165,13 +165,15 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	BigNumber BNK;
 	BNK.SetBinary(K, 40);
 
-	uint8 *key = new uint8[20];
-	AutheticationPacketKey::GenerateKey(key, K);
+	
+	//uint8 *key = new uint8[20];
+	//AutheticationPacketKey::GenerateKey(key, K);
 
 	// Initialize crypto.
-	_crypt.SetKey(key, 20);
-	_crypt.Init();
-	delete [] key;
+	//_crypt.SetKey(key, 20);
+	//_crypt.Init();
+	//_crypt.Init(K);
+	//delete [] key;
 
 	//checking if player is already connected
 	//disconnect corrent player and login this one(blizzlike)
@@ -220,6 +222,8 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 		OutPacket(SMSG_AUTH_RESPONSE, 1, "\x15");
 		return;
 	}
+
+	_crypt.Init(digest);
 
 	// Allocate session
 	m_session->m_accountFlags = AccountFlags;
@@ -278,7 +282,7 @@ void WorldSocket::OnRead()
 			readBuffer.Read(&Header, 6);
 
 			// Decrypt the header
-            _crypt.DecryptSixRecv((uint8*)&Header);
+            _crypt.DecryptRecv((uint8*)&Header, sizeof (ClientPktHeader));
 
 			mRemaining = mSize = ntohs(Header.size) - 4;
 			mOpcode = Header.cmd;

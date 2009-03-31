@@ -258,7 +258,10 @@ void WeatherInfo::SendUpdate()
 {
 	WorldPacket data(SMSG_WEATHER, 9);
 	BuildWeatherPacket(&data, m_currentEffect, m_currentDensity);
-	sWorld.SendZoneMessage(&data, m_zoneId, 0);
+	MapMgrPointer mgr = sInstanceMgr.GetMapMgr(dbcArea.LookupEntryForced(m_zoneId)->mapId);
+	if(mgr)
+		mgr->SendPacketToPlayers(m_zoneId, FACTION_MASK_ALL, &data);
+	//sWorld.SendZoneMessage(&data, m_zoneId, 0);
 }
 
 void WeatherInfo::SendUpdate(PlayerPointer plr) //Updates weather for player's zone-change only if new zone weather differs

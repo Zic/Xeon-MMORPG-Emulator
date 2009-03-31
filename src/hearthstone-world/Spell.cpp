@@ -123,19 +123,28 @@ void SpellCastTargets::write( WorldPacket& data )
 
 void SpellCastTargets::write( StackPacket& data )
 {
+	if( m_targetMask & TARGET_FLAG_DEST_LOCATION ){
+		m_targetMask = TARGET_FLAG_SELF;	// hackfix for client crash. TODO fix
+	}
 	data << m_targetMask;
 
-	if( m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_CORPSE | TARGET_FLAG_CORPSE2 | TARGET_FLAG_OBJECT ) )
-		FastGUIDPack( data, m_unitTarget );
+	if( m_targetMask & (TARGET_FLAG_UNIT | TARGET_FLAG_CORPSE | TARGET_FLAG_CORPSE2 | TARGET_FLAG_OBJECT | TARGET_FLAG_GLYPH) )
+        FastGUIDPack( data, m_unitTarget );
 
-	if( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM ) )
-		FastGUIDPack( data, m_itemTarget );
+    if( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM ) )
+        FastGUIDPack( data, m_itemTarget );
 
 	if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
 		data << m_srcX << m_srcY << m_srcZ;
 
 	if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
+	{
+		if(m_unitTarget)
+			FastGUIDPack( data, m_unitTarget );
+		else
+			data << uint8(0);
 		data << m_destX << m_destY << m_destZ;
+	}
 
 	/*if( m_targetMask & TARGET_FLAG_STRING )
 		data << m_strTarget;*/
@@ -1974,7 +1983,9 @@ void Spell::SendSpellStart()
 	StackPacket data(SMSG_SPELL_START, buf, 1000);
 
 	uint32 cast_flags = SPELL_START_FLAG_DEFAULT;
-	cast_flags |= 0x200800;
+	cast_flags |= SPELL_START_FLAGS_POWER_UPDATE;
+	if(p_caster && p_caster->getClass() == DEATHKNIGHT)
+		cast_flags |= SPELL_START_FLAGS_RUNE_UPDATE;
 
 	if( GetType() == SPELL_DMG_TYPE_RANGED )
 		cast_flags |= SPELL_START_FLAG_RANGED;
@@ -1998,7 +2009,7 @@ void Spell::SendSpellStart()
 
 	if (cast_flags & SPELL_START_FLAGS_POWER_UPDATE) //send new mana
 		data << uint32( u_caster ? u_caster->GetUInt32Value(UNIT_FIELD_POWER1 + u_caster->GetPowerType()) : 0);
-	if (cast_flags & SPELL_START_FLAGS_RUNE_UPDATE && p_caster) //send new runes
+	if (cast_flags & SPELL_START_FLAGS_RUNE_UPDATE) //send new runes
 	{
 		SpellRuneCostEntry * runecost = dbcSpellRuneCost.LookupEntry(m_spellInfo->runeCostID);
 		uint8 theoretical = p_caster->TheoreticalUseRunes(runecost->bloodRuneCost, runecost->frostRuneCost, runecost->unholyRuneCost);

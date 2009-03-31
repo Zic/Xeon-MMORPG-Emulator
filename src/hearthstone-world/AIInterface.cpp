@@ -1796,6 +1796,7 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 	uint8 buffer[100];
 	StackPacket data(SMSG_MONSTER_MOVE, buffer, 100);
 	data << m_Unit->GetNewGUID();
+	data << uint8(0);
 	data << m_Unit->GetPositionX() << m_Unit->GetPositionY() << m_Unit->GetPositionZ();
 	data << getMSTime();
 	
@@ -1804,10 +1805,24 @@ void AIInterface::SendMoveToPacket(float toX, float toY, float toZ, float toO, u
 	{
 		data << uint8(4);
 		data << toO;
-	} else {
+	}
+	else
+	{
 		data << uint8(0);
 	}
+
 	data << MoveFlags;
+	if(MoveFlags & 0x200000)
+	{
+		data << uint8(0);
+		data << uint32(0);
+	}
+	if(MoveFlags & 0x800)
+	{
+		data << float(0);
+		data << uint32(0);
+	}
+
 	data << time;
 	data << uint32(1);	  // 1 waypoint
 	data << toX << toY << toZ;
@@ -2021,25 +2036,50 @@ void AIInterface::UpdateMove()
 void AIInterface::SendCurrentMove(PlayerPointer plyr/*uint64 guid*/)
 {
 	if(m_destinationX == 0.0f && m_destinationY == 0.0f && m_destinationZ == 0.0f) return; //invalid move 
-	ByteBuffer *splineBuf = new ByteBuffer(20*4);
+
+	uint32 numpoints = 4;
+	float pointDiffX = m_sourceX - m_destinationX / (float)numpoints;
+	float pointDiffY = m_sourceY - m_destinationY / (float)numpoints;
+	float pointDiffZ = m_sourceZ - m_destinationZ / (float)numpoints;
+
+	if(pointDiffX < 1.0f || pointDiffY < 1.0f)
+	{
+		SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, 0.0f, 0, getMoveFlags());
+		return;
+	}
+
+	ByteBuffer *splineBuf = new ByteBuffer(34*4);
 	uint32 flags = 0;
 	*splineBuf << uint32(flags); // spline flags
-	/*if(flags & 0x10000)
+	/*
+	else if(flags & 0x8000)
 		; // 3 unk floats
-	if(flags & 0x20000)
+	if(flags & 0x10000)
 		; // unknown int64
-	if(flags & 0x40000)
+	if(flags & 0x20000)
 		; // unknown float*/
+	*splineBuf << uint32(0); //dont know if this is an uint32 but client seems to be trying to read 4 - 24 + 8 + 4
 	*splineBuf << uint32((m_totalMoveTime - m_timeToMove)+m_moveTimer); //Time Passed (start Position) //should be generated/save 
 	*splineBuf << uint32(m_totalMoveTime); //Total Time //should be generated/save
-	*splineBuf << uint32(0); //Unknown
-	*splineBuf << uint32(4); //Spline Count	// lets try this
+	*splineBuf << m_sourceX << m_sourceY << m_sourceZ;
+	*splineBuf << uint32(0);
 
+	*splineBuf << uint32(numpoints); //Spline Count	// lets try this
+
+	for(uint8 i = 0 ; i < numpoints; i++)
+	{
+		*splineBuf << m_sourceX + (pointDiffX * i);
+		*splineBuf << m_sourceY + (pointDiffY * i);
+		*splineBuf << m_sourceZ + (pointDiffZ * i);
+	}
+	/*
 	*splineBuf << m_sourceX << m_sourceY << m_sourceZ;
 	*splineBuf << m_Unit->GetPositionX() << m_Unit->GetPositionY() << m_Unit->GetPositionZ();
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;
+	*/
 	*splineBuf << uint8(0); // Pguid?
+	
 	*splineBuf << m_destinationX << m_destinationY << m_destinationZ;	// 3 floats after all the spline points
 
 	plyr->AddSplinePacket(m_Unit->GetGUID(), splineBuf);
@@ -3568,4 +3608,5 @@ void AIInterface::WipeCurrentTarget()
 	if( m_nextTarget == UnitToFollow_backup )
 		UnitToFollow_backup = NULLUNIT;
 }
+
 

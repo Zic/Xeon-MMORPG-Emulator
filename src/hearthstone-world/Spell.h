@@ -769,7 +769,10 @@ enum SpellEffects
 	SPELL_EFFECT_UNKNOWN37,                 //    157
 	SPELL_EFFECT_MILLING,	                //    158
 	SPELL_EFFECT_UNKNOWN39,                 //    159
-    TOTAL_SPELL_EFFECTS,                    //    160
+	SPELL_EFFECT_UNKNOWN40,                 //    160
+	SPELL_EFFECT_SET_TALENT_SPECS_COUNT,    //    161
+	SPELL_EFFECT_ACTIVATE_TALENT_SPEC,      //    162
+    TOTAL_SPELL_EFFECTS,                    //    163
 };
 
 
@@ -1791,6 +1794,8 @@ public:
 	void SpellEffectMegaJump(uint32 i);
 	void SpellEffectMilling(uint32 i);
 	void SpellEffectTitanGrip(uint32 i);
+	void SpellEffectSetTalentSpecsCount(uint32 i);
+	void SpellEffectActivateTalentSpec(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);

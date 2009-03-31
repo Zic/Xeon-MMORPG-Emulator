@@ -574,7 +574,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_PLAYER_LOGOUT].handler							 = &WorldSession::HandlePlayerLogoutOpcode;
 	WorldPacketHandlers[CMSG_LOGOUT_CANCEL].handler							 = &WorldSession::HandleLogoutCancelOpcode;
 	WorldPacketHandlers[CMSG_ZONEUPDATE].handler								= &WorldSession::HandleZoneUpdateOpcode;
-	WorldPacketHandlers[CMSG_SET_TARGET_OBSOLETE].handler					   = &WorldSession::HandleSetTargetOpcode;
+	//WorldPacketHandlers[CMSG_SET_TARGET_OBSOLETE].handler					   = &WorldSession::HandleSetTargetOpcode;
 	WorldPacketHandlers[CMSG_SET_SELECTION].handler							 = &WorldSession::HandleSetSelectionOpcode;
 	WorldPacketHandlers[CMSG_STANDSTATECHANGE].handler						  = &WorldSession::HandleStandStateChangeOpcode;
 	WorldPacketHandlers[CMSG_CANCEL_MOUNT_AURA].handler								= &WorldSession::HandleDismountOpcode;
@@ -866,8 +866,8 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_OPEN_ITEM].handler								 = &WorldSession::HandleOpenItemOpcode;
 	WorldPacketHandlers[CMSG_COMPLETE_CINEMATIC].handler						= &WorldSession::HandleCompleteCinematic;
 	WorldPacketHandlers[CMSG_MOUNTSPECIAL_ANIM].handler						 = &WorldSession::HandleMountSpecialAnimOpcode;
-	WorldPacketHandlers[CMSG_TOGGLE_CLOAK].handler							  = &WorldSession::HandleToggleCloakOpcode;
-	WorldPacketHandlers[CMSG_TOGGLE_HELM].handler							   = &WorldSession::HandleToggleHelmOpcode;
+	WorldPacketHandlers[CMSG_SHOWING_CLOAK].handler							  = &WorldSession::HandleToggleCloakOpcode;
+	WorldPacketHandlers[CMSG_SHOWING_HELM].handler							   = &WorldSession::HandleToggleHelmOpcode;
 	WorldPacketHandlers[CMSG_SET_TITLE].handler							= &WorldSession::HandleSetVisibleRankOpcode;
 	WorldPacketHandlers[CMSG_COMPLAIN].handler								= &WorldSession::HandleReportSpamOpcode;
 

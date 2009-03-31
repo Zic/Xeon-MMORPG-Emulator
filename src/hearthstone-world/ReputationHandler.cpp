@@ -125,7 +125,10 @@ void Player::smsg_InitialFactions()
 			{
 				printf("listid %u\n", i);
 			}*/
-			data << rep->flag << rep->CalcStanding();
+			// TODO fix. Structure is right but need to filter sent data.
+			// crashes client when opening rep window with assert((value >= min) && (value <= max))
+			//data << rep->flag << rep->CalcStanding();
+			data << uint8(0) << uint32(0);
 		}
 		else
 			data << uint8(0) << uint32(0);

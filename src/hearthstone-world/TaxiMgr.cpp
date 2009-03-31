@@ -225,6 +225,7 @@ void TaxiPath::SendMoveForTime(PlayerPointer riding, PlayerPointer to, uint32 ti
 	size_t pos;
 
 	*data << riding->GetNewGUID();
+	*data << uint8(0);
 	*data << riding->GetPositionX( ) << riding->GetPositionY( ) << riding->GetPositionZ( );
 	*data << getMSTime();
 	*data << uint8( 0 );

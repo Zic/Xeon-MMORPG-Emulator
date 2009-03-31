@@ -357,10 +357,10 @@ void AchievementInterface::SendCriteriaUpdate(AchievementData * ad, uint32 idx)
 	data << uint32(0);
 	data << uint32(0); 
 
-	if( !m_player->IsInWorld() )
+	/*if( !m_player->IsInWorld() )
 		m_player->CopyAndSendDelayedPacket(&data);
 	else
-		m_player->GetSession()->SendPacket(&data);
+		m_player->GetSession()->SendPacket(&data);*/
 
 	if( m_achievementInspectPacket )
 	{

@@ -428,9 +428,6 @@ void EyeOfTheStorm::DropFlag(PlayerPointer plr)
 	* reposition, spawn.
 	 */
 	m_dropFlag->SetNewGuid(m_mapMgr->GenerateGameobjectGuid());
-	m_dropFlag->SetFloatValue(GAMEOBJECT_POS_X, plr->GetPositionX());
-	m_dropFlag->SetFloatValue(GAMEOBJECT_POS_Y, plr->GetPositionY());
-	m_dropFlag->SetFloatValue(GAMEOBJECT_POS_Z, plr->GetPositionZ());
 	m_dropFlag->SetPosition( plr->GetPosition() );
 	m_dropFlag->PushToWorld( m_mapMgr );
 	m_flagHolder = 0;
@@ -1079,4 +1076,5 @@ void EyeOfTheStorm::SetIsWeekend(bool isweekend)
 		extraHonorDiv = 12;
 	}
 }
+
 

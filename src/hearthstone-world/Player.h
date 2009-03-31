@@ -974,6 +974,7 @@ public:
 	bool HasSpell(uint32 spell);
 	bool HasDeletedSpell(uint32 spell);
 	void smsg_InitialSpells();
+	void smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRank);
 	void addSpell(uint32 spell_idy);
 	void removeSpellByHashName(uint32 hash);
 	bool removeSpell(uint32 SpellID, bool MoveToDeleted, bool SupercededSpell, uint32 SupercededSpellID);
@@ -2112,6 +2113,10 @@ public:
 	bool mWeakenedSoul;
 	bool mForbearance;
 	bool mHypothermia;
+
+	// Talent Specs
+	uint8 m_talentSpecsCount;
+	uint8 m_talentActiveSpec;
 
 	// Glyphs
 	void RemoveGlyph(uint32 slot);

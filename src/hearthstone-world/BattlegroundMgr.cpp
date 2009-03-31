@@ -158,9 +158,11 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 	uint32 Count = 0;
 	WorldPacket data(SMSG_BATTLEFIELD_LIST, 200);
 	data << m_session->GetPlayer()->GetGUID();
+	data << uint8(2);	// unk
 	data << BattlegroundType;
-	data << uint8(2);
-	data << uint32(0);		// Count
+	data << uint8(0);	// unk
+	size_t CountPos = data.wpos();
+	data << uint32(0);		// Count, will be replaced later
 
 	/* Append the battlegrounds */
 	m_instanceLock.Acquire();
@@ -173,7 +175,7 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 		}
 	}
 	m_instanceLock.Release();
-	*(uint32*)&data.contents()[13] = Count;
+	*(uint32*)&data.contents()[CountPos] = Count;
 	m_session->SendPacket(&data);
 }
 

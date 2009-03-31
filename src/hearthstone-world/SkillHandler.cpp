@@ -65,9 +65,9 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
  	 
-	uint32 talent_id, requested_rank, unk;
+	uint32 talent_id, requested_rank;
 	unsigned int i;
-	recv_data >> talent_id >> requested_rank >> unk;
+	recv_data >> talent_id >> requested_rank;
 
 	uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
 	if(CurTalentPoints == 0)
@@ -238,6 +238,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 	}
 
 	_player->UpdateTalentInspectBuffer();
+	_player->smsg_TalentsInfo(true, talent_id, requested_rank);
 }
 
 void WorldSession::HandleUnlearnTalents( WorldPacket & recv_data )

@@ -2,15 +2,13 @@
 #define AUTH_PACKET_KEY_H
 
 #include "Common.h"
+#include "Sha1.h"
 
-class AutheticationPacketKey
+class AuthenticationPacketKey
 {
 public:
-	HEARTHSTONE_INLINE static void GenerateKey(uint8 *key, uint8 *sessionkey)
+	HEARTHSTONE_INLINE uint8* GenerateKey(const uint8 SeedKeyLen, uint8* SeedKey, uint8 *sessionkey)
 	{
-		const uint8 SeedKeyLen = 16;
-		uint8 SeedKey[SeedKeyLen] = { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
-
 		uint8 firstBuffer[64];
 		uint8 secondBuffer[64];
 
@@ -34,7 +32,7 @@ public:
 		sha2.UpdateData(tempDigest, 20);
 		sha2.Finalize();
 
-		memcpy(key, sha2.GetDigest(), 20);
+		return sha2.GetDigest();
 	}
 };
 

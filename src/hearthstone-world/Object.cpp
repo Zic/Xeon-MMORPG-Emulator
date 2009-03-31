@@ -160,7 +160,7 @@ void Object::_Create( uint32 mapid, float x, float y, float z, float ang )
 
 uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer target)
 {
-	uint8 flags = 0;
+	uint16 flags = 0;
 	uint32 flags2 = 0;
 
 	uint8 updatetype = UPDATETYPE_CREATE_OBJECT;
@@ -176,33 +176,39 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 		// items + containers: 0x8
 	case TYPEID_ITEM:
 	case TYPEID_CONTAINER:
-		flags = 0x18;
+		flags = 0x0008;
 		break;
 		
 		// player/unit: 0x68 (except self)
 	case TYPEID_UNIT:
-		flags = 0x70;
+		flags = 0x0060;
 		break;
 
 	case TYPEID_PLAYER:
-		flags = 0x70;
+		flags = 0x0060;
 		break;
 
 		// gameobject/dynamicobject
 	case TYPEID_GAMEOBJECT:
+		flags = 0x0348;
+		break;
+
 	case TYPEID_DYNAMICOBJECT:
+		flags = 0x0048;
+		break;
+
 	case TYPEID_CORPSE:
-		flags = 0x58;
+		flags = 0x0148;
 		break;
 	}
 
 	if(GetTypeFromGUID() == HIGHGUID_TYPE_VEHICLE)
-		flags |= 0x80;
+		flags |= 0x00E0;
 
 	if(target == shared_from_this())
 	{
 		// player creating self
-		flags |= 0x01;
+		flags |= 0x0001;
 		updatetype = UPDATETYPE_CREATE_YOURSELF;
 	}
 
@@ -216,13 +222,13 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 					if(GetTypeFromGUID() != HIGHGUID_TYPE_TRANSPORTER)
 						return 0;   // bad transporter
 					else
-						flags = 0x5A;
+						flags = 0x034A;
 				}break;
 
 			case GAMEOBJECT_TYPE_TRANSPORT:
 				{
 					/* deeprun tram, etc */
-					flags = 0x5A;
+					flags = 0x034A;
 				}break;
 
 			case GAMEOBJECT_TYPE_DUEL_ARBITER:
@@ -349,6 +355,7 @@ void Object::DestroyForPlayer(PlayerPointer target) const
 
 	WorldPacket data(SMSG_DESTROY_OBJECT, 8);
 	data << GetGUID();
+	data << uint8(0);
 
 	target->GetSession()->SendPacket( &data );
 }
@@ -360,11 +367,11 @@ void Object::DestroyForPlayer(PlayerPointer target) const
 /// TODO: rewrite this stuff, document unknown fields and flags
 uint32 TimeStamp();
 
-void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2, PlayerPointer target )
+void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2, PlayerPointer target )
 {
 	ByteBuffer *splinebuf = (m_objectTypeId == TYPEID_UNIT) ? target->GetAndRemoveSplinePacket(GetGUID()) : 0;
 	uint16 flag16 = 0;	// some other flag
-	*data << (uint8)flags;
+	*data << (uint16)flags;
 
 	PlayerPointer pThis = NULLPLR;
 	if(m_objectTypeId == TYPEID_PLAYER)
@@ -438,15 +445,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 		//   0x10 -> disables movement compensation and causes players to jump around all the place
 		//   0x40 -> disables movement compensation and causes players to jump around all the place
 
-		/* some old stuff
-		static uint8 fl = 0x04;
-		*data << uint8(fl);		// wtf? added in 2.3.0
-		if(target==this)
-			*data<<uint8(0x53);
-		else
-			*data<<uint8(0);
-		//*data << uint8(0x1);*/
-
 		*data << (float)m_position.x;
 		*data << (float)m_position.y;
 		*data << (float)m_position.z;
@@ -461,7 +459,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 
 				if (pUnit->m_inVehicleSeatId != 0xFF && vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId] != NULL)
 				{
-					*data << pUnit->m_CurrentVehicle->GetGUID();
+					*data << pUnit->m_CurrentVehicle->GetNewGUID();
 					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetX;
 					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetY;
 					*data << vehicle->m_vehicleSeats[pUnit->m_inVehicleSeatId]->m_attachmentOffsetZ;
@@ -471,7 +469,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 				}
 				else
 				{
-					*data << uint64(0);
+					*data << uint8(0);
 					*data << float(0);
 					*data << float(0);
 					*data << float(0);
@@ -482,13 +480,15 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 			}
 			else if(pThis)
 			{
-				*data << pThis->m_TransporterGUID;
+				WoWGuid wowguid(pThis->m_TransporterGUID);
+				*data << wowguid;
 				*data << pThis->m_TransporterX << pThis->m_TransporterY << pThis->m_TransporterZ << pThis->m_TransporterO;
 				*data << pThis->m_TransporterUnk << uint8(0);
 			}
 			else if(m_objectTypeId==TYPEID_UNIT && creature_shared_from_this()->m_transportPosition != NULL)
 			{
-				*data << creature_shared_from_this()->m_transportGuid;
+				
+				*data << creature_shared_from_this()->m_transportNewGuid;
 				*data << uint32(HIGHGUID_TYPE_TRANSPORTER);
 				*data << creature_shared_from_this()->m_transportPosition->x << creature_shared_from_this()->m_transportPosition->y << 
 					creature_shared_from_this()->m_transportPosition->z << creature_shared_from_this()->m_transportPosition->o;
@@ -498,80 +498,88 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2,
 			}
 		}
 
-		if(flags2 & 0x2200000 || flag16 & 0x20)
+		if(flags2 & 0x2200000 || flag16 & 0x20) //flying/swimming, && unk sth to do with vehicles?
 		{
-			// unknown float
+			*data << (float)0; //pitch
 		}
-		*data << (uint32)0;
+		*data << (uint32)0; //last fall time
 
 		if(flags2 & 0x1000) // BYTE1(flags2) & 0x10
 		{
 			*data << (float)0;
-			*data << (float)1.0;
-			*data << (float)0;
-			*data << (float)0;
+			*data << (float)1.0; //sinAngle
+			*data << (float)0;	 //cosAngle
+			*data << (float)0;	 //xySpeed
 		}
 		if( flags2 & 0x4000000 )
 		{
-			//unknown float
+			*data << (float)0; //unknown float
 		}
 
 		*data << m_walkSpeed;	 // walk speed
 		*data << m_runSpeed;	  // run speed
-		*data << m_backWalkSpeed; // backwards walk speed
-		*data << m_swimSpeed;	 // swim speed
 		*data << m_backSwimSpeed; // backwards swim speed
+		*data << m_swimSpeed;	 // swim speed
+		*data << m_backWalkSpeed; // backwards walk speed
 		*data << m_flySpeed;		// fly speed
 		*data << m_backFlySpeed;	// back fly speed
 		*data << m_turnRate;	  // turn rate
 		*data << float(7);
 
-		if(splinebuf)	// client expects that (*(char(flags2) + 3) & 0x8) != 0 in this case
+		if(splinebuf)	// client expects that flags2 & 0x8000000 != 0 in this case
 		{
 			data->append(*splinebuf);
 			delete splinebuf;
 		}
 	}
-	else if (flags & 0x40)
+	else if(flags & 0x100)
+    {
+			*data << uint8(0);                              // unk PGUID!
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
+            *data << (float)0;
+            *data << float(0);
+	}
+	else if(flags & 0x40)
 	{
-		// some 4 floats. may be position
-		*data << (float)m_position.x;
-		*data << (float)m_position.y;
-		*data << (float)m_position.z;
-		*data << (float)m_position.o;
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
+			*data << (float)0;
 	}
 
-	if(flags & 0x8)
+	if(flags & 8)
 	{
 		*data << GetUInt32Value(OBJECT_FIELD_GUID);
-		if(flags & 0x10)
-			*data << GetUInt32Value(OBJECT_FIELD_GUID + 1);
-	}
-	else if(flags & 0x10)
-		*data << GetUInt32Value(OBJECT_FIELD_GUID);
-
-	if(flags & 0x4)
-	{
-		// unknown NewGUID
-	}
-
-	if(flags & 0x2)
-	{
-		/*if(target)
-		{
-			int32 m_time = TimeStamp() - target->GetSession()->m_clientTimeDelay;
-			m_time += target->GetSession()->m_moveDelayTime;
-			*data << m_time;
-			*data << getMSTime();
-		}
-		else*/
-        *data << getMSTime();
 	}
 	
-	/*if (flags & 0x80)
+	if(flags & 0x0010)
+		*data << GetUInt32Value(OBJECT_FIELD_GUID+1);
+
+	if(flags & 0x0004)
 	{
-			*data << vehicle_shared_from_this()->GetVehicleEntry() << float(0.0f); //facing adjustment
-	}*/
+		*data << uint8(0);// unknown NewGUID
+	}
+
+	if(flags & 2)
+	{
+        *data << (uint32)getMSTime();
+	}
+
+	if (flags & 0x80) //if ((_BYTE)flags_ < 0)
+	{
+			*data << vehicle_shared_from_this()->GetVehicleEntry() << float(0.0f);
+	}
+
+	// 0x200
+    if(flags & 0x0200)
+    {
+        *data << uint64(0); //64bit rotation/Some GUID?
+    }
 }
 
 //=======================================================================================
@@ -751,19 +759,11 @@ bool Object::SetPosition( float newX, float newY, float newZ, float newOrientati
 		updateMap = true;
 
 	m_position.ChangeCoords(newX, newY, newZ, newOrientation);
-	// We have unitfields for this. Why? Who the fuck knows.
-	if( m_objectTypeId == TYPEID_GAMEOBJECT )
-	{
-		SetFloatValue( GAMEOBJECT_POS_X, newX );
-		SetFloatValue( GAMEOBJECT_POS_Y, newY );
-		SetFloatValue( GAMEOBJECT_POS_Z, newZ );
-	}
 
 	if (!allowPorting && newZ < -500)
 	{
 		m_position.z = 500;
 		OUT_DEBUG( "setPosition: fell through map; height ported" );
-
 		result = false;
 	}
 

@@ -519,7 +519,7 @@ protected:
 	//! Mark values that player should get when he/she/it sees object for first time.
 	virtual void _SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const;
 
-	void _BuildMovementUpdate( ByteBuffer *data, uint8 flags, uint32 flags2, PlayerPointer target );
+	void _BuildMovementUpdate( ByteBuffer *data, uint16 flags, uint32 flags2, PlayerPointer target );
 	void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask, PlayerPointer target );
 
 	/* Main Function called by isInFront(); */
@@ -645,4 +645,5 @@ public:
 };
 
 #endif
+
 

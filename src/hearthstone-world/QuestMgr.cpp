@@ -368,9 +368,10 @@ void QuestMgr::BuildQuestDetails(WorldPacket *data, Quest* qst, ObjectPointer qs
 		*data <<  qst->objectives;
 	}
 
-	*data << uint8(0);								// Pvp warning?
 	*data << uint32(1);								// Is Acceptable
 	*data << qst->suggested_players;				// "Suggested players"
+	*data << uint8(0);								// Pvp warning?
+	*data << uint8(0);								// new field in 3.1
 
 	*data << qst->count_reward_choiceitem;
 	ItemPrototype *ip;

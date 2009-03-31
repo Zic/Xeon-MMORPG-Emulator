@@ -206,7 +206,7 @@ OUTPACKET_RESULT WorldSocket::_OutPacket(uint16 opcode, size_t len, const void* 
 	ServerPktHeader Header;
 	Header.cmd = opcode;
 	Header.size = ntohs((uint16)len + 2);
-    _crypt.EncryptFourSend((uint8*)&Header);
+    _crypt.EncryptSend((uint8*)&Header, sizeof (ServerPktHeader));
 
 	// Pass the header to our send buffer
 	rv = BurstSend((const uint8*)&Header, 4);
@@ -298,19 +298,24 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 //	sLog.outColor(TNORMAL, "\n");
 
 	mRequestID = 0;
-	// Pull the session key.
-	uint8 K[40];
+	//Pull the session key.
+	
 	recvData.read(K, 40);
+
+	_crypt.Init(K);
 	
 	BigNumber BNK;
 	BNK.SetBinary(K, 40);
 	
+	/*
 	uint8 key[20];
-	AutheticationPacketKey::GenerateKey(key, K);
+	const uint8 SeedKeyLen = 16;
+	uint8 SeedKey[SeedKeyLen] = { 0x38, 0xA7, 0x83, 0x15, 0xF8, 0x92, 0x25, 0x30, 0x71, 0x98, 0x67, 0xB1, 0x8C, 0x4, 0xE2, 0xAA };
+	AutheticationPacketKey::GenerateKey(SeedKeyLen, (uint8*)SeedKey, key, K);
 	
 	// Initialize crypto.
 	_crypt.SetKey(key, 20);
-	_crypt.Init();
+	*/
 
 	//checking if player is already connected
 	//disconnect current player and login this one(blizzlike)
@@ -376,6 +381,7 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 	mSession = pSession;
 	ASSERT(mSession);
 	pSession->deleteMutex.Acquire();
+
 	
 	// Set session properties
 	pSession->permissioncount = 0;//just to make sure it's 0
@@ -553,7 +559,7 @@ void WorldSocket::OnRead()
 			readBuffer.Read(&Header, 6);
 
 			// Decrypt the header
-            _crypt.DecryptSixRecv((uint8*)&Header);
+             _crypt.DecryptRecv((uint8*)&Header, sizeof (ClientPktHeader));
 			mRemaining = mSize = ntohs(Header.size) - 4;
 			mOpcode = Header.cmd;
 		}

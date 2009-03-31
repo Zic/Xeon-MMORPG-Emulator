@@ -116,12 +116,8 @@ bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, fl
 
 	Object::_Create( mapid, x, y, z, ang );
 	SetUInt32Value( OBJECT_FIELD_ENTRY, entry );
-	
-	SetFloatValue( GAMEOBJECT_POS_X, x );
-	SetFloatValue( GAMEOBJECT_POS_Y, y );
-	SetFloatValue( GAMEOBJECT_POS_Z, z );
-	SetFloatValue( GAMEOBJECT_FACING, ang );
 
+	SetPosition(x, y, z, orientation1);
 	SetRotation(ang);
 
 	SetFloatValue(GAMEOBJECT_PARENTROTATION, orientation1);

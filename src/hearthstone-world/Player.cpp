@@ -373,6 +373,8 @@ void Player::Init()
 		{
 			m_runes[i] = baseRunes[i];
 		}
+		m_talentActiveSpec = 0;
+		m_talentSpecsCount = 1;
 		ok_to_remove = false;
 		trigger_on_stun = 0;
 		trigger_on_stun_chance = 100;
@@ -1666,7 +1668,7 @@ void Player::smsg_InitialSpells()
 	{
 		// todo: check out when we should send 0x0 and when we should send 0xeeee
 		// this is not slot,values is always eeee or 0,seems to be cooldown
-		data << uint16(*sitr);				   // spell id
+		data << uint32(*sitr);				   // spell id
 		data << uint16(0x0000);	 
 	}
 
@@ -1685,7 +1687,7 @@ void Player::smsg_InitialSpells()
 			continue;
 		}
 
-		data << uint16( itr2->first );						// spell id
+		data << uint32( itr2->first );						// spell id
 		data << uint16( itr2->second.ItemId );				// item id
 		data << uint16( 0 );								// spell category
 		data << uint32( itr2->second.ExpireTime - mstime );	// cooldown remaining in ms (for spell)
@@ -1707,7 +1709,7 @@ void Player::smsg_InitialSpells()
 			continue;
 		}
 
-		data << uint16( itr2->second.SpellId );				// spell id
+		data << uint32( itr2->second.SpellId );				// spell id
 		data << uint16( itr2->second.ItemId );				// item id
 		data << uint16( itr2->first );						// spell category
 		data << uint32( 0 );								// cooldown remaining in ms (for spell)
@@ -1724,6 +1726,74 @@ void Player::smsg_InitialSpells()
 
 	uint32 v = 0;
 	GetSession()->OutPacket(0x041d, 4, &v);
+}
+
+void Player::smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRank)
+{
+	WorldPacket data(SMSG_TALENTS_INFO, 1000);
+	data << uint8(update);
+	if(update)	// send just the update
+	{
+		uint8 count = 1;
+		data << uint32(GetUInt32Value(PLAYER_CHARACTER_POINTS1)); // Unspent talents
+		data << uint8(count);
+		for(uint8 i = 0; i < count; i++)
+		{
+			data << uint32(newTalentId); // unk	talentid?
+			data << uint8(1); // unk	rank?
+		}
+	} else	// initialize sending all info
+	{
+		uint8 talent_max_rank = 0;
+		data << uint32(GetUInt32Value(PLAYER_CHARACTER_POINTS1)); // Unspent talents
+		data << uint8(m_talentSpecsCount);
+		data << uint8(m_talentActiveSpec); // unk
+		for(uint8 s = 0; s < m_talentSpecsCount; s++)
+		{
+			size_t countPos = data.wpos();
+			uint8 count = 0;
+			data << uint8(count);
+			for( uint32 i = 0; i < 3; ++i )
+			{// build and send list of known talents. TODO rewrite. Copy&pasted from UpdateTalentInspectBuffer.
+				uint32 talent_tab_id = sWorld.InspectTalentTabPages[getClass()][i];
+
+				for( uint32 j = 0; j < dbcTalent.GetNumRows(); ++j )
+				{
+					TalentEntry const* talent_info = dbcTalent.LookupRow( j );
+
+					if( talent_info == NULL )
+						continue;
+					if( talent_info->TalentTree != talent_tab_id )
+						continue;
+
+					talent_max_rank = 0;
+					for( uint32 k = 5; k > 0; --k )
+					{
+						if( talent_info->RankID[k - 1] != 0 && HasSpell( talent_info->RankID[k - 1] ) )
+						{
+							talent_max_rank = k;
+							break;
+						}
+					}
+
+					if( talent_max_rank <= 0 )
+						continue;
+					data << uint32(talent_info->TalentID);
+					data << uint8(talent_max_rank-1);
+					count++;
+				}
+			}
+			*(uint8*)&data.contents()[countPos] = count;
+			// Send Glyph info
+			uint8 glyphsCount = 6;
+			data << uint8(glyphsCount);
+			for(uint8 i = 0; i < glyphsCount; i++)
+			{
+				data << uint16(GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + i));
+			}
+		}
+	}
+	GetSession()->SendPacket(&data);
 }
 
 void Player::_SavePet(QueryBuffer * buf)
@@ -2093,23 +2163,15 @@ void Player::InitVisibleUpdateBits()
 	for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=4)
 		Player::m_visibleUpdateMask.SetBit(i);
 
-	for(uint16 i = 0; i < EQUIPMENT_SLOT_END; ++i)
-	{
-		uint32 offset = i * PLAYER_VISIBLE_ITEM_LENGTH;
+    for(uint16 i = 0; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        uint32 offset = i * PLAYER_VISIBLE_ITEM_LENGTH;
 
-		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + 0 + offset);
-		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_0 + 0 + offset);
-
-		// enchants
-		for(uint8 j = 0; j < 12; ++j)
-		{
-			Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_0 + 1 + j + offset);
-		}
-
-		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + offset);
-		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_SEED + offset);
-		Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_PAD + offset);
-	}
+        // item entry
+        Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_ENTRYID + offset);
+        // enchant
+        Player::m_visibleUpdateMask.SetBit(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + offset);
+    }
 
 	Player::m_visibleUpdateMask.SetBit(PLAYER_CHOSEN_TITLE);
 
@@ -2375,7 +2437,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	// dump glyphs
 	ss << "'";
 
-	for(uint32 i = 0; i < 8; ++i)
+	for(uint32 i = 0; i < 6; ++i)
 		ss << m_uint32Values[PLAYER_FIELD_GLYPHS_1 + i] << ",";
 
 	ss << "', 0)";
@@ -3119,7 +3181,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
     iInstanceType = get_next_field.GetUInt32();
 
 	start = (char*)get_next_field.GetString();
-	for(uint32 Counter = 0; Counter < 8; Counter++) 
+	for(uint32 Counter = 0; Counter < 6; Counter++) 
 	{
 		end = strchr(start,',');
 		if(!end)
@@ -3130,7 +3192,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	}
 
 	GlyphPropertyEntry *glyph;
-	for(uint32 i=0; i < 8; i++)
+	for(uint32 i=0; i < 6; i++)
 	{
 		uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + i);
 		if(glyphId == 0)
@@ -4539,7 +4601,12 @@ void Player::CleanupChannels()
 
 void Player::SendInitialActions()
 {
-	m_session->OutPacket(SMSG_ACTION_BUTTONS, PLAYER_ACTION_BUTTON_SIZE, &mActions);
+	uint8 buffer[PLAYER_ACTION_BUTTON_SIZE + 1];
+	StackPacket data(SMSG_ACTION_BUTTONS, buffer, PLAYER_ACTION_BUTTON_SIZE + 1);
+	data << uint8(1);	// some bool - 0 or 1. seems to work both ways
+	data.Write((uint8*)&mActions, PLAYER_ACTION_BUTTON_SIZE);
+	m_session->SendPacket(&data);
+	//m_session->OutPacket(SMSG_ACTION_BUTTONS, PLAYER_ACTION_BUTTON_SIZE, &mActions);
 }
 
 void Player::setAction(uint8 button, uint16 action, uint8 type, uint8 misc)
@@ -6145,6 +6212,9 @@ void Player::SendInitialLogonPackets()
 	//Factions
 	smsg_InitialFactions();
 
+	// Talents
+	smsg_TalentsInfo(false, 0, 0);
+
 
     /* Some minor documentation about the time field
     // MOVE THIS DOCUMENATION TO THE WIKI
@@ -6585,6 +6655,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 
 	WorldPacket data(SMSG_MONSTER_MOVE, 38 + ( (endn - start_node) * 12 ) );
 	data << GetNewGUID();
+	data << uint8(0);
 	data << firstNode->x << firstNode->y << firstNode->z;
 	data << m_taxi_ride_time;
 	data << uint8( 0 );
@@ -7225,20 +7296,25 @@ void Player::ProcessPendingUpdates(ByteBuffer *pBuildBuffer, ByteBuffer *pCompre
     //build out of range updates if creation updates are queued
     if(bCreationBuffer.size() || mOutOfRangeIdCount)
     {
-        *(uint32*)&update_buffer[c] = ((mOutOfRangeIds.size() > 0) ? (mCreationCount + 1) : mCreationCount);	c += 4;
+        *(uint32*)&update_buffer[c] = ((mOutOfRangeIds.size() > 0) ? (mCreationCount + 1) : mCreationCount);
+		c += 4;
 
             // append any out of range updates
 	    if(mOutOfRangeIdCount)
 	    {
-		    update_buffer[c]				= UPDATETYPE_OUT_OF_RANGE_OBJECTS;			 ++c;
-            *(uint32*)&update_buffer[c]	 = mOutOfRangeIdCount;						  c += 4;
-		    memcpy(&update_buffer[c], mOutOfRangeIds.contents(), mOutOfRangeIds.size());   c += mOutOfRangeIds.size();
+		    update_buffer[c]				= UPDATETYPE_OUT_OF_RANGE_OBJECTS;
+			++c;
+            *(uint32*)&update_buffer[c]	 = mOutOfRangeIdCount;
+			c += 4;
+		    memcpy(&update_buffer[c], mOutOfRangeIds.contents(), mOutOfRangeIds.size());
+			c += mOutOfRangeIds.size();
 		    mOutOfRangeIds.clear();
 		    mOutOfRangeIdCount = 0;
 	    }
 
         if(bCreationBuffer.size())
-			memcpy(&update_buffer[c], bCreationBuffer.contents(), bCreationBuffer.size());  c += bCreationBuffer.size();
+			memcpy(&update_buffer[c], bCreationBuffer.contents(), bCreationBuffer.size());
+		c += bCreationBuffer.size();
 
         // clear our update buffer
 	    bCreationBuffer.clear();
@@ -7256,7 +7332,8 @@ void Player::ProcessPendingUpdates(ByteBuffer *pBuildBuffer, ByteBuffer *pCompre
 	if(bUpdateBuffer.size())
 	{
 		c = 0;
-		*(uint32*)&update_buffer[c] = ((mOutOfRangeIds.size() > 0) ? (mUpdateCount + 1) : mUpdateCount);	c += 4;
+		*(uint32*)&update_buffer[c] = ((mOutOfRangeIds.size() > 0) ? (mUpdateCount + 1) : mUpdateCount);
+		c += 4;
 		memcpy(&update_buffer[c], bUpdateBuffer.contents(), bUpdateBuffer.size());  c += bUpdateBuffer.size();
 
 		// clear our update buffer
@@ -11554,6 +11631,8 @@ static const uint32 glyphType[6] = {0, 1, 1, 0, 1, 0};
 
 uint8 Player::SetGlyph(uint32 slot, uint32 glyphId)
 {
+	if(slot < 0 || slot > 6)
+		return SPELL_FAILED_INVALID_GLYPH;
 	// Get info
 	GlyphPropertyEntry *glyph = dbcGlyphProperty.LookupEntry(glyphId);
 	if(!glyph)

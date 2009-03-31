@@ -2484,10 +2484,6 @@ bool ChatHandler::HandleGOMove(const char * args, WorldSession * m_session)
 
 	go->RemoveFromWorld(true);
 	go->SetPosition(m_session->GetPlayer()->GetPosition());
-	go->SetFloatValue(GAMEOBJECT_POS_X, m_session->GetPlayer()->GetPositionX());
-	go->SetFloatValue(GAMEOBJECT_POS_Y, m_session->GetPlayer()->GetPositionY());
-	go->SetFloatValue(GAMEOBJECT_POS_Z, m_session->GetPlayer()->GetPositionZ());
-	go->SetFloatValue(GAMEOBJECT_FACING, m_session->GetPlayer()->GetOrientation());
 	go->SetNewGuid(m_session->GetPlayer()->GetMapMgr()->GenerateGameobjectGuid());
 	go->SaveToDB();
 	go->PushToWorld(m_session->GetPlayer()->GetMapMgr());
@@ -3164,4 +3160,5 @@ bool ChatHandler::HandleMultiAccountBanCommand(const char *args, WorldSession *m
 
 	return true;
 }
+
 

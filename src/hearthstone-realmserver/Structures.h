@@ -203,6 +203,11 @@ struct GameObjectInfo
 	uint32 Unknown12;
 	uint32 Unknown13;
 	uint32 Unknown14;
+	/*float UnknownFloat;	// uncomment when DB has the fields
+	uint32 Unknown15;
+	uint32 Unknown16;
+	uint32 Unknown17;
+	uint32 Unknown18;*/
 };
 
 struct ItemPage

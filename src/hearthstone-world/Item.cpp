@@ -672,7 +672,7 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 
 	// Apply the visual on the player.
 	uint32 ItemSlot = m_owner->GetItemInterface()->GetInventorySlotByGuid( GetGUID() ) * PLAYER_VISIBLE_ITEM_LENGTH;
-	uint32 VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + ItemSlot;
+	uint32 VisibleBase = PLAYER_VISIBLE_ITEM_1_ENTRYID + ItemSlot;
 	m_owner->SetUInt32Value( VisibleBase + 1 + Slot, Apply ? Entry->Id : 0 );
 
 	// Another one of those for loop that where not indented properly god knows what will break

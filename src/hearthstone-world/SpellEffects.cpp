@@ -184,7 +184,10 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL, //156 Add Socket
 		&Spell::SpellEffectNULL, //157 create/learn random item/spell for profession
 		&Spell::SpellEffectMilling, //158 milling
-		&Spell::SpellEffectNULL //159 allow rename pet once again
+		&Spell::SpellEffectNULL, //159 allow rename pet once again
+		&Spell::SpellEffectNULL, //160
+		&Spell::SpellEffectSetTalentSpecsCount, //161 Sets number of talent specs available to the player
+		&Spell::SpellEffectActivateTalentSpec, //162 Activates one of talent specs
 };
 
 void Spell::SpellEffectNULL(uint32 i)
@@ -5614,6 +5617,7 @@ void Spell::SpellEffectCharge(uint32 i)
 
 	WorldPacket data(SMSG_MONSTER_MOVE, 50);
 	data << m_caster->GetNewGUID();
+	data << uint8(0);
 	data << m_caster->GetPositionX();
 	data << m_caster->GetPositionY();
 	data << m_caster->GetPositionZ();
@@ -5660,6 +5664,7 @@ void Spell::SpellEffectPlayerPull( uint32 i )
 
 	WorldPacket data( SMSG_MONSTER_MOVE, 60 );
 	data << p_target->GetNewGUID();
+	data << uint8(0);
 	data << p_target->GetPositionX() << p_target->GetPositionY() << p_target->GetPositionZ();
 	data << getMSTime();
 	data << uint8( 4 );
@@ -6661,4 +6666,26 @@ bool Spell::SpellEffectUpdateQuest(uint32 questid)
 		return true;
 	}
 	return false;
+}
+
+void Spell::SpellEffectSetTalentSpecsCount(uint32 i)
+{
+	if(!p_caster)
+		return;
+
+	p_caster->m_talentSpecsCount = damage;
+
+	// Send update
+	p_caster->smsg_TalentsInfo(false, 0, 0);
+}
+
+void Spell::SpellEffectActivateTalentSpec(uint32 i)
+{
+	if(!p_caster)
+		return;
+
+	// 1 = primary, 2 = secondary
+	p_caster->m_talentActiveSpec = damage;
+	// Send update
+	p_caster->smsg_TalentsInfo(false, 0, 0);
 }

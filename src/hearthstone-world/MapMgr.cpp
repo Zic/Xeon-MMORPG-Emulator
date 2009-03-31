@@ -2117,7 +2117,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacke
 			if( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
 				continue;
 
 			p->GetSession()->SendPacket(pData);
@@ -2137,7 +2137,7 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacke
 			if( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
 				continue;
 
 			p->GetSession()->SendPacket(pData);

@@ -737,7 +737,7 @@ void World::SendZoneMessage(WorldPacket *packet, uint32 zoneid, WorldSession *se
 	{
 		if (itr->second->GetPlayer() &&
 			itr->second->GetPlayer()->IsInWorld()
-			&& itr->second != self)  // dont send to self!
+			&& (self && itr->second != self))  // dont send to self!
 		{
 			if (itr->second->GetPlayer()->GetZoneId() == zoneid)
 				itr->second->SendPacket(packet);

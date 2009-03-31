@@ -67,8 +67,8 @@ void WorldSession::HandleBattlefieldListOpcode(WorldPacket &recv_data)
 
 	CHECK_INWORLD_RETURN;
 
-	if( GetPlayer()->HasBGQueueSlotOfType(type) == 4)
-		return;
+	//if( GetPlayer()->HasBGQueueSlotOfType(type) == 4)
+	//	return;
 	
 	BattlegroundManager.HandleBattlegroundListPacket(this, type);
 }
@@ -383,4 +383,5 @@ void WorldSession::HandlePVPLogDataOpcode(WorldPacket &recv_data)
 	if(_player->m_bg)
 		_player->m_bg->SendPVPData(_player);
 }
+
 

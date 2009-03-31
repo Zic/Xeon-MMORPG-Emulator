@@ -499,6 +499,7 @@ void Transporter::AddNPC(uint32 Entry, float offsetX, float offsetY, float offse
 	pCreature->Load(proto, m_position.x, m_position.y, m_position.z, 0.0f);
 	pCreature->m_transportPosition = new LocationVector(offsetX, offsetY, offsetZ, offsetO);
 	pCreature->m_transportGuid = GetUIdFromGUID();
+	pCreature->m_transportNewGuid = GetNewGUID();
 	m_npcs.insert(make_pair(guid,pCreature));
 }
 

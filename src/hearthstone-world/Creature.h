@@ -539,6 +539,7 @@ public:
 	bool m_noRespawn;
 	LocationVector * m_transportPosition;
 	uint32 m_transportGuid;
+	WoWGuid m_transportNewGuid;
 protected:
 	CreatureAIScript *_myScriptClass;
 	bool m_limbostate;

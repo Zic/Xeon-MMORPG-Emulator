@@ -45,22 +45,30 @@ void Session::HandleCreatureQueryOpcode(WorldPacket & pck)
 			return;
 		DEBUG_LOG("World", "CMSG_CREATURE_QUERY '%s'", ci->Name);
 
-		data << (uint32)entry;
+		data << uint32(entry);
 		data << ci->Name;
-		data << uint8(0) << uint8(0) << uint8(0);
+		data << uint8(0) << uint8(0) << uint8(0);	// 3 CStrings
 		data << ci->SubName;
-		data << ci->Flags1;  
-		data << ci->Type;
-		data << ci->Family;
-		data << ci->Rank;
-		data << ci->Unknown1;
-		data << ci->SpellDataID;
-		data << ci->DisplayID;
-		data << ci->unk2;
-		data << ci->unk3;
-		data << ci->Civilian;
-		data << ci->Leader;
-
+		data << uint8(0); // unk CString
+		data << uint32(ci->Flags1);  
+		data << uint32(ci->Type);
+		data << uint32(ci->Family);
+		data << uint32(ci->Rank);
+		data << uint32(ci->Unknown1);
+		data << uint32(ci->SpellDataID);
+		data << uint32(ci->DisplayID);
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << float(ci->unk2);
+		data << float(ci->unk3);
+		data << uint8(ci->Civilian);
+		//data << ci->Leader; // only one uint8 is here
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
 	}
 
 	SendPacket( &data );
@@ -109,6 +117,11 @@ void Session::HandleGameObjectQueryOpcode(WorldPacket & pck)
 	data << goinfo->Unknown12;
 	data << goinfo->Unknown13;
 	data << goinfo->Unknown14;
+	/*data << goinfo->UnknownFloat;
+	data << goinfo->Unknown15;
+	data << goinfo->Unknown16;
+	data << goinfo->Unknown17;
+	data << goinfo->Unknown18;*/
 
 	SendPacket( &data );
 }
@@ -156,17 +169,21 @@ void Session::HandleItemQuerySingleOpcode(WorldPacket & pck)
 	data << itemProto->Unique;
 	data << itemProto->MaxCount;
 	data << itemProto->ContainerSlots;
+	data << uint32(10);	// Count of following stats
 	for(i = 0; i < 10; i++)
 	{
 		data << itemProto->Stats[i].Type;
 		data << itemProto->Stats[i].Value;
 	}
-	for(i = 0; i < 5; i++)
+	data << uint32(0); // unk
+	data << uint32(0); // unk
+	for(i = 0; i < 2; i++)
 	{
 		data << itemProto->Damage[i].Min;
 		data << itemProto->Damage[i].Max;
 		data << itemProto->Damage[i].Type;
 	}
+	// 7 resistances
 	data << itemProto->Armor;
 	data << itemProto->HolyRes;
 	data << itemProto->FireRes;
@@ -174,6 +191,7 @@ void Session::HandleItemQuerySingleOpcode(WorldPacket & pck)
 	data << itemProto->FrostRes;
 	data << itemProto->ShadowRes;
 	data << itemProto->ArcaneRes;
+
 	data << itemProto->Delay;
 	data << itemProto->AmmoType;
 	data << itemProto->Range;
@@ -203,24 +221,21 @@ void Session::HandleItemQuerySingleOpcode(WorldPacket & pck)
 	data << itemProto->MapID;
 	data << itemProto->BagFamily;
 	data << itemProto->ToolCategory;
+	// 3 sockets
 	data << itemProto->Sockets[0].SocketColor ;
 	data << itemProto->Sockets[0].Unk;
 	data << itemProto->Sockets[1].SocketColor ;
 	data << itemProto->Sockets[1].Unk ;
 	data << itemProto->Sockets[2].SocketColor ;
 	data << itemProto->Sockets[2].Unk ;
-	/*
-	data << itemProto->SocketColor1;
-	data << itemProto->Unk201_3;
-	data << itemProto->SocketColor2;
-	data << itemProto->Unk201_5;
-	data << itemProto->SocketColor3;
-	data << itemProto->Unk201_7;*/
+
 	data << itemProto->SocketBonus;
 	data << itemProto->GemProperties;
 	data << itemProto->ItemExtendedCost;
-	data << itemProto->DisenchantReqSkill;
+	data << itemProto->DisenchantReqSkill;	// float should be in this place
 	data << itemProto->ArmorDamageModifier;
+	data << uint32(1); // unk
+	data << uint32(1); // unk
 	//WPAssert(data.size() == 453 + itemProto->Name1.length() + itemProto->Description.length());
 	SendPacket( &data );
 }
