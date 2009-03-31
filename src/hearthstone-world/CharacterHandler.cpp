@@ -1005,11 +1005,17 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	if(enter_world && !_player->GetMapMgr())
 	{
 		plr->AddToWorld();
-	}
 
-	//Only add player to objmgr if we are actualy Added To World
-	if(_player->GetMapMgr())
-		objmgr.AddPlayer(_player);
+		//Only add player to objmgr if we are actualy Added To World
+		if(_player->GetMapMgr())
+			objmgr.AddPlayer(_player);
+		else
+		{
+			uint8 respons = CHAR_LOGIN_NO_CHARACTER;		// CHAR_LOGIN_NO_CHARACTER
+			OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);
+			_player = NULLPLR;
+		}
+	}
 }
 
 bool ChatHandler::HandleRenameCommand(const char * args, WorldSession * m_session)

@@ -921,7 +921,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 void Object::AddToWorld()
 {
 	MapMgrPointer mapMgr = sInstanceMgr.GetInstance(shared_from_this());
-	if(!mapMgr)
+	if(mapMgr == NULL)
 		return; //instance add failed
 
 	if( IsPlayer() )
@@ -934,12 +934,8 @@ void Object::AddToWorld()
 			// that means we re-logged into one. if it's an arena, don't allow it!
 			// also, don't allow them in if the bg is full.
 
-			if( /*( mapMgr->m_battleground->IsArena() && mapMgr->m_battleground->HasStarted() ) ||*/
-				( !mapMgr->m_battleground->CanPlayerJoin(p) ) && !p->bGMTagOn )	// above check isn't needed, done in Arena::CanPlayerJoin.
-			{
-				//p->EjectFromInstance();
+			if( !mapMgr->m_battleground->CanPlayerJoin(p) && !p->bGMTagOn)
 				return;
-			}
 		}
 	}
 
