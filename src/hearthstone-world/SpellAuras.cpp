@@ -1680,7 +1680,7 @@ void Aura::SpellAuraPeriodicDamage(bool apply)
 					if(it && it->GetProto())
 					{
 						dmg = 0;
-						for(int i=0;i<5;i++)
+						for(int i=0;i<2;i++)
 							if(it->GetProto()->Damage[i].Type==SCHOOL_NORMAL)
 								dmg += int32((it->GetProto()->Damage[i].Min + it->GetProto()->Damage[i].Max) / 2);
 						dmg = multiplyer * dmg /100;

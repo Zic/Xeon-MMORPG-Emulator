@@ -810,14 +810,15 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 		data << itemProto->Stats[i].Type;
 		data << itemProto->Stats[i].Value;
 	}
-	data << uint32(0);								// 3.0.2
-	data << uint32(0);								// 3.0.2
-	for(i = 0; i < 5; i++)
+	data << uint32(0);								// 3.0.2 related to scaling stats
+	data << uint32(0);								// 3.0.2 related to scaling stats
+	for(i = 0; i < 2; i++)
 	{
 		data << itemProto->Damage[i].Min;
 		data << itemProto->Damage[i].Max;
 		data << itemProto->Damage[i].Type;
 	}
+	// 7 resistances
 	data << itemProto->Armor;
 	data << itemProto->HolyRes;
 	data << itemProto->FireRes;
@@ -825,6 +826,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->FrostRes;
 	data << itemProto->ShadowRes;
 	data << itemProto->ArcaneRes;
+
 	data << itemProto->Delay;
 	data << itemProto->AmmoType;
 	data << itemProto->Range;
@@ -858,6 +860,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->MapID;
 	data << itemProto->BagFamily;
 	data << itemProto->TotemCategory;
+	// 3 sockets
 	data << itemProto->Sockets[0].SocketColor ;
 	data << itemProto->Sockets[0].Unk;
 	data << itemProto->Sockets[1].SocketColor ;
@@ -866,10 +869,11 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	data << itemProto->Sockets[2].Unk ;
 	data << itemProto->SocketBonus;
 	data << itemProto->GemProperties;
-	data << itemProto->DisenchantReqSkill;
+	data << itemProto->DisenchantReqSkill;			// should be a float here
 	data << itemProto->ArmorDamageModifier;
 	data << uint32(0);								// 2.4.2 Item duration in seconds
 	data << uint32(0);								// 3.0.2
+	data << uint32(0);								// 3.1.0
 
 	SendPacket( &data );
 }

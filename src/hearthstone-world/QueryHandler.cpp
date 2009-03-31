@@ -119,6 +119,11 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 		data << ci->unkfloat1;
 		data << ci->unkfloat2;
 		data << ci->Leader;
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
+		data << uint32(0);	// unk
 	}
 
 	SendPacket( &data );
