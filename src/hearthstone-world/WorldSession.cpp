@@ -131,8 +131,7 @@ int WorldSession::Update(uint32 InstanceID)
 			if( m_lastPing + WORLDSOCKET_TIMEOUT - (uint32)UNIXTIME > WORLDSOCKET_TIMEOUT)
 			{
 				DEBUG_LOG("WorldSession","Removing pending player due to socket timeout.");
-				objmgr.RemovePlayer(_player);
-				_player = NULLPLR;
+				LogoutPlayer(true);
 				bDeleted = true;
 			}
 			return 0;

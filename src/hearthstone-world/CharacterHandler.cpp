@@ -1009,11 +1009,11 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		//Only add player to objmgr if we are actualy Added To World
 		if(_player->GetMapMgr())
 			objmgr.AddPlayer(_player);
-		else
+		else //undo loading by logging out
 		{
-			uint8 respons = CHAR_LOGIN_NO_CHARACTER;		// CHAR_LOGIN_NO_CHARACTER
-			OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);
-			_player = NULLPLR;
+			DEBUG_LOG("WorldSession","Adding player %s to map %u failed",_player->GetName(), vwpck.MapId );
+			LogoutPlayer(false);
+			m_loggingInPlayer=NULLPLR;
 		}
 	}
 }
