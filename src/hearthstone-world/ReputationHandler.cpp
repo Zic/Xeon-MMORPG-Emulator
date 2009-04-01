@@ -113,7 +113,7 @@ HEARTHSTONE_INLINE bool RankChangedFlat(int32 Standing, int32 NewStanding)
 
 void Player::smsg_InitialFactions()
 {
-	WorldPacket data(SMSG_INITIALIZE_FACTIONS, 644);
+	WorldPacket data(SMSG_INITIALIZE_FACTIONS, 764);
 	data << uint32(128);
 	FactionReputation * rep;
 	for(uint32 i = 0; i < 128; ++i)
@@ -121,14 +121,14 @@ void Player::smsg_InitialFactions()
 		rep = reputationByListId[i];
 		if(rep)
 		{
-			/*if(rep->flag & 2 && rep->standing >= 0)
+			if(rep->flag & 2 && rep->standing >= 0)
 			{
 				printf("listid %u\n", i);
-			}*/
+			}
 			// TODO fix. Structure is right but need to filter sent data.
 			// crashes client when opening rep window with assert((value >= min) && (value <= max))
-			//data << rep->flag << rep->CalcStanding();
-			data << uint8(0) << uint32(0);
+			data << rep->flag << rep->CalcStanding();
+			//data << uint8(0) << uint32(0);
 		}
 		else
 			data << uint8(0) << uint32(0);

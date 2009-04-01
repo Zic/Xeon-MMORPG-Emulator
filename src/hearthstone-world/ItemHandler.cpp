@@ -780,9 +780,6 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 	else
 		data << itemProto->Name1;
 
-	/*data << itemProto->Name2;
-	data << itemProto->Name3;
-	data << itemProto->Name4;*/
 	data << uint8(0) << uint8(0) << uint8(0); // name 2,3,4
 	data << itemProto->DisplayInfoID;
 	data << itemProto->Quality;

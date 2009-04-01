@@ -562,6 +562,7 @@ struct EnchantEntry
     uint32 unk7;		//36 Gem Related
 	//uint32 requiredSkill;	//37
     //uint32 requiredSkillValue;	//38
+	//								//39
 };
 
 struct GemPropertyEntry{
@@ -745,6 +746,7 @@ struct SpellEntry
 	uint32 School;							//228
 	uint32 runeCostID;                      //229
     //uint32 spellMissileID;                //230 not used
+	uint32  PowerDisplayId;					//231 Related to PowerDisplay.dbc
 
     /// CUSTOM: these fields are used for the modifications made in the world.cpp
     uint32 DiminishStatus;                  //
@@ -1250,8 +1252,6 @@ struct VehicleEntry
     float m_cameraFadeDistScalarMin; // 15
     float m_cameraFadeDistScalarMax; // 16
     float m_cameraPitchOffset; // 17
-    int m_powerType[3]; // 18-20
-    int m_powerToken[3]; // 21-23
     float m_facingLimitRight; // 24
     float m_facingLimitLeft; // 25
     float m_msslTrgtTurnLingering; // 26
@@ -1269,6 +1269,9 @@ struct VehicleEntry
     uint32 m_uiLocomotionType; // 40
     float m_msslTrgtImpactTexRadius; // 41
     uint32 m_uiSeatIndicatorType; // 42
+	//
+	//
+	//
 };
  
 struct VehicleSeatEntry
@@ -1319,6 +1322,7 @@ struct VehicleSeatEntry
     uint32 m_exitUISoundID; // 43
     int32 m_uiSkin; // 44
     uint32 m_flagsB; // 45
+	// 46-57
 };
 
 #pragma pack(pop)
