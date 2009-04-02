@@ -176,21 +176,24 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 		// items + containers: 0x8
 	case TYPEID_ITEM:
 	case TYPEID_CONTAINER:
-		flags = 0x0008;
+		flags = 0x0010;
 		break;
 		
 		// player/unit: 0x68 (except self)
 	case TYPEID_UNIT:
-		flags = 0x0060;
-		break;
-
+		{
+		flags  = 0x0070;
+		flags2 |= unit_shared_from_this()->GetAIInterface()->getMoveFlags();
+		}	
 	case TYPEID_PLAYER:
-		flags = 0x0060;
+		{
+		flags  = 0x0070;
+		}	
 		break;
 
 		// gameobject/dynamicobject
 	case TYPEID_GAMEOBJECT:
-		flags = 0x0348;
+		flags = 0x0350;
 		break;
 
 	case TYPEID_DYNAMICOBJECT:
@@ -396,11 +399,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 		if(splinebuf)
 		{
 			flags2 |= 0x08000001;	   //1=move forward
-			if(GetTypeId() == TYPEID_UNIT)
-			{
-				if( unit_shared_from_this()->GetAIInterface()->m_moveRun == false)
-					flags2 |= 0x100;	//100=walk
-			}			
 		}
 
 		if(GetTypeId() == TYPEID_UNIT)
@@ -518,13 +516,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 
 		*data << m_walkSpeed;	 // walk speed
 		*data << m_runSpeed;	  // run speed
-		*data << m_backSwimSpeed; // backwards swim speed
+		*data << m_backWalkSpeed; // backwards run speed
 		*data << m_swimSpeed;	 // swim speed
-		*data << m_backWalkSpeed; // backwards walk speed
+		*data << m_backSwimSpeed; // backwards swim speed
 		*data << m_flySpeed;		// fly speed
 		*data << m_backFlySpeed;	// back fly speed
 		*data << m_turnRate;	  // turn rate
-		*data << float(7);
+		*data << float(7);			//pitch rate
 
 		if(splinebuf)	// client expects that flags2 & 0x8000000 != 0 in this case
 		{

@@ -1899,18 +1899,16 @@ uint32 AIInterface::getMoveFlags()
 	else if(m_moveSprint == true) //Sprint
 	{
 		m_runSpeed = (m_Unit->m_runSpeed+5.0f)*0.001f;
-		MoveFlags = 0x100;
 	}
 	else if(m_moveRun == true) //Run
 	{
 		m_runSpeed = m_Unit->m_runSpeed*0.001f;
-		MoveFlags = 0x100;
 	}
-/*	else //Walk
-	{
-		m_runSpeed = m_Unit->m_walkSpeed*0.001f;
-		MoveFlags = 0x000;
-	}*/
+//	else
+//	{
+//		m_runSpeed = m_Unit->m_walkSpeed*0.001f;
+//		MoveFlags = 0x100;
+//	}
 	m_walkSpeed = m_Unit->m_walkSpeed*0.001f;//move distance per ms time 
 	return MoveFlags;
 }
@@ -1928,7 +1926,13 @@ void AIInterface::UpdateMove()
 	
 	m_nextPosX = m_nextPosY = m_nextPosZ = 0;
 
-	uint32 moveTime = (m_moveFly?(uint32)(distance/m_flySpeed):(m_moveRun?(uint32)(distance/m_runSpeed):(uint32)(distance/m_walkSpeed)));
+	uint32 moveTime = 0;
+	if(m_moveFly)
+		moveTime = (uint32)(distance/m_flySpeed);
+	else if(m_moveRun)
+		moveTime = (uint32)(distance/m_runSpeed);
+	else
+		moveTime = (uint32)(distance/m_walkSpeed);
 
 	m_totalMoveTime = moveTime;
 
