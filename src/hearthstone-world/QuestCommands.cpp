@@ -1227,7 +1227,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 		return true;
 	}
 
-	my_query = "SELECT map, position_x, position_y, position_z FROM creature_spawns WHERE entry = " + starterId;
+	my_query = "SELECT map, position_x, position_y, position_z, orientation FROM creature_spawns WHERE entry = " + starterId;
 	QueryResult *spawnResult = WorldDatabase.Query(my_query.c_str());
 
 	if(!spawnResult)
@@ -1242,6 +1242,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 	float x = fields[1].GetFloat();
 	float y = fields[2].GetFloat();
 	float z = fields[3].GetFloat();
+	float o = fields[4].GetFloat();
 
 	delete spawnResult;
 
@@ -1255,7 +1256,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 	recout += "\n\n";
 	SendMultilineMessage(m_session, recout.c_str());
 
-	m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z));
+	m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z, o));
 
 	return true;
 }

@@ -665,7 +665,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				if( CastingSpell == NULL )
 					continue;
 
-				if (itr2->SpellClassMask[0] || itr2->SpellClassMask[1] || itr2->SpellClassMask[2]) {
+				if (itr2->SpellClassMask[0] || itr2->SpellClassMask[1] || itr2->SpellClassMask[2])
+				{
 					if (!(itr2->SpellClassMask[0] & CastingSpell->SpellGroupType[0]) &&
 						!(itr2->SpellClassMask[1] & CastingSpell->SpellGroupType[1]) &&
 						!(itr2->SpellClassMask[2] & CastingSpell->SpellGroupType[2]))
