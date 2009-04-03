@@ -4168,8 +4168,6 @@ CorpsePointer Player::RepopRequestedPlayer()
 		return NULLCORPSE;
 	}
 
-	MapInfo * pMapinfo;
-
 	sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_PLAYER_FORECED_RESURECT ); //in case somebody resurrected us before this event happened
 
 	// Set death state to corpse, that way players will lose visibility
@@ -4189,6 +4187,23 @@ CorpsePointer Player::RepopRequestedPlayer()
 	
 	BuildPlayerRepop();
 
+	if( corpse )
+	{
+		/* Send Spirit Healer Location */
+		WorldPacket data( SMSG_DEATH_RELEASE_LOC, 16 );
+		data << m_mapId << m_position;
+		m_session->SendPacket( &data );
+
+		/* Corpse reclaim delay */
+		WorldPacket data2( SMSG_CORPSE_RECLAIM_DELAY, 4 );
+		data2 << (uint32)( CORPSE_RECLAIM_TIME_MS );
+		GetSession()->SendPacket( &data2 );
+	}
+
+	if( myCorpse != NULL )
+		myCorpse->ResetDeathClock();
+
+	MapInfo * pMapinfo = NULL;
 	pMapinfo = WorldMapInfoStorage.LookupEntry( GetMapId() );
 	if( pMapinfo != NULL )
 	{
@@ -4205,22 +4220,6 @@ CorpsePointer Player::RepopRequestedPlayer()
 	{
 		RepopAtGraveyard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
 	}
-	
-	if( corpse )
-	{
-		/* Send Spirit Healer Location */
-		WorldPacket data( SMSG_DEATH_RELEASE_LOC, 16 );
-		data << m_mapId << m_position;
-		m_session->SendPacket( &data );
-
-		/* Corpse reclaim delay */
-		WorldPacket data2( SMSG_CORPSE_RECLAIM_DELAY, 4 );
-		data2 << (uint32)( CORPSE_RECLAIM_TIME_MS );
-		GetSession()->SendPacket( &data2 );
-	}
-
-	if( myCorpse != NULL )
-		myCorpse->ResetDeathClock();
 
 	return ret;
 }
@@ -8390,20 +8389,19 @@ void Player::CompleteLoading()
 		}
 	}
 
-	std::list<LoginAura>::iterator i =  loginauras.begin();
 
-	for(;i!=loginauras.end(); i++)
+	if(!isDead())//only add aura's to the living (death aura set elsewhere)
 	{
-
-		// this stuff REALLY needs to be fixed - Burlex
-		SpellEntry * sp = dbcSpell.LookupEntry((*i).id);
-
-		//do not load auras that only exist while pet exist. We should recast these when pet is created anyway
-		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
-			continue;
-
-		if(!isDead())
+		std::list<LoginAura>::iterator i =  loginauras.begin();
+		for(;i!=loginauras.end(); i++)
 		{
+			// this stuff REALLY needs to be fixed - Burlex
+			SpellEntry * sp = dbcSpell.LookupEntry((*i).id);
+
+			//do not load auras that only exist while pet exist. We should recast these when pet is created anyway
+			if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
+				continue;
+
 			AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
 			if( a )
 			{
@@ -8415,18 +8413,8 @@ void Player::CompleteLoading()
 				AddAura(a, NULLAURA);
 			}
 		}
-		else
-		{
-			if(sp->Id == 8326|| sp->Id == 9036|| sp->Id == 20584 )
-			{
-				AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
-				if( a )
-					AddAura(a, NULLAURA);
-			}break;
-		}
+		loginauras.clear();
 	}
-	loginauras.clear();
-
 	// this needs to be after the cast of passive spells, because it will cast ghost form, after the remove making it in ghost alive, if no corpse.
 
 	if(iActivePet)

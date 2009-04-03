@@ -6582,7 +6582,7 @@ void Aura::SpellAuraGhost(bool apply)
 
 		if(apply)
 		{
-			SetNegative();
+			SetNegative(2);//we picked up one extra from calling SpellAuraWaterWalk ;)
 		}
 	}
 	m_target->SendPowerUpdate();

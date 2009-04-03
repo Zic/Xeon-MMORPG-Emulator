@@ -200,7 +200,10 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 	StackPacket data(MSG_CORPSE_QUERY, databuffer, 100);
 	MapInfo *pMapinfo;
 
-	pCorpse = objmgr.GetCorpseByOwner(GetPlayer()->GetLowGUID());
+	if(_player->isDead())
+		_player->BuildPlayerRepop();
+
+	pCorpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
 	if(pCorpse)
 	{
 		pMapinfo = WorldMapInfoStorage.LookupEntry(pCorpse->GetMapId());

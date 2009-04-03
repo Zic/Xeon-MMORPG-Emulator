@@ -952,47 +952,6 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	if(info->m_Group)
 		info->m_Group->Update();
 
-	//death system checkout
-	if(_player->GetUInt32Value(UNIT_FIELD_HEALTH) == 0 || _player->isDead() || _player->HasFlag(PLAYER_FLAGS, PLAYER_FLAG_DEATH_WORLD_ENABLE))
-	{
-		CorpsePointer corpse = objmgr.GetCorpseByOwner(_player->GetLowGUID());
-		if( corpse != NULL )
-		{
-			MapMgrPointer myMgr = sInstanceMgr.GetInstance(_player);
-			if( myMgr == NULL || (myMgr->GetMapInfo()->type != INSTANCE_NULL && myMgr->GetMapInfo()->type != INSTANCE_PVP)
-				|| (myMgr->GetMapId() != corpse->GetMapId()) )	
-			{
-				// instance death, screw it, revive them
-				_player->ResurrectPlayer(NULLPLR);
-				_player->SpawnCorpseBones();
-				//_player->KillPlayer();
-				//_player->RepopRequestedPlayer();
-			}
-			else
-			{
-				// got a corpse
-				_player->setDeathState(CORPSE);
-				_player->SetFlag(PLAYER_FLAGS, PLAYER_FLAG_DEATH_WORLD_ENABLE);
-				_player->SetUInt32Value(UNIT_FIELD_HEALTH, 1);
-			}
-		}
-		else
-		{
-			// logged out after death, attempt repop
-			// otherwise people can cheat death by relogging
-			if( _player->m_uint32Values[UNIT_FIELD_HEALTH] == 0 )
-			{
-				_player->KillPlayer();
-				_player->RepopRequestedPlayer();
-			}
-			else
-			{
-				// just revive them
-				_player->ResurrectPlayer(NULLPLR);
-			}
-		}
-	}
-
 	// Retroactive: Level achievement
 	_player->GetAchievementInterface()->HandleAchievementCriteriaLevelUp( _player->getLevel() );
 	// Retroactive: Bank slots: broken atm :(
@@ -1011,7 +970,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 			objmgr.AddPlayer(_player);
 		else //undo loading by logging out
 		{
-			DEBUG_LOG("WorldSession","Adding player %s to map %u failed",_player->GetName(), vwpck.MapId );
+			Log.Warning("WorldSession","Adding player %s to map %u failed!",_player->GetName(), vwpck.MapId );
 			LogoutPlayer(false);
 			m_loggingInPlayer=NULLPLR;
 		}
