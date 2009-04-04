@@ -53,6 +53,7 @@ void Player::Init()
 	m_bgSlot = 0;
 	mAngerManagement = false;
 
+	m_feralAP = 0;
 	m_finishingmovesdodge = false;
 	iActivePet			  = 0;
 	resurrector			 = 0;
@@ -3883,6 +3884,19 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 			{
 				BaseDamage[0] = apply ? proto->Damage[0].Min : 1;
 				BaseDamage[1] = apply ? proto->Damage[0].Max : 1;
+			}
+		}
+		if( getClass() == DRUID )
+		{
+			//calc weapon dps
+			float dps = (( proto->Damage[0].Min + proto->Damage[0].Max / 2 ) / (proto->Delay / 1000));
+			if( dps > 54.8f )
+			{
+				//formula taken from http://www.wowwiki.com/Feral_attack_power
+				float feral_ap = (dps - 54.8f)*14;
+				m_feralAP = apply ? float2int32(floor(feral_ap)) : -float2int32(floor(feral_ap));
+				if( IsInFeralForm() || GetShapeShift() == FORM_MOONKIN )
+					ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_feralAP);
 			}
 		}
 	}
