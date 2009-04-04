@@ -5936,7 +5936,7 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 {
 	if(!p_caster || !p_caster->IsInWorld()) return;
 
-	float RetreivedMana = 0.0f;
+	uint32 energize_amt = 0;
 	for(uint32 x=SUMMON_TYPE_TOTEM_1;x<SUMMON_TYPE_TOTEM_4+1;x++)
 	{
 		SummonPropertiesEntry * spe = dbcSummonProps.LookupEntryForced(x);
@@ -5955,21 +5955,18 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 			if (!sp)
 				continue;
 
-			float pts = float(m_spellInfo->EffectBasePoints[i]+1) / 100.0f;
-			RetreivedMana += float(sp->manaCost) * pts;
+			if( sp->manaCost )
+				energize_amt += float2int32( (sp->manaCost) * (damage/100.0f) );
+			else if( sp->ManaCostPercentage )
+				energize_amt += float2int32(((p_caster->GetUInt32Value(UNIT_FIELD_BASE_MANA)*sp->ManaCostPercentage)/100.0f) * (damage/100.0f) );
 
 			p_caster->m_SummonSlots[slot]->TotemExpire();
 			p_caster->m_SummonSlots[slot] = NULLCREATURE;
 		}
 	}
 
-	// get the current mana, get the max mana. Calc if we overflow
-	SendHealManaSpellOnPlayer(m_caster, m_caster, (uint32)RetreivedMana, 0, pSpellId ? pSpellId : m_spellInfo->Id);
-	RetreivedMana += float(m_caster->GetUInt32Value(UNIT_FIELD_POWER1));
-	uint32 max = m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
-	if((uint32)RetreivedMana > max)
-		RetreivedMana = (float)max;
-	m_caster->SetUInt32Value(UNIT_FIELD_POWER1, (uint32)RetreivedMana);
+	if( energize_amt > 0 )
+		p_caster->Energize(p_caster, m_spellInfo->Id, energize_amt, POWER_TYPE_MANA);
 }
 
 void Spell::SpellEffectSummonDemonOld(uint32 i)
