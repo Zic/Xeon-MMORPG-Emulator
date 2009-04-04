@@ -972,6 +972,8 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		{
 			Log.Warning("WorldSession","Adding player %s to map %u failed!",_player->GetName(), vwpck.MapId );
 			LogoutPlayer(false);
+			uint8 respons = CHAR_LOGIN_NO_CHARACTER;
+			OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);
 			m_loggingInPlayer=NULLPLR;
 		}
 	}
