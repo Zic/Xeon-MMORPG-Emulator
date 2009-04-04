@@ -121,19 +121,20 @@ class MovementInfo
 public:
 	uint32 time;
 	float pitch;// -1.55=looking down, 0=looking forward, +1.55=looking up
-	uint32 unk8;//on slip 8 is zero, on jump some other number
-	uint32 unk9, unk10;//9,10 changes if you are not on foot
-	uint32 unk11, unk12;
+	float jump_sinAngle;//on slip 8 is zero, on jump some other number
+	float jump_cosAngle, jump_xySpeed;//9,10 changes if you are not on foot
+	uint32 unk11;
+	uint32 spline_unk;
 	uint8 unk13;
 	uint32 unklast;//something related to collision
-	uint16 unk_230;
+	uint16 flag16;
 
 	float x, y, z, orientation;
 	uint32 flags;
 	uint32 FallTime;
 	uint64 transGuid;
-	float transX, transY, transZ, transO, transUnk;
-	uint8 transUnk_2;
+	float transX, transY, transZ, transO, transTime;
+	uint8 transSeat;
 
 	void init(WorldPacket & data);
 	void write(WorldPacket & data);

@@ -225,13 +225,13 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 					if(GetTypeFromGUID() != HIGHGUID_TYPE_TRANSPORTER)
 						return 0;   // bad transporter
 					else
-						flags = 0x034A;
+						flags = 0x0352;
 				}break;
 
 			case GAMEOBJECT_TYPE_TRANSPORT:
 				{
 					/* deeprun tram, etc */
-					flags = 0x034A;
+					flags = 0x0352;
 				}break;
 
 			case GAMEOBJECT_TYPE_DUEL_ARBITER:
@@ -377,9 +377,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 	*data << (uint16)flags;
 
 	PlayerPointer pThis = NULLPLR;
+	MovementInfo* moveinfo;
 	if(m_objectTypeId == TYPEID_PLAYER)
 	{
 		pThis = plr_shared_from_this();
+		if(pThis->GetSession())
+			moveinfo = pThis->GetSession()->GetMovementInfo();
 		if(target == pThis)
 		{
 			// Updating our last speeds.
@@ -498,12 +501,28 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 
 		if(flags2 & 0x2200000 || flag16 & 0x20) //flying/swimming, && unk sth to do with vehicles?
 		{
+			if(pThis && moveinfo)
+			{
+				*data << moveinfo->pitch;
+			}
 			*data << (float)0; //pitch
 		}
+		if(pThis && moveinfo)
+		{
+			*data << moveinfo->unklast;
+		}
+		else
 		*data << (uint32)0; //last fall time
 
 		if(flags2 & 0x1000) // BYTE1(flags2) & 0x10
 		{
+			if(pThis && moveinfo)
+			{
+				*data << moveinfo->FallTime;
+				*data << moveinfo->jump_sinAngle;
+				*data << moveinfo->jump_cosAngle;
+				*data << moveinfo->jump_xySpeed;
+			}
 			*data << (float)0;
 			*data << (float)1.0; //sinAngle
 			*data << (float)0;	 //cosAngle
@@ -533,21 +552,30 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 	else if(flags & 0x100)
     {
 			*data << uint8(0);                              // unk PGUID!
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
-            *data << (float)0;
-            *data << float(0);
+			*data << (float)m_position.x;
+			*data << (float)m_position.y;
+			*data << (float)m_position.z;
+			*data << (float)m_position.x;
+			*data << (float)m_position.y;
+			*data << (float)m_position.z;
+			*data << (float)m_position.o;
+			*data << float(0);
 	}
 	else if(flags & 0x40)
 	{
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
-			*data << (float)0;
+		if(flags & 0x2)
+		{
+			*data << float(0);
+			*data << float(0);
+			*data << float(0);
+		}
+		else
+		{
+			*data << (float)m_position.x;
+			*data << (float)m_position.y;
+			*data << (float)m_position.z;
+		}
+			*data << (float)m_position.o;
 	}
 
 	if(flags & 8)
@@ -576,7 +604,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 	// 0x200
     if(flags & 0x0200)
     {
-        *data << uint64(0); //64bit rotation/Some GUID?
+        *data << uint64(0); //blizz 64bit rotation
     }
 }
 
@@ -693,7 +721,7 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
 	*data << GetGUID();
 
 	*data << uint32(0); // flags
-	*data << uint32(0); // mysterious value #1
+	*data << getMSTime(); // mysterious value #1
 
 	*data << m_position;
 	*data << m_position.o;
@@ -711,7 +739,7 @@ WorldPacket * Object::BuildTeleportAckMsg(const LocationVector & v)
 
 	//First 4 bytes = no idea what it is
 	*data << uint32(2); // flags
-	*data << uint32(0); // mysterious value #1
+	*data << getMSTime(); // mysterious value #1
 	*data << uint16(0);
 
 	*data << float(0);

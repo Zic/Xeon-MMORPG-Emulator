@@ -211,9 +211,10 @@ void _HandleBreathing(MovementInfo &movement_info, PlayerPointer _player, WorldS
 	//player is swiming and not flagged as in the water
 	if( movement_info.flags & MOVEFLAG_SWIMMING && !( _player->m_UnderwaterState & UNDERWATERSTATE_SWIMMING ) )
 	{
+		// Changed in 3.1 TODO: dismount for flying mounts only
 		// dismount if mounted
-		if(_player->IsMounted())
-			TO_UNIT(_player)->Dismount();
+		//if(_player->IsMounted())
+		//	TO_UNIT(_player)->Dismount();
 
 		// get water level only if it was not set before
 		if( !pSession->m_bIsWLevelSet )
@@ -591,7 +592,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 				/* set variables */
 				_player->m_TransporterGUID = movement_info.transGuid;
-				_player->m_TransporterUnk = movement_info.transUnk;
+				_player->m_TransporterUnk = movement_info.transTime;
 				_player->m_TransporterX = movement_info.transX;
 				_player->m_TransporterY = movement_info.transY;
 				_player->m_TransporterZ = movement_info.transZ;
@@ -600,7 +601,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			else
 			{
 				/* no changes */
-				_player->m_TransporterUnk = movement_info.transUnk;
+				_player->m_TransporterUnk = movement_info.transTime;
 				_player->m_TransporterX = movement_info.transX;
 				_player->m_TransporterY = movement_info.transY;
 				_player->m_TransporterZ = movement_info.transZ;
@@ -816,27 +817,29 @@ void MovementInfo::init(WorldPacket & data)
 {
 	transGuid = 0;
 	unk13 = 0;
-	data >> flags >> unk_230 >> time;
+	data >> flags >> flag16 >> time;
 	data >> x >> y >> z >> orientation;
 
 	if (flags & MOVEFLAG_TAXI)
 	{
-		data >> transGuid >> transX >> transY >> transZ >> transO >> transUnk >> transUnk_2;
+		data >> transGuid >> transX >> transY >> transZ >> transO >> transTime >> transSeat;
 	}
-	if (flags & (MOVEFLAG_SWIMMING | MOVEFLAG_AIR_SWIMMING) || unk_230 & 0x20)
+	if (flags & (MOVEFLAG_SWIMMING | MOVEFLAG_AIR_SWIMMING) || flag16 & 0x20)
 	{
 		data >> pitch;
 	}
+
+	data >> unklast;
+
 	if (flags & MOVEFLAG_FALLING || flags & MOVEFLAG_REDIRECTED)
 	{
-		data >> FallTime >> unk8 >> unk9 >> unk10;
+		data >> FallTime >> jump_sinAngle >> jump_cosAngle >> jump_xySpeed;
 	}
 	if (flags & MOVEFLAG_SPLINE_MOVER)
 	{
-		data >> unk12;
+		data >> spline_unk;
 	}
 
-	data >> unklast;
 	if(data.rpos() != data.wpos())
 	{
 		if(data.rpos() + 4 == data.wpos())
@@ -848,27 +851,30 @@ void MovementInfo::init(WorldPacket & data)
 
 void MovementInfo::write(WorldPacket & data)
 {
-	data << flags << unk_230 << getMSTime();
+	data << flags << flag16 << getMSTime();
 
 	data << x << y << z << orientation;
 
 	if (flags & MOVEFLAG_TAXI)
 	{
-		data << transGuid << transX << transY << transZ << transO << transUnk << transUnk_2;
+		data << transGuid << transX << transY << transZ << transO << transTime << transSeat;
 	}
-	if (flags & MOVEFLAG_SWIMMING)
+	if (flags & (MOVEFLAG_SWIMMING | MOVEFLAG_AIR_SWIMMING) || flag16 & 0x20)
 	{
 		data << pitch;
 	}
-	if (flags & MOVEFLAG_FALLING)
+
+	data << unklast;
+
+	if (flags & MOVEFLAG_FALLING || flags & MOVEFLAG_REDIRECTED)
 	{
-		data << FallTime << unk8 << unk9 << unk10;
+		data << FallTime << jump_sinAngle << jump_cosAngle << jump_xySpeed;
 	}
 	if (flags & MOVEFLAG_SPLINE_MOVER)
 	{
-		data << unk12;
+		data << spline_unk;
 	}
-	data << unklast;
+	
 	if(unk13)
 		data << unk13;
 }
