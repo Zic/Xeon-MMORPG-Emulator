@@ -3894,9 +3894,12 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 			{
 				//formula taken from http://www.wowwiki.com/Feral_attack_power
 				float feral_ap = (dps - 54.8f)*14;
-				m_feralAP = apply ? float2int32(floor(feral_ap)) : -float2int32(floor(feral_ap));
+				m_feralAP += apply ? float2int32(floor(feral_ap)) : -float2int32(floor(feral_ap));
 				if( IsInFeralForm() || GetShapeShift() == FORM_MOONKIN )
-					ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_feralAP);
+					if( apply)
+						ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_feralAP);
+					else
+						ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, -float2int32(floor(feral_ap)));
 			}
 		}
 	}

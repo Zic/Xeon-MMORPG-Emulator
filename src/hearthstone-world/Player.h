@@ -1867,7 +1867,7 @@ public:
 	uint32 GetLastLoginTime() { return 	m_timeLogoff; };
 
 	//Current value of Feral Attack Power from items
-	uint32 m_feralAP;
+	int32 m_feralAP;
 
 protected:
 	uint32 m_timeLogoff;

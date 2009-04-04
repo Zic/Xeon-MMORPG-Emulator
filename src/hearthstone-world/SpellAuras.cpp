@@ -2761,24 +2761,12 @@ void Aura::SpellAuraDummy(bool apply)
 					caster->RemoveOnAuraRemoveSpell(SPELL_HASH_PSYCHIC_SCREAM);
 			}
 		}break;
-	}
-
-	if( m_target )
-		switch( GetSpellProto()->NameHash )
+	default:
 		{
-			case SPELL_HASH_TORMENT_THE_WEAK:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_TORMENT_THE_WEAK] = apply ? mod->m_amount : 0;
-				}break;
-			case SPELL_HASH_ARCANE_POTENCY:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_POTENCY] = apply ? mod->m_amount : 0;
-				}break;
-			case SPELL_HASH_GLYPH_OF_FIREBALL:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] = apply;
-				}break;
-		}
+			if( m_target )
+				m_target->m_DummyAuras[m_spellProto->NameHash] = apply ? m_spellProto : 0;
+		}break;
+	}
 
 	if ( TamingSpellid && ! GetTimeLeft() )
 	{

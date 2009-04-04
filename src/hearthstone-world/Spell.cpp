@@ -2695,8 +2695,8 @@ void Spell::HandleAddAura(uint64 guid)
 	case SPELL_HASH_CLEARCASTING:
 	case SPELL_HASH_PRESENCE_OF_MIND:
 		{
-			if( Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] )
-				spellid = Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] == 15 ? 57529 : 57531;
+			if( Target->m_DummyAuras[ SPELL_HASH_ARCANE_POTENCY ] )
+				spellid = (Target->m_DummyAuras[ SPELL_HASH_ARCANE_POTENCY ]->EffectBasePoints[0] + 1) == 15 ? 57529 : 57531;
 		}break;
 	}
 

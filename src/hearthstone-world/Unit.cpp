@@ -230,8 +230,7 @@ Unit::Unit()
 	m_chargeSpells.clear();
 	m_chargeSpellRemoveQueue.clear();
 	tmpAura.clear();
-
-	memset(m_DummyAuras, 0, sizeof(int32) * NUM_DUMMY_AURAS);
+	m_DummyAuras.clear();
 }
 
 Unit::~Unit()
@@ -4301,10 +4300,10 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	summaryPCTmod += pVictim->ModDamageTakenByMechPCT[spellInfo->MechanicsType];
 
 	if((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) && 
-		caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] &&
+		caster->m_DummyAuras[ SPELL_HASH_TORMENT_THE_WEAK ] &&
 		pVictim->m_speedModifier < 0 )
 	{
-		summaryPCTmod += (caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] / 100.f);
+		summaryPCTmod += (caster->m_DummyAuras[ SPELL_HASH_TORMENT_THE_WEAK ]->EffectBasePoints[0] / 100.f);
 	}
 	
 	int32 res = (int32)((base_dmg+bonus_damage)*summaryPCTmod + bonus_damage); // 1.x*(base_dmg+bonus_damage) == 1.0*base_dmg + 1.0*bonus_damage + 0.x*(base_dmg+bonus_damage) -> we add the returned value to base damage so we do not add it here (function returns bonus only)

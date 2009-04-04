@@ -610,15 +610,6 @@ enum AURA_CHECK_RESULT
 	AURA_CHECK_RESULT_LOWER_BUFF_PRESENT	= 3,
 };
 
-enum DUMMY_AURAS
-{
-	DUMMY_AURA_TORMENT_THE_WEAK,
-	DUMMY_AURA_ARCANE_POTENCY,
-	DUMMY_AURA_ARCANE_EMPOWERMENT,
-	DUMMY_AURA_GLYPH_OF_FIREBALL,
-	NUM_DUMMY_AURAS
-};
-
 typedef std::list<struct ProcTriggerSpellOnSpell> ProcTriggerSpellOnSpellList;
 
 /************************************************************************/
@@ -1197,7 +1188,7 @@ public:
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
 
-	int32 m_DummyAuras[NUM_DUMMY_AURAS];
+	std::map<uint32, SpellEntry*> m_DummyAuras;
 
 protected:
 	Unit ();
