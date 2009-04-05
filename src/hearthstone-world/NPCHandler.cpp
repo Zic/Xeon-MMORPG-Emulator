@@ -414,7 +414,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 		TalkingWith->GetAIInterface()->StopMovement(180000);
  
 	// unstealth meh
-	if( _player->IsStealth() )
+	if( _player->InStealth() )
 		_player->RemoveAllAurasOfType( SPELL_AURA_MOD_STEALTH );
 
 	// reputation
