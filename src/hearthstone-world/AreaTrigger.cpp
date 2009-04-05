@@ -91,12 +91,15 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 		if(pMapInfo && pMapInfo->required_item && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->required_item, true))
 			return AREA_TRIGGER_FAILURE_NO_ATTUNE_I;
 
-		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE && 
-			!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[0], false) && 
-			!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[1], false))
-			return AREA_TRIGGER_FAILURE_NO_KEY;
-
-		if(pPlayer->getLevel()<(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) ? 80 : 70) && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
+		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE )
+		{
+			for(uint32 i = 0; i < 2; ++i) 
+			{
+				if(pMapInfo->heroic_key[i] && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[i], false))
+					return AREA_TRIGGER_FAILURE_NO_KEY;
+			}
+		}
+		if(pPlayer->getLevel()<uint32(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) ? 80 : 70) && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
 			return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
 	}
 	else
