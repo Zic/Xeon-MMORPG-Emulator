@@ -635,7 +635,7 @@ void EyeOfTheStorm::UpdateCPs()
 
 		for(; itr != itrend; ++itr)
 		{ 
-			if( !(*itr)->IsPvPFlagged() || (*itr)->IsStealth() || (*itr)->m_invisible || (*itr)->SchoolImmunityList[0] || (*itr)->m_bgFlagIneligible )
+			if( !(*itr)->IsPvPFlagged() || (*itr)->InStealth() || (*itr)->m_invisible || (*itr)->SchoolImmunityList[0] || (*itr)->m_bgFlagIneligible )
 				is_valid = false;
 			else
 				is_valid = true;
@@ -1079,4 +1079,5 @@ void EyeOfTheStorm::SetIsWeekend(bool isweekend)
 		extraHonorDiv = 12;
 	}
 }
+
 
