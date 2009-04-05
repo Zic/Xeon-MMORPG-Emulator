@@ -143,7 +143,7 @@ public:
 		
 		for(; itr != itrend; ++itr)
 		{
-			if( !(*itr)->IsPvPFlagged() || (*itr)->IsStealth() )
+			if( !(*itr)->IsPvPFlagged() || (*itr)->InStealth() )
 				is_valid = false;
 			else
 				is_valid = true;
