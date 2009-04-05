@@ -9421,6 +9421,9 @@ void Player::RemoveFromBattlegroundQueue(uint32 queueSlot, bool forced)
 		m_pendingBattleground[queueSlot] = NULLBATTLEGROUND;
 	}
 	m_bgIsQueued[queueSlot] = false;
+	m_bgQueueType[queueSlot] = 0;
+	m_bgQueueInstanceId[queueSlot] = 0;
+
 	BattlegroundManager.SendBattlegroundQueueStatus(plr_shared_from_this(), queueSlot);
 	sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_BATTLEGROUND_QUEUE_UPDATE_SLOT_1 + queueSlot);
 

@@ -55,10 +55,11 @@ const char * AreaTriggerFailureMessages[] = {
 	"You must have item \"%s\" to pass through here.",                                  //AREA_TRIGGER_FAILURE_NO_ATTUNE_I	
 	"You must have reached level %u before you can pass through here.",                 //AREA_TRIGGER_FAILURE_LEVEL				
 	"You must be in a party to pass through here.",                                     //AREA_TRIGGER_FAILURE_NO_GROUP			
-	"You do not have a required key(s) \"%s\" to pass through here.",                      //AREA_TRIGGER_FAILURE_NO_KEY				
+	"You do not have a required key(s) \"%s\" to pass through here.",                   //AREA_TRIGGER_FAILURE_NO_KEY				
 	"You must have reached level %u before you can enter heroic mode.",                 //AREA_TRIGGER_FAILURE_LEVEL_HEROIC	
 	"Don\'t have any idea why you can\'t pass through here.",                           //AREA_TRIGGER_FAILURE_NO_CHECK			
 	"You must have the \"Wrath of the Lich King\" expansion to access this content.",   //AREA_TRIGGER_FAILURE_NO_WOTLK			
+	"You are in queue for this raid group.",                                            //AREA_TRIGGER_FAILURE_IN_QUEUE
 };
 
 uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSession, PlayerPointer pPlayer, MapInfo * pMapInfo)
@@ -95,7 +96,7 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 			!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[1], false))
 			return AREA_TRIGGER_FAILURE_NO_KEY;
 
-		if(pPlayer->getLevel()<80 && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
+		if(pPlayer->getLevel()<(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) ? 80 : 70) && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
 			return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
 	}
 	else

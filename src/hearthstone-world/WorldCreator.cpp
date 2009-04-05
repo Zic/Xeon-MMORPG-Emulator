@@ -281,18 +281,16 @@ uint32 InstanceMgr::PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instance
 	{
 		inf->type = INSTANCE_NONRAID;
 		sGMLog.writefromsession(plr->GetSession(), "Started a raid instance %d [%s] as non_raid instance.", mapid, inf->name);
-		Log.Debug("InstanceMgr","Started a raid instance %d [%s] as non_raid instance.", mapid, inf->name);
+		DEBUG_LOG("InstanceMgr","Started a raid instance %d [%s] as non_raid instance.", mapid, inf->name);
 	}
 
 	in->m_mapInfo = inf;
 	in->m_isBattleground=false;
 	plr->SetInstanceID(in->m_instanceId);
-	if( plr->GetGroup() )
+	if( plr->GetGroup() && !plr->GetSession()->HasGMPermissions())//GM should not set the instanceID
 		pGroup->SetGroupInstanceID(in->m_instanceId);
-	Log.Debug("InstanceMgr", "Prepared new instance %u for player %u and group %u on map %u. (%u)",in->m_instanceId, in->m_creatorGuid, in->m_creatorGroup, in->m_mapId, in->m_instanceId);
+	DEBUG_LOG("InstanceMgr", "Prepared new instance %u for player %u and group %u on map %u. (%u)",in->m_instanceId, in->m_creatorGuid, in->m_creatorGroup, in->m_mapId, in->m_instanceId);
 
-
-	//	in->SaveToDB(); //saved when killed something..not on create
 
 	// apply it in the instance map
 	instancemap->insert( InstanceMap::value_type( in->m_instanceId, in ) );
@@ -363,7 +361,7 @@ MapMgrPointer InstanceMgr::GetInstance(ObjectPointer obj)
 						in->m_mapMgr = _CreateInstance(in);
 						m_mapLock.Release();
 						// first one to enter, set the group instance ID
-						if( plr->GetGroup() )
+						if( plr->GetGroup() && !plr->GetSession()->HasGMPermissions() )
 							plr->GetGroup()->SetGroupInstanceID(in->m_instanceId);
 						return in->m_mapMgr;
 					}
@@ -783,7 +781,8 @@ bool InstanceMgr::_DeleteInstance(Instance * in, bool ForcePlayersOut)
 		// otherwise, they will get a 60 second timeout telling them they are not in this instance's group.
 		if(in->m_mapMgr->HasPlayers())
 		{
-			GetFirstPlayer(in)->GetGroup()->SetGroupInstanceID(0);
+			if(GetFirstPlayer(in)->GetGroup())// only happens if GM is the first one in
+				GetFirstPlayer(in)->GetGroup()->SetGroupInstanceID(0);
 			if(ForcePlayersOut)
 				in->m_mapMgr->InstanceShutdown();
 			else
@@ -822,7 +821,11 @@ PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); ++itr )
 	{
 		if (itr->second && itr->second->IsPlayer())
-			return itr->second;
+		{
+			//GM's should not enter first !!
+			if(!itr->second->GetSession()->HasGMPermissions())
+				return itr->second;
+		}
 	}
 	return NULLPLR;
 

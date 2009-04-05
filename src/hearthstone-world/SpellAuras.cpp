@@ -1971,6 +1971,11 @@ void Aura::SpellAuraDummy(bool apply)
 				sEventMgr.RemoveEvents( shared_from_this(), EVENT_AURA_PERIODIC_TELEPORT );
 			}
 		}break;
+	case 26013: // deserter
+		{
+			if(apply)
+				SetNegative();
+		}break;
 	case 41425:
 		{
 			if( p_target != NULL )
