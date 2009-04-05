@@ -622,9 +622,9 @@ void Creature::CalcStat(uint32 type)
 }
 
 
-void Creature::RegenerateHealth()
+void Creature::RegenerateHealth(bool isinterrupted)
 {
-	if(m_limbostate || !m_canRegenerateHP)
+	if(m_limbostate || !m_canRegenerateHP || isinterrupted)
 		return;
 
 	uint32 cur=GetUInt32Value(UNIT_FIELD_HEALTH);
@@ -649,16 +649,17 @@ void Creature::RegenerateHealth()
 	SetUInt32Value(UNIT_FIELD_HEALTH,(cur>=mh)?mh:cur);
 }
 
-void Creature::RegenerateMana()
+void Creature::RegenerateMana(bool isinterrupted)
 {
-	float amt;
-	if (m_interruptRegen)
+	if (m_interruptRegen || isinterrupted)
 		return;
    
 	uint32 cur=GetUInt32Value(UNIT_FIELD_POWER1);
 	uint32 mm=GetUInt32Value(UNIT_FIELD_MAXPOWER1);
-	if(cur>=mm)return;
-	amt=(getLevel()+10)*PctPowerRegenModifier[POWER_TYPE_MANA];
+	if(cur>=mm)
+		return;
+
+	float amt=(getLevel()+10)*PctPowerRegenModifier[POWER_TYPE_MANA]/10;
 	
 	//Apply shit from conf file
 	amt*=sWorld.getRate(RATE_POWER1);
@@ -677,7 +678,7 @@ void Creature::RegenerateFocus()
 	uint32 cur=GetUInt32Value(UNIT_FIELD_POWER3);
 	uint32 mm=GetUInt32Value(UNIT_FIELD_MAXPOWER3);
 	if(cur>=mm)return;
-	float amt = 10.0f * PctPowerRegenModifier[POWER_TYPE_FOCUS];
+	float amt = 1.0f * PctPowerRegenModifier[POWER_TYPE_FOCUS];
 	cur+=(uint32)amt;
 	SetUInt32Value(UNIT_FIELD_POWER3,(cur>=mm)?mm:cur);
 }
@@ -1339,7 +1340,7 @@ void Creature::DestroyCustomWaypointMap()
 
 void Creature::RemoveLimboState(UnitPointer healer)
 {
-	if(!m_limbostate != true)
+	if(!m_limbostate)
 		return;
 
 	m_limbostate = false;
