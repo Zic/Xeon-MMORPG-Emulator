@@ -675,7 +675,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 			PlayerPointer pl = TO_PLAYER(pAttacker);
 			if( pl->m_outStealthDamageBonusPct )
 			{
-				if( pl->IsStealth() )
+				if( pl->InStealth() )
 				{
 					result *= ((float(TO_PLAYER(pAttacker)->m_outStealthDamageBonusPct) / 100.0f) + 1.0f);
 				}
@@ -707,6 +707,7 @@ bool isEven (int num)
 
 	return false;
 }
+
 
 
 
