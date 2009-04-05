@@ -1255,7 +1255,7 @@ void Player::_EventAttack( bool offhand )
 		// Set to weapon time.
 		setAttackTimer(0, offhand);		
 
-		if(IsStealth())
+		if(InStealth())
 		{
 			RemoveAura( m_stealth );
 			SetStealth(0);
@@ -5181,7 +5181,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 
 		if(m_deathVision) // if we have arena death-vision we can see everything
 		{
-			if(obj->IsPlayer() && TO_PLAYER(obj)->IsStealth())
+			if(obj->IsPlayer() && TO_PLAYER(obj)->InStealth())
 				return false;
 
 			return true;
@@ -5236,7 +5236,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 						return bGMTagOn; // GM can see invisible players
 				}
 
-				if(pObj->IsStealth()) // Stealth Detection
+				if(pObj->InStealth()) // Stealth Detection
 				{
 					if(GetGroup() && pObj->GetGroup() == GetGroup()) // can see stealthed group members
 						return true;
@@ -11131,54 +11131,26 @@ void Player::VampiricSpell(uint32 dmg, UnitPointer pTarget)
 {
 	float fdmg = float(dmg);
 	uint32 bonus;
-	int32 perc;
 	Group * pGroup = GetGroup();
 	SubGroup * pSubGroup = (pGroup != NULL) ? pGroup->GetSubGroup(GetSubGroup()) : NULL;
 	GroupMembersSet::iterator itr;
-
-	if( ( !m_vampiricEmbrace && !m_vampiricTouch ) || getClass() != PRIEST )
-		return;
-
-	if( m_vampiricEmbrace > 0 && pTarget->m_hasVampiricEmbrace > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_EMBRACE, plr_shared_from_this()) )
+	if( m_vampiricEmbrace > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_EMBRACE, plr_shared_from_this()) )
 	{
-		perc = 15;
-		uint32 spellgroup[3] = {4, 0, 0};
-		SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, spellgroup);
-
-		bonus = float2int32(fdmg * (float(perc)/100.0f));
+		int32 pct = 15;
+		uint32 sgt[3] = {4,0,0};
+		SM_PIValue(SM[SMT_MISC_EFFECT][1],&pct,sgt);
+		bonus = float2int32(fdmg * pct/100.0f);
 		if( bonus > 0 )
 		{
 			Heal(plr_shared_from_this(), 15286, bonus);
-			
+
 			// loop party
 			if( pSubGroup != NULL )
 			{
 				for( itr = pSubGroup->GetGroupMembersBegin(); itr != pSubGroup->GetGroupMembersEnd(); ++itr )
 				{
 					if( (*itr)->m_loggedInPlayer != NULL && (*itr) != m_playerInfo )
-						Heal( (*itr)->m_loggedInPlayer, 15286, bonus );
-				}
-			}
-		}
-	}
-
-	if( m_vampiricTouch > 0 && pTarget->m_hasVampiricTouch > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_TOUCH, plr_shared_from_this()) )
-	{
-		perc = 5;
-		//SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, 4);
-
-		bonus = float2int32(fdmg * (float(perc)/100.0f));
-		if( bonus > 0 )
-		{
-			Energize(plr_shared_from_this(), 34919, bonus, POWER_TYPE_MANA);
-
-			// loop party
-			if( pSubGroup != NULL )
-			{
-				for( itr = pSubGroup->GetGroupMembersBegin(); itr != pSubGroup->GetGroupMembersEnd(); ++itr )
-				{
-					if( (*itr)->m_loggedInPlayer != NULL && (*itr) != m_playerInfo && (*itr)->m_loggedInPlayer->GetPowerType() == POWER_TYPE_MANA && (*itr)->m_loggedInPlayer->isAlive() )
-						Energize((*itr)->m_loggedInPlayer, 34919, bonus, POWER_TYPE_MANA);
+						Heal( (*itr)->m_loggedInPlayer, 15286, bonus / 5 );
 				}
 			}
 		}

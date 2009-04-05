@@ -196,7 +196,6 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				sp->autocast_type=(uint32)-1;
 				sp->custom_pointer=false;
 				sp->procCounter=0;
-				sp->first_use=false;
 
 				//Set cooldowntimer
 				sp->cooldowntime=getMSTime();
@@ -229,26 +228,26 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 							//now this will not be exact cooldown but maybe a bigger one to not make him spam spells to often
 							int cooldown = 0;
 
-							if(sp->spell->DurationIndex)
+							if (sp->spell->Attributes & ATTRIBUTES_PASSIVE) //passive skills
 							{
-								SpellDuration *sd = dbcSpellDuration.LookupEntry(sp->spell->DurationIndex);
-								cooldown += GetDuration(sd);
+								cooldown = 1000*60*60*4; //once per 4 hours :P
+							}else{
+								if( sp->spell->CastingTimeIndex )
+									cooldown = GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
+
+								uint32 maxRT = std::max(sp->spell->RecoveryTime, sp->spell->CategoryRecoveryTime);
+								if (maxRT>cooldown)
+									cooldown = maxRT;
 							}
 
-							if( sp->spell->CastingTimeIndex )
-								cooldown += GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
-
-							cooldown += sp->spell->RecoveryTime;
 							if(cooldown <= 0)
 							{
-								Log.Warning("AIAgent","SpellId %u has no CoolDownTime in DBC. Forced to 20 seconds.", spellID );
-								sp->cooldown=20000;
-							}
-							else
+								Log.Warning("AIAgent","SpellId %u has no CoolDownTime in DBC. Forced to GCD.", spellID );
+								sp->cooldown=1500;
+							}else{
 								sp->cooldown=cooldown;
+							}
 						}
-						if( sp->spellType == STYPE_BUFF)
-							sp->spelltargetType = TTYPE_CASTER;
 						counter += 1;
 					}break;
 	
@@ -745,5 +744,6 @@ void Storage_LoadAdditionalTables()
 		}
 	}
 }
+
 
 

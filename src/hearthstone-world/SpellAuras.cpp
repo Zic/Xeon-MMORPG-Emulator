@@ -706,7 +706,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 					p->CombatModeDelay = COMBAT_DECAY_TIME;
 			}*/
 
-			if( target->IsStealth() && target != caster )
+			if( target->InStealth() && target != caster )
 				target->RemoveStealth();
 		}
 		else 
@@ -2300,40 +2300,22 @@ void Aura::SpellAuraDummy(bool apply)
 			if(apply)
 			{
 				SetNegative();
-				UnitPointer caster =this->GetUnitCaster();
+				UnitPointer caster =GetUnitCaster();
 				if(caster && caster->IsPlayer())
 					TO_PLAYER(caster)->m_vampiricEmbrace++;
-				++m_target->m_hasVampiricEmbrace;
 			}
 			else
 			{
-				UnitPointer caster =this->GetUnitCaster();
+				UnitPointer caster =GetUnitCaster();
 				if(caster && caster->IsPlayer())
 					TO_PLAYER(caster)->m_vampiricEmbrace--;
-				--m_target->m_hasVampiricEmbrace;
 			}
 		}break;
 	case 34914://Vampiric Touch
 	case 34916:
 	case 34917:
 		{
-			if(apply)
-			{
-				SetNegative();
-				UnitPointer caster =this->GetUnitCaster();
-				if(caster && caster->IsPlayer())
-					++TO_PLAYER(caster)->m_vampiricTouch;
-
-				++m_target->m_hasVampiricTouch;
-			}
-			else
-			{
-				UnitPointer caster =this->GetUnitCaster();
-				if(caster && caster->IsPlayer())
-					--TO_PLAYER(caster)->m_vampiricTouch;
-
-				--m_target->m_hasVampiricTouch;
-			}
+			//TODO: Implement. Add proc spell
 		}break;
 	case 18182:
 	case 18183:
@@ -3305,12 +3287,6 @@ void Aura::SpellAuraModStun(bool apply)
 		//warrior talent - second wind triggers on stun and immobilize. This is not used as proc to be triggered always !
 		if(p_target && m_spellProto->MechanicsType != MECHANIC_INCAPACIPATED)
 			p_target->EventStunOrImmobilize();
-
-		if(p_target && p_target->IsStealth())
-		{
-			p_target->RemoveAura( p_target->m_stealth );
-			p_target->SetStealth(0);
-		}
 	}
 	else
 	{
@@ -3529,10 +3505,9 @@ void Aura::SpellAuraModStealth(bool apply)
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
 			m_target->SetStealth(GetSpellId());
 
-		if( m_spellProto->NameHash == SPELL_HASH_STEALTH)
-			m_target->SetFlag(UNIT_FIELD_BYTES_2,0x1E000000);//sneak anim
-
+		m_target->SetFlag(UNIT_FIELD_BYTES_2,0x1E000000);//sneak anim
 		m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x020000);
+
 		if( m_target->IsPlayer() )
 			m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
@@ -3545,9 +3520,7 @@ void Aura::SpellAuraModStealth(bool apply)
 			// check for stealh spells
 			PlayerPointer p_caster = TO_PLAYER( m_target );
 			uint32 stealth_id = 0;
-			SpellSet::iterator itr = p_caster->mSpells.begin();
-			SpellSet::iterator end = p_caster->mSpells.end();
-			for(; itr != end; ++itr)
+			for(SpellSet::iterator itr = p_caster->mSpells.begin(); itr != p_caster->mSpells.end(); ++itr)
 			{
 				if((*itr) == 1787 || (*itr) == 1786 || (*itr) == 1785 || (*itr) == 1784)
 				{
@@ -3558,46 +3531,32 @@ void Aura::SpellAuraModStealth(bool apply)
 			if(stealth_id)
 				p_caster->CastSpell(p_caster, dbcSpell.LookupEntry(stealth_id), true);
 
-			if(p_caster->IsMounted())
-				p_caster->RemoveAura(p_caster->m_MountSpellId);
-
-			if(p_caster->m_bg && p_caster->m_bgHasFlag)
-			{
-				if(p_caster->m_bg->GetType() == BATTLEGROUND_WARSONG_GULCH)
-				{
-					TO_WARSONGGULCH(p_caster->m_bg)->DropFlag(p_caster);
-				}
-				if(p_caster->m_bg->GetType() == BATTLEGROUND_EYE_OF_THE_STORM)
-				{
-					TO_EYEOFTHESTORM(p_caster->m_bg)->DropFlag(p_caster);
-				}
-			}
+			/*if(p_caster->IsMounted())
+			p_caster->RemoveAura(p_caster->m_MountSpellId);*/
 		}
 	}
 	else 
 	{
+		m_target->m_stealthLevel -= mod->m_amount;
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
 			m_target->SetStealth(0);
 
-		m_target->m_stealthLevel -= mod->m_amount;
 		if( m_spellProto->NameHash == SPELL_HASH_STEALTH) 
-			m_target->RemoveFlag(UNIT_FIELD_BYTES_2,0x1E000000);
-
-		m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x020000);
-
-		if( m_target->GetTypeId() == TYPEID_PLAYER )
 		{
-			m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
-			/*WorldPacket data(12);
-			data.SetOpcode(SMSG_COOLDOWN_EVENT);
-			data << (uint32)GetSpellProto()->Id << m_target->GetGUID();
-			TO_PLAYER( m_target )->GetSession()->SendPacket (&data);*/
-			packetSMSG_COOLDOWN_EVENT cd;
-			cd.guid = m_target->GetGUID();
-			cd.spellid = m_spellProto->Id;
-			TO_PLAYER(m_target)->GetSession()->OutPacket( SMSG_COOLDOWN_EVENT, sizeof(packetSMSG_COOLDOWN_EVENT), &cd);
-			if( TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod && TO_PLAYER(m_target)->m_outStealthDamageBonusPct )
-				TO_PLAYER(m_target)->m_outStealthDamageBonusTimer = (uint32)UNIXTIME + TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod;
+			m_target->RemoveFlag(UNIT_FIELD_BYTES_2,0x1E000000);
+			m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x020000);
+
+			if( m_target->GetTypeId() == TYPEID_PLAYER )
+			{
+				m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
+
+				packetSMSG_COOLDOWN_EVENT cd;
+				cd.guid = m_target->GetGUID();
+				cd.spellid = m_spellProto->Id;
+				TO_PLAYER(m_target)->GetSession()->OutPacket( SMSG_COOLDOWN_EVENT, sizeof(packetSMSG_COOLDOWN_EVENT), &cd);
+				if( TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod && TO_PLAYER(m_target)->m_outStealthDamageBonusPct )
+					TO_PLAYER(m_target)->m_outStealthDamageBonusTimer = (uint32)UNIXTIME + TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod;
+			}
 		}
 	}
 
@@ -5949,40 +5908,13 @@ void Aura::SpellAuraMechanicImmunity(bool apply)
 		}
 	}
 
-//sLog.outString( "Aura::SpellAuraMechanicImmunity begun." );
 	if(apply)
 	{
-		//sLog.outString( "mod->m_miscValue = %u" , (uint32) mod->m_miscValue );
-		//sLog.outString( "Incrementing MechanicsDispels (current value: %u, new val: %u)" , m_target->MechanicsDispels[mod->m_miscValue] , m_target->MechanicsDispels[mod->m_miscValue] + 1 );
-		assert(mod->m_miscValue < 27);
+		assert(mod->m_miscValue < MECHANIC_COUNT);
 		m_target->MechanicsDispels[mod->m_miscValue]++;
 
-		if(mod->m_miscValue != 16 && mod->m_miscValue != 25 && mod->m_miscValue != 19) // dont remove bandages, Power Word and protection effect
+		if(mod->m_miscValue != MECHANIC_HEALING && mod->m_miscValue != MECHANIC_INVULNARABLE && mod->m_miscValue != MECHANIC_SHIELDED) // dont remove bandages, Power Word and protection effect
 		{
-			/*
-			sLog.outString( "Removing values because we're not a bandage, PW:S or forbearance" );
-			for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
-				if(m_target->m_auras[x])
-				{
-					sLog.outString( "Found aura in %u" , x );
-					if(m_target->m_auras[x]->GetSpellProto()->MechanicsType == (uint32)mod->m_miscValue)
-					{
-						sLog.outString( "Removing aura: %u, ID %u" , x , m_target->m_auras[x]->GetSpellId() );
-						m_target->m_auras[x]->Remove();
-					}
-					else if(mod->m_miscValue == 11) // if got immunity for slow, remove some that are not in the mechanics
-					{
-						sLog.outString( "Removing roots" );
-						for(int i=0;i<3;i++)
-							if(m_target->m_auras[x]->GetSpellProto()->EffectApplyAuraName[i] == SPELL_AURA_MOD_DECREASE_SPEED)
-							{
-								sLog.outString( "Removed snare aura in slot %u, spellid %u" , x , m_target->m_auras[x]->GetSpellId() );
-								m_target->m_auras[x]->Remove();
-								break;
-							}
-					}
-				}
-			*/
 			/* Supa's test run of Unit::RemoveAllAurasByMechanic */
 			if( m_target ) // just to be sure?
 			{
@@ -6042,7 +5974,7 @@ void Aura::SpellAuraMounted(bool apply)
 			p_target->GetSummon()->Remove(false, true, true);	// hunter pet -> just remove for later re-call
 	}
 
-	if(m_target->IsStealth())
+	if(m_target->InStealth())
 	{
 		uint32 id = m_target->m_stealth;
 		m_target->m_stealth = 0;

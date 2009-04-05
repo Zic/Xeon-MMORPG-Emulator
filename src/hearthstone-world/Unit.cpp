@@ -198,7 +198,6 @@ Unit::Unit()
 	m_extraAttackCounter = false;
 	m_temp_summon=false;
 	m_interruptedRegenTime = 0;
-	m_hasVampiricEmbrace = m_hasVampiricTouch = 0;
 	mAngerManagement = false;
 	mRecentlyBandaged = false;
 
@@ -1084,14 +1083,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 spell->prepare( &targets );
                                 continue;
                             }break;*/
-						//mage - Arcane Blast proc
-						case 36032:
-							{
-								if( CastingSpell == NULL )
-									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_ARCANE_BLAST ) //Arcane Blast
-									continue;
-							}break;
 						//warlock - Shadow Embrace
 						case 32386:
 						case 32388:
@@ -1418,18 +1409,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash != SPELL_HASH_AMBUSH && //Ambush
 									CastingSpell->NameHash != SPELL_HASH_GARROTE )  //Garrote
 									continue;
-							}break;
-						//Priest - Shadowguard
-						case 28377:
-						case 28378:
-						case 28379:
-						case 28380:
-						case 28381:
-						case 28382:
-						case 28385:
-							{
-								if( CastingSpell && ( unit_shared_from_this() == victim || !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) ) //no self casts allowed or beneficial spells
-									continue;//we can proc on ranged weapons too
 							}break;
 						//Priest - blackout
 						case 15269:
@@ -2151,21 +2130,11 @@ void Unit::RegenerateHealth()
 		return;
 
 	// player regen
-	if(this->IsPlayer())
+	if(IsPlayer())
 	{
-		// These only NOT in combat
-		if(!CombatStatus.IsInCombat())
-		{
-			plr_shared_from_this()->RegenerateHealth(false);
-		}
-		else
-			plr_shared_from_this()->RegenerateHealth(true);
-	}
-	else
-	{
-		// Only regen health out of combat
-		if(!CombatStatus.IsInCombat())
-			creature_shared_from_this()->RegenerateHealth();
+		plr_shared_from_this()->RegenerateHealth(CombatStatus.IsInCombat());
+	}else{
+		creature_shared_from_this()->RegenerateHealth(CombatStatus.IsInCombat());
 	}
 }
 
@@ -2195,24 +2164,19 @@ void Unit::RegeneratePower(bool isinterrupted)
 
 		case POWER_TYPE_RAGE:
 			{
+				m_P_regenTimer = 3000;
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					if (HasAura(29131)) //Fix for bloodrage, no decay
-					{	m_P_regenTimer = 3000;
-						plr_shared_from_this()->LoseRage(0);
-					}
-					else
-					{
-						m_P_regenTimer = 3000;
-						plr_shared_from_this()->LoseRage(30);
-					}
-				}
-				else
-				{
 					if (plr_shared_from_this()->mAngerManagement)
 					{
-						m_P_regenTimer = 3000;
+						plr_shared_from_this()->LoseRage(20);
+					}else{
+						plr_shared_from_this()->LoseRage(30);
+					}
+				}else{
+					if (plr_shared_from_this()->mAngerManagement)
+					{
 						plr_shared_from_this()->LoseRage(-10);
 					}
 				}
@@ -2259,7 +2223,7 @@ void Unit::RegeneratePower(bool isinterrupted)
 		switch(powertype)
 		{
 		case POWER_TYPE_MANA:
-			creature_shared_from_this()->RegenerateMana();
+			creature_shared_from_this()->RegenerateMana(isinterrupted);
 			break;
 		case POWER_TYPE_FOCUS:
 			creature_shared_from_this()->RegenerateFocus();

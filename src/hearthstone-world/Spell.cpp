@@ -325,7 +325,7 @@ void Spell::FillSpecifiedTargetsInArea( float srcx, float srcy, float srcz, uint
 void Spell::FillSpecifiedTargetsInArea(uint32 i,float srcx,float srcy,float srcz, float range, uint32 specification)
 {
 	//TargetsList *tmpMap=&m_targetUnits[i];
-    //IsStealth()
+    //InStealth()
     float r = range * range;
 	//uint8 did_hit_result;
     for(unordered_set<ObjectPointer >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
@@ -334,7 +334,7 @@ void Spell::FillSpecifiedTargetsInArea(uint32 i,float srcx,float srcy,float srcz
         if( !( (*itr)->IsUnit() ) || ! TO_UNIT( *itr )->isAlive())
             continue;
         
-        //TO_UNIT(*itr)->IsStealth()
+        //TO_UNIT(*itr)->InStealth()
         if( m_spellInfo->TargetCreatureType)
         {
             if((*itr)->GetTypeId()!= TYPEID_UNIT)
@@ -1038,7 +1038,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	{
 		if( GetGameObjectTarget() || GetSpellProto()->Id == 21651)
 		{
-			if( p_caster->IsStealth() )
+			if( p_caster->InStealth() )
 			{
 				p_caster->RemoveAura( p_caster->m_stealth );
 			}
@@ -1342,6 +1342,13 @@ void Spell::cast(bool check)
 			if(!m_triggeredSpell)
 				AddCooldown();
 
+			if (u_caster)
+			{
+				if (u_caster->InStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) && !m_triggeredSpell)
+					u_caster->RemoveStealth();
+			}
+
+
 			if( p_caster )
 			{
 				if( m_spellInfo->NameHash == SPELL_HASH_SLAM)
@@ -1349,16 +1356,6 @@ void Spell::cast(bool check)
 					/* slam - reset attack timer */
 					p_caster->setAttackTimer( 0, true );
 					p_caster->setAttackTimer( 0, false );
-				}
-				if( p_caster->IsStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) )
-				{
-					/* talents procing - don't remove stealth either */
-					if (!(m_spellInfo->Attributes & ATTRIBUTES_PASSIVE) && 
-						!( pSpellId && dbcSpell.LookupEntry(pSpellId)->Attributes & ATTRIBUTES_PASSIVE ) )
-					{
-						p_caster->RemoveAura(p_caster->m_stealth);
-						p_caster->m_stealth = 0;
-					}
 				}
 
 				// Arathi Basin opening spell, remove stealth, invisibility, etc. 
@@ -1696,7 +1693,7 @@ void Spell::AddTime(uint32 type)
 void Spell::update(uint32 difftime)
 {
 	// ffs stealth capping
-	if( p_caster && GetGameObjectTarget() && p_caster->IsStealth() )
+	if( p_caster && GetGameObjectTarget() && p_caster->InStealth() )
 	{
 		p_caster->RemoveAura( p_caster->m_stealth );
 	}
@@ -2681,8 +2678,6 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 6788;
 	else if( m_spellInfo->Id == 45438) // Cast spell Hypothermia
 		spellid = 41425;
-	else if( m_spellInfo->Id == 30451) // Cast spell Arcane Blast
-		spellid = 36032;
 	else if( m_spellInfo->Id == 20572 || m_spellInfo->Id == 33702 || m_spellInfo->Id == 33697) // Cast spell Blood Fury
 		spellid = 23230;
 	else if( m_spellInfo->Id == 31884)
@@ -2949,7 +2944,7 @@ uint8 Spell::CanCast(bool tolerate)
 		// backstab/ambush
 		if( m_spellInfo->NameHash == SPELL_HASH_BACKSTAB || m_spellInfo->NameHash == SPELL_HASH_AMBUSH )
 		{
-			if( m_spellInfo->NameHash == SPELL_HASH_AMBUSH && !p_caster->IsStealth() )
+			if( m_spellInfo->NameHash == SPELL_HASH_AMBUSH && !p_caster->InStealth() )
 				return SPELL_FAILED_ONLY_STEALTHED;
 
 			ItemPointer pMainHand = p_caster->GetItemInterface()->GetInventoryItem( INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_MAINHAND );
@@ -3810,7 +3805,6 @@ uint8 Spell::CanCast(bool tolerate)
 						}break;
 
 					case 0xF60291F4: //Death Wish
-					case 0xD77038F4: //Fear Ward
 					case 0x19700707: //Berserker Rage
 						{
 							if( u_caster->m_special_state & UNIT_STATE_FEAR )

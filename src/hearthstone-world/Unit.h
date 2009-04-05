@@ -33,7 +33,7 @@ bool SERVER_DECL Rand(float);
 #define SPELL_GROUPS	96
 #define SPELL_MODIFIERS 30
 #define DIMINISH_GROUPS	13
-#define NUM_MECHANIC 31
+#define NUM_MECHANIC 32
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 
@@ -782,7 +782,7 @@ public:
 	HEARTHSTONE_INLINE int32 GetStealthLevel() { return m_stealthLevel; }
 	HEARTHSTONE_INLINE int32 GetStealthDetectBonus() { return m_stealthDetectBonus; }
 	HEARTHSTONE_INLINE void SetStealth(uint32 id) { m_stealth = id; }
-	HEARTHSTONE_INLINE bool IsStealth() { return (m_stealth!=0 ? true : false); }
+	HEARTHSTONE_INLINE bool InStealth() { return (m_stealth!=0 ? true : false); }
 	float detectRange;
 
 	// Invisibility
@@ -961,9 +961,9 @@ public:
 	uint64 stalkedby;
 	uint32 dispels[10];
 	bool trackStealth;
-	uint32 MechanicsDispels[27];
-	float MechanicsResistancesPCT[27]; 
-	float ModDamageTakenByMechPCT[27];
+	uint32 MechanicsDispels[NUM_MECHANIC];
+	float MechanicsResistancesPCT[NUM_MECHANIC]; 
+	float ModDamageTakenByMechPCT[NUM_MECHANIC];
 	//int32 RangedDamageTakenPct; 
 
 	//SM
@@ -1174,8 +1174,6 @@ public:
 	void SetPower(uint32 type, int32 value);
 
 	bool HasAurasOfNameHashWithCaster(uint32 namehash, UnitPointer caster);
-	int8 m_hasVampiricTouch;
-	int8 m_hasVampiricEmbrace;
 	bool mAngerManagement;
 	bool mRecentlyBandaged;
 

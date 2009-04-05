@@ -1171,14 +1171,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->EffectMiscValue[0] = SMT_MISC_EFFECT;
 				}break;
-		
-			//rogue	-	Vanish : Second	Trigger	Spell
-			case  18461:
-			case  36554:
-				{
-						sp->AttributesEx |=	ATTRIBUTESEX_NOT_BREAK_STEALTH;
-				}break;
-		
 			//rogue	-	Mace Specialization.
 			case  13709:
 			case  13800:
@@ -1246,58 +1238,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	PROC_ON_CRIT_HIT_VICTIM;
 				}break;
-
-			//Priest:	Shadowguard
-			case  18137:
+			//Priest:	Improved Vampiric Embrace (Rank1)
+			case 27839:
 				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28377;
-				}break;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_ADD_PCT_MODIFIER;
 
-			case  19308:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28378;
 				}break;
-
-			case  19309:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28379;
-				}break;
-
-			case  19310:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28380;
-				}break;
-
-			case  19311:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28381;
-				}break;
-
-			case  19312:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28382;
-				}break;
-
-			case  25477:
-				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM	|	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->proc_interval	=	3000;	//every	3	seconds
-						sp->EffectTriggerSpell[0]	=	28385;
-				}break;
-
-		
 			//Paladin: Seal	of Wisdom
 			case  20166:
 				{
@@ -1901,11 +1847,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;	
 		
 			//Mage - Arcane	Blast
-			case  30451:
+			case  36032:
 				{
-						sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[1]	=	36032;
-						sp->procFlags	=	PROC_ON_CAST_SPECIFIC_SPELL;
+						sp->procFlags	|=	PROC_TARGET_SELF;
+						sp->c_is_flags |= SPELL_FLAG_IS_FORCEDDEBUFF;
 				}break;
 		
 			//rogue	-	Seal Fate

@@ -21,8 +21,8 @@
 
 #include "StdAfx.h"
 
-#define CREATESPELL(a,b,c,d) \
-	SpellPointer(new Spell( a, b, c, (d == NULL ? NULLAURA : d)));
+#define CREATESPELL(caster,info,triggered,aur) \
+	SpellPointer(new Spell( caster, info, triggered, (aur == NULL ? NULLAURA : aur)));
 
 pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_NULL - 0
@@ -585,7 +585,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 	if(!dmg) return;
 
 	// stealthed stuff
-	if( m_projectileWait && unitTarget->IsStealth() )
+	if( m_projectileWait && unitTarget->InStealth() )
 		return;
 
 	/**************************************************************************
@@ -3120,7 +3120,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 	if(!p_caster)
 		return;
 
-	if( p_caster->IsStealth() )
+	if( p_caster->InStealth() )
 	{
 		p_caster->RemoveAura(p_caster->m_stealth);
 		p_caster->m_stealth = 0;
@@ -4344,7 +4344,7 @@ void Spell::SpellEffectThreat(uint32 i) // Threat
 
 void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 {
-	if(!unitTarget )
+	if(!unitTarget || !m_caster )
 		return;
 
 	SpellEntry *spe = dbcSpell.LookupEntryForced(m_spellInfo->EffectTriggerSpell[i]);
@@ -4352,7 +4352,7 @@ void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 		return;
 
 	SpellPointer sp=CREATESPELL(m_caster,spe,true,NULLAURA);
-	SpellCastTargets tgt(unitTarget->GetGUID());
+	SpellCastTargets tgt((spe->procFlags & PROC_TARGET_SELF) ? m_caster->GetGUID() :unitTarget->GetGUID());
 	sp->prepare(&tgt);
 }
 
@@ -5134,7 +5134,7 @@ void Spell::SpellEffectDuel(uint32 i) // Duel
 		return;
 	}
 
-	if (p_caster->IsStealth())
+	if (p_caster->InStealth())
 	{
 		SendCastResult(SPELL_FAILED_CANT_DUEL_WHILE_STEALTHED);
 		return; // Player is stealth

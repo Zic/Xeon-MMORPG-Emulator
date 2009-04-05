@@ -2080,8 +2080,8 @@ public:
 	uint32 m_outStealthDamageBonusPeriod;
 	uint32 m_outStealthDamageBonusTimer;
 
-	int16 m_vampiricEmbrace;
-	int16 m_vampiricTouch;
+	uint32 m_vampiricEmbrace;
+	uint32 m_vampiricTouch;
 	void VampiricSpell(uint32 dmg, UnitPointer pTarget);
 
 	// grounding totem

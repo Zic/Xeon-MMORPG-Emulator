@@ -92,7 +92,6 @@ AIInterface::AIInterface()
 
 	disable_targeting = false;
 
-	last_found_spell = NULL;
 	next_spell_time = 0;
 
 	waiting_for_cooldown = false;
@@ -393,7 +392,6 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				FollowDistance_backup = FollowDistance;
 				FollowDistance = 0.0f;
 
-				m_aiTargets.clear(); // we'll get a new target after we are unfeared
 				m_fleeTimer = 0;
 				m_hasFled = false;
 				m_hasCalledForHelp = false;
@@ -1215,7 +1213,7 @@ void AIInterface::DismissPet()
 
 void AIInterface::AttackReaction(UnitPointer pUnit, uint32 damage_dealt, uint32 spellId)
 {
-	if( m_AIState == STATE_EVADE || m_fleeTimer != 0 || !pUnit || !pUnit->isAlive() || m_Unit->IsPacified() || m_Unit->IsFeared() || m_Unit->IsStunned() || !m_Unit->isAlive() )
+	if( m_AIState == STATE_EVADE || m_fleeTimer != 0 || !pUnit || !pUnit->isAlive() || !m_Unit->isAlive() )
 	{
 		return;
 	}
@@ -1239,7 +1237,7 @@ bool AIInterface::HealReaction(UnitPointer caster, UnitPointer victim, uint32 am
 {
 	if(!caster || !victim)
 	{
-		printf("!!!BAD POINTER IN AIInterface::HealReaction!!!\n");
+		//printf("!!!BAD POINTER IN AIInterface::HealReaction!!!\n");
 		return false;
 	}
 
@@ -1523,32 +1521,30 @@ UnitPointer AIInterface::FindHealTargetForSpell(AI_Spell *sp)
 
 	if(sp)
 	{
-		if(sp->spellType == STYPE_HEAL)
+		ASSERT(sp->spellType == STYPE_HEAL);
+
+		uint32 cur = m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) + 1;
+		uint32 max = m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) + 1;
+		float healthPercent = float(cur) / float(max);
+		if(healthPercent <= sp->floatMisc1 && !m_Unit->HasActiveAura(sp->spell->Id,m_Unit->GetGUID())) // Heal ourselves cause we got too low HP
 		{
-			uint32 cur = m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) + 1;
-			uint32 max = m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) + 1;
-			float healthPercent = float(cur / max);
-			if(healthPercent <= sp->floatMisc1) // Heal ourselves cause we got too low HP
+			sp->spelltargetType = TTYPE_CASTER;
+			m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, 0);
+			return m_Unit;
+		}
+		for(AssistTargetSet::iterator i = m_assistTargets.begin(); i != m_assistTargets.end(); ++i)
+		{
+			if(!(*i)->isAlive())
+				continue;
+
+			cur = (*i)->GetUInt32Value(UNIT_FIELD_HEALTH);
+			max = (*i)->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+			healthPercent = float(cur / max);
+			if(healthPercent <= sp->floatMisc1 && !(*i)->HasActiveAura(sp->spell->Id,m_Unit->GetGUID()))
 			{
-				sp->spelltargetType = TTYPE_CASTER;
-				m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, 0);
-				return m_Unit;
-			}
-			for(AssistTargetSet::iterator i = m_assistTargets.begin(); i != m_assistTargets.end(); ++i)
-			{
-				if(!(*i)->isAlive())
-				{
-					continue;
-				}
-				cur = (*i)->GetUInt32Value(UNIT_FIELD_HEALTH);
-				max = (*i)->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-				healthPercent = float(cur / max);
-				if(healthPercent <= sp->floatMisc1) // Heal ourselves cause we got too low HP
-				{
-					sp->spelltargetType = TTYPE_SINGLETARGET;
-					m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, (*i)->GetGUID());
-					return (*i); // heal Assist Target which has low HP
-				}
+				sp->spelltargetType = TTYPE_SINGLETARGET;
+				m_Unit->SetUInt64Value(UNIT_FIELD_TARGET, (*i)->GetGUID());
+				return (*i); // heal Assist Target which has low HP
 			}
 		}
 	}
@@ -2911,17 +2907,17 @@ AI_Spell *AIInterface::getSpell()
 			for(list<AI_Spell*>::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
 			{
 				sp = (*itr);
-			
+
+				//don't waste our time if we already have spell in priority
+				if (def_spell && def_spell->spellType > sp->spellType)
+					continue;
+
 				// Wtf?? There should be only spells on the list
 				if(sp->agent != AGENT_SPELL)
 				{
-					Log.Error("AI_Agent","Agent entry %u is loaded, but not valid",sp->agent); 
+					//Log.Warning("AI_Agent","Agent entry %u is loaded, but not valid",sp->agent); 
 					continue;
 				}
-				//check if we arent casting the same spell twice when we have more then 1 spell in list.
-				//Size can be used safely, as only AGENT_SPELL where added to the list during loading.
-				if( last_found_spell == sp && m_spells.size() > 1 )
-					continue;
 
 				// skip when max proccount reached.	
 				if((sp->procCount && sp->procCounter >= sp->procCount ))
@@ -2935,60 +2931,40 @@ AI_Spell *AIInterface::getSpell()
 				if(sp->procChance < 100 && !Rand(sp->procChance))
 					continue;
 
-				// Don't bother if we have this BUFF already
-				if (sp->spellType == STYPE_BUFF && m_Unit->HasActiveAura(sp->spell->Id))
-					continue;
-
-				//Skipp if health threshold isn't met (for non-healing spells; healing spells have their own checks)
-				if( sp->spellType != STYPE_HEAL && sp->floatMisc1 > 0.0f )
+				//checks by spell type
+				switch (sp->spellType)
 				{
-					float healthPercent = float( (m_Unit->GetUInt32Value(UNIT_FIELD_HEALTH) + 1) / ( m_Unit->GetUInt32Value(UNIT_FIELD_MAXHEALTH) + 1 ));
-					if(healthPercent >= sp->floatMisc1)
-						continue;
-				}
-
-				//focus/mana requirement; do we have enough?
-				switch(sp->spell->powerType)
-				{
-					case POWER_TYPE_MANA:
+				case STYPE_DEBUFF:
 					{
-						if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER1) < sp->spell->manaCost)
+						if (!m_nextTarget || m_nextTarget->HasActiveAura(sp->spell->Id))
 							continue;
 					}break;
-					case POWER_TYPE_FOCUS:
+				case STYPE_BUFF:
 					{
-						if(m_Unit->GetUInt32Value(UNIT_FIELD_POWER3) < sp->spell->manaCost)
+						if (m_Unit->HasActiveAura(sp->spell->Id))
+							continue;
+					}break;
+				case STYPE_HEAL:
+					{
+						if (!FindHealTargetForSpell(sp))
+							continue;
+					}
+				case STYPE_INTERRUPT:
+					{
+						if (!m_nextTarget || !m_nextTarget->isCasting())
 							continue;
 					}break;
 				}
+				//success
 				def_spell = sp;
-				break;
 			}
 		}
 
-		//We found a spell, lets update cooldown and return it.
-		if(def_spell != NULL)
-		{
-			last_found_spell = def_spell;
-
-			//Take at least a 1 second before checking another spell
-			//and add some randomness after fist spell, so not all NPC will the same spell at the same time.
-			if(def_spell->first_use)
-			{
-				next_spell_time = nowtime + 1000;
-				return def_spell;
-			}
-			else
-			{
-				def_spell->first_use = true;
-				next_spell_time = nowtime + RandomUInt(5000);
-				return NULL;
-			}
-		}
+		//Lets update cooldown and return a spell.
+		next_spell_time = nowtime + 500 + RandomUInt(1000);
+		return def_spell;
 	}
 
-	//	 How come we did not find a spell? Check again next cycle!.
-	next_spell_time = nowtime + 1;
 	return NULL;
 }
 
@@ -3570,4 +3546,5 @@ void AIInterface::WipeCurrentTarget()
 	if( m_nextTarget == UnitToFollow_backup )
 		UnitToFollow_backup = NULLUNIT;
 }
+
 
