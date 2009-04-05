@@ -226,7 +226,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						if( tcd < 0 ) // -1 will force dbc lookup
 						{
 							//now this will not be exact cooldown but maybe a bigger one to not make him spam spells to often
-							int cooldown = 0;
+							uint32 cooldown = 0;
 
 							if (sp->spell->Attributes & ATTRIBUTES_PASSIVE) //passive skills
 							{
