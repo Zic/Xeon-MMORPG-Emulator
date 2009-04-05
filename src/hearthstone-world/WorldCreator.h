@@ -54,6 +54,21 @@ enum INSTANCE_ABORT_ERROR
 	INSTANCE_OK = 0x10,
 };
 
+enum OWNER_CHECK
+{
+	OWNER_CHECK_ERROR		= 0,
+	OWNER_CHECK_EXPIRED		= 1,
+	OWNER_CHECK_NOT_EXIST	= 2,
+	OWNER_CHECK_NO_GROUP	= 3,
+	OWNER_CHECK_DIFFICULT	= 4,
+	OWNER_CHECK_MAX_LIMIT	= 5,
+	OWNER_CHECK_MIN_LEVEL	= 6,
+	OWNER_CHECK_OK			= 10,
+	OWNER_CHECK_GROUP_OK	= 11,
+	OWNER_CHECK_SAVED_OK	= 12,
+	OWNER_CHECK_TRIGGERPASS = 13,
+};
+
 extern const char * InstanceAbortMessages[];
 
 class Map;
@@ -90,6 +105,7 @@ public:
 	uint32 m_creatorGroup;
 	uint32 m_difficulty;
 	unordered_set<uint32> m_killedNpcs;
+	set<uint32> m_SavedPlayers;
 	time_t m_creation;
 	time_t m_expiration;
 	MapInfo * m_mapInfo;
@@ -134,23 +150,51 @@ public:
 
 	// has an instance expired?
 	// can a player join?
-    HEARTHSTONE_INLINE bool PlayerOwnsInstance(Instance * pInstance, PlayerPointer pPlayer)
+    HEARTHSTONE_INLINE uint8 PlayerOwnsInstance(Instance * pInstance, PlayerPointer pPlayer)
 	{
+		uint8 OwnsInstance = OWNER_CHECK_ERROR;
+
 		// expired?
-		if( pInstance->m_expiration && (UNIXTIME+20) >= pInstance->m_expiration)
+		if( HasInstanceExpired( pInstance) )
 		{
-			// delete the instance
 			_DeleteInstance(pInstance, true);
-			return false;
+			OwnsInstance = OWNER_CHECK_EXPIRED;
+		}
+		else if( !pInstance->m_mapInfo )
+		{
+			OwnsInstance = OWNER_CHECK_NOT_EXIST;
+		}
+		else if( pPlayer->triggerpass_cheat )
+		{
+			OwnsInstance = OWNER_CHECK_TRIGGERPASS;
+		}
+		else if( !pPlayer->GetGroup() )
+		{
+			OwnsInstance = OWNER_CHECK_NO_GROUP;
 		}
 
-		if( pPlayer->GetGroup() && pInstance->m_creatorGroup == pPlayer->GetGroup()->GetID() )
-			return true;
+		else if( pInstance->m_difficulty == 1 && pPlayer->iInstanceType == MODE_NORMAL )
+		{
+			OwnsInstance = OWNER_CHECK_DIFFICULT;
+		}
+		else if( pInstance->m_mapMgr && pInstance->m_mapInfo->playerlimit < pInstance->m_mapMgr->m_PlayerStorage.size() )
+		{
+				OwnsInstance = OWNER_CHECK_MAX_LIMIT;
+		}
+		else if( pInstance->m_mapMgr && pPlayer->getLevel() < pInstance->m_mapInfo->minlevel )
+		{
+				OwnsInstance = OWNER_CHECK_MIN_LEVEL;
+		}
+		else if( pInstance->m_mapMgr && pInstance->m_mapMgr->HasPlayers() && GetFirstPlayer(pInstance)->GetGroup()== pPlayer->GetGroup() )
+		{
+			OwnsInstance = OWNER_CHECK_GROUP_OK;
+		}
+		else if( ( pInstance->m_mapInfo->type == INSTANCE_RAID || ( pPlayer->iInstanceType >= MODE_HEROIC && pInstance->m_mapInfo->type == INSTANCE_MULTIMODE ) ) && HasActiveInstance( pInstance , pPlayer->GetLowGUID( ) ) )
+		{
+			OwnsInstance = OWNER_CHECK_SAVED_OK;
+		}
 
-		if( !pPlayer->GetGroup() && pInstance->m_creatorGuid == pPlayer->GetLowGUID() )
-			return true;
-
-		return false;
+		return OwnsInstance;
 	}
 
 	// has an instance expired?
@@ -178,12 +222,21 @@ public:
 	void DeleteBattlegroundInstance(uint32 mapid, uint32 instanceid);
 	MapMgrPointer GetMapMgr(uint32 mapId);
 
+	//Find saved instance for player at given mapid
+	Instance* GetSavedInstance(uint32 map_id, uint32 guid);
+	InstanceMap * GetInstancesForMap(uint32 map_id) 
+	{
+		return m_instances[map_id];
+	}
+	PlayerPointer GetFirstPlayer(Instance * pInstance);
+
 private:
 	void _LoadInstances();
 	void _CreateMap(uint32 mapid);
 	MapMgrPointer _CreateInstance(Instance * in);
 	MapMgrPointer _CreateInstance(uint32 mapid, uint32 instanceid);		// only used on main maps!
 	bool _DeleteInstance(Instance * in, bool ForcePlayersOut);
+	bool HasActiveInstance(Instance * pInstance, uint32 guid);
 
 	uint32 m_InstanceHigh;
 

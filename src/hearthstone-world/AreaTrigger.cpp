@@ -42,6 +42,7 @@ enum AreaTriggerFailures
 	AREA_TRIGGER_FAILURE_LEVEL_HEROIC	= 10,
 	AREA_TRIGGER_FAILURE_NO_CHECK		= 11,
 	AREA_TRIGGER_FAILURE_NO_WOTLK		= 12,
+	AREA_TRIGGER_FAILURE_IN_QUEUE		= 13,
 };
 
 const char * AreaTriggerFailureMessages[] = {
@@ -68,43 +69,45 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 	if(!pMapInfo || !pMapInfo->HasFlag(WMI_INSTANCE_ENABLED))
 		return AREA_TRIGGER_FAILURE_UNAVAILABLE;
 
-	if(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_01) &&
-	   !pSession->HasFlag(ACCOUNT_FLAG_XPACK_01) && !pSession->HasFlag(ACCOUNT_FLAG_XPACK_02))
+	if(!pSession->HasFlag(ACCOUNT_FLAG_XPACK_01) && pMapInfo->HasFlag(WMI_INSTANCE_XPACK_01))
 		return AREA_TRIGGER_FAILURE_NO_BC;
 
-	if(!pSession->HasFlag(ACCOUNT_FLAG_XPACK_02) && pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02))
-		return AREA_TRIGGER_FAILURE_NO_WOTLK;
-
 	// These can be overridden by cheats/GM
-	if(pPlayer->triggerpass_cheat)
+	if(!pPlayer->triggerpass_cheat)
+	{
+		if( (pMapInfo->type == INSTANCE_RAID || pMapInfo->type == INSTANCE_MULTIMODE ) && !pPlayer->GetGroup())
+			return AREA_TRIGGER_FAILURE_NO_GROUP;
+
+		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type != INSTANCE_MULTIMODE && pMapInfo->type != INSTANCE_NULL)
+			return AREA_TRIGGER_FAILURE_NO_HEROIC;
+
+		if( pMapInfo->type == INSTANCE_RAID && pPlayer->GetGroup()->GetGroupType() != GROUP_TYPE_RAID )
+			return AREA_TRIGGER_FAILURE_NO_RAID;
+
+		if( pMapInfo && pMapInfo->required_quest && !( pPlayer->HasFinishedDailyQuest(pMapInfo->required_quest) || pPlayer->HasFinishedDailyQuest(pMapInfo->required_quest)))
+			return AREA_TRIGGER_FAILURE_NO_ATTUNE_Q;
+
+		if(pMapInfo && pMapInfo->required_item && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->required_item, true))
+			return AREA_TRIGGER_FAILURE_NO_ATTUNE_I;
+
+		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE && 
+			!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[0], false) && 
+			!pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[1], false))
+			return AREA_TRIGGER_FAILURE_NO_KEY;
+
+		if(pPlayer->getLevel()<80 && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
+			return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
+	}
+	else
 		return AREA_TRIGGER_FAILURE_OK;
 
-	if(pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type != INSTANCE_MULTIMODE && pMapInfo->type != INSTANCE_NULL)
-		return AREA_TRIGGER_FAILURE_NO_HEROIC;
-
-	if(pMapInfo->type == INSTANCE_RAID && (!pPlayer->GetGroup() || (pPlayer->GetGroup() && pPlayer->GetGroup()->GetGroupType() != GROUP_TYPE_RAID)))
-		return AREA_TRIGGER_FAILURE_NO_RAID;
-
-	if(pMapInfo->type == INSTANCE_MULTIMODE && !pPlayer->GetGroup())
-		return AREA_TRIGGER_FAILURE_NO_GROUP;
-
-	if(pMapInfo && pMapInfo->required_quest && !pPlayer->HasFinishedQuest(pMapInfo->required_quest))
-		return AREA_TRIGGER_FAILURE_NO_ATTUNE_Q;
-
-	if(pMapInfo && pMapInfo->required_item && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->required_item, true))
-		return AREA_TRIGGER_FAILURE_NO_ATTUNE_I;
-
-	if (pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE )
+	//Raid queue
+	if( pMapInfo->type == INSTANCE_RAID || ( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE ) )
 	{
-			for(uint32 i = 0; i < 2; ++i) 
-			{ 
-				if( pMapInfo->heroic_key[i] && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[i], false))
-					return AREA_TRIGGER_FAILURE_NO_KEY;
-			}
+		if( ! pPlayer->triggerpass_cheat && pPlayer->m_playerInfo && pMapInfo->playerlimit >= 5 &&
+			(int32)((pMapInfo->playerlimit - 5)/5) < pPlayer->m_playerInfo->subGroup)
+			return AREA_TRIGGER_FAILURE_IN_QUEUE;
 	}
-	if (pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type != INSTANCE_NULL && 
-			(pPlayer->getLevel() < 70 || pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) && pPlayer->getLevel() < 80))
-		return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
 
 	return AREA_TRIGGER_FAILURE_OK;
 }
@@ -225,6 +228,48 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 
 				if( _player->IsMounted())
 					TO_UNIT(_player)->Dismount();
+
+				uint32 InstanceID = 0;
+				MapInfo * pMi = WorldMapInfoStorage.LookupEntry(pAreaTrigger->Mapid);
+
+				// Do not handle Hyjal Inn (trigger 4319) as an instance,
+				// since we need a unique mapid when generating our instance_id.
+				if( id != 4319 && pMi && ( pMi->type == INSTANCE_RAID || _player->iInstanceType >= MODE_HEROIC && pMi->type == INSTANCE_MULTIMODE ) )
+				{
+					//Do we have a saved instance we should use?
+					Instance * in = sInstanceMgr.GetSavedInstance( pMi->mapid,_player->GetLowGUID() );
+					if( in && in->m_instanceId )
+						InstanceID = in->m_instanceId;
+					else //no saved instances found, try to find an active intance for the group we are in.
+					{
+						InstanceMap::iterator itr;
+						InstanceMap * instancemap = sInstanceMgr.GetInstancesForMap( pMi->mapid );
+						if( instancemap )
+						{
+							for( itr = instancemap->begin(); itr != instancemap->end(); ++itr )
+							{
+								in = itr->second;
+								if( in->m_mapMgr && in->m_mapMgr->HasPlayers() ) //some instances are inside another
+								{
+									PlayerPointer firstplr = sInstanceMgr.GetFirstPlayer(in);
+									if( firstplr != NULL  && firstplr->GetGroup() == _player->GetGroup() )
+									{
+										if (_player->GetGroup()->GetGroupInstanceID() != firstplr->GetGroup()->GetGroupInstanceID())
+										{
+											Log.Warning("InstanceMgr","Group inside instance %d didn't set the GroupInstanceID for map %d [%s], old_instanceID = %d",
+												in->m_instanceId, in->m_mapId, in->m_mapInfo->name, firstplr->GetGroup()->GetGroupInstanceID() );
+											_player->GetGroup()->SetGroupInstanceID(in->m_instanceId);
+										}
+										InstanceID = in->m_instanceId;
+										break;
+									}
+								}
+							}
+						}
+					}
+					// Set current InstanceID for player (or 0 if no instances found)
+					_player->SetInstanceID(InstanceID);
+				}
 
 				_player->SaveEntryPoint(pAreaTrigger->Mapid);
 				_player->SafeTeleport(pAreaTrigger->Mapid, 0, LocationVector(pAreaTrigger->x, pAreaTrigger->y, pAreaTrigger->z, pAreaTrigger->o));

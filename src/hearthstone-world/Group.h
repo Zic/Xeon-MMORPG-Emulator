@@ -139,6 +139,9 @@ public:
 	HEARTHSTONE_INLINE void OutPacketToAll(uint16 op, uint16 len, const void* data) { OutPacketToAllButOne(op, len, data, NULLPLR); }
 	void OutPacketToAllButOne(uint16 op, uint16 len, const void* data, PlayerPointer pSkipTarget);
 
+	HEARTHSTONE_INLINE uint32 GetGroupInstanceID(void)		{ return m_GroupInstanceID; }
+	HEARTHSTONE_INLINE void SetGroupInstanceID(uint32 newid)	{ m_GroupInstanceID = newid; }
+
 	void SendNullUpdate(PlayerPointer pPlayer);
 
 	// Group Combat
@@ -237,6 +240,7 @@ protected:
 	uint16 m_LootThreshold;
 	uint8 m_GroupType;
 	uint32 m_Id;
+	uint32 m_GroupInstanceID;
 
 	SubGroup* m_SubGroups[8];
 	uint8 m_SubGroupCount;

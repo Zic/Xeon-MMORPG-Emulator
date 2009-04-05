@@ -969,13 +969,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		if(_player->GetMapMgr())
 			objmgr.AddPlayer(_player);
 		else //undo loading by logging out
-		{
-			Log.Warning("WorldSession","Adding player %s to map %u failed!",_player->GetName(), vwpck.MapId );
-			LogoutPlayer(false);
-			uint8 respons = CHAR_LOGIN_NO_CHARACTER;
-			OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);
-			m_loggingInPlayer=NULLPLR;
-		}
+			DEBUG_LOG("WorldSession","Adding player %s to map %u failed, porting to instance entrace",_player->GetName(), vwpck.MapId );
 	}
 }
 
