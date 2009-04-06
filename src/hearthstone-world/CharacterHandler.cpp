@@ -56,7 +56,7 @@ cont:
 				return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -67,7 +67,7 @@ bool ChatHandler::HandleRenameAllCharacter(const char * args, WorldSession * m_s
 	QueryResult * result = CharacterDatabase.Query("SELECT guid, name FROM characters");
 	if( result )
 	{
-		do 
+		do
 		{
 			uint32 uGuid = result->Fetch()[0].GetUInt32();
 			const char * pName = result->Fetch()[1].GetString();
@@ -109,6 +109,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 	{
 		uint32 displayid;
 		uint8 invtype;
+		uint32 enchantment; // added in 2.4
 	};
 
 	player_item items[20];
@@ -127,7 +128,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 	m_hasDeathKnight= false;
 
 	// should be more than enough.. 200 bytes per char..
-	WorldPacket data(SMSG_CHAR_ENUM, (result ? result->GetRowCount() * 200 : 1));	
+	WorldPacket data(SMSG_CHAR_ENUM, (result ? result->GetRowCount() * 200 : 1));
 
 	// parse m_characters and build a mighty packet of
 	// characters to send to the client.
@@ -145,7 +146,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			fields = result->Fetch();
 			guid = fields[0].GetUInt32();
 			bytes2 = fields[6].GetUInt32();
-			Class = fields[3].GetUInt8();			
+			Class = fields[3].GetUInt8();
 			flags = fields[17].GetUInt32();
 			race = fields[3].GetUInt8();
 
@@ -214,12 +215,14 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			else
 				data << uint32(0) << uint32(0) << uint32(0);
 
-			res = CharacterDatabase.Query("SELECT containerslot, slot, entry FROM playeritems WHERE ownerguid=%u", GUID_LOPART(guid));
+			res = CharacterDatabase.Query("SELECT containerslot, slot, entry, enchantments FROM playeritems WHERE ownerguid=%u", GUID_LOPART(guid));
 
+			uint32 enchantid;
+			EnchantEntry * enc;
 			memset(items, 0, sizeof(player_item) * 20);
 			if(res)
 			{
-				do 
+				do
 				{
 					containerslot = res->Fetch()[0].GetInt8();
 					slot = res->Fetch()[1].GetInt8();
@@ -229,9 +232,23 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 						if(proto)
 						{
 							// slot0 = head, slot14 = cloak
-							if(!(slot == 0 && (flags & (uint32)PLAYER_FLAG_NOHELM) != 0) && !(slot == 14 && (flags & (uint32)PLAYER_FLAG_NOCLOAK) != 0)) {
+							if(!(slot == 0 && (flags & (uint32)PLAYER_FLAG_NOHELM) != 0) && !(slot == 14 && (flags & (uint32)PLAYER_FLAG_NOCLOAK) != 0))
+							{
 								items[slot].displayid = proto->DisplayInfoID;
 								items[slot].invtype = proto->InventoryType;
+								if( slot == EQUIPMENT_SLOT_MAINHAND || slot == EQUIPMENT_SLOT_OFFHAND )
+								{
+									// get enchant visual ID
+									const char * enchant_field = res->Fetch()[3].GetString();
+									if( sscanf( enchant_field , "%u,0,0;" , (unsigned int *)&enchantid ) == 1 && enchantid > 0 )
+									{
+										enc = dbcEnchant.LookupEntry( enchantid );
+										if( enc != NULL )
+											items[slot].enchantment = enc->visual;
+										else
+											items[slot].enchantment = 0;;
+									}
+								}
 							}
 						}
 					}
@@ -240,11 +257,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 			}
 
 			for( i = 0; i < 20; ++i )
-			{
-				// 2.4.0 added a uint32 here, it's obviously one of the itemtemplate fields,
-				// we just gotta figure out which one :P
-				data << items[i].displayid << items[i].invtype << uint32(0);
-			}
+				data << items[i].displayid << items[i].invtype << uint32(items[i].enchantment);
 
 			num++;
 		}
@@ -258,7 +271,7 @@ void WorldSession::CharacterEnumProc(QueryResult * result)
 }
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
-{	
+{
 	if( m_asyncQuery )		// should be enough
 	{
 		return;
@@ -348,7 +361,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 		delete result;
 	}
 	// loading characters
-	
+
 	//checking number of chars is useless since client will not allow to create more than 10 chars
 	//as the 'create' button will not appear (unless we want to decrease maximum number of characters)
 
@@ -390,7 +403,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 		pNewChar->AddSummonSpell(1863, 7814);
 	}
 
-	pNewChar->SaveToDB(true);	
+	pNewChar->SaveToDB(true);
 
 	PlayerInfo *pn=new PlayerInfo;
 	memset(pn, 0, sizeof(PlayerInfo));
@@ -577,10 +590,10 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 					inf->arenaTeam[i]->RemoveMember(inf);
 			}
 		}
-			
+
 		/*if( _socket != NULL )
 			sPlrLog.write("Account: %s | IP: %s >> Deleted player %s", GetAccountName().c_str(), GetSocket()->GetRemoteIP().c_str(), name.c_str());*/
-			
+
 		sPlrLog.writefromsession(this, "deleted character %s (GUID: %u)", name.c_str(), (uint32)guid);
 
 		CharacterDatabase.WaitExecute("DELETE FROM characters WHERE guid = %u", (uint32)guid);
@@ -603,8 +616,8 @@ uint8 WorldSession::DeleteCharacter(uint32 guid)
 		CharacterDatabase.Execute("DELETE FROM tutorials WHERE playerId = %u", (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_friends WHERE character_guid = %u OR friend_guid = %u", (uint32)guid, (uint32)guid);
 		CharacterDatabase.Execute("DELETE FROM social_ignores WHERE character_guid = %u OR ignore_guid = %u", (uint32)guid, (uint32)guid);
- 
-	 
+
+
 		/* remove player info */
 		objmgr.DeletePlayerInfo((uint32)guid);
 		return 0x3E;
@@ -704,7 +717,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	plr->Init();
 	plr->SetSession(this);
 	m_bIsWLevelSet = false;
-	
+
 	DEBUG_LOG("WorldSession", "Async loading player %u", (uint32)playerGuid);
 	m_loggingInPlayer = plr;
 	plr->LoadFromDB((uint32)playerGuid);
@@ -713,7 +726,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 void WorldSession::FullLogin(PlayerPointer plr)
 {
 	DEBUG_LOG("WorldSession", "Fully loading player %u", plr->GetLowGUID());
-	SetPlayer(plr); 
+	SetPlayer(plr);
 	m_MoverWoWGuid.Init(plr->GetGUID());
 
 	// copy to movement array
@@ -938,7 +951,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		uint32 timediff = currenttime - plr->m_timeLogoff;
 
 		//Calculate rest bonus
-		if( timediff > 0 ) 
+		if( timediff > 0 )
 			plr->AddCalculatedRestXP(timediff);
 	}
 
@@ -1035,7 +1048,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	data << uint32(0) // ok
 	data << uint32(1) // not enough money
 	data << uint32(2) // you must be sitting on the barber's chair
-	
+
 	GameObjectPointer barberChair = _player->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), BARBERCHAIR_ID);
 	if(!barberChair || _player->GetStandState() != STANDSTATE_SIT_MEDIUM_CHAIR)
 	{
@@ -1044,21 +1057,21 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 		return;
 	}
 	*/
-	
+
 
 	OUT_DEBUG("WORLD: CMSG_ALTER_APPEARANCE");
 	CHECK_PACKET_SIZE(recv_data, 12);
-	
+
 	uint32 hair, colour, facialhair;
 	recv_data >> hair >> colour >> facialhair;
-	
+
 	BarberShopStyleEntry * Hair = dbcBarberShopStyle.LookupEntry(hair);
 	BarberShopStyleEntry * facialHair = dbcBarberShopStyle.LookupEntry(facialhair);
 	if(!facialHair || !Hair)
 		return;
 
 	uint8 newHair = Hair->hair_id;
-	uint8 newFacialHair = facialHair->hair_id;	
+	uint8 newFacialHair = facialHair->hair_id;
 	uint32 level = _player->getLevel();
 	float cost = 0;
 	uint8 oldHair = _player->GetByte(PLAYER_BYTES, 2);
@@ -1087,7 +1100,7 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
         cost += cutcosts->val * 0.75f;
 
 	if(_player->GetUInt32Value(PLAYER_FIELD_COINAGE) < cost)
-	{		
+	{
 		data << uint32(1); // not enough money
 		SendPacket(&data);
 		return;
@@ -1101,4 +1114,3 @@ void WorldSession::HandleAlterAppearance(WorldPacket & recv_data)
 	_player->SetByte(PLAYER_BYTES_2, 0, newFacialHair);
 	_player->SetStandState(0);
 }
-
