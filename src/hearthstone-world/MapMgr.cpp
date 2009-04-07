@@ -79,7 +79,7 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 	_mapWideStaticObjects.clear();
 	_updates.clear();
 	_processQueue.clear();
-	Sessions.clear();
+	MapSessions.clear();
 
 	activeGameObjects.clear();
 	activeCreatures.clear();
@@ -191,7 +191,7 @@ void MapMgr::Destructor()
 	_combatProgress.clear();
 	_updates.clear();
 	_processQueue.clear();
-	Sessions.clear();
+	MapSessions.clear();
 
 	activeGameObjects.clear();
 	activeCreatures.clear();
@@ -418,7 +418,7 @@ void MapMgr::PushObject(ObjectPointer obj)
 	// Add the session to our set if it is a player.
 	if(plObj)
 	{
-		Sessions.insert(plObj->GetSession());
+		MapSessions.insert(plObj->GetSession());
 
 		// Change the instance ID, this will cause it to be removed from the world thread (return value 1)
 		plObj->GetSession()->SetInstance(GetInstanceID());
@@ -1807,34 +1807,34 @@ void MapMgr::_PerformObjectDuties()
 	// Sessions are updated every loop.
 	{
 		int result = 0;
-		WorldSession * session;
-		SessionSet::iterator itr = Sessions.begin();
+		WorldSession * MapSession;
+		SessionSet::iterator itr = MapSessions.begin();
 		SessionSet::iterator it2;
 
-		for(; itr != Sessions.end();)
+		for(; itr != MapSessions.end();)
 		{
-			session = (*itr);
+			MapSession = (*itr);
 			it2 = itr;
 			++itr;
 
-			if(session->GetInstance() != m_instanceID)
+			if(MapSession->GetInstance() != m_instanceID)
 			{
-				Sessions.erase(it2);
+				MapSessions.erase(it2);
 				continue;
 			}
 
 			// Don't update players not on our map.
 			// If we abort in the handler, it means we will "lose" packets, or not process this.
 			// .. and that could be diasterous to our client :P
-			if( session->GetSocket()!=NULL && session->GetPlayer() != NULL && session->GetPlayer()->GetMapMgr()!= NULL && session->GetPlayer()->GetMapMgr() != shared_from_this())
+			if( MapSession->GetSocket()!=NULL && MapSession->GetPlayer() != NULL && MapSession->GetPlayer()->GetMapMgr()!= NULL && MapSession->GetPlayer()->GetMapMgr() != shared_from_this())
 				continue;
 
-			result = session->Update(m_instanceID);
+			result = MapSession->Update(m_instanceID);
 			if(result)//session or socket deleted?
 			{
 				if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
-					sWorld.DeleteSession(session);
-				Sessions.erase(it2);
+					sWorld.DeleteGlobalSession(MapSession);
+				MapSessions.erase(it2);
 			}
 		}
 	}

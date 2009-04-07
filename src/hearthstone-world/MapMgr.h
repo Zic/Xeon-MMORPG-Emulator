@@ -316,7 +316,7 @@ private:
 
 	/* Sessions */
 	
-	SessionSet Sessions;
+	SessionSet MapSessions;
 
 	/* Map Information */
 	MapInfo *pMapInfo;

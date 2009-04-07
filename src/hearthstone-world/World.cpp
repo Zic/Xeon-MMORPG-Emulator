@@ -128,14 +128,13 @@ void World::LogoutPlayers()
 	}
 
 	Log.Notice("World", "Deleting sessions...");
-	WorldSession * p;
+	WorldSession * GlobalSession;
 	for(SessionMap::iterator i=m_sessions.begin();i!=m_sessions.end();)
 	{
-		p = i->second;
+		GlobalSession = i->second;
 		++i;
 
-		DeleteSession(p);
-		//delete p;
+		DeleteGlobalSession(GlobalSession);
 	}
 }
 
@@ -243,20 +242,20 @@ void World::AddSession(WorldSession* s)
 	m_sessionlock.ReleaseWriteLock();
 }
 
-void World::AddGlobalSession(WorldSession *session)
+void World::AddGlobalSession(WorldSession *GlobalSession)
 {
-	if(!session)
+	if(!GlobalSession)
 		return;
 
 	SessionsMutex.Acquire();
-	Sessions.insert(session);
+	GlobalSessions.insert(GlobalSession);
 	SessionsMutex.Release();
 }
 
-void World::RemoveGlobalSession(WorldSession *session)
+void World::RemoveGlobalSession(WorldSession *GlobalSession)
 {
 	SessionsMutex.Acquire();
-	Sessions.erase(session);
+	GlobalSessions.erase(GlobalSession);
 	SessionsMutex.Release();
 }
 
@@ -802,27 +801,27 @@ void World::SendWorldWideScreenText(const char *text, WorldSession *self)
 void World::UpdateSessions(uint32 diff)
 {
 	SessionSet::iterator itr, it2;
-	WorldSession *session;
+	WorldSession *GlobalSession;
 	int result;
-	for(itr = Sessions.begin(); itr != Sessions.end();)
+	for(itr = GlobalSessions.begin(); itr != GlobalSessions.end();)
 	{
-		session = (*itr);
+		GlobalSession = (*itr);
 		it2 = itr;
 		++itr;
-		if(!session || session->GetInstance() != 0)
+		if(!GlobalSession || GlobalSession->GetInstance() != 0)
 		{
-			Sessions.erase(it2);
+			GlobalSessions.erase(it2);
 			continue;
 		}
-		result = session->Update(0);
+		result = GlobalSession->Update(0);
 		if(result)
 		{
 			if(result == 1)//socket don't exist anymore, delete from worldsessions.
 			{
 				// complete deletion
-				DeleteSession(session);
+				DeleteGlobalSession(GlobalSession);
 			}
-			Sessions.erase(it2);
+			GlobalSessions.erase(it2);
 		}
 	}
 }
@@ -836,16 +835,16 @@ std::string World::GenerateName(uint32 type)
 	return _namegendata[type].at(ent).name;
 }
 
-void World::DeleteSession(WorldSession *session)
+void World::DeleteGlobalSession(WorldSession *GlobalSession)
 {
 	m_sessionlock.AcquireWriteLock();
 	// remove from big map
-	m_sessions.erase(session->GetAccountId());
+	m_sessions.erase(GlobalSession->GetAccountId());
 
 	m_sessionlock.ReleaseWriteLock();
 
 	// delete us
-	session->Delete();
+	GlobalSession->Delete();
 }
 
 uint32 World::GetNonGmSessionCount()

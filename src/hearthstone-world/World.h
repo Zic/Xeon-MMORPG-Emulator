@@ -380,9 +380,9 @@ public:
 	void AddSession(WorldSession *s);
 	void RemoveSession(uint32 id);
 
-	void AddGlobalSession(WorldSession *session);
-	void RemoveGlobalSession(WorldSession *session);
-	void DeleteSession(WorldSession *session);
+	void AddGlobalSession(WorldSession *GlobalSession);
+	void RemoveGlobalSession(WorldSession *GlobalSession);
+	void DeleteGlobalSession(WorldSession *GlobalSession);
 
 	HEARTHSTONE_INLINE size_t GetSessionCount() const { return m_sessions.size(); }
 	uint32 GetNonGmSessionCount();
@@ -604,7 +604,7 @@ private:
 
 protected:
 	Mutex SessionsMutex;//FOR GLOBAL !
-	SessionSet Sessions;
+	SessionSet GlobalSessions;
 
 	float regen_values[MAX_RATES];
 	uint32 int_rates[MAX_INTRATES];
