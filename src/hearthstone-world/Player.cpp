@@ -3358,6 +3358,7 @@ void Player::AddToWorld()
 	// Add failed.
 	if(m_mapMgr == NULL)
 	{
+		DEBUG_LOG("WorldSession","Adding player %s to map %u failed.",GetName(),GetMapId());
 		// eject from instance
 		m_beingPushed = false;
 		EjectFromInstance();

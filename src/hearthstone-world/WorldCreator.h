@@ -67,6 +67,7 @@ enum OWNER_CHECK
 	OWNER_CHECK_GROUP_OK	= 11,
 	OWNER_CHECK_SAVED_OK	= 12,
 	OWNER_CHECK_TRIGGERPASS = 13,
+	OWNER_CHECK_GM_INSIDE	= 14,
 };
 
 extern const char * InstanceAbortMessages[];
@@ -150,7 +151,7 @@ public:
 
 	// has an instance expired?
 	// can a player join?
-    HEARTHSTONE_INLINE uint8 PlayerOwnsInstance(Instance * pInstance, PlayerPointer pPlayer)
+	HEARTHSTONE_INLINE uint8 PlayerOwnsInstance(Instance * pInstance, PlayerPointer pPlayer)
 	{
 		uint8 OwnsInstance = OWNER_CHECK_ERROR;
 
@@ -185,9 +186,12 @@ public:
 		{
 				OwnsInstance = OWNER_CHECK_MIN_LEVEL;
 		}
-		else if( pInstance->m_mapMgr && pInstance->m_mapMgr->HasPlayers() && GetFirstPlayer(pInstance)->GetGroup()== pPlayer->GetGroup() )
+		else if( pInstance->m_mapMgr && pInstance->m_mapMgr->HasPlayers() )
 		{
-			OwnsInstance = OWNER_CHECK_GROUP_OK;
+			if( GetFirstPlayer(pInstance)->GetGroup() && GetFirstPlayer(pInstance)->GetGroup()== pPlayer->GetGroup())
+				OwnsInstance = OWNER_CHECK_GROUP_OK;
+			else if (GetFirstPlayer(pInstance)->GetSession()->HasGMPermissions())
+				OwnsInstance = OWNER_CHECK_GM_INSIDE;
 		}
 		else if( ( pInstance->m_mapInfo->type == INSTANCE_RAID || ( pPlayer->iInstanceType >= MODE_HEROIC && pInstance->m_mapInfo->type == INSTANCE_MULTIMODE ) ) && HasActiveInstance( pInstance , pPlayer->GetLowGUID( ) ) )
 		{

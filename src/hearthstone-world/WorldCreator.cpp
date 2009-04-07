@@ -212,7 +212,7 @@ uint32 InstanceMgr::PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instance
 			Instance * saved_in = sInstanceMgr.GetSavedInstance( mapid, plr->GetLowGUID() );
 			if( saved_in && saved_in->m_instanceId == instanceid )
 			{
-				if ( PlayerOwnsInstance( saved_in, plr ) > 9 )
+				if ( PlayerOwnsInstance( saved_in, plr ) >= OWNER_CHECK_OK )
 				{
 					m_mapLock.Release();
 					return INSTANCE_OK;
@@ -352,7 +352,8 @@ MapMgrPointer InstanceMgr::GetInstance(ObjectPointer obj)
 				++itr;
 
 				// Is this our instance?
-				if(PlayerOwnsInstance(in, plr) >= OWNER_CHECK_OK )
+				uint8 poinst = PlayerOwnsInstance(in, plr);
+				if(poinst >= OWNER_CHECK_OK )
 				{
 					//Has it been created yet?
 					if(in->m_mapMgr == NULL)
@@ -367,9 +368,14 @@ MapMgrPointer InstanceMgr::GetInstance(ObjectPointer obj)
 					}
 					else // instance has found and verfied; us it.
 					{
-						if( in->m_mapMgr->HasPlayers() && plr->GetGroup() && plr->GetGroup()->GetGroupInstanceID() != in->m_instanceId )
+						if( poinst != OWNER_CHECK_GM_INSIDE && in->m_mapMgr->HasPlayers() && plr->GetGroup() && plr->GetGroup()->GetGroupInstanceID() != in->m_instanceId )
 						{
 							Log.Warning("InstanceMgr","Reset GroupInstanceID for existing instance %u [%s] , old_ID = %u, new_ID = %u", in->m_mapId, in->m_mapInfo->name, plr->GetGroup()->GetGroupInstanceID(), in->m_instanceId );
+							plr->GetGroup()->SetGroupInstanceID(in->m_instanceId);
+						}
+						else if(in->m_mapMgr->HasPlayers() && plr->GetGroup() && plr->GetGroup()->GetGroupInstanceID() != in->m_instanceId)
+						{
+							Log.Warning("InstanceMgr","Forced GroupInstanceID for instance %u [%s] started by GM, old_ID = %u, new_ID = %u", in->m_mapId, in->m_mapInfo->name, plr->GetGroup()->GetGroupInstanceID(), in->m_instanceId );
 							plr->GetGroup()->SetGroupInstanceID(in->m_instanceId);
 						}
 						m_mapLock.Release();
@@ -821,11 +827,7 @@ PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); ++itr )
 	{
 		if (itr->second && itr->second->IsPlayer())
-		{
-			//GM's should not enter first !!
-			if(!itr->second->GetSession()->HasGMPermissions())
-				return itr->second;
-		}
+			return itr->second;
 	}
 	return NULLPLR;
 
@@ -936,7 +938,8 @@ void InstanceMgr::BuildRaidSavedInstancesForPlayer(PlayerPointer plr)
 				in = itr->second;
 				++itr;
 
-				if( /*in->m_mapInfo->type != INSTANCE_NONRAID && */PlayerOwnsInstance(in, plr) )
+				uint8 poinst = PlayerOwnsInstance(in, plr);
+				if( poinst >= OWNER_CHECK_OK )
 				{
 					data << in->m_mapId;
 					data << uint32(in->m_expiration - UNIXTIME);

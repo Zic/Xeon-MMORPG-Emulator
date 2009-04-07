@@ -776,8 +776,8 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	/*if(plr->getLevel()>70)
 		plr->SetUInt32Value(UNIT_FIELD_LEVEL,70);*/
 
-	// enable trigger cheat by default
-	plr->triggerpass_cheat = HasGMPermissions();
+	// Enable trigger cheat by default
+	//plr->triggerpass_cheat = HasGMPermissions();
 
 	// Make sure our name exists (for premade system)
 	PlayerInfo * info = objmgr.GetPlayerInfo(plr->GetLowGUID());
@@ -975,15 +975,9 @@ void WorldSession::FullLogin(PlayerPointer plr)
 		_player->CopyAndSendDelayedPacket(_player->GetAchievementInterface()->BuildAchievementData());
 
 	if(enter_world && !_player->GetMapMgr())
-	{
 		plr->AddToWorld();
 
-		//Only add player to objmgr if we are actualy Added To World
-		if(_player->GetMapMgr())
-			objmgr.AddPlayer(_player);
-		else //undo loading by logging out
-			DEBUG_LOG("WorldSession","Adding player %s to map %u failed, porting to instance entrace",_player->GetName(), vwpck.MapId );
-	}
+	objmgr.AddPlayer(_player);
 }
 
 bool ChatHandler::HandleRenameCommand(const char * args, WorldSession * m_session)
