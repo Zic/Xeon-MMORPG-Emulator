@@ -116,7 +116,7 @@ int WorldSession::Update(uint32 InstanceID)
 	if(InstanceID != instanceId)
 	{
 		// We're being updated by the wrong thread.
-		// "Remove us!" - 2
+		// "Remove us from this mapsession list!" - 2
 		return 2;
 	}
 
@@ -134,7 +134,7 @@ int WorldSession::Update(uint32 InstanceID)
 				LogoutPlayer(true);
 				bDeleted = true;
 			}
-			return 0;
+			return 1;
 		}
 		if(!_logoutTime)
 			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
