@@ -9524,6 +9524,109 @@ void Player::_UpdateSkillFields()
 
 		GetAchievementInterface()->HandleAchievementCriteriaReachSkillLevel( itr->second.Skill->id, itr->second.CurrentValue );
 
+		switch(itr->second.Skill->id)
+		{
+			case SKILL_HERBALISM:
+			{
+				uint32 skill_base = getRace() == RACE_TAUREN ? 90 : 75;
+				if( itr->second.CurrentValue >= skill_base + 375 && !HasSpell( 55503 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55503 );												// Lifeblood Rank 6
+				}
+				else if( itr->second.CurrentValue >= skill_base + 300 && !HasSpell( 55502 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55502 );												// Lifeblood Rank 5
+				}
+				else if( itr->second.CurrentValue >= skill_base + 225 && !HasSpell( 55501 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55501 );												// Lifeblood Rank 4
+				}
+				else if( itr->second.CurrentValue >= skill_base + 150 && !HasSpell( 55500 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55500 );												// Lifeblood Rank 3
+				}
+				else if( itr->second.CurrentValue >= skill_base + 75 && !HasSpell( 55480 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55480 );												// Lifeblood Rank 2
+				}
+				else if( itr->second.CurrentValue >= skill_base && !HasSpell( 55428 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55428 );												// Lifeblood Rank 1
+				}
+			}break;
+			case SKILL_SKINNING:
+			{
+				if( itr->second.CurrentValue >= 450 && !HasSpell( 53666 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53666 );												// Master of Anatomy Rank 6
+				}
+				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53665 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53665 );												// Master of Anatomy Rank 5
+				}
+				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53664 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53664 );												// Master of Anatomy Rank 4
+				}
+				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53663 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53663 );												// Master of Anatomy Rank 3
+				}
+				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53662 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53662 );												// Master of Anatomy Rank 2
+				}
+				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53125 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53125 );												// Master of Anatomy Rank 1
+				}
+			}break;
+			case SKILL_MINING:
+			{
+				if( itr->second.CurrentValue >= 450 && !HasSpell( 53040 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53040 );												// Toughness Rank 6
+				}
+				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53124 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53124 );												// Toughness Rank 5
+				}
+				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53123 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53123 );												// Toughness Rank 4
+				}
+				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53122 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53122 );												// Toughness Rank 3
+				}
+				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53121 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53121 );												// Toughness Rank 2
+				}
+				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53120 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53120 );												// Toughness Rank 1
+				}
+			}break;
+		}
 		++itr;
 	}
 
