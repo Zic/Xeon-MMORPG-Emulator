@@ -125,16 +125,17 @@ int WorldSession::Update(uint32 InstanceID)
 	{
 		// Check if the player is in the process of being moved. We can't delete him
 		// if we are.
-		if(_player && _player->m_beingPushed) // Abort
+		if(_player && _player->m_beingPushed) // check timeout
 		{
-			//Timeout client, in case AddToWorld failed (f.e. client crash)
-			if( m_lastPing + WORLDSOCKET_TIMEOUT - (uint32)UNIXTIME > WORLDSOCKET_TIMEOUT)
+			//Timeout client after 2 minutes, in case AddToWorld failed (f.e. client crash)
+			if(  (uint32)UNIXTIME - m_lastPing > 120000 )
 			{
-				DEBUG_LOG("WorldSession","Removing pending player due to socket timeout.");
+				DEBUG_LOG("WorldSession","Removing InQueue player due to socket timeout.");
 				LogoutPlayer(true);
 				bDeleted = true;
+				return 1;
 			}
-			return 1;
+			return 0;
 		}
 		if(!_logoutTime)
 			SetLogoutTimer(PLAYER_LOGOUT_DELAY);
