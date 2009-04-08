@@ -2216,7 +2216,7 @@ void Aura::SpellAuraDummy(bool apply)
 			break;
 		}
 		else
-			TamingSpellid=30648;
+			TamingSpellid=30652;
 	}break;
 	case 16972://Predatory Strikes
 	case 16974:
