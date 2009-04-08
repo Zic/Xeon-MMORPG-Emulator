@@ -864,6 +864,11 @@ void Aura::Remove()
 
 	if( m_spellProto->AdditionalAura )
 		m_target->RemoveAura( m_spellProto->AdditionalAura );
+	
+	uint32 flag = 0;
+	if( m_spellProto->buffType & SPELL_TYPE_SEAL )
+        flag |= AURASTATE_FLAG_JUDGEMENT;
+	   m_target->RemoveFlag( UNIT_FIELD_AURASTATE, flag );
 
 /*
 #ifdef SHAREDPTR_DEBUGMODE

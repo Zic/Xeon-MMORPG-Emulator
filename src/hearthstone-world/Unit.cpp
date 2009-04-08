@@ -1051,7 +1051,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								}
 								continue;
 							}break;
-						//warlock - Nighfall
+						//warlock - Nightfall
 						case 17941:
 							{
 								if( CastingSpell == NULL )
@@ -1546,6 +1546,33 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( dmg_overwrite > half_health )
 									dmg_overwrite = half_health ;
 							}break;
+						//paladin  - Sacred Cleansing
+						case 53659:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(CastingSpell->NameHash != SPELL_HASH_CLEANSE )
+									continue;
+							}break;
+						//paladin - Infusion of Light
+						case 53672:
+						case 54149:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_HOLY_SHOCK )
+									continue;
+							}break;
+						//paladin - art of war
+						case 53489:
+						case 59578:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_CRUSADER_STRIKE &&
+									CastingSpell->NameHash != SPELL_HASH_DIVINE_STORM )
+									continue;				
+								}break;
 						case 45057: // Trinket: Evasive Maneuvers
 							{
 								if(GetHealthPct() > 35)
@@ -1699,6 +1726,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									continue; 
 							}break;
 						//SETBONUSES END
+						//Pendulum of Telluric Currents
+						case 60483:
+							{
+								if (CastingSpell == NULL)
+									continue;
+								if(!( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ))
+									continue;
+							}break;
 							//http://www.wowhead.com/?item=32493 Ashtongue Talisman of Shadows
 						case 40480:
 							{
@@ -5145,6 +5180,16 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							//this spell gets removed only when casting smite
 						    SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_SMITE )
+								continue;
+						}break;
+					//paladin - Art of war
+					case 53489:
+					case 59578:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_OF_LIGHT )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLASH_OF_LIGHT )
 								continue;
 						}break;
 					case 34936:		// Backlash

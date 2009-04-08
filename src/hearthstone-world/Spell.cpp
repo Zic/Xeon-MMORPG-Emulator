@@ -1136,8 +1136,8 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		}
 
 		// aura state removal
-		if( m_spellInfo->CasterAuraState )
-			u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, uint32(1) << (m_spellInfo->CasterAuraState - 1) );
+		if( m_spellInfo->CasterAuraState && m_spellInfo->CasterAuraState != AURASTATE_FLAG_JUDGEMENT )
+          u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, m_spellInfo->CasterAuraState ); 
 	}
 
 	m_spellState = SPELL_STATE_PREPARING;
@@ -4513,6 +4513,13 @@ void Spell::Heal(int32 amount)
 			amount += float2int32(u_caster->GetAP() * m_spellInfo->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
 		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
 		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
+
+	     //Judgement of Light
+			if(m_spellInfo->Id == 20267)
+				amount = (uint32)(0.10f * unitTarget->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + 0.10f * unitTarget->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1));
+         //Seal of Light
+			if(m_spellInfo->Id == 20167)
+			    amount = (uint32)(0.15f * u_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + 0.15f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1));
 
 		// Healing Way fix
  		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)

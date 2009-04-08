@@ -897,16 +897,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->RequiredShapeShift = 0;
 				}break;
 		
-			//paladin	-	Blessing of	Light. Changed to	scripted because it	needs	to mod target	and	should not influence holy	nova
-			case  19977:
-			case  19978:
-			case  19979:
-			case  27144:
-			case  32770:
-				{
-						sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
-						sp->EffectApplyAuraName[1] = SPELL_AURA_DUMMY;
-				}break;
 			case 53007: // Penance
 				{
 					CopyEffect(dbcSpell.LookupEntry(54518), 0, sp, 0);
@@ -1012,7 +1002,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectImplicitTargetA[0] = EFF_TARGET_SINGLE_ENEMY;
 				}break;
 
-		
+			//Judgements - rebuff
+			case 20184:
+				{
+					sp->RankNumber = 0;
+				}break;
 			//paladin	-	Eye	for	an Eye
 			case  9799:
 			case  25988:
@@ -1046,7 +1040,52 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  31835:
 			case  31836:
 				{
+						sp->EffectSpellClassMask[0][0]=0x80000000;
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
+				}break;
+
+			//Paladin - Sacred Cleansing
+			case  53551:
+			case  53552:
+			case  53553:
+				{
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->EffectSpellClassMask[0][0] = 0x00001000;
+						sp->EffectSpellClassMask[0][1] = 0x00001000;
+						sp->EffectSpellClassMask[0][2] = 0x00001000;
+				}break;
+			
+			//Paladin - Infusion of light
+			case  53569:
+			case  53576:
+				{
+						sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
+				}break;
+
+			//Paladin - Vindication
+			case 9452:
+			case 26016:
+				{
+						sp->procFlags	=	PROC_ON_MELEE_ATTACK | PROC_ON_ANY_HOSTILE_ACTION;
+						sp->procChance	=	30;
+				}break;
+			//Paladin - Art of War
+			case 53486:
+				{
+						sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+						sp->EffectApplyAuraName[2]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[2]	=	53489;
+				}break;
+			case 53488:
+				{
+						sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+						sp->EffectApplyAuraName[2]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[2]	=	59578;
+				}break;
+			case 53489:
+			case 59578:
+				{
+						 sp->AuraInterruptFlags	|= AURA_INTERRUPT_ON_CAST_SPELL;
 				}break;
 
 			//shaman - Lightning Overload	
@@ -2004,6 +2043,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectTriggerSpell[0]	=	17941;
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 						sp->procChance = 2;
+						sp->EffectSpellClassMask[0][0]=0x0;
 				}break;
 			case  18095:
 				{
@@ -2011,8 +2051,54 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectTriggerSpell[0]	=	17941;
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 						sp->procChance = 4;
+						sp->EffectSpellClassMask[0][0]=0x0;
 				}break;
-		
+			case 17941:
+				{
+						sp->AuraInterruptFlags	=	AURA_INTERRUPT_ON_CAST_SPELL;
+				}break;
+			//Warlock - Backdraft
+			case 47258:
+				{
+						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[0]	=	54274;
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->procChance = 100;
+						sp->procCharges	= 4;
+						sp->EffectSpellClassMask[0][0]=0x00800000;
+						sp->EffectSpellClassMask[0][1]=0x00800000;
+				}break;
+			case 47269:
+				{
+						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[0]	=	54276;
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->procChance = 100;
+						sp->procCharges	= 4;
+						sp->EffectSpellClassMask[0][0]=0x00800000;
+						sp->EffectSpellClassMask[0][1]=0x00800000;
+				}break;
+			case 47260:
+				{
+						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[0]	=	54277;
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->procChance = 100;
+						sp->procCharges	= 4;
+						sp->EffectSpellClassMask[0][0]=0x00800000;
+						sp->EffectSpellClassMask[0][1]=0x00800000;
+				}break;
+			//Warlock - Eradication
+			case 47195:
+			case 47196:
+			case 47197:
+				{
+						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectTriggerSpell[0]	=	47274;
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->proc_interval	=	30000;
+				}break;
+			
 			//warlock: Empowered Corruption
 			case  32381:
 				{
@@ -2667,45 +2753,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 		
 			// priest	-	Reflective Shield
-			case  33201:
+			case 33201:
+			case 33202:
+			case 33203:
+			case 33204:
+			case 33205:
 				{
 						sp->procFlags	=	PROC_ON_ABSORB;
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[0]	=	33619; //!!	WRONG	spell, we	will make	direct dmg here
-				}break;
-			case  33202:
-				{
-						sp->procFlags	=	PROC_ON_ABSORB;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[0]	=	33619; //!!	WRONG	spell, we	will make	direct dmg here
-				}break;
-			case  33203:
-				{
-						sp->procFlags	=	PROC_ON_ABSORB;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[0]	=	33619; //!!	WRONG	spell, we	will make	direct dmg here
-				}break;
-			case  33204:
-				{
-						sp->procFlags	=	PROC_ON_ABSORB;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[0]	=	33619; //!!	WRONG	spell, we	will make	direct dmg here
-				}break;
-			case  33205:
-				{
-						sp->procFlags	=	PROC_ON_ABSORB;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[0]	=	33619; //!!	WRONG	spell, we	will make	direct dmg here
-				}break;
-		
-			// paladin - Improved	Sanctity Aura
-			case  31869:
-				{
-						sp->EffectMiscValue[0] = SMT_MISC_EFFECT;
-				}break;
-			case  31870:
-				{
-						sp->EffectMiscValue[0] = SMT_MISC_EFFECT;
 				}break;
 
 			case  20608:	//Reincarnation
@@ -4082,7 +4138,31 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
 				}break;
-
+			//Noise Machine - Sonic Shield
+			case 54808:
+				{
+					sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	55019;
+					sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
+					sp->proc_interval	=	60000;
+					sp->procChance	=	50;
+				}break;
+			//Pendulum of Telluric Currents
+			case 60482:
+				{
+					sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	60483;
+					sp->procFlags	=	PROC_ON_CAST_SPELL;
+					sp->procChance	=	15;
+				}break;
+			//Tears of Bitter Anguish
+			case 58901:
+				{
+					sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	58904;
+					sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+					sp->procChance	=	10;
+				}break;
 			// FIXES FOR WARLOCK GRIMOIRES BEGIN
 			case 20270:// Imp spells
 				{
