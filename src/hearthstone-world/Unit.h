@@ -22,7 +22,7 @@
 
 class AIInterface;
 
-#define MAX_AURAS 56 // 40 buff slots, 16 debuff slots.
+#define MAX_AURAS 96 // 40 buff slots, 46 debuff slots.
 #define MAX_POSITIVE_AURAS 40 // ?
 #define MAX_PASSIVE_AURAS 192   // grep: i mananged to break this.. :p seems we need more
 
@@ -823,9 +823,7 @@ public:
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
 	HEARTHSTONE_INLINE bool isDead() { return  m_deathState !=ALIVE; };
-	virtual void setDeathState(DeathState s) {
-		m_deathState = s;
-	};
+	virtual void setDeathState(DeathState s) { m_deathState = s; };
 	DeathState getDeathState() { return m_deathState; }
 	void OnDamageTaken();
 
@@ -837,10 +835,9 @@ public:
 	void AddAura(AuraPointer aur, AuraPointer pParentAura);
 	//! Remove aura from unit
 	bool RemoveAura(AuraPointer aur);
-	bool RemoveAura(uint32 spellId);
 	bool RemovePositiveAura(uint32 spellId);
 	bool RemoveNegativeAura(uint32 spellId);
-	bool RemoveAura(uint32 spellId,uint64 guid);
+	bool RemoveAura(uint32 spellId,uint64 guid = 0);
 	bool RemoveAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAuraPosByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAuraNegByNameHash(uint32 namehash);//required to remove weaker instances of a spell
@@ -853,7 +850,7 @@ public:
 
 	//! Remove all auras
 	void RemoveAllAuras();
-	bool RemoveAllAurasBySpellIDOrGUID(uint32 spellId,uint64 guid); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
+	bool RemoveAllAuras(uint32 spellId,uint64 guid = 0); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
     void RemoveAllAurasOfType(uint32 auratype);//ex:to remove morph spells
 	bool RemoveAllAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAllPosAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
@@ -863,9 +860,8 @@ public:
 	void RemoveAllNegativeAuras();
 	AuraPointer FindPositiveAuraByNameHash(uint32 namehash);
 	AuraPointer FindNegativeAuraByNameHash(uint32 namehash);
-	AuraPointer FindActiveAura(uint32 spellId);
-	AuraPointer FindAura(uint32 spellId);
-	AuraPointer FindAura(uint32 spellId, uint64 guid);
+	AuraPointer FindActiveAura(uint32 spellId, uint64 guid = 0);
+	AuraPointer FindAura(uint32 spellId, uint64 guid = 0);
 	bool SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration);
 	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();

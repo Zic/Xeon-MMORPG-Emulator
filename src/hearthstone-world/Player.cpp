@@ -10316,14 +10316,14 @@ void Player::EventSummonPet( PetPointer new_pet )
 		SpellEntry *spellInfo = dbcSpell.LookupEntry(SpellID);
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_PET_OWNER )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			RemoveAllAuras( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( this->GetGUID() );
 			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			RemoveAllAuras( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( new_pet->GetGUID() );
 			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
@@ -11599,7 +11599,7 @@ void Player::RemoveGlyph(uint32 slot)
 	if(!glyph)
 		return;
 	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
-	RemoveAllAurasBySpellIDOrGUID(glyph->SpellID, 0);
+	RemoveAllAuras(glyph->SpellID);
 }
 
 static const uint32 glyphType[6] = {0, 1, 1, 0, 1, 0};

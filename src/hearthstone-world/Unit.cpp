@@ -3867,34 +3867,15 @@ bool Unit::RemoveAura(AuraPointer aur)
 	return true;
 }
 
-bool Unit::RemoveAura(uint32 spellId)
-{//this can be speed up, if we know passive \pos neg
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 bool Unit::RemovePositiveAura(uint32 spellId)
 {
-	for(uint32 x=0;x<=MAX_POSITIVE_AURAS;x++)
+	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
+			if(m_auras[x] && m_auras[x]->GetSpellId()==spellId)
 			{
 				m_auras[x]->Remove();
 				return true;
 			}
-		}
 	}
 	return false;
 }
@@ -3903,14 +3884,11 @@ bool Unit::RemoveNegativeAura(uint32 spellId)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
+			if(m_auras[x] && m_auras[x]->GetSpellId()==spellId)
 			{
 				m_auras[x]->Remove();
 				return true;
 			}
-		}
 	}
 	return false;
 }
@@ -3920,13 +3898,12 @@ bool Unit::RemoveAuras(uint32 * SpellIds)
 	if(!SpellIds || *SpellIds == 0)
 		return false;
 
-	uint32 x=0,y;
 	bool res = false;
-	for(;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
+	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
 		if(m_auras[x])
 		{
-			for(y=0;SpellIds[y] != 0;++y)
+			for(uint32 y=0;SpellIds[y] != 0;++y)
 			{
 				if(m_auras[x]->GetSpellId()==SpellIds[y])
 				{
@@ -3939,49 +3916,44 @@ bool Unit::RemoveAuras(uint32 * SpellIds)
 	return res;
 }
 
-bool Unit::RemoveAura(uint32 spellId, uint64 guid)
+bool Unit::RemoveAura(uint32 spellId, uint64 guid )
 {   
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId()==spellId && m_auras[x]->m_casterGuid == guid)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
 }
-
-bool Unit::RemoveAuraByNameHash(uint32 namehash)
-{
-	for(uint32 x=0;x<MAX_AURAS;x++)
+bool Unit::RemoveAllAuras(uint32 spellId, uint64 guid)
+{   
+	bool res = false;
+	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid) )
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			res = true;
 		}
 	}
-	return false;
+	return res;
+}
+bool Unit::RemoveAuraByNameHash(uint32 namehash)
+{
+	return RemoveAuraPosByNameHash(namehash) || RemoveAuraNegByNameHash(namehash);
 }
 
 bool Unit::RemoveAuraPosByNameHash(uint32 namehash)
 {
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
@@ -3991,52 +3963,19 @@ bool Unit::RemoveAuraNegByNameHash(uint32 namehash)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
 }
 
-bool Unit::RemoveAllAurasBySpellIDOrGUID(uint32 spellId, uint64 guid)
-{   
-	bool res = false;
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				if (!guid || m_auras[x]->m_casterGuid == guid)
-				{
-					m_auras[x]->Remove();
-					res = true;
-				}
-			}
-		}
-	}
-	return res;
-}
-
 bool Unit::RemoveAllAuraByNameHash(uint32 namehash)
 {
-	bool res = false;
-	for(uint32 x=0;x<MAX_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
-		}
-	}
+	bool res = RemoveAllPosAuraByNameHash(namehash);
+	res |= RemoveAllNegAuraByNameHash(namehash);
 	return res;
 }
 
@@ -4045,13 +3984,10 @@ bool Unit::RemoveAllPosAuraByNameHash(uint32 namehash)
 	bool res = false;
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
+			m_auras[x]->Remove();
+			res=true;
 		}
 	}
 	return res;
@@ -4062,13 +3998,10 @@ bool Unit::RemoveAllNegAuraByNameHash(uint32 namehash)
 	bool res = false;
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
+			m_auras[x]->Remove();
+			res=true;
 		}
 	}
 	return res;
@@ -4144,12 +4077,9 @@ AuraPointer Unit::FindPositiveAuraByNameHash(uint32 namehash)
 {
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -4159,42 +4089,21 @@ AuraPointer Unit::FindNegativeAuraByNameHash(uint32 namehash)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
 }
 
-AuraPointer Unit::FindActiveAura(uint32 spellId)
+AuraPointer Unit::FindActiveAura(uint32 spellId, uint64 guid)
 {
 	for(uint32 x=0;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				return m_auras[x];
-			}
-		}
-	}
-	return NULLAURA;
-}
-
-AuraPointer Unit::FindAura(uint32 spellId)
-{
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -4204,12 +4113,9 @@ AuraPointer Unit::FindAura(uint32 spellId, uint64 guid)
 {
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId() == spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId() == spellId && m_auras[x]->m_casterGuid == guid)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -6509,12 +6415,12 @@ void Unit::Dismount()
 		PlayerPointer plr = plr_shared_from_this();
 		if( plr->m_MountSpellId )
 		{
-			RemoveAllAurasBySpellIDOrGUID( plr->m_MountSpellId, 0 );
+			RemoveAllAuras( plr->m_MountSpellId);
 			plr->m_MountSpellId = 0;
 		}
 		if( plr->m_FlyingAura )
 		{
-			RemoveAllAurasBySpellIDOrGUID( plr->m_FlyingAura, 0 );
+			RemoveAllAuras( plr->m_FlyingAura);
 			plr->m_FlyingAura = 0;
 			plr->SetUInt32Value( UNIT_FIELD_DISPLAYID, plr->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		}
