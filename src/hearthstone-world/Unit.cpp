@@ -1986,6 +1986,32 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								}
 								spellId = greatness[maxstat];
 							}break;
+						case 49694:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_MIND_BLAST &&
+									CastingSpell->NameHash != SPELL_HASH_SHADOW_WORD__DEATH )
+									continue; 
+							}break;
+						case 53655://judgements of the pure
+						case 53656:
+						case 53657:
+						case 54152:
+						case 54153:
+							{
+								if (!CastingSpell )
+									continue;
+								if( !(CastingSpell->buffType & SPELL_TYPE_JUDGEMENT) )
+									continue; 
+							}break;
+						case 60803://Glyph of Remove Curse
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_REMOVE_CURSE || victim == shared_from_this() )
+									continue;
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix

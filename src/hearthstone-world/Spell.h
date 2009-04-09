@@ -1039,6 +1039,7 @@ enum SpellTypes // SPELL_ENTRY_buffType
     SPELL_TYPE_HUNTER_MARK			= 0x00200000,
     SPELL_TYPE_WARRIOR_SHOUT        = 0x00400000,
 	SPELL_TYPE_DK_PRESENCE          = 0x00800000,
+	SPELL_TYPE_JUDGEMENT			= 0x01000000,
 };
 
 //custom stuff generated for spells that will not change in time

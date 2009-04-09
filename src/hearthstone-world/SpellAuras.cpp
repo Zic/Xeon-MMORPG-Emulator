@@ -5356,6 +5356,14 @@ void Aura::SpellAuraTransform(bool apply)
 
 				if(apply)
 				{
+					if( GetUnitCaster()->IsPlayer() )
+						if( GetUnitCaster()->m_DummyAuras[ SPELL_HASH_GLYPH_OF_POLYMORPH ] )
+							for(uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+								if( m_target->m_auras[i] )
+									for( int x=0; x<3; x++ )
+										if( m_target->m_auras[i]->GetSpellProto()->EffectApplyAuraName[x] == SPELL_AURA_PERIODIC_DAMAGE )
+											m_target->m_auras[i]->Remove();
+
 					m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
 
 					// remove the current spell (for channelers)

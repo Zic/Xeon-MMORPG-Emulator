@@ -4602,6 +4602,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 20578:
 				sp->AuraInterruptFlags = AURA_INTERRUPT_ON_MOVEMENT|AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN;
 				break;
+			case 56364:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
 			}
 		}
 	}
@@ -4826,6 +4830,8 @@ void ApplyNormalFixes()
 		    type |= SPELL_TYPE_ASPECT;
 		else if( strstr( sp->Name, "Sting") || strstr( sp->Name, "sting"))
 		    type |= SPELL_TYPE_STING;
+        else if( strstr( sp->Name, "Judgement"))
+            type |= SPELL_TYPE_JUDGEMENT;
 		// don't break armor items!
 		else if(strcmp(sp->Name, "Armor") && strstr( sp->Name, "Armor") || strstr( sp->Name, "Demon Skin"))
 		    type |= SPELL_TYPE_ARMOR;
@@ -5996,6 +6002,9 @@ void ApplyNormalFixes()
 			sp->procChance = 45;	/* this will do */
 		}
 
+		if( sp->NameHash == SPELL_HASH_JUDGEMENTS_OF_THE_PURE )
+			sp->procFlags = PROC_ON_CAST_SPELL;
+
 		//////////////////////////////////////////
 		// HUNTER								//
 		//////////////////////////////////////////
@@ -6043,6 +6052,9 @@ void ApplyNormalFixes()
 
 		// Insert priest spell fixes here
 		if( sp->NameHash == SPELL_HASH_BORROWED_TIME )
+			sp->procFlags = PROC_ON_CAST_SPELL;
+
+		if( sp->NameHash == SPELL_HASH_IMPROVED_SPIRIT_TAP )
 			sp->procFlags = PROC_ON_CAST_SPELL;
 
 		//////////////////////////////////////////
