@@ -266,9 +266,9 @@ void Guild::CreateFromCharter(Charter * pCharter, WorldSession * pTurnIn)
 	// rest of the fields have been nulled out, create some default ranks.
 	GuildRank * leaderRank = CreateGuildRank("Guild Master", GR_RIGHT_ALL, true);
 	CreateGuildRank("Officer", GR_RIGHT_ALL, true);
-	CreateGuildRank("Veteran", GR_RIGHT_DEFAULT, false);
-	CreateGuildRank("Member", GR_RIGHT_DEFAULT, false);
-	GuildRank * defRank = CreateGuildRank("Initiate", GR_RIGHT_DEFAULT, false);
+	CreateGuildRank("Veteran", GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK, false);
+	CreateGuildRank("Member", GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK, false);
+	GuildRank * defRank = CreateGuildRank("Initiate", GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK, false);
 
 	// turn off command logging, we don't wanna spam the logs
 	m_commandLogging = false;
@@ -608,8 +608,7 @@ bool Guild::LoadFromDB(Field * f)
 			{
 				do 
 				{
-					//Field *itemfields = objmgr.GetCachedItem(res2->Fetch()[3].GetUInt32());
-					//ItemPointer pItem = (itemfields == NULL) ? NULL : objmgr.LoadItem(itemfields);
+
 					ItemPointer pItem = objmgr.LoadItem(res2->Fetch()[3].GetUInt64());
 					if(pItem == NULL)
 					{
@@ -772,7 +771,7 @@ void Guild::AddGuildMember(PlayerInfo * pMember, WorldSession * pClient, int32 F
 		pMember->m_loggedInPlayer->SetGuildRank(r->iId);
 	}
 
-	CharacterDatabase.Execute("INSERT INTO guild_data VALUES(%u, %u, %u, '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)", m_guildId, pMember->guid, r->iId);
+	CharacterDatabase.Execute("REPLACE INTO guild_data VALUES(%u, %u, %u, '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)", m_guildId, pMember->guid, r->iId);
 	LogGuildEvent(GUILD_EVENT_JOINED, 1, pMember->name);
 	AddGuildLogEntry(GUILD_LOG_EVENT_JOIN, 1, pMember->guid);
 	m_lock.Release();
@@ -780,6 +779,9 @@ void Guild::AddGuildMember(PlayerInfo * pMember, WorldSession * pClient, int32 F
 
 void Guild::RemoveGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 {
+	if(pMember->guild != this )
+		return;
+
 	if(pMember->guildRank->iId==0)
 	{
 		if(pClient != NULL)
@@ -824,13 +826,19 @@ void Guild::RemoveGuildMember(PlayerInfo * pMember, WorldSession * pClient)
 		m_members.erase(itr);
 	}
 
-	LogGuildEvent(GUILD_EVENT_LEFT, 1, pMember->name);
 	if(pClient != NULL && pClient->GetPlayer()->m_playerInfo != pMember)
 	{
+		if(pMember->m_loggedInPlayer)
+		{
+			PlayerPointer plr = objmgr.GetPlayer(pMember->guid);
+			sChatHandler.SystemMessageToPlr(plr, "You have been removed from the guild by %s", pClient->GetPlayer()->GetName());
+		}
+		LogGuildEvent(GUILD_EVENT_REMOVED, 2, pMember->name, pClient->GetPlayer()->GetName());
 		AddGuildLogEntry(GUILD_LOG_EVENT_REMOVAL, 2, pClient->GetPlayer()->GetLowGUID(), pMember->guid);
 	}
 	else
 	{
+		LogGuildEvent(GUILD_EVENT_LEFT, 1, pMember->name);
 		AddGuildLogEntry(GUILD_LOG_EVENT_LEFT, 1, pMember->guid);
 	}
 
@@ -987,6 +995,12 @@ void Guild::Disband()
 
 void Guild::ChangeGuildMaster(PlayerInfo * pNewMaster, WorldSession * pClient)
 {
+	if(pClient->GetPlayer()->GetLowGUID() != m_guildLeader /* && pClient->GetPlayer()->m_playerInfo != pNewMaster*/ )
+	{
+		Guild::SendGuildCommandResult(pClient, GUILD_PROMOTE_S, "", GUILD_PERMISSIONS);
+		return;
+	}
+
 	m_lock.Acquire();
 	GuildRank * newRank = FindHighestRank();
 	if(newRank==NULL)
@@ -1008,9 +1022,9 @@ void Guild::ChangeGuildMaster(PlayerInfo * pNewMaster, WorldSession * pClient)
 	itr->first->guildRank = itr->second->pRank;
 	itr2->second->pRank = newRank;
 	itr2->first->guildRank = newRank;
-	CharacterDatabase.WaitExecute("UPDATE guild_data SET guildRank = 0 WHERE playerid = %u AND guildid = %u", itr->first->guid, m_guildId);
-	CharacterDatabase.WaitExecute("UPDATE guild_data SET guildRank = %u WHERE playerid = %u AND guildid = %u", newRank->iId, itr->first->guid, m_guildId);
-	CharacterDatabase.WaitExecute("UPDATE guilds SET leaderGuid = %u WHERE guildId = %u", itr->first->guid, m_guildId);
+	CharacterDatabase.Execute("UPDATE guild_data SET guildRank = 0 WHERE playerid = %u AND guildid = %u", itr->first->guid, m_guildId);
+	CharacterDatabase.Execute("UPDATE guild_data SET guildRank = %u WHERE playerid = %u AND guildid = %u", newRank->iId, itr->first->guid, m_guildId);
+	CharacterDatabase.Execute("UPDATE guilds SET leaderGuid = %u WHERE guildId = %u", itr->first->guid, m_guildId);
 	m_guildLeader = itr->first->guid;
 	m_lock.Release();
 }
@@ -1132,6 +1146,8 @@ void Guild::SendGuildRoster(WorldSession * pClient)
 	uint32 pos;
 	GuildRank * myRank;
 	bool ofnote;
+	if( pClient == NULL || pClient->GetPlayer() == NULL || pClient->GetPlayer()->m_playerInfo == NULL )
+		return;
 	if(pClient->GetPlayer()->m_playerInfo->guild != this)
 		return;
 
