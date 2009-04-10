@@ -197,6 +197,14 @@ int WorldSession::Update(uint32 InstanceID)
 		// if we are.
 		if(_player && _player->m_beingPushed)
 		{
+			//Timeout client after 2 minutes, in case AddToWorld failed (f.e. client crash)
+			if(  (uint32)UNIXTIME - m_lastPing > 120000 )
+			{
+				DEBUG_LOG("WorldSession","Removing InQueue player due to socket timeout.");
+				LogoutPlayer(true);
+				bDeleted = true;
+				return 1;
+			}
 			// Abort..
 			return 0;
 		}
