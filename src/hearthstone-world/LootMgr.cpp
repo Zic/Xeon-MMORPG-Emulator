@@ -820,7 +820,7 @@ void LootRoll::Finalize()
 			return;
 		}
 
-		OUT_DEBUG("AutoLootItem MISC");
+		DEBUG_LOG("HandleAutostoreItem","AutoLootItem %u",itemid);
 		ItemPointer item = objmgr.CreateItem( itemid, _player);
 
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);

@@ -179,7 +179,7 @@ public:
 	__inline PlayerPointer GetPlayer(uint32 guid)
 	{
 		PlayerStorageMap::iterator itr = m_PlayerStorage.find(guid);
-		return (itr != m_PlayerStorage.end()) ? itr->second : NULLPLR;
+		return (itr != m_PlayerStorage.end()) ? m_PlayerStorage[guid] : NULLPLR;
 	}
 
 //////////////////////////////////////////////////////////

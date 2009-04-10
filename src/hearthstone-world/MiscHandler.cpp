@@ -110,7 +110,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 			return;
 		}
 	
-		OUT_DEBUG("AutoLootItem MISC");
+		DEBUG_LOG("HandleAutostoreItem","AutoLootItem %u",itemid);
 		ItemPointer item = objmgr.CreateItem( itemid, GetPlayer());
 	   
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
@@ -157,7 +157,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		PlayerPointer plr;
 		for(LooterSet::iterator itr = pLootObj->m_loot.looters.begin(); itr != pLootObj->m_loot.looters.end(); ++itr)
 		{
-			if( plr != NULL && plr == _player->GetMapMgr()->GetPlayer(*itr))
+			plr = _player->GetMapMgr()->GetPlayer((*itr));
+			if( plr != NULL )
 				plr->GetSession()->SendPacket(&data);
 		}
 	}
