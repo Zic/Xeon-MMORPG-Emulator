@@ -5356,13 +5356,17 @@ void Aura::SpellAuraTransform(bool apply)
 
 				if(apply)
 				{
-					if( GetUnitCaster()->IsPlayer() )
-						if( GetUnitCaster()->m_DummyAuras[ SPELL_HASH_GLYPH_OF_POLYMORPH ] )
-							for(uint32 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
-								if( m_target->m_auras[i] )
-									for( int x=0; x<3; x++ )
-										if( m_target->m_auras[i]->GetSpellProto()->EffectApplyAuraName[x] == SPELL_AURA_PERIODIC_DAMAGE )
-											m_target->m_auras[i]->Remove();
+					if( GetUnitCaster()->m_DummyAuras[ SPELL_HASH_GLYPH_OF_POLYMORPH ] )
+					{
+						for(uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+						{
+							if( m_target->m_auras[i] != NULL &&
+								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[0] == SPELL_AURA_PERIODIC_DAMAGE ||
+								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[1] == SPELL_AURA_PERIODIC_DAMAGE ||
+								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[2] == SPELL_AURA_PERIODIC_DAMAGE )
+								m_target->m_auras[i]->Remove();
+						}
+					}
 
 					m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
 

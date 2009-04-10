@@ -4111,6 +4111,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->AdditionalAura = 49772;
 				}break;
+			case 56364:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
 			case 44443:
 			case 44442:
 				{
@@ -4602,10 +4606,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 20578:
 				sp->AuraInterruptFlags = AURA_INTERRUPT_ON_MOVEMENT|AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN;
 				break;
-			case 56364:
-				{
-					sp->procFlags = PROC_ON_CAST_SPELL;
-				}break;
 			}
 		}
 	}

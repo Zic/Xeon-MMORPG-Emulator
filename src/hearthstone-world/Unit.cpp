@@ -1986,7 +1986,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								}
 								spellId = greatness[maxstat];
 							}break;
-						case 49694:
+						case 49694://Improved Spirit Tap
+						case 59000:
 							{
 								if (!CastingSpell )
 									continue;
@@ -2002,7 +2003,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if (!CastingSpell )
 									continue;
-								if( !(CastingSpell->buffType & SPELL_TYPE_JUDGEMENT) )
+								if( CastingSpell->buffIndexType != SPELL_TYPE_INDEX_JUDGEMENT )
 									continue; 
 							}break;
 						case 60803://Glyph of Remove Curse
