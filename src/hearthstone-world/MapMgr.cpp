@@ -1197,7 +1197,7 @@ void MapMgr::_UpdateObjects()
 						lplr = *itr;
 						++itr;
 						// Make sure that the target player can see us.
-						if( lplr->GetTypeId() == TYPEID_PLAYER && lplr->IsVisible( pObj ) )
+						if( lplr != NULL && lplr->GetTypeId() == TYPEID_PLAYER && lplr->IsVisible( pObj ) )
 							lplr->PushUpdateData( &m_updateBuffer, count );
 					}
 					m_updateBuffer.clear();

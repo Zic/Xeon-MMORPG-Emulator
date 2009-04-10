@@ -4511,15 +4511,18 @@ void Spell::Heal(int32 amount)
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 		if(m_spellInfo->fixed_apcoef > 0)
 			amount += float2int32(u_caster->GetAP() * m_spellInfo->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
-		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
-		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
+		amount = float2int32(float(amount) * u_caster->HealDonePctMod[m_spellInfo->School]);
+		amount = float2int32(float(amount) * unitTarget->HealTakenPctMod[m_spellInfo->School]);
 
-	     //Judgement of Light
+		if(unitTarget->IsPlayer())
+		{
+			//Judgement of Light
 			if(m_spellInfo->Id == 20267)
-				amount = (uint32)(0.10f * unitTarget->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + 0.10f * unitTarget->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1));
-         //Seal of Light
+				amount = float2int32(0.10f * float(unitTarget->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + unitTarget->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1)));
+			//Seal of Light
 			if(m_spellInfo->Id == 20167)
-			    amount = (uint32)(0.15f * u_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + 0.15f * u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1));
+			    amount = float2int32(0.15f * float(u_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1)));
+		}
 
 		// Healing Way fix
  		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)
