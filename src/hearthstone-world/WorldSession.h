@@ -139,6 +139,8 @@ public:
 	void write(WorldPacket & data);
 };
 
+#define PLAYER_LOGOUT_DELAY (20*1000)		/* 20 seconds should be more than enough to gank ya. */
+
 #define CHECK_INWORLD_RETURN if(_player == NULL || !_player->IsInWorld()) { return; }
 #define CHECK_GUID_EXISTS(guidx) if(_player->GetMapMgr()->GetUnit((guidx)) == NULL) { return; }
 #define CHECK_PACKET_SIZE(pckp, ssize) if(ssize && pckp.size() < ssize) { Disconnect(); return; }

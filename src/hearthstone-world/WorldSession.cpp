@@ -24,7 +24,6 @@
 #include "StdAfx.h"
 
 #define WORLDSOCKET_TIMEOUT		 80
-#define PLAYER_LOGOUT_DELAY (20*1000)		/* 20 seconds should be more than enough to gank ya. */
 
 OpcodeHandler WorldPacketHandlers[NUM_MSG_TYPES];
 

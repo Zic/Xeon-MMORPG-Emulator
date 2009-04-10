@@ -687,7 +687,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
 		//make player sit
 		pPlayer->SetStandState(STANDSTATE_SIT);
-		SetLogoutTimer(20000);
+		SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 	/*
 	> 0 = You can't Logout Now
@@ -712,7 +712,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 	DEBUG_LOG( "WORLD"," Recvd CMSG_LOGOUT_CANCEL Message" );
 
 	PlayerPointer pPlayer = GetPlayer();
-	if(!pPlayer)
+	if(!pPlayer || !_logoutTime)
 		return;
 
 	//Cancel logout Timer
