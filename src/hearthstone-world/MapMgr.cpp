@@ -1649,17 +1649,20 @@ bool MapMgr::Do()
 void MapMgr::BeginInstanceExpireCountdown()
 {
 	WorldPacket data(SMSG_RAID_GROUP_ONLY, 8);
-	PlayerStorageMap::iterator itr;
 
 	// so players getting removed don't overwrite us
 	forced_expire = true;
 
 	// send our sexy packet
-    data << uint32(60000) << uint32(1);
-	for(itr = m_PlayerStorage.begin(); itr != m_PlayerStorage.end(); ++itr)
+	data << uint32(60000) << uint32(1);
+
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		if(!itr->second->raidgrouponlysent)
-			itr->second->GetSession()->SendPacket(&data);
+		if(__player_iterator->second->GetSession())
+		{
+			if(!__player_iterator->second->raidgrouponlysent)
+				__player_iterator->second->GetSession()->SendPacket(&data);
+		}
 	}
 
 	// set our expire time to 60 seconds.
@@ -1773,19 +1776,12 @@ void MapMgr::_PerformObjectDuties()
 	eventHolder.Update(difftime);
 
 	// Update players.
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		__player_iterator = m_PlayerStorage.begin();
-		PlayerPointer ptr;
-		for(; __player_iterator != m_PlayerStorage.end(); )
-		{
-			ptr = __player_iterator->second;
-			++__player_iterator;
-			if( ptr != NULL )
-				ptr->Update( difftime );
-		}
-
-		lastUnitUpdate = mstime;
+		if(__player_iterator->second->GetSession())
+			__player_iterator->second->Update( difftime );
 	}
+	lastUnitUpdate = mstime;
 
 	// Update gameobjects (not on every loop, however)
 	if( mLoopCounter % 2 )
@@ -1859,28 +1855,25 @@ void MapMgr::EventCorpseDespawn(uint64 guid)
 
 void MapMgr::TeleportPlayers()
 {
-	PlayerStorageMap::iterator itr =  m_PlayerStorage.begin();
 	if(!bServerShutdown)
 	{
-		for(; itr !=  m_PlayerStorage.end();)
+		for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 		{
-			PlayerPointer p = itr->second;
-			++itr;
-			p->EjectFromInstance();
+			if(__player_iterator->second->GetSession())
+				__player_iterator->second->EjectFromInstance();
 		}
 	}
 	else
 	{
-		for(; itr !=  m_PlayerStorage.end();)
+		for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 		{
-			PlayerPointer p = itr->second;
-			++itr;
-			if(p->GetSession())
-				p->GetSession()->LogoutPlayer(false);
+			if(__player_iterator->second->GetSession())
+				__player_iterator->second->GetSession()->LogoutPlayer(false);
 			else
 			{
-				p->Destructor();
-				p = NULLPLR;
+				__player_iterator->second->Destructor();
+				__player_iterator->second = NULLPLR;
+				m_PlayerStorage.erase(__player_iterator);
 			}
 		}
 	}
@@ -2107,90 +2100,80 @@ DynamicObjectPointer MapMgr::CreateDynamicObject()
 
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacket *pData)
 {
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
-		if(p->GetSession())
+		if(__player_iterator->second->GetSession())
 		{
-			if( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask )
+			if( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != ZONE_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			p->GetSession()->SendPacket(pData);
+			__player_iterator->second->GetSession()->SendPacket(pData);
 		}
 	}
 }
 
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacket *pData)
 {
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
-		if(p->GetSession())
+		if(__player_iterator->second->GetSession())
 		{
-			if( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask )
+			if( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && p->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != ZONE_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			p->GetSession()->SendPacket(pData);
+			__player_iterator->second->GetSession()->SendPacket(pData);
 		}
 	}
 }
 
 void MapMgr::RemoveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
+		if(__player_iterator->second->GetSession())
+		{
+			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+				continue;
 
-		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
-			continue;
-
-		p->RemoveAura(uAuraId);
+			__player_iterator->second->RemoveAura(uAuraId);
+		}
 	}
 }
 
 void MapMgr::RemovePositiveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
-
-		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
-			continue;
-
-		p->RemovePositiveAura(uAuraId);
+		if(__player_iterator->second->GetSession())
+		{
+			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+				continue;
+			__player_iterator->second->RemovePositiveAura(uAuraId);
+		}
 	}
 }
 
 void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
 {
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
 	SpellEntry * sp = dbcSpell.LookupEntryForced(uSpellId);
 	if( !sp )
 		return;
 
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
+		if(__player_iterator->second->GetSession())
+		{
+			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+				continue;
 
-		if( iFactionMask != FACTION_MASK_ALL && p->GetTeam() != (uint32)iFactionMask )
-			continue;
-
-		p->CastSpell(p, sp, true);
+			__player_iterator->second->CastSpell(TO_UNIT(__player_iterator->second), sp, true);
+		}
 	}
 }
 
@@ -2208,15 +2191,14 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 	data << uint32(strlen(msgbuf)+1);
 	data << msgbuf;
 
-	PlayerStorageMap::iterator itr = m_PlayerStorage.begin();
-	for(; itr !=  m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
 	{
-		PlayerPointer p = itr->second;
-		++itr;
+		if(__player_iterator->second->GetSession())
+		{
+			if( ( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask) )
+				continue;
 
-		if( ( iZoneMask != ZONE_MASK_ALL && p->GetZoneId() != (uint32)iZoneMask) )
-			continue;
-
-		p->GetSession()->SendPacket(&data);
+			__player_iterator->second->GetSession()->SendPacket(&data);
+		}
 	}
 }
