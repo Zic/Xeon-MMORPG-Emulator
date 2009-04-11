@@ -2567,7 +2567,6 @@ void Aura::SpellAuraDummy(bool apply)
 				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_HEAL, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			else
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_HEAL);
-            		
 		}break;
 
 	case 16914:
@@ -2756,7 +2755,7 @@ void Aura::SpellAuraDummy(bool apply)
 	default:
 		{
 			if( m_target )
-				m_target->m_DummyAuras[m_spellProto->NameHash] = apply ? m_spellProto : 0;
+				m_target->m_DummyAuras[m_spellProto->NameHash] && apply ? m_spellProto : 0;
 		}break;
 	}
 
@@ -5161,9 +5160,12 @@ void Aura::SpellAuraTransform(bool apply)
 		return;
 
 	uint32 displayId = 0;
-	CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
+	CreatureInfo* ci = NULL;
+	ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
 
-	if(ci)
+	if(ci == NULL)
+		DEBUG_LOG("Aura","SpellAuraTransform cannot find CreatureInfo for id %d",mod->m_miscValue);
+	else
 		displayId = ci->Male_DisplayID;
 
 	if( p_target && p_target->IsMounted() )
@@ -5237,80 +5239,82 @@ void Aura::SpellAuraTransform(bool apply)
 		{
 			if( apply )
 			{
-				if(m_target->getRace() == RACE_ORC)
+				switch(m_target->getRace())
 				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140);
+					case RACE_ORC:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140);
+					}break;
+					case RACE_TAUREN:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147);
+					}break;
+					case RACE_TROLL:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134);
+					}break;
+					case RACE_UNDEAD:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145);
+					}break;
+					case RACE_BLOODELF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830);
+					}break;
+					case RACE_GNOME:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149);
+					}break;
+					case RACE_DWARF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142);
+					}break;
+					case RACE_HUMAN:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138);
+					}break;
+					case RACE_NIGHTELF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144);
+					}break;
+					case RACE_DRAENEI:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828);
+					}break;
+					default:
+						m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 				}
-				if(m_target->getRace() == RACE_TAUREN)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147);
-				}
-				if(m_target->getRace() == RACE_TROLL)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134);
-				}
-				if(m_target->getRace() == RACE_UNDEAD)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145);
-				}
-				if(m_target->getRace() == RACE_BLOODELF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830);
-				}
-
-				if(m_target->getRace() == RACE_GNOME)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149);
-				}
-				if(m_target->getRace() == RACE_DWARF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142);
-				}
-				if(m_target->getRace() == RACE_HUMAN)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138);
-				}
-				if(m_target->getRace() == RACE_NIGHTELF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144);
-				}
-				if(m_target->getRace() == RACE_DRAENEI)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828);
-				}
-			} 
-			else
-				m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
+			}
 		}break;
 
 		case 42365:	// murloc costume
@@ -5359,12 +5363,15 @@ void Aura::SpellAuraTransform(bool apply)
 					if( GetUnitCaster()->m_DummyAuras[ SPELL_HASH_GLYPH_OF_POLYMORPH ] )
 					{
 						for(uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
-						{
-							if( m_target->m_auras[i] != NULL &&
-								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[0] == SPELL_AURA_PERIODIC_DAMAGE ||
-								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[1] == SPELL_AURA_PERIODIC_DAMAGE ||
-								m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[2] == SPELL_AURA_PERIODIC_DAMAGE )
-								m_target->m_auras[i]->Remove();
+						{ 
+							if(m_target->m_auras[i] != NULL)
+							{
+								for(uint32 x = 0; x < 3; x++)
+								{
+									if( m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[x] == SPELL_AURA_PERIODIC_DAMAGE )
+										m_target->m_auras[i]->Remove();
+								}
+							}
 						}
 					}
 
