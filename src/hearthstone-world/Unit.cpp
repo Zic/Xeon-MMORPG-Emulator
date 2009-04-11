@@ -1650,6 +1650,16 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) //requires offensive spell. ! might not cover all spells
 									continue;
 							}break;
+						//Brain Freeze
+						case 57761:
+							{
+								if( CastingSpell == NULL)
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_FROSTBOLT &&
+									CastingSpell->NameHash != SPELL_HASH_CONE_OF_COLD &&
+									CastingSpell->NameHash != SPELL_HASH_FROSTFIRE_BOLT )
+									continue;
+							}break;
 						// druid - Celestial Focus
 						case 16922:
 							{
@@ -5123,6 +5133,26 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 								continue;
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_FLASH_OF_LIGHT )
+								continue;
+						}break;
+					//paladin - Infusion of light
+					case 53672:
+					case 54149:
+						{
+							if( m_currentSpell && !(m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_OF_LIGHT ||
+												m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_HOLY_LIGHT))
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLASH_OF_LIGHT && spi->NameHash != SPELL_HASH_HOLY_LIGHT)
+								continue;
+						}break;
+					//Mage - Firestarter
+					case 54741:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLAMESTRIKE )
 								continue;
 						}break;
 					case 34936:		// Backlash

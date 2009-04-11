@@ -1061,7 +1061,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
 				}break;
-
+			case 53672:
+			case 54149:
+				{
+					sp->AuraInterruptFlags	=	AURA_INTERRUPT_ON_CAST_SPELL;
+				}break;
 			//Paladin - Vindication
 			case 9452:
 			case 26016:
@@ -3654,11 +3658,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->c_is_flags |=	SPELL_FLAG_IS_FORCEDDEBUFF;
 				}break;
 		
-			case 44549:
-				{
-						sp->procFlags	=	PROC_ON_CAST_SPELL;
-				}break;
-		
 			case 48978:
 			case 61216:
 				{
@@ -4115,10 +4114,25 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->procFlags = PROC_ON_CAST_SPELL;
 				}break;
-			case 44443:
+			case 44443://Firestarter
 			case 44442:
 				{
 					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[0][0] = 0x0;
+					sp->EffectSpellClassMask[0][1] = 0x0;
+				}break;
+			//Mage - Brain Freeze
+			case 44546:
+			case 44584:
+			case 44549:
+				{
+					sp->procFlags	=	PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[0][0] = 0x0;
+					sp->EffectSpellClassMask[0][1] = 0x0;
+				}break;
+			case 54741:
+				{
+					sp->AuraInterruptFlags	=	AURA_INTERRUPT_ON_CAST_SPELL;
 				}break;
 			case 66:
 				{
