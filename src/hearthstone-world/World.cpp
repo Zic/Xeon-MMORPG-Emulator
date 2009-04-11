@@ -702,12 +702,10 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
 	SessionMap::iterator itr;
 	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
 	{
-		if (itr->second->GetPlayer() &&
-			itr->second->GetPlayer()->IsInWorld()
-			&& itr->second != self)  // dont send to self!
-		{
+		if(self == NULL)// dont send to self!
+			continue;
+		if (itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
 			itr->second->SendPacket(packet);
-		}
 	}
 
 	m_sessionlock.ReleaseReadLock();
@@ -736,13 +734,10 @@ void World::SendZoneMessage(WorldPacket *packet, uint32 zoneid, WorldSession *se
 	SessionMap::iterator itr;
 	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
 	{
-		if (itr->second->GetPlayer() &&
-			itr->second->GetPlayer()->IsInWorld()
-			&& itr->second != self)  // dont send to self!
-		{
-			if (itr->second->GetPlayer()->GetZoneId() == zoneid)
-				itr->second->SendPacket(packet);
-		}
+		if(self == NULL)// dont send to self!
+			continue;
+		if (itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld() && itr->second->GetPlayer()->GetZoneId() == zoneid)
+			itr->second->SendPacket(packet);
 	}
 
 	m_sessionlock.ReleaseReadLock();
@@ -755,13 +750,10 @@ void World::SendInstanceMessage(WorldPacket *packet, uint32 instanceid, WorldSes
 	SessionMap::iterator itr;
 	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
 	{
-		if (itr->second->GetPlayer() &&
-			itr->second->GetPlayer()->IsInWorld()
-			&& itr->second != self)  // dont send to self!
-		{
-			if (itr->second->GetPlayer()->GetInstanceID() == (int32)instanceid)
-				itr->second->SendPacket(packet);
-		}
+		if(self == NULL)// dont send to self!
+			continue;
+		if (itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld())
+			itr->second->SendPacket(packet);
 	}
 
 	m_sessionlock.ReleaseReadLock();
