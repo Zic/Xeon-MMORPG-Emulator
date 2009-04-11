@@ -258,7 +258,7 @@ void WeatherInfo::SendUpdate()
 {
 	WorldPacket data(SMSG_WEATHER, 9);
 	BuildWeatherPacket(&data, m_currentEffect, m_currentDensity);
-	sWorld.SendZoneMessage(&data, m_zoneId, 0);
+	sWorld.SendZoneMessage(&data, m_zoneId);
 }
 
 void WeatherInfo::SendUpdate(PlayerPointer plr) //Updates weather for player's zone-change only if new zone weather differs

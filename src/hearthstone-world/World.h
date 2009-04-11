@@ -414,6 +414,7 @@ public:
 	void SendWorldWideScreenText(const char *text, WorldSession *self = 0);
 	void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
 	void SendZoneMessage(WorldPacket *packet, uint32 zoneid, WorldSession *self = 0);
+	void SendZoneWeather(WorldPacket *packet, uint32 zoneid);
 	void SendInstanceMessage(WorldPacket *packet, uint32 instanceid, WorldSession *self = 0);
 	void SendFactionMessage(WorldPacket *packet, uint8 teamId);
 	void SendMessageToGMs(WorldSession *self, const char * text, ...);
