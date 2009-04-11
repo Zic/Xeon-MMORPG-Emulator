@@ -376,7 +376,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 	if(qst->count_required_item || qst_giver->GetTypeId() == TYPEID_GAMEOBJECT)	// gameobject quests deactivate
 		_player->UpdateNearbyGameObjects();
 
-	CALL_QUESTSCRIPT_EVENT(this, OnQuestStart)(plr, this);
+	CALL_QUESTSCRIPT_EVENT(qle, OnQuestStart)(_player, qle);
 
 	sQuestMgr.OnQuestAccepted(_player,qst,qst_giver);
 
