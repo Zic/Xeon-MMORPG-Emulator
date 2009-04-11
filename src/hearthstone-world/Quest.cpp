@@ -185,8 +185,6 @@ void QuestLogEntry::Init(Quest* quest, PlayerPointer plr, uint32 slot)
 		m_time_left = m_quest->time;
 	else
 		m_time_left = 0;
-
-	CALL_QUESTSCRIPT_EVENT(this, OnQuestStart)(plr, this);
 }
 
 void QuestLogEntry::ClearAffectedUnits()

@@ -227,6 +227,8 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 					QuestLogEntry *qle = new QuestLogEntry();
 					qle->Init(qst, plr, (uint32)open_slot);
 					qle->UpdatePlayerFields();
+
+					CALL_QUESTSCRIPT_EVENT(this, OnQuestStart)(plr, this);
 		
 					// If the quest should give any items on begin, give them the items.
 					for(uint32 i = 0; i < 4; ++i)
