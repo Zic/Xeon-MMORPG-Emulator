@@ -4299,6 +4299,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 		x = pTarget->GetBindPositionX();
 		y = pTarget->GetBindPositionY();
 		z = pTarget->GetBindPositionZ();
+		o = pTarget->GetOrientation();
 		mapid = pTarget->GetBindMapId();
 	}
 	else // normal behavior
