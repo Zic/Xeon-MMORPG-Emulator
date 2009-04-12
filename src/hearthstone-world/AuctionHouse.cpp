@@ -49,9 +49,11 @@ AuctionHouse::AuctionHouse(uint32 ID)
 
 AuctionHouse::~AuctionHouse()
 {
-	HM_NAMESPACE::hash_map<uint32, Auction*>::iterator itr = auctions.begin();
-	for(; itr != auctions.end(); ++itr)
+	for(HM_NAMESPACE::hash_map<uint32, Auction*>::iterator itr = auctions.begin(); itr != auctions.end(); ++itr)
+	{
+		itr->second->pItem->Delete();
 		delete itr->second;
+	}
 }
 
 void AuctionHouse::QueueDeletion(Auction * auct, uint32 Reason)
