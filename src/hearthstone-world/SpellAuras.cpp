@@ -5385,7 +5385,7 @@ void Aura::SpellAuraTransform(bool apply)
 						m_target->m_currentSpell = NULLSPELL;
 					}
 
-					sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)1000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+					sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)2000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 					m_target->polySpell = GetSpellProto()->Id;
 				}
 				else
