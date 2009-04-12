@@ -2049,6 +2049,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procChance = 2;
 						sp->EffectSpellClassMask[0][0]=0x0;
 				}break;
+			case  56218://Glyph of Corruption
 			case  18095:
 				{
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
