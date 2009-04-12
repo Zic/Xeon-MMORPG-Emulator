@@ -964,6 +964,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if( myroll > chance )
 								continue;
 						}break;
+						// Sword and Board
+						case 50227:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_DEVASTATE &&
+								CastingSpell->NameHash != SPELL_HASH_REVENGE )
+									continue;
+							}break;
 /*						//disabled by zack until finished : this needs to get trigered on trap trigger and not trap cast
 						// hunter - Entrapment
 						case 19185:

@@ -662,16 +662,35 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !p_caster )
 				return;
 
-			uint32 ClearSpellId[5] =
+			uint32 ClearSpellId[1] =
 			{
-			20252,  /* Intercept - Rank 1 */
-			20616,  /* Intercept - Rank 2 */
-			20617,  /* Intercept - Rank 3 */
-			25272,  /* Intercept - Rank 4 */
-			25275,  /* Intercept - Rank 5 */
+			20252,  /* Intercept */
 			};
 
-			for(i = 0; i < 5; i++)
+			for(i = 0; i < 1; i++)
+			{
+				if( p_caster->HasSpell( ClearSpellId[i] ) )
+					p_caster->ClearCooldownForSpell( ClearSpellId[i] );
+			}
+		}break;
+	case 50227: // Sword and Board
+		{
+			if( !p_caster )
+				return;
+
+			uint32 ClearSpellId[8] =
+			{
+			23922,  /* Shield Slam - Rank 1 */
+			23923,  /* Shield Slam - Rank 2 */
+			23924,  /* Shield Slam - Rank 3 */
+			23925,  /* Shield Slam - Rank 4 */
+			25258,  /* Shield Slam - Rank 5 */
+			30356,  /* Shield Slam - Rank 6 */
+			47487,  /* Shield Slam - Rank 7 */
+			47488,  /* Shield Slam - Rank 8 */
+			};
+
+			for(i = 0; i < 8; i++)
 			{
 				if( p_caster->HasSpell( ClearSpellId[i] ) )
 					p_caster->ClearCooldownForSpell( ClearSpellId[i] );

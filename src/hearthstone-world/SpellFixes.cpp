@@ -3372,6 +3372,18 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	 PROC_ON_BLOCK_VICTIM | PROC_ON_DODGE_VICTIM;
 				}break;
+			// Sword and Board
+			case 46951:
+			case 46952:
+			case 46953:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Sword and Board Refresh
+			case 50227:
+				{
+						sp->Effect[1]	=	3;
+				}break;
 			//////////////////////////////////////////
 			// PALADIN								//
 			//////////////////////////////////////////
