@@ -977,6 +977,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash!=SPELL_HASH_GOUGE ) //gouge
 									continue;
 						}break;*/
+						// Improved Revenge / Glyph of Revenge
+						case 12798:
+						case 58363:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_REVENGE )
+									continue;
+							}break;
 						// Mage ignite talent only for fire dmg
 						case 12654:
 						{
@@ -5166,6 +5175,15 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 						{
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_SHADOW_BOLT )
+								continue;
+						}break;
+					// Glyph of Revenge Proc
+					case 58363:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_HEROIC_STRIKE )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_HEROIC_STRIKE )
 								continue;
 						}break;
 					case 18708: //Fel Domination

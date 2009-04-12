@@ -2675,7 +2675,25 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags	|= PROC_TARGET_SELF;
 				}break;
 
-		
+			// Improved Revenge
+			case 12797:
+			case 12799:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Glyph of Revenge
+			case 58364:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[0][0]=0x0;
+					sp->EffectSpellClassMask[0][1]=0x0;
+				}break;
+			// Glyph of Revenge Proc
+			case 58363:
+				{
+					sp->AuraInterruptFlags  =   AURA_INTERRUPT_ON_CAST_SPELL;
+				}break;
+			
 			//warrior	-	berserker	rage is	missing	1	effect = regenerate	rage
 			case  18499:
 				{
