@@ -483,24 +483,24 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				sp->procChance = 10;
 				break;
 		
-			// Spell 19228 Proc Chance (Improved Wing Clip Rank 1:
+			// Improved Wing Clip
 			case  19228:
 				{
-				sp->procChance = 4;
+				sp->procChance = 7;
 				sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
 				}break;
 		
-			// Spell 19232 Proc Chance (Improved Wing Clip Rank 2:
+			// Improved Wing Clip
 			case  19232:
 				{
-				sp->procChance = 8;
+				sp->procChance = 14;
 				sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
 				}break;
 		
-			// Spell 19233 Proc Chance (Improved Wing Clip Rank 3:
+			// Improved Wing Clip 
 			case  19233:
 				{
-				sp->procChance = 12;
+				sp->procChance = 20;
 				sp->procFlags = PROC_ON_CAST_SPECIFIC_SPELL;
 				}break;
 		
@@ -2825,6 +2825,24 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->proc_interval = 45000;
 					sp->EffectTriggerSpell[0] = 60229;
 				}break;
+			// Mystical Skyfire Diamond
+			case 32837:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_CAST_SPELL;
+				}break;
+			// Swordguard Embroidery
+			case 55776:
+				{
+						sp->proc_interval	=	60000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;
+			// Chuchu's Tiny Box of Horrors
+			case 61618:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK;
+				}break;		
 			case 60063: // Sundial of the Exiled
 				{
 					sp->procFlags = PROC_ON_CAST_SPELL;
@@ -2837,6 +2855,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 60196:
 				{
 					sp->EffectImplicitTargetA[0] = EFF_TARGET_SELF;
+				}break;
+			// Darkmoon Card: Death
+			case 57352:
+				{
+						sp->proc_interval	=	45000;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK | PROC_ON_CAST_SPELL;
 				}break;
 			case 60493: //Dying Curse
 				{
@@ -3306,7 +3330,30 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Unique = true;
 				}break;
 
-		
+			// Wrecking Crew
+			case 46867:
+			case 56611:
+			case 56612:
+			case 56613:
+			case 56614:
+				{
+						sp->procFlags	=	 PROC_ON_CRIT_ATTACK;
+				}break;
+			// Enrage
+			case 12317:
+			case 13045:
+			case 13046:
+			case 13047:
+			case 13048:
+				{
+						sp->procFlags	=	 PROC_ON_ANY_DAMAGE_VICTIM;
+				}break;
+			// Improved Defensive Stance (Missing Parry Flag)
+			case 29593:
+			case 29594:
+				{
+						sp->procFlags	=	 PROC_ON_BLOCK_VICTIM | PROC_ON_DODGE_VICTIM;
+				}break;
 			//////////////////////////////////////////
 			// PALADIN								//
 			//////////////////////////////////////////
