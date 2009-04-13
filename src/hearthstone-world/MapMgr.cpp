@@ -1747,37 +1747,42 @@ void MapMgr::_PerformObjectDuties()
 	}	
 
 	// Sessions are updated every loop.
+	int result = 0;
+	WorldSession * MapSession;
+	PlayerPointer ptr5;
+
+	SessionSet::iterator itr = MapSessions.begin();
+	SessionSet::iterator it2;
+
+	for(; itr != MapSessions.end();)
 	{
-		int result = 0;
-		WorldSession * MapSession;
-		SessionSet::iterator itr = MapSessions.begin();
-		SessionSet::iterator it2;
+		MapSession = (*itr);
+		it2 = itr;
+		++itr;
 
-		for(; itr != MapSessions.end();)
+		ptr5 = (*it2)->GetPlayer();
+
+		//we are no longer handled by this thread?
+		//Then don't update, but remove us from upate list.
+		if( ptr5 == NULL || ptr5->GetMapMgr()== NULL || 
+			ptr5->GetMapMgr() != shared_from_this() ||
+			MapSession->GetInstance() != m_instanceID)
 		{
-			MapSession = (*itr);
-			it2 = itr;
-			++itr;
+			MapSessions.erase(it2);
+			continue;
+		}
 
-			if(MapSession->GetInstance() != m_instanceID)
-			{
-				MapSessions.erase(it2);
-				continue;
-			}
 
-			// Don't update players not on our map.
-			// If we abort in the handler, it means we will "lose" packets, or not process this.
-			// .. and that could be diasterous to our client :P
-			if( MapSession->GetSocket()!=NULL && MapSession->GetPlayer() != NULL && MapSession->GetPlayer()->GetMapMgr()!= NULL && MapSession->GetPlayer()->GetMapMgr() != shared_from_this())
-				continue;
+		// Teleporting Players can have allready have a differnt MapMgr, 
+		// If we abort in the handler, it means we will "lose" packets, or not process this.
+		// .. and that could be diasterous to our client :P
 
-			result = MapSession->Update(m_instanceID);
-			if(result)//session or socket deleted?
-			{
-				if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
-					sWorld.DeleteGlobalSession(MapSession);
-				MapSessions.erase(it2);
-			}
+		result = MapSession->Update(m_instanceID);
+		if(result)//session or socket deleted?
+		{
+			if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
+				sWorld.DeleteGlobalSession(MapSession);
+			MapSessions.erase(it2);
 		}
 	}
 

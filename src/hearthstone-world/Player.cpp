@@ -509,11 +509,6 @@ void Player::Destructor()
 
 	objmgr.RemovePlayer(player_shared_from_this());
 
-	if(m_session)
-	{
-		m_session->SetPlayer(NULLPLR);
-	}
-
 	PlayerPointer pTarget;
 	if(mTradeTarget != 0)
 	{
@@ -594,8 +589,6 @@ void Player::Destructor()
 			}
 	}
 
-	SetSession(NULL);
-
 	if (mSpellsUniqueTargets)
 	{
 		for (i=0; i<hashmap_length(mSpellsUniqueTargets); i++)
@@ -620,6 +613,10 @@ void Player::Destructor()
 	if(linkTarget)
 		linkTarget = NULLUNIT;
 
+	for(std::map<uint32, PlayerPet*>::iterator itr = m_Pets.begin(); itr != m_Pets.end(); ++itr)
+		delete itr->second;
+
+	m_Pets.clear();
 	m_wratings.clear();
 	m_QuestGOInProgress.clear();
 	m_removequests.clear();
@@ -628,11 +625,6 @@ void Player::Destructor()
 	quest_mobs.clear();
 	loginauras.clear();
 	OnMeleeAuras.clear();
-
-	for(std::map<uint32, PlayerPet*>::iterator itr = m_Pets.begin(); itr != m_Pets.end(); ++itr)
-		delete itr->second;
-	m_Pets.clear();
-	
 	m_itemsets.clear();
 	m_channels.clear();
 

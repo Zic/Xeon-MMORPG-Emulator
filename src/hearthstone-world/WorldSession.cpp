@@ -377,7 +377,6 @@ void WorldSession::LogoutPlayer(bool Save)
 				CharacterDatabase.ExecuteNA(ss.str().c_str());
 			}
 		}
-		_player->SetSession(NULL);
 		_player->ObjUnlock();
 
 		_player->Destructor();
@@ -388,7 +387,7 @@ void WorldSession::LogoutPlayer(bool Save)
 	_loggingOut = false;
 
 	SetLogoutTimer(0);
-	if(_player)
+	if(_player != NULL)
 		_player = NULLPLR;
 }
 
