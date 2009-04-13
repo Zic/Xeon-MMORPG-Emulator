@@ -672,76 +672,6 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 	// Update in-range data for old objects
 	///////////////////////////////////////
 
-	/** let's duplicate some code here :P Less branching is always good.
-	 * - Burlex
-	 */
-/*#define IN_RANGE_LOOP \
-	for (Object::InRangeSet::iterator iter = obj->GetInRangeSetBegin(), iter2; \
-		iter != obj->GetInRangeSetEnd();) \
-	{ \
-		curObj = *iter; \
-		iter2 = iter; \
-		++iter; \
-		if(curObj->IsPlayer() && obj->IsPlayer() && plObj->m_TransporterGUID && plObj->m_TransporterGUID == TO_PLAYER( curObj )->m_TransporterGUID ) \
-			fRange = 0.0f;		\
-		else if((curObj->GetGUIDHigh() == HIGHGUID_TRANSPORTER || obj->GetGUIDHigh() == HIGHGUID_TRANSPORTER)) \
-			fRange = 0.0f;		\
-		else if((curObj->GetGUIDHigh() == HIGHGUID_GAMEOBJECT && curObj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) == GAMEOBJECT_TYPE_TRANSPORT || obj->GetGUIDHigh() == HIGHGUID_GAMEOBJECT && obj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID) == GAMEOBJECT_TYPE_TRANSPORT)) \
-			fRange = 0.0f;		\
-		else \
-			fRange = m_UpdateDistance;	\
-		if (curObj->GetDistance2dSq(obj) > fRange && fRange > 0) \
-
-#define END_IN_RANGE_LOOP } \
-
-	if(plObj)
-	{
-		IN_RANGE_LOOP
-		{
-			plObj->RemoveIfVisible(curObj);
-			plObj->RemoveInRangeObject(iter2);
-
-			if(curObj->NeedsInRangeSet())
-				curObj->RemoveInRangeObject(obj);
-
-			if(curObj->IsPlayer())
-				TO_PLAYER( curObj )->RemoveIfVisible(obj);
-		}
-		END_IN_RANGE_LOOP
-	}
-	else if(obj->NeedsInRangeSet())
-	{
-		IN_RANGE_LOOP
-		{
-			if(curObj->NeedsInRangeSet())
-				curObj->RemoveInRangeObject(obj);
-
-			if(curObj->IsPlayer())
-				TO_PLAYER( curObj )->RemoveIfVisible(obj);
-
-			obj->RemoveInRangeObject(iter2);
-		}
-		END_IN_RANGE_LOOP
-	}
-	else
-	{
-		IN_RANGE_LOOP
-		{
-			if(curObj->NeedsInRangeSet())
-				curObj->RemoveInRangeObject(obj);
-
-			if(curObj->IsPlayer())
-			{
-				TO_PLAYER( curObj )->RemoveIfVisible(obj);
-				obj->RemoveInRangePlayer(curObj);
-			}
-		}
-		END_IN_RANGE_LOOP
-	}
-
-#undef IN_RANGE_LOOP
-#undef END_IN_RANGE_LOOP*/
-
 	if(obj->HasInRangeObjects()) {
 		for (Object::InRangeSet::iterator iter = obj->GetInRangeSetBegin(), iter2;
 			iter != obj->GetInRangeSetEnd();)
@@ -754,9 +684,13 @@ void MapMgr::ChangeObjectLocation( ObjectPointer obj )
 				fRange = 0.0f; // unlimited distance for people on same vehicle
 			else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER || curObj->GetTypeFromGUID() ==  HIGHGUID_TYPE_VEHICLE)
 				fRange = 0.0f; // unlimited distance for transporters (only up to 2 cells +/- anyway.)
+//TODO Implement distance by protoid
+//			else if (curObj->m_update_distance)
+//				frange = curObj->m_update_distance;
 			else
 				fRange = m_UpdateDistance; // normal distance
 
+			//If we have a update_distance, check if we are in range. 
 			if( fRange > 0.0f && curObj->GetDistance2dSq(obj) > fRange )
 			{
 				if( plObj )
@@ -922,10 +856,14 @@ void MapMgr::UpdateInRangeSet( ObjectPointer obj, PlayerPointer plObj, MapCell* 
 			fRange = 0.0f; // unlimited distance for people on same vehicle
 		else if( curObj->GetTypeFromGUID() == HIGHGUID_TYPE_TRANSPORTER || curObj->GetTypeFromGUID() ==  HIGHGUID_TYPE_VEHICLE)
 			fRange = 0.0f; // unlimited distance for transporters (only up to 2 cells +/- anyway.)
+//TODO Implement distance by protoid
+//			else if (curObj->m_update_distance)
+//				frange = curObj->m_update_distance;
 		else
 			fRange = m_UpdateDistance; // normal distance
 
-		if ( curObj != obj && ( curObj->GetDistance2dSq( obj ) <= fRange || fRange == 0.0f ) )
+		//Add if we are not ourself and  range ==0 or distance is withing range.
+		if ( curObj != obj && (fRange == 0.0f || curObj->GetDistance2dSq( obj ) <= fRange ))
 		{
 			if( !obj->IsInRangeSet( curObj ) )
 			{
@@ -1652,16 +1590,22 @@ void MapMgr::BeginInstanceExpireCountdown()
 
 	// so players getting removed don't overwrite us
 	forced_expire = true;
-
+	
 	// send our sexy packet
 	data << uint32(60000) << uint32(1);
 
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if(!__player_iterator->second->raidgrouponlysent)
-				__player_iterator->second->GetSession()->SendPacket(&data);
+			if(!ptr->raidgrouponlysent)
+				ptr->GetSession()->SendPacket(&data);
 		}
 	}
 
@@ -1738,49 +1682,51 @@ void MapMgr::_PerformObjectDuties()
 		difftime = 500;
 
 	// Update creatures.
+	__creature_iterator = activeCreatures.begin();
+	CreaturePointer ptr;
+	PetPointer ptr2;
+	VehiclePointer ptr3;
+	PlayerPointer ptr4;
+
+	for(; __creature_iterator != activeCreatures.end();)
 	{
-		__creature_iterator = activeCreatures.begin();
-		CreaturePointer ptr;
-		PetPointer ptr2;
-		VehiclePointer ptr3;
+		ptr = *__creature_iterator;
+		++__creature_iterator;
 
-		for(; __creature_iterator != activeCreatures.end();)
-		{
-			ptr = *__creature_iterator;
-			++__creature_iterator;
+		ptr->Update(difftime);
+	}
 
-			ptr->Update(difftime);
-		}
+	__pet_iterator = m_PetStorage.begin();
+	for(; __pet_iterator != m_PetStorage.end();)
+	{
+		ptr2 = __pet_iterator->second;
+		++__pet_iterator;
 
-		__pet_iterator = m_PetStorage.begin();
-		for(; __pet_iterator != m_PetStorage.end();)
-		{
-			ptr2 = __pet_iterator->second;
-			++__pet_iterator;
+		ptr2->Update(difftime);
+	}		
 
-			ptr2->Update(difftime);
-		}		
-
-		__vehicle_iterator = activeVehicles.begin();
-		for(; __vehicle_iterator != activeVehicles.end();)
- 		{
-
-			ptr3 = *__vehicle_iterator;
- 			++__vehicle_iterator;
+	__vehicle_iterator = activeVehicles.begin();
+	for(; __vehicle_iterator != activeVehicles.end();)
+	{
+		ptr3 = *__vehicle_iterator;
+		++__vehicle_iterator;
  
- 			ptr3->Update(difftime);
-		}
+		ptr3->Update(difftime);
 	}
 
 	// Update any events.
 	eventHolder.Update(difftime);
 
 	// Update players.
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	__player_iterator = m_PlayerStorage.begin();
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
-			__player_iterator->second->Update( difftime );
+		ptr4 = __player_iterator->second;;
+		++__player_iterator;
+
+		ptr4->Update( difftime );
 	}
+
 	lastUnitUpdate = mstime;
 
 	// Update gameobjects (not on every loop, however)
@@ -1857,22 +1803,34 @@ void MapMgr::TeleportPlayers()
 {
 	if(!bServerShutdown)
 	{
-		for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+		// Update all players on map.
+		__player_iterator = m_PlayerStorage.begin();
+		PlayerPointer ptr;
+		for(; __player_iterator != m_PlayerStorage.end();)
 		{
-			if(__player_iterator->second->GetSession())
-				__player_iterator->second->EjectFromInstance();
+			ptr = __player_iterator->second;;
+			++__player_iterator;
+
+			if(ptr->GetSession())
+				ptr->EjectFromInstance();
 		}
 	}
 	else
 	{
-		for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+		// Update all players on map.
+		__player_iterator = m_PlayerStorage.begin();
+		PlayerPointer ptr;
+		for(; __player_iterator != m_PlayerStorage.end();)
 		{
-			if(__player_iterator->second->GetSession())
-				__player_iterator->second->GetSession()->LogoutPlayer(false);
+			ptr = __player_iterator->second;;
+			++__player_iterator;
+
+			if(ptr->GetSession())
+				ptr->GetSession()->LogoutPlayer(false);
 			else
 			{
-				__player_iterator->second->Destructor();
-				__player_iterator->second = NULLPLR;
+				ptr->Destructor();
+				ptr = NULLPLR;
 				m_PlayerStorage.erase(__player_iterator);
 			}
 		}
@@ -2100,61 +2058,85 @@ DynamicObjectPointer MapMgr::CreateDynamicObject()
 
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacket *pData)
 {
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask )
+			if( iZoneMask != ZONE_MASK_ALL && ptr->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != ZONE_MASK_ALL && ptr->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			__player_iterator->second->GetSession()->SendPacket(pData);
+			ptr->GetSession()->SendPacket(pData);
 		}
 	}
 }
 
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacket *pData)
 {
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask )
+			if( iZoneMask != ZONE_MASK_ALL && ptr->GetZoneId() != (uint32)iZoneMask )
 				continue;
 
-			if( iFactionMask != ZONE_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iZoneMask )
+			if( iFactionMask != ZONE_MASK_ALL && ptr->GetTeam() != (uint32)iZoneMask )
 				continue;
 
-			__player_iterator->second->GetSession()->SendPacket(pData);
+			ptr->GetSession()->SendPacket(pData);
 		}
 	}
 }
 
 void MapMgr::RemoveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+			if( iFactionMask != FACTION_MASK_ALL && ptr->GetTeam() != (uint32)iFactionMask )
 				continue;
 
-			__player_iterator->second->RemoveAura(uAuraId);
+			ptr->RemoveAura(uAuraId);
 		}
 	}
 }
 
 void MapMgr::RemovePositiveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+			if( iFactionMask != FACTION_MASK_ALL && ptr->GetTeam() != (uint32)iFactionMask )
 				continue;
-			__player_iterator->second->RemovePositiveAura(uAuraId);
+			ptr->RemovePositiveAura(uAuraId);
 		}
 	}
 }
@@ -2165,14 +2147,20 @@ void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
 	if( !sp )
 		return;
 
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( iFactionMask != FACTION_MASK_ALL && __player_iterator->second->GetTeam() != (uint32)iFactionMask )
+			if( iFactionMask != FACTION_MASK_ALL && ptr->GetTeam() != (uint32)iFactionMask )
 				continue;
 
-			__player_iterator->second->CastSpell(TO_UNIT(__player_iterator->second), sp, true);
+			ptr->CastSpell(TO_UNIT(__player_iterator->second), sp, true);
 		}
 	}
 }
@@ -2191,14 +2179,20 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 	data << uint32(strlen(msgbuf)+1);
 	data << msgbuf;
 
-	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end(); ++__player_iterator)
+	// Update all players on map.
+	__player_iterator = m_PlayerStorage.begin();
+	PlayerPointer ptr;
+	for(; __player_iterator != m_PlayerStorage.end();)
 	{
-		if(__player_iterator->second->GetSession())
+		ptr = __player_iterator->second;;
+		++__player_iterator;
+
+		if(ptr->GetSession())
 		{
-			if( ( iZoneMask != ZONE_MASK_ALL && __player_iterator->second->GetZoneId() != (uint32)iZoneMask) )
+			if( ( iZoneMask != ZONE_MASK_ALL && ptr->GetZoneId() != (uint32)iZoneMask) )
 				continue;
 
-			__player_iterator->second->GetSession()->SendPacket(&data);
+			ptr->GetSession()->SendPacket(&data);
 		}
 	}
 }

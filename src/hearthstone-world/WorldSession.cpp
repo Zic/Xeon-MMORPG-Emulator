@@ -557,6 +557,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_FORCE_RUN_SPEED_CHANGE_ACK].handler				= &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK].handler		   = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_SWIM_SPEED_CHANGE_ACK].handler			   = &WorldSession::HandleAcknowledgementOpcodes;
+	WorldPacketHandlers[CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK].handler				= &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_MOVE_ROOT_ACK].handler					   = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_MOVE_UNROOT_ACK].handler					 = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_MOVE_KNOCK_BACK_ACK].handler					   = &WorldSession::HandleAcknowledgementOpcodes;

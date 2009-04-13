@@ -195,7 +195,7 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 		return;		// cheater!
 	}
 
-	if ( m_session->GetPlayer()->HasActiveAura(BG_DESERTER) )
+	if ( m_session->GetPlayer()->HasActiveAura(BG_DESERTER) && !m_session->HasGMPermissions() )
 	{
 		m_session->GetPlayer()->GetSession()->SendNotification("You have been marked as a Deserter.");
 		return;
