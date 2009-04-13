@@ -580,19 +580,24 @@ bool World::SetInitialWorldSettings()
 		lootmgr.LoadCreatureLoot();
 	}
 
+	Log.Notice("World", "Loading Channel config...");
 	Channel::LoadConfSettings();
-	Log.Notice("BattlegroundManager", "Starting...");
+
+	Log.Notice("World", "Starting BattlegroundManager...");
 	BattlegroundMgrPointer BattlegroundMgr(new CBattlegroundManager);
 	BattlegroundMgr->Init();
 
+	Log.Notice("World", "Starting Daywatcher...");
 	dw = new DayWatcherThread();
 	ThreadPool.ExecuteTask( dw );
 
+	Log.Notice("World", "Starting ChracterLoader...");
 	ctl = new CharacterLoaderThread();
 	ThreadPool.ExecuteTask( ctl );
 	ThreadPool.ExecuteTask( new NewsAnnouncer() );
 
 #ifdef ENABLE_COMPRESSED_MOVEMENT
+	Log.Notice("World", "Starting MovementCompressor...");
 	MovementCompressor = new CMovementCompressorThread();
 	ThreadPool.ExecuteTask( MovementCompressor );
 #endif
@@ -745,19 +750,7 @@ void World::SendZoneMessage(WorldPacket *packet, uint32 zoneid, WorldSession *se
 
 	m_sessionlock.ReleaseReadLock();
 }
-void World::SendZoneWeather(WorldPacket *packet, uint32 zoneid)
-{
-	m_sessionlock.AcquireReadLock();
 
-	SessionMap::iterator itr;
-	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
-	{
-		if (itr->second->GetPlayer() && itr->second->GetPlayer()->IsInWorld() && itr->second->GetPlayer()->GetZoneId() == zoneid)
-			itr->second->SendPacket(packet);
-	}
-
-	m_sessionlock.ReleaseReadLock();
-}
 void World::SendInstanceMessage(WorldPacket *packet, uint32 instanceid, WorldSession *self)
 {
 	m_sessionlock.AcquireReadLock();
