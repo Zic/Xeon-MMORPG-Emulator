@@ -82,9 +82,19 @@ void InstanceMgr::Load(TaskList * l)
 		if( itr->Get()->mapid >= NUM_MAPS )
 		{
 			Log.Warning("InstanceMgr", "One or more of your worldmap_info rows specifies an invalid map: %u", itr->Get()->mapid );
+			itr->Inc();
 			continue;
 		}
 
+#ifdef EXCLUDE_TEST_MAPS
+		MapEntry *me = dbcMap.LookupEntry(itr->Get()->mapid);
+		if (me && !me->multimap_id)
+		{
+			Log.Warning("InstanceMgr", "Skipped test map: %u", itr->Get()->mapid );
+			itr->Inc();
+			continue;
+		}
+#endif
 		if(m_maps[itr->Get()->mapid] == NULL)
 		{
 			l->AddTask(new Task(new NoSharedPtrCallbackP1<InstanceMgr,uint32>(this, &InstanceMgr::_CreateMap, itr->Get()->mapid)));
