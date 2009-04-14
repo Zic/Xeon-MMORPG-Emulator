@@ -29,6 +29,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 	recv_data >> guid;
 
 	PlayerInfo *pn = objmgr.GetPlayerInfo( (uint32)guid );
+	WoWGuid pguid(guid);
 
 	if(!pn)
 		return;
@@ -37,7 +38,8 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
 
 	uint8 databuffer[5000];
 	StackPacket data(SMSG_NAME_QUERY_RESPONSE, databuffer, 5000);
-	data << pn->guid << uint32(0);	//highguid
+	data << pguid;
+	data << uint8(0);
 	data << pn->name;
 	data << uint8(0);	   // this probably is "different realm" or something flag.
 	data << pn->race << pn->gender << pn->cl;
