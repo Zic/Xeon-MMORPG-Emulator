@@ -90,7 +90,7 @@ void InstanceMgr::Load(TaskList * l)
 		MapEntry *me = dbcMap.LookupEntry(itr->Get()->mapid);
 		if (me && !me->multimap_id)
 		{
-			Log.Warning("InstanceMgr", "Skipped test map: %u", itr->Get()->mapid );
+			Log.Notice("InstanceMgr", "Skipped test map: %u (hearthstoneConfig.h)", itr->Get()->mapid );
 			itr->Inc();
 			continue;
 		}
