@@ -1890,11 +1890,11 @@ bool AIInterface::IsFlying()
 
 uint32 AIInterface::getMoveFlags()
 {
-	uint32 MoveFlags = 0;
+	uint32 MoveFlags = MONSTER_MOVE_FLAG_RUN;
 	if(m_moveFly == true) //Fly
 	{
 		m_flySpeed = m_Unit->m_flySpeed*0.001f;
-		MoveFlags = 0x300;
+		MoveFlags = MONSTER_MOVE_FLAG_FLY;
 	}
 	else if(m_moveSprint == true) //Sprint
 	{

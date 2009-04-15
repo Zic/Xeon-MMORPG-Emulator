@@ -5615,7 +5615,7 @@ void Spell::SpellEffectCharge(uint32 i)
 
 	uint32 time = uint32( (m_caster->CalcDistance(unitTarget) / ((m_caster->m_runSpeed * 3.5) * 0.001f)) + 0.5);
 	
-	p_caster->GetAIInterface()->SendMoveToPacket(x, y, z, alpha, time, 0x1);
+	p_caster->GetAIInterface()->SendMoveToPacket(x, y, z, alpha, time, MONSTER_MOVE_FLAG_RUN);
 
 	if(unitTarget->GetTypeId() == TYPEID_UNIT)
 		unitTarget->GetAIInterface()->StopMovement(2000);  

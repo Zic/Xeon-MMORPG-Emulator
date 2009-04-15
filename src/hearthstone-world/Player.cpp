@@ -11805,3 +11805,35 @@ uint8 Player::TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy)
 	
 	return runemask;
 }
+
+void Player::GroupUninvite(PlayerPointer targetPlayer, PlayerInfo *targetInfo)
+{
+	if ( targetPlayer == NULL && targetInfo == NULL )
+	{
+		GetSession()->SendPartyCommandResult(player_shared_from_this(), 0, "", ERR_PARTY_CANNOT_FIND);
+		return;
+	}
+
+	if ( !InGroup() || targetInfo->m_Group != GetGroup() )
+	{
+		GetSession()->SendPartyCommandResult(player_shared_from_this(), 0, "", ERR_PARTY_IS_NOT_IN_YOUR_PARTY);
+		return;
+	}
+
+	if ( !IsGroupLeader() || targetInfo->m_Group->HasFlag(GROUP_FLAG_BATTLEGROUND_GROUP) )	// bg group
+	{
+		if(player_shared_from_this() != targetPlayer)
+		{
+			GetSession()->SendPartyCommandResult(player_shared_from_this(), 0, "", ERR_PARTY_YOU_ARE_NOT_LEADER);
+			return;
+		}
+	}
+
+	if(m_bg)
+		return;
+
+	Group *group = GetGroup();
+
+	if(group)
+		group->RemovePlayer(targetInfo);
+}

@@ -778,6 +778,7 @@ public:
 	HEARTHSTONE_INLINE GuildRank * GetGuildRankS() { return m_playerInfo->guildRank; }
 
 	void EventGroupFullUpdate();
+	void GroupUninvite(PlayerPointer player, PlayerInfo *info);
 
 	/************************************************************************/
 	/* Skill System															*/

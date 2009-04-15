@@ -185,7 +185,6 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld()) return;
 	CHECK_PACKET_SIZE(recv_data, 1);
 	std::string membername;
-	Group *group;
 	PlayerPointer player;
 	PlayerInfo * info;
 
@@ -193,42 +192,25 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 
 	player = objmgr.GetPlayer(membername.c_str(), false);
 	info = objmgr.GetPlayerInfoByName(membername.c_str());
-	if ( player == NULL && info == NULL )
-	{
-		SendPartyCommandResult(_player, 0, membername, ERR_PARTY_CANNOT_FIND);
-		return;
-	}
-
-	if ( !_player->InGroup() || info->m_Group != _player->GetGroup() )
-	{
-		SendPartyCommandResult(_player, 0, membername, ERR_PARTY_IS_NOT_IN_YOUR_PARTY);
-		return;
-	}
-
-	if ( !_player->IsGroupLeader() || info->m_Group->HasFlag(GROUP_FLAG_BATTLEGROUND_GROUP) )	// bg group
-	{
-		if(_player != player)
-		{
-			SendPartyCommandResult(_player, 0, "", ERR_PARTY_YOU_ARE_NOT_LEADER);
-			return;
-		}
-	}
-
-	if(_player->m_bg)
-		return;
-
-	group = _player->GetGroup();
-
-	if(group)
-		group->RemovePlayer(info);
+	_player->GroupUninvite(player, info);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 ///This function handles CMSG_GROUP_UNINVITE_GUID:
 //////////////////////////////////////////////////////////////////////////////////////////
-void WorldSession::HandleGroupUninviteGuildOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGroupUninviteGUIDOpcode( WorldPacket & recv_data )
 {
-	DEBUG_LOG( "WORLD"," got CMSG_GROUP_UNINVITE_GUID." );
+	if(!_player->IsInWorld()) return;
+	CHECK_PACKET_SIZE(recv_data, 1);
+	std::string membername;
+	PlayerPointer player;
+	PlayerInfo * info;
+	uint64 guid;
+	recv_data >> guid;
+
+	player = objmgr.GetPlayer(guid);
+	info = objmgr.GetPlayerInfo(guid);
+	_player->GroupUninvite(player, info);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -142,6 +142,14 @@ enum MovementState
 	MOVEMENTSTATE_FOLLOW_OWNER
 };
 
+enum MonsterMoveFlags	// for AIInterface::SendMoveToPacket
+{
+	MONSTER_MOVE_FLAG_WALK		= 0x0,
+	MONSTER_MOVE_FLAG_RUN		= 0x1000,
+	MONSTER_MOVE_FLAG_TELEPORT	= 0x100,
+	MONSTER_MOVE_FLAG_FLY		= 0x3000,
+};
+
 enum CreatureState
 {
 	STOPPED,

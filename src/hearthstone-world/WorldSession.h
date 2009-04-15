@@ -382,7 +382,7 @@ protected:
 	void HandleGroupAcceptOpcode(WorldPacket& recvPacket);
 	void HandleGroupDeclineOpcode(WorldPacket& recvPacket);
 	void HandleGroupUninviteOpcode(WorldPacket& recvPacket);
-	void HandleGroupUninviteGuildOpcode(WorldPacket& recvPacket);
+	void HandleGroupUninviteGUIDOpcode(WorldPacket& recvPacket);
 	void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
 	void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
 	void HandleLootMethodOpcode(WorldPacket& recvPacket);

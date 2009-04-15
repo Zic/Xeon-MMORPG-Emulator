@@ -183,7 +183,6 @@ uint32 Object::BuildCreateUpdateBlockForPlayer(ByteBuffer *data, PlayerPointer t
 	case TYPEID_UNIT:
 		{
 		flags  = 0x0070;
-		flags2 |= unit_shared_from_this()->GetAIInterface()->getMoveFlags();
 		}	
 	case TYPEID_PLAYER:
 		{
