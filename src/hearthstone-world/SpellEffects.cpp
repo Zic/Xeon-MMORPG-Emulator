@@ -5614,23 +5614,11 @@ void Spell::SpellEffectCharge(uint32 i)
 	z = unitTarget->GetPositionZ();
 
 	uint32 time = uint32( (m_caster->CalcDistance(unitTarget) / ((m_caster->m_runSpeed * 3.5) * 0.001f)) + 0.5);
+	
+	p_caster->GetAIInterface()->SendMoveToPacket(x, y, z, alpha, time, 0x1);
 
-	WorldPacket data(SMSG_MONSTER_MOVE, 50);
-	data << m_caster->GetNewGUID();
-	data << uint8(0);
-	data << m_caster->GetPositionX();
-	data << m_caster->GetPositionY();
-	data << m_caster->GetPositionZ();
-	data << getMSTime();
-	data << uint8(0x00);
-	data << uint32(0x00000100);
-	data << time;
-	data << uint32(1);
-	data << x << y << z;
 	if(unitTarget->GetTypeId() == TYPEID_UNIT)
-		unitTarget->GetAIInterface()->StopMovement(2000);
-
-	p_caster->SendMessageToSet(&data, true);   
+		unitTarget->GetAIInterface()->StopMovement(2000);  
 	
 	p_caster->SetPosition(x,y,z,alpha,true);
 	p_caster->addStateFlag(UF_ATTACKING);

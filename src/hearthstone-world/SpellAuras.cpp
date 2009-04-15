@@ -484,7 +484,7 @@ const char* SpellAuraNames[TOTAL_SPELL_AURAS] = {
     "INCREASE_SPELL_HEALING_PCT",						// 175 Increase Spell Healing by % status
     "SPIRIT_OF_REDEMPTION",								// 176 Spirit of Redemption Auras
     "AREA_CHARM",										// 177 Area Charm 
-	"",													// 178
+	"MOD_DEBUFF_RESISTANCE_PERCENT",					// 178 Mod Debuff Resistance %
     "INCREASE_ATTACKER_SPELL_CRIT",						// 179 Increase Attacker Spell Crit Type
     "INCREASE_SPELL_DAMAGE_VS_TYPE",					// 180 Increase Spell Damage Type
 	"",													// 181

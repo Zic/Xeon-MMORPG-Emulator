@@ -1731,6 +1731,7 @@ void Player::smsg_InitialSpells()
 void Player::smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRank)
 {
 	WorldPacket data(SMSG_TALENTS_INFO, 1000);
+	update = false;
 	data << uint8(update);
 	if(update)	// send just the update
 	{
