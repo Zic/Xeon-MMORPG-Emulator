@@ -6527,6 +6527,11 @@ void Player::ApplyTalent(uint32 spellid)
 	if(!spellInfo)
 		return;	// not found
 
+	if(!(spellInfo->Attributes & ATTRIBUTES_PASSIVE))
+	{
+		addSpell(spellid);	// in this case we need to learn the spell itself
+	}
+
 	if( (spellInfo->Attributes & ATTRIBUTES_PASSIVE || (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL ||
 		spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL ||
 		spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL) 
@@ -6561,6 +6566,11 @@ void Player::RemoveTalent(uint32 spellid)
 			if(!sp2) continue;
 			removeSpellByHashName(sp2->NameHash);
 		}
+	}
+	if(!(sp->Attributes & ATTRIBUTES_PASSIVE))
+	{	// in this case we need to remove the spells we learned from this talent
+		// TODO we need to store them somewhere so that player doesn't have to relearn all ranks again
+		removeSpellByHashName(sp->NameHash);
 	}
 
 	for(uint32 x=0;x < MAX_AURAS + MAX_PASSIVE_AURAS; x++)

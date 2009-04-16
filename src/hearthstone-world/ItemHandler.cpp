@@ -1412,7 +1412,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 	 SendPacket( &data );
 		
 	 _player->GetItemInterface()->BuyItem(it,amount,unit, item.extended_cost);
-	 if(item.max_amount)
+	 if(int32(item.max_amount) > 0)
 	 {
 		 unit->ModAvItemAmount(item.itemid,item.amount*amount);
 		
