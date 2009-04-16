@@ -1084,15 +1084,15 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	uint64 srcguid, bagguid;
 	uint32 itemid;
-	int8 slot;
+	int32 slot;
 	uint8 amount = 0;
 	uint8 error;
 	int8 bagslot = INVENTORY_SLOT_NOT_SET;
 
 	recv_data >> srcguid >> itemid;
-	recv_data >> bagguid; 
-	recv_data >> slot;
+	recv_data >> bagguid;
 	recv_data >> amount;
+	recv_data >> slot;
 
 	if( _player->isCasting() )
 		_player->InterruptCurrentSpell();
@@ -1256,8 +1256,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data ) // drag 
 
 	SendItemPushResult(pItem, false, true, false, (pItem==oldItem) ? false : true, bagslot, slot, amount*ci.amount);
 
-	WorldPacket data(SMSG_BUY_ITEM, 12);
+	WorldPacket data(SMSG_BUY_ITEM, 22);
 	data << uint64(srcguid);
+	data << getMSTime();
 	data << uint32(itemid) << uint32(amount);
  
 	SendPacket( &data );
