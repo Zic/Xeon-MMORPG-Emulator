@@ -65,180 +65,27 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
 	if(!_player->IsInWorld()) return;
  	 
-	uint32 talent_id, requested_rank;
-	unsigned int i;
+	uint32 talent_id, requested_rank;	
 	recv_data >> talent_id >> requested_rank;
 
-	uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
-	if(CurTalentPoints == 0)
-		return;
-
-	if (requested_rank > 4)
-		return;
-
-/*	unsigned int numRows = sTalentStore.GetNumRows();
-	TalentEntry *talentInfo=NULL ;
-	for (unsigned int i = 0; i < numRows; i++)		  // Loop through all talents.
-	{
-		TalentEntry *t= sTalentStore.LookupEntry( i );
-		if(t->TalentID==talent_id)
-		{
-			talentInfo=t;
-			break;
-		}
-	}*/
-	TalentEntry * talentInfo = dbcTalent.LookupEntryForced(talent_id);
-	if(!talentInfo)return;
-  
-	PlayerPointer player = GetPlayer();
-
-	// Check if it requires another talent
-	if (talentInfo->DependsOn > 0)
-	{
-		TalentEntry *depTalentInfo = NULL;
-		/*for (unsigned int i = 0; i < numRows; i++)		  // Loop through all talents.
-		{
-			TalentEntry *t= sTalentStore.LookupEntry( i );
-			if(t->TalentID==talentInfo->DependsOn)
-			{
-				depTalentInfo=t;
-				break;
-			}
-		}*/
-		depTalentInfo = dbcTalent.LookupEntryForced(talentInfo->DependsOn);
-		if (depTalentInfo)
-		{
-			bool hasEnoughRank = false;
-			for (int i = talentInfo->DependsOnRank; i < 5; i++)
-			{
-				if (depTalentInfo->RankID[i] != 0)
-				{
-					if (player->HasSpell(depTalentInfo->RankID[i]))
-					{
-						hasEnoughRank = true;
-						break;
-					}
-				}
-			}
-			if (!hasEnoughRank)
-				return;
-		}
-	}
-
-	// Find out how many points we have in this field
-	uint32 spentPoints = 0;
-
-	uint32 tTree = talentInfo->TalentTree;
-	uint32 cl = _player->getClass();
-
-	for(i = 0; i < 3; ++i)
-		if(tTree == TalentTreesPerClass[cl][i])
-			break;
-
-	if(i == 3)
-	{
-		// cheater!
-		Disconnect();
-		return;
-	}
-
-	if (talentInfo->Row > 0)
-	{
-		for (i = 0; i < dbcTalent.GetNumRows(); i++)		  // Loop through all talents.
-		{
-			// Someday, someone needs to revamp
-			TalentEntry *tmpTalent = dbcTalent.LookupRow(i);
-			if (tmpTalent)								  // the way talents are tracked
-			{
-				if (tmpTalent->TalentTree == tTree)
-				{
-					for (int j = 0; j < 5; j++)
-					{
-						if (tmpTalent->RankID[j] != 0)
-						{
-							if (player->HasSpell(tmpTalent->RankID[j]))
-							{
-								spentPoints += j + 1;
-							//	break;
-							}
-						}
-						else 
-							break;
-					}
-				}
-			}
-		}
-	}
-
-	uint32 spellid = talentInfo->RankID[requested_rank];
-	if( spellid == 0 )
-	{
-		OUT_DEBUG("Talent: %u Rank: %u = 0", talent_id, requested_rank);
-	}
-	else
-	{
-		if(spentPoints < (talentInfo->Row * 5))			 // Min points spent
-		{
-			return;
-		}
-
-		if(requested_rank > 0)
-		{
-			if(talentInfo->RankID[requested_rank-1] && !_player->HasSpell(talentInfo->RankID[requested_rank-1]))
-			{
-				// cheater
-				return;
-			}
-		}
-
-		if(!(GetPlayer( )->HasSpell(spellid)))
-		{
-			GetPlayer( )->addSpell(spellid);
-			// More cheat death hackage! :)
-			if(spellid == 31330)
-				GetPlayer()->m_cheatDeathRank = 3;
-			else if(spellid == 31329)
-				GetPlayer()->m_cheatDeathRank = 2;
-			else if(spellid == 31328)
-				GetPlayer()->m_cheatDeathRank = 1;
-	
-			SpellEntry *spellInfo = dbcSpell.LookupEntry( spellid );	 
-			
-			if(requested_rank > 0 )
-			{
-				uint32 respellid = talentInfo->RankID[requested_rank-1];
-				if(respellid)
-				{
-					_player->removeSpell(respellid, false, false, 0);
-					_player->RemoveAura(respellid);
-				}
-			}
-
-			if( (spellInfo->Attributes & ATTRIBUTES_PASSIVE || (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL ||
-															   spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL ||
-															   spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL) 
-				&& ( (spellInfo->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET) == 0 || ( (spellInfo->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET) && _player->GetSummon() ) ) )
-				)
-			{
-				if( spellInfo->RequiredShapeShift && !( (uint32)1 << (_player->GetShapeShift()-1) & spellInfo->RequiredShapeShift ) )
-				{
-					// do nothing
-				}
-				else
-				{
-					SpellPointer sp(new Spell(_player,spellInfo,true,NULLAURA));
-					SpellCastTargets tgt;
-					tgt.m_unitTarget=_player->GetGUID();
-					sp->prepare(&tgt);
-				}
-			}
-
-			_player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints-1);
-		}
-	}
+	_player->LearnTalent(talent_id, requested_rank);
 
 	_player->UpdateTalentInspectBuffer();
 	_player->smsg_TalentsInfo(true, talent_id, requested_rank);
+}
+
+void WorldSession::HandleLearnPreviewTalents( WorldPacket & recv_data )
+{
+	uint32 count = 0;
+	uint32 talent_id, requested_rank;
+	recv_data >> count;
+	for(uint32 i = 0; i < count && recv_data.rpos() < recv_data.size(); i++)
+	{
+		recv_data >> talent_id >> requested_rank;
+		_player->LearnTalent(talent_id, requested_rank);
+	}
+	_player->UpdateTalentInspectBuffer();
+	_player->smsg_TalentsInfo(false, 0, 0);
 }
 
 void WorldSession::HandleUnlearnTalents( WorldPacket & recv_data )

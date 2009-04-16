@@ -2080,5 +2080,7 @@ void WorldSession::HandleRemoveGlyph(WorldPacket & recv_data)
 {
 	uint32 glyphSlot;
 	recv_data >> glyphSlot;
-	_player->RemoveGlyph(glyphSlot);
+	_player->UnapplyGlyph(glyphSlot);
+	if(glyphSlot < GLYPHS_COUNT)
+		_player->m_specs[_player->m_talentActiveSpec].glyphs[glyphSlot] = 0;
 }

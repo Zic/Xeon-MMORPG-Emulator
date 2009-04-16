@@ -488,6 +488,7 @@ protected:
 	/// Skill opcodes (SkillHandler.spp)
 	//void HandleSkillLevelUpOpcode(WorldPacket& recvPacket);
 	void HandleLearnTalentOpcode(WorldPacket& recvPacket);
+	void HandleLearnPreviewTalents(WorldPacket& recv_data);
 	void HandleUnlearnTalents( WorldPacket & recv_data );
 
 	/// Quest opcodes (QuestHandler.cpp)

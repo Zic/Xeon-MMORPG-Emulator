@@ -42,6 +42,8 @@ struct LevelInfo;
 /* action button defines */
 #define PLAYER_ACTION_BUTTON_COUNT 132
 #define PLAYER_ACTION_BUTTON_SIZE PLAYER_ACTION_BUTTON_COUNT * sizeof(ActionButton)
+#define MAX_SPEC_COUNT 2
+#define GLYPHS_COUNT 6
 
 // gold cap
 #define PLAYER_MAX_GOLD 0x7FFFFFFF
@@ -1423,6 +1425,7 @@ public:
 	uint32 m_modblockvaluefromspells;
 	void SendInitialLogonPackets();
 	void Reset_Spells();
+	void LearnTalent(uint32 talent_id, uint32 requested_rank);
 	void Reset_Talents();
 	void Reset_ToLevel1();
 	void RetroactiveCompleteQuests();
@@ -1903,6 +1906,15 @@ protected:
 	void _LoadSkills(QueryResult * result);
 	void _SaveSkillsToDB(QueryBuffer * buf);
 
+	void _LoadSpells(QueryResult * result);
+	void _SaveSpellsToDB(QueryBuffer * buf);
+
+	void _LoadTalents(QueryResult * result);
+	void _SaveTalentsToDB(QueryBuffer * buf);
+
+	void _LoadGlyphs(QueryResult * result);
+	void _SaveGlyphsToDB(QueryBuffer * buf);
+
 	void _LoadPet(QueryResult * result);
 	void _LoadPetNo();
 	void _LoadPetSpells(QueryResult * result);
@@ -2116,11 +2128,22 @@ public:
 	bool mHypothermia;
 
 	// Talent Specs
+	uint16 m_maxTalentPoints;
+	uint16 GetMaxTalentPoints();
+	void ApplySpec(uint8 spec, bool init);
+	void ApplyTalent(uint32 spellId);
+	void RemoveTalent(uint32 spellid);
 	uint8 m_talentSpecsCount;
 	uint8 m_talentActiveSpec;
+	struct PlayerSpec
+	{
+		std::map<uint32, uint8> talents;	// map of <talentId, talentRank>
+		uint16  glyphs[GLYPHS_COUNT];
+	};
+	PlayerSpec m_specs[MAX_SPEC_COUNT];
 
 	// Glyphs
-	void RemoveGlyph(uint32 slot);
+	void UnapplyGlyph(uint32 slot);
 	uint8 SetGlyph(uint32 slot, uint32 glyphId);
 	void InitGlyphSlots();
 	void InitGlyphsForLevel();

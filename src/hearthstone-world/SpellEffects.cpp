@@ -4302,7 +4302,7 @@ void Spell::SpellEffectWeapondamage( uint32 i ) // Weapon damage +
 		return;
 
 	//Hackfix for Mangle
-	if( m_spellInfo->NameHash == SPELL_HASH_MANGLE___CAT && u_caster->IsPlayer() )
+	if( m_spellInfo->NameHash == SPELL_HASH_MANGLE__CAT_ && u_caster->IsPlayer() )
 		TO_PLAYER( u_caster )->AddComboPoints( unitTarget->GetGUID(), 1 );
 
 	// Rune Strike
@@ -4580,8 +4580,10 @@ void Spell::SpellEffectUseGlyph(uint32 i)
 	if(!p_caster)
 		return;
 	uint8 result = p_caster->SetGlyph(m_glyphIndex, m_spellInfo->EffectMiscValue[i]);
-	if(result)
+	if(result) // there was an error
 		SendCastResult(result);
+	else		// success, need to update client display
+		p_caster->smsg_TalentsInfo(false, 0, 0);
 }
 
 void Spell::SpellEffectHealMechanical(uint32 i)
@@ -6661,7 +6663,13 @@ void Spell::SpellEffectSetTalentSpecsCount(uint32 i)
 	if(!p_caster)
 		return;
 
+	if(p_caster->m_talentActiveSpec >= damage)
+	{
+		// activate primary spec
+		p_caster->ApplySpec(0, false);
+	}
 	p_caster->m_talentSpecsCount = damage;
+	
 
 	// Send update
 	p_caster->smsg_TalentsInfo(false, 0, 0);
@@ -6673,7 +6681,6 @@ void Spell::SpellEffectActivateTalentSpec(uint32 i)
 		return;
 
 	// 1 = primary, 2 = secondary
-	p_caster->m_talentActiveSpec = damage;
-	// Send update
-	p_caster->smsg_TalentsInfo(false, 0, 0);
+	p_caster->ApplySpec(uint8(damage - 1), false);
+
 }

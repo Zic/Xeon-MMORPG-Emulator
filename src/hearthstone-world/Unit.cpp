@@ -824,7 +824,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if( CastingSpell->Effect[0] != 80 &&
 								CastingSpell->Effect[1] != 80 &&
 								CastingSpell->Effect[2] != 80 &&
-								CastingSpell->NameHash != SPELL_HASH_MANGLE___CAT )
+								CastingSpell->NameHash != SPELL_HASH_MANGLE__CAT_ )
 								continue;
 						}break;
 						case 17106: //druid intencity
@@ -1769,7 +1769,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							//http://www.wowhead.com/?item=32486 Ashtongue Talisman of Equilibrium
 						case 40452: //Mangle has a 40% chance to grant 140 Strength for 8 sec
 							{
-								if( CastingSpell == NULL || CastingSpell->NameHash != SPELL_HASH_MANGLE___BEAR || CastingSpell->NameHash != SPELL_HASH_MANGLE___CAT)
+								if( CastingSpell == NULL || CastingSpell->NameHash != SPELL_HASH_MANGLE__BEAR_ || CastingSpell->NameHash != SPELL_HASH_MANGLE__CAT_)
 									continue; 
 							}break;
 						case 40445: //Starfire has a 25% chance to grant up to 150 spell damage for 8 sec

@@ -373,6 +373,7 @@ void Player::Init()
 		{
 			m_runes[i] = baseRunes[i];
 		}
+		m_maxTalentPoints = 0;
 		m_talentActiveSpec = 0;
 		m_talentSpecsCount = 1;
 		ok_to_remove = false;
@@ -1751,46 +1752,20 @@ void Player::smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRa
 		data << uint8(m_talentActiveSpec); // unk
 		for(uint8 s = 0; s < m_talentSpecsCount; s++)
 		{
-			size_t countPos = data.wpos();
-			uint8 count = 0;
-			data << uint8(count);
-			for( uint32 i = 0; i < 3; ++i )
-			{// build and send list of known talents. TODO rewrite. Copy&pasted from UpdateTalentInspectBuffer.
-				uint32 talent_tab_id = sWorld.InspectTalentTabPages[getClass()][i];
-
-				for( uint32 j = 0; j < dbcTalent.GetNumRows(); ++j )
-				{
-					TalentEntry const* talent_info = dbcTalent.LookupRow( j );
-
-					if( talent_info == NULL )
-						continue;
-					if( talent_info->TalentTree != talent_tab_id )
-						continue;
-
-					talent_max_rank = 0;
-					for( uint32 k = 5; k > 0; --k )
-					{
-						if( talent_info->RankID[k - 1] != 0 && HasSpell( talent_info->RankID[k - 1] ) )
-						{
-							talent_max_rank = k;
-							break;
-						}
-					}
-
-					if( talent_max_rank <= 0 )
-						continue;
-					data << uint32(talent_info->TalentID);
-					data << uint8(talent_max_rank-1);
-					count++;
-				}
-			}
-			*(uint8*)&data.contents()[countPos] = count;
-			// Send Glyph info
-			uint8 glyphsCount = 6;
-			data << uint8(glyphsCount);
-			for(uint8 i = 0; i < glyphsCount; i++)
+			PlayerSpec spec = m_specs[s];
+			// Send Talents
+			data << uint8(spec.talents.size());
+			std::map<uint32, uint8>::iterator itr;
+			for(itr = spec.talents.begin(); itr != spec.talents.end(); itr++)
 			{
-				data << uint16(GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + i));
+				data << uint32(itr->first);	// TalentId
+				data << uint8(itr->second);	// TalentRank
+			}
+			// Send Glyph info
+			data << uint8(GLYPHS_COUNT);
+			for(uint8 i = 0; i < GLYPHS_COUNT; i++)
+			{
+				data << uint16(spec.glyphs[i]);
 			}
 		}
 	}
@@ -2271,7 +2246,7 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	<< m_uint32Values[PLAYER_FIELD_COINAGE] << ","
 	<< m_uint32Values[PLAYER_AMMO_ID] << ","
 	<< m_uint32Values[PLAYER_CHARACTER_POINTS2] << ","
-	<< m_uint32Values[PLAYER_CHARACTER_POINTS1] << ","
+	<< m_maxTalentPoints << ","
 	<< load_health << ","
 	<< load_mana << ","
 	<< uint32(GetPVPRank()) << ","
@@ -2371,18 +2346,8 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << ",'" << m_TransporterX << "','" << m_TransporterY << "','" << m_TransporterZ << "'";
 	ss << ",'";
 
-	// Dump spell data to stringstream
-	SpellSet::iterator spellItr = mSpells.begin();
-	for(; spellItr != mSpells.end(); ++spellItr)
-	{
-		SpellEntry * sp = dbcSpell.LookupEntry( *spellItr );
-		if( !sp || sp->RequiredShapeShift == FORM_ZOMBIE )
-			continue;
-
-		ss << uint32(*spellItr) << ",";
-	}
-	ss << "','";
 	// Dump deleted spell data to stringstream
+	SpellSet::iterator spellItr;
 	spellItr = mDeletedSpells.begin();
 	for(; spellItr != mDeletedSpells.end(); ++spellItr)
 	{
@@ -2435,13 +2400,10 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 	ss << m_honorPoints << ", ";
    	ss << iInstanceType << ", ";
 
-	// dump glyphs
-	ss << "'";
+	ss << uint32(m_talentActiveSpec) << ", ";
+	ss << uint32(m_talentSpecsCount) << ", ";
 
-	for(uint32 i = 0; i < 6; ++i)
-		ss << m_uint32Values[PLAYER_FIELD_GLYPHS_1 + i] << ",";
-
-	ss << "', 0)";
+	ss << "0)";	// force_reset_talents
 	
 	if(bNewCharacter)
 		CharacterDatabase.WaitExecuteNA(ss.str().c_str());
@@ -2454,6 +2416,15 @@ void Player::SaveToDB(bool bNewCharacter /* =false */)
 
 	// Skills
 	_SaveSkillsToDB(buf);
+
+	// Talents
+	_SaveTalentsToDB(buf);
+
+	// Spells
+	_SaveSpellsToDB(buf);
+
+	// Glyphs
+	_SaveGlyphsToDB(buf);
 
 	// Inventory
 	 GetItemInterface()->mSaveItemsToDatabase(bNewCharacter, buf);
@@ -2518,6 +2489,174 @@ void Player::_SaveSkillsToDB(QueryBuffer * buf)
 		CharacterDatabase.Execute(ss.str().c_str());
 	else
 		buf->AddQueryStr(ss.str());
+}
+
+void Player::_LoadGlyphs(QueryResult * result)
+{
+	// init with 0s just in case
+	for(uint8 s = 0; s < MAX_SPEC_COUNT; s++)
+	{
+		for(uint32 i=0; i < GLYPHS_COUNT; i++)
+		{
+			m_specs[s].glyphs[i] = 0;
+		}
+	}
+	// Load info from DB
+	if(result)
+	{
+		do 
+		{
+			Field *fields = result->Fetch();
+			uint8 spec = fields[1].GetInt8();
+			if(spec >= MAX_SPEC_COUNT)
+			{
+				sLog.outDebug("Out of range spec number [%d] for player with GUID [%d] in playerglyphs", 
+					spec, fields[0].GetUInt32());
+				continue;
+			}
+			for(uint32 i=0; i < GLYPHS_COUNT; i++)
+			{
+				m_specs[spec].glyphs[i] = fields[2 + i].GetUInt16();
+			}
+		} while(result->NextRow());
+	}
+}
+
+void Player::_SaveGlyphsToDB(QueryBuffer * buf)
+{
+	bool empty = true;
+	for(uint8 s = 0; s < m_talentSpecsCount; s++)
+	{
+		for(uint32 i=0; i < GLYPHS_COUNT; i++)
+		{
+			if(m_specs[s].glyphs[i] != 0)
+			{
+				empty = false;
+				break;
+			}
+		}
+	}
+	if(empty)
+		return;	// nothing to save
+
+	for(uint8 s = 0; s < m_talentSpecsCount; s++)
+	{
+		std::stringstream ss;
+		ss << "REPLACE INTO playerglyphs (guid, spec, glyph1, glyph2, glyph3, glyph4, glyph5, glyph6) VALUES "
+			<< "(" << GetLowGUID() << ","
+			<< uint32(s) << ",";
+		for(uint32 i = 0; i < GLYPHS_COUNT; i++)
+		{
+			ss << uint32(m_specs[s].glyphs[i]);
+			if(i != GLYPHS_COUNT - 1)
+				ss << ",";
+			else
+				ss << ")";
+		}
+
+		if(buf == NULL)
+			CharacterDatabase.Execute(ss.str().c_str());
+		else
+			buf->AddQueryStr(ss.str());
+	}
+}
+
+void Player::_LoadSpells(QueryResult * result)
+{
+	if(result)
+	{
+		do 
+		{
+			Field *fields = result->Fetch();
+			SpellEntry * spProto = dbcSpell.LookupEntryForced(fields[1].GetInt32());
+			if(spProto)
+				mSpells.insert(spProto->Id);
+		} while(result->NextRow());
+	}
+}
+
+void Player::_SaveSpellsToDB(QueryBuffer * buf)
+{
+	// delete old first
+	if(buf == NULL)
+		CharacterDatabase.Execute("DELETE FROM playerspells WHERE guid = %u", GetLowGUID() );
+	else
+		buf->AddQuery("DELETE FROM playerspells WHERE guid = %u", GetLowGUID() );
+
+	// Dump spell data to stringstream
+	std::stringstream ss;
+	ss << "INSERT INTO playerspells (guid, spellid) VALUES ";
+	SpellSet::iterator spellItr = mSpells.begin();
+	bool first = true;
+	for(; spellItr != mSpells.end(); ++spellItr)
+	{
+		SpellEntry * sp = dbcSpell.LookupEntry( *spellItr );
+		if( !sp || sp->RequiredShapeShift == FORM_ZOMBIE )
+			continue;
+		if(!first)
+			ss << ",";
+		else
+			first = false;
+		ss << "("<< GetLowGUID() << "," << uint32(*spellItr) << ")";
+	}
+	if(buf == NULL)
+		CharacterDatabase.Execute(ss.str().c_str());
+	else
+		buf->AddQueryStr(ss.str());
+}
+
+void Player::_LoadTalents(QueryResult * result)
+{
+	// Load info from DB
+	uint32 talentId;
+	uint8 talentRank;
+	if(result)
+	{
+		do 
+		{
+			Field *fields = result->Fetch();
+			uint8 spec = fields[1].GetInt8();
+			if(spec >= MAX_SPEC_COUNT)
+			{
+				sLog.outDebug("Out of range spec number [%d] for player with GUID [%d] in playertalents", 
+					spec, fields[0].GetUInt32());
+				continue;
+			}
+			talentId = fields[2].GetUInt32();
+			talentRank = fields[3].GetUInt8();
+			m_specs[spec].talents.insert(make_pair(talentId, talentRank));
+		} while(result->NextRow());
+	}
+}
+
+void Player::_SaveTalentsToDB(QueryBuffer * buf)
+{
+	// delete old talents first
+	if(buf == NULL)
+		CharacterDatabase.Execute("DELETE FROM playertalents WHERE guid = %u", GetLowGUID() );
+	else
+		buf->AddQuery("DELETE FROM playertalents WHERE guid = %u", GetLowGUID() );
+
+	for(uint8 s = 0; s < m_talentSpecsCount; s++)
+	{
+		if(s > MAX_SPEC_COUNT)
+			break;
+		std::map<uint32, uint8> *talents = &m_specs[s].talents;
+		std::map<uint32, uint8>::iterator itr;
+		for(itr = talents->begin(); itr != talents->end(); itr++)
+		{
+			std::stringstream ss;
+			ss << "INSERT INTO playertalents (guid, spec, tid, rank) VALUES "
+				<< "(" << GetLowGUID() << "," 
+				<< uint32(s) << "," 
+				<< itr->first << ","
+				<< uint32(itr->second) << ")";
+			if(buf == NULL)
+				CharacterDatabase.Execute(ss.str().c_str());
+			else
+				buf->AddQueryStr(ss.str());
+		}
+	}
 }
 
 
@@ -2620,6 +2759,15 @@ bool Player::LoadFromDB(uint32 guid)
 
 	//skills
 	q->AddQuery("SELECT * FROM playerskills WHERE player_guid = %u AND type <> %u ORDER BY skill_id ASC, currentlvl DESC", guid,SKILL_TYPE_LANGUAGE ); //load skill, skip languages
+
+	//Talents
+	q->AddQuery("SELECT * FROM playertalents WHERE guid = %u", guid);
+	
+	//Glyphs
+	q->AddQuery("SELECT * FROM playerglyphs WHERE guid = %u", guid);
+
+	//Spells
+	q->AddQuery("SELECT * FROM playerspells WHERE guid = %u", guid);
 
 	// queue it!
 	m_uint32Values[OBJECT_FIELD_GUID] = guid;
@@ -2832,7 +2980,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	m_uint32Values[PLAYER_FIELD_COINAGE]				= get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_AMMO_ID]					  = get_next_field.GetUInt32();
 	m_uint32Values[PLAYER_CHARACTER_POINTS2]			= get_next_field.GetUInt32();
-	m_uint32Values[PLAYER_CHARACTER_POINTS1]			= get_next_field.GetUInt32();
+	m_maxTalentPoints								= get_next_field.GetUInt16();
 	load_health										 = get_next_field.GetUInt32();
 	load_mana										   = get_next_field.GetUInt32();
 	SetUInt32Value(UNIT_FIELD_HEALTH, load_health);
@@ -2989,54 +3137,10 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	m_TransporterX = get_next_field.GetFloat();
 	m_TransporterY = get_next_field.GetFloat();
 	m_TransporterZ = get_next_field.GetFloat();
-	
-	// Load Spells from CSV data.
-	start = (char*)get_next_field.GetString();//buff;
+
 	SpellEntry * spProto;
-	while(true) 
-	{
-		end = strchr(start,',');
-		if(!end)break;
-		*end=0;
-		//mSpells.insert(atol(start));
-		spProto = dbcSpell.LookupEntryForced(atol(start));
-//#define _language_fix_ 1
-#ifndef _language_fix_
-		if(spProto)
-			mSpells.insert(spProto->Id);
-#else		
-		if (spProto)
-		{
-			SpellPointer skillline_spell = objmgr.GetSpellSkill(spProto->Id);
-			if (_spell)
-			{
-				skilllineentry * _skill = dbcSkillLine.LookupEntry(_spell->skilline);
-				if (_skill && _skill->type != SKILL_TYPE_LANGUAGE)
-				{
-					mSpells.insert(spProto->Id);
-				}
-			}
-			else
-			{
-				mSpells.insert(spProto->Id);
-
-				// Cheat Death hack!
-				if(_spell->Id == 31230)
-					m_cheatDeathRank = 3;
-				else if(_spell->Id == 31329)
-					m_cheatDeathRank = 2;
-				else if(_spell->Id == 31328)
-					m_cheatDeathRank = 1;
-			}
-		}
-#endif
-//#undef _language_fix_
-			
-		start = end +1;
-	}
-
 	start = (char*)get_next_field.GetString();//buff;
-	while(true) 
+	while(true)
 	{
 		end = strchr(start,',');
 		if(!end)break;
@@ -3181,33 +3285,6 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	RolloverHonor();
     iInstanceType = get_next_field.GetUInt32();
 
-	start = (char*)get_next_field.GetString();
-	for(uint32 Counter = 0; Counter < 6; Counter++) 
-	{
-		end = strchr(start,',');
-		if(!end)
-			break;
-		*end = 0;
-		SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + Counter, atol(start));
-		start = end + 1;
-	}
-
-	GlyphPropertyEntry *glyph;
-	for(uint32 i=0; i < 6; i++)
-	{
-		uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + i);
-		if(glyphId == 0)
-			continue;
-		// Get info
-		glyph = dbcGlyphProperty.LookupEntry(glyphId);
-		if(!glyph || !glyph->SpellID)
-			continue;
-		LoginAura la;
-		la.id = glyph->SpellID;
-		la.dur = -1;
-		loginauras.push_back(la);
-	}
-
 	HonorHandler::RecalculateHonorFields(plr_shared_from_this());
 	
 	for(uint32 x=0;x<5;x++)
@@ -3248,6 +3325,13 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	if(GetGuildId())
 		SetUInt32Value(PLAYER_GUILD_TIMESTAMP, (uint32)UNIXTIME);
 
+	m_talentActiveSpec = get_next_field.GetUInt32();
+	m_talentSpecsCount = get_next_field.GetUInt32();
+	if(m_talentSpecsCount > MAX_SPEC_COUNT)
+		m_talentSpecsCount = MAX_SPEC_COUNT;
+	if(m_talentActiveSpec >= m_talentSpecsCount )
+		m_talentActiveSpec = 0;
+
 	bool needTalentReset = get_next_field.GetBool();
 	if( needTalentReset )
 	{
@@ -3257,6 +3341,9 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 #undef get_next_field
 
 	// load properties
+	_LoadTalents(results[13].result);
+	_LoadGlyphs(results[14].result);
+	_LoadSpells(results[15].result);
 	_LoadTutorials(results[1].result);
 	_LoadPlayerCooldowns(results[2].result);
 	_LoadQuestLogEntry(results[3].result);
@@ -6213,9 +6300,6 @@ void Player::SendInitialLogonPackets()
 	//Factions
 	smsg_InitialFactions();
 
-	// Talents
-	smsg_TalentsInfo(false, 0, 0);
-
 
     /* Some minor documentation about the time field
     // MOVE THIS DOCUMENATION TO THE WIKI
@@ -6343,40 +6427,16 @@ void Player::ResetTitansGrip()
 
 void Player::Reset_Talents()
 {
-	for(uint32 i = 0; i < 3; ++i)
+	std::map<uint32, uint8> *talents = &m_specs[m_talentActiveSpec].talents;
+	std::map<uint32, uint8>::iterator itr;
+	for(itr = talents->begin(); itr != talents->end(); itr++)
 	{
-		uint32 root = TalentTreesPerClass[getClass()][i];
-		if(!root) continue;
-
-		for(uint32 x = 0; x < dbcTalent.GetNumRows(); ++x)
-		{
-			TalentEntry * te = dbcTalent.LookupRow(x);
-			if(!te || te->TalentTree != root)
-				continue;
-
-			// It's our tree!
-			for(uint32 t = 0; t < 5; ++t)
-			{
-				if(!te->RankID[t])
-					continue;
-
-				SpellEntry * sp = dbcSpell.LookupEntryForced(te->RankID[t]);
-				if(!sp) continue;
-
-				for(uint32 k = 0; k < 3; ++k)
-				{
-					if(sp->Effect[k] == SPELL_EFFECT_LEARN_SPELL)
-					{
-						SpellEntry * sp2 = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[k]);
-						if(!sp2) continue;
-						removeSpellByHashName(sp2->NameHash);
-					}
-				}
-
-				removeSpellByHashName(sp->NameHash);
-			}
-		}
+		TalentEntry *te = dbcTalent.LookupEntryForced(itr->first);
+		if(!te)
+			continue;
+		RemoveTalent(te->RankID[itr->second]);
 	}
+	talents->clear();
 
 	// The dual wield skill for shamans can only be added by talents.
 	// so when reset, the dual wield skill should be removed too.
@@ -6384,21 +6444,233 @@ void Player::Reset_Talents()
 	if( getClass()==SHAMAN && _HasSkillLine( SKILL_DUAL_WIELD ) )
 		_RemoveSkillLine( SKILL_DUAL_WIELD );
 
-	uint32 l=getLevel();
-	if(l>9)
-	{
-		SetUInt32Value(PLAYER_CHARACTER_POINTS1, l - 9); 
-	}
-	else
-	{
-		SetUInt32Value(PLAYER_CHARACTER_POINTS1, 0); 
-	}
+	SetUInt32Value(PLAYER_CHARACTER_POINTS1, GetMaxTalentPoints()); 
 
 	if( getClass() == WARRIOR )
 	{	
 		titanGrip = false;
 		ResetTitansGrip();
 	}
+	smsg_TalentsInfo(false, 0, 0);
+}
+
+uint16 Player::GetMaxTalentPoints()
+{
+	// see if we have a custom value
+	if(m_maxTalentPoints > 0)
+		return m_maxTalentPoints;
+
+	// otherwise use blizzlike value
+	uint32 l = getLevel();
+	if(l > 9)
+	{
+		return l - 9; 
+	}
+	else
+	{
+		return 0; 
+	}
+}
+
+void Player::ApplySpec(uint8 spec, bool init)
+{
+	if(spec > m_talentSpecsCount || spec > MAX_SPEC_COUNT)
+		return;
+	std::map<uint32, uint8> *talents;
+	std::map<uint32, uint8>::iterator itr;
+
+	if(!init)	// unapply old spec
+	{
+		talents = &m_specs[m_talentActiveSpec].talents;
+		for(itr = talents->begin(); itr != talents->end(); itr++)
+		{
+			TalentEntry * talentInfo = dbcTalent.LookupEntryForced(itr->first);
+			if(!talentInfo || itr->second > 4)
+				continue;
+			RemoveTalent(talentInfo->RankID[itr->second]);
+		}
+	}
+	
+	// apply new spec
+	talents = &m_specs[spec].talents;
+	uint32 spentPoints = 0;
+	for(itr = talents->begin(); itr != talents->end(); itr++)
+	{
+		TalentEntry * talentInfo = dbcTalent.LookupEntryForced(itr->first);
+		if(!talentInfo || itr->second > 4)
+			continue;
+		ApplyTalent(talentInfo->RankID[itr->second]);
+		spentPoints += itr->second + 1;
+	}
+	m_talentActiveSpec = spec;
+	// update available Talent Points
+	uint32 maxTalentPoints = GetMaxTalentPoints();
+	uint32 newTalentPoints;
+	if(spentPoints >= maxTalentPoints)
+		newTalentPoints = 0;	// just in case
+	else
+		newTalentPoints = maxTalentPoints - spentPoints;
+	SetUInt32Value(PLAYER_CHARACTER_POINTS1, newTalentPoints);
+
+	// Apply glyphs
+	for(uint32 i = 0; i < GLYPHS_COUNT; i++)
+	{
+		UnapplyGlyph(i);
+		SetGlyph(i, m_specs[m_talentActiveSpec].glyphs[i]);
+	}
+	smsg_TalentsInfo(false, 0, 0);
+}
+
+void Player::ApplyTalent(uint32 spellid)
+{
+	SpellEntry *spellInfo = dbcSpell.LookupEntryForced( spellid );
+	if(!spellInfo)
+		return;	// not found
+
+	if( (spellInfo->Attributes & ATTRIBUTES_PASSIVE || (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL ||
+		spellInfo->Effect[1] == SPELL_EFFECT_LEARN_SPELL ||
+		spellInfo->Effect[2] == SPELL_EFFECT_LEARN_SPELL) 
+		&& ( (spellInfo->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET) == 0 || ( (spellInfo->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET) && GetSummon() ) ) )
+		)
+	{
+		if( spellInfo->RequiredShapeShift && !( (uint32)1 << (GetShapeShift()-1) & spellInfo->RequiredShapeShift ) )
+		{
+			// do nothing
+		}
+		else
+		{
+			SpellPointer sp(new Spell(player_shared_from_this(),spellInfo,true,NULLAURA));
+			SpellCastTargets tgt;
+			tgt.m_unitTarget=GetGUID();
+			sp->prepare(&tgt);
+		}
+	}
+}
+
+void Player::RemoveTalent(uint32 spellid)
+{
+	SpellEntry * sp = dbcSpell.LookupEntryForced(spellid);
+	if(!sp)
+		return; // not found
+
+	for(uint32 k = 0; k < 3; ++k)
+	{
+		if(sp->Effect[k] == SPELL_EFFECT_LEARN_SPELL)
+		{
+			SpellEntry * sp2 = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[k]);
+			if(!sp2) continue;
+			removeSpellByHashName(sp2->NameHash);
+		}
+	}
+
+	for(uint32 x=0;x < MAX_AURAS + MAX_PASSIVE_AURAS; x++)
+	{
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash == sp->NameHash)
+		{
+			m_auras[x]->Remove();
+		}
+	}
+}
+
+void Player::LearnTalent(uint32 talent_id, uint32 requested_rank)
+{
+	unsigned int i;
+	if (requested_rank > 4)
+		return;
+
+	TalentEntry * talentInfo = dbcTalent.LookupEntryForced(talent_id);
+	if(!talentInfo)return;
+
+	uint32 CurTalentPoints = GetUInt32Value(PLAYER_CHARACTER_POINTS1);
+	std::map<uint32, uint8> *talents = &m_specs[m_talentActiveSpec].talents;
+	uint8 currentRank = 0;
+	std::map<uint32, uint8>::iterator itr = talents->find(talent_id);
+	if(itr != talents->end())
+		currentRank = itr->second + 1;
+
+	if(currentRank >= requested_rank + 1)
+		return; // player already knows requested or higher rank for this talent
+
+	uint32 RequiredTalentPoints = requested_rank + 1 - currentRank;
+	if(CurTalentPoints < RequiredTalentPoints )
+		return; // player doesn't have enough points to get this rank for this talent
+
+	// Check if it requires another talent
+	if (talentInfo->DependsOn > 0)
+	{
+		TalentEntry *depTalentInfo = NULL;
+		depTalentInfo = dbcTalent.LookupEntryForced(talentInfo->DependsOn);
+		if (depTalentInfo)
+		{
+			itr = talents->find(talentInfo->DependsOn);
+			if(itr == talents->end())
+				return;	// player doesn't have the talent this one depends on
+			if(talentInfo->DependsOnRank > itr->second)
+				return;	// player doesn't have the talent rank this one depends on
+		}
+	}
+
+	// Check that the requested talent belongs to a tree from player's class
+	uint32 tTree = talentInfo->TalentTree;
+	uint32 cl = getClass();
+
+	for(i = 0; i < 3; ++i)
+		if(tTree == TalentTreesPerClass[cl][i])
+			break;
+
+	if(i == 3)
+	{
+		// cheater!
+		GetSession()->Disconnect();
+		return;
+	}
+
+	// Find out how many points we have in this field
+	uint32 spentPoints = 0;
+	if (talentInfo->Row > 0)
+	{
+		for(itr = talents->begin(); itr != talents->end(); itr++)
+		{
+			TalentEntry *tmpTalent = dbcTalent.LookupEntryForced(itr->first);
+			if (tmpTalent->TalentTree == tTree)
+			{
+				spentPoints += itr->second + 1;
+			}
+		}
+	}
+
+	uint32 spellid = talentInfo->RankID[requested_rank];
+	if( spellid == 0 )
+	{
+		OUT_DEBUG("Talent: %u Rank: %u = 0", talent_id, requested_rank);
+		return;
+	}
+
+	if(spentPoints < (talentInfo->Row * 5))			 // Min points spent
+	{
+		return;
+	}
+
+	(*talents)[talent_id] = requested_rank;
+	SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - RequiredTalentPoints);
+	// More cheat death hackage! :)
+	if(spellid == 31330)
+		m_cheatDeathRank = 3;
+	else if(spellid == 31329)
+		m_cheatDeathRank = 2;
+	else if(spellid == 31328)
+		m_cheatDeathRank = 1;	 
+
+	if(requested_rank > 0 )	// remove old rank aura
+	{
+		uint32 respellid = talentInfo->RankID[currentRank - 1];
+		if(respellid)
+		{
+			RemoveAura(respellid);
+		}
+	}
+
+	ApplyTalent(spellid);
 }
 
 void Player::Reset_ToLevel1()
@@ -8495,6 +8767,8 @@ void Player::CompleteLoading()
 			spell->prepare(&targets);
 		}
 	}
+
+	ApplySpec(m_talentActiveSpec, true);
 
 	std::list<LoginAura>::iterator i =  loginauras.begin();
 
@@ -11613,9 +11887,9 @@ void Player::InitGlyphSlots()
 		SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + i, 21 + i);
 }
 
-void Player::RemoveGlyph(uint32 slot)
+void Player::UnapplyGlyph(uint32 slot)
 {
-	if(slot < 0 || slot > 5)
+	if(slot > 5)
 		return; // Glyph doesn't exist
 	// Get info
 	uint32 glyphId = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot);
@@ -11640,11 +11914,9 @@ uint8 Player::SetGlyph(uint32 slot, uint32 glyphId)
 		return SPELL_FAILED_INVALID_GLYPH;
 
 	uint32 type = glyph->Type;
-	uint32 glyphX = 0;
-	for(uint32 x=0; x<6; ++x)
+	for(uint32 x = 0; x < GLYPHS_COUNT; ++x)
 	{
-		glyphX = GetUInt32Value(PLAYER_FIELD_GLYPHS_1 + x);
-		if(glyphX == glyphId)
+		if(m_specs[m_talentActiveSpec].glyphs[x] == glyphId && slot != x)
 			return SPELL_FAILED_UNIQUE_GLYPH;
 	}
 	
@@ -11652,8 +11924,9 @@ uint8 Player::SetGlyph(uint32 slot, uint32 glyphId)
 			(GetUInt32Value(PLAYER_GLYPHS_ENABLED) & (1 << slot)) == 0) // slot is not enabled
 		return SPELL_FAILED_INVALID_GLYPH;
 
-	RemoveGlyph(slot);
+	UnapplyGlyph(slot);
 	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyphId);
+	m_specs[m_talentActiveSpec].glyphs[slot] = glyphId;
 	CastSpell(plr_shared_from_this(), glyph->SpellID, true);	// Apply the glyph effect
 	return 0;
 }

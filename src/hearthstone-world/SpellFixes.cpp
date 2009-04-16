@@ -225,6 +225,50 @@ void DumpClassSpells()
 	fclose(f);
 }
 
+void DumpTalentSpells()
+{
+	FILE *f;
+
+	f = fopen("TalentSpells.csv", "w");
+	if (f == NULL)
+	{
+		sLog.outString("Error while opening TalentSpells.csv: %s", strerror(errno));
+		return;
+	}
+
+	for(uint32 i = 0 ;i < dbcTalent.GetNumRows(); i++)
+	{
+		TalentEntry *talent = dbcTalent.LookupRow(i);
+		if(!talent)
+			continue;
+		for(uint32 rank = 0; rank < 5; rank++)
+		{
+			if(talent->RankID[rank] != 0)
+				fprintf(f, "%d\n", talent->RankID[rank]); 
+		}
+		SpellEntry * sp = dbcSpell.LookupEntryForced(talent->RankID[0]);
+		if(!sp)
+			continue;
+		for(uint32 k = 0; k < 3; ++k)
+		{
+			if(sp->Effect[k] == SPELL_EFFECT_LEARN_SPELL)
+			{
+				SpellEntry * sp2 = dbcSpell.LookupEntryForced(sp->EffectTriggerSpell[k]);
+				if(!sp2) continue;
+				for(uint32 j = 0; j < dbcSpell.GetNumRows(); j++)
+				{
+					SpellEntry * sp3 = dbcSpell.LookupRow(j);
+					if(!sp3 || sp3->NameHash != sp2->NameHash)
+						continue;
+					fprintf(f, "%d\n", sp3->Id); 
+				}
+			}
+		}
+	}
+
+	fclose(f);
+}
+
 // fills array 'arr' with integers in arguments and returns its new size. Last argument must be 0!
 uint32 fill( uint32* arr, ... ){
 	va_list vl;
@@ -6198,5 +6242,9 @@ void ApplyNormalFixes()
 #endif
 #ifdef DUMP_SPELL_RANKS_SQL
 	DumpSpellRanksSQL();
+#endif
+#ifdef DUMP_TALENT_SPELLS
+	DumpTalentSpells();
+	exit(0);
 #endif
 }
