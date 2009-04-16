@@ -1407,6 +1407,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 
 	 data.Initialize( SMSG_BUY_ITEM );
 	 data << uint64(srcguid);
+	 data << getMSTime();
 	 data << uint32(itemid) << uint32(amount*item.amount);
 	 SendPacket( &data );
 		
