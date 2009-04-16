@@ -1287,7 +1287,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 	WorldPacket data(45);
 	uint64 srcguid=0;
 	uint32 itemid=0;
-	int8 slot=0;
+	int32 slot=0;
 	uint8 amount=0;
 //	int8 playerslot = 0;
 //	int8 bagslot = 0;
@@ -1297,7 +1297,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data ) // right-click
 	AddItemResult result;
 
 	recv_data >> srcguid >> itemid;
-	recv_data >> amount >> slot;
+	recv_data >> slot >> amount;
 
 
 	CreaturePointer unit = _player->GetMapMgr()->GetCreature(GET_LOWGUID_PART(srcguid));
