@@ -266,7 +266,7 @@ bool Database::WaitExecuteNA(const char* QueryString)
 
 bool Database::run()
 {
-	SetThreadName("Database Execute Thread");
+	SetThreadName("Database Executor");
 	ThreadRunning = true;
 	char * query = queries_queue.pop();
 	DatabaseConnection * con = GetFreeConnection();

@@ -300,6 +300,8 @@ static unsigned long WINAPI thread_proc(void* param)
 
 Thread * CThreadPool::StartThread(ThreadContext * ExecutionTarget)
 {
+	SetThreadName("Thread Starter");
+
 	HANDLE h;
 	Thread * t = new Thread;
 	

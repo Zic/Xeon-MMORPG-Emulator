@@ -385,7 +385,7 @@ public:
 	void DeleteGlobalSession(WorldSession *GlobalSession);
 
 	HEARTHSTONE_INLINE size_t GetSessionCount() const { return m_sessions.size(); }
-	uint32 GetNonGmSessionCount();
+
 	HEARTHSTONE_INLINE size_t GetQueueCount() { return mQueuedSessions.size(); }
 	void GetStats(uint32 * GMCount, float * AverageLatency);
 
@@ -516,6 +516,7 @@ public:
 	uint32 PeakSessionCount;
 	bool SendStatsOnJoin;
 	SessionSet gmList;
+	RWLock gmList_lock;
 
 	uint32 expansionUpdateTime;
 
@@ -581,7 +582,7 @@ protected:
 	{
 		// Update Server time
 		time_t thisTime = UNIXTIME;
-		m_gameTime += thisTime - m_lastTick;
+		m_gameTime += thisTime - m_lastTick; //in seconds
 
 		if(m_gameTime >= 86400)			// One day has passed
 			m_gameTime -= 86400;

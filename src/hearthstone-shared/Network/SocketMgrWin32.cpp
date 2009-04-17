@@ -27,6 +27,8 @@ SocketMgr::~SocketMgr()
 
 void SocketMgr::SpawnWorkerThreads()
 {
+	SetThreadName("Worker Spawner");
+
 	SYSTEM_INFO si;
 	GetSystemInfo(&si);
 
@@ -39,6 +41,7 @@ void SocketMgr::SpawnWorkerThreads()
 
 bool SocketWorkerThread::run()
 {
+	SetThreadName("Socket Worker");
 	HANDLE cp = sSocketMgr.GetCompletionPort();
 	DWORD len;
 	Socket * s;

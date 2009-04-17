@@ -266,9 +266,6 @@ bool Master::Run(int argc, char ** argv)
 		return false;
 	}
 
-	if( do_cheater_check )
-		sWorld.CleanupCheaters();
-
 	g_bufferPool.Init();
 	sWorld.SetStartTime((uint32)UNIXTIME);
 	
