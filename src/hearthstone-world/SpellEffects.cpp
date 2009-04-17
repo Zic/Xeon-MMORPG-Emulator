@@ -2602,7 +2602,7 @@ void Spell::SpellEffectWeapon(uint32 i)
 	case 5009:  // wands
 		{
 			skill = SKILL_WANDS;
-			spell = SPELL_RANGED_GENERAL;
+			spell = SPELL_RANGED_WAND;
 		}break;
 	//case 3386:  // spears
 	//	skill = 0;   // ??!!
