@@ -366,7 +366,9 @@ void MapMgr::PushObject(ObjectPointer obj)
 	 //Add to the mapmanager's object list
 	if(plObj)
 	{
+		PlayerStorageMaplock.Acquire();
 		m_PlayerStorage[plObj->GetLowGUID()] = plObj;
+		PlayerStorageMaplock.Release();
 		UpdateCellActivity(cx, cy, 2);
 	}
 	else
@@ -418,7 +420,9 @@ void MapMgr::PushObject(ObjectPointer obj)
 	// Add the session to our set if it is a player.
 	if(plObj)
 	{
+		MapSessionsMutex.Acquire();
 		MapSessions.insert(plObj->GetSession());
+		MapSessionsMutex.Release();
 
 		// Change the instance ID, this will cause it to be removed from the world thread (return value 1)
 		plObj->GetSession()->SetInstance(GetInstanceID());
@@ -534,9 +538,10 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 
 		case HIGHGUID_TYPE_PLAYER:
 			// check iterator
+			PlayerStorageMaplock.Acquire();
 			if( __player_iterator != m_PlayerStorage.end() && __player_iterator->second == TO_PLAYER(obj) )
 				++__player_iterator;
-
+			PlayerStorageMaplock.Release();
 			break;
 	}
 
@@ -619,7 +624,9 @@ void MapMgr::RemoveObject(ObjectPointer obj, bool free_guid)
 			uint32 y = GetPosY(obj->GetPositionY());
 			UpdateCellActivity(x, y, 2);
 		}
+		PlayerStorageMaplock.Acquire();
 		m_PlayerStorage.erase( TO_PLAYER( obj )->GetLowGUID() );
+		PlayerStorageMaplock.Release();
 	}
 
 	// Remove the session from our set if it is a player.
@@ -1595,6 +1602,7 @@ void MapMgr::BeginInstanceExpireCountdown()
 	data << uint32(60000) << uint32(1);
 
 	// Update all players on map.
+	PlayerStorageMaplock.Acquire();
 	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
 	for(; __player_iterator != m_PlayerStorage.end();)
@@ -1608,6 +1616,7 @@ void MapMgr::BeginInstanceExpireCountdown()
 				ptr->GetSession()->SendPacket(&data);
 		}
 	}
+	PlayerStorageMaplock.Release();
 
 	// set our expire time to 60 seconds.
 	InactiveMoveTime = UNIXTIME + 60;
@@ -1718,6 +1727,7 @@ void MapMgr::_PerformObjectDuties()
 	eventHolder.Update(difftime);
 
 	// Update players.
+	PlayerStorageMaplock.Acquire();
 	__player_iterator = m_PlayerStorage.begin();
 	for(; __player_iterator != m_PlayerStorage.end();)
 	{
@@ -1726,6 +1736,7 @@ void MapMgr::_PerformObjectDuties()
 
 		ptr4->Update( difftime );
 	}
+	PlayerStorageMaplock.Release();
 
 	lastUnitUpdate = mstime;
 
@@ -1747,45 +1758,42 @@ void MapMgr::_PerformObjectDuties()
 	}	
 
 	// Sessions are updated every loop.
-	int result = 0;
-	WorldSession * MapSession;
-	PlayerPointer ptr5;
-
-	SessionSet::iterator itr = MapSessions.begin();
-	SessionSet::iterator it2;
-
-	for(; itr != MapSessions.end();)
 	{
-		MapSession = (*itr);
-		it2 = itr;
-		++itr;
+		int result = 0;
+		WorldSession * MapSession;
+		SessionSet::iterator itr = MapSessions.begin();
+		SessionSet::iterator it2;
 
-		ptr5 = (*it2)->GetPlayer();
-
-		//we are no longer handled by this thread?
-		//Then don't update, but remove us from upate list.
-		if( ptr5 == NULL || ptr5->GetMapMgr()== NULL || 
-			ptr5->GetMapMgr() != shared_from_this() ||
-			MapSession->GetInstance() != m_instanceID)
+		MapSessionsMutex.Acquire();
+		for(; itr != MapSessions.end();)
 		{
-			MapSessions.erase(it2);
-			continue;
-		}
+			MapSession = (*itr);
+			it2 = itr;
+			++itr;
 
+			//we have teleported to another map, remove us here.
+			if(MapSession->GetInstance() != m_instanceID)
+			{
+				MapSessions.erase(it2);
+				continue;
+			}
 
-		// Teleporting Players can have allready have a differnt MapMgr, 
-		// If we abort in the handler, it means we will "lose" packets, or not process this.
-		// .. and that could be diasterous to our client :P
+			// Don't update players not on our map.
+			// If we abort in the handler, it means we will "lose" packets, or not process this.
+			// .. and that could be diasterous to our client :P
+			if( MapSession->GetSocket()!=NULL && MapSession->GetPlayer() != NULL && MapSession->GetPlayer()->GetMapMgr()!= NULL && MapSession->GetPlayer()->GetMapMgr() != shared_from_this())
+				continue;
 
-		result = MapSession->Update(m_instanceID);
-		if(result)//session or socket deleted?
-		{
-			if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
-				sWorld.DeleteGlobalSession(MapSession);
-			MapSessions.erase(it2);
+			result = MapSession->Update(m_instanceID);
+			if(result)//session or socket deleted?
+			{
+				if(result == 1)//socket don't exist anymore, delete from both world- and map-sessions.
+					sWorld.DeleteGlobalSession(MapSession);
+				MapSessions.erase(it2);
+			}
 		}
 	}
-
+	MapSessionsMutex.Release();
 	// Finally, A9 Building/Distribution
 	_UpdateObjects();
 }
@@ -1808,6 +1816,7 @@ void MapMgr::TeleportPlayers()
 {
 	if(!bServerShutdown)
 	{
+		PlayerStorageMaplock.Acquire();
 		// Update all players on map.
 		__player_iterator = m_PlayerStorage.begin();
 		PlayerPointer ptr;
@@ -1819,9 +1828,12 @@ void MapMgr::TeleportPlayers()
 			if(ptr->GetSession())
 				ptr->EjectFromInstance();
 		}
+		PlayerStorageMaplock.Release();
+
 	}
 	else
 	{
+		PlayerStorageMaplock.Acquire();
 		// Update all players on map.
 		__player_iterator = m_PlayerStorage.begin();
 		PlayerPointer ptr;
@@ -1839,6 +1851,7 @@ void MapMgr::TeleportPlayers()
 				m_PlayerStorage.erase(__player_iterator);
 			}
 		}
+		PlayerStorageMaplock.Release();
 	}
 }
 
@@ -2064,12 +2077,11 @@ DynamicObjectPointer MapMgr::CreateDynamicObject()
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacket *pData)
 {
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	PlayerStorageMaplock.Acquire();
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
-		ptr = __player_iterator->second;;
-		++__player_iterator;
+		ptr = __player_iterator->second;
 
 		if(ptr->GetSession())
 		{
@@ -2082,17 +2094,17 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, StackPacke
 			ptr->GetSession()->SendPacket(pData);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }
 
 void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacket *pData)
 {
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	PlayerStorageMaplock.Acquire();
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
 		ptr = __player_iterator->second;;
-		++__player_iterator;
 
 		if(ptr->GetSession())
 		{
@@ -2105,17 +2117,17 @@ void MapMgr::SendPacketToPlayers(int32 iZoneMask, int32 iFactionMask, WorldPacke
 			ptr->GetSession()->SendPacket(pData);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }
 
 void MapMgr::RemoveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	PlayerStorageMaplock.Acquire();
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
 		ptr = __player_iterator->second;;
-		++__player_iterator;
 
 		if(ptr->GetSession())
 		{
@@ -2125,17 +2137,17 @@ void MapMgr::RemoveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 			ptr->RemoveAura(uAuraId);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }
 
 void MapMgr::RemovePositiveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 {
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	PlayerStorageMaplock.Acquire();
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
 		ptr = __player_iterator->second;;
-		++__player_iterator;
 
 		if(ptr->GetSession())
 		{
@@ -2144,6 +2156,7 @@ void MapMgr::RemovePositiveAuraFromPlayers(int32 iFactionMask, uint32 uAuraId)
 			ptr->RemovePositiveAura(uAuraId);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }
 
 void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
@@ -2153,12 +2166,11 @@ void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
 		return;
 
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	PlayerStorageMaplock.Acquire();
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
 		ptr = __player_iterator->second;;
-		++__player_iterator;
 
 		if(ptr->GetSession())
 		{
@@ -2168,6 +2180,7 @@ void MapMgr::CastSpellOnPlayers(int32 iFactionMask, uint32 uSpellId)
 			ptr->CastSpell(TO_UNIT(__player_iterator->second), sp, true);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }
 
 void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * Format, ...)
@@ -2185,12 +2198,11 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 	data << msgbuf;
 
 	// Update all players on map.
-	__player_iterator = m_PlayerStorage.begin();
+	PlayerStorageMaplock.Acquire();
 	PlayerPointer ptr;
-	for(; __player_iterator != m_PlayerStorage.end();)
+	for(__player_iterator = m_PlayerStorage.begin(); __player_iterator != m_PlayerStorage.end();__player_iterator++)
 	{
 		ptr = __player_iterator->second;;
-		++__player_iterator;
 
 		if(ptr->GetSession())
 		{
@@ -2200,4 +2212,5 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 			ptr->GetSession()->SendPacket(&data);
 		}
 	}
+	PlayerStorageMaplock.Release();
 }

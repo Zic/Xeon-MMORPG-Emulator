@@ -454,8 +454,8 @@ void WorldSocket::Authenticate()
 	ASSERT(pAuthenticationPacket);
 	mQueued = false;
 
-	if(!pSession) return;
-	//pSession->deleteMutex.Acquire();
+	if(!pSession)
+		return;
 
 	if(pSession->HasFlag(ACCOUNT_FLAG_XPACK_02))
 		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x02");
@@ -467,23 +467,11 @@ void WorldSocket::Authenticate()
 	sAddonMgr.SendAddonInfoPacket(pAuthenticationPacket, (uint32)pAuthenticationPacket->rpos(), pSession);
 	pSession->_latency = _latency;
 
-	//delete pAuthenticationPacket;
 	g_bufferPool.Deallocate(pAuthenticationPacket);
 	pAuthenticationPacket = NULL;
 
-	if(mSession)
-	{
-		sWorld.AddSession(mSession);
-		sWorld.AddGlobalSession(mSession);
-
-/*		if(pSession->HasFlag(ACCOUNT_FLAG_XTEND_INFO))
-			sWorld.AddExtendedSession(pSession);*/
-
-		if(pSession->HasGMPermissions() && mSession)
-			sWorld.gmList.insert(pSession);
-	}
-
-	//pSession->deleteMutex.Release();
+	sWorld.AddSession(pSession);
+	sWorld.AddGlobalSession(pSession);
 }
 
 void WorldSocket::UpdateQueuePosition(uint32 Position)

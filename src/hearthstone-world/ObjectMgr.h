@@ -501,7 +501,7 @@ public:
 	Mutex m_petlock;
 
 	PlayerPointer CreatePlayer();
-	 Mutex m_playerguidlock;
+	Mutex m_playerguidlock;
 	PlayerStorageMap _players;
 	RWLock _playerslock;
 	uint32 m_hiPlayerGuid;

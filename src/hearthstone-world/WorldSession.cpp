@@ -63,9 +63,6 @@ WorldSession::~WorldSession()
 {
 	deleteMutex.Acquire();
 
-	if(HasGMPermissions())
-		sWorld.gmList.erase(this);
-
 	if(_player)
 	{
 		printf("warning: logged out player in worldsession destructor");
@@ -377,6 +374,7 @@ void WorldSession::LogoutPlayer(bool Save)
 				CharacterDatabase.ExecuteNA(ss.str().c_str());
 			}
 		}
+//		_player->SetSession(NULL);
 		_player->ObjUnlock();
 
 		_player->Destructor();

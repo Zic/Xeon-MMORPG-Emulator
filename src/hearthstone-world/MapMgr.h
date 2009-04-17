@@ -175,11 +175,21 @@ public:
     
     // double typedef lolz// a compile breaker..
 	typedef HM_NAMESPACE::hash_map<uint32, PlayerPointer  >                     PlayerStorageMap;
+
+	Mutex PlayerStorageMaplock;
+
 	PlayerStorageMap m_PlayerStorage;
 	__inline PlayerPointer GetPlayer(uint32 guid)
 	{
+		PlayerStorageMaplock.Acquire();
 		PlayerStorageMap::iterator itr = m_PlayerStorage.find(guid);
-		return (itr != m_PlayerStorage.end()) ? m_PlayerStorage[guid] : NULLPLR;
+		if (itr != m_PlayerStorage.end())
+		{
+			PlayerStorageMaplock.Release();
+			return m_PlayerStorage[guid];
+		}
+		PlayerStorageMaplock.Release();
+		return NULLPLR;
 	}
 
 //////////////////////////////////////////////////////////
@@ -316,6 +326,7 @@ private:
 
 	/* Sessions */
 	
+	Mutex MapSessionsMutex;//FOR Maps !
 	SessionSet MapSessions;
 
 	/* Map Information */

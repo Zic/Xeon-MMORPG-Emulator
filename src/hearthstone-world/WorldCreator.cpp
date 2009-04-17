@@ -348,13 +348,15 @@ MapMgrPointer InstanceMgr::GetInstance(ObjectPointer obj)
 			itr = instancemap->find(plr_instanceID);
 			if(itr != instancemap->end())
 			{
-				if(itr->second->m_mapMgr)
+				in = itr->second;
+				if(in && in->m_mapMgr)
 				{
 					m_mapLock.Release();
-					return itr->second->m_mapMgr;
+					return in->m_mapMgr;
 				}
 			}
 
+			
 			// iterate over our instances, and see if any of them are owned/joinable by him.
 			for(itr = instancemap->begin(); itr != instancemap->end();)
 			{
@@ -833,12 +835,17 @@ bool InstanceMgr::_DeleteInstance(Instance * in, bool ForcePlayersOut)
 
 PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 {
+	pInstance->m_mapMgr->PlayerStorageMaplock.Acquire();
 	PlayerStorageMap::iterator itr;
-	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); ++itr )
+	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); itr++ )
 	{
 		if (itr->second && itr->second->IsPlayer())
+		{
+			pInstance->m_mapMgr->PlayerStorageMaplock.Release();
 			return itr->second;
+		}
 	}
+	pInstance->m_mapMgr->PlayerStorageMaplock.Release();
 	return NULLPLR;
 
 }
@@ -977,9 +984,9 @@ void Instance::SaveToDB()
 		return;
 
 	// Add new player to m_SavedPlayers
+	m_mapMgr->PlayerStorageMaplock.Acquire();
 	PlayerStorageMap::iterator itr1 = m_mapMgr->m_PlayerStorage.begin();
 	set<uint32>::iterator itr2;
-	objmgr._playerslock.AcquireReadLock();
 	for(; itr1 != m_mapMgr->m_PlayerStorage.end(); itr1++)
 	{
 		itr2 = m_SavedPlayers.find(itr1->second->GetLowGUID());
@@ -988,7 +995,7 @@ void Instance::SaveToDB()
 			m_SavedPlayers.insert(itr1->second->GetLowGUID());
 		}
 	}
-	objmgr._playerslock.ReleaseReadLock();
+	m_mapMgr->PlayerStorageMaplock.Release();
 
 	std::stringstream ss;
 	unordered_set<uint32>::iterator itr;
