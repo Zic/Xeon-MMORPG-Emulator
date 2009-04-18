@@ -52,7 +52,7 @@ bool ChatHandler::HandleBattlegroundCommand(const char* args, WorldSession *m_se
 
 	PlayerPointer plr = getSelectedChar(m_session, true);
 	if(!plr) return true;
-	BattlegroundManager.HandleBattlegroundListPacket(plr->GetSession(), atoi(args));
+	BattlegroundManager.HandleBattlegroundListPacket(plr->GetSession(), atoi(args), true);
 	return true;
 }
 

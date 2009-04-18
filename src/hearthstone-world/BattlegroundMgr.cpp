@@ -75,6 +75,8 @@ const static uint32 BGPvPDataFieldCount[BATTLEGROUND_NUM_TYPES] = {
 	0,							// SOTA
 };
 
+#define IS_ARENA(x) ( (x) >= BATTLEGROUND_ARENA_2V2 && (x) <= BATTLEGROUND_ARENA_5V5 )
+
 CBattlegroundManager::CBattlegroundManager() : EventableObject()
 {
 	int i, j;
@@ -141,41 +143,36 @@ void CBattlegroundManager::AddAverageQueueTime(uint32 BgType, uint32 queueTime)
 	m_averageQueueTimes[BgType][0] = queueTime;
 }
 
-void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType)
+void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType, bool battlemaster)
 {
 	if( BattlegroundType >= BATTLEGROUND_NUM_TYPES )
 		return;
-
-	if(BattlegroundType == BATTLEGROUND_ARENA_2V2 || BattlegroundType == BATTLEGROUND_ARENA_3V3 || BattlegroundType == BATTLEGROUND_ARENA_5V5)
-	{
-		WorldPacket data(SMSG_BATTLEFIELD_LIST, 17);
-		data << m_session->GetPlayer()->GetGUID() << uint32(6) << uint32(0xC) << uint8(0);
-		m_session->SendPacket(&data);
-		return;
-	}
 
 	uint32 LevelGroup = GetLevelGrouping(m_session->GetPlayer()->getLevel());
 	uint32 Count = 0;
 	WorldPacket data(SMSG_BATTLEFIELD_LIST, 200);
 	data << m_session->GetPlayer()->GetGUID();
-	data << uint8(2);	// unk
+	data << uint8(!battlemaster);	// unk
 	data << BattlegroundType;
 	data << uint8(0);	// unk
 	size_t CountPos = data.wpos();
 	data << uint32(0);		// Count, will be replaced later
 
-	/* Append the battlegrounds */
-	m_instanceLock.Acquire();
-	for(map<uint32, BattlegroundPointer >::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
+	if(!IS_ARENA(BattlegroundType))
 	{
-        if( itr->second->GetLevelGroup() == LevelGroup  && !itr->second->HasEnded() )
+		/* Append the battlegrounds */
+		m_instanceLock.Acquire();
+		for(map<uint32, BattlegroundPointer >::iterator itr = m_instances[BattlegroundType].begin(); itr != m_instances[BattlegroundType].end(); ++itr)
 		{
-			data << itr->first;
-			++Count;
+			if( itr->second->GetLevelGroup() == LevelGroup  && !itr->second->HasEnded() )
+			{
+				data << itr->first;
+				++Count;
+			}
 		}
+		m_instanceLock.Release();
+		*(uint32*)&data.contents()[CountPos] = Count;
 	}
-	m_instanceLock.Release();
-	*(uint32*)&data.contents()[CountPos] = Count;
 	m_session->SendPacket(&data);
 }
 
@@ -276,8 +273,6 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 
 	/* We will get updated next few seconds =) */
 }
-
-#define IS_ARENA(x) ( (x) >= BATTLEGROUND_ARENA_2V2 && (x) <= BATTLEGROUND_ARENA_5V5 )
 
 void ErasePlayerFromList(uint32 guid, list<uint32>* l)
 {

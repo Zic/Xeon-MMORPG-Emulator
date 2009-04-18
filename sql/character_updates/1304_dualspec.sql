@@ -38,7 +38,6 @@ update playerglyphs set glyph5 =
 update characters set glyphs = SUBSTRING(glyphs, LOCATE( ',' , glyphs)+1, CHAR_LENGTH(glyphs));
 update playerglyphs set glyph6 = 
 (select SUBSTRING(glyphs, 1, LOCATE( ',' , glyphs)-1) from characters where characters.guid = playerglyphs.guid);
-ALTER TABLE characters DROP COLUMN glyphs;
 
 CREATE TABLE `playerspells` (                                                           
                 `guid` int(10) unsigned NOT NULL,                                                     

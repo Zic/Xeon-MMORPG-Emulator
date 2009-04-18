@@ -62,15 +62,17 @@ void WorldSession::HandleBattlefieldStatusOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleBattlefieldListOpcode(WorldPacket &recv_data)
 {
-	uint32 type;
-	recv_data >> type;
+	uint32 battlegroundType;
+	uint8 requestType; // 0 = ShowBattlefieldList, 1 = RequestBattlegroundInstanceInfo
+
+	recv_data >> battlegroundType >> requestType;
 
 	CHECK_INWORLD_RETURN;
 
 	//if( GetPlayer()->HasBGQueueSlotOfType(type) == 4)
 	//	return;
 	
-	BattlegroundManager.HandleBattlegroundListPacket(this, type);
+	BattlegroundManager.HandleBattlegroundListPacket(this, battlegroundType, false);
 }
 
 // Returns -1 if indeterminable.
@@ -143,7 +145,7 @@ void WorldSession::SendBattlegroundList(CreaturePointer pCreature, uint32 mapid)
 	if( type == -1 )
 		SystemMessage("Sorry, invalid battlemaster.");
 	else
-		BattlegroundManager.HandleBattlegroundListPacket(this, type);
+		BattlegroundManager.HandleBattlegroundListPacket(this, type, true);
 }
 
 void WorldSession::HandleBattleMasterHelloOpcode(WorldPacket &recv_data)
