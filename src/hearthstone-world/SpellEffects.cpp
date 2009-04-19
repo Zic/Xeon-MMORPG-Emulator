@@ -3058,7 +3058,10 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 	}
 	else  
         modEnergy = damage;
-
+	//Judgement of Wisdom
+	if( m_spellInfo->Id == 20268 )
+		modEnergy = uint32(0.02f*unitTarget->GetUInt32Value(UNIT_FIELD_BASE_MANA));
+	
 	u_caster->Energize(unitTarget, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id), 
 		modEnergy, m_spellInfo->EffectMiscValue[i]);
 }
