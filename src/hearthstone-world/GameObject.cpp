@@ -136,34 +136,7 @@ bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, fl
 	InitAI();
 
 	return true;
-	/*
-	original_flags = m_uint32Values[GAMEOBJECT_FLAGS];
-	original_state = m_uint32Values[GAMEOBJECT_STATE];
-	*/
 }
-/*
-void GameObject::Create(uint32 mapid, float x, float y, float z, float ang)
-{
-	Object::_Create( mapid, x, y, z, ang);
-
-	SetFloatValue( GAMEOBJECT_POS_X, x);
-	SetFloatValue( GAMEOBJECT_POS_Y, y );
-	SetFloatValue( GAMEOBJECT_POS_Z, z );
-	SetFloatValue( GAMEOBJECT_FACING, ang );
-	//SetUInt32Value( GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
-}
-
-void GameObject::Create( uint32 guidlow, uint32 guidhigh,uint32 displayid, uint8 state, uint32 entryid, float scale,uint32 typeId, uint32 type,uint32 flags, uint32 mapid, float x, float y, float z, float ang )
-{
-	Object::_Create( mapid, x, y, z, ang);
-
-	SetUInt32Value( OBJECT_FIELD_ENTRY, entryid );
-	SetFloatValue( OBJECT_FIELD_SCALE_X, scale );
-	SetUInt32Value( GAMEOBJECT_DISPLAYID, displayid );
-	SetUInt32Value( GAMEOBJECT_STATE, state  );
-	SetUInt32Value( GAMEOBJECT_TYPE_ID, typeId  );
-	SetUInt32Value( GAMEOBJECT_FLAGS, flags );
-}*/
 
 void GameObject::TrapSearchTarget()
 {
@@ -334,8 +307,7 @@ void GameObject::SaveToFile(std::stringstream & name)
 }
 
 void GameObject::InitAI()
-{
-	
+{	
 	if(!pInfo)
 		return;
 	
@@ -359,47 +331,51 @@ void GameObject::InitAI()
 
 
 	uint32 spellid = 0;
-	if(pInfo->Type==GAMEOBJECT_TYPE_TRAP)
-	{	
-		spellid = pInfo->sound3;
-	}
-	else if(pInfo->Type == GAMEOBJECT_TYPE_SPELL_FOCUS)//redirect to properties of another go
+	switch(pInfo->Type)
 	{
-		uint32 new_entry = pInfo->sound2;
-		if(!new_entry)
-			return;
-		pInfo = GameObjectNameStorage.LookupEntry( new_entry );
-		if(!pInfo)
-			return;
-		spellid = pInfo->sound3;
-	}
-	else if(pInfo->Type == GAMEOBJECT_TYPE_RITUAL)
-	{	
-		m_ritualmembers = new uint32[pInfo->SpellFocus];
-		memset(m_ritualmembers,0,sizeof(uint32)*pInfo->SpellFocus);
-	}
-	else if(pInfo->Type == GAMEOBJECT_TYPE_CHEST)
- 	{
-		Lock *pLock = dbcLock.LookupEntry(GetInfo()->SpellFocus);
-		if(pLock)
+		case GAMEOBJECT_TYPE_TRAP:
+		{	
+			spellid = pInfo->sound3;
+		}break;
+		case GAMEOBJECT_TYPE_SPELL_FOCUS://redirect to properties of another go
 		{
-			for(uint32 i=0; i < 5; i++)
+			uint32 new_entry = pInfo->sound2;
+			if(new_entry)
 			{
-				if(pLock->locktype[i])
+				pInfo = GameObjectNameStorage.LookupEntry( new_entry );
+				if(pInfo && pInfo->sound3)
+					spellid = pInfo->sound3;
+			}
+		}break;
+		case GAMEOBJECT_TYPE_RITUAL:
+		{	
+			m_ritualmembers = new uint32[pInfo->SpellFocus];
+			memset(m_ritualmembers,0,sizeof(uint32)*pInfo->SpellFocus);
+		}break;
+		case GAMEOBJECT_TYPE_CHEST:
+ 		{
+			Lock *pLock = dbcLock.LookupEntry(GetInfo()->SpellFocus);
+			if(pLock)
+			{
+				for(uint32 i=0; i < 5; i++)
 				{
-					if(pLock->locktype[i] == 2) //locktype;
+					if(pLock->locktype[i])
 					{
-						//herbalism and mining;
-						if(pLock->lockmisc[i] == LOCKTYPE_MINING || pLock->lockmisc[i] == LOCKTYPE_HERBALISM)
+						if(pLock->locktype[i] == 2) //locktype;
 						{
-							CalcMineRemaining(true);
+							//herbalism and mining;
+							if(pLock->lockmisc[i] == LOCKTYPE_MINING || pLock->lockmisc[i] == LOCKTYPE_HERBALISM)
+							{
+								CalcMineRemaining(true);
+							}
 						}
 					}
 				}
 			}
-		}
+		}break;
 	}
-
+	//Null out gossip_script here, will be set with sScriptMgr.register_go_gossip_script (if any).
+	pInfo->gossip_script = NULL;
 	myScript = sScriptMgr.CreateAIScriptClassForGameObject(GetEntry(), gob_shared_from_this());
 
 	// hackfix for bad spell in BWL
@@ -463,8 +439,6 @@ bool GameObject::Load(GOSpawn *spawn)
 		SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_ANIMPROGRESS, 100);
 
 	CALL_GO_SCRIPT_EVENT(gob_shared_from_this(), OnCreate)();
-
-	InitAI();
 
 	_LoadQuests();
 	return true;
