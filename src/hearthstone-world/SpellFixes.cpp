@@ -843,17 +843,16 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->Effect[1]	=	SPELL_EFFECT_TRIGGER_SPELL;
 					sp->EffectTriggerSpell[1]	=	48076;
 				}break;
-			
-             // Replenishment
-             case 57669:
-                 {
-                     sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
-                     sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
-                     sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
-                     sp->EffectImplicitTargetB[0] = 0;
-                     sp->EffectImplicitTargetB[1] = 0;
-                     sp->EffectImplicitTargetB[2] = 0;
-                 }break;				
+			// Replenishment
+			case 57669:
+			{
+				sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
+				sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
+				sp->EffectImplicitTargetA[2] = EFF_TARGET_ALL_PARTY;
+				sp->EffectImplicitTargetB[0] = 0;
+				sp->EffectImplicitTargetB[1] = 0;
+				sp->EffectImplicitTargetB[2] = 0;
+			}break;				
 			// Moroes' garrote targets a single	enemy	instead	of us
 			case 37066:
 				{
@@ -2849,7 +2848,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	30000;
 						sp->EffectApplyAuraName[1]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[1]	=	48518;//Crit Chance of Starfire 30% more
-						sp->procChance	=	20;
 						sp->EffectSpellClassMask[0][0]	=	0x0;
 						sp->EffectSpellClassMask[0][1]	=	0x0;
 					}break;
@@ -2862,7 +2860,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	30000;
 						sp->EffectApplyAuraName[1]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[1]	=	48518;//Crit Chance of Starfire 30% more
-						sp->procChance	=	40;
 						sp->EffectSpellClassMask[0][0]	=	0x0;
 						sp->EffectSpellClassMask[0][1]	=	0x0;
 					}break;
@@ -2875,7 +2872,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	30000;
 						sp->EffectApplyAuraName[1]	=	SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[1]	=	48518;//Crit Chance of Starfire 30% more
-						sp->procChance	=	60;
 						sp->EffectSpellClassMask[0][0]	=	0x0;
 						sp->EffectSpellClassMask[0][1]	=	0x0;
 					}break;
