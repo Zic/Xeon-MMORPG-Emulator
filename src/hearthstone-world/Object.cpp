@@ -603,7 +603,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint16 flags, uint32 flags2
 	// 0x200
     if(flags & 0x0200)
     {
-        *data << uint64(0); //blizz 64bit rotation
+		uint64 rotation = 0;
+		if(IsGameObject())
+			rotation = gob_shared_from_this()->m_rotation;
+        *data << uint64(rotation); //blizz 64bit rotation
     }
 }
 

@@ -172,6 +172,7 @@ public:
 	HEARTHSTONE_INLINE bool IsPlayer() { return m_objectTypeId == TYPEID_PLAYER; }
 	HEARTHSTONE_INLINE bool IsCreature() { return m_objectTypeId == TYPEID_UNIT; }
 	HEARTHSTONE_INLINE bool IsVehicle() { return m_isVehicle; }
+	HEARTHSTONE_INLINE bool IsGameObject() { return m_objectTypeId == TYPEID_GAMEOBJECT; }
 	bool IsPet();
 
 	//! This includes any nested objects we have, inventory for example.

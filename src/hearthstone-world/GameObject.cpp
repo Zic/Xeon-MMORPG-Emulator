@@ -47,6 +47,7 @@ GameObject::GameObject(uint64 guid)
 	m_ritualtarget = 0;
 	m_ritualmembers = NULL;
 	m_ritualspell = 0;
+	m_rotation = 0;
 
 	m_quests = NULL;
 	pInfo = NULL;
@@ -118,12 +119,11 @@ bool GameObject::CreateFromProto(uint32 entry,uint32 mapid, float x, float y, fl
 	SetUInt32Value( OBJECT_FIELD_ENTRY, entry );
 
 	SetPosition(x, y, z, orientation1);
-	SetRotation(ang);
 
-	SetFloatValue(GAMEOBJECT_PARENTROTATION, orientation1);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION_1, orientation2);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION_2, orientation3);
-    SetFloatValue(GAMEOBJECT_PARENTROTATION_3, orientation4);
+	SetFloatValue(GAMEOBJECT_PARENTROTATION_1, ang);
+    /*SetFloatValue(GAMEOBJECT_PARENTROTATION_2, orientation2);
+    SetFloatValue(GAMEOBJECT_PARENTROTATION_3, orientation3);*/
+	UpdateRotation();
 
 	SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, 1);
 	SetUInt32Value( GAMEOBJECT_DISPLAYID, pInfo->DisplayID );
@@ -442,7 +442,6 @@ bool GameObject::Load(GOSpawn *spawn)
 
 	m_phaseMode = spawn->phase;
 	m_spawn = spawn;
-	SetRotation(spawn->facing);
 	SetUInt32Value(GAMEOBJECT_FLAGS,spawn->flags);
 //	SetUInt32Value(GAMEOBJECT_LEVEL,spawn->level);
 	SetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_STATE, spawn->state);
@@ -760,22 +759,28 @@ void GameObject::GenerateLoot()
 }
 
 // Convert from radians to blizz rotation system
-void GameObject::SetRotation(float rad)
+void GameObject::UpdateRotation()
 {
-	if (rad < 0)
+	m_rotation = 0;
+	uint32 max = (1 << 20) - 2;	// first 2 fields are 21 bit long. so max positive value is this
+	for(uint32 i = 0; i < 3; i++)
 	{
-		rad = float((360.0f * (M_PI / 180.0f)) - (-rad));
+		if(i == 2)
+			max = (1 << 21) - 2;	// last field is 1 bit wider than first 2
+		float rad = GetFloatValue(GAMEOBJECT_ROTATION_01 + i);
+		if (rad < 0)
+		{
+			rad = float(2 * M_PI) + rad;
+		}
+		if (rad > (float)M_PI)
+		{
+			rad = -sinf(rad/2.0f);
+		} else
+		{
+			rad = sinf(rad/2.0f);
+		}
+		m_rotation |= uint64(float2int32(max * rad)) << (21 * i);
 	}
-	float deg = (float)(rad * (180.0f / (float)M_PI));
-	if (deg > 180.0f)
-	{
-		rad = (1.0f - sinf(rad/2.0f)) / 8.0f + 1.125f;
-	}
-	else
-	{
-		rad = sinf(rad/2.0f) / 8.0f + 1.0f;
-	}
-	SetFloatValue(GAMEOBJECT_ROTATION, rad);
 }
 
 //	custom functions for scripting

@@ -723,8 +723,7 @@ bool ChatHandler::HandleGOSpawn(const char *args, WorldSession *m_session)
 
 	go->SetInstanceID(chr->GetInstanceID());
 	go->CreateFromProto(EntryID,mapid,x,y,z,o,0.0f,0.0f,0.0f,0.0f);
-	
-	go->SetRotation(o);
+
 	go->PushToWorld(m_session->GetPlayer()->GetMapMgr());
 
 	// Create sapwn instance

@@ -157,7 +157,7 @@ public:
 	void Init();
 
 	/* Packet Handlers */
-	void HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType, bool battlemaster);
+	void HandleBattlegroundListPacket(WorldSession * m_session, uint32 BattlegroundType, bool battlemaster = true);
 	void HandleArenaJoin(WorldSession * m_session, uint32 BattlegroundType, uint8 as_group, uint8 rated_match);
 
 	/* Player Logout Handler */
