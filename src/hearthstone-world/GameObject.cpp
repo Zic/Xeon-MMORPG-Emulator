@@ -308,7 +308,7 @@ void GameObject::SaveToFile(std::stringstream & name)
 
 void GameObject::InitAI()
 {	
-	if(!pInfo)
+	if(pInfo == NULL)
 		return;
 	
 	// this fixes those fuckers in booty bay
@@ -343,7 +343,12 @@ void GameObject::InitAI()
 			if(new_entry)
 			{
 				pInfo = GameObjectNameStorage.LookupEntry( new_entry );
-				if(pInfo && pInfo->sound3)
+				if(pInfo == NULL)
+				{
+					Log.Warning("GameObject","Redirected gameobject %u doesn't seem to exists in database, skipping",new_entry);
+					return;
+				}
+				if(pInfo->sound3)
 					spellid = pInfo->sound3;
 			}
 		}break;
