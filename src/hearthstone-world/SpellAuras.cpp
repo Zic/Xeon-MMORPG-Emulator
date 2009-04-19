@@ -5215,6 +5215,20 @@ void Aura::SpellAuraTransform(bool apply)
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE);
 			}
 		}break;
+		case 57669: // Replenishment
+		case 61782:
+		{
+			if(apply)
+			{
+				uint32 manaToRegen = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) * 0.0025f);
+				if( !manaToRegen ) return;
+				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)manaToRegen,(uint32)0, EVENT_AURA_PERIODIC_ENERGIZE,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			}
+			else
+			{
+				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE);
+			}
+		}break;
 		case 20584://wisp
 			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, apply ? 10045:m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		break;
