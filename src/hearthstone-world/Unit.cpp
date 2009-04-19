@@ -831,6 +831,45 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if( CastingSpell->Id != 5229 )//enrage
 								continue;
 						}break;
+						//Druid Eclipse
+						case 48518:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_WRATH )
+									continue;
+							}break;
+						case 48517:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_STARFIRE )
+									continue;
+							}break;
+						// Infected Wounds
+						case 58179:
+						case 58180:
+						case 58181:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_SHRED &&
+									CastingSpell->NameHash != SPELL_HASH_MAUL &&
+									CastingSpell->NameHash != SPELL_HASH_MANGLE___CAT &&
+									CastingSpell->NameHash != SPELL_HASH_MANGLE___BEAR )
+									continue;
+							}break;
+						//Earth And Moon
+						case 60431:
+						case 60432:
+						case 60433:
+							{
+								if ( CastingSpell == NULL)
+									continue;
+								if ( CastingSpell->NameHash != SPELL_HASH_WRATH &&
+									CastingSpell->NameHash != SPELL_HASH_STARFIRE )
+									continue;
+							}break;
 						case 31616: // Nature's Guardian
 						{
 							if(GetHealthPct() > 30)
@@ -873,10 +912,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								CastingSpell->NameHash != SPELL_HASH_GREATER_HEAL )
 								continue;
 						}break;
+						//Bloodsurge
 						case 46916:
 						{
-							if( CastingSpell->NameHash != SPELL_HASH_BLOODSURGE )
-								continue;
+							if (!CastingSpell )
+									continue;
+							if( CastingSpell->NameHash != SPELL_HASH_HEROIC_STRIKE &&
+								CastingSpell->NameHash != SPELL_HASH_BLOODTHIRST &&
+								CastingSpell->NameHash != SPELL_HASH_WHIRLWIND )
+									continue;
 						}break;
 						case 5530:
 						{
@@ -1242,6 +1286,17 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 spell->prepare(&targets);
                                 continue;
                             }break;
+						//Druid Living Seed
+						case 48504:
+							{
+								if ( CastingSpell == NULL )
+									continue;
+								if ( CastingSpell->NameHash != SPELL_HASH_SWIFTMEND &&
+									 CastingSpell->NameHash != SPELL_HASH_REGROWTH &&
+									 CastingSpell->NameHash != SPELL_HASH_HEALING_TOUCH &&
+									 CastingSpell->NameHash != SPELL_HASH_NOURISH )
+									continue;
+							}break;
 						case 974:
 						case 32593:
 						case 32594:
@@ -1478,6 +1533,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									continue;
 								dmg_overwrite = CastingSpell->manaCost * 40 / 100;
 							}break;
+						// Improved Steady Shot
+						case 53220:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_STEADY_SHOT )
+									continue;				
+							}break;
 						//priest - Reflective Shield 
 						case 33619:
 							{
@@ -1540,6 +1603,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								//trigger only on heal spell cast by NOT us
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) || unit_shared_from_this() == victim )
 									continue; 
+								dmg_overwrite = (CastingSpell->EffectBasePoints[IsHealingSpell(CastingSpell)-1] + 1) * (ospinfo->EffectBasePoints[0] + 1 ) / 100;
 							}break;
 						//paladin - Light's Grace
 						case 31834:
@@ -1867,11 +1931,12 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if (!CastingSpell )
 									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_FIREBALL ||
-									CastingSpell->NameHash != SPELL_HASH_FIRE_BLAST ||
-									CastingSpell->NameHash != SPELL_HASH_SCORCH ||
+								if( CastingSpell->NameHash != SPELL_HASH_FIREBALL &&
+									CastingSpell->NameHash != SPELL_HASH_FIRE_BLAST &&
+									CastingSpell->NameHash != SPELL_HASH_SCORCH &&
+									CastingSpell->NameHash != SPELL_HASH_LIVING_BOMB &&
 									CastingSpell->NameHash != SPELL_HASH_FROSTFIRE_BOLT )
-									continue; 
+ 									continue; 
 
 								m_hotStreakCount++;
 								if (m_hotStreakCount >= 2)
