@@ -958,6 +958,7 @@ void WorldSession::HandleBuyBackOpcode( WorldPacket & recv_data )
 
 		data.Initialize( SMSG_BUY_ITEM );
 		data << uint64(guid);
+		data << getMSTime();
 		data << uint32(itemid) << uint32(amount);
 		SendPacket( &data );
 	}
