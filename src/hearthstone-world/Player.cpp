@@ -9531,34 +9531,31 @@ void Player::_UpdateSkillFields()
 				uint32 skill_base = getRace() == RACE_TAUREN ? 90 : 75;
 				if( itr->second.CurrentValue >= skill_base + 375 && !HasSpell( 55503 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					removeSpell(55502,false,false,0);//can't use name_hash
 					addSpell( 55503 );												// Lifeblood Rank 6
 				}
 				else if( itr->second.CurrentValue >= skill_base + 300 && !HasSpell( 55502 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					removeSpell(55501,false,false,0);
 					addSpell( 55502 );												// Lifeblood Rank 5
 				}
 				else if( itr->second.CurrentValue >= skill_base + 225 && !HasSpell( 55501 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					removeSpell(55500,false,false,0);
 					addSpell( 55501 );												// Lifeblood Rank 4
 				}
 				else if( itr->second.CurrentValue >= skill_base + 150 && !HasSpell( 55500 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					removeSpell(55480,false,false,0);
 					addSpell( 55500 );												// Lifeblood Rank 3
 				}
 				else if( itr->second.CurrentValue >= skill_base + 75 && !HasSpell( 55480 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					removeSpell(55428,false,false,0);
 					addSpell( 55480 );												// Lifeblood Rank 2
 				}
 				else if( itr->second.CurrentValue >= skill_base && !HasSpell( 55428 ) )
-				{
-					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
 					addSpell( 55428 );												// Lifeblood Rank 1
-				}
 			}break;
 			case SKILL_SKINNING:
 			{
