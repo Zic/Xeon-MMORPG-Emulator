@@ -9561,32 +9561,31 @@ void Player::_UpdateSkillFields()
 			{
 				if( itr->second.CurrentValue >= 450 && !HasSpell( 53666 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					removeSpell(53665,false,false,0);//can't use namehash here either
 					addSpell( 53666 );												// Master of Anatomy Rank 6
 				}
 				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53665 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					removeSpell(53664,false,false,0);
 					addSpell( 53665 );												// Master of Anatomy Rank 5
 				}
 				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53664 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					removeSpell(53663,false,false,0);
 					addSpell( 53664 );												// Master of Anatomy Rank 4
 				}
 				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53663 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					removeSpell(53662,false,false,0);
 					addSpell( 53663 );												// Master of Anatomy Rank 3
 				}
 				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53662 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					removeSpell(53125,false,false,0);
 					addSpell( 53662 );												// Master of Anatomy Rank 2
 				}
 				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53125 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
 					addSpell( 53125 );												// Master of Anatomy Rank 1
 				}
 			}break;
@@ -9594,32 +9593,31 @@ void Player::_UpdateSkillFields()
 			{
 				if( itr->second.CurrentValue >= 450 && !HasSpell( 53040 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					removeSpell(53124,false,false,0);//can't use namehash here either
 					addSpell( 53040 );												// Toughness Rank 6
 				}
 				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53124 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					removeSpell(53123,false,false,0);
 					addSpell( 53124 );												// Toughness Rank 5
 				}
 				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53123 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					removeSpell(53122,false,false,0);
 					addSpell( 53123 );												// Toughness Rank 4
 				}
 				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53122 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					removeSpell(53121,false,false,0);
 					addSpell( 53122 );												// Toughness Rank 3
 				}
 				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53121 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					removeSpell(53120,false,false,0);
 					addSpell( 53121 );												// Toughness Rank 2
 				}
 				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53120 ) )
 				{
-					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
 					addSpell( 53120 );												// Toughness Rank 1
 				}
 			}break;
