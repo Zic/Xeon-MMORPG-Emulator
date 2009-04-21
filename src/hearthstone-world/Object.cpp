@@ -2313,7 +2313,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 
 					if( pVictim->IsPlayer() )
 					{
-						dmg_reduction_pct = 2.2f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE );
+						dmg_reduction_pct = 2.2f * TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE ) / 100.0f;
 						if( dmg_reduction_pct > 0.33f )
 							dmg_reduction_pct = 0.33f; // 3.0.3
 
