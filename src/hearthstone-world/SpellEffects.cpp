@@ -2025,29 +2025,6 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 	if( m_spellInfo->NameHash == SPELL_HASH_FIREBALL && p_caster && p_caster->m_DummyAuras[SPELL_HASH_GLYPH_OF_FIREBALL] )
 		return;
 
-	// can't apply stuns/fear/polymorph/root etc on boss
-	if ( !playerTarget )
-	{
-		CreaturePointer c = TO_CREATURE( unitTarget );
-		if (c&&c->GetCreatureName()&&c->GetCreatureName()->Rank == ELITE_WORLDBOSS)
-		{
-			switch(m_spellInfo->EffectApplyAuraName[i])
-			{
-			case 5:  // confuse
-			case 6:  // charm
-			case 7:  // fear
-			case 12: // stun
-			case 25: // pacify
-			case 26: // root
-			case 27: // silence
-			case 31: // increase speed
-			case 33: // decrease speed
-				//SendCastResult(SPELL_FAILED_IMMUNE);
-				return;
-			}
-		}
-	}
-	
 	// avoid map corruption.
 	if(unitTarget->GetInstanceID()!=m_caster->GetInstanceID())
 		return;
