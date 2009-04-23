@@ -773,6 +773,7 @@ protected:
 
 	void SendInterrupted(uint8 result, ObjectPointer m_caster);
 	void SendChannelUpdate(uint32 time, ObjectPointer m_caster);
+	void SetModAmount();
 public:
 	bool m_deleted;
 	bool m_added;

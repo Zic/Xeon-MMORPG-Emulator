@@ -1392,7 +1392,33 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[1]	=	0;
 						sp->Effect[2]	=	0; //removing	strange	effects.
 					}break;
-		
+			//Druid - Master Shapeshifter
+			case 48411:
+			case 48412:
+				{
+						sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA;
+						sp->EffectApplyAuraName[0]	=	SPELL_AURA_DUMMY;
+						sp->Effect[1]	=	0;
+						sp->Effect[2]	=	0;
+						sp->procFlags	=	PROC_ON_CAST_SPELL;
+						sp->procChance	=	100;
+				}break;
+			case 48418:
+				{
+					sp->RequiredShapeShift	=	(1<<(FORM_BEAR-1))|(1<<(FORM_DIREBEAR-1));
+				}break;
+			case 48420:
+				{
+					sp->RequiredShapeShift	=	(1<<(FORM_CAT-1));
+				}break;
+			case 48421:
+				{
+					sp->RequiredShapeShift	=	1073741824;
+				}break;
+			case 48422:
+				{
+					sp->RequiredShapeShift	=	FORM_TREE;//WORKING
+				}break;
 			//Druid: Improved	Leader of	the	Pack
 			case  34299:
 					{

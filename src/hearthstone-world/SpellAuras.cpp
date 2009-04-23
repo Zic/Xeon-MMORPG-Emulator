@@ -2629,7 +2629,27 @@ void Aura::SpellAuraDummy(bool apply)
 			else
 				pTarget->RemoveShapeShiftSpell( 24932 );
 		}break;
-
+	case 48411: //Master ShapeShifter
+	case 48412:
+		{
+			if( !m_target->IsPlayer() )
+				return;
+			PlayerPointer pTarget = TO_PLAYER(m_target);
+			if( apply )
+				{
+					pTarget->AddShapeShiftSpell( 48418 );
+					pTarget->AddShapeShiftSpell( 48420 );
+					pTarget->AddShapeShiftSpell( 48421 );
+					pTarget->AddShapeShiftSpell( 48422 );
+				}
+			else
+				{
+					pTarget->RemoveShapeShiftSpell( 48418 );
+					pTarget->RemoveShapeShiftSpell( 48420 );
+					pTarget->RemoveShapeShiftSpell( 48421 );
+					pTarget->RemoveShapeShiftSpell( 48422 );
+				}
+		}break;
 	case 31223:
 	case 31222:
 	case 31221:		// Rogue : Master of Subtlety
@@ -4268,17 +4288,7 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 
 	if(apply)
 	{
-		//threet special cases. We should move these to scripted spells maybe
-		switch(m_spellProto->Id)
-		{
-			case 23782:// Gift of Life
-			  mod->m_amount = 1500; 
-			  break;
-			case 50322:// Survival Instincts
-			case 12976:// Last Stand
-			  mod->m_amount = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.3);
-			  break;
-		}
+		SetModAmount();
 		SetPositive();
 		amt = mod->m_amount;
 	}
@@ -4984,6 +4994,7 @@ void Aura::SpellAuraModBlockPerc(bool apply)
 
 void Aura::SpellAuraModCritPerc(bool apply)
 {
+	SetModAmount();
 	if (m_target->IsPlayer())
 	{
 		if(apply)
@@ -6086,7 +6097,7 @@ void Aura::SpellAuraModSpellDamageDOTPct(bool apply)
 
 void Aura::SpellAuraModDamagePercDone(bool apply)
 {
-
+	SetModAmount();
 	float val = (apply) ? mod->m_amount/100.0f : -mod->m_amount/100.0f;
 
 	switch (GetSpellId()) //dirty or mb not fix bug with wand specializations
@@ -8039,6 +8050,7 @@ void Aura::SpellAuraModHealingDone(bool apply)
 
 void Aura::SpellAuraModHealingDonePct(bool apply)
 {
+	SetModAmount();
 	int32 val;
 	if(apply)
 	{
@@ -9132,3 +9144,32 @@ void Aura::ModProcCharges(int32 mod)
 	else
 		Remove();
 }
+
+void Aura::SetModAmount()
+{
+	//We put all the special cases here, so we keep the code clean.
+	switch(m_spellProto->Id)
+	{
+		case 12976:// Last Stand
+		case 50322:// Survival Instincts
+		{
+			  mod->m_amount = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.3);
+		}break;
+		case 23782:// Gift of Life
+		{
+			  mod->m_amount = 1500; 
+		}break;
+		case 48418:// Master Shapeshifter Physical Damage
+		case 48420:// Master Shapeshifter CritChance
+		case 48421:// Master Shapeshifter SpellDamage
+		case 48422:// Master Shapeshifter Healing 
+		{
+			if(TO_PLAYER(m_target)->HasSpell(48411))
+				mod->m_amount =  2;
+			if(TO_PLAYER(m_target)->HasSpell(48412))
+				mod->m_amount =  4;
+		}break;
+	}
+}
+
+
