@@ -91,16 +91,28 @@ uint32 CheckTriggerPrerequsites(AreaTrigger * pAreaTrigger, WorldSession * pSess
 		if(pMapInfo && pMapInfo->required_item && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->required_item, true))
 			return AREA_TRIGGER_FAILURE_NO_ATTUNE_I;
 
-		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type == INSTANCE_MULTIMODE )
+		//we try to enter a heroic instance
+		if( pPlayer->iInstanceType >= MODE_HEROIC && pMapInfo->type != INSTANCE_NULL )
 		{
-			for(uint32 i = 0; i < 2; ++i) 
+			//All Northerend heroic instances are automatically unlocked when reaching lvl 80, no keys needed here.
+			if(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) && pPlayer->getLevel()>= 80)
+					return AREA_TRIGGER_FAILURE_OK;
+			else
 			{
-				if(pMapInfo->heroic_key[i] && !pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[i], false))
+				//we still need to be lvl 70 for heroic.
+				if(pPlayer->getLevel()<  70)
+					return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
+
+				//do we need a key?
+				bool reqkey = (pMapInfo->heroic_key[0]||pMapInfo->heroic_key[1])?true:false;
+
+				//do we have a key?
+				bool haskey = (pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[0], false) || pPlayer->GetItemInterface()->GetItemCount(pMapInfo->heroic_key[1], false))?true:false;
+
+				if(reqkey && !haskey)
 					return AREA_TRIGGER_FAILURE_NO_KEY;
 			}
 		}
-		if(pPlayer->getLevel()<uint32(pMapInfo->HasFlag(WMI_INSTANCE_XPACK_02) ? 80 : 70) && pPlayer->iInstanceType>=MODE_HEROIC && pMapInfo->type != INSTANCE_NULL)
-			return AREA_TRIGGER_FAILURE_LEVEL_HEROIC;
 	}
 	else
 		return AREA_TRIGGER_FAILURE_OK;
