@@ -4097,12 +4097,31 @@ exit:*/
 			}
 			if(target && target->HasActiveAura(5116)) //Concussive Shot (Dazed)
 				value += 175;
-			value += (uint32)(u_caster->GetRAP()*0.2);
+			value += (uint32)(u_caster->GetRAP()*0.1);
 		}
 	}
-    // HACK FIX
-    else if( m_spellInfo->NameHash == SPELL_HASH_VICTORY_RUSH )
-	{//causing ${$AP*$m1/100} damage
+	// Slam	
+	else if( m_spellInfo->NameHash == SPELL_HASH_SLAM )
+	{
+		if( p_caster != NULL )
+		{
+			ItemPointer it;
+			if(p_caster->GetItemInterface())
+			{
+				it = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);
+				if(it)
+				{
+					float weapondmg = ( it->GetProto()->Damage[0].Max + it->GetProto()->Damage[0].Min ) / 2;
+					value += float2int32( m_spellInfo->EffectBasePoints[0] + weapondmg );
+				}
+			}
+		}
+	}
+	
+	// HACK FIX
+	else if( m_spellInfo->NameHash == SPELL_HASH_VICTORY_RUSH )
+	{
+		//causing ${$AP*$m1/100} damage
 		if(i==0 && u_caster)
 			value = (value*u_caster->GetAP())/100;
 	}
