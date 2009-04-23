@@ -2678,8 +2678,6 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 6788;
 	else if( m_spellInfo->Id == 45438) // Cast spell Hypothermia
 		spellid = 41425;
-	else if( m_spellInfo->Id == 20572 || m_spellInfo->Id == 33702 || m_spellInfo->Id == 33697) // Cast spell Blood Fury
-		spellid = 23230;
 	else if( m_spellInfo->Id == 31884)
 		spellid = 25771;
 	else if( m_spellInfo->AdditionalAura )
@@ -4285,16 +4283,16 @@ exit:*/
 
 void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 {
-	if(Target->GetTypeId()!=TYPEID_PLAYER)
+	if(Target == NULL || Target->GetTypeId()!=TYPEID_PLAYER)
 		return;
 
 	PlayerPointer pTarget = TO_PLAYER( Target );
-   
+
 	float x,y,z,o;
 	uint32 mapid;
 	
-    // predefined behavior 
-	if (m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 || m_spellInfo->Id == 39937)// 556 - Astral Recall ; 39937 - Ruby Slippers
+	// predefined behavior, return home
+	if (m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 || m_spellInfo->Id == 39937)// 8690 - Hearthstone ; 556 - Astral Recall ; 39937 - Ruby Slippers
 	{
 		x = pTarget->GetBindPositionX();
 		y = pTarget->GetBindPositionY();
