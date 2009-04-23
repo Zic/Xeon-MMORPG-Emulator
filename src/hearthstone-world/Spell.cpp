@@ -3575,7 +3575,12 @@ uint8 Spell::CanCast(bool tolerate)
 					if(p_caster && p_caster->GetShapeShift() != FORM_CAT)
 						return SPELL_FAILED_ONLY_SHAPESHIFT;
 				}break;
-
+				//Survival Instincts - Druid
+				case 61336:
+					{
+						if(p_caster && !(p_caster->GetShapeShift() == FORM_CAT || p_caster->GetShapeShift() == FORM_BEAR || p_caster->GetShapeShift() == FORM_DIREBEAR ))
+						return SPELL_FAILED_ONLY_SHAPESHIFT;
+					}break;
 				// disable spell
 				case 25997: // Eye for an Eye
 				case 38554: //Absorb Eye of Grillok

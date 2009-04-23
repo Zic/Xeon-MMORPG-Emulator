@@ -661,17 +661,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if( !p_caster )
 				return;
-
-			uint32 ClearSpellId[1] =
-			{
-			20252,  /* Intercept */
-			};
-
-			for(i = 0; i < 1; i++)
-			{
-				if( p_caster->HasSpell( ClearSpellId[i] ) )
-					p_caster->ClearCooldownForSpell( ClearSpellId[i] );
-			}
+			if( p_caster->HasSpell( 20252 ) )
+					p_caster->ClearCooldownForSpell( 20252 );
 		}break;
 	case 50227: // Sword and Board
 		{
@@ -1386,6 +1377,16 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellCastTargets tgt;
 			tgt.m_unitTarget = playerTarget->GetGUID();
 			SpellEntry * inf =dbcSpell.LookupEntry(12976);
+			SpellPointer spe = CREATESPELL(u_caster,inf,true,NULLAURA);
+			spe->prepare(&tgt);
+		}break;
+	case 61336:// Survival Instincts - Druid
+		{
+			if(!playerTarget)
+				break;
+			SpellCastTargets tgt;
+			tgt.m_unitTarget = playerTarget->GetGUID();
+			SpellEntry * inf =dbcSpell.LookupEntry(50322);
 			SpellPointer spe = CREATESPELL(u_caster,inf,true,NULLAURA);
 			spe->prepare(&tgt);
 		}break;

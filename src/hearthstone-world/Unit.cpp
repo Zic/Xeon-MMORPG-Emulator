@@ -885,6 +885,13 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								value = basePoints + rand() % randomPoints;
 							dmg_overwrite = GetUInt32Value(UNIT_FIELD_MAXHEALTH) * value / 100;
 						}break;
+						//Fiery Payback
+						case 44440:
+						case 44441:
+							{
+								if(GetHealthPct() > 35)
+								continue;
+							}break;
 						case 45058: // Commendation of Kael'thas
 						{
 							if(GetHealthPct() >= 35)
@@ -1655,6 +1662,24 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash != SPELL_HASH_DIVINE_STORM )
 									continue;				
 								}break;
+						// Righteous Vengeance (judgements damage is broken also crusader strike was added in 3.1 need update on 3.1)
+						case 61840:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_DIVINE_STORM )
+									continue;
+						dmg_overwrite = ( dmg * (ospinfo->EffectBasePoints[0] + 1 )) / 400 ;
+							}break;
+						// Paladin - Sheat of Light
+						case 54203:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING))
+									continue; 
+								dmg_overwrite = dmg * (ospinfo->EffectBasePoints[1] + 1) / 400;
+							}break;
 						case 45057: // Trinket: Evasive Maneuvers
 							{
 								if(GetHealthPct() > 35)
@@ -1732,6 +1757,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) //requires offensive spell. ! might not cover all spells
 									continue;
 							}break;
+						//Fingers of Frost
+						case 44544:
 						//Brain Freeze
 						case 57761:
 							{

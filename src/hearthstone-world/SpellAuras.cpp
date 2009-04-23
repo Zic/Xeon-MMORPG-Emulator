@@ -4274,6 +4274,7 @@ void Aura::SpellAuraModIncreaseHealth(bool apply)
 			case 23782:// Gift of Life
 			  mod->m_amount = 1500; 
 			  break;
+			case 50322:// Survival Instincts
 			case 12976:// Last Stand
 			  mod->m_amount = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.3);
 			  break;

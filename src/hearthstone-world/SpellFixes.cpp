@@ -1322,7 +1322,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[1]	=	SPELL_EFFECT_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[1]	=	24864;
 				}break;
-
+			//Survival Instincts - Druid
+			case  61336:
+				{
+						sp->Effect[0]	=	SPELL_EFFECT_DUMMY;
+				}break;
 			//Druid: Natural Perfection
 			case  33881:
 			case  33882:
@@ -3476,7 +3480,35 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->is_melee_spell = true;
 				}break;
-
+			// Righteous Vengeance (3.1 reduced to 3 ranks only just need remove 2 last cases)
+			case 53380:
+			case 53381:
+			case 53382:
+			case 53383:
+			case 53384:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	61840;
+					sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+				}break;
+			case 61840:
+				{
+					sp->fixed_hotdotcoef = 0.0f;
+				}break;
+			// Sheat of Light (Hot Effect)
+			case 53501:
+			case 53502:
+			case 53503:
+				{
+					sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[1]	=	54203;
+					sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
+				}break;
+			case 54203:
+				{
+					sp->fixed_hotdotcoef = 0.0f;
+					sp->logsId = sp->Id;
+				}break;		
 		
 		
 			//////////////////////////////////////////
@@ -3783,9 +3815,24 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 				}break;
-
-		
-		
+			//Fiery Payback 
+			case 44440:
+			case 44441:
+				{
+					sp->procChance	=	100;
+					sp->procFlags = PROC_ON_SPELL_HIT_VICTIM | PROC_ON_MELEE_ATTACK_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM | PROC_ON_ANY_DAMAGE_VICTIM;
+				}break;
+			//Fingers of Frost
+			case 44543:
+				{
+					sp->procFlags	=	PROC_ON_CAST_SPELL;
+					sp->procChance	=	5;
+				}break;
+			case 44545:
+				{
+					sp->procFlags	=	PROC_ON_CAST_SPELL;
+					sp->procChance	=	10;
+				}break;
 			//////////////////////////////////////////
 			// WARLOCK								//
 			//////////////////////////////////////////
@@ -4122,13 +4169,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  49576:
 				{
 						sp->FacingCasterFlags	=	0;
-				}break;
-		
-			// Fiery Payback disable until it's	properly implemented
-			case  44441:
-			case  44440:
-				{
-						sp->Effect[0]	=	sp->Effect[1]	=	sp->Effect[2]	=	0;
 				}break;
 		
 			// Item	procs
@@ -6326,7 +6366,7 @@ void ApplyNormalFixes()
 		if( sp->NameHash == SPELL_HASH_NATURE_S_GUARDIAN )
 		{
 			sp->procFlags = PROC_ON_SPELL_HIT_VICTIM | PROC_ON_MELEE_ATTACK_VICTIM | PROC_ON_RANGED_ATTACK_VICTIM | PROC_ON_ANY_DAMAGE_VICTIM;
-			sp->proc_interval = 5000;
+			sp->proc_interval = 8000;
 			sp->EffectTriggerSpell[0] = 31616;
 		}
 
