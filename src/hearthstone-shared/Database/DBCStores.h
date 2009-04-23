@@ -741,7 +741,7 @@ struct SpellEntry
 	uint32 MinReputation;                   //223   only one spellid:6994 has this value = 4 UNUSED
 	uint32 RequiredAuraVision;              //224  3 spells 1 or 2   
 	uint32 TotemCategory[2];				//225-226
-	int32 RequiresAreaId;					//227
+	int32 AreaGroupId;						//227  //look up area by index in areagroup.dbc
 	uint32 School;							//228
 	uint32 runeCostID;                      //229
     //uint32 spellMissileID;                //230 not used
@@ -924,6 +924,12 @@ struct WorldMapOverlayEntry
 {
 	uint32 AreaReference;
 	uint32 AreaTableID;
+};
+
+struct AreaGroup
+{
+	uint32  AreaGroupId;		// 0
+	uint32  AreaId[7];			// 1-7
 };
 
 struct AreaTable
@@ -1646,6 +1652,7 @@ extern SERVER_DECL DBCStorage<SpellRuneCostEntry> dbcSpellRuneCost;
 extern SERVER_DECL DBCStorage<emoteentry> dbcEmoteEntry;
 extern SERVER_DECL DBCStorage<SpellRadius> dbcSpellRadius;
 extern SERVER_DECL DBCStorage<SpellCastTime> dbcSpellCastTime;
+extern SERVER_DECL DBCStorage<AreaGroup> dbcAreaGroup;
 extern SERVER_DECL DBCStorage<AreaTable> dbcArea;
 extern SERVER_DECL DBCStorage<FactionTemplateDBC> dbcFactionTemplate;
 extern SERVER_DECL DBCStorage<FactionDBC> dbcFaction;

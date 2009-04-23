@@ -1880,7 +1880,9 @@ void Spell::SendCastResult(uint8 result)
 
 	if(!plr && u_caster)
 		plr = u_caster->m_redirectSpellPackets;
-	if(!plr) return;
+
+	if(!plr)
+		return;
 
 	// reset cooldowns
 	if( m_spellState == SPELL_STATE_PREPARING )
@@ -1894,7 +1896,18 @@ void Spell::SendCastResult(uint8 result)
 		break;
 
 	case SPELL_FAILED_REQUIRES_AREA:
-		Extra = m_spellInfo->RequiresAreaId;
+		if( m_spellInfo->AreaGroupId > 0 )
+		{
+			uint16 area_id = plr->GetMapMgr()->GetAreaID( plr->GetPositionX(), plr->GetPositionY() );
+			AreaGroup *GroupEntry = dbcAreaGroup.LookupEntry( m_spellInfo->AreaGroupId );
+
+			for( uint8 i = 0; i < 7; i++ )
+				if( GroupEntry->AreaId[i] != 0 && GroupEntry->AreaId[i] != area_id )
+				{
+					Extra = GroupEntry->AreaId[i];
+					break;
+				}
+		}
 		break;
 
 	case SPELL_FAILED_TOTEMS:
@@ -3253,8 +3266,19 @@ uint8 Spell::CanCast(bool tolerate)
 				return SPELL_FAILED_REQUIRES_SPELL_FOCUS;
 		}
 
-		if (m_spellInfo->RequiresAreaId > 0 && m_spellInfo->RequiresAreaId != p_caster->GetMapMgr()->GetAreaID(p_caster->GetPositionX(),p_caster->GetPositionY()))
-			return SPELL_FAILED_REQUIRES_AREA;
+		if( m_spellInfo->AreaGroupId > 0)
+		{
+			uint16 area_id = p_caster->GetMapMgr()->GetAreaID( p_caster->GetPositionX(),p_caster->GetPositionY() );
+			AreaGroup const* groupEntry = dbcAreaGroup.LookupEntry( m_spellInfo->AreaGroupId );
+			if( groupEntry )
+			{
+				for ( uint8 i=0; i<7; i++ )
+				{
+					if( groupEntry->AreaId[i] == area_id )
+						return SPELL_FAILED_REQUIRES_AREA;
+				}
+			}
+		}
 
 		// aurastate check
 		if( m_spellInfo->CasterAuraState)
@@ -3597,9 +3621,9 @@ uint8 Spell::CanCast(bool tolerate)
 					if(pPet && !pPet->isDead())
 						return SPELL_FAILED_TARGET_NOT_DEAD;
 				}break;
-				case 38177:
+				case 38177: //Blackwhelp Net
 				{
-					if(target->GetEntry() != 21387)
+					if(target->GetEntry() != 21387) // should only affect Wyrmcult Blackwhelps
 						return SPELL_FAILED_BAD_TARGETS;
 				}break;
 			}
@@ -3625,8 +3649,7 @@ uint8 Spell::CanCast(bool tolerate)
 				}
 				if( m_spellInfo->Id == 38177) //Blackwhelp Net
 				{
-					// should only affect Wyrmcult Blackwhelps
-					if(target->GetEntry()!= 21387)
+					if(target->GetEntry()!= 21387) // should only affect Wyrmcult Blackwhelps
 						return SPELL_FAILED_BAD_TARGETS;
 				}
 

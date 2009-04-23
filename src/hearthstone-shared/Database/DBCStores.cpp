@@ -22,6 +22,7 @@
 #include "NGLog.h"
 
 SERVER_DECL DBCStorage<AreaTriggerEntry> dbcAreaTrigger;
+SERVER_DECL DBCStorage<AreaGroup> dbcAreaGroup;
 SERVER_DECL DBCStorage<CharTitlesEntry> dbcCharTitlesEntry;
 SERVER_DECL DBCStorage<GemPropertyEntry> dbcGemProperty;
 SERVER_DECL DBCStorage<GlyphPropertyEntry> dbcGlyphProperty;
@@ -81,6 +82,7 @@ SERVER_DECL DBCStorage<SummonPropertiesEntry> dbcSummonProps;
 
 const char* SummonPropertiesfmt = "uuuuuu";
 const char* AreaTriggerFormat = "uuffffffff";
+const char* AreaGroupFormat="niiiiiii";
 const char* CharTitlesEntryfmt = "usxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxu";
 const char* ItemSetFormat = "usxxxxxxxxxxxxxxxuuuuuuuuuuuxxxxxxxuuuuuuuuuuuuuuuuuu";
 const char* LockFormat = "uuuuuuxxxuuuuuxxxuuuuuxxxxxxxxxxx";
@@ -177,6 +179,7 @@ bool LoadDBCs()
 {
 	LOAD_DBC("DBC/Achievement.dbc", achievementfmt,true, dbcAchievement,true);
 	LOAD_DBC("DBC/Achievement_Criteria.dbc", achievementCriteriafmt,true,dbcAchivementCriteria,true);
+	LOAD_DBC("DBC/AreaGroup.dbc", AreaGroupFormat, true, dbcAreaGroup, true);
 	LOAD_DBC("DBC/AreaTable.dbc", areatableFormat, true, dbcArea, true);
 	LOAD_DBC("DBC/AreaTrigger.dbc", AreaTriggerFormat, true, dbcAreaTrigger, false);
 	LOAD_DBC("DBC/AuctionHouse.dbc", auctionhousedbcFormat, true, dbcAuctionHouse, false);
