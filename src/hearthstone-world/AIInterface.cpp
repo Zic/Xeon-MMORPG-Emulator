@@ -266,13 +266,19 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 					if(cr->original_emotestate)
 						m_Unit->SetUInt32Value(UNIT_NPC_EMOTESTATE, cr->original_emotestate);
 					
-					if(cr->m_spawn && (cr->m_spawn->channel_target_go || cr->m_spawn->channel_target_creature ) )
+					if(cr->m_spawn)
 					{
-						if(cr->m_spawn->channel_target_go)
-							sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpGO, cr->m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
+						if(cr->m_spawn->channel_target_go || cr->m_spawn->channel_target_creature)
+						{
+							if(cr->m_spawn->channel_target_go)
+								sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpGO, cr->m_spawn->channel_target_go, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
 
-						if(cr->m_spawn->channel_target_creature)
-							sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpCreature, cr->m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
+							if(cr->m_spawn->channel_target_creature)
+								sEventMgr.AddEvent( cr, &Creature::ChannelLinkUpCreature, cr->m_spawn->channel_target_creature, EVENT_CREATURE_CHANNEL_LINKUP, 1000, 5, 0 );
+						}
+						// Remount if mounted
+						if( cr->m_spawn->MountedDisplayID )
+							m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, cr->m_spawn->MountedDisplayID );
 					}
 				}
 
@@ -338,10 +344,6 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 							  m_Unit->GetMapMgr()->RemoveCombatInProgress(m_Unit->GetGUID());
 					}
 				}
-
-				// Remount if mounted
-				if( cr!= NULL && cr->m_spawn )
-						m_Unit->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, cr->m_spawn->MountedDisplayID );
 			}break;
 		case EVENT_DAMAGETAKEN:
 			{
