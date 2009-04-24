@@ -937,84 +937,31 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procChance = 100;
 						sp->procFlags	=	PROC_ON_MELEE_ATTACK | PROC_TARGET_SELF;
-				}break;
-
-		
-			//paladin	-	Judgement	of Wisdom
+				}break;		
+			//Paladin - Judgement of Wisdom
 			case  20186:
 				{
 						sp->procFlags	=	PROC_ON_ANY_DAMAGE_VICTIM;
 						sp->EffectTriggerSpell[0]	=	20268;
+						sp->RankNumber = 0;
 				}break;
-
-			case  20354:
-				{
-						sp->procFlags	=	PROC_ON_ANY_DAMAGE_VICTIM;
-						sp->EffectTriggerSpell[0]	=	20352;
-				}break;
-
-			case  20355:
-				{
-						sp->procFlags	=	PROC_ON_ANY_DAMAGE_VICTIM;
-						sp->EffectTriggerSpell[0]	=	20353;
-				}break;
-
-			case  27164:
-				{
-						sp->procFlags	=	PROC_ON_ANY_DAMAGE_VICTIM;
-						sp->EffectTriggerSpell[0]	=	27165;
-				}break;
-
 			case  20268:
-			case  20352:
-			case  20353:
-			case  27165:
 				{
 						sp->EffectImplicitTargetA[0] = EFF_TARGET_SINGLE_ENEMY;
-				}break;
-
-		
-			//paladin	-	Judgement	of Light
+				}break;		
+			//Paladin - Judgement of Light
 			case  20185:
 				{
 						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
 						sp->EffectTriggerSpell[0]	=	20267;
+						sp->RankNumber = 0;
 				}break;
-
-			case  20344:
-				{
-						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->EffectTriggerSpell[0]	=	20341;
-				}break;
-
-			case  20345:
-				{
-						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->EffectTriggerSpell[0]	=	20342;
-				}break;
-
-			case  20346:
-				{
-						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->EffectTriggerSpell[0]	=	20343;
-				}break;
-
-			case  27162:
-				{
-						sp->procFlags	=	PROC_ON_MELEE_ATTACK_VICTIM;
-						sp->EffectTriggerSpell[0]	=	27163;
-				}break;
-
 			case  20267:
-			case  20341:
-			case  20342:
-			case  20343:
-			case  27163:
 				{
 						sp->EffectImplicitTargetA[0] = EFF_TARGET_SINGLE_ENEMY;
 				}break;
 
-			//Judgements - rebuff
+			//Paladin - Judgement of Justice
 			case 20184:
 				{
 					sp->RankNumber = 0;
@@ -1254,7 +1201,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 34860:
 				 {
 						sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
-						sp->procChance = 100;
 				}break;
 			case 34754://Make it similar to Mage Clearcasting
 				{
@@ -2696,12 +2642,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  33150:
 			case  33154:
 				{
-						sp->procFlags	=	uint32(PROC_ON_SPELL_CRIT_HIT_VICTIM | PROC_TARGET_SELF);
+						sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
 				}break;
 
 			case  33151:
 				{
-						sp->AuraInterruptFlags = AURA_INTERRUPT_ON_CAST_SPELL;
+						sp->procCharges	=	2;
 				}break;
 		
 			//Seal of	Justice	-lowered proc	chance (experimental values	!)
@@ -4287,8 +4233,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->proc_interval	=	60000;
 						sp->procFlags = PROC_ON_MELEE_ATTACK;
 				}break;	
-			// Meteorite Whetstone
-			case 60301:
+			case 60301: // Meteorite Whetstone
+			case 60317; // Signet of Edward the Odd
 				{
 						sp->proc_interval	=	45000;
 						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;

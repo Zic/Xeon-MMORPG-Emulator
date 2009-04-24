@@ -5227,18 +5227,6 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							if( spi && spi->NameHash != SPELL_HASH_FLASH_HEAL && spi->NameHash != SPELL_HASH_BINDING_HEAL && spi->NameHash != SPELL_HASH_GREATER_HEAL)
 								continue;
 						}break;
-					//priest - surge of light
-					case 33151:
-						{
-							//our luck. it got trigered on smite..we do not remove it just yet
-							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_SMITE )
-								continue;
-
-							//this spell gets removed only when casting smite
-						    SpellEntry *spi = dbcSpell.LookupEntry( skip );
-							if( spi && spi->NameHash != SPELL_HASH_SMITE )
-								continue;
-						}break;
 					//paladin - Art of war
 					case 53489:
 					case 59578:
