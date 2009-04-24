@@ -4234,7 +4234,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags = PROC_ON_MELEE_ATTACK;
 				}break;	
 			case 60301: // Meteorite Whetstone
-			case 60317; // Signet of Edward the Odd
+			case 60317: // Signet of Edward the Odd
 				{
 						sp->proc_interval	=	45000;
 						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;

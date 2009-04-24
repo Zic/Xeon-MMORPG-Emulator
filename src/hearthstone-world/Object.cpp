@@ -1434,25 +1434,25 @@ bool Object::isInFront(ObjectPointer target)
 {
 	// check if we facing something ( is the object within a 180 degree slice of our positive y axis )
 
-    double x = target->GetPositionX() - m_position.x;
-    double y = target->GetPositionY() - m_position.y;
+	double x = target->GetPositionX() - m_position.x;
+	double y = target->GetPositionY() - m_position.y;
 
-    double angle = atan2( y, x );
-    angle = ( angle >= 0.0 ) ? angle : 2.0 * M_PI + angle;
+	double angle = atan2( y, x );
+	angle = ( angle >= 0.0 ) ? angle : 2.0 * M_PI + angle;
 	angle -= m_position.o;
 
-    while( angle > M_PI)
-        angle -= 2.0 * M_PI;
+	while( angle > M_PI)
+		angle -= 2.0 * M_PI;
 
-    while(angle < -M_PI)
-        angle += 2.0 * M_PI;
+	while(angle < -M_PI)
+		angle += 2.0 * M_PI;
 
 	// replace M_PI in the two lines below to reduce or increase angle
 
-    double left = -1.0 * ( M_PI / 2.0 );
-    double right = ( M_PI / 2.0 );
+	double left = -1.0 * ( M_PI / 2.0 );
+	double right = ( M_PI / 2.0 );
 
-    return( ( angle >= left ) && ( angle <= right ) );
+	return( ( angle >= left ) && ( angle <= right ) );
 }
 
 bool Object::isInBack(ObjectPointer target)
@@ -1600,7 +1600,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		}
 	}
 
-	if(IsUnit())
+	if(IsUnit() && unit_shared_from_this()->isAlive() )
 	{
 		if( unit_shared_from_this() != pVictim && pVictim->IsPlayer() && IsPlayer() && plr_shared_from_this()->m_hasInRangeGuards )
 		{
@@ -1812,7 +1812,6 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		else
 		{
 			pVictim->setDeathState( JUST_DIED );
-			pVictim->GetAIInterface()->HandleEvent( EVENT_LEAVECOMBAT, unit_shared_from_this(), 0);
 			/* Remove all Auras */
 			pVictim->EventDeathAuraRemoval();
 			/* Set victim health to 0 */
@@ -1882,13 +1881,6 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			}
 		}
 
-		/* Stop victim from attacking */
-		if( IsUnit() )
-			pVictim->smsg_AttackStop( unit_shared_from_this() );
-
-		if( pVictim->GetTypeId() == TYPEID_PLAYER )
-			TO_PLAYER( pVictim )->EventAttackStop();
-
 		if(pVictim->IsPlayer())
 		{
 			uint32 self_res_spell = 0;
@@ -1916,28 +1908,20 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		// Wipe our attacker set on death
 		pVictim->CombatStatus.Vanished();
 
-		//		 sent to set. don't send it to the party, becuase if they're out of
-		//		 range they won't know this guid exists -> possible 132.
 
-		/*if (this->IsPlayer())
-			if( player_shared_from_this()->InGroup() )
-				player_shared_from_this()->GetGroup()->SendPartyKillLog( this, pVictim );*/
-
-		/* Stop Unit from attacking */
+		/* Stop Units from attacking */
 		if( IsPlayer() )
-			player_shared_from_this()->EventAttackStop();
-	   
+			plr->EventAttackStop();
+
 		if( IsUnit() )
 		{
-			CALL_SCRIPT_EVENT( shared_from_this(), OnTargetDied )( pVictim );
 			unit_shared_from_this()->smsg_AttackStop( pVictim );
 		
 			/* Tell Unit that it's target has Died */
 			unit_shared_from_this()->addStateFlag( UF_TARGET_DIED );
 
-			// We will no longer be attacking this target, as it's dead.
-			//unit_shared_from_this()->setAttackTarget(NULL);
 		}
+
 		//so now we are completely dead
 		//lets see if we have spirit of redemption
 		if( pVictim->IsPlayer() )
@@ -2027,10 +2011,9 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 
 			//---------------------------------looot-----------------------------------------  
 			
-			if( GetTypeId() == TYPEID_PLAYER && 
+			if( !pVictim->IsPet() && GetTypeId() == TYPEID_PLAYER && 
 				pVictim->GetUInt64Value( UNIT_FIELD_CREATEDBY ) == 0 && 
-				pVictim->GetUInt64Value( OBJECT_FIELD_CREATED_BY ) == 0 &&
-				!pVictim->IsPet() )
+				pVictim->GetUInt64Value( OBJECT_FIELD_CREATED_BY ) == 0 )
 			{
 				// TODO: lots of casts are bad make a temp member pointer to use for batches like this
 				// that way no local loadhitstore and its just one assignment 
