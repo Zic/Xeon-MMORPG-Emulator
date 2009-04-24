@@ -2693,6 +2693,12 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 41425;
 	else if( m_spellInfo->Id == 31884)
 		spellid = 25771;
+	else if (m_spellInfo->Id == 34754 && p_caster->HasSpell(47549))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
+		spellid = 47894;
+	else if (m_spellInfo->Id == 34754 && p_caster->HasSpell(47551))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
+		spellid = 47895;
+	else if (m_spellInfo->Id == 34754 && p_caster->HasSpell(47552))//Improved Holy Concentration 3.0.9 on 3.1.0 doesn't exist
+		spellid = 47896;
 	else if( m_spellInfo->AdditionalAura )
 		spellid = m_spellInfo->AdditionalAura;
 

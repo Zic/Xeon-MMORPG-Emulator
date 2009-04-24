@@ -1248,21 +1248,21 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags	=	0;
 				}break;
 		
-				 //priest	-	Holy Concentration
+			//priest	-	Holy Concentration
 			case 34753:
 			case 34859:
 			case 34860:
 				 {
 						sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
-						sp->procChance = 30;
+						sp->procChance = 100;
 				}break;
-
-		
-			case 34754:
+			case 34754://Make it similar to Mage Clearcasting
 				{
-					 sp->AuraInterruptFlags	|= AURA_INTERRUPT_ON_CAST_SPELL;
+						sp->procCharges	=	2;
+						sp->Flags3	=	4;
+						sp->Flags4	=	1073741824;
+						sp->procFlags	=	87376;
 				}break;
-
 			//Priest:	Blessed	Recovery
 			case 27811:
 				{
@@ -1279,12 +1279,17 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 
 			case 27816:
-			{
+				{
 						sp->EffectTriggerSpell[0]	=	27818;
 						sp->procFlags	=	PROC_ON_CRIT_HIT_VICTIM;
 						sp->procChance	=	100;
 				}break;
-
+            //Improved Spirit Tap
+			case 15337: //49694 spelltrigger
+			case 15338: //59000 spelltrigger
+				{
+						sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
+				}break;
 			//priest-	Blessed	Resilience
 			case  33142:
 			case  33145:
@@ -1417,7 +1422,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 			case 48422:
 				{
-					sp->RequiredShapeShift	=	FORM_TREE;//WORKING
+					sp->RequiredShapeShift	=	FORM_TREE;
 				}break;
 			//Druid: Improved	Leader of	the	Pack
 			case  34299:
@@ -3738,7 +3743,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				sp->EffectImplicitTargetB[0] = 0;
 				}break;	
 			// Insert	priest spell fixes here
-		
+
 			//////////////////////////////////////////
 			// SHAMAN								//
 			//////////////////////////////////////////

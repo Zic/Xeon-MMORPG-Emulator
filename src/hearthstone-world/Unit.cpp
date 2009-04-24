@@ -913,7 +913,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 
                         case 34754: //holy concentration
                         {
-
+							if ( CastingSpell == NULL )
+								continue;
 							if( CastingSpell->NameHash != SPELL_HASH_FLASH_HEAL &&
 								CastingSpell->NameHash != SPELL_HASH_BINDING_HEAL &&
 								CastingSpell->NameHash != SPELL_HASH_GREATER_HEAL )
@@ -5216,13 +5217,16 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 				switch(a->GetSpellProto()->Id)
 				{
 					// priest - holy conc
-				case 34754:
-					{
-						if( m_currentSpell && !(m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_HEAL ||
-												m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_BINDING_HEAL ||
-												m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_GREATER_HEAL))
+					case 34754:
+						{
+							if( m_currentSpell && !(m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_HEAL ||
+													m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_BINDING_HEAL ||
+													m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_GREATER_HEAL))
 												continue;
-					}break;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLASH_HEAL && spi->NameHash != SPELL_HASH_BINDING_HEAL && spi->NameHash != SPELL_HASH_GREATER_HEAL)
+								continue;
+						}break;
 					//priest - surge of light
 					case 33151:
 						{
