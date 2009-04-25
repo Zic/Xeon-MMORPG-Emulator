@@ -4162,6 +4162,10 @@ exit:*/
 		}
 
 	}
+	else if( m_spellInfo->NameHash == SPELL_HASH_GOUGE )
+	{
+		value = float2int32(1 + 0.21f * u_caster->GetAP());
+	}
 	else if( m_spellInfo->NameHash == SPELL_HASH_RUPTURE )
 	{
 		/* 
@@ -4220,6 +4224,13 @@ exit:*/
 	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 20187 ) // Seal of Righteouness: Judgement
 	{
 		value = float2int32(1 + 0.32f * u_caster->GetDamageDoneMod(SCHOOL_HOLY) + 0.2f * u_caster->GetAP());
+	}
+	else if( m_spellInfo->NameHash == SPELL_HASH_HAMMER_OF_THE_RIGHTEOUS )
+	{
+		int32 max_damage	=	float2int32(p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Damage[0].Max);
+		int32 min_damage	=	float2int32(p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Damage[0].Min);
+		int32 delay			=	p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Delay;
+		value = 4*(( max_damage + min_damage )/ (2*delay/1000));
 	}
 	else if( m_spellInfo->Id == 60103 && p_caster && i == 0) // Lava Lash
 	{   // Check if offhand is enchanted with Flametongue

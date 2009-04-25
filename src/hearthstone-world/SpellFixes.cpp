@@ -6224,6 +6224,9 @@ void ApplyNormalFixes()
 			sp->fixed_apcoef = 0.07f;
 			sp->fixed_dddhcoef = 0.07f;
 			break;
+		case SPELL_HASH_HAMMER_OF_THE_RIGHTEOUS:
+			sp->fixed_dddhcoef = 0.0f;
+			break;
 		}
 
 		//////////////////////////////////////////////////////
