@@ -31,7 +31,7 @@ WorldRunnable::WorldRunnable() : ThreadContext()
 
 bool WorldRunnable::run()
 {
-	SetThreadName("WorldRunnable (non-instance/logon)");
+	SetThreadName("Global Runnable(no map)");
 	uint32 LastWorldUpdate=getMSTime();
 	uint32 LastSessionsUpdate=getMSTime();
 

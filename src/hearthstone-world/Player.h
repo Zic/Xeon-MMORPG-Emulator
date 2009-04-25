@@ -1415,7 +1415,6 @@ public:
 	float m_TransporterO;
 	float m_TransporterUnk;
 	// Misc
-	void EventCannibalize(uint32 amount);
 	void EventReduceDrunk(bool full);
 	bool m_AllowAreaTriggerPort;
 	void EventAllowTiggerPort(bool enable);
@@ -1539,8 +1538,6 @@ public:
 	map<uint32, WeaponModifier> tocritchance;
 	uint32 Seal;
 	uint32 judgespell;
-	bool cannibalize;
-	uint8 cannibalizeCount;
 	int32 rageFromDamageDealt;
 	// GameObject commands
 	GameObjectPointer m_GM_SelectedGO;
@@ -1874,6 +1871,9 @@ public:
 
 	uint32 GetLastLoginTime() { return 	m_timeLogoff; };
 
+	//Current value of Feral Attack Power from items
+	int32 m_feralAP;
+
 protected:
 	uint32 m_timeLogoff;
 	LocationVector m_summonPos;
@@ -2094,8 +2094,8 @@ public:
 	uint32 m_outStealthDamageBonusPeriod;
 	uint32 m_outStealthDamageBonusTimer;
 
-	int16 m_vampiricEmbrace;
-	int16 m_vampiricTouch;
+	uint32 m_vampiricEmbrace;
+	uint32 m_vampiricTouch;
 	void VampiricSpell(uint32 dmg, UnitPointer pTarget);
 
 	// grounding totem

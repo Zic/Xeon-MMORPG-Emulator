@@ -207,7 +207,7 @@ void LogonCommClientSocket::OnDisconnect()
 {
 	if(_id != 0)
 	{
-		printf("Calling ConnectionDropped() due to OnDisconnect().\n");
+		DEBUG_LOG("LogonCommClientSocket","Calling ConnectionDropped() due to OnDisconnect().\n");
 		sLogonCommHandler.ConnectionDropped(_id);	
 	}
 }

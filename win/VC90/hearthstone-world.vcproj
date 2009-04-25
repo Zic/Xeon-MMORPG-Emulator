@@ -55,7 +55,7 @@
 				EnableFunctionLevelLinking="false"
 				RuntimeTypeInfo="false"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="$(IntDir)/game.pch"
+				PrecompiledHeaderFile="$(IntDir)/hearthstone-world.pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
@@ -154,7 +154,7 @@
 				EnableEnhancedInstructionSet="0"
 				FloatingPointModel="2"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="$(IntDir)/game.pch"
+				PrecompiledHeaderFile="$(IntDir)/hearthstone-world.pch"
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/"
@@ -1007,6 +1007,10 @@
 			Name="Spell"
 			>
 			<File
+				RelativePath="..\..\src\hearthstone-world\ClassSpells.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-world\Spell.cpp"
 				>
 			</File>
@@ -1163,6 +1167,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\hearthstone-world\Skill.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\hearthstone-world\SkillNameMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\hearthstone-world\TaxiMgr.cpp"
 				>
 			</File>
@@ -1240,6 +1252,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\src\hearthstone-world\Const.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\hearthstone-world\EventMgr.cpp"
 			>
 		</File>
@@ -1256,6 +1272,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\hearthstone-world\MainServerDefines.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\hearthstone-world\MiscHandler.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\hearthstone-world\ObjectMgr.cpp"
 			>
 		</File>
@@ -1269,10 +1293,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\hearthstone-world\ObjectStorage.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\hearthstone-world\SkillNameMgr.h"
 			>
 		</File>
 		<File

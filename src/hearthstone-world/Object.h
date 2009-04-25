@@ -496,7 +496,6 @@ public:
 		Destructor();
 	}
 
-	void GMScriptEvent(void * function, uint32 argc, uint32 * argv, uint32 * argt);
 	HEARTHSTONE_INLINE size_t GetInRangeOppFactCount() { return m_oppFactsInRange.size(); }
 	void PlaySoundToSet(uint32 sound_entry);
 	void EventSpellHit(SpellPointer pSpell);

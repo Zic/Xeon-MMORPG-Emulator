@@ -22,7 +22,7 @@
 
 class AIInterface;
 
-#define MAX_AURAS 56 // 40 buff slots, 16 debuff slots.
+#define MAX_AURAS 96 // 40 buff slots, 46 debuff slots.
 #define MAX_POSITIVE_AURAS 40 // ?
 #define MAX_PASSIVE_AURAS 192   // grep: i mananged to break this.. :p seems we need more
 
@@ -33,7 +33,7 @@ bool SERVER_DECL Rand(float);
 #define SPELL_GROUPS	96
 #define SPELL_MODIFIERS 30
 #define DIMINISH_GROUPS	13
-#define NUM_MECHANIC 31
+#define NUM_MECHANIC 32
 
 #define UNIT_TYPE_HUMANOID_BIT (1 << (HUMANOID-1)) //should get computed by precompiler ;)
 
@@ -610,15 +610,6 @@ enum AURA_CHECK_RESULT
 	AURA_CHECK_RESULT_LOWER_BUFF_PRESENT	= 3,
 };
 
-enum DUMMY_AURAS
-{
-	DUMMY_AURA_TORMENT_THE_WEAK,
-	DUMMY_AURA_ARCANE_POTENCY,
-	DUMMY_AURA_ARCANE_EMPOWERMENT,
-	DUMMY_AURA_GLYPH_OF_FIREBALL,
-	NUM_DUMMY_AURAS
-};
-
 typedef std::list<struct ProcTriggerSpellOnSpell> ProcTriggerSpellOnSpellList;
 
 /************************************************************************/
@@ -791,7 +782,7 @@ public:
 	HEARTHSTONE_INLINE int32 GetStealthLevel() { return m_stealthLevel; }
 	HEARTHSTONE_INLINE int32 GetStealthDetectBonus() { return m_stealthDetectBonus; }
 	HEARTHSTONE_INLINE void SetStealth(uint32 id) { m_stealth = id; }
-	HEARTHSTONE_INLINE bool IsStealth() { return (m_stealth!=0 ? true : false); }
+	HEARTHSTONE_INLINE bool InStealth() { return (m_stealth!=0 ? true : false); }
 	float detectRange;
 
 	// Invisibility
@@ -832,9 +823,7 @@ public:
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
 	HEARTHSTONE_INLINE bool isDead() { return  m_deathState !=ALIVE; };
-	virtual void setDeathState(DeathState s) {
-		m_deathState = s;
-	};
+	virtual void setDeathState(DeathState s) { m_deathState = s; };
 	DeathState getDeathState() { return m_deathState; }
 	void OnDamageTaken();
 
@@ -846,10 +835,9 @@ public:
 	void AddAura(AuraPointer aur, AuraPointer pParentAura);
 	//! Remove aura from unit
 	bool RemoveAura(AuraPointer aur);
-	bool RemoveAura(uint32 spellId);
 	bool RemovePositiveAura(uint32 spellId);
 	bool RemoveNegativeAura(uint32 spellId);
-	bool RemoveAura(uint32 spellId,uint64 guid);
+	bool RemoveAura(uint32 spellId,uint64 guid = 0);
 	bool RemoveAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAuraPosByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAuraNegByNameHash(uint32 namehash);//required to remove weaker instances of a spell
@@ -862,7 +850,7 @@ public:
 
 	//! Remove all auras
 	void RemoveAllAuras();
-	bool RemoveAllAurasBySpellIDOrGUID(uint32 spellId,uint64 guid); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
+	bool RemoveAllAuras(uint32 spellId,uint64 guid = 0); //remove stacked auras but only if they come from the same caster. Shaman purge If GUID = 0 then removes all auras with this spellid
     void RemoveAllAurasOfType(uint32 auratype);//ex:to remove morph spells
 	bool RemoveAllAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
 	bool RemoveAllPosAuraByNameHash(uint32 namehash);//required to remove weaker instances of a spell
@@ -872,9 +860,8 @@ public:
 	void RemoveAllNegativeAuras();
 	AuraPointer FindPositiveAuraByNameHash(uint32 namehash);
 	AuraPointer FindNegativeAuraByNameHash(uint32 namehash);
-	AuraPointer FindActiveAura(uint32 spellId);
-	AuraPointer FindAura(uint32 spellId);
-	AuraPointer FindAura(uint32 spellId, uint64 guid);
+	AuraPointer FindActiveAura(uint32 spellId, uint64 guid = 0);
+	AuraPointer FindAura(uint32 spellId, uint64 guid = 0);
 	bool SetAuraDuration(uint32 spellId,UnitPointer caster,uint32 duration);
 	bool SetAuraDuration(uint32 spellId,uint32 duration);
 	void EventDeathAuraRemoval();
@@ -970,9 +957,9 @@ public:
 	uint64 stalkedby;
 	uint32 dispels[10];
 	bool trackStealth;
-	uint32 MechanicsDispels[27];
-	float MechanicsResistancesPCT[27]; 
-	float ModDamageTakenByMechPCT[27];
+	uint32 MechanicsDispels[NUM_MECHANIC];
+	float MechanicsResistancesPCT[NUM_MECHANIC]; 
+	float ModDamageTakenByMechPCT[NUM_MECHANIC];
 	//int32 RangedDamageTakenPct; 
 
 	//SM
@@ -1183,8 +1170,6 @@ public:
 	void SetPower(uint32 type, int32 value);
 
 	bool HasAurasOfNameHashWithCaster(uint32 namehash, UnitPointer caster);
-	int8 m_hasVampiricTouch;
-	int8 m_hasVampiricEmbrace;
 	bool mAngerManagement;
 	bool mRecentlyBandaged;
 
@@ -1197,7 +1182,7 @@ public:
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
 
-	int32 m_DummyAuras[NUM_DUMMY_AURAS];
+	std::map<uint32, SpellEntry*> m_DummyAuras;
 
 protected:
 	Unit ();

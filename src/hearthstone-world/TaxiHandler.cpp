@@ -245,7 +245,7 @@ void WorldSession::HandleMultipleActivateTaxiOpcode(WorldPacket & recvPacket)
 	DEBUG_LOG( "WORLD"," Received CMSG_ACTIVATETAXI" );
 
 	uint64 guid;
-	uint32 moocost;
+	uint32 cost;
 	uint32 nodecount;
 	vector<uint32> pathes;
 	int32 newmoney;
@@ -254,12 +254,13 @@ void WorldSession::HandleMultipleActivateTaxiOpcode(WorldPacket & recvPacket)
 	uint32 submask;
 	WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
 
-	recvPacket >> guid >> moocost >> nodecount;
+	recvPacket >> guid >> cost >> nodecount;
 	if(nodecount < 2)
 		return;
 
-	if(nodecount>10)
+	if(nodecount>12)
 	{
+		printf("CMSG_ACTIVATETAXI: Client disconnected, nodecount: %u", nodecount);
 		Disconnect();
 		return;
 	}

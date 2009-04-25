@@ -96,16 +96,15 @@ enum AI_SpellType
 {
 	STYPE_NULL,
 	STYPE_ROOT,
-	STYPE_HEAL,
-	STYPE_STUN,
-	STYPE_FEAR,
-	STYPE_SILENCE,
-	STYPE_CURSE,
-	STYPE_AOEDAMAGE,
 	STYPE_DAMAGE,
-	STYPE_SUMMON,
+	STYPE_AOEDAMAGE,
+	STYPE_INTERRUPT,
+	STYPE_FEAR,
+	STYPE_STUN,
 	STYPE_BUFF,
-	STYPE_DEBUFF
+	STYPE_DEBUFF,
+	STYPE_SUMMON,
+	STYPE_HEAL,
 };
 
 enum AI_SpellTargetType
@@ -194,8 +193,6 @@ struct AI_Spell
 	float maxrange;
 	int32 autocast_type;
 	bool custom_pointer;
-
-	bool first_use;
 };
 
 bool isGuard(uint32 id);
@@ -410,7 +407,6 @@ public:
 	bool waiting_for_cooldown;
 
 	uint32 next_spell_time;
-	AI_Spell * last_found_spell;
 
 	void CheckNextSpell(AI_Spell*sp)
 	{

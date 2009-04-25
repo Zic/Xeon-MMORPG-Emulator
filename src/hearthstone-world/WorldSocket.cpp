@@ -330,8 +330,9 @@ void WorldSocket::InformationRetreiveCallback(WorldPacket & recvData, uint32 req
 		if(session->_player != NULL && session->_player->GetMapMgr() == NULL)
 		{
 			DEBUG_LOG("WorldSocket","_player found without m_mapmgr during logon, trying to remove him [player %s, map %d, instance %d].", session->_player->GetName(), session->_player->GetMapId(), session->_player->GetInstanceID() );
-			objmgr.RemovePlayer(session->_player);
-			session->_player = NULLPLR;
+			if(objmgr.GetPlayer(session->_player->GetLowGUID()))
+				objmgr.RemovePlayer(session->_player);
+			session->LogoutPlayer(false);
 		}
 		// AUTH_FAILED = 0x0D
 		session->Disconnect();
@@ -459,8 +460,8 @@ void WorldSocket::Authenticate()
 	ASSERT(pAuthenticationPacket);
 	mQueued = false;
 
-	if(!pSession) return;
-	//pSession->deleteMutex.Acquire();
+	if(!pSession)
+		return;
 
 	if(pSession->HasFlag(ACCOUNT_FLAG_XPACK_02))
 		OutPacket(SMSG_AUTH_RESPONSE, 11, "\x0C\x30\x78\x00\x00\x00\x00\x00\x00\x00\x02");
@@ -472,23 +473,11 @@ void WorldSocket::Authenticate()
 	sAddonMgr.SendAddonInfoPacket(pAuthenticationPacket, (uint32)pAuthenticationPacket->rpos(), pSession);
 	pSession->_latency = _latency;
 
-	//delete pAuthenticationPacket;
 	g_bufferPool.Deallocate(pAuthenticationPacket);
 	pAuthenticationPacket = NULL;
 
-	if(mSession)
-	{
-		sWorld.AddSession(mSession);
-		sWorld.AddGlobalSession(mSession);
-
-/*		if(pSession->HasFlag(ACCOUNT_FLAG_XTEND_INFO))
-			sWorld.AddExtendedSession(pSession);*/
-
-		if(pSession->HasGMPermissions() && mSession)
-			sWorld.gmList.insert(pSession);
-	}
-
-	//pSession->deleteMutex.Release();
+	sWorld.AddSession(pSession);
+	sWorld.AddGlobalSession(pSession);
 }
 
 void WorldSocket::UpdateQueuePosition(uint32 Position)

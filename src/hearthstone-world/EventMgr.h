@@ -335,6 +335,16 @@ public:
 		obj->event_AddEvent(event);
 	}
 
+	template <class Class, typename P1, typename P2, typename P3, typename P4, typename P5>
+		void AddEvent(shared_ptr<Class> obj, void (Class::*method)(P1,P2,P3,P4,P5), P1 p1, P2 p2, P3 p3, P4 p4, P5 p5, uint32 type, uint32 time, uint32 repeats, uint32 flags)
+	{
+		// create a timed event
+		TimedEvent * event = new TimedEvent(obj, new CallbackP5<Class, P1, P2, P3, P4, P5>(obj, method, p1, p2, p3, p4, p5), type, time, repeats, flags);
+
+		// add this to the object's list, updating will all be done later on...
+		obj->event_AddEvent(event);
+	}
+
 	template <class Class> void RemoveEvents(shared_ptr<Class> obj) { obj->event_RemoveEvents(-1); }
 	template <class Class> void RemoveEvents(shared_ptr<Class> obj, int32 type)
 	{

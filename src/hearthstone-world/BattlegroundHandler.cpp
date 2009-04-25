@@ -264,9 +264,13 @@ void WorldSession::HandleBattleMasterJoinOpcode(WorldPacket &recv_data)
 	CHECK_INWORLD_RETURN
 	if(_player->GetGroup() && _player->GetGroup()->m_isqueued)
 	{
-		SystemMessage("You are in a group that is already queued for a battleground or inside a battleground. Leave this first.");
+		SystemMessage("You are in a group that is already queued for a battleground or inside a battleground. Leave the group first.");
 		return;
 	}
+
+	/* are we already in a queue? */
+	if(_player->m_bgIsQueued)
+		BattlegroundManager.RemovePlayerFromQueues(_player);
 
 	if(_player->IsInWorld())
 		BattlegroundManager.HandleBattlegroundJoin(this, recv_data);
@@ -277,19 +281,20 @@ void WorldSession::HandleArenaJoinOpcode(WorldPacket &recv_data)
 	CHECK_INWORLD_RETURN
 	if(_player->GetGroup() && _player->GetGroup()->m_isqueued)
 	{
-		SystemMessage("You are in a group that is already queued for a battleground or inside a battleground. Leave this first.");
+		SystemMessage("You are in a group that is already queued for a battleground or inside a battleground. Leave the group first.");
 		return;
 	}
 
 	/* are we already in a queue? */
-	BattlegroundManager.RemovePlayerFromQueues(_player);
+	if(_player->m_bgIsQueued)
+		BattlegroundManager.RemovePlayerFromQueues(_player);
 
 	uint32 bgtype=0;
 	uint64 guid;
 	uint8 arenacategory;
 	uint8 as_group;
 	uint8 rated_match;
-    recv_data >> guid >> arenacategory >> as_group >> rated_match;
+	recv_data >> guid >> arenacategory >> as_group >> rated_match;
 	switch(arenacategory)
 	{
 	case 0:		// 2v2
@@ -311,11 +316,11 @@ void WorldSession::HandleArenaJoinOpcode(WorldPacket &recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode( WorldPacket &recv_data )
 {
-    CHECK_PACKET_SIZE( recv_data, 8 );
+	CHECK_PACKET_SIZE( recv_data, 8 );
 	CHECK_INWORLD_RETURN
 
-    uint64 guid;
-    recv_data >> guid;
+	uint64 guid;
+	recv_data >> guid;
 
 	PlayerPointer player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
 	if( player == NULL )
@@ -324,32 +329,32 @@ void WorldSession::HandleInspectHonorStatsOpcode( WorldPacket &recv_data )
 	uint8 buf[100];
 	StackPacket data( MSG_INSPECT_HONOR_STATS, buf, 100 );
 
-    data << player->GetGUID() << (uint8)player->GetUInt32Value( PLAYER_FIELD_HONOR_CURRENCY );
-    data << player->GetUInt32Value( PLAYER_FIELD_KILLS );
-    data << player->GetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION );
-    data << player->GetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION );
-    data << player->GetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS );
+	data << player->GetGUID() << (uint8)player->GetUInt32Value( PLAYER_FIELD_HONOR_CURRENCY );
+	data << player->GetUInt32Value( PLAYER_FIELD_KILLS );
+	data << player->GetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION );
+	data << player->GetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION );
+	data << player->GetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS );
 
-    SendPacket( &data );
+	SendPacket( &data );
 }
 
 void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE( recv_data, 8 );
+	CHECK_PACKET_SIZE( recv_data, 8 );
 	CHECK_INWORLD_RETURN
 
-    uint64 guid;
-    recv_data >> guid;
+	uint64 guid;
+	recv_data >> guid;
 
-    PlayerPointer player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
+	PlayerPointer player =  _player->GetMapMgr()->GetPlayer( (uint32)guid );
 	if( player == NULL )
 		return;
 
 	ArenaTeam *team;
 	uint32 i;
 
-    for( i = 0; i < 3; i++ )
-    {
+	for( i = 0; i < 3; i++ )
+	{
 		team = player->m_playerInfo->arenaTeam[i];
 		if( team != NULL )
 		{
@@ -375,7 +380,7 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
 			}
 			SendPacket( &data );
 		}
-    }
+	}
 }
 
 

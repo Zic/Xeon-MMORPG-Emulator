@@ -55,16 +55,16 @@ struct BGScore
 };
 
 // bg score declarations
-#define BG_SCORE_WSG_FLAG_CAPTURES 0
-#define BG_SCORE_WSG_FLAG_RETURNS 1
-#define BG_SCORE_AB_BASE_ASSAULTED 0
-#define BG_SCORE_AB_BASE_DEFENDED 1
-#define BG_SCORE_AV_GRAVEYARDS_ASSAULTED 0
-#define BG_SCORE_AV_GRAVEYARDS_DEFENDED 1
-#define BG_SCORE_AV_TOWERS_ASSAULTED 2
-#define BG_SCORE_AV_TOWERS_DEFENDED 3
-#define BG_SCORE_AV_MINES_CAPTURES 4
-#define BG_SCORE_EOTS_FLAG_CAPTURES 0
+#define BG_SCORE_WSG_FLAG_CAPTURES			0
+#define BG_SCORE_WSG_FLAG_RETURNS			1
+#define BG_SCORE_AB_BASE_ASSAULTED			0
+#define BG_SCORE_AB_BASE_DEFENDED			1
+#define BG_SCORE_AV_GRAVEYARDS_ASSAULTED	0
+#define BG_SCORE_AV_GRAVEYARDS_DEFENDED		1
+#define BG_SCORE_AV_TOWERS_ASSAULTED		2
+#define BG_SCORE_AV_TOWERS_DEFENDED			3
+#define BG_SCORE_AV_MINES_CAPTURES			4
+#define BG_SCORE_EOTS_FLAG_CAPTURES			0
 
 #define SOUND_BATTLEGROUND_BEGIN			0xD6F
 #define SOUND_HORDE_SCORES					8213
@@ -75,35 +75,36 @@ struct BGScore
 #define SOUND_HORDE_RETURNED				8192	// huh?
 #define SOUND_HORDEWINS						8454
 #define SOUND_ALLIANCEWINS					8455
-#define SOUND_HORDE_BGALMOSTEND			 0x2108
-#define SOUND_ALLIANCE_BGALMOSTEND		  0x2109
+#define SOUND_HORDE_BGALMOSTEND				0x2108
+#define SOUND_ALLIANCE_BGALMOSTEND			0x2109
 
-#define BG_RECENTLY_DROPPED_FLAG	42792
-#define BG_PREPARATION 44521
-#define BG_REVIVE_PREPARATION	44535
-#define RESURRECT_SPELL			21074   // Spirit Healer Res
+#define RESURRECT_SPELL						21074   // Spirit Healer Res
+#define BG_DESERTER							26013
+#define BG_RECENTLY_DROPPED_FLAG			42792
+#define BG_PREPARATION						44521
+#define BG_REVIVE_PREPARATION				44535
 
 // AV define's
-#define AV_UNCONTROLED_SNOWFALL_GRAVE	   0x7AE //1 -> show uncontrolled
+#define AV_UNCONTROLED_SNOWFALL_GRAVE				0x7AE //1 -> show uncontrolled
 
-#define AV_CONTROLED_ICEBLOOD_TOWER_HORDE   0x569 //1 -> horde controled
-#define AV_CONTROLED_TOWER_POINT_HORDE	  0x568 //1 -> horde controled
-#define AV_CONTROLED_FROSTWOLF_RELIFHUNT_HORDE 0x532 //1 -> horde controled
-#define AV_CONTROLED_EAST_FROSTWOLF_TOWER_HORDE 0x567 //1 -> horde controled
-#define AV_CONTROLED_WEST_FROSTWOLF_TOWER_HORDE 0x566 //1 -> horde controled
-#define AV_CONTROLED_ICEBLOOD_GRAVE_HORDE   0x543 //1 -> horde controled
-#define AV_CONTROLED_FROSTWOLF_GRAVE_HORDE   0x53A //1 -> horde controled
+#define AV_CONTROLED_ICEBLOOD_TOWER_HORDE			0x569 //1 -> horde controled
+#define AV_CONTROLED_TOWER_POINT_HORDE				0x568 //1 -> horde controled
+#define AV_CONTROLED_FROSTWOLF_RELIFHUNT_HORDE		0x532 //1 -> horde controled
+#define AV_CONTROLED_EAST_FROSTWOLF_TOWER_HORDE		0x567 //1 -> horde controled
+#define AV_CONTROLED_WEST_FROSTWOLF_TOWER_HORDE		0x566 //1 -> horde controled
+#define AV_CONTROLED_ICEBLOOD_GRAVE_HORDE			0x543 //1 -> horde controled
+#define AV_CONTROLED_FROSTWOLF_GRAVE_HORDE			0x53A //1 -> horde controled
 
-#define AV_CONTROLED_IRONDEEP_MINE_TROGG	0x550 //1 -> trogg controled
-#define AV_CONTROLED_COLDTHOOT_MINE_KOBOLT  0x54D //1 -> kobolt controled
+#define AV_CONTROLED_IRONDEEP_MINE_TROGG			0x550 //1 -> trogg controled
+#define AV_CONTROLED_COLDTHOOT_MINE_KOBOLT			0x54D //1 -> kobolt controled
 
-#define AV_CONTROLED_STORMPIKE_GRAVE_ALLIANCE  0x535 //1 -> alliance controled
-#define AV_CONTROLED_STONEHEART_BUNKER_ALLIANCE  0x554 //1 -> alliance controled
-#define AV_CONTROLED_ICEWING_BUNKER_ALLIANCE  0x553 //1 -> alliance controled
-#define AV_CONTROLED_DUBALDER_NORTH_BUNKER_ALLIANCE  0x552 //1 -> alliance controled
-#define AV_CONTROLED_DUBALDER_SOUTH_BUNKER_ALLIANCE  0x551 //1 -> alliance controled
-#define AV_CONTROLED_STORMPIKE_AID_STATION_ALLIANCE  0x52D //1 -> alliance controled
-#define AV_CONTROLED_STONEHEART_GRAVE_ALLIANCE  0x516 //1 -> alliance controled
+#define AV_CONTROLED_STORMPIKE_GRAVE_ALLIANCE		0x535 //1 -> alliance controled
+#define AV_CONTROLED_STONEHEART_BUNKER_ALLIANCE		0x554 //1 -> alliance controled
+#define AV_CONTROLED_ICEWING_BUNKER_ALLIANCE		0x553 //1 -> alliance controled
+#define AV_CONTROLED_DUBALDER_NORTH_BUNKER_ALLIANCE	0x552 //1 -> alliance controled
+#define AV_CONTROLED_DUBALDER_SOUTH_BUNKER_ALLIANCE	0x551 //1 -> alliance controled
+#define AV_CONTROLED_STORMPIKE_AID_STATION_ALLIANCE	0x52D //1 -> alliance controled
+#define AV_CONTROLED_STONEHEART_GRAVE_ALLIANCE		0x516 //1 -> alliance controled
 
 static inline uint32 GetLevelGrouping(uint32 level)
 {
@@ -332,7 +333,13 @@ public:
 	HEARTHSTONE_INLINE bool IsFull() { return !(HasFreeSlots(0) || HasFreeSlots(1)); }
 
 	/* Are we full? */
-	bool HasFreeSlots(uint32 Team) {m_mainLock.Acquire(); bool res = ((m_players[Team].size() + m_pendPlayers[Team].size()) < m_playerCountPerTeam); m_mainLock.Release(); return res; }
+	bool HasFreeSlots(uint32 Team)
+	{
+		m_mainLock.Acquire();
+		bool res = ((m_players[Team].size() + m_pendPlayers[Team].size()) < m_playerCountPerTeam);
+		m_mainLock.Release();
+		return res;
+	}
 
 	/* Add PlayerPointer */
 	void AddPlayer(PlayerPointer plr, uint32 team);

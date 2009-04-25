@@ -21,8 +21,8 @@
 
 #include "StdAfx.h"
 
-#define CREATESPELL(a,b,c,d) \
-	SpellPointer(new Spell( a, b, c, (d == NULL ? NULLAURA : d)));
+#define CREATESPELL(caster,info,triggered,aur) \
+	SpellPointer(new Spell( caster, info, triggered, (aur == NULL ? NULLAURA : aur)));
 
 pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_NULL - 0
@@ -161,7 +161,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,// SPELL_EFFECT_FORGET_SPECIALIZATION - 133 // http://www.thottbot.com/s36441 // I think this is a gm/npc spell
 		&Spell::SpellEffectNULL,// unknown - 134 // related to summoning objects and removing them, http://www.thottbot.com/s39161
 		&Spell::SpellEffectNULL,// unknown - 135 // no spells
-		&Spell::SpellEffectNULL,// unknown - 136 // http://www.thottbot.com/s41542 and http://www.thottbot.com/s39703
+		&Spell::SpellEffectRestoreHealthPct,// Restore Health % - 136 // http://www.wowhead.com/?spell=48982
 		&Spell::SpellEffectRestoreManaPct,// Restore Mana % - 137 // http://www.thottbot.com/s41542
 		&Spell::SpellEffectNULL,// unknown - 138 // related to superjump or even "*jump" spells http://www.thottbot.com/?e=Unknown%20138
 		&Spell::SpellEffectNULL,// unknown - 139 // no spells
@@ -588,7 +588,7 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 	if(!dmg) return;
 
 	// stealthed stuff
-	if( m_projectileWait && unitTarget->IsStealth() )
+	if( m_projectileWait && unitTarget->InStealth() )
 		return;
 
 	/**************************************************************************
@@ -665,16 +665,35 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !p_caster )
 				return;
 
-			uint32 ClearSpellId[5] =
+			uint32 ClearSpellId[1] =
 			{
-			20252,  /* Intercept - Rank 1 */
-			20616,  /* Intercept - Rank 2 */
-			20617,  /* Intercept - Rank 3 */
-			25272,  /* Intercept - Rank 4 */
-			25275,  /* Intercept - Rank 5 */
+			20252,  /* Intercept */
 			};
 
-			for(i = 0; i < 5; i++)
+			for(i = 0; i < 1; i++)
+			{
+				if( p_caster->HasSpell( ClearSpellId[i] ) )
+					p_caster->ClearCooldownForSpell( ClearSpellId[i] );
+			}
+		}break;
+	case 50227: // Sword and Board
+		{
+			if( !p_caster )
+				return;
+
+			uint32 ClearSpellId[8] =
+			{
+			23922,  /* Shield Slam - Rank 1 */
+			23923,  /* Shield Slam - Rank 2 */
+			23924,  /* Shield Slam - Rank 3 */
+			23925,  /* Shield Slam - Rank 4 */
+			25258,  /* Shield Slam - Rank 5 */
+			30356,  /* Shield Slam - Rank 6 */
+			47487,  /* Shield Slam - Rank 7 */
+			47488,  /* Shield Slam - Rank 8 */
+			};
+
+			for(i = 0; i < 8; i++)
 			{
 				if( p_caster->HasSpell( ClearSpellId[i] ) )
 					p_caster->ClearCooldownForSpell( ClearSpellId[i] );
@@ -1331,37 +1350,8 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if(!p_caster)
 				return;
-			bool check = false;
-			float rad = GetRadius(i);
-			rad *= rad;
-			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
-			{
-				if((*i)->GetTypeId() == TYPEID_UNIT)
-				{
-					if(TO_CREATURE(*i)->getDeathState() == CORPSE)
-					{
-						CreatureInfo *cn = TO_CREATURE(*i)->GetCreatureName();
-							if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
-							{
-								if(p_caster->GetDistance2dSq((*i)) < rad)
-								{
-									check = true;
-									break;
-								}
-							}
-						
-					}
-				}
-			}
-			
-			if(check)
-			{
-				p_caster->cannibalize = true;
-				p_caster->cannibalizeCount = 0;
-				sEventMgr.AddEvent(p_caster, &Player::EventCannibalize, uint32(7),
-					EVENT_CANNIBALIZE, 2000, 5,0);
-				p_caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CANNIBALIZE);
-			}
+			p_caster->CastSpell( p_caster, 20578, true);
+			p_caster->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CANNIBALIZE);
 		}break;
 	case 23074:// Arcanite Dragonling
 	case 23075:// Mithril Mechanical Dragonling
@@ -2035,7 +2025,7 @@ void Spell::SpellEffectApplyAura(uint32 i)  // Apply Aura
 		return;
 
 	//we shouldn't apply fireball dot if we have fireball glyph
-	if( m_spellInfo->NameHash == SPELL_HASH_FIREBALL && p_caster && p_caster->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] )
+	if( m_spellInfo->NameHash == SPELL_HASH_FIREBALL && p_caster && p_caster->m_DummyAuras[SPELL_HASH_GLYPH_OF_FIREBALL] )
 		return;
 
 	// can't apply stuns/fear/polymorph/root etc on boss
@@ -2615,7 +2605,7 @@ void Spell::SpellEffectWeapon(uint32 i)
 	case 5009:  // wands
 		{
 			skill = SKILL_WANDS;
-			spell = SPELL_RANGED_GENERAL;
+			spell = SPELL_RANGED_WAND;
 		}break;
 	//case 3386:  // spears
 	//	skill = 0;   // ??!!
@@ -3071,7 +3061,10 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 	}
 	else  
         modEnergy = damage;
-
+	//Judgement of Wisdom
+	if( m_spellInfo->Id == 20268 )
+		modEnergy = uint32(0.02f*unitTarget->GetUInt32Value(UNIT_FIELD_BASE_MANA));
+	
 	u_caster->Energize(unitTarget, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id), 
 		modEnergy, m_spellInfo->EffectMiscValue[i]);
 }
@@ -3152,7 +3145,7 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 	if(!p_caster)
 		return;
 
-	if( p_caster->IsStealth() )
+	if( p_caster->InStealth() )
 	{
 		p_caster->RemoveAura(p_caster->m_stealth);
 		p_caster->m_stealth = 0;
@@ -4376,7 +4369,7 @@ void Spell::SpellEffectThreat(uint32 i) // Threat
 
 void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 {
-	if(!unitTarget )
+	if(!unitTarget || !m_caster )
 		return;
 
 	SpellEntry *spe = dbcSpell.LookupEntryForced(m_spellInfo->EffectTriggerSpell[i]);
@@ -4384,7 +4377,7 @@ void Spell::SpellEffectTriggerSpell(uint32 i) // Trigger Spell
 		return;
 
 	SpellPointer sp=CREATESPELL(m_caster,spe,true,NULLAURA);
-	SpellCastTargets tgt(unitTarget->GetGUID());
+	SpellCastTargets tgt((spe->procFlags & PROC_TARGET_SELF) ? m_caster->GetGUID() :unitTarget->GetGUID());
 	sp->prepare(&tgt);
 }
 
@@ -4815,20 +4808,39 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 	break;
 
 	// Judgements
-	case 20271:
-	case 53407:
-	case 53408:
+	case 20271: //Light
+	case 53407: //Justice
+	case 53408: //Wisdom
 		{
-			if(!unitTarget || !p_caster) return;
+			if(!unitTarget || !p_caster) 
+				return;
 
-			SpellEntry*en=dbcSpell.LookupEntry(p_caster->judgespell);
-			SpellPointer sp=CREATESPELL(p_caster,en,true,NULLAURA);
-			SpellCastTargets tgt;
-			tgt.m_unitTarget=unitTarget->GetGUID();
-			tgt.m_targetMask=TARGET_FLAG_UNIT;
-			sp->judgement = true;
-			sp->prepare(&tgt);
-			p_caster->RemoveAura(p_caster->Seal);
+			if( p_caster->judgespell )
+			{
+				SpellEntry*en=dbcSpell.LookupEntry(p_caster->judgespell);
+				SpellPointer sp=CREATESPELL(p_caster,en,true,NULLAURA);
+				SpellCastTargets tgt;
+				tgt.m_unitTarget=unitTarget->GetGUID();
+				tgt.m_targetMask=TARGET_FLAG_UNIT;
+				sp->judgement = true;
+				sp->prepare(&tgt);
+			}
+
+			uint32 judge_extra = 0;
+			// This is for handling specific Judgement's debuff application spells
+			switch(m_spellInfo->Id)
+			{
+			case 20271:
+				judge_extra = 20185;
+				break;
+			case 53407:
+				judge_extra = 20184;
+				break;
+			case 53408:
+				judge_extra = 20186;
+				break;
+			}
+			p_caster->CastSpell( unitTarget, judge_extra, true );
 		}break;
 	//warlock - Master Demonologist
 	case 23784:
@@ -5169,7 +5181,7 @@ void Spell::SpellEffectDuel(uint32 i) // Duel
 		return;
 	}
 
-	if (p_caster->IsStealth())
+	if (p_caster->InStealth())
 	{
 		SendCastResult(SPELL_FAILED_CANT_DUEL_WHILE_STEALTHED);
 		return; // Player is stealth
@@ -5214,8 +5226,10 @@ void Spell::SpellEffectStuck(uint32 i)
     if(!playerTarget || playerTarget != p_caster)
         return;
 
+	float orientation = 0;
+
 	sEventMgr.AddEvent(playerTarget,&Player::EventTeleport,playerTarget->GetBindMapId(),playerTarget->GetBindPositionX(),playerTarget->GetBindPositionY(),
-		playerTarget->GetBindPositionZ(),EVENT_PLAYER_TELEPORT,50,1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		playerTarget->GetBindPositionZ(),orientation,EVENT_PLAYER_TELEPORT,50,1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	/*
 	playerTarget->SafeTeleport(playerTarget->GetBindMapId(), 0, playerTarget->GetBindPositionX(), playerTarget->GetBindPositionY(), playerTarget->GetBindPositionZ(), 3.14f);*/
 }
@@ -5659,7 +5673,7 @@ void Spell::SpellEffectPlayerPull( uint32 i )
 	data << getMSTime();
 	data << uint8( 4 );
 	data << pullO;
-	data << uint32( 0x00000100 );
+	data << uint32( MONSTER_MOVE_FLAG_RUN );
 	data << time;
 	data << uint32( 1 );
 	data << pullX << pullY << pullZ;
@@ -5959,7 +5973,7 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 {
 	if(!p_caster || !p_caster->IsInWorld()) return;
 
-	float RetreivedMana = 0.0f;
+	uint32 energize_amt = 0;
 	for(uint32 x=SUMMON_TYPE_TOTEM_1;x<SUMMON_TYPE_TOTEM_4+1;x++)
 	{
 		SummonPropertiesEntry * spe = dbcSummonProps.LookupEntryForced(x);
@@ -5978,21 +5992,18 @@ void Spell::SpellEffectDestroyAllTotems(uint32 i)
 			if (!sp)
 				continue;
 
-			float pts = float(m_spellInfo->EffectBasePoints[i]+1) / 100.0f;
-			RetreivedMana += float(sp->manaCost) * pts;
+			if( sp->manaCost )
+				energize_amt += float2int32( (sp->manaCost) * (damage/100.0f) );
+			else if( sp->ManaCostPercentage )
+				energize_amt += float2int32(((p_caster->GetUInt32Value(UNIT_FIELD_BASE_MANA)*sp->ManaCostPercentage)/100.0f) * (damage/100.0f) );
 
 			p_caster->m_SummonSlots[slot]->TotemExpire();
 			p_caster->m_SummonSlots[slot] = NULLCREATURE;
 		}
 	}
 
-	// get the current mana, get the max mana. Calc if we overflow
-	SendHealManaSpellOnPlayer(m_caster, m_caster, (uint32)RetreivedMana, 0, pSpellId ? pSpellId : m_spellInfo->Id);
-	RetreivedMana += float(m_caster->GetUInt32Value(UNIT_FIELD_POWER1));
-	uint32 max = m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
-	if((uint32)RetreivedMana > max)
-		RetreivedMana = (float)max;
-	m_caster->SetUInt32Value(UNIT_FIELD_POWER1, (uint32)RetreivedMana);
+	if( energize_amt > 0 )
+		p_caster->Energize(p_caster, m_spellInfo->Id, energize_amt, POWER_TYPE_MANA);
 }
 
 void Spell::SpellEffectSummonDemonOld(uint32 i)
@@ -6555,13 +6566,24 @@ void Spell::SpellEffectApplyAura128(uint32 i)
 
 void Spell::SpellEffectRestoreManaPct(uint32 i)
 {
-	if(!unitTarget || !unitTarget->isAlive())
+	if(!u_caster || !unitTarget || !unitTarget->isAlive())
 		return;
 
 	uint32 maxMana = (uint32)unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 	uint32 modMana = damage * maxMana / 100;	
 
 	u_caster->Energize(unitTarget, pSpellId ? pSpellId : m_spellInfo->Id, modMana, POWER_TYPE_MANA);
+}
+
+void Spell::SpellEffectRestoreHealthPct(uint32 i)
+{
+	if(!u_caster || !unitTarget || !unitTarget->isAlive())
+		return;
+
+	uint32 maxHp = (uint32)unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+	uint32 modHp = damage * maxHp / 100;
+
+	u_caster->Heal(unitTarget, m_spellInfo->Id, modHp);
 }
 
 void Spell::SpellEffectTriggerSpellWithValue(uint32 i)

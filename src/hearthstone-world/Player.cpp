@@ -53,6 +53,7 @@ void Player::Init()
 	m_bgSlot = 0;
 	mAngerManagement = false;
 
+	m_feralAP = 0;
 	m_finishingmovesdodge = false;
 	iActivePet			  = 0;
 	resurrector			 = 0;
@@ -313,12 +314,10 @@ void Player::Init()
 		CurrentGossipMenu	   = NULL;
 
 		ResetHeartbeatCoords();
-		cannibalize			 = false;
 
 		m_AreaID				= 0;
 		m_areaDBC				= NULL;
 		m_actionsDirty		  = false;
-		cannibalizeCount		= 0;
 		rageFromDamageDealt	 = 0;
 
 		m_honorToday			= 0;
@@ -598,7 +597,7 @@ void Player::Destructor()
 			}
 	}
 
-	SetSession(NULL);
+//	SetSession(NULL);
 
 	if (mSpellsUniqueTargets)
 	{
@@ -1257,20 +1256,9 @@ void Player::_EventAttack( bool offhand )
 		m_AttackMsgTimer = 0;
 		
 		// Set to weapon time.
-		setAttackTimer(0, offhand);
+		setAttackTimer(0, offhand);		
 
-		//pvp timeout reset
-		if(pVictim->IsPlayer())
-		{
-			if (TO_PLAYER(pVictim)->cannibalize)
-			{
-				sEventMgr.RemoveEvents(pVictim, EVENT_CANNIBALIZE);
-				pVictim->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-				TO_PLAYER(pVictim)->cannibalize = false;
-			}
-		}
-
-		if(IsStealth())
+		if(InStealth())
 		{
 			RemoveAura( m_stealth );
 			SetStealth(0);
@@ -2023,7 +2011,7 @@ void Player::addSpell(uint32 spell_id)
 				break;
 			case SKILL_TYPE_CLASS:
 			case SKILL_TYPE_ARMOR:
-				if(skill->id == SKILL_LOCKPICKING || skill->id == SKILL_POISONS)
+				if(skill->id == SKILL_LOCKPICKING)
 					max=5*getLevel();
 				break;
 		};
@@ -3395,7 +3383,8 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	UpdateTalentInspectBuffer();
 	SetFlag(UNIT_FIELD_FLAGS_2, 0x800); // enables automatic power regen
 	m_session->FullLogin(plr_shared_from_this());
-	m_session->m_loggingInPlayer=NULLPLR;
+	if(m_session)
+		m_session->m_loggingInPlayer=NULLPLR;
 
 	if( !isAlive() )
 		myCorpse = objmgr.GetCorpseByOwner(GetLowGUID());
@@ -3519,6 +3508,7 @@ void Player::AddToWorld()
 	// Add failed.
 	if(m_mapMgr == NULL)
 	{
+		DEBUG_LOG("WorldSession","Adding player %s to map %u failed.",GetName(),GetMapId());
 		// eject from instance
 		m_beingPushed = false;
 		EjectFromInstance();
@@ -4047,6 +4037,22 @@ void Player::_ApplyItemMods(ItemPointer item, int8 slot, bool apply, bool justdr
 				BaseDamage[1] = apply ? proto->Damage[0].Max : 1;
 			}
 		}
+		if( getClass() == DRUID )
+		{
+			//calc weapon dps
+			float dps = (( proto->Damage[0].Min + proto->Damage[0].Max / 2 ) / (proto->Delay / 1000));
+			if( dps > 54.8f )
+			{
+				//formula taken from http://www.wowwiki.com/Feral_attack_power
+				float feral_ap = (dps - 54.8f)*14;
+				m_feralAP += apply ? float2int32(floor(feral_ap)) : -float2int32(floor(feral_ap));
+				if( IsInFeralForm() || GetShapeShift() == FORM_MOONKIN )
+					if( apply)
+						ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_feralAP);
+					else
+						ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, -float2int32(floor(feral_ap)));
+			}
+		}
 	}
 
 	// Misc
@@ -4330,8 +4336,6 @@ CorpsePointer Player::RepopRequestedPlayer()
 		return NULLCORPSE;
 	}
 
-	MapInfo * pMapinfo;
-
 	sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_PLAYER_FORECED_RESURECT ); //in case somebody resurrected us before this event happened
 
 	// Set death state to corpse, that way players will lose visibility
@@ -4351,6 +4355,23 @@ CorpsePointer Player::RepopRequestedPlayer()
 	
 	BuildPlayerRepop();
 
+	if( corpse )
+	{
+		/* Send Spirit Healer Location */
+		WorldPacket data( SMSG_DEATH_RELEASE_LOC, 16 );
+		data << m_mapId << m_position;
+		m_session->SendPacket( &data );
+
+		/* Corpse reclaim delay */
+		WorldPacket data2( SMSG_CORPSE_RECLAIM_DELAY, 4 );
+		data2 << (uint32)( CORPSE_RECLAIM_TIME_MS );
+		GetSession()->SendPacket( &data2 );
+	}
+
+	if( myCorpse != NULL )
+		myCorpse->ResetDeathClock();
+
+	MapInfo * pMapinfo = NULL;
 	pMapinfo = WorldMapInfoStorage.LookupEntry( GetMapId() );
 	if( pMapinfo != NULL )
 	{
@@ -4367,22 +4388,6 @@ CorpsePointer Player::RepopRequestedPlayer()
 	{
 		RepopAtGraveyard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
 	}
-	
-	if( corpse )
-	{
-		/* Send Spirit Healer Location */
-		WorldPacket data( SMSG_DEATH_RELEASE_LOC, 16 );
-		data << m_mapId << m_position;
-		m_session->SendPacket( &data );
-
-		/* Corpse reclaim delay */
-		WorldPacket data2( SMSG_CORPSE_RECLAIM_DELAY, 4 );
-		data2 << (uint32)( CORPSE_RECLAIM_TIME_MS );
-		GetSession()->SendPacket( &data2 );
-	}
-
-	if( myCorpse != NULL )
-		myCorpse->ResetDeathClock();
 
 	return ret;
 }
@@ -5332,7 +5337,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 
 		if(m_deathVision) // if we have arena death-vision we can see everything
 		{
-			if(obj->IsPlayer() && TO_PLAYER(obj)->IsStealth())
+			if(obj->IsPlayer() && TO_PLAYER(obj)->InStealth())
 				return false;
 
 			return true;
@@ -5387,7 +5392,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 						return bGMTagOn; // GM can see invisible players
 				}
 
-				if(pObj->IsStealth()) // Stealth Detection
+				if(pObj->InStealth()) // Stealth Detection
 				{
 					if(GetGroup() && pObj->GetGroup() == GetGroup()) // can see stealthed group members
 						return true;
@@ -5631,23 +5636,6 @@ void Player::ClearInRangeSet()
 	Unit::ClearInRangeSet();
 }
 
-void Player::EventCannibalize(uint32 amount)
-{
-	uint32 amt = (GetUInt32Value(UNIT_FIELD_MAXHEALTH)*amount)/100;
-	
-	uint32 newHealth = GetUInt32Value(UNIT_FIELD_HEALTH) + amt;
-	
-	if(newHealth <= GetUInt32Value(UNIT_FIELD_MAXHEALTH))
-		SetUInt32Value(UNIT_FIELD_HEALTH, newHealth);
-	else
-		SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-
-	cannibalizeCount++;
-	if(cannibalizeCount == 5)
-		SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-
-	Aura::SendPeriodicAuraLog(GetGUID(), unit_shared_from_this(), dbcSpell.LookupEntry(20577), amt, 0, 0, FLAG_PERIODIC_HEAL);
-}
 
 void Player::EventReduceDrunk(bool full)
 {
@@ -6829,6 +6817,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	float mapchangex;
 	float mapchangey;
 	float mapchangez;
+	float orientation = 0;
 	uint32 cn = m_taxiMapChangeNode;
 
 	m_taxiMapChangeNode = 0;
@@ -6942,7 +6931,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	data << firstNode->x << firstNode->y << firstNode->z;
 	data << m_taxi_ride_time;
 	data << uint8( 0 );
-	data << uint32( 0x00000300 );
+	data << uint32( MONSTER_MOVE_FLAG_FLY );
 	data << uint32( traveltime );
 
 	if(!cn)
@@ -6977,7 +6966,7 @@ void Player::TaxiStart(TaxiPath *path, uint32 modelid, uint32 start_node)
 	}
 	else
 	{
-		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventTeleport, (uint32)mapchangeid, mapchangex, mapchangey, mapchangez, EVENT_PLAYER_TELEPORT, traveltime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(plr_shared_from_this(), &Player::EventTeleport, (uint32)mapchangeid, mapchangex, mapchangey, mapchangez, orientation, EVENT_PLAYER_TELEPORT, traveltime, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
 }
 
@@ -8780,20 +8769,18 @@ void Player::CompleteLoading()
 
 	ApplySpec(m_talentActiveSpec, true);
 
-	std::list<LoginAura>::iterator i =  loginauras.begin();
-
-	for(;i!=loginauras.end(); i++)
+	if(!isDead())//only add aura's to the living (death aura set elsewhere)
 	{
-
-		// this stuff REALLY needs to be fixed - Burlex
-		SpellEntry * sp = dbcSpell.LookupEntry((*i).id);
-
-		//do not load auras that only exist while pet exist. We should recast these when pet is created anyway
-		if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
-			continue;
-
-		if(!isDead())
+		std::list<LoginAura>::iterator i =  loginauras.begin();
+		for(;i!=loginauras.end(); i++)
 		{
+			// this stuff REALLY needs to be fixed - Burlex
+			SpellEntry * sp = dbcSpell.LookupEntry((*i).id);
+
+			//do not load auras that only exist while pet exist. We should recast these when pet is created anyway
+			if ( sp->c_is_flags & SPELL_FLAG_IS_EXPIREING_WITH_PET )
+				continue;
+
 			AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
 			if( a )
 			{
@@ -8805,18 +8792,8 @@ void Player::CompleteLoading()
 				AddAura(a, NULLAURA);
 			}
 		}
-		else
-		{
-			if(sp->Id == 8326|| sp->Id == 9036|| sp->Id == 20584 )
-			{
-				AuraPointer a(new Aura(sp,(*i).dur,obj_shared_from_this(),unit_shared_from_this()));
-				if( a )
-					AddAura(a, NULLAURA);
-			}break;
-		}
+		loginauras.clear();
 	}
-	loginauras.clear();
-
 	// this needs to be after the cast of passive spells, because it will cast ghost form, after the remove making it in ghost alive, if no corpse.
 
 	if(iActivePet)
@@ -9806,6 +9783,9 @@ void Player::RemoveFromBattlegroundQueue(uint32 queueSlot, bool forced)
 		m_pendingBattleground[queueSlot] = NULLBATTLEGROUND;
 	}
 	m_bgIsQueued[queueSlot] = false;
+	m_bgQueueType[queueSlot] = 0;
+	m_bgQueueInstanceId[queueSlot] = 0;
+
 	BattlegroundManager.SendBattlegroundQueueStatus(plr_shared_from_this(), queueSlot);
 	sEventMgr.RemoveEvents(plr_shared_from_this(), EVENT_BATTLEGROUND_QUEUE_UPDATE_SLOT_1 + queueSlot);
 
@@ -9871,10 +9851,6 @@ void Player::_AddSkillLine(uint32 SkillLine, uint32 Curr_sk, uint32 Max_sk)
 		m_session->OutPacket( SMSG_SET_PROFICIENCY, sizeof( packetSMSG_SET_PROFICICENCY ), &pr );
 	}
 
-	// hackfix for poisons
-	if(SkillLine==SKILL_POISONS && !HasSpell(2842))
-		addSpell(2842);
-
 	// hackfix for runeforging
 	if(SkillLine==SKILL_RUNEFORGING)
 	{
@@ -9909,6 +9885,109 @@ void Player::_UpdateSkillFields()
 
 		GetAchievementInterface()->HandleAchievementCriteriaReachSkillLevel( itr->second.Skill->id, itr->second.CurrentValue );
 
+		switch(itr->second.Skill->id)
+		{
+			case SKILL_HERBALISM:
+			{
+				uint32 skill_base = getRace() == RACE_TAUREN ? 90 : 75;
+				if( itr->second.CurrentValue >= skill_base + 375 && !HasSpell( 55503 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55503 );												// Lifeblood Rank 6
+				}
+				else if( itr->second.CurrentValue >= skill_base + 300 && !HasSpell( 55502 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55502 );												// Lifeblood Rank 5
+				}
+				else if( itr->second.CurrentValue >= skill_base + 225 && !HasSpell( 55501 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55501 );												// Lifeblood Rank 4
+				}
+				else if( itr->second.CurrentValue >= skill_base + 150 && !HasSpell( 55500 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55500 );												// Lifeblood Rank 3
+				}
+				else if( itr->second.CurrentValue >= skill_base + 75 && !HasSpell( 55480 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55480 );												// Lifeblood Rank 2
+				}
+				else if( itr->second.CurrentValue >= skill_base && !HasSpell( 55428 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_LIFEBLOOD );
+					addSpell( 55428 );												// Lifeblood Rank 1
+				}
+			}break;
+			case SKILL_SKINNING:
+			{
+				if( itr->second.CurrentValue >= 450 && !HasSpell( 53666 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53666 );												// Master of Anatomy Rank 6
+				}
+				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53665 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53665 );												// Master of Anatomy Rank 5
+				}
+				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53664 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53664 );												// Master of Anatomy Rank 4
+				}
+				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53663 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53663 );												// Master of Anatomy Rank 3
+				}
+				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53662 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53662 );												// Master of Anatomy Rank 2
+				}
+				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53125 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_MASTER_OF_ANATOMY );
+					addSpell( 53125 );												// Master of Anatomy Rank 1
+				}
+			}break;
+			case SKILL_MINING:
+			{
+				if( itr->second.CurrentValue >= 450 && !HasSpell( 53040 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53040 );												// Toughness Rank 6
+				}
+				else if( itr->second.CurrentValue >= 375 && !HasSpell( 53124 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53124 );												// Toughness Rank 5
+				}
+				else if( itr->second.CurrentValue >= 300 && !HasSpell( 53123 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53123 );												// Toughness Rank 4
+				}
+				else if( itr->second.CurrentValue >= 225 && !HasSpell( 53122 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53122 );												// Toughness Rank 3
+				}
+				else if( itr->second.CurrentValue >= 150 && !HasSpell( 53121 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53121 );												// Toughness Rank 2
+				}
+				else if( itr->second.CurrentValue >= 75 && !HasSpell( 53120 ) )
+				{
+					removeSpellByHashName( SPELL_HASH_TOUGHNESS );
+					addSpell( 53120 );												// Toughness Rank 1
+				}
+			}break;
+		}
 		++itr;
 	}
 
@@ -9975,7 +10054,7 @@ void Player::_UpdateMaxSkillCounts()
 	for(SkillMap::iterator itr = m_skills.begin(); itr != m_skills.end(); ++itr)
 	{
 
-		if( itr->second.Skill->id == SKILL_LOCKPICKING || itr->second.Skill->id == SKILL_POISONS)
+		if( itr->second.Skill->id == SKILL_LOCKPICKING )
 		{
 			new_max = 5 * getLevel();
 		}
@@ -10598,14 +10677,14 @@ void Player::EventSummonPet( PetPointer new_pet )
 		SpellEntry *spellInfo = dbcSpell.LookupEntry(SpellID);
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_PET_OWNER )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			RemoveAllAuras( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( this->GetGUID() );
 			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
 		}
 		if( spellInfo->c_is_flags & SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET )
 		{
-			this->RemoveAllAurasBySpellIDOrGUID( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
+			RemoveAllAuras( SpellID, GetGUID() ); //this is required since unit::addaura does not check for talent stacking
 			SpellCastTargets targets( new_pet->GetGUID() );
 			SpellPointer spell(new Spell(plr_shared_from_this(), spellInfo ,true, NULLAURA));	//we cast it as a proc spell, maybe we should not !
 			spell->prepare(&targets);
@@ -10644,6 +10723,7 @@ void Player::AppendMovementData(uint32 op, uint32 sz, const uint8* data)
 
 bool CMovementCompressorThread::run()
 {
+	SetThreadName("Compr Movement");
 	set<PlayerPointer  >::iterator itr;
 	while(running)
 	{
@@ -11520,54 +11600,26 @@ void Player::VampiricSpell(uint32 dmg, UnitPointer pTarget)
 {
 	float fdmg = float(dmg);
 	uint32 bonus;
-	int32 perc;
 	Group * pGroup = GetGroup();
 	SubGroup * pSubGroup = (pGroup != NULL) ? pGroup->GetSubGroup(GetSubGroup()) : NULL;
 	GroupMembersSet::iterator itr;
-
-	if( ( !m_vampiricEmbrace && !m_vampiricTouch ) || getClass() != PRIEST )
-		return;
-
-	if( m_vampiricEmbrace > 0 && pTarget->m_hasVampiricEmbrace > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_EMBRACE, plr_shared_from_this()) )
+	if( m_vampiricEmbrace > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_EMBRACE, plr_shared_from_this()) )
 	{
-		perc = 15;
-		uint32 spellgroup[3] = {4, 0, 0};
-		SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, spellgroup);
-
-		bonus = float2int32(fdmg * (float(perc)/100.0f));
+		int32 pct = 15;
+		uint32 sgt[3] = {4,0,0};
+		SM_PIValue(SM[SMT_MISC_EFFECT][1],&pct,sgt);
+		bonus = float2int32(fdmg * pct/100.0f);
 		if( bonus > 0 )
 		{
 			Heal(plr_shared_from_this(), 15286, bonus);
-			
+
 			// loop party
 			if( pSubGroup != NULL )
 			{
 				for( itr = pSubGroup->GetGroupMembersBegin(); itr != pSubGroup->GetGroupMembersEnd(); ++itr )
 				{
 					if( (*itr)->m_loggedInPlayer != NULL && (*itr) != m_playerInfo )
-						Heal( (*itr)->m_loggedInPlayer, 15286, bonus );
-				}
-			}
-		}
-	}
-
-	if( m_vampiricTouch > 0 && pTarget->m_hasVampiricTouch > 0 && pTarget->HasAurasOfNameHashWithCaster(SPELL_HASH_VAMPIRIC_TOUCH, plr_shared_from_this()) )
-	{
-		perc = 5;
-		//SM_FIValue(SM[SMT_MISC_EFFECT][0], &perc, 4);
-
-		bonus = float2int32(fdmg * (float(perc)/100.0f));
-		if( bonus > 0 )
-		{
-			Energize(plr_shared_from_this(), 34919, bonus, POWER_TYPE_MANA);
-
-			// loop party
-			if( pSubGroup != NULL )
-			{
-				for( itr = pSubGroup->GetGroupMembersBegin(); itr != pSubGroup->GetGroupMembersEnd(); ++itr )
-				{
-					if( (*itr)->m_loggedInPlayer != NULL && (*itr) != m_playerInfo && (*itr)->m_loggedInPlayer->GetPowerType() == POWER_TYPE_MANA && (*itr)->m_loggedInPlayer->isAlive() )
-						Energize((*itr)->m_loggedInPlayer, 34919, bonus, POWER_TYPE_MANA);
+						Heal( (*itr)->m_loggedInPlayer, 15286, bonus / 5 );
 				}
 			}
 		}
@@ -11909,7 +11961,7 @@ void Player::UnapplyGlyph(uint32 slot)
 	if(!glyph)
 		return;
 	SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
-	RemoveAllAurasBySpellIDOrGUID(glyph->SpellID, 0);
+	RemoveAllAuras(glyph->SpellID);
 }
 
 static const uint32 glyphType[6] = {0, 1, 1, 0, 1, 0};

@@ -317,8 +317,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 			UnitPointer pUnit = GetPlayer()->GetMapMgr()->GetUnit( targets.m_unitTarget );
 			if( pUnit && pUnit != GetPlayer() && !isAttackable( GetPlayer(), pUnit, false ) && !pUnit->IsInRangeOppFactSet(GetPlayer()) && !pUnit->CombatStatus.DidDamageTo(GetPlayer()->GetGUID()))
 			{
-				GetPlayer()->BroadcastMessage("Faction exploit detected. You will be disconnected in 5 seconds.");
-				GetPlayer()->Kick(5000);
+				//GetPlayer()->BroadcastMessage("Faction exploit detected. You will be disconnected in 5 seconds.");
+				//GetPlayer()->Kick(5000);
+				// Just cancel the cast
+				_player->SendCastResult(spellInfo->Id, SPELL_FAILED_BAD_TARGETS, cn, 0);
 				return;
 			}
 		}

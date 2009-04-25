@@ -178,22 +178,33 @@ void CBattlegroundManager::HandleBattlegroundListPacket(WorldSession * m_session
 
 void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, WorldPacket & pck)
 {
-	PlayerPointer plr;
 	uint64 guid;
-	uint32 pguid;
-	uint32 lgroup;
 	uint32 bgtype;
 	uint32 instance;
+	uint8 joinasgroup; //0x01 = Group and 0x00 = Player
 
-	plr = m_session->GetPlayer();
-	pguid = plr->GetLowGUID();
-	lgroup = GetLevelGrouping(plr->getLevel());
+	PlayerPointer plr = m_session->GetPlayer();
+	uint32 pguid = plr->GetLowGUID();
+	uint32 lgroup = GetLevelGrouping(plr->getLevel());
 
-	pck >> guid >> bgtype >> instance;
+	pck >> guid >> bgtype >> instance >> joinasgroup;
 	if(bgtype >= BATTLEGROUND_NUM_TYPES || BGMapIds[bgtype] == 0)
 	{
 		m_session->Disconnect();
 		return;		// cheater!
+	}
+
+	if ( m_session->GetPlayer()->HasActiveAura(BG_DESERTER) && !m_session->HasGMPermissions() )
+	{
+		m_session->GetPlayer()->GetSession()->SendNotification("You have been marked as a Deserter.");
+		return;
+	}
+
+	if( joinasgroup && m_session->GetPlayer()->GetGroup() == NULL ) 
+	{
+		//Correct? is there any message here at blizz?
+		sChatHandler.RedSystemMessage( m_session, "You are not in a Group." );
+		return;
 	}
 
 	/* Check the instance id */
@@ -212,17 +223,24 @@ void CBattlegroundManager::HandleBattlegroundJoin(WorldSession * m_session, Worl
 
 		m_instanceLock.Release();
 	}
-    
+
 	/* Queue him! */
 	m_queueLock.Acquire();
-
 	if( !plr->HasBattlegroundQueueSlot() )
 	{
 		plr->BroadcastMessage("You are in too many queues already.");
 		m_queueLock.Release();
 		return;
 	}
-	//Log.Success("BattlegroundManager", "Player %u is now in battleground queue for instance %u", plr->GetLowGUID(), instance );
+
+	if( joinasgroup )
+	{
+		m_session->GetPlayer()->GetGroup()->m_isqueued = true;
+		Log.Success("BattlegroundManager", "Group %u is now in battleground queue for instance %u", m_session->GetPlayer()->GetGroup()->GetID(), instance );
+	}
+	else
+		Log.Success("BattlegroundManager", "Player %u is now in battleground queue for instance %u", m_session->GetPlayer()->GetLowGUID(), instance );
+
 
 	/* send the battleground status packet */
 	uint32 queueSlot = plr->GetBGQueueSlot();
@@ -758,12 +776,11 @@ void CBattlegroundManager::RemoveGroupFromQueues(Group * grp)
 	for(GroupMembersSet::iterator itr = grp->GetSubGroup(0)->GetGroupMembersBegin(); itr != grp->GetSubGroup(0)->GetGroupMembersEnd(); ++itr)
 		if((*itr)->m_loggedInPlayer)
 		{
-			(*itr)->m_loggedInPlayer->m_bgIsQueued[0] = false;
-			(*itr)->m_loggedInPlayer->m_bgIsQueued[1] = false;
-			(*itr)->m_loggedInPlayer->m_bgIsQueued[2] = false;
-			SendBattlegroundQueueStatus((*itr)->m_loggedInPlayer, 0);
-			SendBattlegroundQueueStatus((*itr)->m_loggedInPlayer, 1);
-			SendBattlegroundQueueStatus((*itr)->m_loggedInPlayer, 2);
+			for(uint32 i = 0; i < 2; ++i)
+			{
+				(*itr)->m_loggedInPlayer->m_bgIsQueued[i] = false;
+				SendBattlegroundQueueStatus((*itr)->m_loggedInPlayer, 0);
+			}
 		}
 
 	grp->m_isqueued = false;
@@ -1492,13 +1509,20 @@ void CBattlegroundManager::SendBattlegroundQueueStatus(PlayerPointer plr, uint32
 
 void CBattleground::RemovePlayer(PlayerPointer plr, bool logout)
 {
+	if(!plr->IsPlayer())
+		return;
+
 	WorldPacket data(SMSG_BATTLEGROUND_PLAYER_LEFT, 30);
 	data << plr->GetGUID();
 
 	m_mainLock.Acquire();
 	m_players[0].erase(plr);
 	m_players[1].erase(plr);
-	DistributePacketToAll(&data);
+	if ( plr->m_isGmInvisible == false )
+	{
+		//Dont show invisble gm's leaving the game.
+		DistributePacketToAll(&data);
+	}
 
 	memset(&plr->m_bgScore, 0, sizeof(BGScore));
 	OnRemovePlayer(plr);
@@ -1522,6 +1546,22 @@ void CBattleground::RemovePlayer(PlayerPointer plr, bool logout)
 	/* teleport out */
 	if(!logout)
 	{
+		if ( !m_ended )
+		{
+			SpellEntry *spellInfo = dbcSpell.LookupEntryForced( BG_DESERTER );// escape from BG
+			if ( spellInfo )
+			{
+				SpellCastTargets targets;
+				targets.m_unitTarget = plr->GetGUID();
+				SpellPointer sp(new Spell(plr,spellInfo,true,NULLAURA));
+				if ( sp != NULL ) 
+				{
+					sp->prepare(&targets);
+					plr->SetAuraDuration(BG_DESERTER,60000*15);
+				}
+			}
+		}
+
 		if(!IS_INSTANCE(plr->m_bgEntryPointMap))
 		{
 			LocationVector vec(plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
@@ -1636,7 +1676,7 @@ void CBattleground::Close()
 			++itr;
 			RemovePlayer(plr, false);
 		}
-        
+
 		for(it2 = m_pendPlayers[i].begin(); it2 != m_pendPlayers[i].end();)
 		{
 			guid = *it2;
@@ -1985,7 +2025,7 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 bool CBattleground::CanPlayerJoin(PlayerPointer plr)
 {
-	return (plr->bGMTagOn || HasFreeSlots(plr->m_bgTeam));
+	return ( plr->bGMTagOn || HasFreeSlots(plr->m_bgTeam)&&(GetLevelGrouping(plr->getLevel())==GetLevelGroup())&&(!plr->HasAura(BG_DESERTER)));
 }
 
 void CBattleground::QueueAtNearestSpiritGuide(PlayerPointer plr, CreaturePointer old)

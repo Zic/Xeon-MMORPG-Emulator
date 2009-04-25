@@ -24,7 +24,6 @@
 #include "StdAfx.h"
 
 #define WORLDSOCKET_TIMEOUT		 80
-#define PLAYER_LOGOUT_DELAY (20*1000)		/* 20 seconds should be more than enough to gank ya. */
 
 OpcodeHandler WorldPacketHandlers[NUM_MSG_TYPES];
 
@@ -63,9 +62,6 @@ _logoutTime(0), permissions(NULL), permissioncount(0), _loggingOut(false), insta
 WorldSession::~WorldSession()
 {
 	deleteMutex.Acquire();
-
-	if(HasGMPermissions())
-		sWorld.gmList.erase(this);
 
 	if(_player)
 	{
@@ -116,7 +112,7 @@ int WorldSession::Update(uint32 InstanceID)
 	if(InstanceID != instanceId)
 	{
 		// We're being updated by the wrong thread.
-		// "Remove us!" - 2
+		// "Remove us from this mapsession list!" - 2
 		return 2;
 	}
 
@@ -125,15 +121,15 @@ int WorldSession::Update(uint32 InstanceID)
 	{
 		// Check if the player is in the process of being moved. We can't delete him
 		// if we are.
-		if(_player && _player->m_beingPushed) // Abort
+		if(_player && _player->m_beingPushed) // check timeout
 		{
-			//Timeout client, in case AddToWorld failed (f.e. client crash)
-			if( m_lastPing + WORLDSOCKET_TIMEOUT - (uint32)UNIXTIME > WORLDSOCKET_TIMEOUT)
+			//Timeout client after 2 minutes, in case AddToWorld failed (f.e. client crash)
+			if(  (uint32)UNIXTIME - m_lastPing > 120000 )
 			{
-				DEBUG_LOG("WorldSession","Removing pending player due to socket timeout.");
-				objmgr.RemovePlayer(_player);
-				_player = NULLPLR;
+				DEBUG_LOG("WorldSession","Removing InQueue player due to socket timeout.");
+				LogoutPlayer(true);
 				bDeleted = true;
+				return 1;
 			}
 			return 0;
 		}
@@ -197,6 +193,14 @@ int WorldSession::Update(uint32 InstanceID)
 		// if we are.
 		if(_player && _player->m_beingPushed)
 		{
+			//Timeout client after 2 minutes, in case AddToWorld failed (f.e. client crash)
+			if(  (uint32)UNIXTIME - m_lastPing > 120000 )
+			{
+				DEBUG_LOG("WorldSession","Removing InQueue player due to socket timeout.");
+				LogoutPlayer(true);
+				bDeleted = true;
+				return 1;
+			}
 			// Abort..
 			return 0;
 		}
@@ -370,7 +374,7 @@ void WorldSession::LogoutPlayer(bool Save)
 				CharacterDatabase.ExecuteNA(ss.str().c_str());
 			}
 		}
-		_player->SetSession(NULL);
+//		_player->SetSession(NULL);
 		_player->ObjUnlock();
 
 		_player->Destructor();
@@ -381,7 +385,7 @@ void WorldSession::LogoutPlayer(bool Save)
 	_loggingOut = false;
 
 	SetLogoutTimer(0);
-	if(_player)
+	if(_player != NULL)
 		_player = NULLPLR;
 }
 
@@ -550,6 +554,7 @@ void WorldSession::InitPacketHandlerTable()
 	WorldPacketHandlers[CMSG_FORCE_RUN_SPEED_CHANGE_ACK].handler				= &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK].handler		   = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_SWIM_SPEED_CHANGE_ACK].handler			   = &WorldSession::HandleAcknowledgementOpcodes;
+	WorldPacketHandlers[CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK].handler				= &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_MOVE_ROOT_ACK].handler					   = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_FORCE_MOVE_UNROOT_ACK].handler					 = &WorldSession::HandleAcknowledgementOpcodes;
 	WorldPacketHandlers[CMSG_MOVE_KNOCK_BACK_ACK].handler					   = &WorldSession::HandleAcknowledgementOpcodes;

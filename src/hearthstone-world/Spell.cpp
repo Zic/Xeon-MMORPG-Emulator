@@ -334,7 +334,7 @@ void Spell::FillSpecifiedTargetsInArea( float srcx, float srcy, float srcz, uint
 void Spell::FillSpecifiedTargetsInArea(uint32 i,float srcx,float srcy,float srcz, float range, uint32 specification)
 {
 	//TargetsList *tmpMap=&m_targetUnits[i];
-    //IsStealth()
+    //InStealth()
     float r = range * range;
 	//uint8 did_hit_result;
     for(unordered_set<ObjectPointer >::iterator itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
@@ -343,7 +343,7 @@ void Spell::FillSpecifiedTargetsInArea(uint32 i,float srcx,float srcy,float srcz
         if( !( (*itr)->IsUnit() ) || ! TO_UNIT( *itr )->isAlive())
             continue;
         
-        //TO_UNIT(*itr)->IsStealth()
+        //TO_UNIT(*itr)->InStealth()
         if( m_spellInfo->TargetCreatureType)
         {
             if((*itr)->GetTypeId()!= TYPEID_UNIT)
@@ -1045,16 +1045,9 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	uint8 forced_cancast_failure = 0;
 	if( p_caster != NULL )
 	{
-		if( p_caster->cannibalize )
-		{
-			sEventMgr.RemoveEvents( p_caster, EVENT_CANNIBALIZE );
-			p_caster->SetUInt32Value( UNIT_NPC_EMOTESTATE, 0 );
-			p_caster->cannibalize = false;
-		}
-
 		if( GetGameObjectTarget() || GetSpellProto()->Id == 21651)
 		{
-			if( p_caster->IsStealth() )
+			if( p_caster->InStealth() )
 			{
 				p_caster->RemoveAura( p_caster->m_stealth );
 			}
@@ -1152,8 +1145,8 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		}
 
 		// aura state removal
-		if( m_spellInfo->CasterAuraState )
-			u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, uint32(1) << (m_spellInfo->CasterAuraState - 1) );
+		if( m_spellInfo->CasterAuraState && m_spellInfo->CasterAuraState != AURASTATE_FLAG_JUDGEMENT )
+          u_caster->RemoveFlag( UNIT_FIELD_AURASTATE, m_spellInfo->CasterAuraState ); 
 	}
 
 	m_spellState = SPELL_STATE_PREPARING;
@@ -1358,6 +1351,13 @@ void Spell::cast(bool check)
 			if(!m_triggeredSpell)
 				AddCooldown();
 
+			if (u_caster)
+			{
+				if (u_caster->InStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) && !m_triggeredSpell)
+					u_caster->RemoveStealth();
+			}
+
+
 			if( p_caster )
 			{
 				if( m_spellInfo->NameHash == SPELL_HASH_SLAM)
@@ -1365,16 +1365,6 @@ void Spell::cast(bool check)
 					/* slam - reset attack timer */
 					p_caster->setAttackTimer( 0, true );
 					p_caster->setAttackTimer( 0, false );
-				}
-				if( p_caster->IsStealth() && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_NOT_BREAK_STEALTH) )
-				{
-					/* talents procing - don't remove stealth either */
-					if (!(m_spellInfo->Attributes & ATTRIBUTES_PASSIVE) && 
-						!( pSpellId && dbcSpell.LookupEntry(pSpellId)->Attributes & ATTRIBUTES_PASSIVE ) )
-					{
-						p_caster->RemoveAura(p_caster->m_stealth);
-						p_caster->m_stealth = 0;
-					}
 				}
 
 				// Arathi Basin opening spell, remove stealth, invisibility, etc. 
@@ -1712,7 +1702,7 @@ void Spell::AddTime(uint32 type)
 void Spell::update(uint32 difftime)
 {
 	// ffs stealth capping
-	if( p_caster && GetGameObjectTarget() && p_caster->IsStealth() )
+	if( p_caster && GetGameObjectTarget() && p_caster->InStealth() )
 	{
 		p_caster->RemoveAura( p_caster->m_stealth );
 	}
@@ -1983,7 +1973,10 @@ void Spell::SendSpellStart()
 	StackPacket data(SMSG_SPELL_START, buf, 1000);
 
 	uint32 cast_flags = SPELL_START_FLAG_DEFAULT;
-	cast_flags |= SPELL_START_FLAGS_POWER_UPDATE;
+
+	if(u_caster && !m_triggeredSpell && !(m_spellInfo->AttributesEx & ATTRIBUTESEX_AREA_OF_EFFECT))
+		cast_flags |= SPELL_START_FLAGS_POWER_UPDATE;
+
 	if(p_caster && p_caster->getClass() == DEATHKNIGHT)
 		cast_flags |= SPELL_START_FLAGS_RUNE_UPDATE;
 
@@ -2108,8 +2101,8 @@ void Spell::SendSpellGo()
 
 	ItemPrototype* ip = NULL;
 	uint32 cast_flags = (m_triggeredSpell && !(m_spellInfo->Attributes & ATTRIBUTE_ON_NEXT_ATTACK)) ? 0x0105 : 0x0100;
-	if(u_caster && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
-		!(m_spellInfo->NameHash == SPELL_HASH_SHADOWFURY || m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
+	if(u_caster && !m_triggeredSpell && (u_caster->GetPowerType() != POWER_TYPE_MANA || m_usesMana) &&
+		!(m_spellInfo->AttributesEx & ATTRIBUTESEX_AREA_OF_EFFECT))	// Hackfix for client bug which displays mana as 0 after receiving update for these spells
 		cast_flags |= SPELL_GO_FLAGS_POWER_UPDATE;
 	SpellTargetList::iterator itr;
 	uint32 counter;
@@ -2694,8 +2687,6 @@ void Spell::HandleAddAura(uint64 guid)
 		spellid = 6788;
 	else if( m_spellInfo->Id == 45438) // Cast spell Hypothermia
 		spellid = 41425;
-	else if( m_spellInfo->Id == 30451) // Cast spell Arcane Blast
-		spellid = 36032;
 	else if( m_spellInfo->Id == 20572 || m_spellInfo->Id == 33702 || m_spellInfo->Id == 33697) // Cast spell Blood Fury
 		spellid = 23230;
 	else if( m_spellInfo->Id == 31884)
@@ -2708,8 +2699,8 @@ void Spell::HandleAddAura(uint64 guid)
 	case SPELL_HASH_CLEARCASTING:
 	case SPELL_HASH_PRESENCE_OF_MIND:
 		{
-			if( Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] )
-				spellid = Target->m_DummyAuras[ DUMMY_AURA_ARCANE_POTENCY ] == 15 ? 57529 : 57531;
+			if( Target->m_DummyAuras[ SPELL_HASH_ARCANE_POTENCY ] )
+				spellid = (Target->m_DummyAuras[ SPELL_HASH_ARCANE_POTENCY ]->EffectBasePoints[0] + 1) == 15 ? 57529 : 57531;
 		}break;
 	}
 
@@ -2962,7 +2953,7 @@ uint8 Spell::CanCast(bool tolerate)
 		// backstab/ambush
 		if( m_spellInfo->NameHash == SPELL_HASH_BACKSTAB || m_spellInfo->NameHash == SPELL_HASH_AMBUSH )
 		{
-			if( m_spellInfo->NameHash == SPELL_HASH_AMBUSH && !p_caster->IsStealth() )
+			if( m_spellInfo->NameHash == SPELL_HASH_AMBUSH && !p_caster->InStealth() )
 				return SPELL_FAILED_ONLY_STEALTHED;
 
 			ItemPointer pMainHand = p_caster->GetItemInterface()->GetInventoryItem( INVENTORY_SLOT_NOT_SET, EQUIPMENT_SLOT_MAINHAND );
@@ -3192,6 +3183,42 @@ uint8 Spell::CanCast(bool tolerate)
 		{
 			if( p_caster->CombatStatus.IsInCombat() )
 				return SPELL_FAILED_TARGET_IN_COMBAT;
+		}
+
+		if( m_spellInfo->NameHash == SPELL_HASH_CANNIBALIZE )
+		{
+			bool check;
+			float rad = GetRadius( 0 );
+			rad *= rad;
+			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
+			{
+				if(p_caster->GetDistance2dSq((*i)) < rad)
+				{
+					if((*i)->GetTypeId() == TYPEID_UNIT)
+					{
+						if(TO_CREATURE(*i)->getDeathState() == CORPSE)
+						{
+							CreatureInfo *cn = TO_CREATURE(*i)->GetCreatureName();
+							if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
+							{
+								check = true;
+							}
+						}
+					}
+					else if( (*i)->GetTypeId() == TYPEID_PLAYER )
+					{
+						if( TO_PLAYER(*i)->isAlive() == false )
+						{
+							check = true;
+						}
+					}
+					else
+						check  = false;
+				}
+			}
+
+			if(check != true)
+				return SPELL_FAILED_NO_EDIBLE_CORPSES;
 		}
 
 		// check if we have the required gameobject focus
@@ -3787,7 +3814,6 @@ uint8 Spell::CanCast(bool tolerate)
 						}break;
 
 					case 0xF60291F4: //Death Wish
-					case 0xD77038F4: //Fear Ward
 					case 0x19700707: //Berserker Rage
 						{
 							if( u_caster->m_special_state & UNIT_STATE_FEAR )
@@ -3932,7 +3958,7 @@ void Spell::RemoveItems()
 			// if item has charges remaining -> remove 1 charge
 			if(((int32)i_caster->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) < -1)
 			{
-				i_caster->ModUnsigned32Value(ITEM_FIELD_SPELL_CHARGES, 1);
+				i_caster->ModSignedInt32Value(ITEM_FIELD_SPELL_CHARGES, 1);
 				i_caster->m_isDirty = true;
 			}
 			// if item has no charges remaining -> delete item
@@ -3948,7 +3974,7 @@ void Spell::RemoveItems()
 		// Non-Expendable Item -> remove 1 charge
 		else if(i_caster->GetProto()->Spells[0].Charges > 0)
 		{
-			i_caster->ModUnsigned32Value(ITEM_FIELD_SPELL_CHARGES, -1);
+			i_caster->ModSignedInt32Value(ITEM_FIELD_SPELL_CHARGES, -1);
 			i_caster->m_isDirty = true;
 		}
 	} 
@@ -4273,7 +4299,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 
 	PlayerPointer pTarget = TO_PLAYER( Target );
    
-	float x,y,z;
+	float x,y,z,o;
 	uint32 mapid;
 	
     // predefined behavior 
@@ -4282,6 +4308,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 		x = pTarget->GetBindPositionX();
 		y = pTarget->GetBindPositionY();
 		z = pTarget->GetBindPositionZ();
+		o = pTarget->GetOrientation();
 		mapid = pTarget->GetBindMapId();
 	}
 	else // normal behavior
@@ -4293,6 +4320,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 		x=TC->x;
 		y=TC->y;
 		z=TC->z;
+		o=TC->o;
 		mapid=TC->mapId;
 	}
 
@@ -4303,7 +4331,7 @@ void Spell::HandleTeleport(uint32 id, UnitPointer Target)
 	// the game object set of the updater thread WILL Get messed up if we teleport from a gameobject
 	// caster.
 	if(!sEventMgr.HasEvent(pTarget, EVENT_PLAYER_TELEPORT))
-		sEventMgr.AddEvent(pTarget, &Player::EventTeleport, mapid, x, y, z, EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		sEventMgr.AddEvent(pTarget, &Player::EventTeleport, mapid, x, y, z, o, EVENT_PLAYER_TELEPORT, 1, 1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 }
 
 void Spell::CreateItem(uint32 itemId)
@@ -4486,13 +4514,25 @@ void Spell::Heal(int32 amount)
 			coefficient += modifier / 100.0f;
 			SM_PFValue( u_caster->SM[SMT_SPD_BONUS][1], &coefficient, m_spellInfo->SpellGroupType );
 		}
+		if(i_caster != NULL)
+			coefficient = 0.0f;		// Spells casted by items don't get bonus
 
 		bonus = float2int32( float( bonus ) * coefficient);		// apply the computed coefficient
 		amount += float2int32( float( bonus ) * 1.88f); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 		if(m_spellInfo->fixed_apcoef > 0)
 			amount += float2int32(u_caster->GetAP() * m_spellInfo->fixed_apcoef);	// Some spells scale with Attack Power. E.g. Death Knight spells
-		amount = (uint32)(amount * u_caster->HealDonePctMod[m_spellInfo->School]);
-		amount = (uint32)(amount * unitTarget->HealTakenPctMod[m_spellInfo->School]);
+		amount = float2int32(float(amount) * u_caster->HealDonePctMod[m_spellInfo->School]);
+		amount = float2int32(float(amount) * unitTarget->HealTakenPctMod[m_spellInfo->School]);
+
+		if(unitTarget->IsPlayer())
+		{
+			//Judgement of Light
+			if(m_spellInfo->Id == 20267)
+				amount = float2int32(0.10f * float(unitTarget->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + unitTarget->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1)));
+			//Seal of Light
+			if(m_spellInfo->Id == 20167)
+			    amount = float2int32(0.15f * float(u_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS_1)));
+		}
 
 		// Healing Way fix
  		if(m_spellInfo->NameHash == SPELL_HASH_HEALING_WAVE)
@@ -4559,7 +4599,7 @@ void Spell::Heal(int32 amount)
 	} else
 		unitTarget->ModUnsigned32Value(UNIT_FIELD_HEALTH, amount);
 
-	if( m_caster && unitTarget->IsPlayer() )
+	if( m_caster)
 	{
 		SendHealSpellOnPlayer( m_caster, unitTarget, amount, critical, overheal, m_spellInfo->logsId ? m_spellInfo->logsId : (pSpellId ? pSpellId : m_spellInfo->Id) );
 	}

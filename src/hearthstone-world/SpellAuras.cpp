@@ -706,7 +706,7 @@ Aura::Aura( SpellEntry* proto, int32 duration, ObjectPointer caster, UnitPointer
 					p->CombatModeDelay = COMBAT_DECAY_TIME;
 			}*/
 
-			if( target->IsStealth() && target != caster )
+			if( target->InStealth() && target != caster )
 				target->RemoveStealth();
 		}
 		else 
@@ -864,6 +864,11 @@ void Aura::Remove()
 
 	if( m_spellProto->AdditionalAura )
 		m_target->RemoveAura( m_spellProto->AdditionalAura );
+	
+	uint32 flag = 0;
+	if( m_spellProto->buffType & SPELL_TYPE_SEAL )
+        flag |= AURASTATE_FLAG_JUDGEMENT;
+	   m_target->RemoveFlag( UNIT_FIELD_AURASTATE, flag );
 
 /*
 #ifdef SHAREDPTR_DEBUGMODE
@@ -1971,6 +1976,11 @@ void Aura::SpellAuraDummy(bool apply)
 				sEventMgr.RemoveEvents( shared_from_this(), EVENT_AURA_PERIODIC_TELEPORT );
 			}
 		}break;
+	case 26013: // deserter
+		{
+			if(apply)
+				SetNegative();
+		}break;
 	case 41425:
 		{
 			if( p_target != NULL )
@@ -2211,7 +2221,7 @@ void Aura::SpellAuraDummy(bool apply)
 			break;
 		}
 		else
-			TamingSpellid=30648;
+			TamingSpellid=30652;
 	}break;
 	case 16972://Predatory Strikes
 	case 16974:
@@ -2300,40 +2310,22 @@ void Aura::SpellAuraDummy(bool apply)
 			if(apply)
 			{
 				SetNegative();
-				UnitPointer caster =this->GetUnitCaster();
+				UnitPointer caster =GetUnitCaster();
 				if(caster && caster->IsPlayer())
 					TO_PLAYER(caster)->m_vampiricEmbrace++;
-				++m_target->m_hasVampiricEmbrace;
 			}
 			else
 			{
-				UnitPointer caster =this->GetUnitCaster();
+				UnitPointer caster =GetUnitCaster();
 				if(caster && caster->IsPlayer())
 					TO_PLAYER(caster)->m_vampiricEmbrace--;
-				--m_target->m_hasVampiricEmbrace;
 			}
 		}break;
 	case 34914://Vampiric Touch
 	case 34916:
 	case 34917:
 		{
-			if(apply)
-			{
-				SetNegative();
-				UnitPointer caster =this->GetUnitCaster();
-				if(caster && caster->IsPlayer())
-					++TO_PLAYER(caster)->m_vampiricTouch;
-
-				++m_target->m_hasVampiricTouch;
-			}
-			else
-			{
-				UnitPointer caster =this->GetUnitCaster();
-				if(caster && caster->IsPlayer())
-					--TO_PLAYER(caster)->m_vampiricTouch;
-
-				--m_target->m_hasVampiricTouch;
-			}
+			//TODO: Implement. Add proc spell
 		}break;
 	case 18182:
 	case 18183:
@@ -2575,7 +2567,6 @@ void Aura::SpellAuraDummy(bool apply)
 				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1, (uint32)mod->m_amount, EVENT_AURA_PERIODIC_HEAL, 2000, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 			else
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_HEAL);
-            		
 		}break;
 
 	case 16914:
@@ -2761,24 +2752,12 @@ void Aura::SpellAuraDummy(bool apply)
 					caster->RemoveOnAuraRemoveSpell(SPELL_HASH_PSYCHIC_SCREAM);
 			}
 		}break;
-	}
-
-	if( m_target )
-		switch( GetSpellProto()->NameHash )
+	default:
 		{
-			case SPELL_HASH_TORMENT_THE_WEAK:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_TORMENT_THE_WEAK] = apply ? mod->m_amount : 0;
-				}break;
-			case SPELL_HASH_ARCANE_POTENCY:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_ARCANE_POTENCY] = apply ? mod->m_amount : 0;
-				}break;
-			case SPELL_HASH_GLYPH_OF_FIREBALL:
-				{
-					m_target->m_DummyAuras[DUMMY_AURA_GLYPH_OF_FIREBALL] = apply;
-				}break;
-		}
+			if( m_target )
+				m_target->m_DummyAuras[m_spellProto->NameHash] && apply ? m_spellProto : 0;
+		}break;
+	}
 
 	if ( TamingSpellid && ! GetTimeLeft() )
 	{
@@ -3317,12 +3296,6 @@ void Aura::SpellAuraModStun(bool apply)
 		//warrior talent - second wind triggers on stun and immobilize. This is not used as proc to be triggered always !
 		if(p_target && m_spellProto->MechanicsType != MECHANIC_INCAPACIPATED)
 			p_target->EventStunOrImmobilize();
-
-		if(p_target && p_target->IsStealth())
-		{
-			p_target->RemoveAura( p_target->m_stealth );
-			p_target->SetStealth(0);
-		}
 	}
 	else
 	{
@@ -3541,10 +3514,9 @@ void Aura::SpellAuraModStealth(bool apply)
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
 			m_target->SetStealth(GetSpellId());
 
-		if( m_spellProto->NameHash == SPELL_HASH_STEALTH)
-			m_target->SetFlag(UNIT_FIELD_BYTES_2,0x1E000000);//sneak anim
-
+		m_target->SetFlag(UNIT_FIELD_BYTES_2,0x1E000000);//sneak anim
 		m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x020000);
+
 		if( m_target->IsPlayer() )
 			m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
@@ -3557,9 +3529,7 @@ void Aura::SpellAuraModStealth(bool apply)
 			// check for stealh spells
 			PlayerPointer p_caster = TO_PLAYER( m_target );
 			uint32 stealth_id = 0;
-			SpellSet::iterator itr = p_caster->mSpells.begin();
-			SpellSet::iterator end = p_caster->mSpells.end();
-			for(; itr != end; ++itr)
+			for(SpellSet::iterator itr = p_caster->mSpells.begin(); itr != p_caster->mSpells.end(); ++itr)
 			{
 				if((*itr) == 1787 || (*itr) == 1786 || (*itr) == 1785 || (*itr) == 1784)
 				{
@@ -3570,46 +3540,32 @@ void Aura::SpellAuraModStealth(bool apply)
 			if(stealth_id)
 				p_caster->CastSpell(p_caster, dbcSpell.LookupEntry(stealth_id), true);
 
-			if(p_caster->IsMounted())
-				p_caster->RemoveAura(p_caster->m_MountSpellId);
-
-			if(p_caster->m_bg && p_caster->m_bgHasFlag)
-			{
-				if(p_caster->m_bg->GetType() == BATTLEGROUND_WARSONG_GULCH)
-				{
-					TO_WARSONGGULCH(p_caster->m_bg)->DropFlag(p_caster);
-				}
-				if(p_caster->m_bg->GetType() == BATTLEGROUND_EYE_OF_THE_STORM)
-				{
-					TO_EYEOFTHESTORM(p_caster->m_bg)->DropFlag(p_caster);
-				}
-			}
+			/*if(p_caster->IsMounted())
+			p_caster->RemoveAura(p_caster->m_MountSpellId);*/
 		}
 	}
 	else 
 	{
+		m_target->m_stealthLevel -= mod->m_amount;
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
 			m_target->SetStealth(0);
 
-		m_target->m_stealthLevel -= mod->m_amount;
 		if( m_spellProto->NameHash == SPELL_HASH_STEALTH) 
-			m_target->RemoveFlag(UNIT_FIELD_BYTES_2,0x1E000000);
-
-		m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x020000);
-
-		if( m_target->GetTypeId() == TYPEID_PLAYER )
 		{
-			m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
-			/*WorldPacket data(12);
-			data.SetOpcode(SMSG_COOLDOWN_EVENT);
-			data << (uint32)GetSpellProto()->Id << m_target->GetGUID();
-			TO_PLAYER( m_target )->GetSession()->SendPacket (&data);*/
-			packetSMSG_COOLDOWN_EVENT cd;
-			cd.guid = m_target->GetGUID();
-			cd.spellid = m_spellProto->Id;
-			TO_PLAYER(m_target)->GetSession()->OutPacket( SMSG_COOLDOWN_EVENT, sizeof(packetSMSG_COOLDOWN_EVENT), &cd);
-			if( TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod && TO_PLAYER(m_target)->m_outStealthDamageBonusPct )
-				TO_PLAYER(m_target)->m_outStealthDamageBonusTimer = (uint32)UNIXTIME + TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod;
+			m_target->RemoveFlag(UNIT_FIELD_BYTES_2,0x1E000000);
+			m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x020000);
+
+			if( m_target->GetTypeId() == TYPEID_PLAYER )
+			{
+				m_target->RemoveFlag(PLAYER_FIELD_BYTES2, 0x2000);
+
+				packetSMSG_COOLDOWN_EVENT cd;
+				cd.guid = m_target->GetGUID();
+				cd.spellid = m_spellProto->Id;
+				TO_PLAYER(m_target)->GetSession()->OutPacket( SMSG_COOLDOWN_EVENT, sizeof(packetSMSG_COOLDOWN_EVENT), &cd);
+				if( TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod && TO_PLAYER(m_target)->m_outStealthDamageBonusPct )
+					TO_PLAYER(m_target)->m_outStealthDamageBonusTimer = (uint32)UNIXTIME + TO_PLAYER(m_target)->m_outStealthDamageBonusPeriod;
+			}
 		}
 	}
 
@@ -3680,6 +3636,8 @@ void Aura::SpellAuraModTotalHealthRegenPct(bool apply)
 		sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHealPct,(float)mod->m_amount,
 			EVENT_AURA_PERIODIC_HEALPERC,	GetSpellProto()->EffectAmplitude[mod->i],0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
+	else
+		TO_UNIT( m_target )->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
 }
 
 void Aura::EventPeriodicHealPct(float RegenPct)
@@ -3886,8 +3844,10 @@ void Aura::EventPeriodicTriggerSpell(SpellEntry* spellInfo)
 			this->Remove();
 			return;
 		}
-
-		if(pTarget != m_caster && !isAttackable(m_caster, pTarget))
+		
+		// make sure we can't damage friends or heal enemies
+		if(((spellInfo->c_is_flags & SPELL_FLAG_IS_DAMAGING) && pTarget != m_caster && !isAttackable(m_caster, pTarget)) || 
+			((spellInfo->c_is_flags & SPELL_FLAG_IS_HEALING) && (isHostile(m_caster, pTarget) || isAttackable(m_caster, pTarget))))
 		{
 			SendInterrupted(SPELL_FAILED_BAD_TARGETS, m_caster);
 			SendChannelUpdate(0, m_caster);
@@ -4580,6 +4540,9 @@ void Aura::SpellAuraModShapeshift(bool apply)
 		}break;
 	}
 
+	if( mod->m_miscValue == FORM_CAT || mod->m_miscValue == FORM_BEAR || mod->m_miscValue == FORM_DIREBEAR || mod->m_miscValue == FORM_MOONKIN )
+		p_target->ModUnsigned32Value(UNIT_FIELD_ATTACK_POWER_MODS, apply ? p_target->m_feralAP : -p_target->m_feralAP);
+
 	if( apply )
 	{
 		if( m_target->getClass() == WARRIOR && m_target->GetUInt32Value( UNIT_FIELD_POWER2 ) > TO_PLAYER( m_target )->m_retainedrage )
@@ -5197,9 +5160,12 @@ void Aura::SpellAuraTransform(bool apply)
 		return;
 
 	uint32 displayId = 0;
-	CreatureInfo* ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
+	CreatureInfo* ci = NULL;
+	ci = CreatureNameStorage.LookupEntry(mod->m_miscValue);
 
-	if(ci)
+	if(ci == NULL)
+		DEBUG_LOG("Aura","SpellAuraTransform cannot find CreatureInfo for id %d",mod->m_miscValue);
+	else
 		displayId = ci->Male_DisplayID;
 
 	if( p_target && p_target->IsMounted() )
@@ -5249,6 +5215,20 @@ void Aura::SpellAuraTransform(bool apply)
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE);
 			}
 		}break;
+		case 57669: // Replenishment
+		case 61782:
+		{
+			if(apply)
+			{
+				uint32 manaToRegen = (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) * 0.0025f);
+				if( !manaToRegen ) return;
+				sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicEnergize,(uint32)manaToRegen,(uint32)0, EVENT_AURA_PERIODIC_ENERGIZE,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			}
+			else
+			{
+				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE);
+			}
+		}break;
 		case 20584://wisp
 			m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, apply ? 10045:m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		break;
@@ -5273,80 +5253,82 @@ void Aura::SpellAuraTransform(bool apply)
 		{
 			if( apply )
 			{
-				if(m_target->getRace() == RACE_ORC)
+				switch(m_target->getRace())
 				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140);
+					case RACE_ORC:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140);
+					}break;
+					case RACE_TAUREN:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147);
+					}break;
+					case RACE_TROLL:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134);
+					}break;
+					case RACE_UNDEAD:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145);
+					}break;
+					case RACE_BLOODELF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830);
+					}break;
+					case RACE_GNOME:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149);
+					}break;
+					case RACE_DWARF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142);
+					}break;
+					case RACE_HUMAN:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138);
+					}break;
+					case RACE_NIGHTELF:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144);
+					}break;
+					case RACE_DRAENEI:
+					{
+						if( m_target->getGender() == 0 ) 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827);
+						else 
+							m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828);
+					}break;
+					default:
+						m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 				}
-				if(m_target->getRace() == RACE_TAUREN)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147);
-				}
-				if(m_target->getRace() == RACE_TROLL)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134);
-				}
-				if(m_target->getRace() == RACE_UNDEAD)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145);
-				}
-				if(m_target->getRace() == RACE_BLOODELF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830);
-				}
-
-				if(m_target->getRace() == RACE_GNOME)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149);
-				}
-				if(m_target->getRace() == RACE_DWARF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142);
-				}
-				if(m_target->getRace() == RACE_HUMAN)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138);
-				}
-				if(m_target->getRace() == RACE_NIGHTELF)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144);
-				}
-				if(m_target->getRace() == RACE_DRAENEI)
-				{
-					if( m_target->getGender() == 0 ) 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827);
-					else 
-						m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828);
-				}
-			} 
-			else
-				m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
+			}
 		}break;
 
 		case 42365:	// murloc costume
@@ -5392,6 +5374,21 @@ void Aura::SpellAuraTransform(bool apply)
 
 				if(apply)
 				{
+					if( GetUnitCaster()->m_DummyAuras[ SPELL_HASH_GLYPH_OF_POLYMORPH ] )
+					{
+						for(uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; ++i)
+						{ 
+							if(m_target->m_auras[i] != NULL)
+							{
+								for(uint32 x = 0; x < 3; x++)
+								{
+									if( m_target->m_auras[i]->m_spellProto->EffectApplyAuraName[x] == SPELL_AURA_PERIODIC_DAMAGE )
+										m_target->m_auras[i]->Remove();
+								}
+							}
+						}
+					}
+
 					m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
 
 					// remove the current spell (for channelers)
@@ -5402,7 +5399,7 @@ void Aura::SpellAuraTransform(bool apply)
 						m_target->m_currentSpell = NULLSPELL;
 					}
 
-					sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)1000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+					sEventMgr.AddEvent(shared_from_this(), &Aura::EventPeriodicHeal1,(uint32)2000,EVENT_AURA_PERIODIC_HEAL,1000,0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 					m_target->polySpell = GetSpellProto()->Id;
 				}
 				else
@@ -5954,40 +5951,13 @@ void Aura::SpellAuraMechanicImmunity(bool apply)
 		}
 	}
 
-//sLog.outString( "Aura::SpellAuraMechanicImmunity begun." );
 	if(apply)
 	{
-		//sLog.outString( "mod->m_miscValue = %u" , (uint32) mod->m_miscValue );
-		//sLog.outString( "Incrementing MechanicsDispels (current value: %u, new val: %u)" , m_target->MechanicsDispels[mod->m_miscValue] , m_target->MechanicsDispels[mod->m_miscValue] + 1 );
-		assert(mod->m_miscValue < 27);
+		assert(mod->m_miscValue < MECHANIC_COUNT);
 		m_target->MechanicsDispels[mod->m_miscValue]++;
 
-		if(mod->m_miscValue != 16 && mod->m_miscValue != 25 && mod->m_miscValue != 19) // dont remove bandages, Power Word and protection effect
+		if(mod->m_miscValue != MECHANIC_HEALING && mod->m_miscValue != MECHANIC_INVULNARABLE && mod->m_miscValue != MECHANIC_SHIELDED) // dont remove bandages, Power Word and protection effect
 		{
-			/*
-			sLog.outString( "Removing values because we're not a bandage, PW:S or forbearance" );
-			for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
-				if(m_target->m_auras[x])
-				{
-					sLog.outString( "Found aura in %u" , x );
-					if(m_target->m_auras[x]->GetSpellProto()->MechanicsType == (uint32)mod->m_miscValue)
-					{
-						sLog.outString( "Removing aura: %u, ID %u" , x , m_target->m_auras[x]->GetSpellId() );
-						m_target->m_auras[x]->Remove();
-					}
-					else if(mod->m_miscValue == 11) // if got immunity for slow, remove some that are not in the mechanics
-					{
-						sLog.outString( "Removing roots" );
-						for(int i=0;i<3;i++)
-							if(m_target->m_auras[x]->GetSpellProto()->EffectApplyAuraName[i] == SPELL_AURA_MOD_DECREASE_SPEED)
-							{
-								sLog.outString( "Removed snare aura in slot %u, spellid %u" , x , m_target->m_auras[x]->GetSpellId() );
-								m_target->m_auras[x]->Remove();
-								break;
-							}
-					}
-				}
-			*/
 			/* Supa's test run of Unit::RemoveAllAurasByMechanic */
 			if( m_target ) // just to be sure?
 			{
@@ -6047,7 +6017,7 @@ void Aura::SpellAuraMounted(bool apply)
 			p_target->GetSummon()->Remove(false, true, true);	// hunter pet -> just remove for later re-call
 	}
 
-	if(m_target->IsStealth())
+	if(m_target->InStealth())
 	{
 		uint32 id = m_target->m_stealth;
 		m_target->m_stealth = 0;
@@ -6578,7 +6548,7 @@ void Aura::SpellAuraGhost(bool apply)
 
 		if(apply)
 		{
-			SetNegative();
+			SetNegative(2);//we picked up one extra from calling SpellAuraWaterWalk ;)
 		}
 	}
 	m_target->SendPowerUpdate();

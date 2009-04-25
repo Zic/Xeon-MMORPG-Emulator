@@ -388,8 +388,8 @@ public:
 	void CalcResistance(uint32 type);
 	void CalcStat(uint32 type);
 	bool m_canRegenerateHP;
-	void RegenerateHealth();
-	void RegenerateMana();
+	void RegenerateHealth(bool isinterrupted);
+	void RegenerateMana(bool isinterrupted);
 	int BaseAttackType;
 
 	bool CanSee(UnitPointer obj) // * Invisibility & Stealth Detection - Partha *
@@ -406,7 +406,7 @@ public:
 				return false;
 		}
 
-		if(obj->IsStealth()) // Stealth Detection (  I Hate Rogues :P  )
+		if(obj->InStealth()) // Stealth Detection (  I Hate Rogues :P  )
 		{
 			if(isInFront(obj)) // stealthed player is in front of creature
 			{

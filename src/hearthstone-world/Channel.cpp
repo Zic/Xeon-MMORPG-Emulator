@@ -145,6 +145,9 @@ void Channel::AttemptJoin(PlayerPointer plr, const char * password)
 
 void Channel::Part(PlayerPointer plr, bool silent)
 {
+	if(plr == NULL)
+		return;
+
 	m_lock.Acquire();
 	WorldPacket data(SMSG_CHANNEL_NOTIFY, 100);
 	uint32 flags;

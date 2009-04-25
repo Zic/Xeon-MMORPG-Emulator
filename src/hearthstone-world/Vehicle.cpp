@@ -543,6 +543,10 @@ void Vehicle::_AddToSlot(UnitPointer pPassenger, uint8 slot)
 	}
 }
 
+/* This function changes a vehicles position server side to
+keep us in sync with the client, so that the vehicle doesn't
+get dismissed because the server thinks its gone out of range
+of its passengers*/
 void Vehicle::MoveVehicle(float x, float y, float z, float o) //thanks andy
 {
 	SetPosition(x, y, z, o, false);
@@ -567,6 +571,16 @@ void Vehicle::setDeathState(DeathState s)
 		SafeDelete();
 }
 
+/* To change a vehicles speed we must send a Force Speed
+change packet to the client. SpeedType takes values from
+the enum PlayerSpeedType located in Player.h
+RUN	            = 1,
+RUNBACK         = 2,
+SWIM	        = 3,
+SWIMBACK        = 4,
+WALK	        = 5,
+FLY	            = 6,
+value is the new speed to set*/
 void Vehicle::SetSpeed(uint8 SpeedType, float value)
 {
 	if( value < 0.1f )
@@ -632,6 +646,9 @@ void Vehicle::SetSpeed(uint8 SpeedType, float value)
 
 }
 
+/* This function handles the packet sent from the client when we
+leave a vehicle, it removes us server side from our current
+vehicle*/
 void WorldSession::HandleVehicleDismiss(WorldPacket & recv_data)
 {
 	if (GetPlayer() == NULL || !GetPlayer()->m_CurrentVehicle)
@@ -640,6 +657,10 @@ void WorldSession::HandleVehicleDismiss(WorldPacket & recv_data)
 	GetPlayer()->m_CurrentVehicle->RemovePassenger(GetPlayer());
 }
 
+/* This function handles the packet from the client which is
+sent when we click on an npc with the flag UNIT_FLAG_SPELLCLICK
+and checks if there is room for us then adds us as a passenger
+to that vehicle*/
 void WorldSession::HandleSpellClick( WorldPacket & recv_data )
 {
 	if (GetPlayer() == NULL || GetPlayer()->m_CurrentVehicle)

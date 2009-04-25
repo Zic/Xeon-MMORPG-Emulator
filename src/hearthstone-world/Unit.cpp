@@ -198,7 +198,6 @@ Unit::Unit()
 	m_extraAttackCounter = false;
 	m_temp_summon=false;
 	m_interruptedRegenTime = 0;
-	m_hasVampiricEmbrace = m_hasVampiricTouch = 0;
 	mAngerManagement = false;
 	mRecentlyBandaged = false;
 
@@ -230,8 +229,7 @@ Unit::Unit()
 	m_chargeSpells.clear();
 	m_chargeSpellRemoveQueue.clear();
 	tmpAura.clear();
-
-	memset(m_DummyAuras, 0, sizeof(int32) * NUM_DUMMY_AURAS);
+	m_DummyAuras.clear();
 }
 
 Unit::~Unit()
@@ -665,7 +663,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 				if( CastingSpell == NULL )
 					continue;
 
-				if (itr2->SpellClassMask[0] || itr2->SpellClassMask[1] || itr2->SpellClassMask[2]) {
+				if (itr2->SpellClassMask[0] || itr2->SpellClassMask[1] || itr2->SpellClassMask[2])
+				{
 					if (!(itr2->SpellClassMask[0] & CastingSpell->SpellGroupType[0]) &&
 						!(itr2->SpellClassMask[1] & CastingSpell->SpellGroupType[1]) &&
 						!(itr2->SpellClassMask[2] & CastingSpell->SpellGroupType[2]))
@@ -832,6 +831,45 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if( CastingSpell->Id != 5229 )//enrage
 								continue;
 						}break;
+						//Druid Eclipse
+						case 48518:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_WRATH )
+									continue;
+							}break;
+						case 48517:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_STARFIRE )
+									continue;
+							}break;
+						// Infected Wounds
+						case 58179:
+						case 58180:
+						case 58181:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_SHRED &&
+									CastingSpell->NameHash != SPELL_HASH_MAUL &&
+									CastingSpell->NameHash != SPELL_HASH_MANGLE__CAT_ &&
+									CastingSpell->NameHash != SPELL_HASH_MANGLE__BEAR_ )
+									continue;
+							}break;
+						//Earth And Moon
+						case 60431:
+						case 60432:
+						case 60433:
+							{
+								if ( CastingSpell == NULL)
+									continue;
+								if ( CastingSpell->NameHash != SPELL_HASH_WRATH &&
+									CastingSpell->NameHash != SPELL_HASH_STARFIRE )
+									continue;
+							}break;
 						case 31616: // Nature's Guardian
 						{
 							if(GetHealthPct() > 30)
@@ -874,10 +912,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								CastingSpell->NameHash != SPELL_HASH_GREATER_HEAL )
 								continue;
 						}break;
+						//Bloodsurge
 						case 46916:
 						{
-							if( CastingSpell->NameHash != SPELL_HASH_BLOODSURGE )
-								continue;
+							if (!CastingSpell )
+									continue;
+							if( CastingSpell->NameHash != SPELL_HASH_HEROIC_STRIKE &&
+								CastingSpell->NameHash != SPELL_HASH_BLOODTHIRST &&
+								CastingSpell->NameHash != SPELL_HASH_WHIRLWIND )
+									continue;
 						}break;
 						case 5530:
 						{
@@ -965,6 +1008,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							if( myroll > chance )
 								continue;
 						}break;
+						// Sword and Board
+						case 50227:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_DEVASTATE &&
+								CastingSpell->NameHash != SPELL_HASH_REVENGE )
+									continue;
+							}break;
 /*						//disabled by zack until finished : this needs to get trigered on trap trigger and not trap cast
 						// hunter - Entrapment
 						case 19185:
@@ -978,6 +1030,15 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash!=SPELL_HASH_GOUGE ) //gouge
 									continue;
 						}break;*/
+						// Improved Revenge / Glyph of Revenge
+						case 12798:
+						case 58363:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_REVENGE )
+									continue;
+							}break;
 						// Mage ignite talent only for fire dmg
 						case 12654:
 						{
@@ -1052,7 +1113,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								}
 								continue;
 							}break;
-						//warlock - Nighfall
+						//warlock - Nightfall
 						case 17941:
 							{
 								if( CastingSpell == NULL )
@@ -1084,14 +1145,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 spell->prepare( &targets );
                                 continue;
                             }break;*/
-						//mage - Arcane Blast proc
-						case 36032:
-							{
-								if( CastingSpell == NULL )
-									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_ARCANE_BLAST ) //Arcane Blast
-									continue;
-							}break;
 						//warlock - Shadow Embrace
 						case 32386:
 						case 32388:
@@ -1233,6 +1286,17 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
                                 spell->prepare(&targets);
                                 continue;
                             }break;
+						//Druid Living Seed
+						case 48504:
+							{
+								if ( CastingSpell == NULL )
+									continue;
+								if ( CastingSpell->NameHash != SPELL_HASH_SWIFTMEND &&
+									 CastingSpell->NameHash != SPELL_HASH_REGROWTH &&
+									 CastingSpell->NameHash != SPELL_HASH_HEALING_TOUCH &&
+									 CastingSpell->NameHash != SPELL_HASH_NOURISH )
+									continue;
+							}break;
 						case 974:
 						case 32593:
 						case 32594:
@@ -1419,18 +1483,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash != SPELL_HASH_GARROTE )  //Garrote
 									continue;
 							}break;
-						//Priest - Shadowguard
-						case 28377:
-						case 28378:
-						case 28379:
-						case 28380:
-						case 28381:
-						case 28382:
-						case 28385:
-							{
-								if( CastingSpell && ( unit_shared_from_this() == victim || !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) ) //no self casts allowed or beneficial spells
-									continue;//we can proc on ranged weapons too
-							}break;
 						//Priest - blackout
 						case 15269:
 							{
@@ -1480,6 +1532,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell == NULL )
 									continue;
 								dmg_overwrite = CastingSpell->manaCost * 40 / 100;
+							}break;
+						// Improved Steady Shot
+						case 53220:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_STEADY_SHOT )
+									continue;				
 							}break;
 						//priest - Reflective Shield 
 						case 33619:
@@ -1543,6 +1603,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								//trigger only on heal spell cast by NOT us
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING ) || unit_shared_from_this() == victim )
 									continue; 
+								dmg_overwrite = (CastingSpell->EffectBasePoints[IsHealingSpell(CastingSpell)-1] + 1) * (ospinfo->EffectBasePoints[0] + 1 ) / 100;
 							}break;
 						//paladin - Light's Grace
 						case 31834:
@@ -1567,6 +1628,33 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( dmg_overwrite > half_health )
 									dmg_overwrite = half_health ;
 							}break;
+						//paladin  - Sacred Cleansing
+						case 53659:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(CastingSpell->NameHash != SPELL_HASH_CLEANSE )
+									continue;
+							}break;
+						//paladin - Infusion of Light
+						case 53672:
+						case 54149:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_HOLY_SHOCK )
+									continue;
+							}break;
+						//paladin - art of war
+						case 53489:
+						case 59578:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_CRUSADER_STRIKE &&
+									CastingSpell->NameHash != SPELL_HASH_DIVINE_STORM )
+									continue;				
+								}break;
 						case 45057: // Trinket: Evasive Maneuvers
 							{
 								if(GetHealthPct() > 35)
@@ -1642,6 +1730,16 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell == NULL )
 									continue;
 								if( !( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ) ) //requires offensive spell. ! might not cover all spells
+									continue;
+							}break;
+						//Brain Freeze
+						case 57761:
+							{
+								if( CastingSpell == NULL)
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_FROSTBOLT &&
+									CastingSpell->NameHash != SPELL_HASH_CONE_OF_COLD &&
+									CastingSpell->NameHash != SPELL_HASH_FROSTFIRE_BOLT )
 									continue;
 							}break;
 						// druid - Celestial Focus
@@ -1720,6 +1818,14 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									continue; 
 							}break;
 						//SETBONUSES END
+						//Pendulum of Telluric Currents
+						case 60483:
+							{
+								if (CastingSpell == NULL)
+									continue;
+								if(!( CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING ))
+									continue;
+							}break;
 							//http://www.wowhead.com/?item=32493 Ashtongue Talisman of Shadows
 						case 40480:
 							{
@@ -1825,11 +1931,12 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if (!CastingSpell )
 									continue;
-								if( CastingSpell->NameHash != SPELL_HASH_FIREBALL ||
-									CastingSpell->NameHash != SPELL_HASH_FIRE_BLAST ||
-									CastingSpell->NameHash != SPELL_HASH_SCORCH ||
+								if( CastingSpell->NameHash != SPELL_HASH_FIREBALL &&
+									CastingSpell->NameHash != SPELL_HASH_FIRE_BLAST &&
+									CastingSpell->NameHash != SPELL_HASH_SCORCH &&
+									CastingSpell->NameHash != SPELL_HASH_LIVING_BOMB &&
 									CastingSpell->NameHash != SPELL_HASH_FROSTFIRE_BOLT )
-									continue; 
+ 									continue; 
 
 								m_hotStreakCount++;
 								if (m_hotStreakCount >= 2)
@@ -1971,6 +2078,33 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 										maxstat = i;
 								}
 								spellId = greatness[maxstat];
+							}break;
+						case 49694://Improved Spirit Tap
+						case 59000:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_MIND_BLAST &&
+									CastingSpell->NameHash != SPELL_HASH_SHADOW_WORD__DEATH )
+									continue; 
+							}break;
+						case 53655://judgements of the pure
+						case 53656:
+						case 53657:
+						case 54152:
+						case 54153:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->buffIndexType != SPELL_TYPE_INDEX_JUDGEMENT )
+									continue; 
+							}break;
+						case 60803://Glyph of Remove Curse
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_REMOVE_CURSE || victim == shared_from_this() )
+									continue;
 							}break;
 					}
 				}
@@ -2151,21 +2285,11 @@ void Unit::RegenerateHealth()
 		return;
 
 	// player regen
-	if(this->IsPlayer())
+	if(IsPlayer())
 	{
-		// These only NOT in combat
-		if(!CombatStatus.IsInCombat())
-		{
-			plr_shared_from_this()->RegenerateHealth(false);
-		}
-		else
-			plr_shared_from_this()->RegenerateHealth(true);
-	}
-	else
-	{
-		// Only regen health out of combat
-		if(!CombatStatus.IsInCombat())
-			creature_shared_from_this()->RegenerateHealth();
+		plr_shared_from_this()->RegenerateHealth(CombatStatus.IsInCombat());
+	}else{
+		creature_shared_from_this()->RegenerateHealth(CombatStatus.IsInCombat());
 	}
 }
 
@@ -2195,24 +2319,19 @@ void Unit::RegeneratePower(bool isinterrupted)
 
 		case POWER_TYPE_RAGE:
 			{
+				m_P_regenTimer = 3000;
 				// These only NOT in combat
 				if(!CombatStatus.IsInCombat())
 				{
-					if (HasAura(29131)) //Fix for bloodrage, no decay
-					{	m_P_regenTimer = 3000;
-						plr_shared_from_this()->LoseRage(0);
-					}
-					else
-					{
-						m_P_regenTimer = 3000;
-						plr_shared_from_this()->LoseRage(30);
-					}
-				}
-				else
-				{
 					if (plr_shared_from_this()->mAngerManagement)
 					{
-						m_P_regenTimer = 3000;
+						plr_shared_from_this()->LoseRage(20);
+					}else{
+						plr_shared_from_this()->LoseRage(30);
+					}
+				}else{
+					if (plr_shared_from_this()->mAngerManagement)
+					{
 						plr_shared_from_this()->LoseRage(-10);
 					}
 				}
@@ -2259,7 +2378,7 @@ void Unit::RegeneratePower(bool isinterrupted)
 		switch(powertype)
 		{
 		case POWER_TYPE_MANA:
-			creature_shared_from_this()->RegenerateMana();
+			creature_shared_from_this()->RegenerateMana(isinterrupted);
 			break;
 		case POWER_TYPE_FOCUS:
 			creature_shared_from_this()->RegenerateFocus();
@@ -3612,12 +3731,6 @@ void Unit::smsg_AttackStart(UnitPointer pVictim)
 	// FLAGS changed so other players see attack animation
 	//	addUnitFlag(UNIT_FLAG_COMBAT);
 	//	setUpdateMaskBit(UNIT_FIELD_FLAGS );
-	if(pThis->cannibalize)
-	{
-		sEventMgr.RemoveEvents(pThis, EVENT_CANNIBALIZE);
-		pThis->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-		pThis->cannibalize = false;
-	}
 }
 
 void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
@@ -3848,34 +3961,15 @@ bool Unit::RemoveAura(AuraPointer aur)
 	return true;
 }
 
-bool Unit::RemoveAura(uint32 spellId)
-{//this can be speed up, if we know passive \pos neg
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 bool Unit::RemovePositiveAura(uint32 spellId)
 {
-	for(uint32 x=0;x<=MAX_POSITIVE_AURAS;x++)
+	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
+			if(m_auras[x] && m_auras[x]->GetSpellId()==spellId)
 			{
 				m_auras[x]->Remove();
 				return true;
 			}
-		}
 	}
 	return false;
 }
@@ -3884,14 +3978,11 @@ bool Unit::RemoveNegativeAura(uint32 spellId)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
+			if(m_auras[x] && m_auras[x]->GetSpellId()==spellId)
 			{
 				m_auras[x]->Remove();
 				return true;
 			}
-		}
 	}
 	return false;
 }
@@ -3901,13 +3992,12 @@ bool Unit::RemoveAuras(uint32 * SpellIds)
 	if(!SpellIds || *SpellIds == 0)
 		return false;
 
-	uint32 x=0,y;
 	bool res = false;
-	for(;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
+	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
 		if(m_auras[x])
 		{
-			for(y=0;SpellIds[y] != 0;++y)
+			for(uint32 y=0;SpellIds[y] != 0;++y)
 			{
 				if(m_auras[x]->GetSpellId()==SpellIds[y])
 				{
@@ -3920,49 +4010,44 @@ bool Unit::RemoveAuras(uint32 * SpellIds)
 	return res;
 }
 
-bool Unit::RemoveAura(uint32 spellId, uint64 guid)
+bool Unit::RemoveAura(uint32 spellId, uint64 guid )
 {   
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId()==spellId && m_auras[x]->m_casterGuid == guid)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
 }
-
-bool Unit::RemoveAuraByNameHash(uint32 namehash)
-{
-	for(uint32 x=0;x<MAX_AURAS;x++)
+bool Unit::RemoveAllAuras(uint32 spellId, uint64 guid)
+{   
+	bool res = false;
+	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid) )
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			res = true;
 		}
 	}
-	return false;
+	return res;
+}
+bool Unit::RemoveAuraByNameHash(uint32 namehash)
+{
+	return RemoveAuraPosByNameHash(namehash) || RemoveAuraNegByNameHash(namehash);
 }
 
 bool Unit::RemoveAuraPosByNameHash(uint32 namehash)
 {
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
@@ -3972,52 +4057,19 @@ bool Unit::RemoveAuraNegByNameHash(uint32 namehash)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				return true;
-			}
+			m_auras[x]->Remove();
+			return true;
 		}
 	}
 	return false;
 }
 
-bool Unit::RemoveAllAurasBySpellIDOrGUID(uint32 spellId, uint64 guid)
-{   
-	bool res = false;
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				if (!guid || m_auras[x]->m_casterGuid == guid)
-				{
-					m_auras[x]->Remove();
-					res = true;
-				}
-			}
-		}
-	}
-	return res;
-}
-
 bool Unit::RemoveAllAuraByNameHash(uint32 namehash)
 {
-	bool res = false;
-	for(uint32 x=0;x<MAX_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
-		}
-	}
+	bool res = RemoveAllPosAuraByNameHash(namehash);
+	res |= RemoveAllNegAuraByNameHash(namehash);
 	return res;
 }
 
@@ -4026,13 +4078,10 @@ bool Unit::RemoveAllPosAuraByNameHash(uint32 namehash)
 	bool res = false;
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
+			m_auras[x]->Remove();
+			res=true;
 		}
 	}
 	return res;
@@ -4043,13 +4092,10 @@ bool Unit::RemoveAllNegAuraByNameHash(uint32 namehash)
 	bool res = false;
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				m_auras[x]->Remove();
-				res=true;
-			}
+			m_auras[x]->Remove();
+			res=true;
 		}
 	}
 	return res;
@@ -4125,12 +4171,9 @@ AuraPointer Unit::FindPositiveAuraByNameHash(uint32 namehash)
 {
 	for(uint32 x=0;x<MAX_POSITIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -4140,42 +4183,21 @@ AuraPointer Unit::FindNegativeAuraByNameHash(uint32 namehash)
 {
 	for(uint32 x=MAX_POSITIVE_AURAS;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellProto()->NameHash==namehash)
 		{
-			if(m_auras[x]->GetSpellProto()->NameHash==namehash)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
 }
 
-AuraPointer Unit::FindActiveAura(uint32 spellId)
+AuraPointer Unit::FindActiveAura(uint32 spellId, uint64 guid)
 {
 	for(uint32 x=0;x<MAX_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId()==spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				return m_auras[x];
-			}
-		}
-	}
-	return NULLAURA;
-}
-
-AuraPointer Unit::FindAura(uint32 spellId)
-{
-	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
-	{
-		if(m_auras[x])
-		{
-			if(m_auras[x]->GetSpellId()==spellId)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -4185,12 +4207,9 @@ AuraPointer Unit::FindAura(uint32 spellId, uint64 guid)
 {
 	for(uint32 x=0;x<MAX_AURAS+MAX_PASSIVE_AURAS;x++)
 	{
-		if(m_auras[x])
+		if(m_auras[x] && m_auras[x]->GetSpellId() == spellId && (!guid || m_auras[x]->m_casterGuid == guid))
 		{
-			if(m_auras[x]->GetSpellId() == spellId && m_auras[x]->m_casterGuid == guid)
-			{
-				return m_auras[x];
-			}
+			return m_auras[x];
 		}
 	}
 	return NULLAURA;
@@ -4306,10 +4325,10 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	summaryPCTmod += pVictim->ModDamageTakenByMechPCT[spellInfo->MechanicsType];
 
 	if((spellInfo->SpellGroupType[0] & 0x100821 || spellInfo->SpellGroupType[1] & 0x8000) && 
-		caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] &&
+		caster->m_DummyAuras[ SPELL_HASH_TORMENT_THE_WEAK ] &&
 		pVictim->m_speedModifier < 0 )
 	{
-		summaryPCTmod += (caster->m_DummyAuras[ DUMMY_AURA_TORMENT_THE_WEAK ] / 100.f);
+		summaryPCTmod += (caster->m_DummyAuras[ SPELL_HASH_TORMENT_THE_WEAK ]->EffectBasePoints[0] / 100.f);
 	}
 	
 	int32 res = (int32)((base_dmg+bonus_damage)*summaryPCTmod + bonus_damage); // 1.x*(base_dmg+bonus_damage) == 1.0*base_dmg + 1.0*bonus_damage + 0.x*(base_dmg+bonus_damage) -> we add the returned value to base damage so we do not add it here (function returns bonus only)
@@ -5189,6 +5208,36 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							if( spi && spi->NameHash != SPELL_HASH_SMITE )
 								continue;
 						}break;
+					//paladin - Art of war
+					case 53489:
+					case 59578:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_OF_LIGHT )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLASH_OF_LIGHT )
+								continue;
+						}break;
+					//paladin - Infusion of light
+					case 53672:
+					case 54149:
+						{
+							if( m_currentSpell && !(m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLASH_OF_LIGHT ||
+												m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_HOLY_LIGHT))
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLASH_OF_LIGHT && spi->NameHash != SPELL_HASH_HOLY_LIGHT)
+								continue;
+						}break;
+					//Mage - Firestarter
+					case 54741:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_FLAMESTRIKE )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_FLAMESTRIKE )
+								continue;
+						}break;
 					case 34936:		// Backlash
 						{
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
@@ -5200,6 +5249,15 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 						{
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_SHADOW_BOLT )
+								continue;
+						}break;
+					// Glyph of Revenge Proc
+					case 58363:
+						{
+							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_HEROIC_STRIKE )
+								continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_HEROIC_STRIKE )
 								continue;
 						}break;
 					case 18708: //Fel Domination
@@ -6480,12 +6538,12 @@ void Unit::Dismount()
 		PlayerPointer plr = plr_shared_from_this();
 		if( plr->m_MountSpellId )
 		{
-			RemoveAllAurasBySpellIDOrGUID( plr->m_MountSpellId, 0 );
+			RemoveAllAuras( plr->m_MountSpellId);
 			plr->m_MountSpellId = 0;
 		}
 		if( plr->m_FlyingAura )
 		{
-			RemoveAllAurasBySpellIDOrGUID( plr->m_FlyingAura, 0 );
+			RemoveAllAuras( plr->m_FlyingAura);
 			plr->m_FlyingAura = 0;
 			plr->SetUInt32Value( UNIT_FIELD_DISPLAYID, plr->GetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID ) );
 		}

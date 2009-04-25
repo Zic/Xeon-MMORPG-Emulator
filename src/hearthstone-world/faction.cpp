@@ -186,7 +186,7 @@ bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth)// A
         /// we cannot attack sheathed units. Maybe checked in other places too ?
 		/// !! warning, this presumes that objA is attacking ObjB
         /// Capt: Added the possibility to disregard this (regarding the spell class)
-		if(TO_UNIT(objB)->IsStealth() && CheckStealth)
+		if(TO_UNIT(objB)->InStealth() && CheckStealth)
 			return false;
 	}
 
@@ -232,8 +232,8 @@ bool isAttackable(ObjectPointer objA, ObjectPointer objB, bool CheckStealth)// A
 		return false;
 
 	bool attackable = isHostile(objA, objB); // B is attackable if its hostile for A
-	if((objA->m_faction->HostileMask & 8) && (objB->m_factionDBC->RepListId != 0) && 
-		(objB->GetTypeId() != TYPEID_PLAYER) && objB->m_faction->Faction != 31) // B is attackable if its a neutral CreaturePointer/
+	//if((objA->m_faction->HostileMask & 8) && (objB->m_factionDBC->RepListId != 0) && 
+	//	(objB->GetTypeId() != TYPEID_PLAYER) && objB->m_faction->Faction != 31) // B is attackable if its a neutral CreaturePointer/
 
 	// Neutral Creature Check
 	if(objA->IsPlayer() || objA->IsPet())
@@ -334,4 +334,5 @@ bool isAlliance(ObjectPointer objA)// A is alliance?
 
 	return true;
 }
+
 

@@ -221,8 +221,7 @@ struct MapInfo
     uint32 lvl_mod_a;
 	uint32 required_quest;
 	uint32 required_item;
-	uint32 heroic_key_1;
-	uint32 heroic_key_2;
+	uint32 heroic_key[2];
 	float update_distance;
 	uint32 checkpoint_id;
 	bool collision;
@@ -381,12 +380,12 @@ public:
 	void AddSession(WorldSession *s);
 	void RemoveSession(uint32 id);
 
-	void AddGlobalSession(WorldSession *session);
-	void RemoveGlobalSession(WorldSession *session);
-	void DeleteSession(WorldSession *session);
+	void AddGlobalSession(WorldSession *GlobalSession);
+	void RemoveGlobalSession(WorldSession *GlobalSession);
+	void DeleteGlobalSession(WorldSession *GlobalSession);
 
 	HEARTHSTONE_INLINE size_t GetSessionCount() const { return m_sessions.size(); }
-	uint32 GetNonGmSessionCount();
+
 	HEARTHSTONE_INLINE size_t GetQueueCount() { return mQueuedSessions.size(); }
 	void GetStats(uint32 * GMCount, float * AverageLatency);
 
@@ -517,6 +516,7 @@ public:
 	uint32 PeakSessionCount;
 	bool SendStatsOnJoin;
 	SessionSet gmList;
+	RWLock gmList_lock;
 
 	uint32 expansionUpdateTime;
 
@@ -559,6 +559,10 @@ public:
 	bool eots_disabled;
 	bool ab_disabled;
 
+	// Level Caps
+	uint32 LevelCap_Custom_All;
+	// could add configs for every expansion..
+
 	void CharacterEnumProc(QueryResultVector& results, uint32 AccountId);
 	void LoadAccountDataProc(QueryResultVector& results, uint32 AccountId);
 
@@ -578,7 +582,7 @@ protected:
 	{
 		// Update Server time
 		time_t thisTime = UNIXTIME;
-		m_gameTime += thisTime - m_lastTick;
+		m_gameTime += thisTime - m_lastTick; //in seconds
 
 		if(m_gameTime >= 86400)			// One day has passed
 			m_gameTime -= 86400;
@@ -601,7 +605,7 @@ private:
 
 protected:
 	Mutex SessionsMutex;//FOR GLOBAL !
-	SessionSet Sessions;
+	SessionSet GlobalSessions;
 
 	float regen_values[MAX_RATES];
 	uint32 int_rates[MAX_INTRATES];

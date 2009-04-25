@@ -229,7 +229,7 @@ void TaxiPath::SendMoveForTime(PlayerPointer riding, PlayerPointer to, uint32 ti
 	*data << riding->GetPositionX( ) << riding->GetPositionY( ) << riding->GetPositionZ( );
 	*data << getMSTime();
 	*data << uint8( 0 );
-	*data << uint32( 0x00000300 );
+	*data << uint32( MONSTER_MOVE_FLAG_FLY );
 	*data << uint32( uint32((length * TAXI_TRAVEL_SPEED) - time));
 	*data << uint32( nodecounter );
 	pos = data->wpos();
@@ -300,7 +300,7 @@ void TaxiPath::SendMoveForTime(PlayerPointer riding, PlayerPointer to, uint32 ti
 	*data << riding->GetPositionX( ) << riding->GetPositionY( ) << riding->GetPositionZ( );
 	*data << getMSTime();
 	*data << uint8( 0 );
-	*data << uint32( 0x00000300 );
+	*data << uint32( MONSTER_MOVE_FLAG_FLY );
 	*data << uint32( uint32((getLength() * TAXI_TRAVEL_SPEED) - time));
 	*data << uint32( GetNodeCount() - count );
 	*data << nx << ny << nz;

@@ -130,12 +130,12 @@ const char* mapentryFormat =
 	"u"					// 3 is_pvp_zone
 	"sxxxxxxxxxxxxxxxx"	// 4-20 real_name
 	"u"					// 21 linked_zone
-	"xxxxxxxxxxxxxxxxx" // 22-38 hordeIntro
-	"xxxxxxxxxxxxxxxxx" // 39-55 allianceIntro
+	"sxxxxxxxxxxxxxxxx" // 22-38 hordeIntro
+	"sxxxxxxxxxxxxxxxx" // 39-55 allianceIntro
 	"u"					// 56 multimap_id
 	"x"					// 57 unk_float (all 1 but arathi 1.25)
-	"xxxxxxxxxxxxxxxxx"	// 58-74 normalReqText
-	"xxxxxxxxxxxxxxxxx"	// 75-91 heroicReqText
+	"sxxxxxxxxxxxxxxxx"	// 58-74 normalReqText
+	"sxxxxxxxxxxxxxxxx"	// 75-91 heroicReqText
 	"xxxxxxxxxxxxxxxxx"	// 92-108 emptyText
 	"u"					// 109 parent_map
 	"u"					// 110 start_x

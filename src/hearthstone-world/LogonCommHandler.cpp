@@ -159,6 +159,9 @@ const string* LogonCommHandler::GetForcedPermissions(string& username)
 
 void LogonCommHandler::Connect(LogonServer * server)
 {
+	if(bServerShutdown)
+		return;
+
 	Log.Notice("LogonCommClient", "Connecting to logonserver on `%s:%u`...", server->Address.c_str(), server->Port );
 	server->RetryTime = (uint32)UNIXTIME + 10;
 	server->Registered = false;
@@ -174,7 +177,7 @@ void LogonCommHandler::Connect(LogonServer * server)
 	conn->SendChallenge();
 	while(!conn->authenticated)
 	{
-		if((uint32)UNIXTIME >= tt)
+		if((uint32)UNIXTIME >= tt || bServerShutdown)
 		{
 			Log.Notice("LogonCommClient", "Authentication timed out.");
 			conn->Disconnect();
@@ -293,6 +296,8 @@ void LogonCommHandler::UpdateSockets()
 
 void LogonCommHandler::ConnectionDropped(uint32 ID)
 {
+	if(bServerShutdown)
+		return;
 	mapLock.Acquire();
 	map<LogonServer*, LogonCommClientSocket*>::iterator itr = logons.begin();
 	for(; itr != logons.end(); ++itr)

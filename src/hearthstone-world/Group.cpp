@@ -65,6 +65,7 @@ Group::Group(bool Assign)
 	m_LootThreshold = 2;
 	m_SubGroupCount = 1;
 	m_MemberCount = 0;
+	m_GroupInstanceID = 0;
 
 	if( Assign )
 	{
@@ -813,6 +814,9 @@ void Group::LoadFromDB(Field *fields)
 	LOAD_ASSISTANT(7, m_mainTank);
 	LOAD_ASSISTANT(8, m_mainAssist);
 
+	//active instance for this group
+	m_GroupInstanceID = fields[9].GetUInt32();
+
 	// create groups
 	for(int i = 1; i < m_SubGroupCount; ++i)
 		m_SubGroups[i] = new SubGroup(this, i);
@@ -866,6 +870,11 @@ void Group::SaveToDB()
 
 	if(m_mainAssist)
 		ss << m_mainAssist->guid << ",";
+	else
+		ss << "0,";
+
+	if(m_GroupInstanceID)
+		ss << m_GroupInstanceID << ",";
 	else
 		ss << "0,";
 

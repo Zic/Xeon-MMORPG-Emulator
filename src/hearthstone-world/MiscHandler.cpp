@@ -110,7 +110,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 			return;
 		}
 	
-		OUT_DEBUG("AutoLootItem MISC");
+		DEBUG_LOG("HandleAutostoreItem","AutoLootItem %u",itemid);
 		ItemPointer item = objmgr.CreateItem( itemid, GetPlayer());
 	   
 		item->SetUInt32Value(ITEM_FIELD_STACK_COUNT,amt);
@@ -157,7 +157,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 		PlayerPointer plr;
 		for(LooterSet::iterator itr = pLootObj->m_loot.looters.begin(); itr != pLootObj->m_loot.looters.end(); ++itr)
 		{
-			if( plr != NULL && plr == _player->GetMapMgr()->GetPlayer(*itr))
+			plr = _player->GetMapMgr()->GetPlayer((*itr));
+			if( plr != NULL )
 				plr->GetSession()->SendPacket(&data);
 		}
 	}
@@ -686,7 +687,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
 		//make player sit
 		pPlayer->SetStandState(STANDSTATE_SIT);
-		SetLogoutTimer(20000);
+		SetLogoutTimer(PLAYER_LOGOUT_DELAY);
 	}
 	/*
 	> 0 = You can't Logout Now
@@ -711,7 +712,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 	DEBUG_LOG( "WORLD"," Recvd CMSG_LOGOUT_CANCEL Message" );
 
 	PlayerPointer pPlayer = GetPlayer();
-	if(!pPlayer)
+	if(!pPlayer || !_logoutTime)
 		return;
 
 	//Cancel logout Timer

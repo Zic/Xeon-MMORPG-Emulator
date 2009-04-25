@@ -949,7 +949,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, PlayerPointer target) const
 void Object::AddToWorld()
 {
 	MapMgrPointer mapMgr = sInstanceMgr.GetInstance(shared_from_this());
-	if(!mapMgr)
+	if(mapMgr == NULL)
 		return; //instance add failed
 
 	if( IsPlayer() )
@@ -962,12 +962,8 @@ void Object::AddToWorld()
 			// that means we re-logged into one. if it's an arena, don't allow it!
 			// also, don't allow them in if the bg is full.
 
-			if( /*( mapMgr->m_battleground->IsArena() && mapMgr->m_battleground->HasStarted() ) ||*/
-				( !mapMgr->m_battleground->CanPlayerJoin(p) ) && !p->bGMTagOn )	// above check isn't needed, done in Arena::CanPlayerJoin.
-			{
-				//p->EjectFromInstance();
+			if( !mapMgr->m_battleground->CanPlayerJoin(p) && !p->bGMTagOn)
 				return;
-			}
 		}
 	}
 
@@ -1682,17 +1678,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			pVictim->SendPowerUpdate();
 		}
 
-	if( pVictim->IsPlayer() )
-	{
-		PlayerPointer pThis = TO_PLAYER(pVictim);
-		if(pThis->cannibalize)
-		{
-			sEventMgr.RemoveEvents(pVictim, EVENT_CANNIBALIZE);
-			pThis->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-			pThis->cannibalize = false;
-		}
-	}
-
+	
 	//* BATTLEGROUND DAMAGE COUNTER *//
 	if( pVictim != unit_shared_from_this() )
 	{

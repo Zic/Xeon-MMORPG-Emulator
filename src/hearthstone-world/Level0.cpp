@@ -309,22 +309,22 @@ bool ChatHandler::HandleGMListCommand(const char* args, WorldSession *m_session)
 	WorldPacket data;
 	bool first = true;
 
-	PlayerStorageMap::const_iterator itr;
-	objmgr._playerslock.AcquireReadLock();
-	for (itr = objmgr._players.begin(); itr != objmgr._players.end(); itr++)
+	WorldSession *gm_session;
+	SessionSet::iterator itr;
+
+	sWorld.gmList_lock.AcquireReadLock();	
+	for (itr = sWorld.gmList.begin(); itr != sWorld.gmList.end();)
 	{
-		if(itr->second->GetSession()->GetPermissionCount())
-		{
-			if(first)
-				GreenSystemMessage(m_session, "There are following active GMs on this server:");
+		gm_session = (*itr);
+		++itr;
+		if(first)
+			GreenSystemMessage(m_session, "There are following active GMs on this server:");
+		first = false;
 
-			SystemMessage(m_session, "%s [%s]", itr->second->GetName(), itr->second->GetSession()->GetPermissions());
-
-			first = false;
-		}
+		if(gm_session->GetPlayer() && m_session != gm_session)
+			SystemMessage(m_session, "%s [%s]", gm_session->GetPlayer()->GetName(), gm_session->GetPermissions());
 	}
-	objmgr._playerslock.ReleaseReadLock();
-
+	sWorld.gmList_lock.ReleaseReadLock();
 	if(first)
 		SystemMessage(m_session, "There are no GMs currently logged in on this server.");
 

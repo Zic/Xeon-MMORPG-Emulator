@@ -227,6 +227,8 @@ bool ChatHandler::HandleQuestStartCommand(const char * args, WorldSession * m_se
 					QuestLogEntry *qle = new QuestLogEntry();
 					qle->Init(qst, plr, (uint32)open_slot);
 					qle->UpdatePlayerFields();
+
+					CALL_QUESTSCRIPT_EVENT(qle, OnQuestStart)(plr, qle);
 		
 					// If the quest should give any items on begin, give them the items.
 					for(uint32 i = 0; i < 4; ++i)
@@ -1227,7 +1229,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 		return true;
 	}
 
-	my_query = "SELECT map, position_x, position_y, position_z FROM creature_spawns WHERE entry = " + starterId;
+	my_query = "SELECT map, position_x, position_y, position_z, orientation FROM creature_spawns WHERE entry = " + starterId;
 	QueryResult *spawnResult = WorldDatabase.Query(my_query.c_str());
 
 	if(!spawnResult)
@@ -1242,6 +1244,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 	float x = fields[1].GetFloat();
 	float y = fields[2].GetFloat();
 	float z = fields[3].GetFloat();
+	float o = fields[4].GetFloat();
 
 	delete spawnResult;
 
@@ -1255,7 +1258,7 @@ bool ChatHandler::HandleQuestSpawnCommand(const char * args, WorldSession * m_se
 	recout += "\n\n";
 	SendMultilineMessage(m_session, recout.c_str());
 
-	m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z));
+	m_session->GetPlayer()->SafeTeleport(locmap, 0, LocationVector(x, y, z, o));
 
 	return true;
 }

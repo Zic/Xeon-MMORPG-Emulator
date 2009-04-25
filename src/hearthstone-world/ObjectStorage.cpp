@@ -40,7 +40,7 @@ const char * gItemPageFormat							= "usu";
 const char * gItemPrototypeFormat						= "uuuussssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuffuffuffuffuffuuuuuuuuuufuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuusuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gNpcTextFormat								= "ufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuufssuuuuuuu";
 const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuc";
-const char * gTeleportCoordFormat						= "uxufffx";
+const char * gTeleportCoordFormat						= "uxuffff";
 const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
 const char * gProfessionDiscoveryFormat					= "uuuf";
 const char * gZoneGuardsFormat							= "uuu";
@@ -196,7 +196,6 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				sp->autocast_type=(uint32)-1;
 				sp->custom_pointer=false;
 				sp->procCounter=0;
-				sp->first_use=false;
 
 				//Set cooldowntimer
 				sp->cooldowntime=getMSTime();
@@ -213,13 +212,8 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 							sp = NULL;
 							continue;
 						}
-						if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT ||
-							sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
-						{
-							Log.Warning("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
-//							sp = NULL;
-//							continue;
-						}
+						if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
+							Log.Debug("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
 
 						sp->minrange = GetMinRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
 						sp->maxrange = GetMaxRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
@@ -227,28 +221,28 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 						if( tcd < 0 ) // -1 will force dbc lookup
 						{
 							//now this will not be exact cooldown but maybe a bigger one to not make him spam spells to often
-							int cooldown = 0;
+							uint32 cooldown = 0;
 
-							if(sp->spell->DurationIndex)
+							if (sp->spell->Attributes & ATTRIBUTES_PASSIVE) //passive skills
 							{
-								SpellDuration *sd = dbcSpellDuration.LookupEntry(sp->spell->DurationIndex);
-								cooldown += GetDuration(sd);
+								cooldown = 1000*60*60*4; //once per 4 hours :P
+							}else{
+								if( sp->spell->CastingTimeIndex )
+									cooldown = GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
+
+								uint32 maxRT = std::max(sp->spell->RecoveryTime, sp->spell->CategoryRecoveryTime);
+								if (maxRT>cooldown)
+									cooldown = maxRT;
 							}
 
-							if( sp->spell->CastingTimeIndex )
-								cooldown += GetCastTime( dbcSpellCastTime.LookupEntry( sp->spell->CastingTimeIndex ));
-
-							cooldown += sp->spell->RecoveryTime;
 							if(cooldown <= 0)
 							{
-								Log.Warning("AIAgent","SpellId %u has no CoolDownTime in DBC. Forced to 20 seconds.", spellID );
-								sp->cooldown=20000;
-							}
-							else
+								Log.Warning("AIAgent","SpellId %u has no CoolDownTime in DBC. Forced to GCD.", spellID );
+								sp->cooldown=1500;
+							}else{
 								sp->cooldown=cooldown;
+							}
 						}
-						if( sp->spellType == STYPE_BUFF)
-							sp->spelltargetType = TTYPE_CASTER;
 						counter += 1;
 					}break;
 	
@@ -745,5 +739,6 @@ void Storage_LoadAdditionalTables()
 		}
 	}
 }
+
 
 

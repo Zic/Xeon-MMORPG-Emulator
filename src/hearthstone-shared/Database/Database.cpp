@@ -266,7 +266,7 @@ bool Database::WaitExecuteNA(const char* QueryString)
 
 bool Database::run()
 {
-	SetThreadName("Database Execute Thread");
+	SetThreadName("Database Executor");
 	ThreadRunning = true;
 	char * query = queries_queue.pop();
 	DatabaseConnection * con = GetFreeConnection();
@@ -303,6 +303,8 @@ bool Database::run()
 void AsyncQuery::AddQuery(const char * format, ...)
 {
 	AsyncQueryResult res;
+	res.query = NULL;
+	res.result = NULL;
 	va_list ap;
 	char buffer[10000];
 	size_t len;
@@ -310,12 +312,13 @@ void AsyncQuery::AddQuery(const char * format, ...)
 	vsnprintf(buffer, 10000, format, ap);
 	va_end(ap);
 	len = strlen(buffer);
-	ASSERT(len);
-	res.query = new char[len+1];
-	res.query[len] = 0;
-	memcpy(res.query, buffer, len);
-	res.result = NULL;
-	queries.push_back(res);
+	if(len)
+	{
+		res.query = new char[len+1];
+		res.query[len] = 0;
+		memcpy(res.query, buffer, len);
+		queries.push_back(res);
+	}
 }
 
 void AsyncQuery::Perform()
