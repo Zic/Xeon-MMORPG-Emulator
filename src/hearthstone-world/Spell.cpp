@@ -4221,9 +4221,12 @@ exit:*/
 		if(stack)
 			value += value * stack / 10;	// increased by 10% for each application
 	}
-	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 20187 ) // Seal of Righteouness: Judgement
+	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 20187 ) // Seal of Righteousness: Judgement
 	{
-		value = float2int32(1 + 0.32f * u_caster->GetDamageDoneMod(SCHOOL_HOLY) + 0.2f * u_caster->GetAP());
+		if (p_caster->HasActiveAura(21084))
+			value = float2int32(1 + 0.32f * u_caster->GetDamageDoneMod(SCHOOL_HOLY) + 0.2f * u_caster->GetAP());//Righteousness
+		if (p_caster->HasActiveAura(20165) || p_caster->HasActiveAura(20166))
+			value = float2int32(1 + 0.25f * u_caster->GetDamageDoneMod(SCHOOL_HOLY) + 0.16f * u_caster->GetAP());//Wisdom and Light Damage Seals
 	}
 	else if( m_spellInfo->NameHash == SPELL_HASH_HAMMER_OF_THE_RIGHTEOUS )
 	{

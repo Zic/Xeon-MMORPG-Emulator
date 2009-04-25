@@ -966,6 +966,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->RankNumber = 0;
 				}break;
+			//Paladin Seal of Light Judgement
+			case 20165:
+				{
+					sp->Flags4	=	524288;
+					sp->Effect[2]	=	6;
+					sp->EffectImplicitTargetA[2]	=	1;
+					sp->EffectApplyAuraName[2]		=	4;
+					sp->EffectBasePoints[2]			=	20186;//This will make judgements call spell 20187
+				}break;
 			//paladin	-	Eye	for	an Eye
 			case  9799:
 			case  25988:
@@ -1258,8 +1267,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procChance = 12;
 						sp->procFlags	=	PROC_ON_MELEE_ATTACK;
+						sp->Flags4	=	524288;
+						sp->Effect[2]	=	6;
+						sp->EffectImplicitTargetA[2]	=	1;
+						sp->EffectApplyAuraName[2]		=	4;
+						sp->EffectBasePoints[2]			=	20186;
 				}break;
-
 		
 			//Druid: Feral Swiftness
 			case  17002:
