@@ -1579,10 +1579,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if( !IsPlayer() || !dmg || weapon_damage_type != 2 )
 									continue;
-								//this needs offhand weapon
-								ItemPointer it = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND );
-								if( it == NULL || it->GetProto()->InventoryType != INVTYPE_WEAPON )
-									continue;
 							}break;
 						//paladin - Seal of Blood
 						case 31893:

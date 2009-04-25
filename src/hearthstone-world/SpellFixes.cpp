@@ -2634,7 +2634,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 58424:
 			case 58425:
 				{
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;//proc	spell
+						sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;//proc	spell
+						sp->EffectTriggerSpell[0]	=	14181;	
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 				}break;
 		
@@ -3655,6 +3656,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 51636:
 				{
 						sp->procFlags = PROC_ON_CRIT_ATTACK;
+				}break;
+			case 35541:
+			case 35550:
+			case 35551:
+			case 35552:
+			case 35553:
+				{
+					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
+					sp->procChance	=	20;
 				}break;
 			//////////////////////////////////////////
 			// PRIEST								//

@@ -4217,6 +4217,10 @@ exit:*/
 		if(stack)
 			value += value * stack / 10;	// increased by 10% for each application
 	}
+	else if( GetUnitTarget() && p_caster && m_spellInfo->Id == 20187 ) // Seal of Righteouness: Judgement
+	{
+		value = float2int32(1 + 0.32f * u_caster->GetDamageDoneMod(SCHOOL_HOLY) + 0.2f * u_caster->GetAP());
+	}
 	else if( m_spellInfo->Id == 60103 && p_caster && i == 0) // Lava Lash
 	{   // Check if offhand is enchanted with Flametongue
 		// TODO less hacky implementation		
