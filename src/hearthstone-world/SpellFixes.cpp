@@ -772,7 +772,18 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_CAST_SPELL;
 				}break;
 			
-			
+			//Warlock Healthstones
+			case 6201:
+			case 6202:
+			case 5699:
+			case 11729:
+			case 11730:
+			case 27230:
+			case 47871:
+			case 47878:
+				{
+					sp->Reagent[1]	=	0;
+				}break;
 			//Warlock: Demonic Knowledge
 			case  35691:
 			case  35692:
