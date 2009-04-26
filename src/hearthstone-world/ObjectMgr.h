@@ -550,8 +550,7 @@ public:
 
 	LevelInfo * GetLevelInfo(uint32 Race, uint32 Class, uint32 Level);
 	void GenerateLevelUpInfo();
-	void LoadDefaultPetSpells();
-	set<SpellEntry*>* GetDefaultPetSpells(uint32 Entry);
+
 	uint32 GetPetSpellCooldown(uint32 SpellId);
 	void LoadPetSpellCooldowns();
 	WayPointMap * GetWayPointMap(uint32 spawnid);
@@ -683,7 +682,6 @@ protected:
 
 	TrainerMap mTrainers;
 	LevelInfoMap mLevelInfo;
-	PetDefaultSpellMap mDefaultPetSpells;
 	PetSpellCooldownMap mPetSpellCooldowns;
 };
 

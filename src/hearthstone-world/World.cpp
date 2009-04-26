@@ -506,8 +506,6 @@ bool World::SetInitialWorldSettings()
 	MAKE_TASK(ObjectMgr, LoadVendors);
 	MAKE_TASK(ObjectMgr, LoadAIThreatToSpellId);
 	MAKE_TASK(ObjectMgr, LoadSpellFixes);
-	MAKE_TASK(ObjectMgr, LoadDefaultPetSpells);
-	MAKE_TASK(ObjectMgr, LoadPetSpellCooldowns);
 	MAKE_TASK(ObjectMgr, LoadGuildCharters);
 	MAKE_TASK(ObjectMgr, LoadGMTickets);
 	MAKE_TASK(AddonMgr, LoadFromDB);
