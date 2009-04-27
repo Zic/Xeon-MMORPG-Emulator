@@ -40,6 +40,8 @@ libshared_a_SOURCES = \
     Auth/MD5.cpp \
     Auth/MD5.h \
     Auth/Sha1.cpp \
+    Auth/SARC4.cpp \
+    Auth/SARC4.h \
     Auth/Sha1.h \
     Auth/WowCrypt.cpp \
     Auth/WowCrypt.h \

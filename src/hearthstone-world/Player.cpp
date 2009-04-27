@@ -2556,7 +2556,7 @@ void Player::_LoadSpells(QueryResult * result)
 		do 
 		{
 			Field *fields = result->Fetch();
-			SpellEntry * spProto = dbcSpell.LookupEntryForced(fields[1].GetInt32());
+			SpellEntry * spProto = dbcSpell.LookupEntryForced(fields[0].GetInt32());
 			if(spProto)
 				mSpells.insert(spProto->Id);
 		} while(result->NextRow());
@@ -2603,15 +2603,15 @@ void Player::_LoadTalents(QueryResult * result)
 		do 
 		{
 			Field *fields = result->Fetch();
-			uint8 spec = fields[1].GetInt8();
+			uint8 spec = fields[0].GetInt8();
 			if(spec >= MAX_SPEC_COUNT)
 			{
 				sLog.outDebug("Out of range spec number [%d] for player with GUID [%d] in playertalents", 
-					spec, fields[0].GetUInt32());
+					spec, GetLowGUID());
 				continue;
 			}
-			talentId = fields[2].GetUInt32();
-			talentRank = fields[3].GetUInt8();
+			talentId = fields[1].GetUInt32();
+			talentRank = fields[2].GetUInt8();
 			m_specs[spec].talents.insert(make_pair(talentId, talentRank));
 		} while(result->NextRow());
 	}
@@ -2749,13 +2749,13 @@ bool Player::LoadFromDB(uint32 guid)
 	q->AddQuery("SELECT * FROM playerskills WHERE player_guid = %u AND type <> %u ORDER BY skill_id ASC, currentlvl DESC", guid,SKILL_TYPE_LANGUAGE ); //load skill, skip languages
 
 	//Talents
-	q->AddQuery("SELECT * FROM playertalents WHERE guid = %u", guid);
+	q->AddQuery("SELECT spec, tid, rank FROM playertalents WHERE guid = %u", guid);
 	
 	//Glyphs
 	q->AddQuery("SELECT * FROM playerglyphs WHERE guid = %u", guid);
 
 	//Spells
-	q->AddQuery("SELECT * FROM playerspells WHERE guid = %u", guid);
+	q->AddQuery("SELECT spellid FROM playerspells WHERE guid = %u", guid);
 
 	// queue it!
 	m_uint32Values[OBJECT_FIELD_GUID] = guid;
@@ -6476,6 +6476,11 @@ void Player::ApplySpec(uint8 spec, bool init)
 			if(!talentInfo || itr->second > 4)
 				continue;
 			RemoveTalent(talentInfo->RankID[itr->second]);
+		}
+		if( getClass() == WARRIOR )
+		{	
+			titanGrip = false;
+			ResetTitansGrip();
 		}
 	}
 	

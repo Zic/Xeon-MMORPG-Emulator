@@ -2450,23 +2450,41 @@ bool ChatHandler::HandleGORotate(const char * args, WorldSession * m_session)
 
 	/*float deg = (float)atof(args);
 	if(deg == 0.0f)
-		return false;
+		return false;*/
 
 	// Convert the argument to radians
-	float rad = deg * (float(M_PI) / 180.0f);
+	//float rad = deg * (float(M_PI) / 180.0f);
+	//uint32 rad = (float)atoi(args);
+	float r1, r2, r3;
+	sscanf(args, "%f %f %f", &r1, &r2, &r3);
+//	uint32 rad = low & (high << 21);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_01, r1);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_02, r2);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_03, r3);
+	go->UpdateRotation();
 
-	// let's try rotation_0
-	go->ModFloatValue(GAMEOBJECT_ROTATION, rad);
-	go->ModFloatValue(GAMEOBJECT_ROTATION_01, rad);
-	go->ModFloatValue(GAMEOBJECT_ROTATION_02, rad);
-	go->ModFloatValue(GAMEOBJECT_ROTATION_03, rad);
-	go->SaveToDB();
+
+	//go->ModFloatValue(GAMEOBJECT_ROTATION, rad);
+	//go->ModFloatValue(GAMEOBJECT_ROTATION_01, rad);
+	//go->ModFloatValue(GAMEOBJECT_ROTATION_02, rad);
+	//go->ModFloatValue(GAMEOBJECT_ROTATION_03, rad);
+	//go->SetRotation(rad);
+	/*go->SetUInt32Value(GAMEOBJECT_ROTATION, rad);
+	go->SetUInt32Value(GAMEOBJECT_ROTATION_01, rad);
+	go->SetUInt32Value(GAMEOBJECT_ROTATION_02, rad);
+	go->SetUInt32Value(GAMEOBJECT_ROTATION_03, rad);*/
+	/*float rad=(float)atof(args);
+	go->SetFloatValue(GAMEOBJECT_ROTATION, rad);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_01, rad);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_02, rad);
+	go->SetFloatValue(GAMEOBJECT_ROTATION_03, rad);*/
+	//go->SaveToDB();
 
 	// despawn and respawn
 	//go->Despawn(1000);
 	go->RemoveFromWorld(true);
 	go->SetNewGuid(m_session->GetPlayer()->GetMapMgr()->GenerateGameobjectGuid());
-	go->PushToWorld(m_session->GetPlayer()->GetMapMgr());*/
+	go->PushToWorld(m_session->GetPlayer()->GetMapMgr());
 	uint32 ak = 51;
 	//go->SetUInt32Value(GAMEOBJECT_ARTKIT, ak);
 	return true;
