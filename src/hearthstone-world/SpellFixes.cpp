@@ -3844,6 +3844,13 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_CAST_SPELL;
 					sp->procChance	=	10;
 				}break;
+			//Conjure Refreshment table
+			case 43985:
+			case 58661:
+				{
+					sp->EffectImplicitTargetA[0]	=	EFF_TARGET_DYNAMIC_OBJECT;
+				}break;
+
 			//////////////////////////////////////////
 			// WARLOCK								//
 			//////////////////////////////////////////

@@ -4079,42 +4079,64 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		go->SetUInt64Value(OBJECT_FIELD_CREATED_BY,m_caster->GetGUID());
 		go->PushToWorld(m_caster->GetMapMgr());	  
 		sEventMgr.AddEvent(go, &GameObject::ExpireAndDelete, EVENT_GAMEOBJECT_EXPIRE, GetDuration(), 1,0);
-		if(entry ==17032)//this is a portal
+		
+		switch (entry)
 		{
-			//enable it for party only
-			go->SetByte(GAMEOBJECT_BYTES_1, 0, 0);
-
-			//disable by default
-			WorldPacket *pkt = go->BuildFieldUpdatePacket(GAMEOBJECT_BYTES_1, 1);
-			SubGroup * pGroup = p_caster->GetGroup() ? p_caster->GetGroup()->GetSubGroup(p_caster->GetSubGroup()) : NULL;
-
-			if(pGroup)
+			case 17032://this is a portal
 			{
-				p_caster->GetGroup()->Lock();
-				for(GroupMembersSet::iterator itr = pGroup->GetGroupMembersBegin();
-					itr != pGroup->GetGroupMembersEnd(); ++itr)
-				{
-					if((*itr)->m_loggedInPlayer && m_caster != (*itr)->m_loggedInPlayer)
-						(*itr)->m_loggedInPlayer->GetSession()->SendPacket(pkt);
-				}
-				p_caster->GetGroup()->Unlock();
-			}
-			delete pkt;
-		}
-		else if(entry == 36727 || entry == 177193) // Portal of Summoning and portal of doom
-		{
-			PlayerPointer pTarget = p_caster->GetMapMgr()->GetPlayer((uint32)p_caster->GetSelection());
-			if(!pTarget)
-				return;
+				//enable it for party only
+				go->SetByte(GAMEOBJECT_BYTES_1, 0, 0);
 
-			go->m_ritualmembers[0] = p_caster->GetLowGUID();
-			go->m_ritualcaster = p_caster->GetLowGUID();
-			go->m_ritualtarget = pTarget->GetLowGUID();
-			go->m_ritualspell = m_spellInfo->Id;	 
-		}
-		else//Lightwell,if there is some other type -- add it
+				//disable by default
+				WorldPacket *pkt = go->BuildFieldUpdatePacket(GAMEOBJECT_BYTES_1, 1);
+				SubGroup * pGroup = p_caster->GetGroup() ? p_caster->GetGroup()->GetSubGroup(p_caster->GetSubGroup()) : NULL;
+
+				if(pGroup)
+				{
+					p_caster->GetGroup()->Lock();
+					for(GroupMembersSet::iterator itr = pGroup->GetGroupMembersBegin();
+						itr != pGroup->GetGroupMembersEnd(); ++itr)
+					{
+						if((*itr)->m_loggedInPlayer && m_caster != (*itr)->m_loggedInPlayer)
+							(*itr)->m_loggedInPlayer->GetSession()->SendPacket(pkt);
+					}
+					p_caster->GetGroup()->Unlock();
+				}
+				delete pkt;
+			}break;
+			case 194108:// Portal of Summoning and portal of doom
+			case 177193:
+			{
+				PlayerPointer pTarget = p_caster->GetMapMgr()->GetPlayer((uint32)p_caster->GetSelection());
+				if(!pTarget)
+					return;
+	
+				go->m_ritualmembers[0] = p_caster->GetLowGUID();
+				go->m_ritualcaster = p_caster->GetLowGUID();
+				go->m_ritualtarget = pTarget->GetLowGUID();
+				go->m_ritualspell = m_spellInfo->Id;	 
+			}break;
+			case 186811://Ritual of Souls, Ritual of Refreshment
+			case 181622:
+			case 193062:
+			case 193168:
+			{
+				go->m_ritualmembers[0] = p_caster->GetLowGUID();
+				go->m_ritualcaster = p_caster->GetLowGUID();
+				go->m_ritualtarget = 0;
+				go->m_ritualspell = m_spellInfo->Id;
+			}break;
+			case 186812: //Refreshment Tables and Soulwells
+			case 193061:
+			case 181621:
+			case 193169:
+			{
+				go->charges = goI->sound1;
+			}break;
+		/*else//Lightwell doesn't call object anymore now summon NPC, but we can make it work with an object still
 		{
-			go->charges=5;//Max 5 charges
+			go->charges=5;//Max 5 charges     
+		}*/
 		}
 		p_caster->SetSummonedObject(go);		
 	}
