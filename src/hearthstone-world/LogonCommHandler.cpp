@@ -34,6 +34,7 @@ LogonCommHandler::LogonCommHandler()
 	hash.UpdateData(logon_pass);
 	hash.Finalize();
 	memcpy(sql_passhash, hash.GetDigest(), 20);
+	ReConCounter = 0;
 }
 
 LogonCommHandler::~LogonCommHandler()
@@ -162,7 +163,16 @@ void LogonCommHandler::Connect(LogonServer * server)
 	if(bServerShutdown)
 		return;
 
-	Log.Notice("LogonCommClient", "Connecting to logonserver on `%s:%u`...", server->Address.c_str(), server->Port );
+	//if we reach 25 connect attemps, restart server.
+	//Temporary work around until we find out socket get's jammed.
+	++ReConCounter;
+	if(ReConCounter >25)
+	{
+		sWorld.QueueShutdown(0, SERVER_SHUTDOWN_TYPE_RESTART);
+		return;
+	}
+
+	Log.Notice("LogonCommClient", "Attempt %u out of 25 to logonserver on `%s:%u`", ReConCounter, server->Address.c_str(), server->Port );
 	server->RetryTime = (uint32)UNIXTIME + 10;
 	server->Registered = false;
 	LogonCommClientSocket * conn = ConnectToLogon(server->Address, server->Port);
@@ -191,7 +201,7 @@ void LogonCommHandler::Connect(LogonServer * server)
 	if(conn->authenticated != 1)
 	{
 		Log.Notice("LogonCommClient","Authentication failed.");
-		logons[server] = 0;
+		logons[server] = NULL;
 		conn->Disconnect();
 		return;
 	}
@@ -215,7 +225,7 @@ void LogonCommHandler::Connect(LogonServer * server)
 		if((uint32)UNIXTIME >= st)
 		{
 			Log.Notice("LogonCommClient", "Realm registration timed out.");
-			logons[server] = 0;
+			logons[server] = NULL;
 			conn->Disconnect();
 			break;
 		}
@@ -229,6 +239,9 @@ void LogonCommHandler::Connect(LogonServer * server)
 	Sleep(200);
 
 	Log.Notice("LogonCommClient", "Logonserver latency is %ums.", conn->latency);
+
+	// We have connected, reset our attempt counter.
+	ReConCounter = 0;
 }
 
 void LogonCommHandler::AdditionAck(uint32 ID, uint32 ServID)
