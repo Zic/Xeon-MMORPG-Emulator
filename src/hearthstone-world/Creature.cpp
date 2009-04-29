@@ -951,7 +951,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	BaseOffhandDamage[1]=GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
 	BaseRangedDamage[0]=GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-	BaseAttackType=proto->AttackType;
+	BaseAttackType = proto->AttackType <= SCHOOL_ARCANE ? proto->AttackType : SCHOOL_NORMAL ;
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 
@@ -1143,7 +1143,7 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	BaseOffhandDamage[1]=GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
 	BaseRangedDamage[0]=GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-	BaseAttackType=proto->AttackType;
+	BaseAttackType = proto->AttackType <= SCHOOL_ARCANE ? proto->AttackType : SCHOOL_NORMAL ;
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 
