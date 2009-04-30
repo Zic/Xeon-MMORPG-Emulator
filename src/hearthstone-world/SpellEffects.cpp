@@ -4985,20 +4985,20 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			ObjectPointer corpse = NULLOBJ;
 			for(Object::InRangeSet::iterator i = p_caster->GetInRangeSetBegin(); i != p_caster->GetInRangeSetEnd(); ++i)
 			{
-				if( (*i) && (*i)->IsUnit() )
+				if( (*i) && (*i)->IsCreature() )
 				{
 					if( TO_UNIT((*i))->getDeathState() == CORPSE)
 					{
 						corpse = (*i);
 						CreatureInfo *cn = TO_CREATURE( corpse )->GetCreatureName();
-							if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
+						if(cn && (cn->Type == HUMANOID || cn->Type == UNDEAD))
+						{
+							if(p_caster->GetDistance2dSq( corpse ) < rad)
 							{
-								if(p_caster->GetDistance2dSq( corpse ) < rad)
-								{
-									check = true;
-									break;
-								}
+								check = true;
+								break;
 							}
+						}
 					}
 				}
 			}
