@@ -1034,6 +1034,9 @@ void Group::UpdateAllOutOfRangePlayersFor(PlayerPointer pPlayer)
 void Group::HandleUpdateFieldChange(uint32 Index, PlayerPointer pPlayer)
 {
 	uint32 Flags = 0;
+	if( m_dirty )//sth has corrupted this, workaround
+		return;
+
 	m_groupLock.Acquire();
 	switch(Index)
 	{

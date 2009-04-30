@@ -355,7 +355,15 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 				CALL_SCRIPT_EVENT(m_Unit, OnDamageTaken)(pUnit, float(misc1));
 				if(!modThreatByPtr(pUnit, misc1))
 				{
-					m_aiTargets.insert(TargetMap::value_type(pUnit, misc1));
+					if( pUnit->IsPlayer() )
+					{
+						if( pUnit->mThreatRTarget )
+							m_aiTargets.insert(TargetMap::value_type(TO_PLAYER(pUnit->mThreatRTarget), misc1));
+						else
+							m_aiTargets.insert(TargetMap::value_type(pUnit, misc1));
+					}
+					else
+						m_aiTargets.insert(TargetMap::value_type(pUnit, misc1));
 				}
 				m_Unit->CombatStatus.OnDamageDealt(pUnit, 1);
 			}break;
@@ -1287,7 +1295,16 @@ bool AIInterface::HealReaction(UnitPointer caster, UnitPointer victim, uint32 am
 			//trgt.target = caster;
 			//trgt.threat = amount;
 			//m_aiTargets.push_back(trgt);
-			m_aiTargets.insert(TargetMap::value_type(caster, amount));
+			if( caster->IsPlayer() )
+			{
+				if( caster->mThreatRTarget )
+					m_aiTargets.insert(TargetMap::value_type(TO_PLAYER(caster->mThreatRTarget), amount));
+				else
+					m_aiTargets.insert(TargetMap::value_type(caster, amount));
+			}
+			else
+				m_aiTargets.insert(TargetMap::value_type(caster, amount));
+
 			return true;
 		}
 		return false;
@@ -1928,7 +1945,7 @@ void AIInterface::UpdateMove()
 		float DISTANCE_TO_SMALL_TO_WALK = c_reach - 1.0f <= 0.0f ? 1.0f : c_reach - 1.0f;
 
 		// don't move if we're well within combat range; rooted can't move neither
-		if( distance < DISTANCE_TO_SMALL_TO_WALK || creature->proto->CanMove == LIMIT_ROOT )
+		if( distance < DISTANCE_TO_SMALL_TO_WALK || (creature->proto && creature->proto->CanMove == LIMIT_ROOT ) )
 			return; 
 
 		// check if we're returning to our respawn location. if so, reset back to default orientation.
@@ -3101,14 +3118,51 @@ bool AIInterface::modThreatByPtr(UnitPointer obj, int32 mod)
 {
 	if(!obj)
 		return false;
+
+	if( obj->mThreatRTarget && mod > 0)
+	{
+		int32 partmod = float2int32(mod * obj->mThreatRAmount);
+		mod -= partmod;
+		UnitPointer robj = obj->mThreatRTarget;
+		if( partmod && robj && robj->isAlive() && obj->GetDistanceSq(robj) < 1600 )
+		{
+			TargetMap::iterator it = m_aiTargets.find(robj);
+			if(it != m_aiTargets.end())
+			{
+				it->second += partmod;
+				if((it->second + robj->GetThreatModifier()) > m_currentHighestThreat)
+				{
+					// new target!
+					if(!isTaunted)
+					{
+						m_currentHighestThreat = it->second + robj->GetThreatModifier();
+						SetNextTarget(robj);
+					}
+				}
+			}
+			else
+			{
+				m_aiTargets.insert( make_pair( robj, partmod ) );
+				if((partmod + robj->GetThreatModifier()) > m_currentHighestThreat)
+				{
+					if(!isTaunted)
+					{
+						m_currentHighestThreat = partmod + robj->GetThreatModifier();
+						SetNextTarget(robj);
+					}
+				}
+			}
+		}
+	}
+
 	TargetMap::iterator it = m_aiTargets.find(obj);
-	if(it != m_aiTargets.end())
+	if( it != m_aiTargets.end() )
 	{
 		it->second += mod;
-		if((it->second + obj->GetThreatModifier()) > m_currentHighestThreat)
+		if( (it->second + obj->GetThreatModifier()) > m_currentHighestThreat )
 		{
 			// new target!
-			if(!isTaunted)
+			if( !isTaunted )
 			{
 				m_currentHighestThreat = it->second + obj->GetThreatModifier();
 				SetNextTarget(obj);
@@ -3118,9 +3172,9 @@ bool AIInterface::modThreatByPtr(UnitPointer obj, int32 mod)
 	else
 	{
 		m_aiTargets.insert( make_pair( obj, mod ) );
-		if((mod + obj->GetThreatModifier()) > m_currentHighestThreat)
+		if( (mod + obj->GetThreatModifier()) > m_currentHighestThreat )
 		{
-			if(!isTaunted)
+			if( !isTaunted )
 			{
 				m_currentHighestThreat = mod + obj->GetThreatModifier();
 				SetNextTarget(obj);
@@ -3147,18 +3201,20 @@ void AIInterface::RemoveThreatByPtr(UnitPointer obj)
 {
 	if(!obj)
 		return;
+
 	TargetMap::iterator it = m_aiTargets.find(obj);
 	if(it != m_aiTargets.end())
 	{
 		m_aiTargets.erase(it);
 		//check if we are in combat and need a new target
-		if(obj==m_nextTarget)
+		if(obj == m_nextTarget)
 		{
 			m_nextTarget = GetMostHated();
 			//if there is no more new targets then we can walk back home ?
-			if(!m_nextTarget)
+			if( !m_nextTarget )
 				HandleEvent(EVENT_LEAVECOMBAT, m_Unit, 0);
-			SetNextTarget(m_nextTarget);
+			else
+				SetNextTarget(m_nextTarget);
 		}
 	}
 }

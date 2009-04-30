@@ -1395,7 +1395,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 
 			pGo->m_ritualcaster = _player->GetLowGUID();
 			pGo->m_ritualtarget = pPlayer->GetLowGUID();
-			pGo->m_ritualspell = 18540;	// meh
+			pGo->m_ritualspell = 61994;	// meh
 			pGo->PushToWorld(_player->GetMapMgr());
 
 			/* member one: the (w00t) caster */

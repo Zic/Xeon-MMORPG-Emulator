@@ -1111,8 +1111,14 @@ void Object::ModUnsigned32Value(uint32 index, int32 mod)
 		}
 	}
 
+
+
 	if(m_objectTypeId == TYPEID_PLAYER)
 	{
+		// mana and energy regen
+		if( index == UNIT_FIELD_POWER1 || index == UNIT_FIELD_POWER4 )
+			TO_PLAYER( shared_from_this() )->SendPowerUpdate();
+
 #ifdef OPTIMIZED_PLAYER_SAVING
 		switch(index)
 		{
@@ -1434,25 +1440,25 @@ bool Object::isInFront(ObjectPointer target)
 {
 	// check if we facing something ( is the object within a 180 degree slice of our positive y axis )
 
-	double x = target->GetPositionX() - m_position.x;
-	double y = target->GetPositionY() - m_position.y;
+    double x = target->GetPositionX() - m_position.x;
+    double y = target->GetPositionY() - m_position.y;
 
-	double angle = atan2( y, x );
-	angle = ( angle >= 0.0 ) ? angle : 2.0 * M_PI + angle;
+    double angle = atan2( y, x );
+    angle = ( angle >= 0.0 ) ? angle : 2.0 * M_PI + angle;
 	angle -= m_position.o;
 
-	while( angle > M_PI)
-		angle -= 2.0 * M_PI;
+    while( angle > M_PI)
+        angle -= 2.0 * M_PI;
 
-	while(angle < -M_PI)
-		angle += 2.0 * M_PI;
+    while(angle < -M_PI)
+        angle += 2.0 * M_PI;
 
 	// replace M_PI in the two lines below to reduce or increase angle
 
-	double left = -1.0 * ( M_PI / 2.0 );
-	double right = ( M_PI / 2.0 );
+    double left = -1.0 * ( M_PI / 2.0 );
+    double right = ( M_PI / 2.0 );
 
-	return( ( angle >= left ) && ( angle <= right ) );
+    return( ( angle >= left ) && ( angle <= right ) );
 }
 
 bool Object::isInBack(ObjectPointer target)
@@ -1671,10 +1677,17 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			plr->m_bg->UpdatePvPData();
 		}
 	}
+
+	// Nerves of Steel
+	if( pVictim->HasDummyAura(SPELL_HASH_NERVES_OF_STEEL) )
+	{
+		if( pVictim->IsStunned() || pVictim->m_fearmodifiers )
+			damage *= 0.7f;
+	}
    
 	uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
 
-	if(health <= damage && pVictim->IsPlayer() && pVictim->getClass() == ROGUE && TO_PLAYER(pVictim)->m_lastCheatDeath + 60000 < (uint32)UNIXTIME)
+	if(health <= damage && pVictim->IsPlayer() && pVictim->getClass() == ROGUE && pVictim->m_CustomTimers[CUSTOM_TIMER_CHEATDEATH] <= getMSTime() )
 	{
 		PlayerPointer plrVictim = TO_PLAYER(pVictim);
 		uint32 rank = plrVictim->m_cheatDeathRank;
@@ -1684,11 +1697,11 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		{
 			// Proc that cheating death!
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(45182);
-			SpellPointer spell(new Spell(pVictim,spellInfo,true,NULLAURA));
+			SpellPointer spell(new Spell(pVictim, spellInfo, true, NULLAURA));
 			SpellCastTargets targets;
 			targets.m_unitTarget = pVictim->GetGUID();
 			spell->prepare(&targets);
-			TO_PLAYER(pVictim)->m_lastCheatDeath = (uint32)UNIXTIME;
+			TO_PLAYER(pVictim)->m_CustomTimers[CUSTOM_TIMER_CHEATDEATH] = getMSTime()+60000;
 
 			// Why return? So this damage isn't counted. ;)
 			// On official, it seems Blizzard applies it's Cheating Death school absorb aura for 1 msec, but it's too late
@@ -1756,6 +1769,13 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		//warlock - seed of corruption
 		if( IsUnit() )
 		{
+			if( pVictim->HasDummyAura(SPELL_HASH_GUARDIAN_SPIRIT) )
+			{
+				pVictim->CastSpell(pVictim, 48153, true);
+				pVictim->RemoveDummyAura(SPELL_HASH_GUARDIAN_SPIRIT);
+				return;
+			}
+
 			if( IsPlayer() && pVictim->IsUnit() && !pVictim->IsPlayer() && m_mapMgr->m_battleground && m_mapMgr->m_battleground->GetType() == BATTLEGROUND_ALTERAC_VALLEY )
 				TO_ALTERACVALLEY(m_mapMgr->m_battleground)->HookOnUnitKill( plr_shared_from_this(), pVictim );
 			SpellEntry *killerspell;
@@ -1896,8 +1916,8 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 					if( plrVictim->Cooldown_CanCast( m_reincarnSpellInfo ) )
 					{
 						uint32 ankh_count = plrVictim->GetItemInterface()->GetItemCount( 17030 );
-						if( ankh_count )
-							self_res_spell = 21169;
+					if( ankh_count || TO_PLAYER(plrVictim)->HasDummyAura(SPELL_HASH_GLYPH_OF_RENEWED_LIFE ))
+						self_res_spell = 21169;
 					}
 				}
 			}
@@ -1921,9 +1941,6 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			unit_shared_from_this()->addStateFlag( UF_TARGET_DIED );
 
 		}
-
-		//so now we are completely dead
-		//lets see if we have spirit of redemption
 		if( pVictim->IsPlayer() )
 		{
 			if( TO_PLAYER( pVictim)->HasSpell( 20711 ) ) //check for spirit of Redemption
@@ -1940,11 +1957,11 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		}
 		/* -------------------------------- HONOR + BATTLEGROUND CHECKS ------------------------ */
 		plr = NULLPLR;
-		if( pKiller && pKiller->IsPlayer() )
-			plr = TO_PLAYER( pKiller );
-		else if(pKiller && pKiller->IsPet())
-			plr = TO_PET( pKiller )->GetPetOwner();
-		
+		if( IsPlayer() )
+			plr = TO_PLAYER( shared_from_this() );
+		else if( IsPet())
+			plr = TO_PET( shared_from_this() )->GetPetOwner();
+
 		if( plr != NULL)
 		{
 			if( plr->m_bg != NULL )
@@ -1998,13 +2015,26 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 
 		if(pVictim->GetTypeId() == TYPEID_UNIT)
 		{
+			//--------------------------------- POSSESSED CREATURES -----------------------------------------
+			if( pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED_CREATURE) )
+			{//remove possess aura from controller
+				PlayerPointer vController = GetMapMgr()->GetPlayer( (uint32)pVictim->GetUInt64Value(UNIT_FIELD_CHARMEDBY) );
+				if( vController )
+				{
+					if( vController->GetUInt64Value( UNIT_FIELD_CHARM ) )//make sure he is target controller
+					{
+						vController->UnPossess();
+					}
+				}
+			}
+			//--------------------------------- PARTY LOG -----------------------------------------
 			pVictim->GetAIInterface()->OnDeath( shared_from_this() );
 			if(GetTypeId() == TYPEID_PLAYER)
 			{
 				WorldPacket data(SMSG_PARTYKILLLOG, 16);
 				data << GetGUID() << pVictim->GetGUID();
 				SendMessageToSet(&data, true);
-			}			
+			}
 
 			// it Seems that pets some how dont get a name and cause a crash here
 			//bool isCritter = (pVictim->GetCreatureName() != NULL)? pVictim->GetCreatureName()->Type : 0;
@@ -2028,7 +2058,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 				else
 				{
 					uint32 xp = CalculateXpToGive( pVictim, unit_shared_from_this() );
-					if( xp > 0 )
+					if( xp > 0 && xp < 60000 )
 					{
 						player_shared_from_this()->GiveXP( xp, victimGuid, true );
 						if( player_shared_from_this()->GetSummon() && player_shared_from_this()->GetSummon()->GetUInt32Value( UNIT_CREATED_BY_SPELL ) == 0 )
@@ -2152,8 +2182,39 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 					TO_CREATURE( pVictim )->GetAIInterface()->AttackReaction( unit_shared_from_this(), damage, spellId );
 				}
 			}
+
+			if( IsUnit() && TO_UNIT( shared_from_this() )->HasDummyAura( SPELL_HASH_MARK_OF_BLOOD ) )
+			{
+				TO_UNIT( shared_from_this() )->CastSpell( pVictim, 50424, true );
+			}
+			else if( IsPlayer() && spellId )
+			{
+				PlayerPointer plra = TO_PLAYER(shared_from_this());
+				SpellEntry *spentry = dbcSpell.LookupEntry( spellId );
+				if( plra->HasDummyAura(SPELL_HASH_ERADICATION) && plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] <= getMSTime() )
+				{
+					if( spentry->NameHash == SPELL_HASH_CORRUPTION && Rand(spentry->RankNumber * 3 + 1) )
+					{
+						SpellPointer sp(new Spell(shared_from_this(), dbcSpell.LookupEntry(47274), true, NULLAURA));
+						SpellCastTargets targets;
+						targets.m_unitTarget = plra->GetGUID();
+						sp->prepare(&targets);
+						plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] = getMSTime() + 30000;
+					}
+				}
+				else if( plra->HasDummyAura(SPELL_HASH_PANDEMIC) && (spentry->NameHash == SPELL_HASH_CORRUPTION || spentry->NameHash == SPELL_HASH_UNSTABLE_AFFLICTION) )
+				{
+					if( Rand( plra->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1_5) ) && pVictim )
+					{
+						SpellPointer sp(new Spell(shared_from_this(), dbcSpell.LookupEntry(58691), true, NULLAURA));
+						SpellCastTargets targets;
+						targets.m_unitTarget = pVictim->GetGUID();
+						sp->forced_basepoints[0] = float2int32(damage * ( spentry->RankNumber * 0.33f + 0.01f));
+						sp->prepare(&targets);
+					}
+				}
+			}	
 		}
-		
 		// TODO: Mark victim as a HK
 		/*if( TO_PLAYER( pVictim )->GetCurrentBattleground() != NULL && player_shared_from_this()->GetCurrentBattleground() != NULL)
 		{
@@ -2164,7 +2225,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 	}
 }
 
-void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage, bool no_remove_auras)
+void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage, bool no_remove_auras, uint32 AdditionalCritChance)
 {
 //==========================================================================================
 //==============================Unacceptable Cases Processing===============================
@@ -2201,8 +2262,10 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 	if( IsUnit() && !static_damage )
 	{
 		caster->RemoveAurasByInterruptFlag( AURA_INTERRUPT_ON_START_ATTACK );
-
-		res += caster->GetSpellBonusDamage( pVictim, spellInfo, ( int )res, false );
+		// these already got bonus :P
+		if( spellInfo->NameHash != SPELL_HASH_EXPLOSIVE_SHOT && spellInfo->NameHash != SPELL_HASH_MIND_FLAY )
+			res = caster->GetSpellBonusDamage( pVictim, spellInfo, ( int )res, false, false );
+		
 		res_after_spelldmg = res;
 //==========================================================================================
 //==============================Post +SpellDamage Bonus Modifications=======================
@@ -2229,8 +2292,9 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 				{
 					CritChance = 5.0f; // static value for mobs.. not blizzlike, but an unfinished formula is not fatal :)
 				}
+				CritChance += AdditionalCritChance;
 				if( pVictim->IsPlayer() )
-				CritChance -= TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_RANGED_CRIT_RESILIENCE );
+					CritChance -= TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_RANGED_CRIT_RESILIENCE );
 			}
 			else if( spellInfo->is_melee_spell )
 			{
@@ -2243,6 +2307,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 				{
 					CritChance += TO_PLAYER(pVictim)->res_R_crit_get(); //this could be ability but in that case we overwrite the value
 				}
+				CritChance += AdditionalCritChance;
 				// Resilience
 				CritChance -= pVictim->IsPlayer() ? TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_MELEE_CRIT_RESILIENCE ) : 0.0f;
 				// Victim's (!) crit chance mod for physical attacks?
@@ -2260,6 +2325,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 					SM_FFValue(caster->SM[SMT_CRITICAL][0], &CritChance, spellInfo->SpellGroupType);
 					SM_PFValue(caster->SM[SMT_CRITICAL][1], &CritChance, spellInfo->SpellGroupType);
 				}
+				CritChance += AdditionalCritChance;
 				if( pVictim->IsPlayer() )
 					CritChance -= TO_PLAYER(pVictim)->CalcRating( PLAYER_RATING_MODIFIER_SPELL_CRIT_RESILIENCE );
 			}
@@ -2335,11 +2401,26 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 		// [Mage] Hot Streak
 		if (!(aproc & PROC_ON_SPELL_CRIT_HIT))
 			caster->m_hotStreakCount = 0;
+
+		if( aproc & PROC_ON_SPELL_CRIT_HIT && caster->HasDummyAura(SPELL_HASH_ECLIPSE))
+		{
+			if( caster->m_CustomTimers[CUSTOM_TIMER_ECLIPSE] <= getMSTime() )
+			{
+				caster->m_CustomTimers[CUSTOM_TIMER_ECLIPSE] = getMSTime() + MSTIME_SECOND*30;
+				if( spellInfo->NameHash == SPELL_HASH_STARFIRE )
+				{
+					caster->CastSpell( caster, 48517, true );
+				}else if( spellInfo->NameHash == SPELL_HASH_WRATH )
+				{
+					caster->CastSpell( caster, 48518, true );
+				}
+			}
+		}
 	}
 
 //------------------------------absorption--------------------------------------------------	
 	uint32 ress=(uint32)res;
-	uint32 abs_dmg = pVictim->AbsorbDamage(school, &ress, dbcSpell.LookupEntryForced(spellID));
+	uint32 abs_dmg = pVictim->AbsorbDamage(shared_from_this(), school, &ress, dbcSpell.LookupEntryForced(spellID));
 	uint32 ms_abs_dmg= pVictim->ManaShieldAbsorb(ress, dbcSpell.LookupEntryForced(spellID));
 	if (ms_abs_dmg)
 	{
@@ -2388,9 +2469,11 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 //==========================================================================================
 //==============================Data Sending ProcHandling===================================
 //==========================================================================================
-	SendSpellNonMeleeDamageLog(shared_from_this(), pVictim, spellID, float2int32(res), school, abs_dmg, dmg.resisted_damage, false, 0, critical, IsPlayer());
 
 	int32 ires = float2int32(res);
+
+	SendSpellNonMeleeDamageLog(shared_from_this(), pVictim, spellID, float2int32(res), school, abs_dmg, dmg.resisted_damage, false, 0, critical, IsPlayer());
+
 	if( ires > 0 )
 	{
 		// only deal damage if its >0
@@ -2412,10 +2495,8 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 	}
 	if( IsPlayer() )
 	{
-			player_shared_from_this()->m_casted_amount[school] = ( uint32 )res;
+		player_shared_from_this()->m_casted_amount[school] = ( uint32 )res;
 	}
-
-	
 
 	if( (dmg.full_damage == 0 && abs_dmg) == 0 )
     {
@@ -2427,23 +2508,9 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 //==========================================================================================
 //==============================Post Damage Processing======================================
 //==========================================================================================
-	if( (int32)dmg.resisted_damage == dmg.full_damage && !abs_dmg )
-	{
-		//Magic Absorption
-		if( pVictim->IsPlayer() )
-		{
-			if( TO_PLAYER( pVictim )->m_RegenManaOnSpellResist )
-			{
-				PlayerPointer pl = TO_PLAYER( pVictim );
-				uint32 maxmana = pl->GetUInt32Value( UNIT_FIELD_MAXPOWER1 );
+	if( caster && (int32)dmg.resisted_damage == dmg.full_damage && !abs_dmg )
+		caster->HandleProc(PROC_ON_FULL_RESIST, pVictim, spellInfo);
 
-				//TODO: wtf is this ugly mess of casting bullshit
-				uint32 amount = uint32(float( float(maxmana)*pl->m_RegenManaOnSpellResist));
-
-				pVictim->Energize( pVictim, 29442, amount, POWER_TYPE_MANA );
-			}
-		}
-	}
 	if( school == SHADOW_DAMAGE )
 	{
 		if( IsPlayer() && unit_shared_from_this()->isAlive() && plr_shared_from_this()->getClass() == PRIEST )
@@ -2455,7 +2522,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 			if( spellID == 32379 || spellID == 32996 ) 
 			{
 				uint32 damage = (uint32)( res + abs_dmg );
-				uint32 absorbed = unit_shared_from_this()->AbsorbDamage( school, &damage, dbcSpell.LookupEntryForced(spellID) );
+				uint32 absorbed = unit_shared_from_this()->AbsorbDamage(shared_from_this(), school, &damage, dbcSpell.LookupEntryForced(spellID) );
 				DealDamage( unit_shared_from_this(), damage, 2, 0, spellID );
 				SendSpellNonMeleeDamageLog( shared_from_this(), unit_shared_from_this(), spellID, damage, school, absorbed, 0, false, 0, false, IsPlayer() );
 			}

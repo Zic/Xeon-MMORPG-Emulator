@@ -718,6 +718,9 @@ void WorldLog::LogPacket(uint32 len, uint16 opcode, const uint8* data, uint8 dir
 
 void FastGUIDPack(ByteBuffer & buf, const uint64 & oldguid)
 {
+	if( &oldguid == NULL )
+		return;
+
 	// hehe speed freaks
 	uint8 guidmask = 0;
 	uint8 guidfields[9] = {0,0,0,0,0,0,0,0};

@@ -236,6 +236,9 @@ uint32 CalculateXpToGive(UnitPointer pVictim, UnitPointer pAttacker)
 			break;
 		}
 	}
+	if( xp < 0 )//probably caused incredible wrong exp
+		xp = 0;
+
 	return (uint32)xp;
 	/*const float ZD[PLAYER_LEVEL_CAP+1] = {1,5,5,5,5,5,5,5,6,6,7,7,8,8,8,9,9,9,9,9,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,14,14,14,14,14,15,15,15,15,15,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,17};
 	float temp = 0;
@@ -662,6 +665,7 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 		min_damage += bonus;
 		max_damage += bonus;
 	}
+
 	float diff = fabs(max_damage - min_damage);
 	float result = min_damage;
 
@@ -670,28 +674,6 @@ uint32 CalculateDamage( UnitPointer pAttacker, UnitPointer pVictim, uint32 weapo
 
 	if(result >= 0)
 	{
-		if( pAttacker->IsPlayer() )
-		{
-			PlayerPointer pl = TO_PLAYER(pAttacker);
-			if( pl->m_outStealthDamageBonusPct )
-			{
-				if( pl->InStealth() )
-				{
-					result *= ((float(TO_PLAYER(pAttacker)->m_outStealthDamageBonusPct) / 100.0f) + 1.0f);
-				}
-				else
-				{
-					if( pl->m_outStealthDamageBonusTimer )
-					{
-						if( (uint32)UNIXTIME >= pl->m_outStealthDamageBonusTimer )
-							pl->m_outStealthDamageBonusTimer = 0;
-						else
-							result *= ((float(TO_PLAYER(pAttacker)->m_outStealthDamageBonusPct) / 100.0f) + 1.0f);							
-					}
-				}
-			}				
-		}
-
 		return FL2UINT(result * appbonuspct);
 	}
 

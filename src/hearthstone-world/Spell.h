@@ -104,6 +104,7 @@ enum SUMMON_TYPE
 	SUMMON_TYPE_TOTEM_4 = 83,
 	SUMMON_TYPE_SUMMON = 67,
 	SUMMON_TYPE_CRITTER = 41,
+	SUMMON_TYPE_GHOUL = 829,
 };
 
 //wooohooo, there are 19 spells that actually require to add a proccounter for these 
@@ -142,7 +143,7 @@ enum SPELL_MODIFIER_TYPE
     // 25 dont exist spells with it
     // 26 is obsolete stuff
     SMT_MULTIPLE_VALUE      =27,// mana lost cost per point of damage taken for mana shield,Health or Mana gained from Drain Life and Drain Mana increased by x%.
-    SMT_RESIST_DISPEL       =28,// TODO NEEDS WORK :D
+    SMT_RESIST_DISPEL       =28,// GOOD
 	// 29 Mod Crowd Damage Test 45365 - Increases the critical strike damage bonus of your Frost spells by 100%
 };
 
@@ -287,7 +288,7 @@ enum procFlags
     PROC_ON_CRIT_ATTACK             = 0x1000,
     PROC_ON_RANGED_ATTACK_VICTIM    = 0x2000,
 //    PROC_ANYTIME                    = 0x4000,
-    PROC_ON_PRE_DISPELL_AURA_VICTIM = 0x4000,
+    PROC_ON_DISPEL_AURA_VICTIM		= 0x4000,
 //    PROC_UNK2_DEFILLED              = 0x8000,
 	PROC_ON_SPELL_LAND_VICTIM       = 0x8000,//custom flag. PROC only when spell landed on victim
     PROC_ON_CAST_SPECIFIC_SPELL     = 0x10000,
@@ -299,7 +300,7 @@ enum procFlags
 	PROC_ON_TRAP_TRIGGER            = 0x200000, //triggers on trap activation)
     PROC_ON_AUTO_SHOT_HIT           = 0x400000,
     PROC_ON_ABSORB                  = 0x800000,
-    PROC_ON_RESIST_VICTIM           = 0x1000000,//added it as custom, maybe already exists in another form ?
+	PROC_ON_FULL_RESIST		        = 0x1000000,//added it as custom, maybe already exists in another form ?
     PROC_ON_DODGE_VICTIM            = 0x2000000,//added it as custom, maybe already exists in another form ?
     PROC_ON_DIE                     = 0x4000000,//added it as custom, maybe already exists in another form ?
     PROC_REMOVEONUSE                = 0x8000000,//remove prochcharge only when it is used
@@ -1040,6 +1041,7 @@ enum SpellTypes // SPELL_ENTRY_buffType
     SPELL_TYPE_WARRIOR_SHOUT        = 0x00400000,
 	SPELL_TYPE_DK_PRESENCE          = 0x00800000,
 	SPELL_TYPE_JUDGEMENT			= 0x01000000,
+	SPELL_TYPE_HASTE				= 0x02000000,
 };
 
 //custom stuff generated for spells that will not change in time
@@ -1051,7 +1053,7 @@ enum SpellIsFlags
     SPELL_FLAG_IS_REQUIRECOOLDOWNUPDATE	= 0x00000008, //it started with rogue cold blood but i'm sure others will come
     SPELL_FLAG_IS_POISON				= 0x00000010, //rogue has a few spells that can stack so can't use the spell_type enum ;)
     SPELL_FLAG_IS_FINISHING_MOVE		= 0x00000020, //rogue has a few spells that can stack so can't use the spell_type enum ;)
-    SPELL_FLAG_IS_NOT_USING_DMG_BONUS	= 0x00000040, 
+    // UNUSED							= 0x00000040,
     SPELL_FLAG_IS_CHILD_SPELL			= 0x00000080, //auras proc auras that have same name, these should not remove mother aura when adding to target
     SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_ON_PET		= 0x00000100, //we should cast these on pet too
     SPELL_FLAG_IS_CASTED_ON_PET_SUMMON_PET_OWNER	= 0x00000200, //we should cast these on owner too
@@ -1068,6 +1070,19 @@ enum SpellIsFlags
 	SPELL_FLAG_ON_ONLY_ONE_TARGET		= 0x00100000,
 	SPELL_FLAG_IS_NOT_RESISTABLE		= 0x00200000,
 	SPELL_FLAG_PIERCES_ABSORBTION_EFF	= 0x00400000,
+	SPELL_FLAG_CASTED_ON_FRIENDS		= 0x00800000,
+	SPELL_FLAG_CASTED_ON_ENEMIES		= 0x01000000,
+};
+
+enum PoisonTypes
+{
+	POISON_TYPE_DEADLY			= 1,
+	POISON_TYPE_WOUND			= 2,
+	POISON_TYPE_INSTANT			= 3,
+	POISON_TYPE_MIND_NUMBING	= 4,
+	POISON_TYPE_CRIPPLING		= 5,
+	POISON_TYPE_SCORPID			= 6,
+
 };
 
 enum SpellCoefficientsFlags
@@ -1079,12 +1094,114 @@ enum SpellCoefficientsFlags
 	SPELL_FLAG_ADITIONAL_EFFECT			= 0x00000008, //Spells with aditional effect not DD or DoT or HoT
 };
 
+enum AreaAuraTargets
+{
+	AA_TARGET_PARTY				= 0x01,
+	AA_TARGET_RAID				= 0x02,
+	AA_TARGET_ALLFRIENDLY		= 0x04,
+	AA_TARGET_ALLENEMIES		= 0x08,
+	AA_TARGET_PET				= 0x10,
+	AA_TARGET_NOTSELF			= 0x20,
+};
+
 HEARTHSTONE_INLINE bool CanAgroHash(uint32 spellhashname)
 {
-    if (spellhashname == 4287212498UL) //hunter's mark
+    if (spellhashname == SPELL_HASH_HUNTER_S_MARK || spellhashname == SPELL_HASH_SAP ) //hunter's mark
         return false;
     else
         return true;
+}
+
+HEARTHSTONE_INLINE bool IsCastedOnFriends(SpellEntry *sp)
+{
+	for( int frloop = 0; frloop < 3; frloop++ )
+	{
+		switch (sp->EffectImplicitTargetA[frloop])
+		{
+			case 1:		//EFF_TARGET_SELF
+			case 4:		
+			case 5:		//EFF_TARGET_PET
+			case 20:	//EFF_TARGET_ALL_PARTY_AROUND_CASTER
+			case 21:	//EFF_TARGET_SINGLE_FRIEND
+			case 27:	//EFF_TARGET_PET_MASTER
+			case 30:	//EFF_TARGET_ALL_FRIENDLY_IN_AREA
+			case 31:	//EFF_TARGET_ALL_TARGETABLE_AROUND_LOCATION_IN_RADIUS_OVER_TIME
+			case 32:	//EFF_TARGET_MINION
+			case 33:	//EFF_TARGET_ALL_PARTY_IN_AREA
+			case 35:	//EFF_TARGET_SINGLE_PARTY
+			case 37:	//EFF_TARGET_ALL_PARTY
+			case 41:	//EFF_TARGET_TOTEM_EARTH
+			case 42:	//EFF_TARGET_TOTEM_WATER
+			case 43:	//EFF_TARGET_TOTEM_AIR
+			case 44:	//EFF_TARGET_TOTEM_FIRE
+			case 45:	//EFF_TARGET_CHAIN
+			case 56:
+			case 57:	//EFF_TARGET_PARTY_MEMBER
+			case 61:	//EFF_TARGET_AREAEFFECT_PARTY_AND_CLASS
+				return true;
+		}
+
+		switch (sp->EffectImplicitTargetB[frloop])
+		{
+			case 1:		//EFF_TARGET_SELF
+			case 4:		
+			case 5:		//EFF_TARGET_PET
+			case 20:	//EFF_TARGET_ALL_PARTY_AROUND_CASTER
+			case 21:	//EFF_TARGET_SINGLE_FRIEND	
+			case 27:	//EFF_TARGET_PET_MASTER
+			case 30:	//EFF_TARGET_ALL_FRIENDLY_IN_AREA
+			case 31:	//EFF_TARGET_ALL_TARGETABLE_AROUND_LOCATION_IN_RADIUS_OVER_TIME
+			case 32:	//EFF_TARGET_MINION
+			case 33:	//EFF_TARGET_ALL_PARTY_IN_AREA
+			case 35:	//EFF_TARGET_SINGLE_PARTY
+			case 37:	//EFF_TARGET_ALL_PARTY
+			case 41:	//EFF_TARGET_TOTEM_EARTH
+			case 42:	//EFF_TARGET_TOTEM_WATER
+			case 43:	//EFF_TARGET_TOTEM_AIR
+			case 44:	//EFF_TARGET_TOTEM_FIRE
+			case 45:	//EFF_TARGET_CHAIN
+			case 56:
+			case 57:	//EFF_TARGET_PARTY_MEMBER
+			case 61:	//EFF_TARGET_AREAEFFECT_PARTY_AND_CLASS
+				return true;
+		}
+	}
+	return false;
+}
+
+HEARTHSTONE_INLINE bool IsCastedOnEnemies(SpellEntry *sp)
+{
+	for( int frloop = 0; frloop < 3; frloop++ )
+	{
+		switch (sp->EffectImplicitTargetA[frloop])
+		{
+			case 6:		//EFF_TARGET_SINGLE_ENEMY
+			case 8:		//EFF_TARGET_ALL_TARGETABLE_AROUND_LOCATION_IN_RADIUS
+			case 15:	//EFF_TARGET_ALL_ENEMY_IN_AREA
+			case 16:	//EFF_TARGET_ALL_ENEMY_IN_AREA_INSTANT
+			case 22:	//EFF_TARGET_ALL_ENEMIES_AROUND_CASTER
+			case 24:	//EFF_TARGET_IN_FRONT_OF_CASTER
+			case 28:	//EFF_TARGET_ALL_ENEMY_IN_AREA_CHANNELED
+			case 54:	//EFF_TARGET_TARGET_AT_ORIENTATION_TO_CASTER
+			case 77:	//EFF_TARGET_SELECTED_ENEMY_CHANNELED
+				return true;
+		}
+
+		switch (sp->EffectImplicitTargetB[frloop])
+		{
+			case 6:		//EFF_TARGET_SINGLE_ENEMY
+			case 8:		//EFF_TARGET_ALL_TARGETABLE_AROUND_LOCATION_IN_RADIUS
+			case 15:	//EFF_TARGET_ALL_ENEMY_IN_AREA
+			case 16:	//EFF_TARGET_ALL_ENEMY_IN_AREA_INSTANT
+			case 22:	//EFF_TARGET_ALL_ENEMIES_AROUND_CASTER
+			case 24:	//EFF_TARGET_IN_FRONT_OF_CASTER
+			case 28:	//EFF_TARGET_ALL_ENEMY_IN_AREA_CHANNELED
+			case 54:	//EFF_TARGET_TARGET_AT_ORIENTATION_TO_CASTER
+			case 77:	//EFF_TARGET_SELECTED_ENEMY_CHANNELED
+				return true;
+		}
+	}
+	return false;
 }
 
 /************************************************************************/
@@ -1092,6 +1209,9 @@ HEARTHSTONE_INLINE bool CanAgroHash(uint32 spellhashname)
 /************************************************************************/
 HEARTHSTONE_INLINE bool IsDamagingSpell(SpellEntry *sp)
 {
+	if( sp->NameHash == SPELL_HASH_MUTILATE )
+		return true;
+
 	for (uint32 i = 0; i < 3; i++)
 	{
 		switch (sp->Effect[i])
@@ -1102,8 +1222,10 @@ HEARTHSTONE_INLINE bool IsDamagingSpell(SpellEntry *sp)
 			case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
 			case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
 			case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+			case SPELL_EFFECT_WEAPON_DAMAGE:
 			case SPELL_EFFECT_POWER_BURN:
 			case SPELL_EFFECT_ATTACK:
+			case SPELL_EFFECT_DUMMYMELEE:
 				return true;
 
 			case SPELL_EFFECT_APPLY_AURA:
@@ -1446,7 +1568,9 @@ HEARTHSTONE_INLINE bool IsFlyingSpell(SpellEntry *sp)
 		sp->EffectApplyAuraName[1] == 208 || 
 
 		sp->NameHash == SPELL_HASH_SWIFT_FLIGHT_FORM ||
-		sp->NameHash == SPELL_HASH_FLIGHT_FORM )
+		sp->NameHash == SPELL_HASH_FLIGHT_FORM ||
+		sp->NameHash == SPELL_HASH_MAGNIFICENT_FLYING_CARPET ||
+		sp->NameHash == SPELL_HASH_FLYING_CARPET )
 	{
 		return true;
 	}
@@ -1456,8 +1580,10 @@ HEARTHSTONE_INLINE bool IsFlyingSpell(SpellEntry *sp)
 
 HEARTHSTONE_INLINE bool IsTargetingStealthed(SpellEntry *sp)
 {
-	if(
-			sp->EffectImplicitTargetA[0]==EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS ||
+	if(	sp->Id == 3600 )
+		return false;
+
+	if(		sp->EffectImplicitTargetA[0]==EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS ||
 			sp->EffectImplicitTargetA[1]==EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS ||
 			sp->EffectImplicitTargetA[2]==EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS ||
 			sp->EffectImplicitTargetB[0]==EFF_TARGET_INVISIBLE_OR_HIDDEN_ENEMIES_AT_LOCATION_RADIUS ||
@@ -1570,8 +1696,6 @@ public:
     bool TakePower();
     // Has power?
     bool HasPower();
-    // Trigger Spell function that triggers triggered spells
-    void TriggerSpell();
     // Checks the caster is ready for cast
     uint8 CanCast(bool);
     // Removes reagents, ammo, and items/charges
@@ -1848,7 +1972,15 @@ public:
 					switch(m_spellInfo->NameHash)
 					{
 					case SPELL_HASH_CURSE_OF_TONGUES:
+					case SPELL_HASH_BANISH:
 						this->Dur = 10000;
+					}
+				}
+				if( m_spellInfo->NameHash == SPELL_HASH_THORNS && unitTarget && p_caster && unitTarget == p_caster )
+				{
+					if( p_caster->HasDummyAura( SPELL_HASH_GLYPH_OF_THORNS ) )
+					{
+						Dur += (p_caster->GetDummyAura( SPELL_HASH_GLYPH_OF_THORNS )->EffectBasePoints[0]+1) * MSTIME_MINUTE;
 					}
 				}
             }
@@ -1933,7 +2065,6 @@ public:
    
     int32 damageToHit;
     uint32 castedItemId;
-    bool judgement;
 	uint8 extra_cast_number;
 	uint32 m_glyphIndex;
 	uint32 m_pushbackCount;

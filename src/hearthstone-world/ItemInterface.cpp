@@ -1801,9 +1801,13 @@ int8 ItemInterface::CanEquipItemInSlot(int8 DstInvSlot, int8 slot, ItemPrototype
 		}
 	case EQUIPMENT_SLOT_OFFHAND:
 		{
-			if(m_pOwner->titanGrip && (type == INVTYPE_2HWEAPON || type == INVTYPE_SHIELD))
+			if( m_pOwner->titanGrip && (
+				proto->SubClass == ITEM_SUBCLASS_WEAPON_TWOHAND_SWORD ||
+				proto->SubClass == ITEM_SUBCLASS_WEAPON_TWOHAND_AXE ||
+				proto->SubClass == ITEM_SUBCLASS_WEAPON_TWOHAND_MACE|| 
+				type == INVTYPE_SHIELD) )
 				return 0;	// Titan's Grip
-
+			
 			if(type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND)
 			{
 				ItemPointer mainweapon = GetInventoryItem(EQUIPMENT_SLOT_MAINHAND);

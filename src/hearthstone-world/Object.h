@@ -457,7 +457,7 @@ public:
 	float m_base_runSpeed;
 	float m_base_walkSpeed;
 
-	void SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false);
+	void SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 damage, bool allowProc, bool static_damage = false, bool no_remove_auras = false, uint32 AdditionalCritChance = 0);
 	
 	//*****************************************************************************************
 	//* SpellLog packets just to keep the code cleaner and better to read

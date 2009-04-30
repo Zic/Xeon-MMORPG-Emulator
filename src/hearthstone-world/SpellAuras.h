@@ -255,15 +255,18 @@ enum MOD_TYPES
     SPELL_AURA_INCREASE_CASTING_TIME_PCT = 216,
     SPELL_AURA_REGEN_MANA_STAT_PCT=219,
     SPELL_AURA_HEALING_STAT_PCT=220,
+	SPELL_AURA_REDUCE_AOE_DAMAGE_TAKEN = 229,
     SPELL_AURA_INCREASE_MAX_HEALTH=230,//Used by Commanding Shout
 	SPELL_AURA_VEHICLE_PASSENGER=236,
 	SPELL_AURA_MODIFY_AXE_SKILL=240,
 	SPELL_AURA_ADD_HEALTH=250,
+	SPELL_AURA_MOD_DOT_DAMAGE_DONE_BY_MECHANIC=255,
 	SPELL_AURA_NO_REAGENT=256,
 	SPELL_AURA_SET_PHASE=261,
 	SPELL_AURA_FROZEN_TARGET=262,
 	SPELL_AURA_INCREASE_AP_BY_ATTRIBUTE=268,
 	SPELL_AURA_INCREASE_SPELL_DOT_DAMAGE_PCT = 271,
+	SPELL_AURA_REDIRECT_THREAT = 277,
 	SPELL_AURA_IGNORE_ARMOR_PCT=280,
 	SPELL_AURA_MOD_BASE_HEALTH = 282,
     TOTAL_SPELL_AURAS = 283,
@@ -666,7 +669,11 @@ public:
 	void SpellAuraNoReagent(bool apply);
 	void SpellAuraCastFilter(bool apply);
 	void SpellAuraModBaseHealth(bool apply);
-
+	void SpellAuraModDamageTakenByMechPCT(bool apply);
+	void SpellAuraAddCreatureImmunity(bool apply);
+	void SpellAuraRedirectThreat(bool apply);
+	void SpellAuraReduceAOEDamageTaken(bool apply);
+	
 	void UpdateAuraModDecreaseSpeed();
 
 	void SendModifierLog(int32 ** m,int32 v,uint32 *mask,uint8 type,bool pct = false);
@@ -773,7 +780,7 @@ protected:
 
 	void SendInterrupted(uint8 result, ObjectPointer m_caster);
 	void SendChannelUpdate(uint32 time, ObjectPointer m_caster);
-	void SetModAmount();
+	void SpecialCases();
 public:
 	bool m_deleted;
 	bool m_added;

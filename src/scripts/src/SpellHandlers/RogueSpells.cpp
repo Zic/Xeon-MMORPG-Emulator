@@ -18,21 +18,6 @@
 #include "StdAfx.h"
 #include "Setup.h"
 
-bool Envenom(uint32 i, SpellPointer pSpell)
-{
-	if(!pSpell->p_caster) return true;
-
-	PlayerPointer  pPlayer = pSpell->p_caster;
-
-	// This is approximate, meh.
-	uint32 points = pSpell->damage / 180;
-	for(uint32 x = 0; x < points; x++)
-	{
-		pPlayer->RemoveAuraNegByNameHash(SPELL_HASH_DEADLY_POISON_IV);
-	}
-
-	return true;
-}
 
 void SetupRogueSpells(ScriptMgr * mgr)
 {

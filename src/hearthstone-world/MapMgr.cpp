@@ -1156,6 +1156,7 @@ void MapMgr::_UpdateObjects()
 	
 	// generate pending a9packets and send to clients.
 	PlayerPointer plyr;
+	m_updateMutex.Acquire();
 	for(it = _processQueue.begin(); it != _processQueue.end();)
 	{
 		plyr = *it;
@@ -1165,6 +1166,7 @@ void MapMgr::_UpdateObjects()
 		if(plyr->GetMapMgr() == shared_from_this())
 			plyr->ProcessPendingUpdates(&m_updateBuildBuffer, &m_compressionBuffer);
 	}
+	m_updateMutex.Release();
 }
 void MapMgr::LoadAllCells()
 {

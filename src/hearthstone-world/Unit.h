@@ -61,6 +61,7 @@ typedef struct
 	uint32 spellid;
 	uint64 caster;//not yet in use
 	int32 amt;
+	int32 reflect_pct;
 }Absorb;
 
 typedef std::list<Absorb*> SchoolAbsorb;
@@ -619,6 +620,28 @@ enum AURA_CHECK_RESULT
 	AURA_CHECK_RESULT_LOWER_BUFF_PRESENT	= 3,
 };
 
+enum CUSTOM_TIMERS
+{
+	CUSTOM_TIMER_CHIMERA_SCORPID,
+	CUSTOM_TIMER_ECLIPSE,
+	CUSTOM_TIMER_ERADICATION,
+	CUSTOM_TIMER_CHEATDEATH,
+	CUSTOM_TIMER_RAPTURE,
+	NUM_CUSTOM_TIMERS
+};
+
+enum Powers
+{
+    POWER_MANA                          = 0,
+    POWER_RAGE                          = 1,
+    POWER_FOCUS                         = 2,
+    POWER_ENERGY                        = 3,
+    POWER_HAPPINESS                     = 4,
+    POWER_RUNE                          = 5,
+    POWER_RUNIC_POWER                   = 6,
+    POWER_HEALTH                        = 0xFFFFFFFE
+};
+
 typedef std::list<struct ProcTriggerSpellOnSpell> ProcTriggerSpellOnSpellList;
 
 /************************************************************************/
@@ -831,7 +854,7 @@ public:
 
 	/// Combat / Death Status
 	HEARTHSTONE_INLINE bool isAlive() { return m_deathState == ALIVE; };
-	HEARTHSTONE_INLINE bool isDead() { return  m_deathState !=ALIVE; };
+	HEARTHSTONE_INLINE bool isDead() { return  m_deathState != ALIVE; };
 	virtual void setDeathState(DeathState s) { m_deathState = s; };
 	DeathState getDeathState() { return m_deathState; }
 	void OnDamageTaken();
@@ -843,6 +866,7 @@ public:
 	//! Add Aura to unit
 	void AddAura(AuraPointer aur, AuraPointer pParentAura);
 	//! Remove aura from unit
+	void RemoveAuraNoReturn(uint32 spellId);
 	bool RemoveAura(AuraPointer aur);
 	bool RemovePositiveAura(uint32 spellId);
 	bool RemoveNegativeAura(uint32 spellId);
@@ -879,7 +903,7 @@ public:
 	void InterruptCurrentSpell();
 
 	//caller is the caster
-	int32 GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot);
+	int32 GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32 base_dmg, bool isdot, bool healing);
    
 	//guardians are temporary spawn that will inherit master faction and will folow them. Apart from that they have their own mind
 	UnitPointer CreateTemporaryGuardian(uint32 guardian_entry,uint32 duration,float angle, uint32 lvl);
@@ -920,6 +944,32 @@ public:
 	// Spell Crit
 	float spellcritperc;
 
+	//dummy auras, spell stuff
+	void AddDummyAura( SpellEntry* sp )
+	{
+		m_DummyAuras[sp->NameHash] = sp;
+	}
+	bool HasDummyAura( uint32 namehash )
+	{
+		return m_DummyAuras[namehash] != NULL;
+	}
+	SpellEntry* GetDummyAura( uint32 namehash )
+	{
+		return m_DummyAuras[namehash];
+	}
+	void RemoveDummyAura( uint32 namehash )//we removes only this shit, not aura
+	{
+		m_DummyAuras[namehash] = NULL;
+	}
+
+	//Custom timers
+	uint32 m_CustomTimers[NUM_CUSTOM_TIMERS];
+
+	//Beacon of Light
+	UnitPointer BeaconCaster;//if we receive heal from him
+	UnitPointer BeaconTarget;//heal him for this same value
+	void RemoveBeacons();
+
 	// AIInterface
 	AIInterface *GetAIInterface() { return m_aiInterface; }
 
@@ -948,7 +998,6 @@ public:
 	int32 MechanicDurationPctMod[NUM_MECHANIC];
 	int32 GetDamageDoneMod(uint32 school);
 	float GetDamageDonePctMod(uint32 school);
-	float DamageDoneModPCT[7];
 	int32 DamageTakenMod[7];
 	float DamageTakenPctMod[7];
 	//float DamageTakenPctModOnHP35; DEPRECATED, YAY!
@@ -960,12 +1009,11 @@ public:
 	float BaseOffhandDamage[2];
 	float BaseRangedDamage[2];
 	SchoolAbsorb Absorbs[7];
-	uint32 AbsorbDamage(uint32 School,uint32 * dmg, SpellEntry * pSpell);//returns amt of absorbed dmg, decreases dmg by absorbed value
+	uint32 AbsorbDamage(ObjectPointer Attacker, uint32 School,uint32 * dmg, SpellEntry * pSpell);//returns amt of absorbed dmg, decreases dmg by absorbed value
 	int32 RAPvModifier;
 	int32 APvModifier;
 	uint64 stalkedby;
 	uint32 dispels[10];
-	bool trackStealth;
 	uint32 MechanicsDispels[NUM_MECHANIC];
 	float MechanicsResistancesPCT[NUM_MECHANIC]; 
 	float ModDamageTakenByMechPCT[NUM_MECHANIC];
@@ -1047,10 +1095,12 @@ public:
 	uint32 SpellDelayResist[7];
 	int32 CreatureAttackPowerMod[12];
 	int32 CreatureRangedAttackPowerMod[12];
+	float AOEDmgMod;
 
 	int32 PctRegenModifier;
+	float m_toRegen;
 	float PctPowerRegenModifier[4];
-	HEARTHSTONE_INLINE uint32 GetPowerType(){ return (GetUInt32Value(UNIT_FIELD_BYTES_0)>> 24);}
+	HEARTHSTONE_INLINE uint32 GetPowerType(){ return (GetByte(UNIT_FIELD_BYTES_0,3));}
 	void RemoveSoloAura(uint32 type);
 
 	void RemoveAurasByInterruptFlag(uint32 flag);
@@ -1070,6 +1120,7 @@ public:
 	int32 m_noInterrupt;
 	int32 m_rooted;
 	bool disarmed;
+	bool disarmedShield;
 	uint64 m_detectRangeGUID[5];
 	int32  m_detectRangeMOD[5];
 	// Affect Speed
@@ -1127,9 +1178,9 @@ public:
 	bool HasNegativeAuraWithNameHash(uint32 name_hash); //just to reduce search range in some cases
 	bool HasNegativeAura(uint32 spell_id); //just to reduce search range in some cases
 	bool IsPoisoned();
+	uint32 GetPoisonDosesCount( uint32 poison_type );
 
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, ObjectPointer caster=NULLOBJ);
-	AuraCheckResponse AuraCheck(uint32 name_hash, uint32 rank, AuraPointer aur, ObjectPointer caster=NULLOBJ);
+	AuraCheckResponse AuraCheck(SpellEntry *info);
 
 	uint16 m_diminishCount[DIMINISH_GROUPS];
 	uint8  m_diminishAuraCount[DIMINISH_GROUPS];
@@ -1172,6 +1223,10 @@ public:
 	CombatStatusHandler CombatStatus;
 	bool m_temp_summon;
 
+	// Redirect Threat shit
+	UnitPointer mThreatRTarget;
+	float mThreatRAmount;
+
 	void CancelSpell(SpellPointer ptr);
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);
@@ -1185,13 +1240,13 @@ public:
 	float m_ignoreArmorPctMaceSpec;
 	float m_ignoreArmorPct;
 
+	bool m_IsBleeding;
+	int32 m_LastSpellManaCost;
 
 	void OnPositionChange();
 	void Dismount();
 	//	custom functions for scripting
 	void SetWeaponDisplayId(uint8 slot, uint32 displayId);
-
-	std::map<uint32, SpellEntry*> m_DummyAuras;
 
 protected:
 	Unit ();
@@ -1243,6 +1298,7 @@ protected:
 	uint32 m_charmtemp;
 
 	bool m_extraAttackCounter;
+	std::map<uint32, SpellEntry*> m_DummyAuras;
 };
 
 

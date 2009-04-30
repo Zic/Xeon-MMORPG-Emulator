@@ -38,7 +38,7 @@ bool SealOfRighteousness(uint32 i, AuraPointer pAura, bool apply)
 	if(i != 0) return false;
 
 	uint32 applyId = 20187;
-	UnitPointer  u_caster = pAura->GetUnitCaster();
+	UnitPointer u_caster = pAura->GetUnitCaster();
 
 	if(u_caster == 0 || !u_caster->IsPlayer()) return false;
 
@@ -51,33 +51,16 @@ bool SealOfRighteousness(uint32 i, AuraPointer pAura, bool apply)
 		if(mainHand && mainHand->GetProto())
 			MWS = mainHand->GetProto()->Delay / 1000.0f;
 
-		uint32 AP = TO_PLAYER(u_caster)->GetAP(); // Attack Power
-		uint32 SPH = u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY); // Holy Spell Damage
+		uint32 AP = u_caster->GetAP();
+		uint32 SPH = u_caster->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SCHOOL_HOLY);
 		float damage = MWS * (0.022f * AP + 0.044f * SPH);
 
 		uint32 max_dmg = uint32(damage * 1.01f);
 		uint32 min_dmg = uint32(damage * 0.99f);
 		TO_PLAYER(u_caster)->AddOnStrikeSpellDamage(pAura->m_spellProto->Id, min_dmg, max_dmg);
-
-		// set the seal business
-		if(u_caster->GetTypeId() == TYPEID_PLAYER)
-		{
-				TO_PLAYER(u_caster)->judgespell = applyId;
-				TO_PLAYER(u_caster)->Seal = pAura->m_spellProto->Id;
-		}
-		u_caster->SetFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
 	}
 	else
-	{
-			TO_PLAYER(u_caster)->RemoveOnStrikeSpellDamage(pAura->m_spellProto->Id);
-			// set the seal business
-			if(u_caster->GetTypeId() == TYPEID_PLAYER)
-			{
-					TO_PLAYER(u_caster)->judgespell = 0;
-					TO_PLAYER(u_caster)->Seal = 0;
-			}
-			u_caster->RemoveFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
-	}
+		TO_PLAYER(u_caster)->RemoveOnStrikeSpellDamage(pAura->m_spellProto->Id);
 
 	return true;
 }
@@ -91,7 +74,7 @@ bool HolyShock(uint32 i, SpellPointer pSpell)
 
 	uint32 newspell = 0;
 
-	if(isAttackable(pSpell->p_caster,target)) // if its an enemy
+	if( isAttackable(pSpell->p_caster, target, true) ) // if its an enemy
 	{
 		switch(pSpell->m_spellInfo->Id)
 		{
@@ -153,103 +136,19 @@ bool HolyShock(uint32 i, SpellPointer pSpell)
 	return true;
 }
 
-bool SealOfCorruption(uint32 i, AuraPointer pAura, bool apply)
-{
-	if(i != 0) return false;
-
-	uint32 applyId = 53733;
-	UnitPointer  u_caster = pAura->GetUnitCaster();
-
-	if(u_caster == 0 || !u_caster->IsPlayer()) return false;
-
-	SpellEntry * m_spellInfo = dbcSpell.LookupEntry(applyId);
-	SpellEntry * sp = dbcSpell.LookupEntry(53742);
-
-	if(apply == true)
-	{
-		TO_PLAYER(u_caster)->AddOnStrikeSpell( sp, 0 );
-
-		// set the seal business
-		if(u_caster->GetTypeId() == TYPEID_PLAYER)
-		{
-			TO_PLAYER(u_caster)->judgespell = applyId;
-			TO_PLAYER(u_caster)->Seal = pAura->m_spellProto->Id;
-		}
-		u_caster->SetFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
-	}
-	else
-	{
-		TO_PLAYER(u_caster)->RemoveOnStrikeSpell( sp );
-		// set the seal business
-		if(u_caster->GetTypeId() == TYPEID_PLAYER)
-		{
-			TO_PLAYER(u_caster)->judgespell = 0;
-			TO_PLAYER(u_caster)->Seal = 0;
-		}
-		u_caster->RemoveFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
-	}
-
-	return true;
-}
-
-bool SealOfVengeance(uint32 i, AuraPointer pAura, bool apply)
-{
-	if(i != 0) return false;
-
-	uint32 applyId = 31804;
-	UnitPointer  u_caster = pAura->GetUnitCaster();
-
-	if(u_caster == 0 || !u_caster->IsPlayer()) return false;
-
-	SpellEntry * m_spellInfo = dbcSpell.LookupEntry(applyId);
-	SpellEntry * sp = dbcSpell.LookupEntry(31803);
-
-	if(apply == true)
-	{
-		
-		TO_PLAYER(u_caster)->AddOnStrikeSpell( sp, 0 );
-
-		// set the seal business
-		if(u_caster->GetTypeId() == TYPEID_PLAYER)
-		{
-			TO_PLAYER(u_caster)->judgespell = applyId;
-			TO_PLAYER(u_caster)->Seal = pAura->m_spellProto->Id;
-		}
-		u_caster->SetFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
-	}
-	else
-	{
-		TO_PLAYER(u_caster)->RemoveOnStrikeSpell( sp );
-		// set the seal business
-		if(u_caster->GetTypeId() == TYPEID_PLAYER)
-		{
-			TO_PLAYER(u_caster)->judgespell = 0;
-			TO_PLAYER(u_caster)->Seal = 0;
-		}
-		u_caster->RemoveFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_JUDGEMENT);
-	}
-
-	return true;
-}
-
-
 // ADD NEW FUNCTIONS ABOVE THIS LINE
 // *****************************************************************************
 
 void SetupPaladinSpells(ScriptMgr * mgr)
 {
 	mgr->register_dummy_aura( 21084, &SealOfRighteousness); // Seal of Righteousness
-	mgr->register_dummy_aura( 53736, &SealOfCorruption);	// Seal of Corruption
-	mgr->register_dummy_aura( 31801, &SealOfVengeance);		// Seal of Vengeance
 	mgr->register_dummy_spell(20473, &HolyShock);           // Holy Shock rank 1
 	mgr->register_dummy_spell(20929, &HolyShock);           // Holy Shock rank 2
 	mgr->register_dummy_spell(20930, &HolyShock);           // Holy Shock rank 3
 	mgr->register_dummy_spell(27174, &HolyShock);           // Holy Shock rank 4
 	mgr->register_dummy_spell(33072, &HolyShock);           // Holy Shock rank 5
 	mgr->register_dummy_spell(48824, &HolyShock);           // Holy Shock rank 6
-	mgr->register_dummy_spell(48825, &HolyShock);           // Holy Shock rank 6
-
-
+	mgr->register_dummy_spell(48825, &HolyShock);           // Holy Shock rank 7
 
 // REGISTER NEW DUMMY SPELLS ABOVE THIS LINE
 // *****************************************************************************

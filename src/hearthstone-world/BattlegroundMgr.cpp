@@ -477,9 +477,12 @@ void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 				}
 
 				// queued to a specific instance id?
-				if(plr->m_bgQueueInstanceId[queueSlot] != 0)
+				if(plr->m_bgQueueInstanceId[queueSlot] != 0 && plr->m_bgIsQueued[queueSlot])
 				{
-					iitr = m_instances[i].find(plr->m_bgQueueInstanceId[queueSlot]);
+					if( m_instances[i].empty() )
+						continue;
+					
+					iitr = m_instances[i].find( plr->m_bgQueueInstanceId[queueSlot] );
 					if(iitr == m_instances[i].end())
 					{
 						// queue no longer valid
@@ -487,11 +490,12 @@ void CBattlegroundManager::EventQueueUpdate(bool forceStart)
 						plr->RemoveFromBattlegroundQueue(queueSlot);
 						//m_queuedPlayers[i][j].erase(it4);
 						SendBattlegroundQueueStatus(plr, queueSlot);
+						continue;
 					}
 
 					// can we join?
-					bg = iitr->second;
-					if(bg && bg->CanPlayerJoin(plr))
+					bg = (*iitr).second;
+					if(bg->CanPlayerJoin(plr))
 					{
 						bg->AddPlayer(plr, plr->GetTeam());
 						m_queuedPlayers[i][j].erase(it4);
@@ -1945,6 +1949,13 @@ void CBattlegroundManager::HandleArenaJoin(WorldSession * m_session, uint32 Batt
 
 				if((*itx)->m_loggedInPlayer)
 				{
+					if( !(*itx)->m_loggedInPlayer->IsInWorld() )
+					{
+						m_session->SystemMessage("One or more of your party members are offline.");
+						pGroup->Unlock();
+						return;
+					}
+
 					bool isQueued = false;
 					if( (*itx)->m_loggedInPlayer && ((*itx)->m_loggedInPlayer->m_bgIsQueued[0] || (*itx)->m_loggedInPlayer->m_bgIsQueued[1] || (*itx)->m_loggedInPlayer->m_bgIsQueued[2]))
 						isQueued = true;

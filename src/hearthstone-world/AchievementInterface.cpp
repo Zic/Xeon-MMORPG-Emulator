@@ -199,7 +199,7 @@ void AchievementInterface::GiveRewardsForAchievement(AchievementEntry * ae)
 		msg.expire_time = 0; // This message NEVER expires.
 		
 		DEBUG_LOG("AchievementInterface","GiveRewardsForAchievement disabled until properly fixed");
-//		sMailSystem.DeliverMessage(m_player->m_playerInfo->guid, &msg);
+//		sMailSystem.DeliverMessage(&msg);
 
 		pItem->Destructor();
 		pItem = NULLITEM;
@@ -279,11 +279,15 @@ AchievementData* AchievementInterface::CreateAchievementDataEntryForAchievement(
 
 bool AchievementInterface::CanCompleteAchievement(AchievementData * ad)
 {
+	// don't allow GMs to complete achievements
+	if( m_player->GetSession()->HasGMPermissions() )
+		return false;
+
 	if( ad->completed ) return false;
 
 	bool hasCompleted = false;
 	AchievementEntry * ach = dbcAchievement.LookupEntry(ad->id);
-	if( ach->is_statistic == 1 ) // We cannot complete statistics
+	if( ach->categoryId == 1 ) // We cannot complete statistics
 		return false;
 
 	// realm first achievements

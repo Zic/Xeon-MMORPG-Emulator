@@ -470,6 +470,8 @@ void Pet::LoadFromDB(PlayerPointer owner, PlayerPet * pi)
 	m_OwnerGuid = m_Owner->GetGUID();
 	mPi = pi;
 	creature_info = CreatureNameStorage.LookupEntry(mPi->entry);
+	if( creature_info == NULL )
+		return;
 	myFamily = dbcCreatureFamily.LookupEntry(creature_info->Family);
 
 	Create(pi->name.c_str(), owner->GetMapId(), owner->GetPositionX() + 2 , owner->GetPositionY() +2, owner->GetPositionZ(), owner->GetOrientation());

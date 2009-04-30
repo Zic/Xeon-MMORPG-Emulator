@@ -178,19 +178,17 @@ void WorldSession::HandleSetGuildInformation(WorldPacket & recv_data)
 
 void WorldSession::HandleGuildInfo(WorldPacket & recv_data)
 {
-	if(_player == NULL || _player->m_playerInfo->guild == NULL)
-		return;
-
-	_player->GetGuild()->SendGuildInfo(this);
+	if(_player->GetGuild() != NULL)
+		_player->GetGuild()->SendGuildInfo(this);
 }
 
 void WorldSession::HandleGuildRoster(WorldPacket & recv_data)
 {
-
-	if(_player == NULL || _player->m_playerInfo->guild == NULL)
+	if(!_player->m_playerInfo->guild)
 		return;
 
-	_player->m_playerInfo->guild->SendGuildRoster(this);
+	if( _player->m_playerInfo->guild )
+		_player->m_playerInfo->guild->SendGuildRoster(this);
 }
 
 void WorldSession::HandleGuildPromote(WorldPacket & recv_data)

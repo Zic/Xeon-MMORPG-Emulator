@@ -79,14 +79,14 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 	&Spell::SpellTargetTargetAreaSelectedUnit,  // 53
 	&Spell::SpellTargetInFrontOfCaster2,		// 54
 	&Spell::SpellTargetNULL,					// 55 Not handled (Not realy handled by the current spell system)
-	&Spell::SpellTarget56,					  // 56
+	&Spell::SpellTarget56,						// 56
 	&Spell::SpellTargetTargetPartyMember,	   // 57
 	&Spell::SpellTargetNULL,					// 58
 	&Spell::SpellTargetNULL,					// 59
 	&Spell::SpellTargetNULL,					// 60 // scripted target fill..
 	&Spell::SpellTargetSameGroupSameClass,	  // 61
 	&Spell::SpellTargetNULL,					// 62 // targets the priest champion, big range..
-	&Spell::SpellTargetSimpleTargetAdd,		 // 63 // summon [] creature
+	&Spell::SpellTargetScriptedEffects,		 // 63 // summon [] creature
 	&Spell::SpellTargetSimpleTargetAdd,		 // 64 // summon [] creature
 	&Spell::SpellTargetSimpleTargetAdd,		 // 65 // summon [] creature
 	&Spell::SpellTargetSimpleTargetAdd,		 // 66 // summon [] creature
@@ -403,14 +403,51 @@ void Spell::SpellTargetCustomAreaOfEffect(uint32 i, uint32 j)
 /// Spell Target Handling for type 15 / 16: All Enemies in Area of Effect (instant)
 void Spell::SpellTargetAreaOfEffect(uint32 i, uint32 j)
 {
-	FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
+	if( m_spellInfo->NameHash == SPELL_HASH_MASS_DISPEL )
+	{
+		if( p_caster == NULL || !p_caster->IsInWorld() )
+			return;
+
+		uint32 TCount = 0;
+		UnitPointer target = NULLUNIT;
+		Object::InRangeSet::iterator itr = p_caster->GetInRangeSetBegin();
+		for(; itr != p_caster->GetInRangeSetEnd(); ++itr)
+		{
+			if( TCount > 10 )
+				break;
+
+			if( !(*itr) )
+				continue;
+
+			if( (*itr)->IsPlayer() || (*itr)->IsUnit() )
+				target = TO_UNIT( (*itr) );
+			else
+				continue;
+
+			if( !isHostile( p_caster, target ) )
+				continue;
+
+			if( target->isDead() || (*itr)->GetDistanceSq(p_caster) > 900 )
+				continue;
+
+			_AddTargetForced( target->GetGUID(), i );
+			TCount += 1;
+		}
+	}
+	else
+		FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
 }
 
 /// Spell Target Handling for type 18: Land under caster
 void Spell::SpellTargetLandUnderCaster(uint32 i, uint32 j) /// I don't think this is the correct name for this one
 {
-	if(m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_DEMON && m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_WILD)
-		FillAllTargetsInArea(i,m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),GetRadius(i));
+	if(	m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_DEMON && 
+		m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_WILD &&
+		m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_SLOT1 &&
+		m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_SLOT2 &&
+		m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_SLOT3 &&
+		m_spellInfo->Effect[i] != SPELL_EFFECT_SUMMON_OBJECT_SLOT4 )
+		FillAllTargetsInArea(i, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), GetRadius(i));
 	else
 		_AddTargetForced(m_caster->GetGUID(), i);
 }
@@ -603,7 +640,68 @@ void Spell::SpellTargetAllyBasedAreaEffect(uint32 i, uint32 j)
 /// Spell Target Handling for type 31: related to scripted effects
 void Spell::SpellTargetScriptedEffects(uint32 i, uint32 j)
 {
-	FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
+	if( m_spellInfo->NameHash == SPELL_HASH_WILD_GROWTH || m_spellInfo->NameHash == SPELL_HASH_CIRCLE_OF_HEALING )
+	{
+		if( p_caster == NULL || !p_caster->IsInWorld() )
+			return;
+
+		if( p_caster->GetGroup() )
+		{
+			uint32 TargetCount = 0;
+			p_caster->GetGroup()->Lock();
+			for(uint32 x = 0; x < p_caster->GetGroup()->GetSubGroupCount(); ++x)
+			{
+				if( TargetCount == 5 )
+					break;
+				for(GroupMembersSet::iterator itr = p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersBegin(); itr != p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersEnd(); ++itr)
+				{
+					if((*itr)->m_loggedInPlayer && TargetCount != 5)
+					{
+						PlayerPointer p_target = (*itr)->m_loggedInPlayer;
+						if( p_caster->GetDistance2dSq( p_target ) <= 225 ) // both spells have 15yd range, change in future if needed
+						{
+							_AddTargetForced( (*itr)->m_loggedInPlayer->GetGUID(), i );
+							TargetCount += 1;
+						}
+					}
+				}
+			}
+			p_caster->GetGroup()->Unlock();
+		}
+	}
+	else if( m_spellInfo->NameHash == SPELL_HASH_MASS_DISPEL )
+	{
+		if( p_caster == NULL || !p_caster->IsInWorld() )
+			return;
+
+		uint32 TCount = 0;
+		UnitPointer target = NULLUNIT;
+		Object::InRangeSet::iterator itr = p_caster->GetInRangeSetBegin();
+		for(; itr != p_caster->GetInRangeSetEnd(); ++itr)
+		{
+			if( TCount > 10 )
+				break;
+
+			if( !(*itr) )
+				continue;
+
+			if( (*itr)->IsPlayer() || (*itr)->IsUnit() )
+				target = TO_UNIT( (*itr) );
+			else
+				continue;
+
+			if( isHostile( p_caster, target ) )
+				continue;
+
+			if( target->isDead() || target->GetDistanceSq(p_caster) > 900 )
+				continue;
+
+			_AddTargetForced( target->GetGUID(), i );
+			TCount += 1;
+		}
+	}
+	else
+		FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
 }
 
 /// Spell Target Handling for type 32 / 73: related to summoned pet or creature
@@ -710,7 +808,19 @@ void Spell::SpellTargetPartyMember(uint32 i, uint32 j)
 void Spell::SpellTargetDummyTarget(uint32 i, uint32 j)
 {
 	//TargetsList *tmpMap=&m_targetUnits[i];
-	if(m_spellInfo->Id == 12938)
+	if( m_spellInfo->Id == 51699 )
+	{
+		if( p_caster )
+		{
+			AuraPointer aur = p_caster->FindAura( 52916 );
+			if( aur && aur->GetUnitCaster() )
+			{
+				_AddTargetForced(aur->GetUnitCaster()->GetGUID(), i);
+				return;
+			}
+		}
+	}				
+	else if( m_spellInfo->Id == 12938 )
 	{
 		//FIXME:this ll be immortal targets
 		FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
@@ -911,22 +1021,27 @@ void Spell::SpellTargetSameGroupSameClass(uint32 i, uint32 j)
 	if(!m_caster->IsInWorld())
 		return;
 
+	if( m_caster->IsPlayer() )
+		if( !TO_PLAYER(m_caster)->GetGroup() )
+			_AddTargetForced(m_caster->GetGUID(), i);
+
 	PlayerPointer Target = m_caster->GetMapMgr()->GetPlayer((uint32)m_targets.m_unitTarget);
 	if(!Target)
 		return;
 
-	SubGroup * subgroup = Target->GetGroup() ?
-		Target->GetGroup()->GetSubGroup(Target->GetSubGroup()) : 0;
-
-	if(subgroup)
+	if( m_caster->IsPlayer() && Target->IsPlayer() && Target->GetGroup() && (Target == m_caster || Target->GetGroup()->HasMember(TO_PLAYER(m_caster))) )
 	{
 		Target->GetGroup()->Lock();
-		for(GroupMembersSet::iterator itr = subgroup->GetGroupMembersBegin(); itr != subgroup->GetGroupMembersEnd(); ++itr)
+
+		for( uint32 x = 0; x < Target->GetGroup()->GetSubGroupCount(); ++x )
 		{
-			if(!(*itr)->m_loggedInPlayer || Target->getClass() != (*itr)->m_loggedInPlayer->getClass()) 
-				continue;
-			
-			_AddTargetForced((*itr)->m_loggedInPlayer->GetGUID(), i);
+			for(GroupMembersSet::iterator itr = Target->GetGroup()->GetSubGroup( x )->GetGroupMembersBegin(); itr != Target->GetGroup()->GetSubGroup( x )->GetGroupMembersEnd(); ++itr)
+			{
+				if(!(*itr)->m_loggedInPlayer || Target->getClass() != (*itr)->m_loggedInPlayer->getClass()) 
+					continue;
+				
+				_AddTargetForced((*itr)->m_loggedInPlayer->GetGUID(), i);
+			}
 		}
 		Target->GetGroup()->Unlock();
 	}

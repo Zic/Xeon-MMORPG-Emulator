@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,51 +20,155 @@
 #include "StdAfx.h"
 initialiseSingleton(MailSystem);
 
-void MailSystem::StartMailSystem()
+bool MailMessage::LoadFromDB(Field * fields)
 {
-	QueryResult * result = CharacterDatabase.Query("SELECT MAX(message_id) FROM mailbox");
-	if(result)
+//	Field * fields;
+	uint32 i;
+	char * str;
+	char * p;
+	uint64 itemguid;
+
+	// Create message struct
+	i = 0;
+	items.clear();
+	message_id = fields[i++].GetUInt32();
+	message_type = fields[i++].GetUInt32();
+	player_guid = fields[i++].GetUInt32();
+	sender_guid = fields[i++].GetUInt32();
+	subject = fields[i++].GetString();
+	body = fields[i++].GetString();
+	money = fields[i++].GetUInt32();
+	str = (char*)fields[i++].GetString();
+	p = strchr(str, ',');
+	if( p == NULL )
 	{
-		max_id = result->Fetch()[0].GetUInt32();
-		delete result;
+		itemguid = atoi(str);
+		if( itemguid != 0 )
+			items.push_back( itemguid );
 	}
 	else
-		max_id = 0;
-}
-
-MailError MailSystem::DeliverMessage(uint64 recipent, MailMessage* message)
-{
-	// assign a new id
-	message->message_id = Generate_Message_Id();
-
-	PlayerPointer plr = objmgr.GetPlayer((uint32)recipent);
-	if(plr != NULL)
 	{
-		plr->m_mailBox->AddMessage(message);
-		if((uint32)UNIXTIME >= message->delivery_time)
+		while( p )
 		{
-			uint32 v = 0;
-			plr->GetSession()->OutPacket(SMSG_RECEIVED_MAIL, 4, &v);
+			*p = 0;
+			p++;
+			itemguid = atol( str );
+			if( itemguid != 0 )
+				items.push_back( itemguid );
+			str = p;
+			p = strchr( str, ',' );
 		}
 	}
 
-	SaveMessageToSQL(message);
-	return MAIL_OK;
+	cod = fields[i++].GetUInt32();
+	stationary = fields[i++].GetUInt32();
+	expire_time = fields[i++].GetUInt32();
+	delivery_time = fields[i++].GetUInt32();
+	copy_made = fields[i++].GetBool();
+	read_flag = fields[i++].GetBool();
+	deleted_flag = fields[i++].GetBool();
+	returned_flag = fields[i++].GetBool();
+
+/*
+		if( msg.deleted_flag )
+		{
+			CharacterDatabase.WaitExecute( "DELETE FROM playeritems WHERE itemtext = %u", msg.message_id );
+			CharacterDatabase.WaitExecute( "DELETE FROM mailbox WHERE message_id = %u", msg.message_id );
+		}else
+*/
+
+	return (!deleted_flag || copy_made);
 }
 
+void MailMessage::SaveToDB()
+{
+	stringstream ss;
+	vector< uint64 >::iterator itr;
+	ss << "REPLACE INTO mailbox VALUES("
+		<< message_id << ","
+		<< message_type << ","
+		<< player_guid << ","
+		<< sender_guid << ",\""
+		<< CharacterDatabase.EscapeString(subject) << "\",\""
+		<< CharacterDatabase.EscapeString(body) << "\","
+		<< money << ",'";
+
+	for( itr = items.begin( ); itr != items.end( ); ++itr )
+		ss << (*itr) << ",";
+
+	ss << "'," 
+		<< cod << ","
+		<< stationary << ","
+		<< expire_time << ","
+		<< delivery_time << ","
+		<< copy_made << ","
+		<< read_flag << ","
+		<< deleted_flag << ","
+		<< returned_flag << ")";
+	if(message_id == 0)
+	{
+		AsyncQuery * q = new AsyncQuery( new SQLClassCallbackP0<MailMessage>(this, &MailMessage::SaveToDBCallBack) );
+		q->AddQuery(ss.str().c_str());
+		q->AddQuery("SELECT LAST_INSERT_ID()");
+		CharacterDatabase.QueueAsyncQuery(q);
+	} else
+	{
+		CharacterDatabase.WaitExecute(ss.str().c_str());
+	}
+}
+
+void MailMessage::SaveToDBCallBack(QueryResultVector & results)
+{
+	QueryResult *result = results[1].result;
+	if(result)
+	{
+		Field *fields = result->Fetch();
+		message_id = fields[0].GetUInt32();
+	}
+}
+
+bool MailMessage::Expired()
+{
+	return (expire_time && expire_time < (uint32)UNIXTIME);
+}
 void Mailbox::AddMessage(MailMessage* Message)
 {
 	Messages[Message->message_id] = *Message;
 }
 
-void Mailbox::DeleteMessage(uint32 MessageId, bool sql)
+void Mailbox::DeleteMessage(MailMessage* Message)
 {
-	Messages.erase(MessageId);
-	if(sql)
-		CharacterDatabase.WaitExecute("DELETE FROM mailbox WHERE message_id = %u", MessageId);
+	if(Message->copy_made)
+	{
+		// we have the message as a copy on the item. we can't delete it or this item will no longer function.
+		// deleted_flag prevents it from being shown in the mail list.
+		Message->deleted_flag = true;
+		Message->SaveToDB();
+	}
+	else
+	{
+		// delete the message, there are no other references to it.
+		Messages.erase(Message->message_id);
+		CharacterDatabase.WaitExecute("DELETE FROM mailbox WHERE message_id = %u", Message->message_id);
+	}
 }
 
-WorldPacket * Mailbox::BuildMailboxListingPacket()
+void Mailbox::Load(QueryResult * result)
+{
+	if(!result)
+		return;
+
+	MailMessage msg;
+	do 
+	{
+		if (msg.LoadFromDB(result->Fetch()))
+		{
+			AddMessage(&msg);// Add to the mailbox
+		}
+	} while(result->NextRow());
+}
+
+WorldPacket * Mailbox::MailboxListingPacket()
 {
 	WorldPacket * data = new WorldPacket(SMSG_MAIL_LIST_RESULT, 500);
 	MessageMap::iterator itr;
@@ -74,42 +178,21 @@ WorldPacket * Mailbox::BuildMailboxListingPacket()
 
 	for(itr = Messages.begin(); itr != Messages.end(); ++itr)
 	{
-		if(itr->second.expire_time && t > itr->second.expire_time)
-			continue;	   // expired mail -> skip it
-
-		if((uint32)UNIXTIME < itr->second.delivery_time)
-			continue;		// undelivered
-		
-		if(itr->second.AddMessageDataToPacket(*data))
+		if(AddMessageToListingPacket(*data, &itr->second))
 			++count;
-		
-		if(count == 50)
+	
+		if(count == 30)
 			break;
 	}
 
 	const_cast<uint8*>(data->contents())[0] = count;
 
 	// do cleanup on request mail
-	CleanupExpiredMessages();
+//	CleanupExpiredMessages();
 	return data;
 }
 
-void Mailbox::CleanupExpiredMessages()
-{
-	MessageMap::iterator itr, it2;
-	uint32 curtime = (uint32)UNIXTIME;
-
-	for(itr = Messages.begin(); itr != Messages.end();)
-	{
-		it2 = itr++;
-		if(it2->second.expire_time && it2->second.expire_time < curtime)
-		{
-			Messages.erase(it2);
-		}
-	}
-}
-
-bool MailMessage::AddMessageDataToPacket(WorldPacket& data)
+bool Mailbox::AddMessageToListingPacket(WorldPacket& data,MailMessage *msg)
 {
 	uint8 i = 0;
 	uint32 j;
@@ -118,32 +201,32 @@ bool MailMessage::AddMessageDataToPacket(WorldPacket& data)
 	ItemPointer pItem;
 
 	// add stuff
-	if(deleted_flag)
+	if(msg->deleted_flag || msg->Expired() || (uint32)UNIXTIME < msg->delivery_time)
 		return false;
 
 	data << uint16(0x0032);
-	data << message_id;
-	data << uint8(message_type);
-	if(message_type)
-		data << uint32(sender_guid);
+	data << msg->message_id;
+	data << uint8(msg->message_type);
+	if(msg->message_type)
+		data << uint32(msg->sender_guid);
 	else
-		data << sender_guid;
+		data << msg->sender_guid;
 
-	data << cod;			// cod
-	data << message_id;		// itempageid
+	data << msg->cod;			// cod
+	data << msg->message_id;		// itempageid
 	data << uint32(0);
-	data << stationary;
-	data << money;		// money
+	data << msg->stationary;
+	data << msg->money;		// money
 	data << uint32(0x10);
-	data << float(float(expire_time - (uint32)UNIXTIME) / 86400.0f);
+	data << float(float(msg->expire_time - (uint32)UNIXTIME) / 86400.0f);
 	data << uint32(0);
-	data << subject;
+	data << msg->subject;
 	pos = data.wpos();
 	data << uint8(0);		// item count
 
-	if( !items.empty( ) )
+	if( !msg->items.empty( ) )
 	{
-		for( itr = items.begin( ); itr != items.end( ); ++itr )
+		for( itr = msg->items.begin( ); itr != msg->items.end( ); ++itr )
 		{
 			pItem = objmgr.LoadItem( *itr );
 			if( pItem == NULL )
@@ -174,115 +257,224 @@ bool MailMessage::AddMessageDataToPacket(WorldPacket& data)
 			data << uint32( 0 );
 			data << uint32( 0 );
 			data << uint32( 0 );
-
 			pItem->Destructor();
 		}
-
 		data.put< uint8 >( pos, i );
 	}
 
 	return true;
-/*
-	data << uint16(0);
-	data << message_id;
-	data << uint8(message_type);
-	if(message_type)
-		data << uint32(sender_guid);
-	else
-		data << sender_guid;
-
-	data << subject;
-	data << message_id;	  // itempageid
-	data << message_id;
-
-	data << stationary;
-
-	uint32 itementry = 0, itemcount = 0;
-	uint32 charges = 0, durability = 0, maxdurability = 0;
-
-	if(attached_item_guid)
-	{
-		QueryResult * result = CharacterDatabase.Query("SELECT `entry`, `count`, `charges`, `durability` FROM playeritems WHERE guid='%u'", GUID_LOPART(attached_item_guid));
-		if(result)
-		{
-			itementry = result->Fetch()[0].GetUInt32();
-			itemcount = result->Fetch()[1].GetUInt32();
-			charges = result->Fetch()[2].GetUInt32();
-			durability = result->Fetch()[3].GetUInt32();
-			ItemPrototype * it = ItemPrototypeStorage.LookupEntry(itementry);
-			maxdurability = it ? it->MaxDurability : durability;
-
-			delete result;
-		}
-	}
-
-	if(external_attached_item_guid)
-	{
-		QueryResult * result = CharacterDatabase.Query("SELECT `entry`, `count`, `charges`, `durability` FROM playeritems_external WHERE guid='%u'", GUID_LOPART(external_attached_item_guid));
-		if(result)
-		{
-			itementry = result->Fetch()[0].GetUInt32();
-			itemcount = result->Fetch()[1].GetUInt32();
-			charges = result->Fetch()[2].GetUInt32();
-			durability = result->Fetch()[3].GetUInt32();
-			ItemPrototype * it = ItemPrototypeStorage.LookupEntry(itementry);
-			maxdurability = it ? it->MaxDurability : durability;
-
-			delete result;
-		}
-	}
-
-	data << itementry;
-	data << uint32(0);  // unk
-	data << uint32(0);  // unk
-	data << uint32(0);  // unk
-	for(uint32 i = 0; i < 17; ++i)
-		data << uint32(0);
-
-	data << (itemcount ? uint8(itemcount) : uint8(1));
-	data << charges;
-	data << maxdurability;
-	data << durability;
-	data << money;
-	data << cod;
-	data << uint32(read_flag);
-
-	if(expire_time)
-		data << float(float(expire_time - (uint32)UNIXTIME) / 86400.0f);
-	else
-		data << float(0);
-
-	data << uint32(0);
-
-	return true;*/
 }
 
-void MailSystem::SaveMessageToSQL(MailMessage * message)
+WorldPacket * Mailbox::MailboxTimePacket()
 {
-	stringstream ss;
-	vector< uint64 >::iterator itr;
-	ss << "REPLACE INTO mailbox VALUES("
-		<< message->message_id << ","
-		<< message->message_type << ","
-		<< message->player_guid << ","
-		<< message->sender_guid << ",\""
-		<< CharacterDatabase.EscapeString(message->subject) << "\",\""
-		<< CharacterDatabase.EscapeString(message->body) << "\","
-		<< message->money << ",'";
 
-	for( itr = message->items.begin( ); itr != message->items.end( ); ++itr )
-		ss << (*itr) << ",";
+	WorldPacket * data = new WorldPacket(MSG_QUERY_NEXT_MAIL_TIME, 100);
+	uint32 count = 0;
+	MessageMap::iterator iter;
 
-	ss << "'," 
-		<< message->cod << ","
-		<< message->stationary << ","
-		<< message->expire_time << ","
-		<< message->delivery_time << ","
-		<< message->copy_made << ","
-		<< message->read_flag << ","
-		<< message->deleted_flag << ")";
-	CharacterDatabase.WaitExecute(ss.str().c_str());
+
+	*data << uint32(0) << uint32(0);
+
+	for( iter = Messages.begin(); iter != Messages.end(); ++iter )
+	{
+		if(AddMessageToTimePacket(* data, &iter->second))
+		{
+			++count;
+		}
+	}
+
+	if(count==0)
+	{
+		data->put(0, uint32(0xc7a8c000));
+//		*(uint32*)(data->contents()[0])=0xc7a8c000;
+	}
+	else
+	{
+		data->put(4, uint32(count));
+//		*(uint32*)(data->contents()[0])=uint32(0);
+//		*(uint32*)(data->contents()[4])=count;
+	}
+	return data;
 }
+
+bool Mailbox::AddMessageToTimePacket(WorldPacket& data,MailMessage *msg)
+{
+	if ( msg->deleted_flag == 1 || msg->read_flag == 1  || msg->Expired() || (uint32)UNIXTIME < msg->delivery_time )
+		return false;
+	// unread message, w00t.
+	data << uint64(msg->sender_guid);
+	data << uint32(0);
+	data << uint32(0);// money or smth?
+	data << uint32(msg->stationary);
+	//data << float(UNIXTIME-msg->delivery_time);
+	data << float(-9.0f);	// maybe the above?
+
+	return true;
+}
+
+void Mailbox::OnMessageCopyDeleted(uint32 msg_id)
+{
+	MailMessage * msg = GetMessage(msg_id);
+	if(msg == 0) return;
+
+	msg->copy_made = false;
+
+	if(msg->deleted_flag)   // we've deleted from inbox
+		DeleteMessage(msg);   // wipe the message
+	else
+		msg->SaveToDB();
+}
+void MailSystem::StartMailSystem()
+{
+
+}
+
+void MailSystem::DeliverMessage(MailMessage* message)
+{
+	message->SaveToDB();
+
+	PlayerPointer plr = objmgr.GetPlayer((uint32)message->player_guid);
+	if(plr != NULL)
+	{
+		plr->m_mailBox->AddMessage(message);
+		if((uint32)UNIXTIME >= message->delivery_time)
+		{
+			uint32 v = 0;
+			plr->GetSession()->OutPacket(SMSG_RECEIVED_MAIL, 4, &v);
+		}
+	}
+}
+
+void MailSystem::ReturnToSender(MailMessage* message)
+{
+	MailMessage msg = *message;
+
+	// re-assign the owner/sender
+	msg.player_guid = message->sender_guid;
+	msg.sender_guid = message->player_guid;
+
+	// remove the old message
+	PlayerPointer plr = objmgr.GetPlayer((uint32)message->player_guid);
+	if(plr != NULL)
+	{
+		plr->m_mailBox->DeleteMessage(message);
+	} else
+	{
+		if(message->copy_made)
+		{
+			message->deleted_flag = true;
+			message->SaveToDB();
+		}
+		else
+		{
+			CharacterDatabase.WaitExecute("DELETE FROM mailbox WHERE message_id = %u", message->message_id);
+		}
+	}
+
+	// return mail
+	msg.message_id = 0;
+	msg.read_flag = false;
+	msg.deleted_flag = false;
+	msg.copy_made = false;
+	msg.returned_flag = true;
+	msg.cod = 0;
+	msg.delivery_time = msg.items.empty() ? (uint32)UNIXTIME : (uint32)UNIXTIME + 3600;
+	// returned mail's don't expire
+	msg.expire_time = 0;
+	// add to the senders mailbox
+	sMailSystem.DeliverMessage(&msg);
+}
+
+void MailSystem::DeliverMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body,
+									  uint32 money, uint32 cod, uint64 item_guid, uint32 stationary, bool returned)
+{
+	// This is for sending automated messages, for example from an auction house.
+	MailMessage msg;
+	msg.message_id = 0;
+	msg.message_type = type;
+	msg.sender_guid = sender;
+	msg.player_guid = receiver;
+	msg.subject = subject;
+	msg.body = body;
+	msg.money = money;
+	msg.cod = cod;
+	if( GUID_LOPART(item_guid) != 0 )
+		msg.items.push_back( GUID_LOPART(item_guid) );
+
+	msg.stationary = stationary;
+	msg.delivery_time = (uint32)UNIXTIME;
+	msg.expire_time = 0;
+	msg.read_flag = false;
+	msg.copy_made = false;
+	msg.deleted_flag = false;
+	msg.returned_flag = returned;
+
+	// Send the message.
+	DeliverMessage(&msg);
+}
+
+void MailSystem::UpdateMessages()
+{
+	if((++loopcount % 1200))
+		return;
+
+	QueryResult *result = CharacterDatabase.Query("SELECT * FROM mailbox WHERE expiry_time > 0 and expiry_time <= %u and deleted_flag = 0",(uint32)UNIXTIME);
+
+	if(!result)
+		return;
+
+	MailMessage msg;
+	do 
+	{
+		if (msg.LoadFromDB(result->Fetch()))
+		{
+			if (/*msg.Expired() &&*/ msg.items.size() == 0 && msg.money == 0)
+			{
+				if(msg.copy_made)
+				{
+					msg.deleted_flag = true;
+					msg.SaveToDB();
+				} else
+				{
+					CharacterDatabase.WaitExecute("DELETE FROM mailbox WHERE message_id = %u", msg.message_id);
+				}
+			} else
+			{
+				ReturnToSender(&msg);
+			}
+
+		}
+	} while(result->NextRow());
+	delete result;
+}
+
+//delete
+void MailSystem::SendAutomatedMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body,
+									  uint32 money, uint32 cod, uint64 item_guid, uint32 stationary)
+{
+	// This is for sending automated messages, for example from an auction house.
+	MailMessage msg;
+	msg.message_type = type;
+	msg.sender_guid = sender;
+	msg.player_guid = receiver;
+	msg.subject = subject;
+	msg.body = body;
+	msg.money = money;
+	msg.cod = cod;
+	if( GUID_LOPART(item_guid) != 0 )
+		msg.items.push_back( GUID_LOPART(item_guid) );
+
+	msg.stationary = stationary;
+	msg.delivery_time = (uint32)UNIXTIME;
+	msg.expire_time = 0;
+	msg.read_flag = false;
+	msg.copy_made = false;
+	msg.deleted_flag = false;
+
+	// Send the message.
+	DeliverMessage(&msg);
+}
+//delete
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
@@ -298,19 +490,22 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	string recepient;
 	ItemPointer pItem;
 	int8 real_item_slot;
-	//uint32 err = MAIL_OK;
 
 	recv_data >> gameobject >> recepient;
-	recv_data >> msg.subject >> msg.body >> msg.stationary;
-	recv_data >> unk2 >> itemcount;
-
-	if( itemcount > 12 || msg.body.find("%") != string::npos || msg.subject.find("%") != string::npos)
+	// Search for the recipient
+	PlayerInfo* player = ObjectMgr::getSingleton().GetPlayerInfoByName(recepient.c_str());
+	if( player == NULL )
 	{
-		//SystemMessage("Sorry, Ascent does not support sending multiple items at this time. (don't want to lose your item do you) Remove some items, and try again.");
-		SendMailError(MAIL_ERR_INTERNAL_ERROR);
+		SendMailError(MAIL_ERR_RECIPIENT_NOT_FOUND);
 		return;
 	}
+	msg.player_guid = player->guid;
+	msg.sender_guid = _player->GetGUID();
 
+	recv_data >> msg.subject >> msg.body >> msg.stationary;
+
+	// Check attached items
+	recv_data >> unk2 >> itemcount;
 	for( i = 0; i < itemcount; ++i )
 	{
 		recv_data >> itemslot;
@@ -319,58 +514,39 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         pItem = _player->GetItemInterface()->GetItemByGUID( itemguid );
 		real_item_slot = _player->GetItemInterface()->GetInventorySlotByGuid( itemguid );
 		if( pItem == NULL || pItem->IsSoulbound() || pItem->HasFlag( ITEM_FIELD_FLAGS, ITEM_FLAG_CONJURED ) || 
-			( pItem->IsContainer() && TO_CONTAINER(pItem)->HasItems() ) || real_item_slot >= 0 && real_item_slot < INVENTORY_SLOT_ITEM_START )
+			( pItem->IsContainer() && (TO_CONTAINER( pItem ))->HasItems() ) || real_item_slot >= 0 && real_item_slot < INVENTORY_SLOT_ITEM_START )
 		{
-			SendMailError( MAIL_ERR_INTERNAL_ERROR );
+			SendMailError(MAIL_ERR_INTERNAL_ERROR);
 			return;
 		}
-
 		items.push_back( pItem );
 	}
-	
+	if( items.size() > 12 || msg.body.find("%") != string::npos || msg.subject.find("%") != string::npos)
+	{
+		SendMailError(MAIL_ERR_INTERNAL_ERROR);
+		return;
+	}
+
 	recv_data >> msg.money;
 	recv_data >> msg.cod;
 	// left over: (TODO- FIX ME BURLEX!)
 	// uint32
 	// uint32
 	// uint8
-	
-	// Search for the recipient
-	PlayerInfo* player = ObjectMgr::getSingleton().GetPlayerInfoByName(recepient.c_str());
-	if( player == NULL )
-	{
-		SendMailError( MAIL_ERR_RECIPIENT_NOT_FOUND );
-		return;
-	}
-
-	bool interfaction = false;
-	if( sMailSystem.MailOption( MAIL_FLAG_CAN_SEND_TO_OPPOSITE_FACTION ) || (HasGMPermissions() && sMailSystem.MailOption( MAIL_FLAG_CAN_SEND_TO_OPPOSITE_FACTION_GM ) ) )
-	{
-		interfaction = true;
-	}
-
-	// Check we're sending to the same faction (disable this for testing)
-	if( player->team != _player->GetTeam() && !interfaction )
-	{
-		SendMailError( MAIL_ERR_NOT_YOUR_ALLIANCE );
-		return;
-	}
 
 	// Check if we're sending mail to ourselves
-	if(player->name == _player->GetName() && !GetPermissionCount())
+	if(msg.player_guid == msg.sender_guid && !GetPermissionCount())
 	{
 		SendMailError(MAIL_ERR_CANNOT_SEND_TO_SELF);
 		return;
 	}
 
+	// Check stationary
 	if( msg.stationary == 0x3d && !HasGMPermissions())
 	{
 		SendMailError(MAIL_ERR_INTERNAL_ERROR);
 		return;
 	}
-
-	// Instant delivery time by default.
-	msg.delivery_time = (uint32)UNIXTIME;
 
 	// Set up the cost
 	int32 cost = 0;
@@ -378,17 +554,14 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	{
 		cost = 30;
 	}
-
 	// Check for attached money
 	if( msg.money > 0 )
 		cost += msg.money;
-
 	if( cost < 0 )
 	{
 		SendMailError(MAIL_ERR_INTERNAL_ERROR);
 		return;
 	}
-
 	// check that we have enough in our backpack
 	if( (int32)_player->GetUInt32Value( PLAYER_FIELD_COINAGE ) < cost )
 	{
@@ -396,6 +569,44 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 		return;
 	}
 
+	// Check we're sending to the same faction (disable this for testing)
+	bool interfaction = (sMailSystem.MailOption( MAIL_FLAG_CAN_SEND_TO_OPPOSITE_FACTION ) || (HasGMPermissions() && sMailSystem.MailOption( MAIL_FLAG_CAN_SEND_TO_OPPOSITE_FACTION_GM ) ));
+	if(!interfaction)
+	{
+		if(player->team != _player->GetTeam())
+		{
+			SendMailError( MAIL_ERR_NOT_YOUR_ALLIANCE );
+			return;
+		}
+	}
+
+	msg.message_id = 0;
+	msg.message_type = 0;
+	msg.copy_made = false;
+	msg.read_flag = false;
+	msg.deleted_flag = false;
+	msg.returned_flag = false;
+	msg.delivery_time = (uint32)UNIXTIME;
+
+	if(msg.money != 0 || msg.cod != 0 || !items.size() && player->acct != _player->GetSession()->GetAccountId())
+	{
+		if(!sMailSystem.MailOption(MAIL_FLAG_DISABLE_HOUR_DELAY_FOR_ITEMS))
+			msg.delivery_time += 3600;  // +1hr
+	}
+
+	msg.expire_time = 0;
+	if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
+	{
+		msg.expire_time = (uint32)UNIXTIME + (TIME_DAY * 30);
+		if (msg.cod != 0)
+		{
+			msg.expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
+		}
+	}
+
+	// Sending Message
+	// take the money
+	_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -cost);
 	// Check for the item, and required item.
 	if( !items.empty( ) )
 	{
@@ -409,7 +620,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 			pItem->SetOwner( NULLPLR );
 			pItem->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
 			msg.items.push_back( pItem->GetUInt32Value(OBJECT_FIELD_GUID) );
-
+				
 			if( GetPermissionCount() > 0 )
 			{
 				/* log the message */
@@ -417,36 +628,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 			}
 
 			pItem->Destructor();
-			pItem = NULLITEM;
 		}
 	}
 
-	if(msg.money != 0 || msg.cod != 0 || !msg.items.size() && player->acct != _player->GetSession()->GetAccountId())
-	{
-		if(!sMailSystem.MailOption(MAIL_FLAG_DISABLE_HOUR_DELAY_FOR_ITEMS))
-			msg.delivery_time += 3600;  // 1hr
-	}
-
-	// take the money
-	_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -cost);
-
-	// Fill in the rest of the info
-	msg.player_guid = player->guid;
-	msg.sender_guid = _player->GetGUID();
-	
-	// 30 day expiry time for unread mail mail
-	if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
-		msg.expire_time = (uint32)UNIXTIME + (TIME_DAY * 30);
-	else
-		msg.expire_time = 0;
-
-	msg.copy_made = false;
-	msg.read_flag = false;
-	msg.deleted_flag = false;
-	msg.message_type = 0;
-
 	// Great, all our info is filled in. Now we can add it to the other players mailbox.
-	sMailSystem.DeliverMessage(player->guid, &msg);
+	sMailSystem.DeliverMessage(&msg);
 
 	// Success packet :)
 	SendMailError(MAIL_OK);
@@ -459,20 +645,16 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 	recv_data >> mailbox >> message_id;
 
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
-	if(message == 0) return;
+	if(message == 0 || message->Expired()) return;
 
-	if( message->read_flag ) // no point re-executing.
-		return;
-
-	// mark the message as read
-	message->read_flag = 1;
-
-	// mail now has a 3 day expiry time
-	if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
-		message->expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
-
-	// update it in sql
-	CharacterDatabase.Execute("UPDATE mailbox SET read_flag = 1, expiry_time = %u WHERE message_id = %u", message->message_id, message->expire_time);
+	message->read_flag = true;
+	if(!message->returned_flag)
+	{
+		// mail now has a 3 day expiry time
+		if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
+			message->expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
+	}
+	message->SaveToDB();
 }
 
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
@@ -485,30 +667,14 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 	data << message_id << uint32(MAIL_RES_DELETED);
 
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
-	if(message == 0)
+	if(message == 0 || message->Expired())
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
 		SendPacket(&data);
-
 		return;
 	}
 
-	if(message->copy_made)
-	{
-		// we have the message as a copy on the item. we can't delete it or this item
-		// will no longer function.
-
-		// deleted_flag prevents it from being shown in the mail list.
-		message->deleted_flag = 1;
-
-		// update in sql
-		CharacterDatabase.WaitExecute("UPDATE mailbox SET deleted_flag = 1 WHERE message_id = %u", message_id);
-	}
-	else
-	{
-		// delete the message, there are no other references to it.
-		_player->m_mailBox->DeleteMessage(message_id, true);
-	}
+	_player->m_mailBox->DeleteMessage(message);
 
 	data << uint32(MAIL_OK);
 	SendPacket(&data);
@@ -527,7 +693,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 	data << message_id << uint32(MAIL_RES_ITEM_TAKEN);
 	
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
-	if(message == 0 || message->items.empty())
+	if(message == 0 || message->Expired() || message->items.empty())
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
 		SendPacket(&data);
@@ -608,20 +774,26 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
 	message->items.erase( itr );
 
-	// re-save (update the items field)
-	sMailSystem.SaveMessageToSQL( message);
-	SendPacket(&data);
-	
+	if ((message->items.size() == 0) && (message->money == 0))
+	{
+		// mail now has a 3 day expiry time
+		if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
+			message->expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
+	}
+
 	if( message->cod > 0 )
 	{
 		_player->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -int32(message->cod));
 		string subject = "COD Payment: ";
 		subject += message->subject;
-		sMailSystem.SendAutomatedMessage(NORMAL, message->player_guid, message->sender_guid, subject, "", message->cod, 0, 0, 1);
+		sMailSystem.DeliverMessage(NORMAL, message->player_guid, message->sender_guid, subject, "", message->cod, 0, 0, 1, true);
 
 		message->cod = 0;
-		CharacterDatabase.Execute("UPDATE mailbox SET cod = 0 WHERE message_id = %u", message->message_id);
 	}
+
+	// re-save (update the items field)
+	message->SaveToDB();// sMailSystem.SaveMessageToSQL( message);
+	SendPacket(&data);
 
 	// prolly need to send an item push here
 }
@@ -636,7 +808,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 	data << message_id << uint32(MAIL_RES_MONEY_TAKEN);
 
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
-	if(message == 0 || !message->money)
+	if(message == 0 || message->Expired() || !message->money)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
 		SendPacket(&data);
@@ -660,8 +832,14 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 	// message no longer has any money
 	message->money = 0;
 
+	if ((message->items.size() == 0) && (message->money == 0))
+	{
+		// mail now has a 3 day expiry time
+		if(!sMailSystem.MailOption(MAIL_FLAG_NO_EXPIRY))
+			message->expire_time = (uint32)UNIXTIME + (TIME_DAY * 3);
+	}
 	// update in sql!
-	CharacterDatabase.Execute("UPDATE mailbox SET money = 0 WHERE message_id = %u", message->message_id);
+	message->SaveToDB();
 
 	// send result
 	data << uint32(MAIL_OK);
@@ -678,38 +856,22 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 	data << message_id << uint32(MAIL_RES_RETURNED_TO_SENDER);
 
 	MailMessage * msg = _player->m_mailBox->GetMessage(message_id);
-	if(msg == 0)
+	if(msg == 0 || msg->Expired())
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
 		SendPacket(&data);
 
 		return;
 	}
-	
-	// copy into a new struct
-	MailMessage message = *msg;
+	if(msg->returned_flag)
+	{
+		data << uint32(MAIL_ERR_INTERNAL_ERROR);
+		SendPacket(&data);
 
-	// remove the old message
-	_player->m_mailBox->DeleteMessage(message_id, true);
+		return;
+	}
 
-	// re-assign the owner/sender
-	message.player_guid = message.sender_guid;
-	message.sender_guid = _player->GetGUID();
-
-	// turn off the read flag
-	message.read_flag = false;
-	message.deleted_flag = false;
-	message.copy_made = false;
-
-	// null out the cod charges. (the sender doesnt want to have to pay for his own item
-	// that he got nothing for.. :p)
-	message.cod = 0;
-
-	// assign new delivery time
-	message.delivery_time = message.items.empty() ? (uint32)UNIXTIME : (uint32)UNIXTIME + 3600;
-
-	// add to the senders mailbox
-	sMailSystem.DeliverMessage(message.player_guid, &message);
+	sMailSystem.ReturnToSender(msg);
 
 	// finish the packet
 	data << uint32(MAIL_OK);
@@ -727,7 +889,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
 	ItemPrototype * proto = ItemPrototypeStorage.LookupEntry(8383);
 	MailMessage * message = _player->m_mailBox->GetMessage(message_id);
-	if(message == 0 || !proto)
+	if(message == 0 || message->Expired() || message->copy_made || !proto)
 	{
 		data << uint32(MAIL_ERR_INTERNAL_ERROR);
 		SendPacket(&data);
@@ -750,9 +912,8 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 	{
 		// mail now has an item after it
 		message->copy_made = true;
-
 		// update in sql
-		CharacterDatabase.Execute("UPDATE mailbox SET copy_made = 1 WHERE message_id = %u", message_id);
+		message->SaveToDB();
 
 		data << uint32(MAIL_OK);
 		SendPacket(&data);
@@ -780,42 +941,11 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data)
 	SendPacket(&data);
 }
 
-void Mailbox::FillTimePacket(WorldPacket& data)
-{
-	uint32 c = 0;
-	MessageMap::iterator iter = Messages.begin();
-	data << uint32(0) << uint32(0);
-
-	for(; iter != Messages.end(); ++iter)
-	{
-		if(iter->second.deleted_flag == 0 && iter->second.read_flag == 0 && (uint32)UNIXTIME >= iter->second.delivery_time)
-		{
-			// unread message, w00t.
-			++c;
-			data << uint64(iter->second.sender_guid);
-			data << uint32(0);
-			data << uint32(0);// money or smth?
-			data << uint32(iter->second.stationary);
-			//data << float(UNIXTIME-iter->second.delivery_time);
-			data << float(-9.0f);	// maybe the above?
-		}
-	}
-
-	if(c==0)
-	{
-		*(uint32*)(&data.contents()[0])=0xc7a8c000;
-	}
-	else
-	{
-		*(uint32*)(&data.contents()[4])=c;
-	}
-}
-
 void WorldSession::HandleMailTime(WorldPacket & recv_data)
 {
-	WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 100);
-	_player->m_mailBox->FillTimePacket(data);
-	SendPacket(&data);
+	WorldPacket * data = _player->m_mailBox->MailboxTimePacket();
+	SendPacket(data);
+	delete data;
 }
 
 void WorldSession::SendMailError(uint32 error)
@@ -829,129 +959,8 @@ void WorldSession::SendMailError(uint32 error)
 
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
-	WorldPacket * data = _player->m_mailBox->BuildMailboxListingPacket();
+	WorldPacket * data = _player->m_mailBox->MailboxListingPacket();
 	SendPacket(data);
 	delete data;
 }
 
-void MailSystem::RemoveMessageIfDeleted(uint32 message_id, PlayerPointer plr)
-{
-	MailMessage * msg = plr->m_mailBox->GetMessage(message_id);
-	if(msg == 0) return;
-
-	if(msg->deleted_flag)   // we've deleted from inbox
-		plr->m_mailBox->DeleteMessage(message_id, true);   // wipe the message
-}
-
-void MailSystem::SendAutomatedMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body,
-									  uint32 money, uint32 cod, uint64 item_guid, uint32 stationary)
-{
-	// This is for sending automated messages, for example from an auction house.
-	MailMessage msg;
-	msg.message_type = type;
-	msg.sender_guid = sender;
-	msg.player_guid = receiver;
-	msg.subject = subject;
-	msg.body = body;
-	msg.money = money;
-	msg.cod = cod;
-	if( GUID_LOPART(item_guid) != 0 )
-		msg.items.push_back( GUID_LOPART(item_guid) );
-
-	msg.stationary = stationary;
-	msg.delivery_time = (uint32)UNIXTIME;
-	msg.expire_time = 0;
-	msg.read_flag = false;
-	msg.copy_made = false;
-	msg.deleted_flag = false;
-
-	// Send the message.
-	DeliverMessage(receiver, &msg);
-}
-
-uint32 MailSystem::Generate_Message_Id()
-{
-	max_id++;
-	return max_id;
-}
-
-void Mailbox::Load(QueryResult * result)
-{
-	if(!result)
-		return;
-
-	Field * fields;
-	MailMessage msg;
-	uint32 i;
-	char * str;
-	char * p;
-	uint64 itemguid;
-
-	do 
-	{
-		fields = result->Fetch();
-
-		// Create message struct
-		i = 0;
-		msg.items.clear();
-		msg.message_id = fields[i++].GetUInt32();
-		msg.message_type = fields[i++].GetUInt32();
-		msg.player_guid = fields[i++].GetUInt32();
-		msg.sender_guid = fields[i++].GetUInt32();
-		msg.subject = fields[i++].GetString();
-		msg.body = fields[i++].GetString();
-		msg.money = fields[i++].GetUInt32();
-		str = (char*)fields[i++].GetString();
-		p = strchr(str, ',');
-		if( p == NULL )
-		{
-			itemguid = atoi(str);
-			if( itemguid != 0 )
-				msg.items.push_back( itemguid );
-		}
-		else
-		{
-			while( p )
-			{
-				*p = 0;
-				p++;
-
-				itemguid = atoi( str );
-				if( itemguid != 0 )
-					msg.items.push_back( itemguid );
-
-                str = p;
-				p = strchr( str, ',' );
-			}
-		}
-
-		msg.cod = fields[i++].GetUInt32();
-		msg.stationary = fields[i++].GetUInt32();
-		msg.expire_time = fields[i++].GetUInt32();
-		msg.delivery_time = fields[i++].GetUInt32();
-		msg.copy_made = fields[i++].GetBool();
-		msg.read_flag = fields[i++].GetBool();
-		msg.deleted_flag = fields[i++].GetBool();
-
-		/*if( msg.copy_made )
-		{
-			QueryResult * result = CharacterDatabase.Query( "SELECT * FROM playeritems WHERE itemtext = %u", msg.message_id );
-			if( result == NULL )
-			{
-				if( msg.deleted_flag )
-					CharacterDatabase.WaitExecute( "DELETE FROM mailbox WHERE message_id = %u", msg.message_id );
-				else
-				{
-					msg.copy_made = false;
-					CharacterDatabase.WaitExecute( "UPDATE mailbox SET copy_made = 0 WHERE message_id = %u", msg.message_id	);
-				}
-			}
-			else
-				delete result;
-		}*/
-
-		// Add to the mailbox
-		AddMessage(&msg);
-
-	} while(result->NextRow());
-}

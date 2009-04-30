@@ -682,6 +682,7 @@ void World::Update(time_t diff)
 {
 	eventholder->Update((uint32)diff);
 	sAuctionMgr.Update();
+	sMailSystem.UpdateMessages();
 	_UpdateGameTime();
 	UpdateQueuedSessions((uint32)diff);
 #ifdef SESSION_CAP
@@ -1575,8 +1576,8 @@ void World::PollMailboxInsertQueue(DatabaseConnection * con)
 				pItem = NULLITEM;
 
 			Log.Notice("MailboxQueue", "Sending message to %u (item: %u)...", f[1].GetUInt32(), itemid);
-			sMailSystem.SendAutomatedMessage( 0, f[0].GetUInt64(), f[1].GetUInt64(), f[2].GetString(), f[3].GetString(), f[5].GetUInt32(),
-				0, pItem ? pItem->GetGUID() : 0, f[4].GetUInt32() );
+			sMailSystem.DeliverMessage( 0, f[0].GetUInt64(), f[1].GetUInt64(), f[2].GetString(), f[3].GetString(), f[5].GetUInt32(),
+				0, pItem ? pItem->GetGUID() : 0, f[4].GetUInt32(), true );
 
 			if( pItem != NULL )
 			{

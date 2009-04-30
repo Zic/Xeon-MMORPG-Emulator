@@ -1485,7 +1485,6 @@ public:
 
 	uint32 m_ModInterrMRegenPCT;
 	int32 m_ModInterrMRegen;
-	float m_RegenManaOnSpellResist;
 	uint32 m_casted_amount[7]; //Last casted spells amounts. Need for some spells. Like Ignite etc. DOesn't count HoTs and DoTs. Only directs
 	
 	uint32 FlatStatModPos[5];
@@ -1532,7 +1531,6 @@ public:
 	map<uint32, WeaponModifier> damagedone;
 	map<uint32, WeaponModifier> tocritchance;
 	uint32 Seal;
-	uint32 judgespell;
 	int32 rageFromDamageDealt;
 	// GameObject commands
 	GameObjectPointer m_GM_SelectedGO;
@@ -1747,7 +1745,6 @@ public:
 	uint32 m_speedChangeCounter;
 
 	// HACKKKKK
-	uint32 m_lastCheatDeath;
 	uint32 m_cheatDeathRank;
 
 	void SendAreaTriggerMessage(const char * message, ...);
@@ -2076,9 +2073,6 @@ public:
 	uint32 m_skipCastCheck[3];  // spell group relation of spell types that should ignore some cancast checks
 	bool m_castFilterEnabled;
 	uint32 m_castFilter[3];	// spell group relation of only spells that player can currently cast 
-	uint32 m_outStealthDamageBonusPct;
-	uint32 m_outStealthDamageBonusPeriod;
-	uint32 m_outStealthDamageBonusTimer;
 
 	uint32 m_vampiricEmbrace;
 	uint32 m_vampiricTouch;
@@ -2112,12 +2106,19 @@ public:
 	bool mWeakenedSoul;
 	bool mForbearance;
 	bool mHypothermia;
+	bool mExhaustion;
+	bool mSated;
+
+	// Avenging Wrath...
+	bool mAvengingWrath;
+	void AvengingWrath();
 
 	// Glyphs
 	void RemoveGlyph(uint32 slot);
 	uint8 SetGlyph(uint32 slot, uint32 glyphId);
 	void InitGlyphSlots();
 	void InitGlyphsForLevel();
+
 	// Runes
 	uint8 m_runes[6];
 	uint8 m_runemask;

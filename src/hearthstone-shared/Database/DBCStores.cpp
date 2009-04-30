@@ -162,7 +162,7 @@ const char* spellshapeshiftformformat = "uxxxxxxxxxxxxxxxxxxxxxxxxxxxuuuuuuu";
 const char* vehicleseatentryFormat = "uuuffffffffffuuuuuufffffffuuufffuuuuuuuffuuuuu";
 const char* vehicleentryFormat = "uuffffuuuuuuuuffffuuuuuufffffffffffssssfufu";
 
-const char* achievementfmt="niixsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiixxxxxxxxxxxxxxxxxxxi";
+const char* achievementfmt="niixsxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiixixxxxxxxxxxxxxxxxxxxx";
 const char* achievementCriteriafmt="niiiiiiiisxxxxxxxxxxxxxxxxiixix";
 
 

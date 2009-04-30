@@ -31,7 +31,7 @@ struct AchievementEntry
     uint32 ID; // 0
     uint32 factionFlag; // 1 -1=all, 0=horde, 1=alliance
     uint32 mapID; // 2 -1=none
-    char* name;
+    char* name; // 4
     //uint32 name_flags; // 20
     //char *description[16]; // 21-36
     //uint32 desc_flags; // 37
@@ -39,12 +39,11 @@ struct AchievementEntry
     uint32 points; // 39 reward points
     //uint32 OrderInCategory; // 40
     uint32 flags; // 41
-	uint32 is_statistic;
     //uint32 flags; // 42 not flags, some unknown value...
     //char *unk1[16]; // 43-58
     //uint32 unk_flags; // 59
     //uint32 count; // 60
-    uint32 refAchievement; // 61
+    //uint32 refAchievement; // 61
 
 	uint32 AssociatedCriteria[32]; // Custom stuff
 	uint32 AssociatedCriteriaCount;
@@ -767,13 +766,11 @@ struct SpellEntry
 	float cone_width;
 
 	//Spell Coefficient
-	float casttime_coef;                                    //!!! CUSTOM, faster spell bonus calculation
-	uint32 spell_coef_flags;                                //!!! CUSTOM, store flags for spell coefficient calculations
-	float fixed_dddhcoef;                                   //!!! CUSTOM, fixed DD-DH coefficient for some spells
-	float fixed_hotdotcoef;                                 //!!! CUSTOM, fixed HOT-DOT coefficient for some spells
-	float fixed_apcoef;										//!!! CUSTOM, fixed Attack Power coefficient for some spells
-	float Dspell_coef_override;                             //!!! CUSTOM, overrides any spell coefficient calculation and use this value in DD&DH
-	float OTspell_coef_override;							//!!! CUSTOM, overrides any spell coefficient calculation and use this value in HOT&DOT
+	uint32 spell_coef_flags;                //!!! CUSTOM, store flags for spell coefficient calculations
+	float Dspell_coef_override;             //!!! CUSTOM, overrides any spell coefficient calculation and use this value in DD&DH
+	float OTspell_coef_override;			//!!! CUSTOM, overrides any spell coefficient calculation and use this value in HOT&DOT
+	float AP_coef_override;					//!!! CUSTOM, Additional coef from ap
+	float RAP_coef_override;				//!!! CUSTOM, Additional coef from RAP
 
 	bool self_cast_only;
 	bool apply_on_shapeshift_change;
@@ -786,6 +783,11 @@ struct SpellEntry
 	uint32 skilline;
 	uint32 logsId;	// SpellId used to send log to client for this spell
 	uint32 AdditionalAura;
+	uint32 forced_creature_target;
+	uint32 AreaAuraTarget;
+
+	//poisons type...
+	uint32 poison_type;
 };
 
 struct SpellRuneCostEntry

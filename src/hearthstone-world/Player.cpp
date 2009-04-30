@@ -66,7 +66,6 @@ void Player::Init()
 	bReincarnation			= false;
 	m_furorChance			= 0;
 	Seal					= 0;
-	judgespell			  = 0;
 	m_session			   = 0;
 	TrackingSpell		   = 0;
 	m_status				= 0;
@@ -93,7 +92,6 @@ void Player::Init()
 	m_taxi_pos_z			= 0;
 	m_taxi_ride_time		= 0;
 
-	m_lastCheatDeath = 0;
 	// Attack related variables
 	m_blockfromspellPCT	 = 0;
 	m_blockfromspell		= 0;
@@ -380,7 +378,6 @@ void Player::Init()
 
 		m_ModInterrMRegenPCT = 0;
 		m_ModInterrMRegen =0;
-		m_RegenManaOnSpellResist=0;
 		m_rap_mod_pct = 0;
 		m_modblockabsorbvalue = 0;
 		m_modblockvaluefromspells = 0;
@@ -434,7 +431,6 @@ void Player::Init()
 		m_speedChangeInProgress = false;
 		m_passOnLoot = false;
 		m_changingMaps = true;
-		m_outStealthDamageBonusPct = m_outStealthDamageBonusPeriod = m_outStealthDamageBonusTimer = 0;
 		m_vampiricEmbrace = m_vampiricTouch = 0;
 		m_magnetAura = NULLAURA;
 		m_lastMoveTime = 0;
@@ -444,7 +440,10 @@ void Player::Init()
 
 		mWeakenedSoul = false;
 		mForbearance = false;
+		mExhaustion = false;
 		mHypothermia = false;
+		mSated = false;
+		mAvengingWrath = true;
 		m_flyhackCheckTimer = 0;
 		m_bgFlagIneligible = 0;
 		m_moltenFuryDamageIncreasePct = 0;
@@ -1754,7 +1753,7 @@ void Player::_SavePet(QueryBuffer * buf)
 	for(std::map<uint32, PlayerPet*>::iterator itr = m_Pets.begin(); itr != m_Pets.end(); itr++)
 	{
 		ss.rdbuf()->str("");
-		ss << "INSERT INTO playerpets VALUES('"
+		ss << "REPLACE INTO playerpets VALUES('"
 			<< GetLowGUID() << "','"
 			<< itr->second->number << "','"
 			<< CharacterDatabase.EscapeString(itr->second->name) << "','"
@@ -2469,6 +2468,9 @@ bool Player::canCast(SpellEntry *m_spellInfo)
 {
 	if (m_spellInfo->EquippedItemClass != 0)
 	{
+		if( disarmed )
+			return false;
+
 		if(GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND))
 		{
 			if((int32)GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_MAINHAND)->GetProto()->Class == m_spellInfo->EquippedItemClass)
@@ -2944,14 +2946,6 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 			else
 			{
 				mSpells.insert(spProto->Id);
-
-				// Cheat Death hack!
-				if(_spell->Id == 31230)
-					m_cheatDeathRank = 3;
-				else if(_spell->Id == 31329)
-					m_cheatDeathRank = 2;
-				else if(_spell->Id == 31328)
-					m_cheatDeathRank = 1;
 			}
 		}
 #endif
@@ -4898,47 +4892,75 @@ void Player::UpdateStats()
 	uint32 cl = getClass();   
 	switch (cl)
 	{
-	case DEATHKNIGHT:
-		AP = lev * 3 + str * 2 - 20;
-		RAP = lev + agi - 10;
-		break;
-
 	case DRUID:
-		AP = str * 2 - 20;
-
-		if( GetShapeShift() == FORM_CAT )
-			AP += agi + lev * 2;
-
-		if( GetShapeShift() == FORM_BEAR || GetShapeShift() == FORM_DIREBEAR )
-			AP += lev * 3;
-
+        //(Strength x 2) - 20           
+        AP = str * 2 - 20;
+        //Agility - 10
+        RAP = agi - 10;
+    
+        if( GetShapeShift() == FORM_MOONKIN )
+        {
+            //(Strength x 2) + (Character Level x 1.5) - 20
+            AP += float2int32( static_cast<float>(lev) * 1.5f );
+        }
+        if( GetShapeShift() == FORM_CAT )
+		{
+            //(Strength x 2) + Agility + (Character Level x 2) - 20
+            AP += agi + (lev *2);
+        }
+        if( GetShapeShift() == FORM_BEAR || GetShapeShift() == FORM_DIREBEAR )
+        {
+            //(Strength x 2) + (Character Level x 3) - 20
+            AP += (lev *3);
+		}
 		break;
+
 
 	case ROGUE:
-		AP = lev * 2 + str + agi - 20;
+		//Strength + Agility + (Character Level x 2) - 20
+		AP = str + agi + (lev *2) - 20;
+		//Character Level + Agility - 10
 		RAP = lev + agi - 10;
+
 		break;
+
 
 	case HUNTER:
-		AP = lev * 2 + str + agi - 20;
-		RAP = lev * 2 + agi - 10;
+		//Strength + Agility + (Character Level x 2) - 20
+		 AP = str + agi + (lev *2) - 20;
+		//(Character Level x 2) + Agility - 10
+		RAP = (lev *2) + agi - 10;
+
 		break;
 
-	case SHAMAN:
-		AP = str + agi + lev*2 - 20;
+	case SHAMAN:   
+		//(Strength) + (Agility) + (Character Level x 2) - 20
+		AP = str + agi + (lev *2) - 20;
+		//Agility - 10
+		RAP = agi - 10;
+		
 		break;
 
 	case PALADIN:
-		AP = lev * 3 + str * 2 - 20;
+		//(Strength x 2) + (Character Level x 3) - 20
+		AP = (str *2) + (lev *3) - 20;
+		//Agility - 10
+		RAP = agi - 10;
+	
 		break;
+
 
 	case WARRIOR:
-		AP = lev * 3 + str * 2 - 20;
+	case DEATHKNIGHT:
+		//(Strength x 2) + (Character Level x 3) - 20
+		AP = (str *2) + (lev *3) - 20;
+		//Character Level + Agility - 10
 		RAP = lev + agi - 10;
+		
 		break;
 
-	default://mage,priest,warlock
-		AP = str - 10;
+	default:    //mage,priest,warlock
+		AP = agi - 10;
 	}
 
 	/* modifiers */
@@ -5032,7 +5054,7 @@ void Player::UpdateStats()
 		float block_multiplier = ( 100.0f + float( m_modblockabsorbvalue ) ) / 100.0f;
 		if( block_multiplier < 1.0f )block_multiplier = 1.0f;
 
-		int32 blockable_damage = float2int32( float( shield->GetProto()->Block ) +( float( m_modblockvaluefromspells + GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) ) * block_multiplier ) + ( ( float( str ) / 20.0f ) - 1.0f ) );
+		int32 blockable_damage = float2int32( float( shield->GetProto()->Block ) +( float( m_modblockvaluefromspells + GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) ) * block_multiplier ) + ( ( float( str ) / 2.0f ) ) );
 		SetUInt32Value( PLAYER_SHIELD_BLOCK, blockable_damage );
 	}
 	else
@@ -5259,17 +5281,15 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 					// 2d distance SQUARED!
 					float base_range = 64.0f;
 					float modDistance = 0.0f;
-					if(getLevel() > pObj->getLevel())
-					{
-						uint32 level_diff = getLevel() - pObj->getLevel();
-						modDistance += (level_diff) * 2.5f;
-					}
 
-					uint32 bonus = GetStealthDetectBonus();
-					modDistance += (uint32)(bonus / 2.0f);
+					int32 hide_level = (getLevel() * 5 + GetStealthDetectBonus()) - pObj->GetStealthLevel();
+					modDistance += hide_level * 0.2f;
 
 					if(pObj->isInBack(plr_shared_from_this()))
 						base_range /= 2.0f;
+
+					if( base_range + modDistance <= 0 )
+						return false;
 
 					base_range += modDistance;
 
@@ -5843,8 +5863,6 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, UnitPointer target, bool aut
 	float minrange = GetMinRange( range );
 	float dist = GetDistance2dSq( target ) - target->GetSize() - GetSize();
 	float maxr = GetMaxRange( range );
-	maxr *= maxr; // square me!
-	minrange *= minrange;
 
 	if( spellinfo->SpellGroupType )
 	{
@@ -5860,16 +5878,9 @@ int32 Player::CanShootRangedWeapon( uint32 spellid, UnitPointer target, bool aut
 #endif
 	}
 
-	//float bonusRange = 0;
-	// another hackfix: bonus range from hunter talent hawk eye: +2/4/6 yard range to ranged weapons
-	//if(autoshot)
-	//SM_FFValue( SM[SMT_RANGE][0], &bonusRange, dbcSpell.LookupEntry( 75 )->SpellGroupType ); // HORRIBLE hackfixes :P
-	// Partha: +2.52yds to max range, plr_shared_from_this() matches the range the client is calculating.
-	// see extra/supalosa_range_research.txt for more info
-	//bonusRange = 2.52f;
-	//sLog.outString( "Bonus range = %f" , bonusRange );
+	maxr *= maxr; // square me!
+	minrange *= minrange;
 
-	// Check for close
 	if( spellid != SPELL_RANGED_WAND )//no min limit for wands
 		if( minrange > dist )
 			fail = SPELL_FAILED_TOO_CLOSE;
@@ -6245,7 +6256,7 @@ void Player::ResetTitansGrip()
 			offhand->RemoveFromWorld();
 			offhand->SetOwner( NULLPLR );
 			offhand->SaveToDB( INVENTORY_SLOT_NOT_SET, 0, true, NULL );
-			sMailSystem.SendAutomatedMessage(NORMAL, GetGUID(), GetGUID(), "Your offhand item", "", 0, 0, offhand->GetUInt32Value(OBJECT_FIELD_GUID), 1);
+			sMailSystem.DeliverMessage(NORMAL, GetGUID(), GetGUID(), "Your offhand item", "", 0, 0, offhand->GetUInt32Value(OBJECT_FIELD_GUID), 1, true);
 			offhand->Destructor();
 			offhand = NULLITEM;
 		}
@@ -6359,18 +6370,21 @@ void Player::CalcResistance(uint32 type)
 	int32 pos;
 	int32 neg;
 	ASSERT(type < 7);
-	pos=(BaseResistance[type]*BaseResistanceModPctPos[type])/100;
-	neg=(BaseResistance[type]*BaseResistanceModPctNeg[type])/100;
+	pos = float2int32( BaseResistance[type] * (float)( BaseResistanceModPctPos[ type ] / 100.0f ) );
+	neg = float2int32( BaseResistance[type] * (float)( BaseResistanceModPctNeg[ type ] / 100.0f ) );
 
-	pos+=FlatResistanceModifierPos[type];
-	neg+=FlatResistanceModifierNeg[type];
-	res=BaseResistance[type]+pos-neg;
-	if(type==0)res+=m_uint32Values[UNIT_FIELD_STAT1]*2;//fix armor from agi
-	if(res<0)res=0;
-	pos+=(res*ResistanceModPctPos[type])/100;
-	neg+=(res*ResistanceModPctNeg[type])/100;
-	res=pos-neg+BaseResistance[type];
-	if(type==0)res+=m_uint32Values[UNIT_FIELD_STAT1]*2;//fix armor from agi
+	pos += FlatResistanceModifierPos[type];
+	neg += FlatResistanceModifierNeg[type];
+	res = BaseResistance[type] + pos - neg;
+	if( type == 0 )
+		res += m_uint32Values[UNIT_FIELD_STAT1] * 2;//fix armor from agi
+	if( res < 0 )
+		res = 0;
+	pos += float2int32( res * (float)( ResistanceModPctPos[type] / 100.0f ) );
+	neg += float2int32( res * (float)( ResistanceModPctNeg[type] / 100.0f ) );
+	res = pos - neg + BaseResistance[type];
+	if( type == 0 )
+		res += m_uint32Values[UNIT_FIELD_STAT1] * 2;//fix armor from agi
 
 	if( res < 0 )
 		res = 1;
@@ -6704,13 +6718,14 @@ void Player::RegenerateMana(bool is_interrupted)
 
 void Player::RegenerateHealth( bool inCombat )
 {
-	gtFloat* HPRegenBase = dbcHPRegenBase.LookupEntry(getLevel()-1 + (getClass()-1)*100);
-	gtFloat* HPRegen =  dbcHPRegen.LookupEntry(getLevel()-1 + (getClass()-1)*100);
 
 	uint32 cur = GetUInt32Value(UNIT_FIELD_HEALTH);
 	uint32 mh = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
 	if(cur >= mh)
 		return;
+
+	gtFloat* HPRegenBase = dbcHPRegenBase.LookupEntry(getLevel()-1 + (getClass()-1)*100);
+	gtFloat* HPRegen =  dbcHPRegen.LookupEntry(getLevel()-1 + (getClass()-1)*100);
 
 	float amt = (m_uint32Values[UNIT_FIELD_STAT4]*HPRegen->val+HPRegenBase->val*100);
 	amt *= sWorld.getRate(RATE_HEALTH);//Apply shit from conf file
@@ -6760,11 +6775,19 @@ void Player::RegenerateEnergy()
 {
 	uint32 cur = GetUInt32Value(UNIT_FIELD_POWER4);
 	uint32 mh = GetUInt32Value(UNIT_FIELD_MAXPOWER4);
-	if(cur >= mh)
+	if( cur >= mh )
 		return;
+
 	float amt = 2.0f * PctPowerRegenModifier[POWER_TYPE_ENERGY];
 
 	cur += float2int32(amt);
+	m_toRegen += (amt - cur);
+	if( m_toRegen > 1 )
+	{
+		cur++;
+		m_toRegen--;
+	}
+
 	SetUInt32Value(UNIT_FIELD_POWER4,(cur>=mh) ? mh : cur);
 }
 
@@ -8927,22 +8950,20 @@ void Player::CalcDamage()
 		}
 		
 		float bonus=ap_bonus*speed;
-		float tmp = 1;
-		map<uint32, WeaponModifier>::iterator i;
-		for(i = damagedone.begin();i!=damagedone.end();i++)
-		{
-			if((i->second.wclass == (uint32)-1) || //any weapon
-				(it && ((1 << it->GetProto()->SubClass) & i->second.subclass) )
-				)
-					tmp+=i->second.value/100.0f;
-		}
-		
+		float tmp = GetDamageDonePctMod(SCHOOL_NORMAL);
+	
 		r = BaseDamage[0]+delta+bonus;
 		r *= tmp;
+		if( it )
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
+
 		SetFloatValue(UNIT_FIELD_MINDAMAGE,r>0?r:0);
 	
 		r = BaseDamage[1]+delta+bonus;
 		r *= tmp;
+		if( it )
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
+
 		SetFloatValue(UNIT_FIELD_MAXDAMAGE,r>0?r:0);
 
 		uint32 cr = 0;
@@ -8970,22 +8991,17 @@ void Player::CalcDamage()
 			else speed  = 2000;
 			
 			bonus = ap_bonus * speed;
-			i = damagedone.begin();
-			tmp = 1;
-			for(;i!=damagedone.end();i++)
-			{
-				if((i->second.wclass==(uint32)-1) || //any weapon
-					(( (1 << it->GetProto()->SubClass) & i->second.subclass)  )
-					)
-					tmp+=i->second.value/100.0f;
-			}
 
 			r = (BaseOffhandDamage[0]+delta+bonus)*offhand_dmg_mod;
 			r *= tmp;
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
 			SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,r>0?r:0);
+
 			r = (BaseOffhandDamage[1]+delta+bonus)*offhand_dmg_mod;
 			r *= tmp;
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
 			SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,r>0?r:0);
+
 			if(m_wratings.size ())
 			{
 				std::map<uint32, uint32>::iterator itr=m_wratings.find(it->GetProto()->SubClass);
@@ -9000,19 +9016,6 @@ void Player::CalcDamage()
 		cr=0;
 		if((it = GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_RANGED)))
 		{
-			i = damagedone.begin();
-			tmp = 1;
-			for(;i != damagedone.end();i++)
-			{
-				if( 
-					(i->second.wclass == (uint32)-1) || //any weapon
-					( ((1 << it->GetProto()->SubClass) & i->second.subclass)  )
-					)
-				{
-					tmp+=i->second.value/100.0f;
-				}
-			}
-
 			if(it->GetProto()->SubClass != 19)//wands do not have bonuses from RAP & ammo
 			{
 //				ap_bonus = (GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)+(int32)GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS))/14000.0;
@@ -9032,12 +9035,13 @@ void Player::CalcDamage()
 			
 			r = BaseRangedDamage[0]+delta+bonus;
 			r *= tmp;
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
 			SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,r>0?r:0);
 
 			r = BaseRangedDamage[1]+delta+bonus;
 			r *= tmp;
-			SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,r>0?r:0);
-			
+			r *= m_WeaponSubClassDamagePct[it->GetProto()->SubClass];
+			SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,r>0?r:0);	
 		
 			if(m_wratings.size ())
 			{
@@ -9051,7 +9055,7 @@ void Player::CalcDamage()
 
 /////////////////////////////////RANGED end
 
-		//tmp = 1;
+	/*	//tmp = 1;
 		tmp = 0;
 		for(i = damagedone.begin();i != damagedone.end();i++)
 		if(i->second.wclass==(uint32)-1)  //any weapon
@@ -9060,7 +9064,7 @@ void Player::CalcDamage()
 		//display only modifiers for any weapon
 
 		// OMG?
-		ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT ,tmp);
+		ModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT ,tmp);*/
  
 }
 
@@ -9176,10 +9180,10 @@ void Player::SendAreaTriggerMessage(const char * message, ...)
 
 void Player::removeSoulStone()
 {
-	if(!this->SoulStone)
+	if(!SoulStone)
 		return;
 	uint32 sSoulStone = 0;
-	switch(this->SoulStone)
+	switch(SoulStone)
 	{
 	case 3026:
 		{
@@ -9277,7 +9281,7 @@ void Player::SetNoseLevel()
 
 void Player::Possess(UnitPointer pTarget)
 {
-	if(m_Summon || m_CurrentCharm)
+	if( m_Summon || m_CurrentCharm )
 		return;
 
 	ResetHeartbeatCoords();
@@ -9390,7 +9394,7 @@ void Player::UnPossess()
 
 	/* send "switch mover" packet */
 	WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
-	data << GetNewGUID() << uint8(0);
+	data << GetNewGUID() << uint8(1);
 	m_session->SendPacket(&data);
 
 	if(pTarget->m_temp_summon)
@@ -9554,8 +9558,6 @@ void Player::_UpdateSkillFields()
 					removeSpell(55428,false,false,0);
 					addSpell( 55480 );												// Lifeblood Rank 2
 				}
-				else if( itr->second.CurrentValue >= skill_base && !HasSpell( 55428 ) )
-					addSpell( 55428 );												// Lifeblood Rank 1
 			}break;
 			case SKILL_SKINNING:
 			{
@@ -9732,6 +9734,9 @@ void Player::_UpdateMaxSkillCounts()
 
 void Player::_ModifySkillBonus(uint32 SkillLine, int32 Delta)
 {
+	if( m_skills.empty() )
+		return;
+
 	SkillMap::iterator itr = m_skills.find(SkillLine);
 	if(itr == m_skills.end())
 		return;
@@ -11772,4 +11777,9 @@ uint8 Player::TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy)
 	}
 	
 	return runemask;
+}
+
+void Player::AvengingWrath()
+{
+	this->mAvengingWrath = true;
 }

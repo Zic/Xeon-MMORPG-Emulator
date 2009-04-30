@@ -154,7 +154,7 @@ void AuctionHouse::RemoveAuction(Auction * auct)
 			snprintf(subject, 100, "%u:0:3", (unsigned int)auct->pItem->GetEntry());
 
 			// Auction expired, resend item, no money to owner.
-			sMailSystem.SendAutomatedMessage(AUCTION, dbc->id, auct->Owner, subject, "", 0, 0, auct->pItem->GetGUID(), 62);
+			sMailSystem.DeliverMessage(AUCTION, dbc->id, auct->Owner, subject, "", 0, 0, auct->pItem->GetGUID(), 62,true);
 		}break;
 
 	case AUCTION_REMOVE_WON:
@@ -166,7 +166,7 @@ void AuctionHouse::RemoveAuction(Auction * auct)
 			snprintf(body, 200, "%X:%u:%u", (unsigned int)auct->Owner, (unsigned int)auct->HighestBid, (unsigned int)auct->BuyoutPrice);
 
 			// Auction won by highest bidder. He gets the item.
-			sMailSystem.SendAutomatedMessage(AUCTION, dbc->id, auct->HighestBidder, subject, body, 0, 0, auct->pItem->GetGUID(), 62);
+			sMailSystem.DeliverMessage(AUCTION, dbc->id, auct->HighestBidder, subject, body, 0, 0, auct->pItem->GetGUID(), 62,true);
 
 			// Send a mail to the owner with his cut of the price.
 			uint32 auction_cut = FL2UINT(float(cut_percent * float(auct->HighestBid)));
@@ -184,7 +184,7 @@ void AuctionHouse::RemoveAuction(Auction * auct)
 				snprintf(body, 200, "%X:%u:0:%u:%u", (unsigned int)auct->HighestBidder, (unsigned int)auct->HighestBid, (unsigned int)auct->DepositAmount, (unsigned int)auction_cut);
 
 			// send message away.
-			sMailSystem.SendAutomatedMessage(AUCTION, dbc->id, auct->Owner, subject, body, amount, 0, 0, 62);
+			sMailSystem.DeliverMessage(AUCTION, dbc->id, auct->Owner, subject, body, amount, 0, 0, 62,true);
 		}break;
 	case AUCTION_REMOVE_CANCELLED:
 		{
@@ -194,13 +194,13 @@ void AuctionHouse::RemoveAuction(Auction * auct)
 			if(cut && plr && plr->GetUInt32Value(PLAYER_FIELD_COINAGE) >= cut)
 				plr->ModUnsigned32Value(PLAYER_FIELD_COINAGE, -((int32)cut));
 			
-			sMailSystem.SendAutomatedMessage(AUCTION, GetID(), auct->Owner, subject, "", 0, 0, auct->pItem->GetGUID(), 62);
+			sMailSystem.DeliverMessage(AUCTION, GetID(), auct->Owner, subject, "", 0, 0, auct->pItem->GetGUID(), 62,true);
 			
 			// return bidders money
 			if(auct->HighestBidder)
 			{
-				sMailSystem.SendAutomatedMessage(AUCTION, GetID(), auct->HighestBidder, subject, "", auct->HighestBid, 
-					0, 0, 62);
+				sMailSystem.DeliverMessage(AUCTION, GetID(), auct->HighestBidder, subject, "", auct->HighestBid, 
+					0, 0, 62,true);
 			}
 			
 		}break;
@@ -410,8 +410,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 		// Return the money to the last highest bidder.
 		char subject[100];
 		snprintf(subject, 100, "%u:0:0", (int)auct->pItem->GetEntry());
-		sMailSystem.SendAutomatedMessage(AUCTION, ah->GetID(), auct->HighestBidder, subject, "", auct->HighestBid,
-			0, 0, 62);
+		sMailSystem.DeliverMessage(AUCTION, ah->GetID(), auct->HighestBidder, subject, "", auct->HighestBid,
+			0, 0, 62,true);
+
 	}
 
 	if(auct->BuyoutPrice == price)

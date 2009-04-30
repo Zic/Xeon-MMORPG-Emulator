@@ -323,6 +323,9 @@ void ScriptMgr::UnloadScripts()
 
 void ScriptMgr::register_creature_script(uint32 entry, exp_create_creature_ai callback)
 {
+	CreatureProto* cn = CreatureProtoStorage.LookupEntry(entry);
+	if( cn && !cn->spells.empty() )
+		cn->spells.clear();
 	_creatures.insert( CreatureCreateMap::value_type( entry, callback ) );
 }
 
@@ -505,6 +508,8 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 		if(text != 0)
 			TextID = Text;
 	}
+	else
+		TextID = 1;
 
 	objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), TextID, Plr);
 	

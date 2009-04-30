@@ -550,7 +550,6 @@ public:
 
 	LevelInfo * GetLevelInfo(uint32 Race, uint32 Class, uint32 Level);
 	void GenerateLevelUpInfo();
-
 	uint32 GetPetSpellCooldown(uint32 SpellId);
 	void LoadPetSpellCooldowns();
 	WayPointMap * GetWayPointMap(uint32 spawnid);

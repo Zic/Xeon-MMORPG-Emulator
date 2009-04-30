@@ -577,7 +577,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
 		uint32 mail_id = it->GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID);
 		if(mail_id)
-			sMailSystem.RemoveMessageIfDeleted(mail_id, _player);
+			_player->m_mailBox->OnMessageCopyDeleted(mail_id);
 		
 		ItemPointer pItem = _player->GetItemInterface()->SafeRemoveAndRetreiveItemFromSlot(SrcInvSlot,SrcSlot,false);
 		if(!pItem)
@@ -1469,6 +1469,8 @@ void WorldSession::SendInventoryList(CreaturePointer unit)
 				if(curItem->AllowableClass && !(_player->getClassMask() & curItem->AllowableClass))
 					continue;
 				if(curItem->AllowableRace && !(_player->getRaceMask() & curItem->AllowableRace))
+					continue;
+				if( curItem->BuyPrice == 0 && itr->extended_cost == NULL )
 					continue;
 
 				int32 av_am = (itr->max_amount>0)?itr->available_amount:-1;

@@ -1,0 +1,1 @@
+ALTER TABLE mailbox ADD COLUMN `returned_flag` int(10) UNSIGNED NOT NULL DEFAULT 0;

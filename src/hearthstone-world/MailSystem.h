@@ -1,6 +1,6 @@
 /*
  * Aspire Hearthstone
- * Copyright (C) 2008 - 2009 AspireDev <http://www.aspiredev.org/>
+ * Copyright (C) 2008 AspireDev <http://www.aspiredev.org/>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -75,14 +75,20 @@ struct MailMessage
 	uint32 copy_made;
 	bool read_flag;
 	bool deleted_flag;
-	
-	bool AddMessageDataToPacket(WorldPacket& data);
+	bool returned_flag;
+	bool LoadFromDB(Field * fields);
+	void SaveToDB();
+	void SaveToDBCallBack(QueryResultVector & results);
+	bool Expired();
 };
 
 typedef map<uint32, MailMessage> MessageMap;
 
 class Mailbox
 {
+private:
+	bool AddMessageToListingPacket(WorldPacket& data, MailMessage *msg);
+	bool AddMessageToTimePacket(WorldPacket& data, MailMessage *msg);
 protected:
 	uint64 owner;
 	MessageMap Messages;
@@ -91,7 +97,7 @@ public:
 	Mailbox(uint64 owner_) : owner(owner_) {}
 
 	void AddMessage(MailMessage* Message);
-	void DeleteMessage(uint32 MessageId, bool sql);
+	void DeleteMessage(MailMessage* Message);
 	MailMessage * GetMessage(uint32 message_id)
 	{
 		MessageMap::iterator iter = Messages.find(message_id);
@@ -99,35 +105,38 @@ public:
 			return NULL;
 		return &(iter->second);
 	}
-
-	WorldPacket * BuildMailboxListingPacket();
-	void CleanupExpiredMessages();
+	string GetMessageBody(uint32 message_id);
+	WorldPacket * MailboxListingPacket();
+	WorldPacket * MailboxTimePacket();
 	HEARTHSTONE_INLINE size_t MessageCount() { return Messages.size(); }
-	void FillTimePacket(WorldPacket& data);
 	HEARTHSTONE_INLINE uint64 GetOwner() { return owner; }
 	void Load(QueryResult * result);
+	void OnMessageCopyDeleted(uint32 msg_id);
 };
 
 
-class SERVER_DECL MailSystem : public Singleton<MailSystem>, public EventableObject
+class MailSystem : public Singleton<MailSystem>, public EventableObject
 {
+private:
+	uint32 loopcount;
 public:
-
+	uint32 config_flags;
+	MailSystem()
+	{
+		loopcount = 0;
+	}
 	void StartMailSystem();
-	MailError DeliverMessage(uint64 recipent, MailMessage* message);
-	void RemoveMessageIfDeleted(uint32 message_id, PlayerPointer plr);
-	void SaveMessageToSQL(MailMessage * message);
+	void DeliverMessage(MailMessage* message);
+	void DeliverMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body,
+						uint32 money, uint32 cod, uint64 item_guid, uint32 stationary, bool returned);
+	void ReturnToSender(MailMessage* message);
 	void SendAutomatedMessage(uint32 type, uint64 sender, uint64 receiver, string subject, string body, uint32 money,
-		uint32 cod, uint64 item_guid, uint32 stationary);
-
+							uint32 cod, uint64 item_guid, uint32 stationary);
 	HEARTHSTONE_INLINE bool MailOption(uint32 flag)
 	{
 		return (config_flags & flag) ? true : false;
 	}
-	uint32 config_flags;
-	uint32 max_id;
-
-	uint32 Generate_Message_Id();
+	void UpdateMessages();
 };
 
 #define sMailSystem MailSystem::getSingleton()

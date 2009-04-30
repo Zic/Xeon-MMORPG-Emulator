@@ -190,6 +190,8 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				sp->spell = spe;
 				sp->spellType = fields[5].GetUInt8();
 				sp->spelltargetType = fields[6].GetUInt8();
+				if( spe->c_is_flags & SPELL_FLAG_CASTED_ON_FRIENDS && !(sp->spelltargetType == TTYPE_OWNER))//just to make sure ;)
+					sp->spelltargetType = TTYPE_CASTER;
 				sp->cooldown = (tcd <0 ? 0 : tcd);
 				sp->floatMisc1 = fields[8].GetFloat();
 				sp->Misc2 = fields[9].GetUInt32();
