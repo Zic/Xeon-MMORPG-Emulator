@@ -769,7 +769,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		{
 			if( p_caster && p_caster->GetGroup() && unitTarget)
 			{
-				uint32 amt = 50*m_spellInfo->RankNumber; //temp hax
+				uint32 amt = float2int32( CalculateEffect(0, unitTarget)*0.25f / 3.0f );
 				uint32 count = 0;
 				p_caster->GetGroup()->Lock();
 				for(uint32 x = 0; x < p_caster->GetGroup()->GetSubGroupCount(); ++x)
@@ -979,7 +979,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 		}break;
 	/*
 		Preparation
-		When activated, this ability immediately finishes the cooldown on your Evasion, Sprint, Vanish, Cold Blood, Shadowstep and Premeditation abilities.		
+		When activated, this ability immediately finishes the cooldown on your Evasion, Sprint, Vanish, Cold Blood and Shadowstep abilities.
 		
 		Effect	Dummy
 	*/
@@ -988,7 +988,7 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			if( !p_caster )
 				return;
 
-			uint32 ClearSpellId[11] =
+			uint32 ClearSpellId[10] =
 			{
 			5277,  /* Evasion - Rank 1 */
 			26669, /* Evasion - Rank 2 */
@@ -999,11 +999,10 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			1857,  /* Vanish  - Rank 2 */
 			26889, /* Vanish  - Rank 3 */
 			14177, /* Cold Blood       */
-			14183, /* Premeditation    */
 			36554  /* Shadowstep       */
 			};
 
-			for(i = 0; i < 11; ++i)
+			for(i = 0; i < 10; ++i)
 			{
 				if( p_caster->HasSpell( ClearSpellId[i] ) )
 					p_caster->ClearCooldownForSpell( ClearSpellId[i] );
