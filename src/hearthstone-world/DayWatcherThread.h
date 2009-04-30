@@ -26,10 +26,12 @@ enum DAYWATCHERSETTINGS
 	DAILY		= 2,
 	MONTHLY		= 3,
 	HOURLY		= 4,
+	MINUTELY	= 5,
 };
 
 class DayWatcherThread : public ThreadContext
 {
+	bool m_threadRunning;
 	bool m_busy;
 	bool m_dirty;
 

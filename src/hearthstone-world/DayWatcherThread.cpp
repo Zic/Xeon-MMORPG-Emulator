@@ -31,6 +31,7 @@ static pthread_mutex_t abortmutex;
 
 DayWatcherThread::DayWatcherThread()
 {
+	m_threadRunning = true;
 	m_dirty = false;
 }
 
@@ -72,7 +73,10 @@ void DayWatcherThread::load_settings()
 		delete result;
 	}
 	else
+	{
+		DEBUG_LOG("DayWatcherThread", "Initializing Arena Updates to zero.");
 		last_arena_time = 0;
+	}
 
 	result = CharacterDatabase.Query("SELECT setting_value FROM server_settings WHERE setting_id = \"last_dailies_reset_time\"");
 	if(result)
@@ -81,7 +85,10 @@ void DayWatcherThread::load_settings()
 		delete result;
 	}
 	else
+	{
+		DEBUG_LOG("DayWatcherThread", "Initializing Daily Updates to zero.");
 		last_daily_reset_time = 0;
+	}
 }
 
 void DayWatcherThread::set_tm_pointers()
@@ -100,6 +107,8 @@ uint32 DayWatcherThread::get_timeout_from_string(const char * string, uint32 def
 		return DAILY;
 	else if(!stricmp(string, "hourly"))
 		return HOURLY;
+	else if(!stricmp(string, "minutely"))
+		return MINUTELY;
 	else
 		return def;
 }
@@ -112,7 +121,7 @@ bool DayWatcherThread::has_timeout_expired(tm * now_time, tm * last_time, uint32
 		{
 			if( (now_time->tm_mon != last_time->tm_mon) )
 				return true;
-            
+
 			return ( (now_time->tm_mday / 7) != (last_time->tm_mday / 7) );
 		}
 		
@@ -124,6 +133,8 @@ bool DayWatcherThread::has_timeout_expired(tm * now_time, tm * last_time, uint32
 
 	case DAILY:
 		return ((now_time->tm_mday != last_time->tm_mday) || (now_time->tm_mday != last_time->tm_mday));
+	case MINUTELY:
+			return ((now_time->tm_min != last_time->tm_min) || (now_time->tm_hour != last_time->tm_hour) || (now_time->tm_mday != last_time->tm_mday) || (now_time->tm_mon != last_time->tm_mon));
 	}
 	return false;
 }
@@ -159,7 +170,7 @@ bool DayWatcherThread::run()
 
 		if(has_timeout_expired(&local_currenttime, &local_last_daily_reset_time, DAILY))
 			update_daily();
-        
+
 		if(m_dirty)
 			update_settings();
 
