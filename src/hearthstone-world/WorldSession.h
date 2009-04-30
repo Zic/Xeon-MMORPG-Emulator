@@ -291,7 +291,6 @@ public:
 
 	bool CanCreateDeathKnight()
 	{
-		return false;
 		if( sWorld.m_deathKnightOnePerAccount && m_hasDeathKnight )
 			return false;
 
