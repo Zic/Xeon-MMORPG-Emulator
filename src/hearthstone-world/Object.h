@@ -571,13 +571,9 @@ protected:
 	//! Set of Objects in range.
 	//! TODO: that functionality should be moved into WorldServer.
 	unordered_set<ObjectPointer > m_objectsInRange;
-	unordered_set<PlayerPointer  > m_inRangePlayers;
+	unordered_set<PlayerPointer > m_inRangePlayers;
 	unordered_set<ObjectPointer > m_oppFactsInRange;
    
-  
-	//! Remove object from map
-	void _RemoveFromMap();
-
 	int32 m_instanceId;
 
 	ExtensionSet * m_extensions;
