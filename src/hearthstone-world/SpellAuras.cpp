@@ -5658,7 +5658,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 		if( apply )
 		{
 			pTarget->EventAttackStop();
-			pTarget->SetFlag( UNIT_FIELD_FLAGS_2, 1 );
+			pTarget->SetFlag( UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH );
 			pTarget->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_FEIGN_DEATH );
 			//pTarget->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DEAD );
 			pTarget->SetFlag( UNIT_DYNAMIC_FLAGS, U_DYN_FLAG_DEAD );
@@ -5705,7 +5705,7 @@ void Aura::SpellAuraFeignDeath(bool apply)
 		}
 		else
 		{
-			pTarget->RemoveFlag(UNIT_FIELD_FLAGS_2, 1);
+			pTarget->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
 			pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FEIGN_DEATH);
 			pTarget->RemoveFlag(UNIT_DYNAMIC_FLAGS, U_DYN_FLAG_DEAD);
 			//pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DEAD);

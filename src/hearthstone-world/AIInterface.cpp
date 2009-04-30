@@ -1378,7 +1378,7 @@ UnitPointer AIInterface::FindTarget()
 			continue;*/
 
 		//do not agro units that are faking death. Should this be based on chance ?
-		if( pUnit->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_FEIGN_DEATH ) )
+		if( pUnit->HasFlag( UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH ) )
 			continue;
 
 		//target is immune to unit attacks however can be targeted

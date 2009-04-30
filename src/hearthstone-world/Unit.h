@@ -518,6 +518,15 @@ enum UnitFieldFlags // UNIT_FIELD_FLAGS #46 - these are client flags
 	UNIT_FLAG_UNKNOWN_32                 = 0x80000000, // 32  2147483648
 };
 
+enum UnitFlags2
+{
+	UNIT_FLAG2_FEIGN_DEATH				= 0x00000001,
+	UNIT_FLAG2_UNK1						= 0x00000002, // Hide unit model (show only player equip)
+	UNIT_FLAG2_COMPREHEND_LANG			= 0x00000008,
+	UNIT_FLAG2_FORCE_MOVE				= 0x00000040,
+	UNIT_FLAG2_REGENERATE_POWER			= 0x00000800
+};
+
 enum UnitDynamicFlags
 {
 	U_DYN_FLAG_LOOTABLE				 = 0x01,
@@ -1217,6 +1226,7 @@ protected:
 	AIInterface *m_aiInterface;
 
 	bool m_useAI;
+	bool m_spellsbusy;
 	bool can_parry;//will be enabled by block spell
 	int32 m_threatModifyer;
 	int32 m_generatedThreatModifyer;
