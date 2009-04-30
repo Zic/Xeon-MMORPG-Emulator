@@ -40,5 +40,5 @@ HEARTHSTONE_INLINE bool isSameFaction(ObjectPointer objA, ObjectPointer objB)
 
 	return (objB->m_faction->Faction == objA->m_faction->Faction);
 }
-
+HEARTHSTONE_INLINE  PlayerPointer GetPlayerFromObject(ObjectPointer obj); 
 #endif
