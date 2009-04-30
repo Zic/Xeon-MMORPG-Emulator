@@ -696,7 +696,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 	recv_data >> time_dif;
 
 	// ignore updates for not us
-	if( guid != _player->GetGUID() )
+	if( _player == NULL || guid != _player->GetGUID() )
 		return;
 
 	// send to other players
