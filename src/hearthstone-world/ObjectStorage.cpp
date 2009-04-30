@@ -176,7 +176,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 				}
 
 				spe = dbcSpell.LookupEntryForced(spellID);
-				if(  agent == AGENT_SPELL && spe == NULL )
+				if( spe == NULL )
 				{
 					Log.Warning("AIAgent", "Agent skipped, NPC %u tried to add non-existing Spell %u.", fields[0].GetUInt32(), fields[4].GetUInt32());
 					continue;
