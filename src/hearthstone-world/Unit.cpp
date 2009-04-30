@@ -2464,10 +2464,11 @@ void Unit::RegeneratePower(bool isinterrupted)
 	if(!isAlive())
 		return;
 
+	uint32 powertype = GetPowerType();
+
 	// player regen
 	if(IsPlayer())
 	{
-		uint32 powertype = GetPowerType();
 		switch(powertype)
 		{
 		case POWER_TYPE_MANA:
@@ -2534,7 +2535,6 @@ void Unit::RegeneratePower(bool isinterrupted)
 	}
 	else
 	{
-		uint32 powertype = GetPowerType();
 		switch(powertype)
 		{
 		case POWER_TYPE_MANA:
@@ -2544,6 +2544,7 @@ void Unit::RegeneratePower(bool isinterrupted)
 			creature_shared_from_this()->RegenerateFocus();
 			break;
 		}
+		SendPowerUpdate();
 	}
 }
 
@@ -4551,13 +4552,28 @@ void Unit::_UpdateSpells( uint32 time )
 {
 	if(m_currentSpell != NULL)
 	{
+		m_spellsbusy=true;
 		SpellPointer blah = m_currentSpell;
 		m_currentSpell->update(time);
+		m_spellsbusy=false;
 	}
 }
 
 void Unit::CastSpell( SpellPointer pSpell )
 {
+
+	// check if we have a spell already casting etc
+	if(m_currentSpell && pSpell != m_currentSpell)
+	{
+		if(m_spellsbusy)
+		{
+			// shouldn't really happen. but due to spell sytem bugs there are some cases where this can happen.
+			sEventMgr.AddEvent(unit_shared_from_this(),&Unit::CancelSpell,m_currentSpell,EVENT_UNK,1,1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+		}
+		else
+			m_currentSpell->cancel();
+	}
+
 	m_currentSpell = pSpell;
 	pLastSpell = pSpell->m_spellInfo;
 }
@@ -6791,7 +6807,7 @@ void Unit::SendPowerUpdate()
 	FastGUIDPack(data, GetGUID());
 	data << (uint8)GetPowerType();
 	data << GetUInt32Value(UNIT_FIELD_POWER1 + GetPowerType());
-	SendMessageToSet(&data, true);
+	SendMessageToSet(&data, GetTypeId() == TYPEID_PLAYER ? true : false);
 }
 
 uint32 Unit::DoDamageSplitTarget(uint32 res, uint32 school_type, bool melee_dmg)
