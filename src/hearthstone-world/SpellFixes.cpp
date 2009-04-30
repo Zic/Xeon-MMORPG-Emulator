@@ -703,7 +703,18 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
 					sp->procCharges++; //	first	charge gets	lost when	it gets	procced
 				}break;
-			
+			//Minor Glyph Research + Northrend Inscription Research
+			case 61177:
+			case 61288:
+				{
+					sp->Effect[0]	=	24;
+					sp->Effect[1]	=	0;
+					sp->EffectBaseDice[1]	=	0;
+					sp->EffectBasePoints[1]	=	0;
+					sp->EffectImplicitTargetA[1]	=	0;
+					sp->EffectMiscValue[0]	=	0;
+					sp->EffectDieSides[1]	=	0;
+				}break;
 			// Shaman	Totem	items	fixes
 			// Totem of	Survival,	Totem	of the Tundra
 			case 46097:
