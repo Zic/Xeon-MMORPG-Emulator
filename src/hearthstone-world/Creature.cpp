@@ -677,8 +677,17 @@ void Creature::RegenerateFocus()
 
 	uint32 cur=GetUInt32Value(UNIT_FIELD_POWER3);
 	uint32 mm=GetUInt32Value(UNIT_FIELD_MAXPOWER3);
-	if(cur>=mm)return;
+	if(cur>=mm)
+		return;
+
 	float amt = 1.0f * PctPowerRegenModifier[POWER_TYPE_FOCUS];
+	//Apply shit from conf file
+	amt*=sWorld.getRate(RATE_POWER3);
+	if(amt<=1.0)//this fixes regen like 0.98
+		cur++;
+	else
+		cur+=(uint32)amt;
+
 	cur+=(uint32)amt;
 	SetUInt32Value(UNIT_FIELD_POWER3,(cur>=mm)?mm:cur);
 }
