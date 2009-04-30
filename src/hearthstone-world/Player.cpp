@@ -1741,9 +1741,9 @@ void Player::_SavePet(QueryBuffer * buf)
 			for(; itr != m_Summon->mSpells.end(); ++itr)
 			{
 				if(buf == NULL)
-					CharacterDatabase.Execute("REPLACE INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
+					CharacterDatabase.Execute("INSERT INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
 				else
-					buf->AddQuery("REPLACE INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
+					buf->AddQuery("INSERT INTO playerpetspells VALUES(%u, %u, %u, %u)", GetLowGUID(), pn, itr->first->Id, itr->second);
 			}
 		}
 	}
@@ -3225,7 +3225,7 @@ void Player::LoadFromDBProc(QueryResultVector & results)
 	SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, maxLevel);
 
 	UpdateTalentInspectBuffer();
-	SetFlag(UNIT_FIELD_FLAGS_2, 0x800); // enables automatic power regen
+	SetFlag(UNIT_FIELD_FLAGS_2,UNIT_FLAG2_REGENERATE_POWER); // enables automatic power regen
 	m_session->FullLogin(plr_shared_from_this());
 	if(m_session)
 		m_session->m_loggingInPlayer=NULLPLR;

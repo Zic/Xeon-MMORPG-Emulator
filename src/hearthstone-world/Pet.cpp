@@ -632,7 +632,7 @@ void Pet::InitializeMe(bool first)
 	else
 	{
 		// Pull from database... :/
-/*		QueryResult * query = CharacterDatabase.Query("SELECT * FROM playerpetspells WHERE ownerguid=%u and petnumber=%u",
+		QueryResult * query = CharacterDatabase.Query("SELECT * FROM playerpetspells WHERE ownerguid=%u and petnumber=%u",
 			m_Owner->GetLowGUID(), m_PetNumber);
 		if(query)
 		{
@@ -646,7 +646,7 @@ void Pet::InitializeMe(bool first)
 
 			} while(query->NextRow());
 		}
-		delete query;*/
+		delete query;
 		UpdateTP();
 	}
 
