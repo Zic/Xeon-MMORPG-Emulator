@@ -1406,19 +1406,6 @@ void Creature::SetGuardWaypoints()
 	}
 }
 
-//	custom functions for scripting
-uint32 Creature::GetProtoItemDisplayId(uint8 slot)
-{
-	switch (slot)
-	{
-		case 0: return GetProto()->Item1;
-		case 1: return GetProto()->Item2;
-		case 2: return GetProto()->Item3;
-	}
-
-	return 0;
-}
-
 void Creature::SetSheatheForAttackType(uint32 type)
 {
 	uint32 sheathe = GetUInt32Value(UNIT_FIELD_BYTES_2);

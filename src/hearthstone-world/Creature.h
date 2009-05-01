@@ -565,7 +565,7 @@ protected:
 	uint32 _fields[UNIT_END];
 public:
 	//	custom functions for scripting
-	uint32 GetProtoItemDisplayId(uint8 slot);
+	HEARTHSTONE_INLINE uint32 GetProtoItemDisplayId(uint8 i) { return GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i); }
 
 	// loooooot
 	void GenerateLoot();
