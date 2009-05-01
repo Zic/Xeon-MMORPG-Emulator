@@ -3222,15 +3222,15 @@ uint8 Spell::CanCast(bool tolerate)
 				if(i_caster->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES) == 0)
 				{
 					//Mounts have changed, they should be added to known spells
-					if(i_caster->GetProto()->Class != ITEM_CLASS_MISCELLANEOUS && i_caster->GetProto()->SubClass != ITEM_SUBCLASS_JUNK_MOUNT )
+					if(i_caster->GetProto()->Class != ITEM_CLASS_MISCELLANEOUS && i_caster->GetProto()->SubClass != ITEM_SUBCLASS_MISCELLANEOUS_MOUNT )
 						return SPELL_FAILED_NO_CHARGES_REMAIN;
 					else
 					{
 						UnitPointer target = (m_caster->IsInWorld()) ? m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget) : NULLUNIT;
 						if(target && target->IsPlayer())
 						{
-							//Allow spell to be casted if player didn't have this mount yet in pet tab.
-							if(i_caster->GetProto()->Spells[1].Id && !TO_PLAYER(target)->HasSpell(i_caster->GetProto()->Spells[1].Id))
+							//Allow spell to be casted if player didn't have this mount yet in pet tab (iow has the spell).
+							if(i_caster->GetProto()->Spells[1].Id && TO_PLAYER(target)->HasSpell(i_caster->GetProto()->Spells[1].Id))
 								return SPELL_FAILED_NO_CHARGES_REMAIN;
 						}
 					}

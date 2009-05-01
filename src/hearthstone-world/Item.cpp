@@ -97,12 +97,10 @@ void Item::Create( uint32 itemid, PlayerPointer owner )
 	m_itemProto = ItemPrototypeStorage.LookupEntry( itemid );
 
 	ASSERT( m_itemProto );
-	 
-	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES, m_itemProto->Spells[0].Charges );
-	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES_1, m_itemProto->Spells[1].Charges );
-	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES_2, m_itemProto->Spells[2].Charges );
-	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES_3, m_itemProto->Spells[3].Charges );
-	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES_4, m_itemProto->Spells[4].Charges );
+	
+	for(uint8 i = 0; i < 5; ++i)
+		SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+i, m_itemProto->Spells[i].Charges );
+
 	SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability );
 	SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability );
 
