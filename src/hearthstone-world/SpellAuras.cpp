@@ -1200,7 +1200,7 @@ void Aura::EventUpdateCreatureAA(float r)
 						m_spellProto->EffectMiscValue[i], i);
 			}
 
-			u_caster->AddAura(aura, shared_from_this());
+			u_caster->AddAura(aura);
 			targets.insert(u_caster->GetUIdFromGUID());
 		}
 	}
@@ -1259,7 +1259,7 @@ void Aura::EventUpdateCreatureAA(float r)
 			}
 			if(aura)
 			{
-				target->AddAura(aura, shared_from_this());
+				target->AddAura(aura);
 				targets.insert(target->GetUIdFromGUID());
 			}			
 		}
@@ -1299,7 +1299,7 @@ void Aura::EventUpdateCreatureAA(float r)
 			}
 			if(aura)
 			{
-				target->AddAura(aura, shared_from_this());
+				target->AddAura(aura);
 				targets.insert(target->GetLowGUID());
 			}	
 		}
@@ -1434,7 +1434,7 @@ void Aura::EventUpdatePlayerAA(float r)
 			}
 			if(aura)
 			{
-				plr->AddAura(aura, shared_from_this());
+				plr->AddAura(aura);
 				NewTargets.push_back(plr->GetLowGUID());
 			}
 		}
@@ -1522,7 +1522,7 @@ void Aura::EventUpdatePlayerAA(float r)
 			}
 			if(aura)
 			{
-				target->AddAura(aura, shared_from_this());
+				target->AddAura(aura);
 				NewTargets.push_back(target->GetLowGUID());
 			}			
 			
@@ -1564,7 +1564,7 @@ void Aura::EventUpdatePlayerAA(float r)
 			}
 			if(aura)
 			{
-				target->AddAura(aura, shared_from_this());
+				target->AddAura(aura);
 				NewTargets.push_back(target->GetLowGUID());
 			}	
 		}
@@ -1592,7 +1592,7 @@ void Aura::EventUpdatePlayerAA(float r)
 			}
 			if(aura)
 			{
-				pPet->AddAura(aura, shared_from_this());
+				pPet->AddAura(aura);
 				NewTargets.push_back(pPet->GetLowGUID());
 			}
 		}

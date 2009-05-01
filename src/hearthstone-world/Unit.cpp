@@ -1959,7 +1959,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 
 								AuraPointer aura(new Aura(spe, std::min(GetDuration(sd), (uint32)10000), object_shared_from_this(), unit_shared_from_this()));
 								aura->AddMod(spe->EffectApplyAuraName[0],spe->EffectBasePoints[0]+1,spe->EffectMiscValue[0],0);
-								AddAura(aura, NULLAURA);
+								AddAura(aura);
 								continue;
 							}break;
 						case 51693: // Waylay
@@ -3975,13 +3975,8 @@ void Unit::smsg_AttackStart(UnitPointer pVictim)
 	//	setUpdateMaskBit(UNIT_FIELD_FLAGS );
 }
 
-void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
+void Unit::AddAura(AuraPointer aur)
 {
-	/*if( aur->GetSpellProto()->School && SchoolImmunityList[aur->GetSpellProto()->School] )
-	{
-		//delete aur;
-		return;
-	}*/
 	uint32 x;
 	UnitPointer pCaster = NULLUNIT;
 	if(aur->GetTarget())
@@ -3992,14 +3987,11 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		pCaster = GetMapMgr()->GetUnit( aur->m_casterGuid );
     if( !aur->IsPassive() )
 	{
-		//uint32 aurName = aur->GetSpellProto()->Name;
-		//uint32 aurRank = aur->GetSpellProto()->Rank;
 		uint32 maxStack = aur->GetSpellProto()->maxstack;
 		if( IsPlayer() && plr_shared_from_this()->stack_cheat )
 			maxStack = 999;
 
 		SpellEntry * info = aur->GetSpellProto();
-		//uint32 flag3 = aur->GetSpellProto()->Flags3;
 
 		WorldPacket data( 21 );
 		bool deleteAur = false;
@@ -4133,7 +4125,6 @@ void Unit::AddAura(AuraPointer aur, AuraPointer pParentAura)
 		{
 			aur->m_deleted = true;
 			sEventMgr.RemoveEvents(aur);
-			//aur->Remove(); // don't seem to need to remove as it hasn't been applied yet
 			return;
 		}
 	}

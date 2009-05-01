@@ -8451,7 +8451,7 @@ void Player::CompleteLoading()
 					if(sp->Effect[x]==SPELL_EFFECT_APPLY_AURA)
 						a->AddMod(sp->EffectApplyAuraName[x],sp->EffectBasePoints[x]+1,sp->EffectMiscValue[x],x);
 				}
-				AddAura(a, NULLAURA);
+				AddAura(a);
 			}
 		}
 		loginauras.clear();

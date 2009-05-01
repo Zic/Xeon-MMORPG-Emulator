@@ -6813,7 +6813,7 @@ void Spell::SpellEffectSpellSteal( uint32 i )
 					aura->AddMod(mod->m_type, mod->m_baseAmount, mod->m_miscValue, mod->i);
 				}
 
-				u_caster->AddAura(aura, NULLAURA);
+				u_caster->AddAura(aura);
 				unitTarget->RemoveAura(aur);
 				if( --spells_to_steal <= 0 )
 					break; //exit loop now

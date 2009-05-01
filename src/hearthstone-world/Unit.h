@@ -864,7 +864,7 @@ public:
 	void RemoveFFAPvPFlag();
 
 	//! Add Aura to unit
-	void AddAura(AuraPointer aur, AuraPointer pParentAura);
+	void AddAura(AuraPointer aur);
 	//! Remove aura from unit
 	void RemoveAuraNoReturn(uint32 spellId);
 	bool RemoveAura(AuraPointer aur);

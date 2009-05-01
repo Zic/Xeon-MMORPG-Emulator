@@ -2883,7 +2883,7 @@ void Spell::HandleAddAura(uint64 guid)
 				return;
 			}
 
-			Target->AddAura(aura, NULLAURA);
+			Target->AddAura(aura);
 			if(!aura->m_tmpAuradeleted)
 				Target->tmpAura.erase(itr);
 		}

@@ -213,7 +213,7 @@ void DynamicObject::UpdateTargets()
 							m_spellProto->EffectBasePoints[i]+1, m_spellProto->EffectMiscValue[i], i);
 					}
 				}
-				target->AddAura(pAura, NULLAURA);
+				target->AddAura(pAura);
 				if(p_caster)
 				{
 					p_caster->HandleProc(PROC_ON_CAST_SPECIFIC_SPELL | PROC_ON_CAST_SPELL,target, m_spellProto);

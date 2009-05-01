@@ -130,7 +130,7 @@ void Arena::OnAddPlayer(PlayerPointer plr)
 
 	/* Add the green/gold team flag */
 	AuraPointer aura(new Aura(dbcSpell.LookupEntry(32724+plr->m_bgTeam), -1, plr, plr));
-	plr->AddAura(aura, NULLAURA);
+	plr->AddAura(aura);
 	
 	/* Set FFA PvP Flag */
 	plr->SetFFAPvPFlag();
