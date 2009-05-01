@@ -3220,8 +3220,22 @@ uint8 Spell::CanCast(bool tolerate)
 			{
 				// check if the item has the required charges
 				if(i_caster->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES) == 0)
-					return SPELL_FAILED_NO_CHARGES_REMAIN;
+				{
+					//Mounts have changed, they should be added to known spells
+					if(i_caster->GetProto()->Class != ITEM_CLASS_MISCELLANEOUS && i_caster->GetProto()->SubClass != ITEM_SUBCLASS_JUNK_MOUNT )
+						return SPELL_FAILED_NO_CHARGES_REMAIN;
+					else
+					{
+						UnitPointer target = (m_caster->IsInWorld()) ? m_caster->GetMapMgr()->GetUnit(m_targets.m_unitTarget) : NULLUNIT;
+						if(target && target->IsPlayer())
+						{
+							//Allow spell to be casted if player didn't have this mount yet in pet tab.
+							if(i_caster->GetProto()->Spells[1].Id && !TO_PLAYER(target)->HasSpell(i_caster->GetProto()->Spells[1].Id))
+								return SPELL_FAILED_NO_CHARGES_REMAIN;
+						}
+					}
 
+				}
 				// for items that combine to create a new item, check if we have the required quantity of the item
 				if(i_caster->GetProto()->ItemId == m_spellInfo->Reagent[0] && (i_caster->GetProto()->Flags != 268435520))
 					if(p_caster->GetItemInterface()->GetItemCount(m_spellInfo->Reagent[0]) < 1 + m_spellInfo->ReagentCount[0])
