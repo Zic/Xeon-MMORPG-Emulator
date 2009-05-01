@@ -999,8 +999,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 	chaindamage = 0;
 	if( p_caster && m_spellInfo->Id == 51514 || 
 		m_spellInfo->NameHash == SPELL_HASH_ARCANE_SHOT || 
-		m_spellInfo->NameHash == SPELL_HASH_MIND_FLAY ||
-		m_spellInfo->NameHash == SPELL_HASH_ARCANE_MISSILES )
+		m_spellInfo->NameHash == SPELL_HASH_MIND_FLAY )
 	{
 		targets->m_unitTarget = 0;
 		GenerateTargets( targets );

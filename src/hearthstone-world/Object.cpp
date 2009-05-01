@@ -2058,7 +2058,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 				else
 				{
 					uint32 xp = CalculateXpToGive( pVictim, unit_shared_from_this() );
-					if( xp > 0 && xp < 60000 )
+					if( xp > 0 )
 					{
 						player_shared_from_this()->GiveXP( xp, victimGuid, true );
 						if( player_shared_from_this()->GetSummon() && player_shared_from_this()->GetSummon()->GetUInt32Value( UNIT_CREATED_BY_SPELL ) == 0 )
