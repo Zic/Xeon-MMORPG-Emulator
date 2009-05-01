@@ -58,11 +58,30 @@ bool isHostile(ObjectPointer objA, ObjectPointer objB)// B is hostile for A?
 	// PvP Flag System Checks
 	// We check this after the normal isHostile test, that way if we're
 	// on the opposite team we'll already know :p
+	if( hostile && ( objA->IsPlayer() || objA->IsPet() || ( objA->IsUnit() && !objA->IsPlayer() && TO_CREATURE(objA)->IsTotem() && TO_CREATURE( objA )->GetTotemOwner()->IsPvPFlagged() ) ) )
+	{
+		if( objB->IsPlayer() )
+		{
+			// Check PvP Flags.
+			if( TO_PLAYER(objB)->IsPvPFlagged() )
+				return true;
+			else
+				return false;
+		}
+		if( objB->IsPet() )
+		{
+			// Check PvP Flags.
+			if( TO_PET( objB )->GetPetOwner() != NULL && TO_PET( objB )->GetPetOwner()->GetMapMgr() == objB->GetMapMgr() && TO_PET( objB )->GetPetOwner()->IsPvPFlagged() )
+				return true;
+			else
+				return false;
+		}
+	}
 
+	//BG?
 	PlayerPointer player_objA = GetPlayerFromObject(objA);
 	PlayerPointer player_objB = GetPlayerFromObject(objB);
 
-	//BG or PVP?
 	if( player_objA && player_objB )
 	{
 		if( player_objA->m_bg != NULL )	
@@ -70,10 +89,6 @@ bool isHostile(ObjectPointer objA, ObjectPointer objB)// B is hostile for A?
 			if( player_objA->m_bgTeam != player_objB->m_bgTeam )
 				return true;
 		}
-		if( hostile && player_objA->IsPvPFlagged()&& player_objB->IsPvPFlagged() )
-			return true;
-		else
-			return false;
 	}
 
 
