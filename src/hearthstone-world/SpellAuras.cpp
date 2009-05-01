@@ -1475,7 +1475,7 @@ void Aura::EventUpdatePlayerAA(float r)
 							}
 							if( aura )
 							{
-								(*itr)->m_loggedInPlayer->AddAura(aura, shared_from_this());
+								(*itr)->m_loggedInPlayer->AddAura(aura);
 								NewTargets.push_back((*itr)->m_loggedInPlayer->GetLowGUID());
 							}
 						}
