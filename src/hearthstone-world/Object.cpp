@@ -2209,7 +2209,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 						SpellPointer sp(new Spell(shared_from_this(), dbcSpell.LookupEntry(58691), true, NULLAURA));
 						SpellCastTargets targets;
 						targets.m_unitTarget = pVictim->GetGUID();
-						sp->forced_basepoints[0] = float2int32(damage * ( spentry->RankNumber * 0.33f + 0.01f));
+						sp->forced_basepoints[0] = float2int32(damage * ( plra->GetDummyAura(SPELL_HASH_PANDEMIC)->RankNumber * 0.33f + 0.01f));
 						sp->prepare(&targets);
 					}
 				}
