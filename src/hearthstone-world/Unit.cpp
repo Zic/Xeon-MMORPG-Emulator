@@ -2544,7 +2544,6 @@ void Unit::RegeneratePower(bool isinterrupted)
 			creature_shared_from_this()->RegenerateFocus();
 			break;
 		}
-		SendPowerUpdate();
 	}
 }
 
