@@ -1405,13 +1405,3 @@ void Creature::SetGuardWaypoints()
 		GetAIInterface()->addWayPoint(wp);
 	}
 }
-
-void Creature::SetSheatheForAttackType(uint32 type)
-{
-	uint32 sheathe = GetUInt32Value(UNIT_FIELD_BYTES_2);
-	uint8 * v = (uint8*)&sheathe;
-	v[0] = 1;
-
-	if( sheathe != GetUInt32Value(UNIT_FIELD_BYTES_2) )
-		SetUInt32Value(UNIT_FIELD_BYTES_2, sheathe);
-}

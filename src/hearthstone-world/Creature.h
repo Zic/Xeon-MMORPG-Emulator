@@ -372,7 +372,7 @@ public:
 	list<QuestRelation *>::iterator QuestsEnd() { return m_quests->end(); };
 	void SetQuestList(std::list<QuestRelation *>* qst_lst) { m_quests = qst_lst; };
 
-	void SetSheatheForAttackType(uint32 type);
+	HEARTHSTONE_INLINE void SetSheatheForAttackType(uint8 type) { SetByte(UNIT_FIELD_BYTES_2, 0, type); }
 	HEARTHSTONE_INLINE bool isQuestGiver() { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ); };
 	
 	int32 FlatResistanceMod[7];
