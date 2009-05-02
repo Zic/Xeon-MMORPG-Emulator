@@ -902,11 +902,6 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647);
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
 		}break;
-	case 46968://Shockwave
-		{
-			uint32 amt = float2int32((damage/100.0f)*u_caster->GetAP());
-			u_caster->Strike( unitTarget, MELEE, m_spellInfo, amt, 0, 0, false, false );
-		}break;
 	/*************************
 	 * MAGE SPELLS
 	 *************************
