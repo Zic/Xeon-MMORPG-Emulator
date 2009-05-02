@@ -198,6 +198,11 @@ public:
 	bool SetPosition( const LocationVector & v, bool allowPorting = false);
 	void SetRotation( uint64 guid );
 
+	void CastSpell(ObjectPointer Target, SpellEntry* Sp, bool triggered);
+	void CastSpell(ObjectPointer Target, uint32 SpellID, bool triggered);
+	void CastSpell(uint64 targetGuid, SpellEntry* Sp, bool triggered);
+	void CastSpell(uint64 targetGuid, uint32 SpellID, bool triggered);
+
 	HEARTHSTONE_INLINE const float& GetPositionX( ) const { return m_position.x; }
 	HEARTHSTONE_INLINE const float& GetPositionY( ) const { return m_position.y; }
 	HEARTHSTONE_INLINE const float& GetPositionZ( ) const { return m_position.z; }

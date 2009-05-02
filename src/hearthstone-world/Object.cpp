@@ -2887,3 +2887,55 @@ int32 Object::GetSpellBaseCost(SpellEntry *sp)
 
 	return float2int32(cost); // Truncate zeh decimals!
 }
+
+void Object::CastSpell( ObjectPointer Target, SpellEntry* Sp, bool triggered )
+{
+	if( Sp == NULL )
+		return;
+
+	SpellPointer newSpell(new Spell(shared_from_this(), Sp, triggered, NULLAURA));
+	SpellCastTargets targets(0);
+	if(Target)
+	{
+		if(Target->IsUnit())
+		{
+			targets.m_targetMask |= TARGET_FLAG_UNIT;
+		}
+		else
+		{
+			targets.m_targetMask |= TARGET_FLAG_OBJECT;
+		}
+		targets.m_unitTarget = Target->GetGUID();
+	}
+	else
+	{
+		newSpell->GenerateTargets(&targets);
+	}
+	newSpell->prepare(&targets);
+}
+
+void Object::CastSpell( ObjectPointer Target, uint32 SpellID, bool triggered )
+{
+	SpellEntry * ent = dbcSpell.LookupEntry(SpellID);
+	if(ent == 0) return;
+
+	CastSpell(Target, ent, triggered);
+}
+
+void Object::CastSpell( uint64 targetGuid, SpellEntry* Sp, bool triggered )
+{
+	if( Sp == NULL )
+		return;
+
+	SpellCastTargets targets(targetGuid);
+	SpellPointer newSpell(new Spell(shared_from_this(), Sp, triggered, NULLAURA));
+	newSpell->prepare(&targets);
+}
+
+void Object::CastSpell( uint64 targetGuid, uint32 SpellID, bool triggered )
+{
+	SpellEntry * ent = dbcSpell.LookupEntry(SpellID);
+	if(ent == 0) return;
+
+	CastSpell(targetGuid, ent, triggered);
+}
