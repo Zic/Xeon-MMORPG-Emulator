@@ -2713,13 +2713,16 @@ void ObjectMgr::ResetDailies()
 	for(; itr != _players.end(); itr++)
 	{
 		PlayerPointer pPlayer = itr->second;
-		pPlayer->DailyMutex.Acquire();
-		pPlayer->m_finishedDailyQuests.clear();
-		for(uint32 i = 0; i < 25; i++)
+		if(pPlayer!=NULL && pPlayer->IsInWorld())
 		{
-			pPlayer->SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + i, 0);
+			pPlayer->DailyMutex.Acquire();
+			pPlayer->m_finishedDailyQuests.clear();
+			for(uint32 i = 0; i < 25; i++)
+			{
+				pPlayer->SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + i, 0);
+			}
+			pPlayer->DailyMutex.Release();
 		}
-		pPlayer->DailyMutex.Release();
 	}
 	_playerslock.ReleaseReadLock();
 }
