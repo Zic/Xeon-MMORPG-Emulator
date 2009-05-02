@@ -5358,7 +5358,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				break;
 			case 51729:
 				{
-					sp->buffInEffectBasePointsdexType = 0;
+					sp->buffIndexType = 0;
 					sp->buffType = 0;
 					sp->AreaGroupId = 0;
 				}break;
