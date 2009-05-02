@@ -649,21 +649,20 @@ void InstanceMgr::_LoadInstances()
 			in->m_mapInfo = inf;
 			in->LoadFromDB(result->Fetch());
 
-			// this assumes that groups are already loaded at this point.
-			if(in->m_creatorGroup && objmgr.GetGroupById(in->m_creatorGroup) == NULL)
-			{
-				delete in;
-				continue;
-			}
-
 			if(m_instances[in->m_mapId] == NULL)
 				m_instances[in->m_mapId] = new InstanceMap;
 
 			m_instances[in->m_mapId]->insert( InstanceMap::value_type( in->m_instanceId, in ) );
 
 		} while(result->NextRow());
+		Log.Debug("InstanceMgr", "Loading %u saved instances." , result->GetRowCount());
 		delete result;
 	}
+	else
+		Log.Debug("InstanceMgr", "No saved instances found.");
+
+	//reset the SavedInstanceId on expired instances.
+	CharacterDatabase.WaitExecute("UPDATE groups LEFT JOIN instances ON groups.GroupInstanceID = instances.id SET groups.GroupInstanceID = 0 WHERE instances.id IS NULL;"); 
 }
 
 void Instance::LoadFromDB(Field * fields)
@@ -733,7 +732,9 @@ void InstanceMgr::ResetSavedInstances(PlayerPointer plr)
 				in = itr->second;
 				++itr;
 
-				if( ( in->m_mapInfo->type == INSTANCE_NONRAID && (plr->GetGroup() && plr->GetGroup()->GetID() == in->m_creatorGroup) ) || ( in->m_mapInfo->type == INSTANCE_NONRAID && plr->GetLowGUID() == in->m_creatorGuid ) )
+				if  ( in->m_mapInfo->type == INSTANCE_NONRAID && 
+					( plr->GetLowGUID() == in->m_creatorGuid || 
+					( plr->GetGroup() && plr->GetGroup()->GetID() == in->m_creatorGroup )))
 				{
 					if(in->m_mapMgr && in->m_mapMgr->HasPlayers())
 					{
@@ -744,6 +745,10 @@ void InstanceMgr::ResetSavedInstances(PlayerPointer plr)
 					// <mapid> has been reset.
 					data << uint32(in->m_mapId);
 					plr->GetSession()->SendPacket(&data);
+
+					// reset groupinstanceid
+					if(plr->GetGroup())
+						plr->GetGroup()->SetGroupInstanceID(0);
 
 					// destroy the instance
 					_DeleteInstance(in, true);
@@ -774,8 +779,7 @@ void InstanceMgr::OnGroupDestruction(Group * pGroup)
 				in = itr->second;
 				++itr;
 
-				if(in->m_creatorGroup && in->m_creatorGroup == pGroup->GetID())
-					_DeleteInstance(in, false);
+				pGroup->SetGroupInstanceID(0);
 			}
 		}
 	}
@@ -852,11 +856,14 @@ PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 
 void Instance::DeleteFromDB()
 {
-	// cleanup all the corpses on this map
-	CharacterDatabase.Execute("DELETE FROM corpses WHERE instanceid = %u", m_instanceId);
-
 	// delete from the database
 	CharacterDatabase.Execute("DELETE FROM instances WHERE id = %u", m_instanceId);
+
+	// cleanup all the corpses
+	CharacterDatabase.Execute("DELETE FROM T1 USING corpses T1 LEFT JOIN instances As T2 ON T1.instanceid = T2.id WHERE  T2.id IS NULL");
+
+	// reset groupinstanceid
+	CharacterDatabase.Execute("UPDATE groups LEFT JOIN instances ON groups.GroupInstanceID = instances.id SET groups.GroupInstanceID = 0 WHERE instances.id IS NULL;"); 
 }
 
 void InstanceMgr::CheckForExpiredInstances()

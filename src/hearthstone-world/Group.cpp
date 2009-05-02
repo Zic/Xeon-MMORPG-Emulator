@@ -555,6 +555,10 @@ void Group::RemovePlayer(PlayerInfo * info)
 
 	if(m_MemberCount < 2)
 	{
+		// Reset the groups saved instance.
+		SetGroupInstanceID(0);
+
+		// disband the group, except battleground groups. 
 		if(!(m_groupFlags & GROUP_FLAG_DONT_DISBAND_WITH_NO_MEMBERS))
 		{
 			m_groupLock.Release();
