@@ -5362,6 +5362,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->buffType = 0;
 					sp->AreaGroupId = 0;
 				}break;
+			case 58691:
+				{
+					sp->spell_can_crit = false;
+				}break;
 			}
 		}
 	}

@@ -641,7 +641,11 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 		case SPELL_HASH_SHIELD_OF_RIGHTEOUSNESS:
 			{
 				if( p_caster )
-					dmg += float2int32( 1.3f * ( p_caster->GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) + p_caster->GetBlockFromSpell() ) );
+				{
+					ItemPointer shield = p_caster->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_OFFHAND);
+					if( shield != NULL && shield->GetProto()->InventoryType == INVTYPE_SHIELD )
+						dmg += float2int32( 1.3f * ( shield->GetProto()->Block + p_caster->m_modblockvaluefromspells + p_caster->GetUInt32Value( PLAYER_RATING_MODIFIER_BLOCK ) ) );
+				}
 			}break;
 		}
 	}
@@ -898,8 +902,11 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 			SpellEntry *spellInfo = dbcSpell.LookupEntry(20647);
 			u_caster->Strike(unitTarget,MELEE,spellInfo,0,0,value,false,false);
 		}break;
-
-
+	case 46968://Shockwave
+		{
+			uint32 amt = float2int32((damage/100.0f)*u_caster->GetAP());
+			u_caster->Strike( unitTarget, MELEE, m_spellInfo, amt, 0, 0, false, false );
+		}break;
 	/*************************
 	 * MAGE SPELLS
 	 *************************
