@@ -5380,7 +5380,7 @@ void Unit::CastSpell(UnitPointer Target, SpellEntry* Sp, bool triggered)
 	SpellCastTargets targets(0);
 	if(Target)
 	{
-		targets.m_unitTarget |= TARGET_FLAG_UNIT;
+		targets.m_targetMask |= TARGET_FLAG_UNIT;
 		targets.m_unitTarget = Target->GetGUID();
 	}
 	else
