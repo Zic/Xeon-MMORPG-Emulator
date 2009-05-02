@@ -255,6 +255,7 @@ void Unit::Init()
 	m_aiInterface->Init(unit_shared_from_this(), AITYPE_AGRO, MOVEMENTTYPE_NONE);
 
 	CombatStatus.SetUnit(unit_shared_from_this());
+	SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER );
 
 	Object::Init();
 }
