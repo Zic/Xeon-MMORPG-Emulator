@@ -793,8 +793,6 @@ public:
 	uint8 m_invisFlag;
 	int32 m_invisDetect[INVIS_FLAG_TOTAL];
 
-	int32 m_damageOverTimePctIncrease[7];
-
     /************************************************************************/
     /* Stun Immobilize                                                      */
     /************************************************************************/
@@ -965,6 +963,10 @@ public:
 	//SM
 	int32 * SM[SPELL_MODIFIERS][2]; // 0 = flat, 1 = percent
 	void InheritSMMods(UnitPointer inherit_from);
+	// Multimap used to handle aura 271
+	// key is caster GUID and value is a pair of SpellMask pointer and mod value
+	typedef tr1::unordered_multimap<uint64, pair<uint32*, int32> > DamageTakenPctModPerCasterType;
+	DamageTakenPctModPerCasterType DamageTakenPctModPerCaster;
 
 	//Events
 	void Emote (EmoteType emote);

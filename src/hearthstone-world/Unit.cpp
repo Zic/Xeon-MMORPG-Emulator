@@ -25,7 +25,6 @@ Unit::Unit()
 	printf("Unit::Unit()\n");
 #endif
 	m_lastHauntInitialDamage = 0;
-	memset(m_damageOverTimePctIncrease, 0, sizeof(int32) * 7);
 	m_attackTimer = 0;
 	m_attackTimer_1 = 0;
 	m_duelWield = false;
@@ -333,6 +332,8 @@ void Unit::Destructor()
 	m_reflectSpellSchool.clear();
 	
 	m_procSpells.clear();
+
+	DamageTakenPctModPerCaster.clear();
 
 	m_chargeSpells.clear();
 	m_chargeSpellRemoveQueue.clear();
@@ -1417,7 +1418,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 							{
 								if(!IsPlayer() || weapon_damage_type < 1 || weapon_damage_type > 2)
 									continue;
-								spellId = 29469;	// Flametongue Weapon proc
+								spellId = 10444;	// Flametongue Weapon proc
 								ItemPointer mh = plr_shared_from_this()->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND + weapon_damage_type - 1 );
 
 								if( mh != NULL)
@@ -2112,6 +2113,10 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if(!victim || GetDistanceSq(victim) < minDistance * minDistance)
 									continue;	// victim not far enough
 							}break;
+						case 63375: // Improved Stormstrike
+							{
+								dmg_overwrite = (spe->EffectBasePoints[0] + 1) * GetUInt32Value(UNIT_FIELD_BASE_MANA) / 100;
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix
@@ -2194,6 +2199,11 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						// Aura gets removed when last stack is removed
 						aura->ModStackSize(-1);
 						continue;
+					}break;
+				case 17364: // Stormstrike
+					{
+						if(victim->GetGUID() != aura->m_casterGuid)
+							continue;	// charges spent only for particular caster
 					}break;
 				}
 				if(spe->NameHash == SPELL_HASH_FLURRY)
@@ -4299,9 +4309,6 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 		coefficient += modifier / 100.0f;
 		SM_PFValue( caster->SM[SMT_SPD_BONUS][1], &coefficient, spellInfo->SpellGroupType );
 	}
-
-	if(isdot)
-		coefficient += (m_damageOverTimePctIncrease[spellInfo->School] / 100.0f);
 
 	plus_damage = float2int32( float( plus_damage ) * coefficient );
 

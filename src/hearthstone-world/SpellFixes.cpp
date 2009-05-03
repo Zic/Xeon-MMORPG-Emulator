@@ -595,7 +595,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 			
 			// Flametongue Weapon	-	10%	spd	coefficient
-			case  29469:
+			case  10444:
 				{	sp->fixed_dddhcoef = 0.1f;
 				}break;
 			
@@ -603,7 +603,13 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  17364:
 				{
 					sp->procFlags=PROC_ON_SPELL_HIT_VICTIM;
-					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+				}break;
+
+			//shaman - Improved Stormstrike
+			case 51521:
+			case 51522:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
 				}break;
 			
 			//shaman - Hex

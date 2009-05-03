@@ -291,7 +291,7 @@ pSpellAura SpellAuraHandler[TOTAL_SPELL_AURAS]={
 		&Aura::SpellAuraIncreaseAPByAttribute,//268
 		&Aura::SpellAuraNULL,//269
 		&Aura::SpellAuraNULL,//270
-		&Aura::SpellAuraModSpellDamageDOTPct,//271
+		&Aura::SpellAuraModDamageTakenPctPerCaster,//271
 		&Aura::SpellAuraNULL,//272
 		&Aura::SpellAuraNULL,//273
 		&Aura::SpellAuraNULL,//274
@@ -547,6 +547,37 @@ const char* SpellAuraNames[TOTAL_SPELL_AURAS] = {
 	"",													// 238
 	"",													// 239
 	"MODIFY_AXE_SKILL",									// 240
+	"",													// 241
+	"",													// 242
+	"",													// 243
+	"",													// 244
+	"",													// 245
+	"",													// 246
+	"",													// 247
+	"",													// 248
+	"",													// 249
+	"",													// 250
+	"",													// 251
+	"",													// 252
+	"",													// 253
+	"",													// 254
+	"",													// 255
+	"",													// 256
+	"",													// 257
+	"",													// 258
+	"",													// 259
+	"",													// 260
+	"",													// 261
+	"",													// 262
+	"",													// 263
+	"",													// 264
+	"",													// 265
+	"",													// 266
+	"",													// 267
+	"",													// 268
+	"",													// 269
+	"",													// 270
+	"MOD_DAMAGE_TAKEN_PCT_PER_CASTER",					// 271
 };
 
 /*
@@ -6066,19 +6097,29 @@ void Aura::SpellAuraMounted(bool apply)
 	}
 }
 
-void Aura::SpellAuraModSpellDamageDOTPct(bool apply)
+void Aura::SpellAuraModDamageTakenPctPerCaster(bool apply)
 {
 	if(!m_target->IsUnit())
 		return;
-
-	UnitPointer u_target = TO_UNIT(m_target);
-	int32 val = (apply) ? mod->m_amount : -mod->m_amount;
-
-	for(uint32 x=0;x<7;x++)
+	
+	if(apply)
 	{
-		if (mod->m_miscValue & (((uint32)1)<<x) )
+		m_target->DamageTakenPctModPerCaster.insert(
+			make_pair(m_casterGuid, make_pair(m_spellProto->EffectSpellClassMask[mod->i], mod->m_amount)));
+	} else
+	{
+		Unit::DamageTakenPctModPerCasterType::iterator it = 
+			m_target->DamageTakenPctModPerCaster.find(m_casterGuid);
+		while(it != m_target->DamageTakenPctModPerCaster.end() && 
+			it->first == m_casterGuid)
 		{
-			m_target->m_damageOverTimePctIncrease[x] += val;
+			if(it->second.first == m_spellProto->EffectSpellClassMask[mod->i])
+			{
+				it = m_target->DamageTakenPctModPerCaster.erase(it);
+			} else
+			{
+				it++;
+			}
 		}
 	}
 }

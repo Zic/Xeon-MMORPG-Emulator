@@ -658,7 +658,7 @@ public:
 	void SpellAuraModSpellHealingFromAP(bool apply);
 	void SpellAuraSkipCanCastCheck(bool apply);
 	void EventPeriodicDrink(uint32 amount);
-	void SpellAuraModSpellDamageDOTPct(bool apply);
+	void SpellAuraModDamageTakenPctPerCaster(bool apply);
 	void SpellAuraSetPhase(bool apply);
 	void SpellAuraIncreaseAPByAttribute(bool apply);
 	void SpellAuraVehiclePassenger(bool apply);
