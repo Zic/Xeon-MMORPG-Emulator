@@ -382,7 +382,7 @@ void WorldSession::HandleAddDynamicTargetOpcode(WorldPacket & recvPacket)
 	uint64 guid;
 	uint8 counter;
 	uint32 spellid;
-	uint32 flags;
+	uint8 flags;
 	UnitPointer caster;
 	SpellCastTargets targets;
 	SpellEntry *sp;

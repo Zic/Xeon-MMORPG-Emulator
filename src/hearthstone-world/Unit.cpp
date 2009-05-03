@@ -2106,6 +2106,12 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( CastingSpell->NameHash != SPELL_HASH_REMOVE_CURSE || victim == shared_from_this() )
 									continue;
 							}break;
+						case 63685:// Frozen Power - Freeze
+							{
+								uint32 minDistance = spe->EffectBasePoints[0] + 1;
+								if(!victim || GetDistanceSq(victim) < minDistance * minDistance)
+									continue;	// victim not far enough
+							}break;
 					}
 				}
 				if(spellId==17364 || spellId==32175 || spellId==32176) // Stormstrike fix

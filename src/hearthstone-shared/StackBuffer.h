@@ -70,9 +70,9 @@ public:
 	 */
 	uint8 * GetBufferPointer() { return m_bufferPointer; }
 
-	/** Gets the buffer size.
+	/** Gets the current write position.
 	 */
-	size_t GetBufferSize() { return m_writePos; }
+	size_t GetWritePos() { return m_writePos; }
 
 	/** Reads sizeof(T) bytes from the buffer
 	 * @return the bytes read

@@ -613,6 +613,17 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->AuraInterruptFlags |=	AURA_INTERRUPT_ON_UNUSED2;
 				}break;
 
+			//shaman - Frozen Power
+			case 63374:
+			case 63373:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[1][0] = 0x80000000;	// frost shock
+					sp->EffectSpellClassMask[1][1] = 0;
+					sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[1] = 63685;
+				}break;
+
 			//shaman - Ancestral Awakening
 			case 51558:
 				{

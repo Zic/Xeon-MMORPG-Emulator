@@ -172,7 +172,7 @@ void Vehicle::SendSpells(uint32 entry, PlayerPointer plr)
 	
 	WorldPacket data(SMSG_PET_SPELLS, GetAIInterface()->m_spells.size() * 4 + 22);
 	data << GetGUID();
-	data << uint32(0x00000000);//pet family
+	data << uint16(0x0000);//pet family
 	data << uint32(0x00000000);//unk
 	data << uint32(0x00000101);//bar type
 
@@ -193,7 +193,6 @@ void Vehicle::SendSpells(uint32 entry, PlayerPointer plr)
 	for(itr = avail_spells.begin(); itr != avail_spells.end(); ++itr)
 		data << uint16(*itr) << uint16(DEFAULT_SPELL_STATE);
 	
-	data << uint8(0);
 	data << uint8(0);
 
 	plr->GetSession()->SendPacket(&data);

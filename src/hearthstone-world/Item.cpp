@@ -671,9 +671,12 @@ void Item::ApplyEnchantmentBonus( uint32 Slot, bool Apply )
 	}
 
 	// Apply the visual on the player.
-	uint32 ItemSlot = m_owner->GetItemInterface()->GetInventorySlotByGuid( GetGUID() ) * PLAYER_VISIBLE_ITEM_LENGTH;
-	uint32 VisibleBase = PLAYER_VISIBLE_ITEM_1_ENTRYID + ItemSlot;
-	m_owner->SetUInt32Value( VisibleBase + 1 + Slot, Apply ? Entry->Id : 0 );
+	uint32 ItemSlot = m_owner->GetItemInterface()->GetInventorySlotByGuid( GetGUID() );
+	if(ItemSlot < EQUIPMENT_SLOT_END)
+	{
+		uint32 VisibleBase = PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + ItemSlot * PLAYER_VISIBLE_ITEM_LENGTH;
+		m_owner->SetUInt32Value( VisibleBase, Apply ? Entry->Id : 0 );
+	}
 
 	// Another one of those for loop that where not indented properly god knows what will break
 	// but i made it actually affect the code below it

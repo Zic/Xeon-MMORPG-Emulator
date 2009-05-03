@@ -1717,6 +1717,38 @@ void Player::smsg_InitialSpells()
 	GetSession()->OutPacket(0x041d, 4, &v);
 }
 
+void Player::BuildFullTalentsInfo(WorldPacket *data, bool self)
+{
+	*data << uint32(GetUInt32Value(PLAYER_CHARACTER_POINTS1)); // Unspent talents
+	// TODO: probably shouldn't send both specs if target is not self
+	*data << uint8(m_talentSpecsCount);
+	*data << uint8(m_talentActiveSpec);
+	for(uint8 s = 0; s < m_talentSpecsCount; s++)
+	{
+		PlayerSpec spec = m_specs[s];
+		// Send Talents
+		*data << uint8(spec.talents.size());
+		std::map<uint32, uint8>::iterator itr;
+		for(itr = spec.talents.begin(); itr != spec.talents.end(); itr++)
+		{
+			*data << uint32(itr->first);	// TalentId
+			*data << uint8(itr->second);	// TalentRank
+		}
+		if(self)
+		{
+			// Send Glyph info
+			*data << uint8(GLYPHS_COUNT);
+			for(uint8 i = 0; i < GLYPHS_COUNT; i++)
+			{
+				*data << uint16(spec.glyphs[i]);
+			}
+		} else
+		{
+			*data << uint8(0);	// glyphs not sent when inspecting another player
+		}
+	}
+}
+
 void Player::smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRank)
 {
 	WorldPacket data(SMSG_TALENTS_INFO, 1000);
@@ -1734,28 +1766,7 @@ void Player::smsg_TalentsInfo(bool update, uint32 newTalentId, uint8 newTalentRa
 		}
 	} else	// initialize sending all info
 	{
-		uint8 talent_max_rank = 0;
-		data << uint32(GetUInt32Value(PLAYER_CHARACTER_POINTS1)); // Unspent talents
-		data << uint8(m_talentSpecsCount);
-		data << uint8(m_talentActiveSpec); // unk
-		for(uint8 s = 0; s < m_talentSpecsCount; s++)
-		{
-			PlayerSpec spec = m_specs[s];
-			// Send Talents
-			data << uint8(spec.talents.size());
-			std::map<uint32, uint8>::iterator itr;
-			for(itr = spec.talents.begin(); itr != spec.talents.end(); itr++)
-			{
-				data << uint32(itr->first);	// TalentId
-				data << uint8(itr->second);	// TalentRank
-			}
-			// Send Glyph info
-			data << uint8(GLYPHS_COUNT);
-			for(uint8 i = 0; i < GLYPHS_COUNT; i++)
-			{
-				data << uint16(spec.glyphs[i]);
-			}
-		}
+		BuildFullTalentsInfo(&data, true);
 	}
 	GetSession()->SendPacket(&data);
 }
@@ -9692,9 +9703,9 @@ void Player::Possess(UnitPointer pTarget)
 	if(pTarget->m_temp_summon)
 		return;
 	
-	WorldPacket data(SMSG_PET_SPELLS, pTarget->GetAIInterface()->m_spells.size() * 4 + 20);
+	WorldPacket data(SMSG_PET_SPELLS, pTarget->GetAIInterface()->m_spells.size() * 4 + 18);
 	data << pTarget->GetGUID();
-	data << uint32(0x00000000);//unk1
+	data << uint16(0x0000);//unk1
 	data << uint32(0x00000101);//unk2
 	data << uint32(0x00000000);//unk3
 
@@ -9718,7 +9729,7 @@ void Player::Possess(UnitPointer pTarget)
 	for(itr = avail_spells.begin(); itr != avail_spells.end(); ++itr)
 		data << uint16(*itr) << uint16(DEFAULT_SPELL_STATE);
 	
-	data << uint64(0);
+	data << uint8(0);
 	m_session->SendPacket(&data);
 }
 

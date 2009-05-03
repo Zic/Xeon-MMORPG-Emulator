@@ -1473,13 +1473,43 @@ void WorldSession::HandleInspectOpcode( WorldPacket & recv_data )
 	if( player == NULL )
 		return;
 
-	uint8 packetbuf[200];
-	StackPacket data( SMSG_INSPECT_TALENT, packetbuf, 200 );
-
+	WorldPacket data(SMSG_INSPECT_TALENT, 1000);
 	data << player->GetNewGUID();
-    data << uint32(TALENT_INSPECT_BYTES);
-	data.Write((uint8*)_player->GetTalentInspectBuffer(), TALENT_INSPECT_BYTES);
+	player->BuildFullTalentsInfo(&data, false);
     SendPacket( &data );
+
+	// build items inspect part. could be sent separately as SMSG_INSPECT
+	uint32 slotUsedMask = 0;
+	uint16 enchantmentMask = 0;
+	size_t maskPos = data.wpos();
+	data << uint32(slotUsedMask);	// will be replaced later
+	for(uint32 slot = 0; slot < EQUIPMENT_SLOT_END; slot++)
+	{
+		ItemPointer item = player->GetItemInterface()->GetInventoryItem(slot);
+		if( item )
+		{
+			slotUsedMask |= 1 << slot;
+			data << uint32(item->GetEntry());
+			size_t maskPosEnch = data.wpos();
+			enchantmentMask = 0;
+			data << uint16(enchantmentMask); // will be replaced later
+			for(uint32 ench = 0; ench < 12; ench++)
+			{
+				uint16 enchId = (uint16) item->GetUInt32Value( ITEM_FIELD_ENCHANTMENT_1_1 + ench * 3);
+				if( enchId )
+				{
+					enchantmentMask |= 1 << ench;
+					data << uint16(enchId);
+				}
+			}
+			*(uint16*)&data.contents()[maskPosEnch] = enchantmentMask;
+			data << uint16(0);	// unk
+			FastGUIDPack(data, item->GetUInt32Value(ITEM_FIELD_CREATOR));
+			data << uint32(0);	// unk
+		}
+	}
+	*(uint16*)&data.contents()[maskPos] = slotUsedMask;
+	SendPacket( &data );
 }
 
 void WorldSession::HandleSetActionBarTogglesOpcode(WorldPacket &recvPacket)

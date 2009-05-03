@@ -361,10 +361,10 @@ void Pet::Update(uint32 time)
 
 void Pet::SendSpellsToOwner()
 {
-	int packetsize = (m_uint32Values[OBJECT_FIELD_ENTRY] != WATER_ELEMENTAL) ? ((int)mSpells.size() * 4 + 20) : 64;
+	int packetsize = (m_uint32Values[OBJECT_FIELD_ENTRY] != WATER_ELEMENTAL) ? ((int)mSpells.size() * 4 + 18) : 64;
 	WorldPacket * data = new WorldPacket(SMSG_PET_SPELLS, packetsize);
 	*data << GetGUID();
-	*data << uint32(0x00000000);//unk1
+	*data << uint16(0x0000);//unk1
 	*data << uint32(0x00000101);//unk2
 	*data << uint32(0x00000100);//unk3
 
@@ -390,7 +390,17 @@ void Pet::SendSpellsToOwner()
 		for(PetSpellMap::iterator itr = mSpells.begin(); itr != mSpells.end(); ++itr)
 			*data << uint16(itr->first->Id) << uint16(itr->second);
 	}
-	*data << uint64(0);
+	*data << uint8(0);	// count
+	/*
+	for(uint32 i = 0; i < count)
+	{
+		*data << uint32(0);
+		*data << uint16(0);
+		*data << uint32(0);
+		*data << uint32(0);
+	}
+	*/
+
 	m_Owner->delayedPackets.add(data);
 }
 

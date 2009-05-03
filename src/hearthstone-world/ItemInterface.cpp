@@ -409,10 +409,8 @@ ItemPointer ItemInterface::SafeRemoveAndRetreiveItemFromSlot(int8 ContainerSlot,
 			{
 				m_pOwner->ApplyItemMods( pItem, slot, false );
 				int VisibleBase = PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * PLAYER_VISIBLE_ITEM_LENGTH);
-				for (int i = VisibleBase; i < VisibleBase + PLAYER_VISIBLE_ITEM_LENGTH - 1; ++i)
-				{
-					m_pOwner->SetUInt32Value(i, 0);
-				}
+				m_pOwner->SetUInt32Value( VisibleBase, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 1, 0 );
 			}
 			else if ( slot < INVENTORY_SLOT_BAG_END )
 				m_pOwner->ApplyItemMods( pItem, slot, false );
@@ -664,10 +662,8 @@ bool ItemInterface::SafeFullRemoveItemFromSlot(int8 ContainerSlot, int8 slot)
 			{
 				m_pOwner->ApplyItemMods(pItem, slot, false );
 				int VisibleBase = PLAYER_VISIBLE_ITEM_1_ENTRYID + (slot * PLAYER_VISIBLE_ITEM_LENGTH);
-				for (int i = VisibleBase; i < VisibleBase + PLAYER_VISIBLE_ITEM_LENGTH - 1; ++i)
-				{
-					m_pOwner->SetUInt32Value(i, 0);
-				}
+				m_pOwner->SetUInt32Value( VisibleBase, 0 );
+				m_pOwner->SetUInt32Value( VisibleBase + 1, 0 );
 			}
 			else if( slot < INVENTORY_SLOT_BAG_END )
 				m_pOwner->ApplyItemMods(pItem, slot, false ); //watch containers that give attackspeed and stuff ;)
