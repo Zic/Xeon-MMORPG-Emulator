@@ -258,7 +258,7 @@ uint32 InstanceMgr::PreTeleport(uint32 mapid, PlayerPointer plr, uint32 instance
 					return INSTANCE_OK;
 				}
 				else
-					Log.Debug("InstanceMgr","Check failed %s",plr->GetName());
+					DEBUG_LOG("InstanceMgr","Check failed %s",plr->GetName());
 			}
 		}
 	}
@@ -655,11 +655,11 @@ void InstanceMgr::_LoadInstances()
 			m_instances[in->m_mapId]->insert( InstanceMap::value_type( in->m_instanceId, in ) );
 
 		} while(result->NextRow());
-		Log.Debug("InstanceMgr", "Loading %u saved instances." , result->GetRowCount());
+		DEBUG_LOG("InstanceMgr", "Loading %u saved instances." , result->GetRowCount());
 		delete result;
 	}
 	else
-		Log.Debug("InstanceMgr", "No saved instances found.");
+		DEBUG_LOG("InstanceMgr", "No saved instances found.");
 
 	//reset the SavedInstanceId on expired instances.
 	CharacterDatabase.WaitExecute("UPDATE groups LEFT JOIN instances ON groups.GroupInstanceID = instances.id SET groups.GroupInstanceID = 0 WHERE instances.id IS NULL;"); 

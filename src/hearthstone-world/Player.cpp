@@ -5116,7 +5116,7 @@ void Player::AddCalculatedRestXP(uint32 seconds)
 	if (m_restAmount > xp_to_lvl + (uint32)((float)( xp_to_lvl >> 1 ) * bubblerate ))
 		m_restAmount = xp_to_lvl + (uint32)((float)( xp_to_lvl >> 1 ) * bubblerate );
 
-	Log.Debug("REST","Add %d rest XP to a total of %d, RestState %d", rested_xp, m_restAmount,m_isResting);
+	DEBUG_LOG("REST","Add %d rest XP to a total of %d, RestState %d", rested_xp, m_restAmount,m_isResting);
 
 	// Update clients interface with new values.
 	UpdateRestState();
@@ -6410,7 +6410,7 @@ void Player::UpdateNearbyGameObjects()
 			info = go->GetInfo();
 			if (!info)
 			{
-				sLog.outString("%s: go->GetInfo returned NULL for go entry = %d", __FUNCTION__, go->GetEntry());
+				Log.Error("%s","go->GetInfo returned NULL for go entry = %d", __FUNCTION__, go->GetEntry());
 				continue;
 			} else if( info->InvolvedQuestIds != NULL )
 			{

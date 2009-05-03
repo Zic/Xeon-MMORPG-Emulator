@@ -331,7 +331,7 @@ uint32 LogonCommHandler::ClientConnected(string AccountName, WorldSocket * Socke
 	uint32 request_id = next_request++;
 	size_t i = 0;
 	const char * acct = AccountName.c_str();
-	Log.Debug ( "LogonCommHandler","Sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
+	DEBUG_LOG( "LogonCommHandler","Sending request for account information: `%s` (request %u).", AccountName.c_str(), request_id);
 
 	// Send request packet to server.
 	map<LogonServer*, LogonCommClientSocket*>::iterator itr = logons.begin();

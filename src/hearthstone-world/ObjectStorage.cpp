@@ -215,7 +215,7 @@ void ObjectMgr::LoadExtraCreatureProtoStuff()
 							continue;
 						}
 						if(sp->spell->Effect[0] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[1] == SPELL_EFFECT_SCRIPT_EFFECT || sp->spell->Effect[2] == SPELL_EFFECT_SCRIPT_EFFECT)
-							Log.Debug("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
+							DEBUG_LOG("AIAgent","Spell %u for NPC %u is a scripted_effect, can result in unwanted side effects", spellID, sp->entryId);
 
 						sp->minrange = GetMinRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
 						sp->maxrange = GetMaxRange(dbcSpellRange.LookupEntry(sp->spell->rangeIndex));
