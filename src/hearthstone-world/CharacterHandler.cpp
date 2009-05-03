@@ -705,14 +705,30 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	DEBUG_LOG( "WorldSession"," Recvd Player Logon Message" );
 
 	recv_data >> playerGuid; // this is the GUID selected by the player
-	if(objmgr.GetPlayer((uint32)playerGuid) != NULL || m_loggingInPlayer || _player)
+
+	//Better validate this Guid before we create an invalid _player.
+	uint8 response = CHAR_LOGIN_NO_CHARACTER;
+
+	//already active?
+	if(objmgr.GetPlayer((uint32)playerGuid) != NULL || m_loggingInPlayer || _player) 
+		response = CHAR_LOGIN_DUPLICATE_CHARACTER;
+	else //Do we exist in DB?
 	{
-		// A character with that name already exists 0x3E
-		uint8 respons = CHAR_LOGIN_DUPLICATE_CHARACTER;
-		OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &respons);
+		QueryResult * res = CharacterDatabase.Query("SELECT guid FROM characters where guid = %u",playerGuid);
+		if(res) 
+		{
+			response = RESPONSE_SUCCESS;
+			delete res;
+		}
+	}
+
+	if(response != RESPONSE_SUCCESS)
+	{
+		OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &response);
 		return;
 	}
 
+	//We have a valid Guid so let's create the player and login
 	PlayerPointer plr = PlayerPointer (new Player((uint32)playerGuid));
 	plr->Init();
 	plr->SetSession(this);
