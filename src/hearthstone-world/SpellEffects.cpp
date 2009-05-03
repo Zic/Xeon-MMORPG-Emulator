@@ -5534,10 +5534,17 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 				Petsp->prepare( &tgt1 );
 			}
 		}break;
-	case 44876:
+	case 44876: //Force Cast - Portal Effect: Sunwell Isle
 		{
 			if( !u_caster || !unitTarget )
 				return;
+
+			if(p_caster && p_caster->getLevel() < 70)
+			{
+				sChatHandler.RedSystemMessage(p_caster->GetSession(),"You must be level 70 to use this!");
+				return;
+			}
+
 			u_caster->CastSpell(unitTarget,damage,true);
 		}break;
 	case 47193: // [Warlock] Demonic Empowerment
