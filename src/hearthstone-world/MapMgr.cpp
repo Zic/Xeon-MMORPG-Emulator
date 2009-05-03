@@ -1783,7 +1783,8 @@ void MapMgr::_PerformObjectDuties()
 			// Don't update players not on our map.
 			// If we abort in the handler, it means we will "lose" packets, or not process this.
 			// .. and that could be diasterous to our client :P
-			if( MapSession->GetSocket()!=NULL && MapSession->GetPlayer() != NULL && MapSession->GetPlayer()->GetMapMgr()!= NULL && MapSession->GetPlayer()->GetMapMgr() != shared_from_this())
+			if( MapSession->GetPlayer()->GetMapMgr()== NULL || 
+				MapSession->GetPlayer()->GetMapMgr() != shared_from_this())
 				continue;
 
 			result = MapSession->Update(m_instanceID);
