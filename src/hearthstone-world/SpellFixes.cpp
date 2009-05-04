@@ -685,7 +685,18 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_MELEE_ATTACK;
 					sp->procCharges++; //	first	charge gets	lost when	it gets	procced
 				}break;
-			
+			//Minor Glyph Research + Northrend Inscription Research
+			case 61177:
+			case 61288:
+				{
+					sp->Effect[0]	=	24;
+					sp->Effect[1]	=	0;
+					sp->EffectBaseDice[1]	=	0;
+					sp->EffectBasePoints[1]	=	0;
+					sp->EffectImplicitTargetA[1]	=	0;
+					sp->EffectMiscValue[0]	=	0;
+					sp->EffectDieSides[1]	=	0;
+				}break;
 			// Shaman	Totem	items	fixes
 			// Totem of	Survival,	Totem	of the Tundra
 			case 46097:
@@ -1340,7 +1351,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  31785:
 			case  33776:
 				{
-						sp->procFlags	=	PROC_ON_SPELL_HIT_VICTIM | PROC_TARGET_SELF;
+						sp->procFlags	=	PROC_ON_SPELL_LAND_VICTIM | PROC_TARGET_SELF;
 						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->EffectTriggerSpell[0]	=	31786;
 				}break;
@@ -1640,12 +1651,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 		
 			// Hunter	-	Expose Weakness
 			case  34500:
-						sp->procFlags	=	PROC_ON_RANGED_CRIT_ATTACK;
 			case  34502:
-						sp->procFlags	=	PROC_ON_RANGED_CRIT_ATTACK;
 			case  34503:
-						sp->procFlags	=	PROC_ON_RANGED_CRIT_ATTACK;
-
+						{
+						sp->procFlags	=	PROC_ON_RANGED_CRIT_ATTACK | PROC_ON_SPELL_CRIT_HIT;
+				}break;
 			// hunter - Wild Quiver
 			case 53215:
 			case 53216:
@@ -1857,19 +1867,22 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 		
 			//Mage - Arcane	Concentration
 			case  11213:
-						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 			case  12574:
-						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 			case  12575:
-						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 			case  12576:
-						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 			case  12577:
 				{
 						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
-				//sp->procChance = 100;
 				}break;
-				
+		
+			//Mage - ClearCasting	Effect 
+			//Druid - Clearcasting Effect
+			case  16870:
+			case  12536:
+				{
+						sp->procCharges	=	2;
+				}break;	
+		
 			//Mage - Arcane	Blast
 			case  36032:
 				{
@@ -3580,7 +3593,32 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectImplicitTargetA[2] = 1;
 						sp->EffectBasePoints[2] = 15;
 				}break;
-
+			// Righteous Vengeance (3.1 reduced to 3 ranks only just need remove 2 last cases)
+			case 53380:
+			case 53381:
+			case 53382:
+			case 53383:
+			case 53384:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[0]	=	61840;
+					sp->procFlags	=	PROC_ON_CRIT_ATTACK;
+				}break;
+			// Sheat of Light (Hot Effect)
+			case 53501:
+			case 53502:
+			case 53503:
+				{
+					sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[1]	=	54203;
+					sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
+				}break;
+			case 54203:
+				{
+					sp->logsId = sp->Id;
+				}break;		
+		
+		
 			//////////////////////////////////////////
 			// HUNTER								//
 			//////////////////////////////////////////
@@ -3628,7 +3666,30 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
 					sp->EffectMiscValue[0] = 1;
 				}break;
-
+			//Two Handed Weapon Specialization and One Handed Weapon Specializacion
+			//Warrior and Paladin and Death Knight - this will change on 3.1.0
+			case 20111:
+			case 20112:
+			case 20113:
+			case 12163:
+			case 12711:
+			case 12712:
+			case 16538:
+			case 16539:
+			case 16540:
+			case 16541:
+			case 16542:
+			case 20196:
+			case 20197:
+			case 20198:
+			case 20199:
+			case 20200:
+			case 55107:
+			case 55108:
+				{
+					sp->EffectApplyAuraName[0] = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE;
+					sp->EffectMiscValue[0] = 2;
+				}break;
 			//Frost Trap
 			case 13809:
 				{
@@ -3766,6 +3827,15 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procChance = 100;
 					sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
 				}break;
+						// Improved Steady Shot
+			case 53221:
+			case 53222:
+			case 53224:
+				{
+					sp->procFlags = PROC_ON_CAST_SPELL;
+					sp->EffectSpellClassMask[0][0] = 0x0;
+					sp->EffectSpellClassMask[0][1] = 0x0;
+				}break;
 			//////////////////////////////////////////
 			// ROGUE								//
 			//////////////////////////////////////////
@@ -3827,6 +3897,13 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[1]	=	0;
 						sp->Effect[2]	=	0;
 						sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+				}break;
+			// Focused Attacks
+			case 51634:
+			case 51635:
+			case 51636:
+				{
+						sp->procFlags = PROC_ON_CRIT_ATTACK;
 				}break;
 
 			// Setup
@@ -4125,6 +4202,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->procFlags	=	PROC_ON_CAST_SPELL;
 					sp->procChance	=	10;
 				}break;
+			//Conjure Refreshment table
+			case 43985:
+			case 58661:
+				{
+					sp->EffectImplicitTargetA[0]	=	EFF_TARGET_DYNAMIC_OBJECT;
+				}break;
 
 			//////////////////////////////////////////
 			// WARLOCK								//
@@ -4366,7 +4449,21 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->RequiredShapeShift	=	FORM_TREE;
 				}break;
-
+			//Owlkin Frenzy
+			case 48389:
+			case 48392:
+			case 48393:
+				{
+					sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_MELEE_ATTACK | PROC_ON_RANGED_ATTACK;
+					sp->EffectSpellClassMask[0][0]	=	0x0;
+				}break;
+			// Infected Wounds
+			case 48483:
+			case 48484:
+			case 48485:
+				{
+					sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_MELEE_ATTACK;
+				}break;
 			//////////////////////////////////////////
 			// BOSSES								//
 			//////////////////////////////////////////
@@ -4484,7 +4581,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 					sp->EffectTriggerSpell[0]	=	48108;
 					sp->procFlags	=	PROC_ON_SPELL_CRIT_HIT;
 					sp->procChance = sp->RankNumber * 33;
-					sp->EffectSpellClassMask[0][0] = 0x100013;
+					sp->EffectSpellClassMask[0][0] = 0x0;
 				}break;
 
 			case 1122:
@@ -4498,13 +4595,13 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[0]	=	SPELL_EFFECT_DUMMY;
 				}break;
 
-		
+			//Bloodsurge
 			case 46915:
 			case 46914:
 			case 46913:
 				{
-						sp->procFlags	=	PROC_ON_CAST_SPELL;
-				}break;
+						sp->procFlags	=	PROC_ON_MELEE_ATTACK | PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_CAST_SPELL;
+				}break;		
 		
 		
 			//Waylay			 

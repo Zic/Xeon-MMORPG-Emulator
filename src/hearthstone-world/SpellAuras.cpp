@@ -5441,6 +5441,7 @@ void Aura::SpellAuraTransform(bool apply)
 				sEventMgr.RemoveEvents(shared_from_this(), EVENT_AURA_PERIODIC_ENERGIZE);
 			}
 		}break;
+		case 57669: // Replenishment
 		case 61782:
 		{
 			if(apply)

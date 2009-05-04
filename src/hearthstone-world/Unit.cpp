@@ -1666,6 +1666,25 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->buffType != SPELL_TYPE_JUDGEMENT )
 									continue;				
 								}break;
+						// Righteous Vengeance (judgements damage is broken also crusader strike was added in 3.1 need update on 3.1)
+						case 61840:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_DIVINE_STORM &&
+									CastingSpell->buffType != SPELL_TYPE_JUDGEMENT )
+									continue;
+						dmg_overwrite = ( dmg * (ospinfo->EffectBasePoints[0] + 1 )) / 400 ;
+							}break;
+						// Paladin - Sheat of Light
+						case 54203:
+							{
+								if( CastingSpell == NULL )
+									continue;
+								if(!(CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING))
+									continue; 
+								dmg_overwrite = dmg * (ospinfo->EffectBasePoints[1] + 1) / 400;
+							}break;
 						case 45057: // Trinket: Evasive Maneuvers
 							{
 								if(GetHealthPct() > 35)
