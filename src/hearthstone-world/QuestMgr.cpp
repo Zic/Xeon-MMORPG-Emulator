@@ -944,32 +944,28 @@ void QuestMgr::GiveQuestRewardReputation(PlayerPointer plr, Quest* qst, ObjectPo
 	for(int z = 0; z < 5; z++)
 	{
 		uint32 fact = 19;   // default to 19 if no factiondbc
-		int32 amt  = float2int32( float( GenerateQuestXP( plr, qst) ) * 0.1f );   // guess
-		if(!qst->reward_repfaction[z])
-		{
-			if( z == 1 )
-				break;
-
-			// Let's do this properly. Determine the faction of the creature, and give reputation to his faction.
-			if( qst_giver->GetTypeId() == TYPEID_UNIT )
-				if(TO_CREATURE(qst_giver)->m_factionDBC != NULL )
-					fact = TO_CREATURE(qst_giver)->m_factionDBC->ID;
-			if( qst_giver->GetTypeId() == TYPEID_GAMEOBJECT )
-				fact = qst_giver->GetUInt32Value(GAMEOBJECT_FACTION );
-		}
-		else
+		int32 amt = 0;   // guess
+		if( qst->reward_repfaction[z] )
 		{
 			fact = qst->reward_repfaction[z];
 			if(qst->reward_repvalue[z])
 				amt = qst->reward_repvalue[z];
 		}
+		else 
+			continue;
 
-		if(qst->reward_replimit)
-			if(plr->GetStanding(fact) >= (int32)qst->reward_replimit)
-				continue;
-	  
-		amt = float2int32( float( amt ) * sWorld.getRate( RATE_QUESTREPUTATION ) ); // reputation rewards 
-		plr->ModStanding(fact, amt);
+		if(amt)
+		{
+			amt = float2int32( float( amt ) * sWorld.getRate( RATE_QUESTREPUTATION ) ); // reputation rewards 
+			if(qst->reward_replimit && plr->GetStanding(fact)+ amt >= (int32)qst->reward_replimit)
+			{
+				amt = (int32)qst->reward_replimit - plr->GetStanding(fact);
+				//prevent substraction when current_rep > limit (this quest should not be available?)
+				amt = amt<0 ? 0 : amt;
+			}
+
+			plr->ModStanding(fact, amt);
+		}
 	}
 }
 void QuestMgr::OnQuestAccepted(PlayerPointer plr, Quest* qst, ObjectPointer qst_giver)
