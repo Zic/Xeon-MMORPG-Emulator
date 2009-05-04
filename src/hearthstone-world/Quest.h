@@ -39,11 +39,12 @@ enum QUEST_STATUS
 	QMGR_QUEST_NOT_AVAILABLE		= 0x00,	// There aren't quests avaiable.				| "No Mark"
 	QMGR_QUEST_AVAILABLELOW_LEVEL	= 0x01,	// Quest avaiable, and your level isnt enough.	| "Gray Quotation Mark !"
 	QMGR_QUEST_CHAT					= 0x02,	// Quest avaiable it shows a talk baloon.		| "No Mark"
-	QMGR_QUEST_NOT_FINISHED			= 0x03,	// Quest isnt finished yet.						| "Gray Question ? Mark"
-	QMGR_QUEST_REPEATABLE_FINISHED	= 0x04,
-	QMGR_QUEST_REPEATABLE			= 0x05,	// Quest repeatable								| "Blue Question ? Mark" 
-	QMGR_QUEST_AVAILABLE			= 0x06,	// Quest avaiable, and your level is enough		| "Yellow Quotation ! Mark" 
-	QMGR_QUEST_FINISHED				= 0x08,	// Quest has been finished.						| "Yellow Question  ? Mark" (7 has no minimap icon)
+	QMGR_QUEST_NOT_FINISHED			= 0x05,	// Quest isnt finished yet.						| "Gray Question ? Mark"
+	QMGR_QUEST_REPEATABLE_FINISHED	= 0x06,
+	QMGR_QUEST_REPEATABLE			= 0x07,	// Quest repeatable								| "Blue Question ? Mark" 
+	QMGR_QUEST_AVAILABLE			= 0x08,	// Quest avaiable, and your level is enough		| "Yellow Quotation ! Mark" 
+	QMGR_QUEST_FINISHED_2			= 0x09,  // Quest has been finished                      | "No icon on the minimap"
+	QMGR_QUEST_FINISHED				= 0x0A,	// Quest has been finished.						| "Yellow Question  ? Mark" (7 has no minimap icon)
 	//QUEST_ITEM_UPDATE				= 0x06	 // Yellow Question "?" Mark. //Unknown
 };
 
