@@ -5672,6 +5672,17 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							if( spi && spi->NameHash != SPELL_HASH_FLASH_HEAL && spi->NameHash != SPELL_HASH_BINDING_HEAL && spi->NameHash != SPELL_HASH_GREATER_HEAL)
 								continue;
 						}break;
+					//Arcane Potency
+					case 57529:
+					case 57531:
+						{
+							if( m_currentSpell && !(m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_PRESENCE_OF_MIND ||
+													m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_CLEARCASTING ))
+												continue;
+							SpellEntry *spi = dbcSpell.LookupEntry( skip );
+							if( spi && spi->NameHash != SPELL_HASH_PRESENCE_OF_MIND && spi->NameHash != SPELL_HASH_CLEARCASTING)
+								continue;
+						}break;
 					//paladin - Art of war
 					case 53489:
 					case 59578:

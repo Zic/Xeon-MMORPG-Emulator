@@ -4178,12 +4178,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procChance = 4 * sp->RankNumber;
 				}
 
-			case 57529:
-			case 57531:
-				{
-						sp->AuraInterruptFlags = AURA_INTERRUPT_ON_CAST_SPELL;
-				}break;
-
 			//Fiery Payback 
 			case 44440:
 			case 44441:
