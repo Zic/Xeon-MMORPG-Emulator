@@ -105,6 +105,7 @@ enum SUMMON_TYPE
 	SUMMON_TYPE_SUMMON = 67,
 	SUMMON_TYPE_CRITTER = 41,
 	SUMMON_TYPE_GHOUL = 829,
+	SUMMON_TYPE_LIGHTWELL = 1141,
 };
 
 //wooohooo, there are 19 spells that actually require to add a proccounter for these 
@@ -139,7 +140,7 @@ enum SPELL_MODIFIER_TYPE
 	//!!! most spells have both SMT_DAMAGE_DONE and this value. Be carefull case there is no need to apply both !
     SMT_SPELL_VALUE_PCT		=22,// damage done by ability by x% : SELECT id,name,description FROM dbc_spell where (EffectApplyAuraName_1=108 and EffectMiscValue_1=22) or (EffectApplyAuraName_2=108 and EffectMiscValue_2=22) or (EffectApplyAuraName_3=108 and EffectMiscValue_3=22)  its DoT actually
     SMT_LAST_EFFECT_BONUS   =23,// increases points of last effect in affected spells  // GOOD 
-    SMT_SPD_BONUS             =24,// This is a modifer for the amount of +spell damage applied to the spell group from spell bonuses
+    SMT_SPD_BONUS            =24,// This is a modifer for the amount of +spell damage applied to the spell group from spell bonuses
     // 25 dont exist spells with it
     // 26 is obsolete stuff
     SMT_MULTIPLE_VALUE      =27,// mana lost cost per point of damage taken for mana shield,Health or Mana gained from Drain Life and Drain Mana increased by x%.
@@ -1480,7 +1481,7 @@ enum MECHANICS
     MECHANIC_DISCOVERY,
     MECHANIC_PROTECTED,
     MECHANIC_SAPPED,
-	MECHANIC_UNK,
+	MECHANIC_ENRAGED,
 	MECHANIC_COUNT
 };
 
@@ -1846,6 +1847,7 @@ public:
 	void SpellEffectMegaJump(uint32 i);
 	void SpellEffectMilling(uint32 i);
 	void SpellEffectTitanGrip(uint32 i);
+	void SummonLightwell(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);
@@ -2034,14 +2036,14 @@ public:
 	}
 	HEARTHSTONE_INLINE static uint32 GetMechanic(SpellEntry * sp)
 	{
-		if(sp->MechanicsType)
-			return sp->MechanicsType;
-		if(sp->EffectMechanic[0])
-			return sp->EffectMechanic[0];
-		if(sp->EffectMechanic[1])
-			return sp->EffectMechanic[1];
 		if(sp->EffectMechanic[2])
 			return sp->EffectMechanic[2];
+		if(sp->EffectMechanic[1])
+			return sp->EffectMechanic[1];
+		if(sp->EffectMechanic[0])
+			return sp->EffectMechanic[0];
+		if(sp->MechanicsType)
+			return sp->MechanicsType;
 		return 0;
 	}
 

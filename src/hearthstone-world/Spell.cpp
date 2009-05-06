@@ -612,7 +612,7 @@ uint8 Spell::_DidHit(const UnitPointer target)
 	/*************************************************************************/
 	/* Check if the target is immune to this mechanic                        */
 	/*************************************************************************/
-	if(u_victim->MechanicsDispels[m_spellInfo->MechanicsType])
+	if(u_victim->MechanicsDispels[Spell::GetMechanic(m_spellInfo)])
 	{
 		return SPELL_DID_HIT_IMMUNE; // Moved here from Spell::CanCast
 	}
@@ -620,13 +620,13 @@ uint8 Spell::_DidHit(const UnitPointer target)
 	/************************************************************************/
 	/* Check if the target has a % resistance to this mechanic              */
 	/************************************************************************/
-	if( m_spellInfo->MechanicsType<27)
+	if( m_spellInfo->MechanicsType < MECHANIC_COUNT)
 	{
 		float res;
 		if(p_victim)
-			res = p_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+			res = p_victim->MechanicsResistancesPCT[Spell::GetMechanic(m_spellInfo)];
 		else 
-			res = u_victim->MechanicsResistancesPCT[m_spellInfo->MechanicsType];
+			res = u_victim->MechanicsResistancesPCT[Spell::GetMechanic(m_spellInfo)];
 		if( !(m_spellInfo->c_is_flags & SPELL_FLAG_IS_NOT_RESISTABLE) && Rand(res))
 			return SPELL_DID_HIT_RESIST;
 	}
@@ -1110,7 +1110,7 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		finish();
 		return ccr;
 	}
-	else
+	else if( !m_triggeredSpell )
 	{
 		if( !HasPower() )
 		{
@@ -1124,14 +1124,14 @@ uint8 Spell::prepare( SpellCastTargets * targets )
 		SendSpellStart();
 
 		// start cooldown handler
-		if( p_caster != NULL && !p_caster->CastTimeCheat && !m_triggeredSpell )
+		if( p_caster != NULL && !p_caster->CastTimeCheat )
 		{
 			AddStartCooldown();
 		}
 
 		if( i_caster == NULL )
 		{
-			if( p_caster != NULL && m_timer > 0 && !m_triggeredSpell )
+			if( p_caster != NULL && m_timer > 0 )
 				p_caster->delayAttackTimer( m_timer + 1000 );
 			//p_caster->setAttackTimer(m_timer + 1000, false);
 		}
@@ -2552,6 +2552,15 @@ bool Spell::HasPower()
 		return true;
 	}
 
+	//Stupid shiv
+	if( m_spellInfo->NameHash == SPELL_HASH_SHIV )
+	{
+		ItemPointer Offhand = p_caster->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND);
+
+		if( Offhand != NULL && Offhand->GetProto() != NULL )
+			cost += Offhand->GetProto()->Delay / 100;
+	}
+
 	//FIXME:DK:if field value < cost what happens
 	if(powerField == UNIT_FIELD_HEALTH)
 	{
@@ -2639,6 +2648,15 @@ bool Spell::TakePower()
 	{
 		SM_FIValue(u_caster->SM[SMT_COST][0],&cost,m_spellInfo->SpellGroupType);
 		SM_PIValue(u_caster->SM[SMT_COST][1],&cost,m_spellInfo->SpellGroupType);
+	}
+
+	//Stupid shiv
+	if( m_spellInfo->NameHash == SPELL_HASH_SHIV )
+	{
+		ItemPointer Offhand = p_caster->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_OFFHAND);
+
+		if( Offhand != NULL && Offhand->GetProto() != NULL )
+			cost += Offhand->GetProto()->Delay / 100;
 	}
 
 	if (cost <=0)
@@ -2823,6 +2841,19 @@ void Spell::HandleAddAura(uint64 guid)
 		if( u_caster->HasDummyAura(SPELL_HASH_VINDICATION) )
 			spellid = u_caster->GetDummyAura(SPELL_HASH_VINDICATION)->RankNumber == 2 ? 26017 : 67;
 	}
+	else if( m_spellInfo->Id == 5229 &&
+		p_caster && (
+		p_caster->GetShapeShift() == FORM_BEAR ||
+		p_caster->GetShapeShift() == FORM_DIREBEAR ) &&
+		p_caster->HasDummyAura(SPELL_HASH_KING_OF_THE_JUNGLE) )
+	{
+		SpellEntry *spellInfo = dbcSpell.LookupEntry( 51185 );
+		if(!spellInfo) return;
+		SpellPointer spell(new Spell(p_caster, spellInfo ,true, NULLAURA));
+		spell->forced_basepoints[0] = p_caster->GetDummyAura(SPELL_HASH_KING_OF_THE_JUNGLE)->RankNumber * 5;
+		SpellCastTargets targets(p_caster->GetGUID());
+		spell->prepare(&targets);
+	}
 
 	switch( m_spellInfo->NameHash )
 	{
@@ -2830,7 +2861,7 @@ void Spell::HandleAddAura(uint64 guid)
 	case SPELL_HASH_PRESENCE_OF_MIND:
 		{
 			if( Target->HasDummyAura(SPELL_HASH_ARCANE_POTENCY) )
-				spellid = (Target->GetDummyAura(SPELL_HASH_ARCANE_POTENCY)->EffectBasePoints[0] + 1) == 15 ? 57529 : 57531;
+				spellid = Target->GetDummyAura(SPELL_HASH_ARCANE_POTENCY)->RankNumber == 1 ? 57529 : 57531;
 		}break;
 	}
 
@@ -2848,19 +2879,8 @@ void Spell::HandleAddAura(uint64 guid)
 		spell->prepare(&targets);	
 	}
 
-	if( m_spellInfo->Id == 5229 &&
-		p_caster && (
-		p_caster->GetShapeShift() == FORM_BEAR ||
-		p_caster->GetShapeShift() == FORM_DIREBEAR ) &&
-		p_caster->HasDummyAura(SPELL_HASH_KING_OF_THE_JUNGLE) )
-	{
-		SpellEntry *spellInfo = dbcSpell.LookupEntry( 51185 );
-		if(!spellInfo) return;
-		SpellPointer spell(new Spell(p_caster, spellInfo ,true, NULLAURA));
-		spell->forced_basepoints[0] = p_caster->GetDummyAura(SPELL_HASH_KING_OF_THE_JUNGLE)->RankNumber * 5;
-		SpellCastTargets targets(p_caster->GetGUID());
-		spell->prepare(&targets);
-	}
+	if( m_spellInfo->MechanicsType == 31 )
+		Target->SetFlag(UNIT_FIELD_AURASTATE, AURASTATE_FLAG_ENRAGE);
 
 	// avoid map corruption
 	if(Target->GetInstanceID()!=m_caster->GetInstanceID())
@@ -3036,7 +3056,7 @@ uint8 Spell::CanCast(bool tolerate)
 				return SPELL_FAILED_SPELL_UNAVAILABLE;
 		}
 
-		// Requires ShapeShift
+		// Requires ShapeShift (stealth only atm, need more work)
 		if( p_caster && m_spellInfo->RequiredShapeShift )
 		{
 			if( m_spellInfo->RequiredShapeShift == (uint32)1 << (FORM_STEALTH-1) )
@@ -3566,8 +3586,11 @@ uint8 Spell::CanCast(bool tolerate)
 		{
 			if( target != m_caster )
 			{
-				if( target->IsCreature() && m_spellInfo->forced_creature_target )
+				if( m_spellInfo->forced_creature_target )
 				{
+					if( !target->IsCreature() )
+						return SPELL_FAILED_BAD_TARGETS;
+
 					if( TO_CREATURE( target )->GetCreatureInfo() != NULL )
 						if( m_spellInfo->forced_creature_target != TO_CREATURE( target )->GetCreatureInfo()->Id )
 							return SPELL_FAILED_BAD_TARGETS;
@@ -3904,6 +3927,7 @@ uint8 Spell::CanCast(bool tolerate)
 					case 0xC7C45478: //Immune Movement Impairment and Loss of Control
 					case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
 					case SPELL_HASH_EVERY_MAN_FOR_HIMSELF:
+					case SPELL_HASH_DISPERSION:
 						{
 							break;
 						}
@@ -3955,6 +3979,7 @@ uint8 Spell::CanCast(bool tolerate)
 				}break;
 				case SPELL_HASH_PVP_TRINKET: // insignia of the alliance/horde 2.4.3
 				case SPELL_HASH_EVERY_MAN_FOR_HIMSELF:
+				case SPELL_HASH_DISPERSION:
 					break;
 
 				default:
@@ -3991,6 +4016,9 @@ uint8 Spell::CanCast(bool tolerate)
 					break;
 
 				case SPELL_HASH_BLINK:
+					break;
+
+				case SPELL_HASH_DISPERSION:
 					break;
 
 				default:
@@ -4479,7 +4507,7 @@ void Spell::SendHealManaSpellOnPlayer(ObjectPointer caster, ObjectPointer target
 
 void Spell::Heal(int32 amount)
 {
-	if(!unitTarget || !unitTarget->isAlive())
+	if( !unitTarget || !unitTarget->isAlive() )
 		return;
 	
 	if( p_caster != NULL )
@@ -4498,10 +4526,7 @@ void Spell::Heal(int32 amount)
 	float critchance = 0; 
 	int32 bonus = 0;
 	if( u_caster != NULL )
-	{
-		if( m_spellInfo->NameHash == SPELL_HASH_FLASH_OF_LIGHT && u_caster->HasDummyAura(SPELL_HASH_INCREASED_FLASH_OF_LIGHT_HEALING) )
-			bonus += 79;
-		
+	{		
 		// All calculations are done in getspellbonusdamage
 		amount = u_caster->GetSpellBonusDamage(unitTarget, m_spellInfo, amount, false, true); // 3.0.2 Spellpower change: In order to keep the effective amount healed for a given spell the same, we’d expect the original coefficients to be multiplied by 1/0.532 or 1.88.
 
@@ -4520,6 +4545,10 @@ void Spell::Heal(int32 amount)
 				SM_FFValue(u_caster->SM[SMT_CRITICAL][0], &critchance, m_spellInfo->SpellGroupType);
 				SM_PFValue(u_caster->SM[SMT_CRITICAL][1], &critchance, m_spellInfo->SpellGroupType);
 			}
+
+			// Sacred Shield HOAX
+			if( unitTarget->HasDummyAura(SPELL_HASH_SACRED_SHIELD) )
+				critchance += 50.0f;
 		}
 		if(critical = Rand(critchance))
 		{
@@ -4593,7 +4622,7 @@ void Spell::Heal(int32 amount)
 			SpellCastTargets tgt;
 			tgt.m_unitTarget = unitTarget->GetGUID();
 			sp->prepare(&tgt);
-			u_caster->m_CustomTimers[CUSTOM_TIMER_RAPTURE] = getMSTime()+12000;
+			u_caster->m_CustomTimers[CUSTOM_TIMER_RAPTURE] = getMSTime() + 12000;
 		}
 	}
 
@@ -4754,7 +4783,7 @@ bool Spell::Reflect(UnitPointer refunit)
 {
 	uint32 refspellid = 0;
 
-	if( m_reflectedParent != NULL )
+	if( m_reflectedParent != NULL || m_caster == refunit )
 		return false;
 
 	// if the spell to reflect is a reflect spell, do nothing.
@@ -4779,22 +4808,14 @@ bool Spell::Reflect(UnitPointer refunit)
 		}
 	}
 
-	if(!refspellid || m_caster == refunit) return false;
-	refunit->RemoveAura(refspellid);
+	if( !refspellid ) 
+		return false;
 
-	SpellPointer camt(new Spell(m_caster, dbcSpell.LookupEntry(refspellid), true, NULLAURA));
-	uint32 amt[3] = {0,0,0};
-	amt[0] = camt->CalculateEffect(0, refunit);
-	amt[1] = camt->CalculateEffect(1, refunit);
-	amt[2] = camt->CalculateEffect(1, refunit);
-	camt->Destructor();
+	//refunit->RemoveAura(refspellid);
 
-	SpellPointer spell(new Spell(refunit, dbcSpell.LookupEntry(refspellid), true, NULLAURA));
+	SpellPointer spell(new Spell(refunit, m_spellInfo, true, NULLAURA));
 	SpellCastTargets targets;
 	targets.m_unitTarget = m_caster->GetGUID();
-	spell->forced_basepoints[0] = amt[0];
-	spell->forced_basepoints[1] = amt[1];
-	spell->forced_basepoints[2] = amt[2];
 	spell->m_reflectedParent = shared_from_this();
 	spell->prepare(&targets);
 	return true;

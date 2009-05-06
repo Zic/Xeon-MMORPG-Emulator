@@ -788,6 +788,9 @@ struct SpellEntry
 
 	//poisons type...
 	uint32 poison_type;
+
+	//backattack
+	bool AllowBackAttack;
 };
 
 struct SpellRuneCostEntry

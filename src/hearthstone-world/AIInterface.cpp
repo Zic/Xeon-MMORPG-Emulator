@@ -944,7 +944,7 @@ void AIInterface::_UpdateCombat(uint32 p_time)
 #endif
 							if(m_nextTarget != NULL)
 							{
-								m_Unit->Strike( m_nextTarget, MELEE, NULL, 0, 0, 0, false, false );
+								m_Unit->Strike( m_nextTarget, MELEE, NULL, 0, 0, 0, false, false, true );
 #ifdef ENABLE_CREATURE_DAZE
 								//now if the target is facing his back to us then we could just cast dazed on him :P
 								//as far as i know dazed is casted by most of the creatures but feel free to remove this code if you think otherwise
@@ -1395,7 +1395,7 @@ UnitPointer AIInterface::FindTarget()
 			continue;*/
 
 		//do not agro units that are faking death. Should this be based on chance ?
-		if( pUnit->HasFlag( UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH ) )
+		if( pUnit->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_FEIGN_DEATH ) )
 			continue;
 
 		//target is immune to unit attacks however can be targeted

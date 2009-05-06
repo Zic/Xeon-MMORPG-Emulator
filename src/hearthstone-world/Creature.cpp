@@ -677,17 +677,8 @@ void Creature::RegenerateFocus()
 
 	uint32 cur=GetUInt32Value(UNIT_FIELD_POWER3);
 	uint32 mm=GetUInt32Value(UNIT_FIELD_MAXPOWER3);
-	if(cur>=mm)
-		return;
-
+	if(cur>=mm)return;
 	float amt = 1.0f * PctPowerRegenModifier[POWER_TYPE_FOCUS];
-	//Apply shit from conf file
-	amt*=sWorld.getRate(RATE_POWER3);
-	if(amt<=1.0)//this fixes regen like 0.98
-		cur++;
-	else
-		cur+=(uint32)amt;
-
 	cur+=(uint32)amt;
 	SetUInt32Value(UNIT_FIELD_POWER3,(cur>=mm)?mm:cur);
 }
@@ -960,7 +951,7 @@ bool Creature::Load(CreatureSpawn *spawn, uint32 mode, MapInfo *info)
 	BaseOffhandDamage[1]=GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
 	BaseRangedDamage[0]=GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-	BaseAttackType = proto->AttackType <= SCHOOL_ARCANE ? proto->AttackType : SCHOOL_NORMAL ;
+	BaseAttackType=proto->AttackType;
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 
@@ -1152,7 +1143,7 @@ void Creature::Load(CreatureProto * proto_, float x, float y, float z, float o)
 	BaseOffhandDamage[1]=GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
 	BaseRangedDamage[0]=GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
 	BaseRangedDamage[1]=GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-	BaseAttackType = proto->AttackType <= SCHOOL_ARCANE ? proto->AttackType : SCHOOL_NORMAL ;
+	BaseAttackType=proto->AttackType;
 
 	SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);   // better set this one
 

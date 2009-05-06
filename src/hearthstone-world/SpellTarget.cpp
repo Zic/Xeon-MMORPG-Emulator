@@ -403,39 +403,7 @@ void Spell::SpellTargetCustomAreaOfEffect(uint32 i, uint32 j)
 /// Spell Target Handling for type 15 / 16: All Enemies in Area of Effect (instant)
 void Spell::SpellTargetAreaOfEffect(uint32 i, uint32 j)
 {
-	if( m_spellInfo->NameHash == SPELL_HASH_MASS_DISPEL )
-	{
-		if( p_caster == NULL || !p_caster->IsInWorld() )
-			return;
-
-		uint32 TCount = 0;
-		UnitPointer target = NULLUNIT;
-		Object::InRangeSet::iterator itr = p_caster->GetInRangeSetBegin();
-		for(; itr != p_caster->GetInRangeSetEnd(); ++itr)
-		{
-			if( TCount > 10 )
-				break;
-
-			if( !(*itr) )
-				continue;
-
-			if( (*itr)->IsPlayer() || (*itr)->IsUnit() )
-				target = TO_UNIT( (*itr) );
-			else
-				continue;
-
-			if( !isHostile( p_caster, target ) )
-				continue;
-
-			if( target->isDead() || (*itr)->GetDistanceSq(p_caster) > 900 )
-				continue;
-
-			_AddTargetForced( target->GetGUID(), i );
-			TCount += 1;
-		}
-	}
-	else
-		FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
+	FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
 }
 
 /// Spell Target Handling for type 18: Land under caster
@@ -667,37 +635,6 @@ void Spell::SpellTargetScriptedEffects(uint32 i, uint32 j)
 				}
 			}
 			p_caster->GetGroup()->Unlock();
-		}
-	}
-	else if( m_spellInfo->NameHash == SPELL_HASH_MASS_DISPEL )
-	{
-		if( p_caster == NULL || !p_caster->IsInWorld() )
-			return;
-
-		uint32 TCount = 0;
-		UnitPointer target = NULLUNIT;
-		Object::InRangeSet::iterator itr = p_caster->GetInRangeSetBegin();
-		for(; itr != p_caster->GetInRangeSetEnd(); ++itr)
-		{
-			if( TCount > 10 )
-				break;
-
-			if( !(*itr) )
-				continue;
-
-			if( (*itr)->IsPlayer() || (*itr)->IsUnit() )
-				target = TO_UNIT( (*itr) );
-			else
-				continue;
-
-			if( isHostile( p_caster, target ) )
-				continue;
-
-			if( target->isDead() || target->GetDistanceSq(p_caster) > 900 )
-				continue;
-
-			_AddTargetForced( target->GetGUID(), i );
-			TCount += 1;
 		}
 	}
 	else

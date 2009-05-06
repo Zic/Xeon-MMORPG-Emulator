@@ -770,7 +770,7 @@ public:
 	HEARTHSTONE_INLINE uint8 getStandState() { return ((uint8)m_uint32Values[UNIT_FIELD_BYTES_1]); }
  
 	uint32 GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability );
-	void Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check );
+	void Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check, bool proc_extrastrike = false );
 
 	uint32 m_procCounter;
 	uint32 HandleProc(uint32 flag, UnitPointer victim, SpellEntry* CastingSpell,uint32 dmg=-1,uint32 abs=0, uint32 weapon_damage_type=0);
@@ -849,6 +849,9 @@ public:
 	bool HasAuraVisual(uint32 visualid);//not spell id!!!
 	bool HasActiveAura(uint32 spelllid);
 	bool HasActiveAura(uint32 spelllid,uint64);
+	bool HasAuraWithMechanic(uint32 mechanic);
+	bool HasPosAuraWithMechanic(uint32 mechanic);
+	bool HasNegAuraWithMechanic(uint32 mechanic);
 	
 	void GiveGroupXP(UnitPointer pVictim, PlayerPointer PlayerInGroup);
 
@@ -995,7 +998,7 @@ public:
 	void Energize(UnitPointer target,uint32 SpellId, uint32 amount, uint32 type);
 
 	uint32 SchoolCastPrevent[7];
-	int32 MechanicDurationPctMod[NUM_MECHANIC];
+	float MechanicDurationPctMod[NUM_MECHANIC];
 	int32 GetDamageDoneMod(uint32 school);
 	float GetDamageDonePctMod(uint32 school);
 	int32 DamageTakenMod[7];
@@ -1111,7 +1114,7 @@ public:
 	int32 m_resistChance;
 	int32 m_powerRegenPCT;
 	int32 m_stunned;
-	int32 m_extraattacks;   
+	int32 m_extraattacks[2];   
 	int32 m_extrastriketarget;
 	int32 m_extrastriketargetc;
 	std::list<ExtraStrike*> m_extraStrikeTargets;
@@ -1240,7 +1243,6 @@ public:
 	float m_ignoreArmorPctMaceSpec;
 	float m_ignoreArmorPct;
 
-	bool m_IsBleeding;
 	int32 m_LastSpellManaCost;
 
 	void OnPositionChange();
@@ -1297,7 +1299,6 @@ protected:
 
 	uint32 m_charmtemp;
 
-	bool m_extraAttackCounter;
 	std::map<uint32, SpellEntry*> m_DummyAuras;
 };
 

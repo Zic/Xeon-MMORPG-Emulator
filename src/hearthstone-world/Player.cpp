@@ -134,8 +134,9 @@ void Player::Init()
 	LfmDungeonId=0;
 	LfmType=0;
 
-	for(int32 i=0;i<NUM_MECHANIC;i++){
-		MechanicDurationPctMod[i] = 0;
+	for(int32 i=0;i<NUM_MECHANIC;i++)
+	{
+		MechanicDurationPctMod[i] = 1.0f;
 	}
 
 	m_invitersGuid		  = 0;
@@ -1262,7 +1263,7 @@ void Player::_EventAttack( bool offhand )
 
 		if (!GetOnMeleeSpell() || offhand)
 		{
-			Strike( pVictim, ( offhand ? OFFHAND : MELEE ), NULL, 0, 0, 0, false, false );
+			Strike( pVictim, ( offhand ? OFFHAND : MELEE ), NULL, 0, 0, 0, false, false, true);
 				
 		} 
 		else 
@@ -1348,7 +1349,7 @@ void Player::_EventCharmAttack()
 
 			if (!m_CurrentCharm->GetOnMeleeSpell())
 			{
-				m_CurrentCharm->Strike( pVictim, MELEE, NULL, 0, 0, 0, false, false );
+				m_CurrentCharm->Strike( pVictim, MELEE, NULL, 0, 0, 0, false, false, true );
 			} 
 			else 
 			{ 
@@ -5282,7 +5283,7 @@ bool Player::CanSee(ObjectPointer obj) // * Invisibility & Stealth Detection - P
 					float base_range = 64.0f;
 					float modDistance = 0.0f;
 
-					int32 hide_level = (getLevel() * 5 + GetStealthDetectBonus()) - pObj->GetStealthLevel();
+					int32 hide_level = (getLevel() * 5 + GetStealthDetectBonus()) - pObj->getLevel() * 5 + GetStealthLevel();
 					modDistance += hide_level * 0.2f;
 
 					if(pObj->isInBack(plr_shared_from_this()))
@@ -6709,10 +6710,12 @@ void Player::RegenerateMana(bool is_interrupted)
 	{
 		if(is_interrupted)
 			return;
+
 		cur++;
 	}
 	else
 		cur += float2int32(amt);	
+
 	SetUInt32Value(UNIT_FIELD_POWER1,(cur >= mm) ? mm : cur);
 }
 
@@ -11777,9 +11780,4 @@ uint8 Player::TheoreticalUseRunes(uint8 blood, uint8 frost, uint8 unholy)
 	}
 	
 	return runemask;
-}
-
-void Player::AvengingWrath()
-{
-	this->mAvengingWrath = true;
 }

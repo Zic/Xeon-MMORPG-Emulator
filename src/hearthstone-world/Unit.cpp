@@ -70,7 +70,7 @@ Unit::Unit()
 	m_slowdown = 0;
 	m_mountedspeedModifier=0;
 	m_maxSpeed = 0;
-	for(uint32 x=0;x<27;x++)
+	for(uint32 x=0;x<MECHANIC_COUNT;x++)
 	{
 		MechanicsDispels[x]=0;
 		MechanicsResistancesPCT[x]=0;
@@ -88,7 +88,8 @@ Unit::Unit()
 	APvModifier=0;
 	stalkedby=0;
 
-	m_extraattacks = 0;
+	m_extraattacks[0] = 0;
+	m_extraattacks[1] = 0;
 	m_stunned = 0;
 	m_manashieldamt=0;
 	m_rooted = 0;
@@ -196,7 +197,6 @@ Unit::Unit()
 	RangedDamageTaken = 0;
 	m_procCounter = 0;
 	m_damgeShieldsInUse = false;
-	m_extraAttackCounter = false;
 	m_temp_summon=false;
 	m_interruptedRegenTime = 0;
 	mAngerManagement = false;
@@ -234,7 +234,6 @@ Unit::Unit()
 	m_chargeSpellRemoveQueue.clear();
 	tmpAura.clear();
 	m_DummyAuras.clear();
-	m_IsBleeding = false;
 	BeaconCaster = NULLUNIT;
 	BeaconTarget = NULLUNIT;
 	m_LastSpellManaCost = 0;
@@ -874,6 +873,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								CastingSpell->Id == 14189 ||
 								CastingSpell->Id == 16953 )
 								continue;
+
 							if( CastingSpell->Effect[0] != 80 &&
 								CastingSpell->Effect[1] != 80 &&
 								CastingSpell->Effect[2] != 80 &&
@@ -960,17 +960,6 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								CastingSpell->NameHash != SPELL_HASH_GREATER_HEAL )
 								continue;
 						}break;
-						//Bloodsurge
-						case 46916:
-							{
-								if( CastingSpell == NULL )
-									continue;
-
-								if( CastingSpell->NameHash != SPELL_HASH_BLOODTHIRST &&
-									CastingSpell->NameHash != SPELL_HASH_HEROIC_STRIKE &&
-									CastingSpell->NameHash != SPELL_HASH_WHIRLWIND )
-									continue;
-							}break;
 						case 5530:
 						{
 							//warrior/rogue mace specialization can trigger only when using maces
@@ -2133,7 +2122,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( HasDummyAura(SPELL_HASH_DAMAGE_SHIELD) )
 									GetDummyAura(SPELL_HASH_DAMAGE_SHIELD)->Id == 58874 ? shdmg = 0.2f : shdmg = 0.1f;
 
-								dmg_overwrite = float2int32(GetUInt32Value(PLAYER_RATING_MODIFIER_BLOCK) * shdmg);
+								dmg_overwrite = float2int32(GetUInt32Value(PLAYER_SHIELD_BLOCK) * shdmg);
 							}break;
 						case 34075:
 							{
@@ -2149,7 +2138,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								if( it )
 								{
 									float mod = it->GetProto()->Delay / 1000.0f;
-									dmg_overwrite = float2int32( 2.0f * mod * caster->GetUInt32Value(UNIT_FIELD_BASE_MANA));
+									dmg_overwrite = float2int32( 0.001f * mod * caster->GetUInt32Value(UNIT_FIELD_BASE_MANA) );
 								}
 								else 
 									dmg_overwrite = 1;
@@ -2260,6 +2249,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									CastingSpell->NameHash != SPELL_HASH_FLASH_OF_LIGHT &&
 									CastingSpell->NameHash != SPELL_HASH_HOLY_SHOCK )
 									continue;
+
 								dmg_overwrite = float2int32(GetSpellBaseCost(CastingSpell) * 0.6f);
 							}break;
 						//Fiery Payback
@@ -2267,6 +2257,19 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 						case 44441:
 							{
 								if(GetHealthPct() > 35)
+									continue;
+							}break;
+						// Pallas
+						case 43747:
+						case 34260:
+							{
+								if( !HasDummyAura(SPELL_HASH_SEAL_OF_COMMAND) )
+									continue;
+							}break;
+						// Omen of Clarity
+						case 16870:
+							{
+								if( CastingSpell && !(CastingSpell->c_is_flags & SPELL_FLAG_IS_HEALING || CastingSpell->c_is_flags & SPELL_FLAG_IS_DAMAGING) )
 									continue;
 							}break;
 					}
@@ -2413,9 +2416,9 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 	for(i = m_damageShields.begin();i != m_damageShields.end();)     // Deal Damage to Attacker
 	{
 		i2 = i++; //we should not proc on proc.. not get here again.. not needed.Better safe then sorry.
-		if(	(flag & (*i2).m_flags) )
+		if(	((*i2).m_flags) & flag )
 		{
-			if(PROC_MISC & (*i2).m_flags)
+			if( (*i2).m_flags & PROC_MISC )
 			{
 				uint32 overkill = attacker->computeOverkill((*i2).m_damage);
 				data.Initialize(SMSG_SPELLDAMAGESHIELD);
@@ -2431,7 +2434,7 @@ void Unit::HandleProcDmgShield(uint32 flag, UnitPointer attacker)
 			else
 			{
 				SpellEntry	*ability=dbcSpell.LookupEntry((*i2).m_spellId);
-				Strike( attacker, RANGED, ability, 0, 0, (*i2).m_damage, true, false );
+				Strike( attacker, RANGED, ability, 0, 0, (*i2).m_damage, false, true );
 			}
 		}
 	}
@@ -2633,7 +2636,7 @@ uint32 Unit::GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_typ
 			if( !backAttack )
 			{
 //--------------------------------block chance----------------------------------------------
-				if( !disarmedShield )
+				if( !pVictim->disarmedShield )
 					block = pVictim->GetFloatValue(PLAYER_BLOCK_PERCENTAGE); //shield check already done in Update chances
 //--------------------------------dodge chance----------------------------------------------
 				if(pVictim->m_stunned<=0) 
@@ -2702,7 +2705,7 @@ uint32 Unit::GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_typ
 
 		// erm. some spells don't use ranged weapon skill but are still a ranged spell and use melee stats instead
 		// i.e. hammer of wrath
-		if( ability && (ability->NameHash == SPELL_HASH_HAMMER_OF_WRATH || ability->NameHash == SPELL_HASH_JUDGEMENT_OF_RIGHTEOUSNESS || ability->NameHash == SPELL_HASH_AVENGER_S_SHIELD) )
+		if( ability && (ability->NameHash == SPELL_HASH_HAMMER_OF_WRATH || ability->NameHash == SPELL_HASH_AVENGER_S_SHIELD) )
 		{
 			it = pr->GetItemInterface()->GetInventoryItem( EQUIPMENT_SLOT_MAINHAND );
 			hitmodifier += pr->CalcRating( PLAYER_RATING_MODIFIER_MELEE_HIT );
@@ -2838,7 +2841,7 @@ uint32 Unit::GetSpellDidHitResult( UnitPointer pVictim, uint32 weapon_damage_typ
 	return roll_results[r];
 }
 
-void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check )
+void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* ability, int32 add_damage, int32 pct_dmg_mod, uint32 exclusive_damage, bool disable_proc, bool skip_hit_check, bool proc_extrastrike )
 {
 //==========================================================================================
 //==============================Unacceptable Cases Processing===============================
@@ -2848,10 +2851,11 @@ void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* a
 
 	if(!isInFront(pVictim))
 		if(IsPlayer())
-		{
-			plr_shared_from_this()->GetSession()->OutPacket(SMSG_ATTACKSWING_BADFACING);
-			return;
-		}
+			if( !(ability && ability->AllowBackAttack) )
+			{
+				plr_shared_from_this()->GetSession()->OutPacket(SMSG_ATTACKSWING_BADFACING);
+				return;
+			}
 //==========================================================================================
 //==============================Variables Initialization====================================
 //==========================================================================================
@@ -2908,7 +2912,7 @@ void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* a
 			if( !backAttack )
 			{
 //--------------------------------block chance----------------------------------------------
-				if( !disarmedShield )
+				if( !pVictim->disarmedShield )
 					block = pVictim->GetFloatValue(PLAYER_BLOCK_PERCENTAGE); //shield check already done in Update chances
 //--------------------------------dodge chance----------------------------------------------
 				if(pVictim->m_stunned<=0) 
@@ -3023,14 +3027,6 @@ void Unit::Strike( UnitPointer pVictim, uint32 weapon_damage_type, SpellEntry* a
 		crit = 5.0f; //will be modified later
 	}
 
-	// crit chance haxes
-	if( ability )
-	{
-		if( pVictim->m_IsBleeding && ability->NameHash == SPELL_HASH_FEROCIOUS_BITE && HasDummyAura( SPELL_HASH_REND_AND_TEAR ) )
-			crit += 10.0f * GetDummyAura(SPELL_HASH_REND_AND_TEAR )->RankNumber;
-		else if( pVictim->IsStunned() && ability->NameHash == SPELL_HASH_JUDGEMENT_OF_COMMAND )
-			crit = 100.0f;
-	}
 //==========================================================================================
 //==============================Special Chances Base Calculation============================
 //==========================================================================================
@@ -3165,11 +3161,18 @@ else
 		block = 0.0f;
 	}
 
-	if( ability != NULL && ability->Attributes & ATTRIBUTES_CANT_BE_DPB )
+	if( ability != NULL )
 	{
-		dodge = 0.0f;
-		parry = 0.0f;
-		block = 0.0f;
+		if( ability->NameHash == SPELL_HASH_FEROCIOUS_BITE && HasDummyAura( SPELL_HASH_REND_AND_TEAR ) && pVictim->HasNegAuraWithMechanic(MECHANIC_BLEEDING) )
+			crit += 5.0f * GetDummyAura(SPELL_HASH_REND_AND_TEAR )->RankNumber;
+		else if( pVictim->IsStunned() && ability->NameHash == SPELL_HASH_JUDGEMENT_OF_COMMAND )
+			crit = 100.0f;
+		else if( ability->Attributes & ATTRIBUTES_CANT_BE_DPB )
+		{
+			dodge = 0.0f;
+			parry = 0.0f;
+			block = 0.0f;
+		}
 	}
 
 //--------------------------------by victim state-------------------------------------------
@@ -3357,13 +3360,19 @@ else
 			// Bonus damage
 			if( ability )
 				dmg.full_damage = GetSpellBonusDamage(pVictim, ability, dmg.full_damage, false, false);
+			else
+			{
+				dmg.full_damage += GetDamageDoneMod(SCHOOL_NORMAL);
+				dmg.full_damage *= pVictim->DamageTakenPctMod[SCHOOL_NORMAL];
+				dmg.full_damage *= GetDamageDonePctMod(SCHOOL_NORMAL);
+			}
 
 			//pet happiness state dmg modifier
 			if( IsPet() && !pet_shared_from_this()->IsSummon() )
 				dmg.full_damage = ( dmg.full_damage <= 0 ) ? 0 : float2int32( dmg.full_damage * pet_shared_from_this()->GetHappinessDmgMod() );
 			
 			if( HasDummyAura(SPELL_HASH_REND_AND_TEAR) && ability &&
-				( ability->NameHash == SPELL_HASH_MAUL || ability->NameHash == SPELL_HASH_SHRED) && pVictim->m_IsBleeding )
+				( ability->NameHash == SPELL_HASH_MAUL || ability->NameHash == SPELL_HASH_SHRED) && pVictim->HasNegAuraWithMechanic(MECHANIC_BLEEDING) )
 			{
 				dmg.full_damage += float2int32(dmg.full_damage * ( ( GetDummyAura(SPELL_HASH_REND_AND_TEAR)->RankNumber * 4 ) / 100.f ) );
 			}
@@ -3408,7 +3417,7 @@ else
 			case 4:
 				{
 					ItemPointer shield = TO_PLAYER( pVictim )->GetItemInterface()->GetInventoryItem(EQUIPMENT_SLOT_OFFHAND);
-					if( shield != NULL && !disarmedShield )
+					if( shield != NULL && !pVictim->disarmedShield )
 					{
 						targetEvent = 2;
 						pVictim->Emote(EMOTE_ONESHOT_PARRYSHIELD);// Animation
@@ -3442,6 +3451,9 @@ else
 							else 
 								sEventMgr.ModifyEventTimeLeft(pVictim,EVENT_DODGE_BLOCK_FLAG_EXPIRE,5000);
 						}
+						
+						// Holy shield fix
+						pVictim->HandleProcDmgShield(PROC_ON_BLOCK_VICTIM, unit_shared_from_this());
 					}
 				}
 				break;
@@ -3476,6 +3488,16 @@ else
 							if( Rand( player_shared_from_this()->GetDummyAura(SPELL_HASH_SEAL_FATE)->RankNumber * 20.0f ) )
 								player_shared_from_this()->AddComboPoints(pVictim->GetGUID(), 1);
 						}
+
+						if( HasDummyAura( SPELL_HASH_PREY_ON_THE_WEAK ) )
+							if( pVictim->GetHealthPct() < GetHealthPct() )
+								dmg.full_damage += dmg.full_damage * ((GetDummyAura(SPELL_HASH_PREY_ON_THE_WEAK)->RankNumber * 4) / 100);
+
+						SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_CRITICAL);	//SB@L: Enables spells requiring critical strike
+						if(!sEventMgr.HasEvent(shared_from_this(),EVENT_CRIT_FLAG_EXPIRE))
+							sEventMgr.AddEvent(unit_shared_from_this(),&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_CRITICAL,EVENT_CRIT_FLAG_EXPIRE,5000,1,0);
+						else 
+							sEventMgr.ModifyEventTimeLeft(shared_from_this(),EVENT_CRIT_FLAG_EXPIRE,5000);					
 					}
 
 					// SpellAuraReduceCritRangedAttackDmg
@@ -3507,34 +3529,6 @@ else
 						aproc |= PROC_ON_RANGED_CRIT_ATTACK;
 					}
 
-					if( ability && ( ability->buffType == SPELL_TYPE_JUDGEMENT || ability->NameHash == SPELL_HASH_DIVINE_STORM || ability->NameHash == SPELL_HASH_CRUSADER_STRIKE ) )
-					{
-						if( HasDummyAura(SPELL_HASH_RIGHTEOUS_VENGEANCE) )
-						{
-							uint32 amt = float2int32( dmg.full_damage * ( (GetDummyAura(SPELL_HASH_RIGHTEOUS_VENGEANCE)->EffectBasePoints[0]+1 ) / 400.0f ));
-							if( amt )
-							{
-								SpellEntry* spellInfo = dbcSpell.LookupEntryForced( 61840 );
-								SpellPointer sp(new Spell( pVictim, spellInfo, true, NULLAURA ));
-								sp->forced_basepoints[0] = amt;
-								SpellCastTargets tgt;
-								tgt.m_unitTarget = pVictim->GetGUID();
-								sp->prepare(&tgt);
-							}
-						}
-					}
-
-					if( HasDummyAura( SPELL_HASH_PREY_ON_THE_WEAK ) )
-						if( pVictim->GetHealthPct() < GetHealthPct() )
-							dmg.full_damage += dmg.full_damage * ((GetDummyAura(SPELL_HASH_PREY_ON_THE_WEAK)->RankNumber * 4) / 100);
-
-					if(IsPlayer())
-					{
-						SetFlag(UNIT_FIELD_AURASTATE,AURASTATE_FLAG_CRITICAL);	//SB@L: Enables spells requiring critical strike
-						if(!sEventMgr.HasEvent(shared_from_this(),EVENT_CRIT_FLAG_EXPIRE))
-							sEventMgr.AddEvent(unit_shared_from_this(),&Unit::EventAurastateExpire,(uint32)AURASTATE_FLAG_CRITICAL,EVENT_CRIT_FLAG_EXPIRE,5000,1,0);
-						else sEventMgr.ModifyEventTimeLeft(shared_from_this(),EVENT_CRIT_FLAG_EXPIRE,5000);
-					}
 
 					CALL_SCRIPT_EVENT(pVictim, OnTargetCritHit)(unit_shared_from_this(), float(dmg.full_damage));
 					CALL_SCRIPT_EVENT(unit_shared_from_this(), OnCritHit)(pVictim, float(dmg.full_damage));
@@ -3866,28 +3860,21 @@ else
 	}
 		
 	RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_START_ATTACK);
+
 //--------------------------extra strikes processing----------------------------------------
 	//check for extra targets
-	if( ability && ability->SpellGroupType )
+	/*if( ability && ability->SpellGroupType )
 	{
-		SM_FIValue(SM[SMT_ADDITIONAL_TARGET][0], &m_extraattacks,ability->SpellGroupType);
-	}
-	if( m_extraattacks )
-		m_extraAttackCounter = true;
+		SM_FIValue(SM[SMT_ADDITIONAL_TARGET][0], &m_extraattacks, ability->SpellGroupType);
+	}*/
 
-	if(!m_extraAttackCounter)
+	if( m_extraattacks[1] > 0 && proc_extrastrike)
 	{
-		int32 extra_attacks = m_extraattacks;
-		m_extraAttackCounter = true;
-		m_extraattacks = 0;
-
-		while(extra_attacks > 0)
+		do
 		{
-			extra_attacks--;
-			Strike( pVictim, weapon_damage_type, NULL, 0, 0, 0, false, false);
-		}
-
-		m_extraAttackCounter = false;
+			m_extraattacks[1]--;
+			Strike( pVictim, weapon_damage_type, NULL, 0, 0, 0, true, false );
+		}while( m_extraattacks[1] > 0 && m_extraattacks[0] == 0 );
 	}
 
 	if(m_extrastriketargetc > 0 && m_extrastriketarget == 0)
@@ -4125,7 +4112,7 @@ void Unit::AddAura(AuraPointer aur)
 					}
 					else if( curAura->GetSpellId() == aur->GetSpellId() )
 					{
-						if( !aur->IsPositive() && curAura->m_casterGuid != aur->m_casterGuid && maxStack == 0)
+						if( !aur->IsPositive() && curAura->m_casterGuid != aur->m_casterGuid && maxStack == 0 && !info->Unique )
 							continue;
 
 						// target already has this aura. Update duration, time left, procCharges
@@ -4595,9 +4582,9 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	uint32 school = spellInfo->School;
 	
 	if( caster->IsPet() )
-		caster = TO_UNIT(TO_PET(caster)->GetPetOwner());
+		caster = TO_PLAYER(TO_PET(caster)->GetPetOwner());
 	else if( caster->IsCreature() && TO_CREATURE(caster)->IsTotem() )
-		caster = TO_UNIT(TO_CREATURE(caster)->GetTotemOwner());
+		caster = TO_PLAYER(TO_CREATURE(caster)->GetTotemOwner());
 
 	if( !caster || !pVictim )
 		return 0;
@@ -4609,11 +4596,19 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	if( caster->IsPlayer() )
 	{
 		if( !healing )
-			for(uint32 a = 0; a < 6; a++)
-				bonus_damage += float2int32(TO_PLAYER(caster)->SpellDmgDoneByAttribute[a][school] * float(caster->GetUInt32Value(UNIT_FIELD_STAT0 + a)));
+		{
+			for(uint32 a = 0; a < 5; a++)
+			{
+				bonus_damage += float2int32(TO_PLAYER(caster)->SpellDmgDoneByAttribute[a][school] * caster->GetUInt32Value(UNIT_FIELD_STAT0 + a));
+			}
+		}
 		else	
-			for(uint32 a = 0; a < 6; a++)
-				bonus_damage += float2int32(TO_PLAYER(caster)->SpellHealDoneByAttribute[a][school] * float(caster->GetUInt32Value(UNIT_FIELD_STAT0 + a)));
+		{
+			for(uint32 a = 0; a < 5; a++)
+			{
+				bonus_damage += float2int32(TO_PLAYER(caster)->SpellHealDoneByAttribute[a][school] * caster->GetUInt32Value(UNIT_FIELD_STAT0 + a));
+			}
+		}
 	}
 	
 	//---------------------------------------------------------
@@ -4715,20 +4710,18 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	//---------------------------------------------------------
 
 	if( caster->IsPlayer() )
-	{
-		if( isdot )
-			bonus_damage += float2int32(bonus_damage * (pVictim->m_damageOverTimePctIncrease[spellInfo->School] / 100.0f));
-		else if( (spellInfo->c_is_flags & SPELL_FLAG_IS_DAMAGING) && (spellInfo->spell_coef_flags & SPELL_FLAG_AOE_SPELL) )
-			bonus_damage *= pVictim->AOEDmgMod;
-
-		if( pVictim->RAPvModifier && spellInfo->is_ranged_spell )
-			bonus_damage += pVictim->RAPvModifier / 14;
-		else if( pVictim->APvModifier && spellInfo->is_melee_spell )
-			bonus_damage += pVictim->APvModifier / 14;
-		
+	{		
 		// Improved Tree of Life
-		if( TO_PLAYER( caster )->IsInFeralForm() && TO_PLAYER( caster )->GetShapeShift() == FORM_TREE && caster->HasDummyAura(SPELL_HASH_IMPROVED_TREE_OF_LIFE) )
-			bonus_damage += float2int32( (caster->GetDummyAura(SPELL_HASH_IMPROVED_TREE_OF_LIFE)->RankNumber * 0.05f) * caster->HealDoneMod[school] );
+		if( TO_PLAYER( caster )->IsInFeralForm() )
+		{
+			if( TO_PLAYER( caster )->GetShapeShift() == FORM_TREE && caster->HasDummyAura(SPELL_HASH_IMPROVED_TREE_OF_LIFE) )
+				bonus_damage += float2int32( (caster->GetDummyAura(SPELL_HASH_IMPROVED_TREE_OF_LIFE)->RankNumber * 0.05f) * caster->HealDoneMod[school] );
+			else if( pVictim->IsPlayer() && TO_PLAYER( pVictim )->GetShapeShift() == FORM_CAT )
+			{
+				if( pVictim->HasDummyAura(SPELL_HASH_NURTURING_INSTINCT) && healing )
+					bonus_damage *= 1.2f;
+			}
+		}
 		else if( spellInfo->NameHash == SPELL_HASH_LESSER_HEALING_WAVE && pVictim->FindPositiveAuraByNameHash(SPELL_HASH_EARTH_SHIELD) && caster->HasDummyAura(SPELL_HASH_GLYPH_OF_LESSER_HEALING_WAVE) )
 			bonus_damage = float2int32( bonus_damage * 1.2f );
 		else if(spellInfo->Id == 31804 )
@@ -4739,12 +4732,23 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 
 			uint32 charges = 0;
 			if( aur )
-				charges = aur->procCharges;
+				charges = aur->stackSize;
 
 			if( charges < 6 )
 				bonus_damage += float2int32(bonus_damage * (1.0f + charges * 0.1f));
 		}
 	}
+
+	if( isdot )
+		bonus_damage += float2int32(bonus_damage * (pVictim->m_damageOverTimePctIncrease[spellInfo->School] / 100.0f));
+	else if( (spellInfo->c_is_flags & SPELL_FLAG_IS_DAMAGING) && (spellInfo->spell_coef_flags & SPELL_FLAG_AOE_SPELL) )
+		bonus_damage *= pVictim->AOEDmgMod;
+
+	if( pVictim->RAPvModifier && spellInfo->is_ranged_spell )
+		bonus_damage += pVictim->RAPvModifier / 14;
+	else if( pVictim->APvModifier && spellInfo->is_melee_spell )
+		bonus_damage += pVictim->APvModifier / 14;
+
 
 	//---------------------------------------------------------
 	// PCT mods
@@ -4755,7 +4759,7 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	{
 		summaryPCTmod += caster->GetDamageDonePctMod(school)-1; //value is initialized with 1
 		summaryPCTmod += pVictim->DamageTakenPctMod[school]-1;//value is initialized with 1
-		summaryPCTmod += pVictim->ModDamageTakenByMechPCT[spellInfo->MechanicsType];
+		summaryPCTmod += pVictim->ModDamageTakenByMechPCT[Spell::GetMechanic(spellInfo)];
 	}
 	else
 	{
@@ -5264,6 +5268,35 @@ bool Unit::HasAura(uint32 spellid)
 		return false;
 }
 
+bool Unit::HasAuraWithMechanic(uint32 mechanic)
+{
+	for(uint32 x = 0; x < MAX_AURAS; x++)
+	{
+		if( m_auras[x] && m_auras[x]->GetMechanic() == mechanic )
+			return true;
+	}
+	return false;
+}
+
+bool Unit::HasPosAuraWithMechanic(uint32 mechanic)
+{
+	for(uint32 x = 0; x < MAX_POSITIVE_AURAS; x++)
+	{
+		if( m_auras[x] && m_auras[x]->GetMechanic() == mechanic )
+			return true;
+	}
+	return false;
+}
+
+bool Unit::HasNegAuraWithMechanic(uint32 mechanic)
+{
+	for(uint32 x = MAX_POSITIVE_AURAS; x < MAX_AURAS; x++)
+	{
+		if( m_auras[x] && m_auras[x]->GetMechanic() == mechanic )
+			return true;
+	}
+	return false;
+}
 
 void Unit::EventDeathAuraRemoval()
 {
@@ -5750,7 +5783,7 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_SLAM )
 								continue;
-						}
+						}break;
 					case 14177: // Cold Blood
 						{
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
@@ -5761,7 +5794,7 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 								a->Remove();
 								continue;
 							}
-						}
+						}break;
 					case 31834: // Light's Grace
 						{
 							if( m_currentSpell && m_currentSpell->m_spellInfo->NameHash == SPELL_HASH_HOLY_LIGHT )
@@ -5770,7 +5803,7 @@ void Unit::RemoveAurasByInterruptFlagButSkip(uint32 flag, uint32 skip)
 							SpellEntry *spi = dbcSpell.LookupEntry( skip );
 							if( spi && spi->NameHash != SPELL_HASH_HOLY_LIGHT )
 								continue;
-						}
+						}break;
 				}
 			}
 			a->Remove();
@@ -5909,7 +5942,6 @@ bool Unit::IsDazed()
 	}
 
 	return false;
-
 }
 
 void Unit::UpdateVisibility()

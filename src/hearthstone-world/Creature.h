@@ -410,7 +410,7 @@ public:
 		{
 			if(isInFront(obj)) // stealthed player is in front of creature
 			{
-				int32 hide_level = (getLevel() * 5 + GetStealthDetectBonus()) - obj->GetStealthLevel();
+				int32 hide_level = (getLevel() * 5 + GetStealthDetectBonus()) - obj->getLevel() * 5 + GetStealthLevel();
 				detectRange += hide_level * 0.15f + 5;
 
 				if(detectRange < 1.0f) detectRange = 1.0f; // Minimum Detection Range = 1yd

@@ -1591,17 +1591,21 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 
 	if(!no_remove_auras)
 	{
+		float breakchance = 35.0f;
+		if( spellId == 51514 )//&& IsUnit() && HasDummyAura(SPELL_HASH_GLYPH_OF_HEX) ) wait till 3.1
+			breakchance += 15.0f;
+
 		//zack 2007 04 24 : root should not remove self (and also other unknown spells)
 		if(spellId)
 		{
 			pVictim->RemoveAurasByInterruptFlagButSkip(AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN,spellId);
-			if(Rand(35.0f))
+			if(Rand(breakchance))
 				pVictim->RemoveAurasByInterruptFlagButSkip(AURA_INTERRUPT_ON_UNUSED2,spellId);
 		}
 		else
 		{
 			pVictim->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN);
-			if(Rand(35.0f))
+			if(Rand(breakchance))
 				pVictim->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_UNUSED2);
 		}
 	}
@@ -1701,7 +1705,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			SpellCastTargets targets;
 			targets.m_unitTarget = pVictim->GetGUID();
 			spell->prepare(&targets);
-			TO_PLAYER(pVictim)->m_CustomTimers[CUSTOM_TIMER_CHEATDEATH] = getMSTime()+60000;
+			TO_PLAYER(pVictim)->m_CustomTimers[CUSTOM_TIMER_CHEATDEATH] = getMSTime() + 60000;
 
 			// Why return? So this damage isn't counted. ;)
 			// On official, it seems Blizzard applies it's Cheating Death school absorb aura for 1 msec, but it's too late
@@ -1766,16 +1770,17 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 	/* -------------------------- HIT THAT CAUSES VICTIM TO DIE ---------------------------*/
 	if ((isCritter || health <= damage) )
 	{
+
+		if( pVictim->HasDummyAura(SPELL_HASH_GUARDIAN_SPIRIT) )
+		{
+			pVictim->CastSpell(pVictim, dbcSpell.LookupEntry(48153), true);
+			pVictim->RemoveDummyAura(SPELL_HASH_GUARDIAN_SPIRIT);
+			return;
+		}
+
 		//warlock - seed of corruption
 		if( IsUnit() )
 		{
-			if( pVictim->HasDummyAura(SPELL_HASH_GUARDIAN_SPIRIT) )
-			{
-				pVictim->CastSpell(pVictim, 48153, true);
-				pVictim->RemoveDummyAura(SPELL_HASH_GUARDIAN_SPIRIT);
-				return;
-			}
-
 			if( IsPlayer() && pVictim->IsUnit() && !pVictim->IsPlayer() && m_mapMgr->m_battleground && m_mapMgr->m_battleground->GetType() == BATTLEGROUND_ALTERAC_VALLEY )
 				TO_ALTERACVALLEY(m_mapMgr->m_battleground)->HookOnUnitKill( plr_shared_from_this(), pVictim );
 			SpellEntry *killerspell;
@@ -2191,9 +2196,9 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			{
 				PlayerPointer plra = TO_PLAYER(shared_from_this());
 				SpellEntry *spentry = dbcSpell.LookupEntry( spellId );
-				if( plra->HasDummyAura(SPELL_HASH_ERADICATION) && plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] <= getMSTime() )
+				if( spentry->NameHash == SPELL_HASH_CORRUPTION && plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] <= getMSTime() )
 				{
-					if( spentry->NameHash == SPELL_HASH_CORRUPTION && Rand(spentry->RankNumber * 3 + 1) )
+					if( plra->HasDummyAura(SPELL_HASH_ERADICATION) && Rand(spentry->RankNumber * 3 + 1) )
 					{
 						SpellPointer sp(new Spell(shared_from_this(), dbcSpell.LookupEntry(47274), true, NULLAURA));
 						SpellCastTargets targets;
@@ -2202,7 +2207,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 						plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] = getMSTime() + 30000;
 					}
 				}
-				else if( plra->HasDummyAura(SPELL_HASH_PANDEMIC) && (spentry->NameHash == SPELL_HASH_CORRUPTION || spentry->NameHash == SPELL_HASH_UNSTABLE_AFFLICTION) )
+				else if( (spentry->NameHash == SPELL_HASH_CORRUPTION || spentry->NameHash == SPELL_HASH_UNSTABLE_AFFLICTION) && plra->HasDummyAura(SPELL_HASH_PANDEMIC) )
 				{
 					if( Rand( plra->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1_5) ) && pVictim )
 					{
@@ -2211,6 +2216,22 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 						targets.m_unitTarget = pVictim->GetGUID();
 						sp->forced_basepoints[0] = float2int32(damage * ( plra->GetDummyAura(SPELL_HASH_PANDEMIC)->RankNumber * 0.33f + 0.01f));
 						sp->prepare(&targets);
+					}
+				}
+				else if( spentry->NameHash == SPELL_HASH_DIVINE_STORM || spentry->NameHash == SPELL_HASH_CRUSADER_STRIKE || spentry->buffType == SPELL_TYPE_JUDGEMENT )
+				{
+					if( plra->HasDummyAura(SPELL_HASH_RIGHTEOUS_VENGEANCE) )
+					{
+						uint32 amt = float2int32( damage * ( (plra->GetDummyAura(SPELL_HASH_RIGHTEOUS_VENGEANCE)->EffectBasePoints[0]+1 ) / 400.0f ));
+						if( amt )
+						{
+							SpellEntry* spellInfo = dbcSpell.LookupEntryForced( 61840 );
+							SpellPointer sp(new Spell( pVictim, spellInfo, true, NULLAURA ));
+							sp->forced_basepoints[0] = amt;
+							SpellCastTargets tgt;
+							tgt.m_unitTarget = pVictim->GetGUID();
+							sp->prepare(&tgt);
+						}
 					}
 				}
 			}	
@@ -2262,9 +2283,8 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 	if( IsUnit() && !static_damage )
 	{
 		caster->RemoveAurasByInterruptFlag( AURA_INTERRUPT_ON_START_ATTACK );
-		// these already got bonus :P
-		if( spellInfo->NameHash != SPELL_HASH_EXPLOSIVE_SHOT && spellInfo->NameHash != SPELL_HASH_MIND_FLAY )
-			res = caster->GetSpellBonusDamage( pVictim, spellInfo, ( int )res, false, false );
+
+		res = caster->GetSpellBonusDamage( pVictim, spellInfo, ( int )res, false, false );
 		
 		res_after_spelldmg = res;
 //==========================================================================================

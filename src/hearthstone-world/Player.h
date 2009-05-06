@@ -2111,8 +2111,8 @@ public:
 
 	// Avenging Wrath...
 	bool mAvengingWrath;
-	void AvengingWrath();
-
+	void AvengingWrath() { mAvengingWrath = true; }
+	
 	// Glyphs
 	void RemoveGlyph(uint32 slot);
 	uint8 SetGlyph(uint32 slot, uint32 glyphId);

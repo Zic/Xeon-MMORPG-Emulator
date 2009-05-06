@@ -1285,80 +1285,86 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 				}
 				
 				SpellEntry *info = NULL;				
-				switch ( goinfo->ID )
+				if(goinfo->ID == 36727) // summon portal
 				{
-					case 177193: // doom portal
-						{
-							PlayerPointer psacrifice = NULLPLR;
-							SpellPointer spell = NULLSPELL;
-							
-							// kill the sacrifice player
-							psacrifice = _player->GetMapMgr()->GetPlayer(obj->m_ritualmembers[(int)(rand()%(goinfo->SpellFocus-1))]);
-							PlayerPointer pCaster = obj->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
-							if(!psacrifice || !pCaster)
-								return;
+					if(!obj->m_ritualtarget)
+						return;
+					info = dbcSpell.LookupEntry(goinfo->sound1);
+					if(!info)
+						break;
+					PlayerPointer target = _player->GetMapMgr()->GetPlayer(obj->m_ritualtarget);
+					if(!target)
+						return;
 
-							info = dbcSpell.LookupEntry(goinfo->sound4);
-							if(!info)
-								break;
-							spell = SpellPointer(new Spell(psacrifice, info, true, NULLAURA));
-							targets.m_unitTarget = psacrifice->GetGUID();
-							spell->prepare(&targets);
-						
-							// summons demon		   
-							info = dbcSpell.LookupEntry(goinfo->sound1);
-							spell = SpellPointer(new Spell(pCaster, info, true, NULLAURA));
-							SpellCastTargets targets;
-							targets.m_unitTarget = pCaster->GetGUID();
-							spell->prepare(&targets);					
-						}break;
-					case 179944:			// Summoning portal for meeting stones
-					case 194108:			//Summon Portal Warlocks
-						{
-							PlayerPointer plr = _player->GetMapMgr()->GetPlayer(obj->m_ritualtarget);
-							if(!plr)
-								return;
-
-							PlayerPointer pleader = _player->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
-							if(!pleader)
-								return;
-
-							info = dbcSpell.LookupEntry(goinfo->sound1);
-							SpellPointer spell(new Spell(pleader, info, true, NULLAURA));
-							SpellCastTargets targets(plr->GetGUID());
-							spell->prepare(&targets);
-
-							/* expire the GameObjectPointer */
-							obj->ExpireAndDelete();
-						}break;
-					case 186811: // Refreshment Portal
-					case 181622:
-					case 193062:
-					case 193168:
-						{
-							PlayerPointer pCaster = obj->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
-							if(!pCaster)
-								return;
+					spell = SpellPointer(new Spell(obj,info,true,NULLAURA));
+					SpellCastTargets targets;
+					targets.m_unitTarget = target->GetGUID();
+					spell->prepare(&targets);
+				}
+				else if(goinfo->ID == 177193) // doom portal
+				{
+					PlayerPointer psacrifice = NULLPLR;
+					SpellPointer spell = NULLSPELL;
 					
-							// summons 
-							info = dbcSpell.LookupEntry(goinfo->sound1);
-							SpellPointer spell(new Spell(pCaster, info, true, NULLAURA));
-							SpellCastTargets targets(pCaster->GetGUID());
-							spell->prepare(&targets);
+					// kill the sacrifice player
+					psacrifice = _player->GetMapMgr()->GetPlayer(obj->m_ritualmembers[(int)(rand()%(goinfo->SpellFocus-1))]);
+					PlayerPointer pCaster = obj->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
+					if(!psacrifice || !pCaster)
+						return;
 
-							PlayerPointer pPlayer = objmgr.GetPlayer((uint32)_player->GetSelection());
-							if(!pPlayer || _player->GetGroup() != pPlayer->GetGroup() || !_player->GetGroup())
-								return;
-							// remove portal
-							obj->RemoveFromWorld(true);
-	
-							/* Create the Refreshment Table or Soulwell */
-							GameObjectPointer pGo = _player->GetMapMgr()->CreateGameObject(info->EffectMiscValue[0]);
-							pGo->CreateFromProto(info->EffectMiscValue[0], _player->GetMapId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(),0,0,0,0,0);
-							/* expire after 3mins*/
-							sEventMgr.AddEvent(pGo, &GameObject::ExpireAndDelete, EVENT_GAMEOBJECT_EXPIRE, 180000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-							sEventMgr.AddEvent(obj, &GameObject::ExpireAndDelete, EVENT_GAMEOBJECT_EXPIRE, 2000, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-						}break;
+					info = dbcSpell.LookupEntry(goinfo->sound4);
+					if(!info)
+						break;
+					spell = SpellPointer(new Spell(psacrifice, info, true, NULLAURA));
+					targets.m_unitTarget = psacrifice->GetGUID();
+					spell->prepare(&targets);
+					
+					// summons demon		   
+					info = dbcSpell.LookupEntry(goinfo->sound1);
+					spell = SpellPointer(new Spell(pCaster, info, true, NULLAURA));
+					SpellCastTargets targets;
+					targets.m_unitTarget = pCaster->GetGUID();
+					spell->prepare(&targets);					
+				}
+				else if(goinfo->ID == 179944)			// Summoning portal for meeting stones
+				{
+					PlayerPointer plr = _player->GetMapMgr()->GetPlayer(obj->m_ritualtarget);
+					if(!plr)
+						return;
+
+					PlayerPointer pleader = _player->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
+					if(!pleader)
+						return;
+
+					info = dbcSpell.LookupEntry(goinfo->sound1);
+					SpellPointer spell(new Spell(pleader, info, true, NULLAURA));
+					SpellCastTargets targets(plr->GetGUID());
+					spell->prepare(&targets);
+
+					/* expire the GameObjectPointer */
+					obj->ExpireAndDelete();
+				}
+				else if(goinfo->ID == 186811) // ritual of refreshment
+				{
+					PlayerPointer pleader = _player->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
+					if(!pleader)
+						return;
+
+					info = dbcSpell.LookupEntry(goinfo->sound1);
+					SpellPointer spell(new Spell(pleader, info, true, NULLAURA));
+					SpellCastTargets targets(pleader->GetGUID());
+					spell->prepare(&targets);
+				}
+				else if( goinfo->ID == 181622 || goinfo->ID == 193168 ) // ritual of souls
+				{
+					PlayerPointer pleader = _player->GetMapMgr()->GetPlayer(obj->m_ritualcaster);
+					if(!pleader)
+						return;
+
+					info = dbcSpell.LookupEntry(goinfo->sound1);
+					SpellPointer spell(new Spell(pleader, info, true, NULLAURA));
+					SpellCastTargets targets(pleader->GetGUID());
+					spell->prepare(&targets);
 				}
 			}
 		}break;

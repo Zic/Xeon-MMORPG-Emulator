@@ -1704,95 +1704,72 @@ void ObjectMgr::GenerateLevelUpInfo()
 				// At a future date, we should attempt to correct them for those levels by decreasing the amount at
 				// lower levels.
 				// The first attempt at doing so is below.
-				#define NORMALIZATION \
-				if(Level <= 15) \
-				{\
-					BaseMana /= 2; \
-					BaseHP /= 2; \
-				}\
-				else if(Level <= 40) \
-				{\
-					BaseMana = uint32(BaseMana / 1.7f); \
-					BaseHP = uint32(BaseHP / 1.7f); \
-				}\
-				else if(Level <= 70) \
-				{\
-					BaseMana = uint32(BaseMana / 1.21f); \
-					BaseHP = uint32(BaseHP / 1.21f); \
-				}\
-
-
-
+				
 				switch(Class)
 				{
 				case PRIEST:
 					{
 						BaseMana = uint32(48.2875f * Level);
 						BaseHP = uint32(87 * Level);
-						NORMALIZATION
 						break;
 					}
 				case WARRIOR:
 					{
 						BaseHP = uint32(101.5125f * Level);
-						NORMALIZATION
 						break;
 					}
 				case DEATHKNIGHT:
 					{
 						BaseHP = uint32(101.5125f * Level);
-						NORMALIZATION
 						break;
 					}
 				case HUNTER:
 					{
 						BaseHP = uint32(104.325f * Level);
 						BaseMana = uint32(63.075f * Level);
-						NORMALIZATION
 						break;
 					}
 				case ROGUE:
 					{
 						BaseHP = uint32(95.05f * Level);
-						NORMALIZATION
 						break;
 					}
 				case SHAMAN:
 					{
 						BaseHP = uint32(85.1125f * Level);
 						BaseMana = uint32(54.95f * Level);
-						NORMALIZATION
 						break;
 					}
 				case DRUID:
 					{
 						BaseHP = uint32(92.7125f * Level);
 						BaseMana = uint32(43.7f * Level);
-						NORMALIZATION
 						break;
 					}
 				case PALADIN:
 					{
 						BaseHP = uint32(87.05f * Level);
 						BaseMana = uint32(54.925f * Level);
-						NORMALIZATION
 						break;
 					}
 				case MAGE:
 					{
 						BaseHP = uint32(87.0375f * Level);
 						BaseMana = uint32(40.85f * Level);
-						NORMALIZATION
 						break;
 					}
 				case WARLOCK:
 					{
 						BaseHP = uint32(104.425f * Level);
 						BaseMana = uint32(52.975f * Level);
-						NORMALIZATION
 						break;
 					}
 				}
+
+				float perlevmod = 4.0f + (Level / 16.0f);
+
+				BaseMana = uint32(BaseMana / (perlevmod - (Level / 10.0f)));
+				BaseHP = uint32(BaseHP / (perlevmod - (Level / 10.0f)));
 
 				lvl->HP = HP + BaseHP;
 				lvl->Mana = Mana + BaseMana;
