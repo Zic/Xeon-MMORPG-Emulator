@@ -68,6 +68,18 @@ struct ProfessionDiscovery
 	uint32 SkillValue;
 	float Chance;
 };
+struct RandomItemCreation
+{
+	uint32 SpellId;
+	uint32 ItemToCreate;
+	uint32 Skill;
+	uint32 Chance;
+};
+struct RandomCardCreation
+{
+	uint32 SpellId;
+	uint32 ItemId[32];
+};
 struct ItemPage
 {
     uint32 id;
@@ -546,6 +558,8 @@ public:
 	void LoadExtraItemStuff();
 	void LoadExtraCreatureProtoStuff();
 	void LoadProfessionDiscoveries();
+	void LoadRandomItemCreation();
+	void LoadRandomCardCreation();
 	void CreateGossipMenuForPlayer(GossipMenu** Location, uint64 Guid, uint32 TextID, PlayerPointer Plr); 
 
 	LevelInfo * GetLevelInfo(uint32 Race, uint32 Class, uint32 Level);

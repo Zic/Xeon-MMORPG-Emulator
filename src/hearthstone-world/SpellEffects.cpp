@@ -182,7 +182,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL, //154 unused
 		&Spell::SpellEffectTitanGrip,// Titan's Grip - 155
 		&Spell::SpellEffectNULL, //156 Add Socket
-		&Spell::SpellEffectNULL, //157 create/learn random item/spell for profession
+		&Spell::SpellEffectCreateRandomItem, //157 create/learn random item/spell for profession
 		&Spell::SpellEffectMilling, //158 milling
 		&Spell::SpellEffectNULL //159 allow rename pet once again
 };
@@ -7190,4 +7190,148 @@ void Spell::SummonLightwell(uint32 i)
 	pCreature->PushToWorld(u_caster->GetMapMgr());
 	if( m_summonProperties->slot < 7 )
 		u_caster->m_SummonSlots[ m_summonProperties->slot ] = pCreature;*/
+}
+
+void Spell::SpellEffectCreateRandomItem(uint32 i) // Create Random Item
+{
+	if(!p_caster)
+		return;
+
+	ItemPointer newItem;
+	ItemPointer add;
+	uint8 slot;
+	uint32 itemid;
+	SlotResult slotresult;
+
+	skilllinespell* skill = objmgr.GetSpellSkill(m_spellInfo->Id);
+
+	for(int j=0; j<3; j++) // now create the Items
+	{
+		ItemPrototype *m_itemProto;
+		itemid	=	m_spellInfo->EffectItemType[i];
+		m_itemProto = ItemPrototypeStorage.LookupEntry( m_spellInfo->EffectItemType[j] );
+		if (!m_itemProto)
+			 continue;
+
+		if(itemid == 0)
+			continue;
+
+		uint32 item_count = 0;
+		// Random Item to Create Jewelcrafting part
+		RandomItemCreation * ric = RandomItemCreationStorage.LookupEntry( m_spellInfo->Id );
+		// If we Have Perfect Gem Cutting then we have a chance to create a Perfect Gem, according to comments on wowhead chance is between 20 and 30%
+		if ( ric && Rand(ric->Chance) && ric->Skill == SKILL_JEWELCRAFTING && p_caster->HasSpell(55534))
+		{
+			m_itemProto = ItemPrototypeStorage.LookupEntry( ric->ItemToCreate );
+			itemid	=	ric->ItemToCreate;
+		}
+		//Tarot and Decks from Inscription 
+		if ( ric && ric->Skill == SKILL_INSCRIPTION )
+		{
+			uint32 k;
+			switch(m_spellInfo->Id)
+			{
+				case 59480:
+				case 59491:
+				case 48247:
+				case 59487:
+					{
+						//Same chance for every card to appear according wowhead and wowwiki info
+						k = RandomUInt(4);
+					}break;
+				case 44317:
+				case 59502:
+				case 59504:
+					{
+						//Same chance for every card to appear according wowhead and wowwiki info
+						k = RandomUInt(31);
+					}break;
+			}
+			RandomCardCreation * rcc = RandomCardCreationStorage.LookupEntry(m_spellInfo->Id);
+			m_itemProto = ItemPrototypeStorage.LookupEntry( rcc->ItemId[k] );
+			itemid	=	rcc->ItemId[k];
+			item_count = 1;
+		}
+		//ToDo Northrend Alchemy Research and move Minor Inscription Research and Northrend Inscription Research
+		//Here we must create an item and also learn a spell and create and item, Use profession dicoveries here 
+		
+		// item count cannot be more than allowed in a single stack
+		if (item_count > m_itemProto->MaxCount)
+			item_count = m_itemProto->MaxCount;
+
+		// item count cannot be more than item unique value
+		if (m_itemProto->Unique && item_count > m_itemProto->Unique)
+			item_count = m_itemProto->Unique;
+
+		if(p_caster->GetItemInterface()->CanReceiveItem(m_itemProto, item_count, NULL)) 
+		{
+			SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
+			return;
+		}
+	
+		slot = 0;
+		add = p_caster->GetItemInterface()->FindItemLessMax(m_spellInfo->EffectItemType[j],1, false);
+		if (!add)
+		{
+			slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
+			if(!slotresult.Result)
+			{
+				  SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
+				  return;
+			}
+			
+			newItem =objmgr.CreateItem(itemid,p_caster);
+			newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
+			newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count);
+
+
+			if(p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
+			{
+				p_caster->GetSession()->SendItemPushResult(newItem,true,false,true,true,slotresult.ContainerSlot,slotresult.Slot,item_count);
+			} else {
+				newItem->Destructor();
+				newItem = NULLITEM;
+			}
+			if(skill)
+				DetermineSkillUp(skill->skilline);
+		} 
+		else 
+		{
+			//scale item_count down if total stack will be more than 20
+			if(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count > 20)
+			{
+				uint32 item_count_filled;
+				item_count_filled = 20 - add->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+				add->SetCount(20);
+				add->m_isDirty = true;
+
+				slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
+				if(!slotresult.Result)
+					item_count = item_count_filled;
+				else
+				{
+					newItem =objmgr.CreateItem(itemid,p_caster);
+					newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
+					newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count - item_count_filled);
+					if(!p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
+					{
+						newItem->Destructor();
+						newItem = NULLITEM;
+						item_count = item_count_filled;
+					}
+					else
+						p_caster->GetSession()->SendItemPushResult(newItem, true, false, true, true, slotresult.ContainerSlot, slotresult.Slot, item_count-item_count_filled);
+                }
+			}
+			else
+			{
+				add->SetCount(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count);
+				add->m_isDirty = true;
+				p_caster->GetSession()->SendItemPushResult(add, true,false,true,false,p_caster->GetItemInterface()->GetBagSlotByGuid(add->GetGUID()),0xFFFFFFFF,item_count);
+			}
+			if(skill)
+				DetermineSkillUp(skill->skilline);
+		}
+		
+	}	   
 }

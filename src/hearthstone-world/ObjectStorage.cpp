@@ -43,6 +43,8 @@ const char * gQuestFormat								= "uuuuuuuuuuuuuuuuuuuussssssssssuuuuuuuuuuuuuu
 const char * gTeleportCoordFormat						= "uxuffff";
 const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
 const char * gProfessionDiscoveryFormat					= "uuuf";
+const char * gRandomItemCreationFormat					= "uuuu";
+const char * gRandomCardCreationFormat					= "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gZoneGuardsFormat							= "uuu";
 
 /** SQLStorage symbols
@@ -62,6 +64,9 @@ SERVER_DECL SQLStorage<TeleportCoords, HashMapStorageContainer<TeleportCoords> >
 SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							WorldMapInfoStorage;
 SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >	ProfessionDiscoveryStorage;
 SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
+SERVER_DECL SQLStorage<RandomItemCreation, HashMapStorageContainer<RandomItemCreation> >	RandomItemCreationStorage;
+SERVER_DECL SQLStorage<RandomCardCreation, HashMapStorageContainer<RandomCardCreation> >	RandomCardCreationStorage;
+
 
 SERVER_DECL set<string> ExtraMapCreatureTables;
 SERVER_DECL set<string> ExtraMapGameObjectTables;
@@ -522,6 +527,8 @@ void Storage_FillTaskList(TaskList & tl)
 	make_task(ZoneGuardStorage, ZoneGuardEntry, HashMapStorageContainer, "zoneguards", gZoneGuardsFormat);
 	make_task(AchievementRewardStorage, AchievementReward, HashMapStorageContainer, "achievement_rewards", gAchievementRewardFormat);
 	make_task(ProfessionDiscoveryStorage, ProfessionDiscovery, HashMapStorageContainer, "professiondiscoveries", gProfessionDiscoveryFormat);
+	make_task(RandomItemCreationStorage, RandomItemCreation, HashMapStorageContainer, "randomitemcreation", gRandomItemCreationFormat);
+	make_task(RandomCardCreationStorage, RandomCardCreation, HashMapStorageContainer, "randomcardcreation", gRandomCardCreationFormat);
 }
 
 void Storage_Cleanup()
@@ -555,6 +562,8 @@ void Storage_Cleanup()
 	AreaTriggerStorage.Cleanup();
 	ItemPageStorage.Cleanup();
 	ProfessionDiscoveryStorage.Cleanup();
+	RandomItemCreationStorage.Cleanup();
+	RandomCardCreationStorage.Cleanup();
 
 	{
 		StorageContainerIterator<Quest> * itr = QuestStorage.MakeIterator();

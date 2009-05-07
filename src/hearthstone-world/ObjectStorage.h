@@ -35,6 +35,8 @@ extern SERVER_DECL SQLStorage<MapInfo, ArrayStorageContainer<MapInfo> >							Wo
 extern SERVER_DECL SQLStorage<ZoneGuardEntry, HashMapStorageContainer<ZoneGuardEntry> >			ZoneGuardStorage;
 extern SERVER_DECL SQLStorage<AchievementReward, HashMapStorageContainer<AchievementReward> >	AchievementRewardStorage;
 extern SERVER_DECL SQLStorage<ProfessionDiscovery, HashMapStorageContainer<ProfessionDiscovery> >   ProfessionDiscoveryStorage;
+extern SERVER_DECL SQLStorage<RandomItemCreation, HashMapStorageContainer<RandomItemCreation> >	RandomItemCreationStorage;
+extern SERVER_DECL SQLStorage<RandomCardCreation, HashMapStorageContainer<RandomCardCreation> >	RandomCardCreationStorage;
 
 void Storage_FillTaskList(TaskList & tl);
 void Storage_Cleanup();
