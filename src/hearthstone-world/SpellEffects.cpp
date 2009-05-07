@@ -2546,29 +2546,27 @@ void Spell::SpellEffectCreateItem(uint32 i) // Create item
 
 	skilllinespell* skill = objmgr.GetSpellSkill(m_spellInfo->Id);
 
-	for(int j=0; j<3; j++) // now create the Items
+	ItemPrototype *m_itemProto;
+	m_itemProto = ItemPrototypeStorage.LookupEntry( m_spellInfo->EffectItemType[i] );
+	if (!m_itemProto)
+		return;
+
+	if(m_spellInfo->EffectItemType[i] == 0)
+		return;
+
+	uint32 item_count = 0;
+	if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != 3) //SpellFamilyName 3 is mage
+		item_count = damage;
+	else if(p_caster->getLevel() >= m_spellInfo->spellLevel)
+		item_count = ((p_caster->getLevel() - (m_spellInfo->spellLevel-1))*damage);
+
+	if(!item_count)
+		item_count = damage;
+
+	//conjure water ranks 7,8 & 9 and conjure food ranks 7 & 8 have different starting amounts
+	// tailoring specializations get +1 cloth bonus
+	switch(m_spellInfo->Id)
 	{
-		ItemPrototype *m_itemProto;
-		m_itemProto = ItemPrototypeStorage.LookupEntry( m_spellInfo->EffectItemType[j] );
-		if (!m_itemProto)
-			 continue;
-
-		if(m_spellInfo->EffectItemType[j] == 0)
-			continue;
-
-		uint32 item_count = 0;
-		if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != 3) //SpellFamilyName 3 is mage
-			item_count = damage;
-		else if(p_caster->getLevel() >= m_spellInfo->spellLevel)
-			item_count = ((p_caster->getLevel() - (m_spellInfo->spellLevel-1))*damage);
-
-		if(!item_count)
-			item_count = damage;
-
-		//conjure water ranks 7,8 & 9 and conjure food ranks 7 & 8 have different starting amounts
-		// tailoring specializations get +1 cloth bonus
-		switch(m_spellInfo->Id)
-		{
 		case 27389: //Conjure Food 7
 		case 10140: //Conjure Water 7
 		case 37420: //Conjure Water 8
@@ -2583,162 +2581,161 @@ void Spell::SpellEffectCreateItem(uint32 i) // Create item
 		case 31373: //Spellcloth
 			if(p_caster->HasSpell(26797)) item_count += 1;
 			break;
-		}
+	}
 
-		if (skill)
+	if (skill)
+	{
+		// Alchemy Specializations
+		// http://www.wowwiki.com/Alchemy#Alchemy_Specializations
+		if ( skill->skilline == SKILL_ALCHEMY && Rand(15) )
 		{
-			// Alchemy Specializations
-			// http://www.wowwiki.com/Alchemy#Alchemy_Specializations
-			if ( skill->skilline == SKILL_ALCHEMY && Rand(15) )
+			//Potion Master and Elixer Master (Elixers and Flasks)
+			if(( p_caster->HasSpell(28675) && m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_POTION ) || 
+				( p_caster->HasSpell(28677) && ( m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_ELIXIR || m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_FLASK ) ))
 			{
-				//Potion Master and Elixer Master (Elixers and Flasks)
-				if( ( p_caster->HasSpell(28675) && m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_POTION ) || 
-					( p_caster->HasSpell(28677) && ( m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_ELIXIR || m_itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE_FLASK ) ))
+				for(int x=0; x<5; x++)
 				{
-					for(int x=0; x<5; x++)
+					SpellEntry *spellInfo;
+					uint32 spellid = m_itemProto->Spells[x].Id;
+					if( spellid ) 
 					{
-						SpellEntry *spellInfo;
-						uint32 spellid = m_itemProto->Spells[x].Id;
-						if ( spellid ) 
+						spellInfo = dbcSpell.LookupEntry(spellid);
+						if ( spellInfo )
 						{
-							spellInfo = dbcSpell.LookupEntry(spellid);
-							if ( spellInfo )
-							{
-								item_count = item_count + rand() % 4 + 1;
-								break;
-							}
+							item_count = item_count + rand() % 4 + 1;
+							break;
 						}
 					}
 				}
-				//Transmutation Master
-				else if ( p_caster->HasSpell(28672) && m_spellInfo->Category == 310 )
-				{
-					item_count = item_count + rand() % 4 + 1;
-				}
 			}
-	
-			// Profession Discoveries
-			ProfessionDiscovery * pf = ProfessionDiscoveryStorage.LookupEntry( m_spellInfo->Id );
-			if ( pf && !p_caster->HasSpell( pf->SpellToDiscover ) && Rand( pf->Chance )&& p_caster->_GetSkillLineCurrent( skill->skilline ) >= pf->SkillValue )
+			//Transmutation Master
+			else if( p_caster->HasSpell(28672) && m_spellInfo->Category == 310 )
 			{
-				// if something discovered learn p_caster that recipe and broadcast message
-				SpellEntry * se = dbcSpell.LookupEntry( pf->SpellToDiscover );
-				if ( se != NULL )
-				{
-					p_caster->addSpell( pf->SpellToDiscover );
-					WorldPacket * data;
-					char msg[256];
-					sprintf( msg, "%sDISCOVERY! %s has discovered how to create %s.|r", MSG_COLOR_GOLD, p_caster->GetName(), se->Name );
-					data = sChatHandler.FillMessageData( CHAT_MSG_SYSTEM, LANG_UNIVERSAL,  msg, p_caster->GetGUID(), 0 );
-					p_caster->GetMapMgr()->SendChatMessageToCellPlayers( p_caster, data, 2, 1, LANG_UNIVERSAL, p_caster->GetSession() );
-				}
+				item_count = item_count + rand() % 4 + 1;
 			}
 		}
 
-		// item count cannot be more than allowed in a single stack
-		if (item_count > m_itemProto->MaxCount)
-			item_count = m_itemProto->MaxCount;
+		// Profession Discoveries
+		ProfessionDiscovery * pf = ProfessionDiscoveryStorage.LookupEntry( m_spellInfo->Id );
+		if( pf && !p_caster->HasSpell( pf->SpellToDiscover ) && Rand( pf->Chance )&& p_caster->_GetSkillLineCurrent( skill->skilline ) >= pf->SkillValue )
+		{
+			// if something discovered learn p_caster that recipe and broadcast message
+			SpellEntry * se = dbcSpell.LookupEntry( pf->SpellToDiscover );
+			if ( se != NULL )
+			{
+				p_caster->addSpell( pf->SpellToDiscover );
+				WorldPacket * data;
+				char msg[256];
+				sprintf( msg, "%sDISCOVERY! %s has discovered how to create %s.|r", MSG_COLOR_GOLD, p_caster->GetName(), se->Name );
+				data = sChatHandler.FillMessageData( CHAT_MSG_SYSTEM, LANG_UNIVERSAL,  msg, p_caster->GetGUID(), 0 );
+				p_caster->GetMapMgr()->SendChatMessageToCellPlayers( p_caster, data, 2, 1, LANG_UNIVERSAL, p_caster->GetSession() );
+			}
+		}
+	}
 
-		// item count cannot be more than item unique value
-		if (m_itemProto->Unique && item_count > m_itemProto->Unique)
-			item_count = m_itemProto->Unique;
+	// item count cannot be more than allowed in a single stack
+	if (item_count > m_itemProto->MaxCount)
+		item_count = m_itemProto->MaxCount;
 
-		if(p_caster->GetItemInterface()->CanReceiveItem(m_itemProto, item_count, NULL)) //reversed since it sends >1 as invalid and 0 as valid
+	// item count cannot be more than item unique value
+	if(m_itemProto->Unique && item_count > m_itemProto->Unique)
+		item_count = m_itemProto->Unique;
+
+	if(p_caster->GetItemInterface()->CanReceiveItem(m_itemProto, item_count, NULL)) //reversed since it sends >1 as invalid and 0 as valid
+	{
+		SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
+		return;
+	}
+
+	slot = 0;
+	add = p_caster->GetItemInterface()->FindItemLessMax(m_spellInfo->EffectItemType[i],1, false);
+	if (!add)
+	{
+		slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
+		if(!slotresult.Result)
 		{
 			SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
 			return;
 		}
+		
+		newItem =objmgr.CreateItem(m_spellInfo->EffectItemType[i],p_caster);
+		newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
+		newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count);
 
-		slot = 0;
-		add = p_caster->GetItemInterface()->FindItemLessMax(m_spellInfo->EffectItemType[j],1, false);
-		if (!add)
+		if (m_itemProto->RandomPropId)
 		{
-			slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
-			if(!slotresult.Result)
+			RandomProps * iRandomProperty = lootmgr.GetRandomProperties(m_itemProto);
+			if( iRandomProperty )
 			{
-				  SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
-				  return;
+				newItem->SetRandomProperty(iRandomProperty->ID);
+				newItem->ApplyRandomProperties(false);
 			}
-			
-			newItem =objmgr.CreateItem(m_spellInfo->EffectItemType[i],p_caster);
-			newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
-			newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count);
-
-			if (m_itemProto->RandomPropId)
-			{
-				RandomProps * iRandomProperty = lootmgr.GetRandomProperties(m_itemProto);
-				if( iRandomProperty )
-				{
-					newItem->SetRandomProperty(iRandomProperty->ID);
-					newItem->ApplyRandomProperties(false);
-				}
-			}
-			if (m_itemProto->RandomSuffixId)
-			{
-				ItemRandomSuffixEntry * iRandomSuffix = lootmgr.GetRandomSuffix(m_itemProto);
-				if( iRandomSuffix )
-				{
-					newItem->SetRandomSuffix(iRandomSuffix->id);
-					newItem->ApplyRandomProperties(false);
-				}
-			}
-
-			if(p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
-			{
-				/*WorldPacket data(45);
-				p_caster->GetSession()->BuildItemPushResult(&data, p_caster->GetGUID(), 1, item_count, m_spellInfo->EffectSpellGroupRelation[i] ,0,0xFF,1,0xFFFFFFFF);
-				p_caster->SendMessageToSet(&data, true);*/
-				p_caster->GetSession()->SendItemPushResult(newItem,true,false,true,true,slotresult.ContainerSlot,slotresult.Slot,item_count);
-			} else {
-				newItem->Destructor();
-				newItem = NULLITEM;
-			}
-
-			if(skill)
-				DetermineSkillUp(skill->skilline);
-		} 
-		else 
+		}
+		if (m_itemProto->RandomSuffixId)
 		{
-			//scale item_count down if total stack will be more than 20
-			if(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count > 20)
+			ItemRandomSuffixEntry * iRandomSuffix = lootmgr.GetRandomSuffix(m_itemProto);
+			if( iRandomSuffix )
 			{
-				uint32 item_count_filled;
-				item_count_filled = 20 - add->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
-				add->SetCount(20);
-				add->m_isDirty = true;
-
-				slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
-				if(!slotresult.Result)
-					item_count = item_count_filled;
-				else
-				{
-					newItem =objmgr.CreateItem(m_spellInfo->EffectItemType[i],p_caster);
-					newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
-					newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count - item_count_filled);
-					if(!p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
-					{
-						newItem->Destructor();
-						newItem = NULLITEM;
-						item_count = item_count_filled;
-					}
-					else
-						p_caster->GetSession()->SendItemPushResult(newItem, true, false, true, true, slotresult.ContainerSlot, slotresult.Slot, item_count-item_count_filled);
-                }
+				newItem->SetRandomSuffix(iRandomSuffix->id);
+				newItem->ApplyRandomProperties(false);
 			}
-			else
-			{
-				add->SetCount(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count);
-				add->m_isDirty = true;
-				p_caster->GetSession()->SendItemPushResult(add, true,false,true,false,p_caster->GetItemInterface()->GetBagSlotByGuid(add->GetGUID()),0xFFFFFFFF,item_count);
-			}
+		}
 
+		if(p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
+		{
 			/*WorldPacket data(45);
 			p_caster->GetSession()->BuildItemPushResult(&data, p_caster->GetGUID(), 1, item_count, m_spellInfo->EffectSpellGroupRelation[i] ,0,0xFF,1,0xFFFFFFFF);
 			p_caster->SendMessageToSet(&data, true);*/
-			if(skill)
-				DetermineSkillUp(skill->skilline);
+			p_caster->GetSession()->SendItemPushResult(newItem,true,false,true,true,slotresult.ContainerSlot,slotresult.Slot,item_count);
+		} else {
+			newItem->Destructor();
+			newItem = NULLITEM;
 		}
-	}	   
+
+		if(skill)
+			DetermineSkillUp(skill->skilline);
+	}
+	else
+	{
+		//scale item_count down if total stack will be more than 20
+		if(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count > 20)
+		{
+			uint32 item_count_filled;
+			item_count_filled = 20 - add->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+			add->SetCount(20);
+			add->m_isDirty = true;
+
+			slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
+			if(!slotresult.Result)
+				item_count = item_count_filled;
+			else
+			{
+				newItem =objmgr.CreateItem(m_spellInfo->EffectItemType[i],p_caster);
+				newItem->SetUInt64Value(ITEM_FIELD_CREATOR,m_caster->GetGUID());
+				newItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT, item_count - item_count_filled);
+				if(!p_caster->GetItemInterface()->SafeAddItem(newItem,slotresult.ContainerSlot, slotresult.Slot))
+				{
+					newItem->Destructor();
+					newItem = NULLITEM;
+					item_count = item_count_filled;
+				}
+				else
+					p_caster->GetSession()->SendItemPushResult(newItem, true, false, true, true, slotresult.ContainerSlot, slotresult.Slot, item_count-item_count_filled);
+			}
+		}
+		else
+		{
+			add->SetCount(add->GetUInt32Value(ITEM_FIELD_STACK_COUNT) + item_count);
+			add->m_isDirty = true;
+			p_caster->GetSession()->SendItemPushResult(add, true,false,true,false,p_caster->GetItemInterface()->GetBagSlotByGuid(add->GetGUID()),0xFFFFFFFF,item_count);
+		}
+
+		/*WorldPacket data(45);
+		p_caster->GetSession()->BuildItemPushResult(&data, p_caster->GetGUID(), 1, item_count, m_spellInfo->EffectSpellGroupRelation[i] ,0,0xFF,1,0xFFFFFFFF);
+		p_caster->SendMessageToSet(&data, true);*/
+		if(skill)
+			DetermineSkillUp(skill->skilline);
+	}
 }
 
 void Spell::SpellEffectWeapon(uint32 i)
