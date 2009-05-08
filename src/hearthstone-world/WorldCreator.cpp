@@ -839,17 +839,14 @@ bool InstanceMgr::_DeleteInstance(Instance * in, bool ForcePlayersOut)
 
 PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 {
-	pInstance->m_mapMgr->PlayerStorageMaplock.Acquire();
 	PlayerStorageMap::iterator itr;
 	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); itr++ )
 	{
 		if (itr->second && itr->second->IsPlayer())
 		{
-			pInstance->m_mapMgr->PlayerStorageMaplock.Release();
 			return itr->second;
 		}
 	}
-	pInstance->m_mapMgr->PlayerStorageMaplock.Release();
 	return NULLPLR;
 
 }
@@ -990,19 +987,6 @@ void Instance::SaveToDB()
 	if (m_killedNpcs.size()==0)
 		return;
 
-	// Add new player to m_SavedPlayers
-	m_mapMgr->PlayerStorageMaplock.Acquire();
-	PlayerStorageMap::iterator itr1 = m_mapMgr->m_PlayerStorage.begin();
-	set<uint32>::iterator itr2;
-	for(; itr1 != m_mapMgr->m_PlayerStorage.end(); itr1++)
-	{
-		itr2 = m_SavedPlayers.find(itr1->second->GetLowGUID());
-		if( itr2 == m_SavedPlayers.end() )
-		{
-			m_SavedPlayers.insert(itr1->second->GetLowGUID());
-		}
-	}
-	m_mapMgr->PlayerStorageMaplock.Release();
 
 	std::stringstream ss;
 	unordered_set<uint32>::iterator itr;
@@ -1021,9 +1005,10 @@ void Instance::SaveToDB()
 		<< m_creatorGroup << ","
 		<< m_creatorGuid << ",'";
 
-	set<uint32>::iterator itr4;
-	for(itr4 = m_SavedPlayers.begin(); itr4 != m_SavedPlayers.end(); ++itr4)
-		ss << (*itr4) << " ";
+	// Add all players in this instance to SavedPlayers
+	PlayerStorageMap::iterator itr1 = m_mapMgr->m_PlayerStorage.begin();
+	for(; itr1 != m_mapMgr->m_PlayerStorage.end(); itr1++)
+		ss << itr1->second->GetLowGUID() << " ";
 
 	ss <<"')";
 
