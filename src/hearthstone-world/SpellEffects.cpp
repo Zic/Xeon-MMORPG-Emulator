@@ -3882,26 +3882,16 @@ void Spell::SpellEffectSpellDefense(uint32 i)
 
 void Spell::SpellEffectLearnPetSpell(uint32 i)
 {
-	/*if(unitTarget && m_caster->GetTypeId() == TYPEID_PLAYER)
-	{
-		if(unitTarget->IsPet() && unitTarget->GetTypeId() == TYPEID_UNIT)
-		{
-			TO_PLAYER(m_caster)->AddPetSpell(m_spellInfo->EffectTriggerSpell[i], unitTarget->GetEntry());
-		}
-	}*/
 
 	if(unitTarget && unitTarget->IsPet() && p_caster)
 	{
-		for(uint32 i=0;i<3;i++)
+		if (m_spellInfo->EffectTriggerSpell[i])
 		{
-			if (m_spellInfo->EffectTriggerSpell[i])
-			{
-				PetPointer pPet = TO_PET( unitTarget );
-				if(pPet->IsSummon())
-					p_caster->AddSummonSpell(unitTarget->GetEntry(), m_spellInfo->EffectTriggerSpell[i]);
-		
-				pPet->AddSpell( dbcSpell.LookupEntry( m_spellInfo->EffectTriggerSpell[i] ), true );
-			}
+			PetPointer pPet = TO_PET( unitTarget );
+			if(pPet->IsSummon())
+				p_caster->AddSummonSpell(unitTarget->GetEntry(), m_spellInfo->EffectTriggerSpell[i]);
+	
+			pPet->AddSpell( dbcSpell.LookupEntry( m_spellInfo->EffectTriggerSpell[i] ), true );
 		}
 	}
 }
