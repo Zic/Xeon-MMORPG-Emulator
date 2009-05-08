@@ -712,17 +712,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	//already active?
 	if(objmgr.GetPlayer((uint32)playerGuid) != NULL || m_loggingInPlayer || _player) 
 		response = CHAR_LOGIN_DUPLICATE_CHARACTER;
-	else //Do we exist in DB?
+	else //Do we exist in DB yet?
 	{
-		QueryResult * res = CharacterDatabase.Query("SELECT guid FROM characters where guid = %u",playerGuid);
-		if(res) 
-		{
-			response = RESPONSE_SUCCESS;
-			delete res;
-		}
+		PlayerInfo * plrInfo = objmgr.GetPlayerInfo(playerGuid);
+		if( plrInfo )
+			response = CHAR_LOGIN_SUCCESS;
 	}
 
-	if(response != RESPONSE_SUCCESS)
+	if(response != CHAR_LOGIN_SUCCESS)
 	{
 		OutPacket(SMSG_CHARACTER_LOGIN_FAILED, 1, &response);
 		return;
