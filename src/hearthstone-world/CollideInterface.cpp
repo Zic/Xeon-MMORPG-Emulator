@@ -100,7 +100,7 @@ void CCollideInterface::DeactivateTile(uint32 mapId, uint32 tileX, uint32 tileY)
 	// get write lock
 	m_mapLocks[mapId]->m_lock.AcquireWriteLock();
 	if( (--m_mapLocks[mapId]->m_tileLoadCount[tileX][tileY]) == 0 )
-		CollisionMgr->unloadMap(mapId, tileX, tileY);
+		CollisionMgr->unloadMap(mapId, tileY, tileX);
 
 	// release write lock
 	m_mapLocks[mapId]->m_lock.ReleaseWriteLock();
