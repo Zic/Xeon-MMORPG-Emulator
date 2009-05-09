@@ -839,16 +839,15 @@ bool InstanceMgr::_DeleteInstance(Instance * in, bool ForcePlayersOut)
 
 PlayerPointer InstanceMgr::GetFirstPlayer(Instance*pInstance)
 {
-	PlayerStorageMap::iterator itr;
-	for( itr = pInstance->m_mapMgr->m_PlayerStorage.begin(); itr != pInstance->m_mapMgr->m_PlayerStorage.end(); itr++ )
+	//Is there a player inside?
+	if(pInstance->m_mapMgr->m_PlayerStorage.size())
 	{
-		if (itr->second && itr->second->IsPlayer())
-		{
-			return itr->second;
-		}
+		//then return the first player from the list
+		PlayerStorageMap::iterator itr;
+		itr = pInstance->m_mapMgr->m_PlayerStorage.begin();
+		return itr->second;
 	}
 	return NULLPLR;
-
 }
 
 void Instance::DeleteFromDB()
