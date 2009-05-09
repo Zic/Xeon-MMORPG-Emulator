@@ -110,7 +110,7 @@ pSpellTarget SpellTargetHandler[TOTAL_SPELL_TARGET] =
 	&Spell::SpellTargetNULL,					// 84
 	&Spell::SpellTargetNULL,					// 85
 	&Spell::SpellTargetNULL,					// 86
-	&Spell::SpellTargetAreaOfEffect,			// 87
+	&Spell::SpellTargetAreaOfEffect87,			// 87
 	&Spell::SpellTargetNULL,					// 88
 	&Spell::SpellTargetNULL,					// 89
 	&Spell::SpellTargetNULL,					// 90
@@ -1015,4 +1015,14 @@ uint64 Spell::FindLowestHealthRaidMember(PlayerPointer Target, uint32 dist)
 		group->Unlock();
 	}
 	return lowestHealthTarget;
+}
+
+/// Spell Target Handling for type 87
+void Spell::SpellTargetAreaOfEffect87(uint32 i, uint32 j)
+{
+	if( !m_caster || !m_caster->IsInWorld() )
+		return;
+
+	_AddTargetForced(m_caster->GetGUID(), i);
+	FillAllTargetsInArea(i,m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,GetRadius(i));
 }

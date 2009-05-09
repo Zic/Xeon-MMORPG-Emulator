@@ -1230,6 +1230,8 @@ public:
 	UnitPointer mThreatRTarget;
 	float mThreatRAmount;
 
+	uint32 m_vampiricTouch;
+
 	void CancelSpell(SpellPointer ptr);
 	void EventStrikeWithAbility(uint64 guid, SpellEntry * sp, uint32 damage);
 	void DispelAll(bool positive);

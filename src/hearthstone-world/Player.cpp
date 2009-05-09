@@ -432,7 +432,7 @@ void Player::Init()
 		m_speedChangeInProgress = false;
 		m_passOnLoot = false;
 		m_changingMaps = true;
-		m_vampiricEmbrace = m_vampiricTouch = 0;
+		m_vampiricEmbrace = 0;
 		m_magnetAura = NULLAURA;
 		m_lastMoveTime = 0;
 		m_lastMovementPacketTimestamp = 0;
@@ -11245,7 +11245,7 @@ void Player::Social_SendFriendList(uint32 flag)
 	m_session->SendPacket(&data);
 }
 
-void Player::VampiricSpell(uint32 dmg, UnitPointer pTarget)
+void Player::VampiricSpell(uint32 dmg, UnitPointer pTarget, SpellEntry *spellinfo)
 {
 	float fdmg = float(dmg);
 	uint32 bonus;
@@ -11271,6 +11271,47 @@ void Player::VampiricSpell(uint32 dmg, UnitPointer pTarget)
 						Heal( (*itr)->m_loggedInPlayer, 15286, bonus / 5 );
 				}
 			}
+		}
+	}
+	else if( pTarget->m_vampiricTouch && spellinfo->NameHash == SPELL_HASH_MIND_BLAST )
+	{				
+		if( GetGroup() )
+		{
+			uint32 TargetCount = 0;
+			GetGroup()->Lock();
+			for(uint32 x = 0; x < GetGroup()->GetSubGroupCount(); ++x)
+			{
+				if( TargetCount == 10 )
+					break;
+
+				for(GroupMembersSet::iterator itr = GetGroup()->GetSubGroup( x )->GetGroupMembersBegin(); itr != GetGroup()->GetSubGroup( x )->GetGroupMembersEnd(); ++itr)
+				{
+					if((*itr)->m_loggedInPlayer && TargetCount <= 10)
+					{
+						PlayerPointer p_target = (*itr)->m_loggedInPlayer;
+						if( p_target->GetPowerType() != POWER_TYPE_MANA )
+							continue;
+
+						SpellEntry* Replinishment = dbcSpell.LookupEntryForced( 57669 );
+						SpellPointer pSpell(new Spell(plr_shared_from_this(), Replinishment, true, NULLAURA));
+						pSpell->forced_basepoints[0] = float2int32(p_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) * 0.0025f);
+						SpellCastTargets tgt;
+						tgt.m_unitTarget = p_target->GetGUID();
+						pSpell->prepare(&tgt);
+						TargetCount++;
+					}
+				}
+			}
+			GetGroup()->Unlock();
+		}
+		else
+		{
+			SpellEntry* Replinishment = dbcSpell.LookupEntryForced( 57669 );
+			SpellPointer pSpell(new Spell(plr_shared_from_this(), Replinishment, true, NULLAURA));
+			pSpell->forced_basepoints[0] = float2int32(GetUInt32Value(UNIT_FIELD_MAXPOWER1) * 0.0025f);
+			SpellCastTargets tgt;
+			tgt.m_unitTarget = GetGUID();
+			pSpell->prepare(&tgt);
 		}
 	}
 }

@@ -205,6 +205,8 @@ Unit::Unit()
 	mThreatRTarget = NULLUNIT;
 	mThreatRAmount = 0;
 
+	m_vampiricTouch = 0;
+
 	m_soulSiphon.amt = 0;
 	m_soulSiphon.max = 0;
 
@@ -672,7 +674,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 
 			uint32 spellId = itr2->spellId;
 
-			if( itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND) {
+			if( itr2->procFlags & PROC_ON_CAST_SPELL || itr2->procFlags & PROC_ON_SPELL_LAND || itr2->procFlags & PROC_ON_CAST_SPECIFIC_SPELL || itr2->procFlags & PROC_ON_ANY_HOSTILE_ACTION ) 
+			{
 				if( CastingSpell == NULL )
 					continue;
 
@@ -3597,13 +3600,6 @@ else
 		dmg.resisted_damage = dmg.full_damage; //godmode
 	}
 
-	// Paladin: Blessing of Sacrifice, and Warlock: Soul Link
-	if( pVictim->m_damageSplitTarget.active )
-	{
-		dmg.full_damage = pVictim->DoDamageSplitTarget(dmg.full_damage, dmg.school_type, true);
-		realdamage = dmg.full_damage;
-	}
-
 //--------------------------dirty fixes-----------------------------------------------------
 	//vstate=1-wound,2-dodge,3-parry,4-interrupt,5-block,6-evade,7-immune,8-deflect	
 	// the above code was remade it for reasons : damage shield needs moslty same flags as handleproc + dual wield should proc too ?
@@ -4582,10 +4578,12 @@ int32 Unit::GetSpellBonusDamage(UnitPointer pVictim, SpellEntry *spellInfo,int32
 	uint32 school = spellInfo->School;
 	
 	if( caster->IsPet() )
-		caster = TO_PLAYER(TO_PET(caster)->GetPetOwner());
+		caster = TO_UNIT(TO_PET(caster)->GetPetOwner());
 	else if( caster->IsCreature() && TO_CREATURE(caster)->IsTotem() )
-		caster = TO_PLAYER(TO_CREATURE(caster)->GetTotemOwner());
-
+		caster = TO_UNIT(TO_CREATURE(caster)->GetTotemOwner());
+	else if( caster->GetTypeId() == TYPEID_GAMEOBJECT && caster->GetMapMgr() && caster->GetUInt64Value(OBJECT_FIELD_CREATED_BY) )
+		caster = TO_UNIT(caster->GetMapMgr()->GetUnit(caster->GetUInt64Value(OBJECT_FIELD_CREATED_BY)));
+	
 	if( !caster || !pVictim )
 		return 0;
 

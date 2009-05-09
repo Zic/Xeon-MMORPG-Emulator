@@ -2019,28 +2019,26 @@ void Aura::EventPeriodicDamage(uint32 amount)
 
 		if(school == SHADOW_DAMAGE)
 			if( c != NULL && c->isAlive() && c->IsPlayer() && c->getClass() == PRIEST )
-				TO_PLAYER(c)->VampiricSpell(float2int32(res), m_target);
+				TO_PLAYER(c)->VampiricSpell(float2int32(res), m_target, m_spellProto);
 	}
 	// grep: this is hack.. some auras seem to delete this shit.
 	SpellEntry * sp = m_spellProto;
 	UnitPointer mtarget = m_target;
 	uint64 cguid = m_casterGuid;
-	if(mtarget)
+	if( mtarget )
 	{
-		if(mtarget->GetGUID()!=cguid && c)//don't use resist when cast on self-- this is some internal stuff
+		if( mtarget->GetGUID() != cguid && c )//don't use resist when cast on self-- this is some internal stuff
 		{
 			uint32 aproc = PROC_ON_ANY_HOSTILE_ACTION;
 			uint32 vproc = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_ANY_DAMAGE_VICTIM;
+			aproc |= PROC_ON_SPELL_LAND;
+			vproc |= PROC_ON_SPELL_LAND_VICTIM;
+
 			c->HandleProc(aproc, mtarget, sp, float2int32(res));
 			c->m_procCounter = 0;
 		
 			mtarget->HandleProc(vproc,c,sp, float2int32(res));
 			mtarget->m_procCounter = 0;
-		}
-
-		if( mtarget->m_damageSplitTarget.active)
-		{
-			res = (float)mtarget->DoDamageSplitTarget((uint32)res, GetSpellProto()->School, false);
 		}
 
 		if(c)
@@ -2235,25 +2233,6 @@ void Aura::SpellAuraDummy(bool apply)
 				p_target->UpdateVisibility();
 			}
 		}break;
-	//paladin - Blessing of Light.
-/*	case 19977:
-	case 19978:
-	case 19979:
-	case 27144:
-	case 32770:
-	case 27145:
-	case 25890:
-		{
-			if( mod->i == 0 )
-				SMTMod_On_target( apply, false, 0x9B56A8F5, mod->m_amount ); //holy light
-			if( mod->i == 1 )
-				SMTMod_On_target( apply, false, 0x333C4740, mod->m_amount ); //flash of light
-		}break;*/
-	//shaman - Healing Way - effect
-/*	case 29203:
-		{
-			SMTMod_On_target( apply, true, 0x08F1A7EF, mod->m_amount ); // Healing Wave
-		}break;*/
 	//warrior - sweeping strikes
 	case 12328:
 		{
@@ -2526,8 +2505,19 @@ void Aura::SpellAuraDummy(bool apply)
 	case 34914://Vampiric Touch
 	case 34916:
 	case 34917:
+	case 48159:
+	case 48160:
 		{
-			//TODO: Implement. Add proc spell
+			if(apply)
+			{
+				if( m_target )
+					m_target->m_vampiricTouch++;
+			}
+			else
+			{
+				if( m_target )
+					m_target->m_vampiricTouch--;
+			}
 		}break;
 	case 18182:
 	case 18183:
@@ -2916,11 +2906,17 @@ void Aura::SpellAuraDummy(bool apply)
 					uint32 shape = TO_PLAYER( m_target )->GetShapeShift();
 					if( shape == FORM_CAT || shape == FORM_BEAR || shape == FORM_DIREBEAR )
 					{
-						int32 amt = float2int32(m_target->GetMaxHealth() * 0.3f);
-						if( !apply )
-							amt = -amt;
-						TO_PLAYER( m_target )->SetHealthFromSpell( TO_PLAYER( m_target )->GetHealthFromSpell() + amt );
-						TO_PLAYER( m_target )->UpdateStats();
+						if( apply )
+						{
+							mod->fixed_float_amount[0] = m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.3f;
+							TO_PLAYER( m_target )->SetHealthFromSpell( TO_PLAYER( m_target )->GetHealthFromSpell() + mod->fixed_float_amount[0] );
+							TO_PLAYER( m_target )->UpdateStats();
+						}
+						else
+						{
+							TO_PLAYER( m_target )->SetHealthFromSpell( TO_PLAYER( m_target )->GetHealthFromSpell() - mod->fixed_float_amount[0] );
+							TO_PLAYER( m_target )->UpdateStats();
+						}
 					}
 				}
 			}break;
@@ -3336,7 +3332,8 @@ void Aura::EventPeriodicHeal( uint32 amount )
 				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
 			}
 		}
-	}   
+	}
+	u_caster->HandleProc(PROC_ON_SPELL_LAND, m_target, m_spellProto, add);
 }
 
 void Aura::SpellAuraModAttackSpeed(bool apply)
@@ -3676,8 +3673,11 @@ void Aura::SpellAuraModStealth(bool apply)
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH )
 			m_target->SetStealth(GetSpellId());
 
+		// Stealth level (not for normal stealth... ;p)
 		if( m_spellProto->NameHash == SPELL_HASH_STEALTH )
 			m_target->SetFlag(UNIT_FIELD_BYTES_2,0x1E000000);//sneak anim
+		else
+			m_target->m_stealthLevel += mod->m_amount;
 		
 		m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x020000);
 
@@ -3685,11 +3685,11 @@ void Aura::SpellAuraModStealth(bool apply)
 			m_target->SetFlag(PLAYER_FIELD_BYTES2, 0x2000);
 
 		m_target->RemoveAurasByInterruptFlag(AURA_INTERRUPT_ON_STEALTH);
-		//m_target->m_stealthLevel += mod->m_amount;
 
 		if( m_target->HasDummyAura(SPELL_HASH_OVERKILL) )
 			m_target->CastSpell(m_target, 58427, true);
 
+		
 		// hack fix for vanish stuff
 		if( m_spellProto->NameHash == SPELL_HASH_VANISH && m_target->GetTypeId() == TYPEID_PLAYER )	 // Vanish
 		{
@@ -3713,7 +3713,8 @@ void Aura::SpellAuraModStealth(bool apply)
 	}
 	else 
 	{
-		//m_target->m_stealthLevel -= mod->m_amount;
+		if( m_spellProto->NameHash != SPELL_HASH_STEALTH )
+			m_target->m_stealthLevel -= mod->m_amount;
 
 		if( m_spellProto->NameHash != SPELL_HASH_VANISH  ) 
 		{
@@ -6024,12 +6025,21 @@ void Aura::SpellAuraSchoolAbsorb(bool apply)
 		PlayerPointer plr = TO_PLAYER( GetUnitCaster() );
 		if( plr )
 		{
+			float otcoef = GetSpellProto()->OTspell_coef_override;
+			float ddcoef = GetSpellProto()->Dspell_coef_override;
+			float coefmod = 0;
+			SM_FFValue( plr->SM[SMT_SPD_BONUS][0], &coefmod, m_spellProto->SpellGroupType );
+			SM_FFValue( plr->SM[SMT_SPD_BONUS][1], &coefmod, m_spellProto->SpellGroupType );
+		
+			otcoef += coefmod / 100;
+			ddcoef += coefmod / 100;
+
 			//For spells Affected by Bonus Healing we use Dspell_coef_override.
-			if( GetSpellProto()->Dspell_coef_override >= 0 )
-				val += float2int32( float( plr->HealDoneMod[GetSpellProto()->School] ) * GetSpellProto()->Dspell_coef_override );
+			if( ddcoef > 0 )
+				val += float2int32( float( plr->HealDoneMod[GetSpellProto()->School] ) * ddcoef );
 			//For spells Affected by Bonus Damage we use OTspell_coef_override.
-			else if( GetSpellProto()->OTspell_coef_override >= 0 )
-				val += float2int32( float( plr->GetDamageDoneMod( GetSpellProto()->School ) ) * GetSpellProto()->OTspell_coef_override );
+			else if( otcoef > 0 )
+				val += float2int32( float( plr->GetDamageDoneMod( GetSpellProto()->School ) ) * otcoef );
 			
 			if( GetSpellProto()->AP_coef_override > 0 )
 				val += float2int32(caster->GetAP() * GetSpellProto()->AP_coef_override);
@@ -6505,7 +6515,7 @@ void Aura::SpellAuraSplitDamage(bool apply)
 		ds->m_flatDamageSplit = 0;
 		ds->m_spellId = GetSpellProto()->Id;
 		ds->m_pctDamageSplit = mod->m_amount / 100.0f;
-		ds->damage_type = mod->m_type;
+		ds->damage_type = mod->m_miscValue;
 		ds->m_target = m_spellProto->Id == 19028 ? m_target->GetGUID() : caster->GetGUID();
 	}
 
@@ -6771,11 +6781,6 @@ void Aura::EventPeriodicDamagePercent(uint32 amount)
 		return;
 
 	uint32 damage = float2int32(amount/100.0f*m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-
-	if( m_target->m_damageSplitTarget.active)
-	{
-		damage = m_target->DoDamageSplitTarget(damage, GetSpellProto()->School, false);
-	}
 
 	UnitPointer c = GetUnitCaster();
 	if(c)

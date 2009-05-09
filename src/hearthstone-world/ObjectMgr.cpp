@@ -1709,8 +1709,8 @@ void ObjectMgr::GenerateLevelUpInfo()
 				{
 				case PRIEST:
 					{
-						BaseMana = uint32(48.2875f * Level);
 						BaseHP = uint32(87 * Level);
+						BaseMana = uint32(48.2875f * Level);
 						break;
 					}
 				case WARRIOR:
@@ -1725,7 +1725,7 @@ void ObjectMgr::GenerateLevelUpInfo()
 					}
 				case HUNTER:
 					{
-						BaseHP = uint32(104.325f * Level);
+						BaseHP = uint32(91.55f * Level);
 						BaseMana = uint32(63.075f * Level);
 						break;
 					}
@@ -1736,7 +1736,7 @@ void ObjectMgr::GenerateLevelUpInfo()
 					}
 				case SHAMAN:
 					{
-						BaseHP = uint32(85.1125f * Level);
+						BaseHP = uint32(81.0625f * Level);
 						BaseMana = uint32(54.95f * Level);
 						break;
 					}
@@ -1748,7 +1748,7 @@ void ObjectMgr::GenerateLevelUpInfo()
 					}
 				case PALADIN:
 					{
-						BaseHP = uint32(87.05f * Level);
+						BaseHP = uint32(86.675f * Level);
 						BaseMana = uint32(54.925f * Level);
 						break;
 					}
@@ -1760,8 +1760,8 @@ void ObjectMgr::GenerateLevelUpInfo()
 					}
 				case WARLOCK:
 					{
-						BaseHP = uint32(104.425f * Level);
-						BaseMana = uint32(52.975f * Level);
+						BaseHP = uint32(89.55f * Level);
+						BaseMana = uint32(48.2f * Level);
 						break;
 					}
 				}

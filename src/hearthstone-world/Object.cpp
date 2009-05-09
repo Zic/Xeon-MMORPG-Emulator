@@ -1610,6 +1610,20 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		}
 	}
 
+	// Paladin: Blessing of Sacrifice, and Warlock: Soul Link
+	if( pVictim->m_damageSplitTarget.active)
+	{
+		if( spellId )
+		{
+			SpellEntry *spell = dbcSpell.LookupEntry(spellId);
+			damage = (float)pVictim->DoDamageSplitTarget(damage, spell->School, false);
+		}
+		else
+		{
+			damage = (float)pVictim->DoDamageSplitTarget(damage, 0, true);
+		}
+	}
+
 	if(IsUnit() && unit_shared_from_this()->isAlive() )
 	{
 		if( unit_shared_from_this() != pVictim && pVictim->IsPlayer() && IsPlayer() && plr_shared_from_this()->m_hasInRangeGuards )
@@ -1682,7 +1696,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 		}
 	}
 
-	// Nerves of Steel
+	// Nerves of Steel very very ugly!!! need proper fix
 	if( pVictim->HasDummyAura(SPELL_HASH_NERVES_OF_STEEL) )
 	{
 		if( pVictim->IsStunned() || pVictim->m_fearmodifiers )
@@ -2479,12 +2493,6 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 		res = 0;
 		dmg.resisted_damage = dmg.full_damage;
 	}
-
-	// Paladin: Blessing of Sacrifice, and Warlock: Soul Link
-	if( pVictim->m_damageSplitTarget.active)
-	{
-		res = (float)pVictim->DoDamageSplitTarget((uint32)res, school, false);
-	}
 	
 //==========================================================================================
 //==============================Data Sending ProcHandling===================================
@@ -2534,7 +2542,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 	if( school == SHADOW_DAMAGE )
 	{
 		if( IsPlayer() && unit_shared_from_this()->isAlive() && plr_shared_from_this()->getClass() == PRIEST )
-			plr_shared_from_this()->VampiricSpell(float2int32(res), pVictim);
+			plr_shared_from_this()->VampiricSpell(float2int32(res), pVictim, dbcSpell.LookupEntry(spellID));
 
 		if( pVictim->isAlive() && IsUnit() )
 		{

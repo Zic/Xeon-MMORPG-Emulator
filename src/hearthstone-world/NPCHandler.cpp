@@ -276,13 +276,10 @@ uint8 WorldSession::TrainerGetSpellStatus(TrainerSpell*  pSpell)
 	if(!pSpell->pCastSpell && !pSpell->pLearnSpell)
 		return TRAINER_STATUS_NOT_LEARNABLE;
 
-	if( pSpell->pCastRealSpell && (_player->HasSpell(pSpell->pCastRealSpell->Id) || _player->HasDeletedSpell(pSpell->pCastRealSpell->Id)) )
+	if( pSpell->pCastRealSpell && (_player->HasSpell(pSpell->pCastRealSpell->Id)) )
 		return TRAINER_STATUS_ALREADY_HAVE;
 
-	if( pSpell->pLearnSpell && (_player->HasSpell(pSpell->pLearnSpell->Id) || _player->HasDeletedSpell(pSpell->pLearnSpell->Id)) )
-		return TRAINER_STATUS_ALREADY_HAVE;
-
-	if(pSpell->DeleteSpell && _player->HasDeletedSpell(pSpell->DeleteSpell))
+	if( pSpell->pLearnSpell && (_player->HasSpell(pSpell->pLearnSpell->Id)) )
 		return TRAINER_STATUS_ALREADY_HAVE;
 
 	if(	(pSpell->RequiredLevel && _player->getLevel()<pSpell->RequiredLevel)

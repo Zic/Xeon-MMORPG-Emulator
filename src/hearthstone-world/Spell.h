@@ -305,7 +305,7 @@ enum procFlags
     PROC_ON_DODGE_VICTIM            = 0x2000000,//added it as custom, maybe already exists in another form ?
     PROC_ON_DIE                     = 0x4000000,//added it as custom, maybe already exists in another form ?
     PROC_REMOVEONUSE                = 0x8000000,//remove prochcharge only when it is used
-    PROC_MISC                       = 0x10000000,//our custom flag to decide if proc dmg or shield
+    PROC_MISC		                = 0x10000000,// depending on destination, flag can be freely used (spell cant visit strike function)
     PROC_ON_BLOCK_VICTIM            = 0x20000000,//added it as custom, maybe already exists in another form ?
     PROC_ON_SPELL_CRIT_HIT          = 0x40000000,//added it as custom, maybe already exists in another form ?
     PROC_TARGET_SELF               = 0x80000000,//our custom flag to decide if proc target is self or victim
@@ -1890,6 +1890,7 @@ public:
     void SpellTargetTargetPartyMember(uint32 i, uint32 j);
     void SpellTargetSameGroupSameClass(uint32 i, uint32 j);
 	void SpellTargetPositionOfTarget(uint32 i, uint32 j);
+	void SpellTargetAreaOfEffect87(uint32 i, uint32 j);
 
 	uint64 static FindLowestHealthRaidMember(PlayerPointer Target, uint32 dist);
 

@@ -1302,6 +1302,14 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->EffectTriggerSpell[0] = 53719;
 				}break;
 
+			// Seal of Blood/Martyr holy dmg
+			case 31893:
+			case 53719:
+				{
+					sp->School = SCHOOL_HOLY; 
+					sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC; 
+				}break;
+
 			//paladin - seal of command
 			case 20375:
 				{
@@ -2013,19 +2021,19 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//warlock	-	 soul	link
 			case  19028:
 				{
-				//this is	for	the	trigger	effect
-						sp->Effect[0]=SPELL_EFFECT_APPLY_AURA;
+						sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
 						sp->EffectApplyAuraName[0] = SPELL_AURA_SPLIT_DAMAGE;
-						sp->EffectMiscValue[0]=20;
-				//sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
-		
-				//this is	for	the	extra	5% dmg for caster	and	pet
-						sp->Effect[1]	=	6;
+						sp->EffectBasePoints[0] = 20;
+						sp->EffectMiscValue[0] = 127;
+						sp->EffectImplicitTargetA[0] = EFF_TARGET_PET;
+						sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET;
+						
+						sp->Effect[1] = 6;
 						sp->EffectApplyAuraName[1] = 79;
-						sp->EffectBasePoints[1]	=	4; //4+1=5
+						sp->EffectBasePoints[1]	= 4;
 						sp->EffectImplicitTargetA[1] = EFF_TARGET_SELF;
 						sp->EffectImplicitTargetB[1] = EFF_TARGET_PET;
-						sp->c_is_flags |=	SPELL_FLAG_IS_EXPIREING_WITH_PET;
+						sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET;
 				}break;
 		
 			//warlock: Nightfall
@@ -2077,27 +2085,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 47196:
 			case 47197:
 				{
-						// ill handle this in deal damage
-						sp->procFlags = 0;
-						sp->procChance = 0;
-						sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
+						sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION;
+						sp->EffectSpellClassMask[0][0] = 2;
 				}break;
-			
-			//warlock: Empowered Corruption
-			case  32381:
-				{
-						sp->EffectBasePoints[0]	*= 6;
-				}break;
-			case  32382:
-				{
-						sp->EffectBasePoints[0]	*= 6;
-				}break;
-			case  32383:
-				{
-						sp->EffectBasePoints[0]	*= 6;
-				}break;
-		
+					
 			//warlock: Improved	Enslave	Demon
 			case  18821:
 				{
@@ -2359,9 +2350,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  35705:
 			case  35706:
 				{
-						sp->c_is_flags |=	SPELL_FLAG_IS_EXPIREING_WITH_PET;
-						sp->Effect[0]	=	SPELL_EFFECT_APPLY_AURA;
-						sp->Effect[1]	=	0; //hacks,	we are handling	this in	another	way
+						sp->c_is_flags |= SPELL_FLAG_IS_EXPIREING_WITH_PET;
+						sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+						sp->Effect[1] = SPELL_EFFECT_APPLY_AURA;
 				}break;
 			//warlock	-	Improved Healthstone
 			case  18692:
@@ -2799,10 +2790,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  37447:
 				{
 						sp->Effect[0]	=	6;
-						sp->EffectApplyAuraName[0] = SPELL_AURA_PROC_TRIGGER_SPELL;
+						sp->EffectApplyAuraName[1] = SPELL_AURA_PROC_TRIGGER_SPELL;
 						sp->procChance = 100;
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
-						sp->EffectTriggerSpell[0]	=	37445;
+						sp->EffectTriggerSpell[1]	=	37445;
 						sp->maxstack = 1;
 				}break;
 
@@ -3032,7 +3023,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				}break;
 
 			// Gnomish Lightning Generator
-			case 56469:
+			case 55039:
 				{
 						sp->InterruptFlags = 0;
 						sp->AuraInterruptFlags = 0;
@@ -3077,7 +3068,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//Idol of terror
 			case 43737:
 				{
-						sp->procFlags = PROC_ON_MELEE_ATTACK;
+						sp->procFlags = PROC_ON_CAST_SPELL;
 				}break;
 			// Lesser	Heroism	(Tenacious Earthstorm	Diamond)
 			case  32844:
@@ -3289,6 +3280,10 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 		
 			// Ashtongue Talisman	of Shadows 
 			case  40478:
+				{
+						sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION;
+				}break;
+
 			// Ashtongue Talisman	of Swiftness
 			case  40485:
 			// Ashtongue Talisman	of Valor
@@ -3729,6 +3724,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  20424:
 				{
 						sp->is_melee_spell = true;
+						sp->Spell_Dmg_Type = SPELL_DMG_TYPE_MAGIC;
+						sp->School = SCHOOL_HOLY;
 				}break;
 
 			// Illumination
@@ -4277,12 +4274,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 
 			// Mass dispel
 			case 32375:
-				{
-						sp->procChance = 100;
-						sp->procFlags = PROC_ON_CAST_SPELL;
-						sp->EffectImplicitTargetA[1] = 1;
-				}break;
-
 			case 32592:
 				{
 						sp->procFlags = PROC_ON_CAST_SPELL;
@@ -4776,6 +4767,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 					sp->procFlags = PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_MELEE_ATTACK;
 				}break;
+			// Swipe (cat) max targets, fixed in 3.1
+			case 62078:
+				{
+					sp->MaxTargets = 10;
+				}break;
+
 			//////////////////////////////////////////
 			// BOSSES								//
 			//////////////////////////////////////////
@@ -5598,6 +5595,11 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 58691://Pandemic
 				{
 					sp->spell_can_crit = false;
+				}break;
+			case 54197:
+				{
+					sp->Effect[0] = SPELL_EFFECT_APPLY_AURA;
+					sp->EffectApplyAuraName[0] = SPELL_AURA_DUMMY;
 				}break;
 		}
 
@@ -7022,7 +7024,10 @@ void ApplyNormalFixes()
 
 		// Insert priest spell fixes here
 		if( sp->NameHash == SPELL_HASH_BORROWED_TIME )
+		{
 			sp->procFlags = PROC_ON_CAST_SPELL;
+			sp->EffectApplyAuraName[1] = SPELL_AURA_ADD_PCT_MODIFIER;
+		}
 
 		if( sp->NameHash == SPELL_HASH_IMPROVED_SPIRIT_TAP )
 			sp->procFlags = PROC_ON_SPELL_CRIT_HIT;
@@ -7032,6 +7037,34 @@ void ApplyNormalFixes()
 
 		if( sp->NameHash == SPELL_HASH_POWER_INFUSION )
 			sp->buffType = SPELL_TYPE_HASTE;
+
+		// Pure hax
+		if( sp->NameHash == SPELL_HASH_LIGHTWELL )
+		{
+			sp->Effect[0] = 50; //Spawn GO
+			switch(sp->Id)
+			{
+			case 724:
+				sp->EffectMiscValue[0] = 300000;
+				break;
+			case 27870:
+				sp->EffectMiscValue[0] = 300001;
+				break;
+			case 27871:
+				sp->EffectMiscValue[0] = 300002;
+				break;
+			case 28275:
+				sp->EffectMiscValue[0] = 300003;
+				break;
+			case 48086:
+				sp->EffectMiscValue[0] = 300004;
+				break;
+			case 48087:
+				sp->EffectMiscValue[0] = 300005;
+				break;
+			}
+		}
+
 
 		//////////////////////////////////////////
 		// SHAMAN								//

@@ -194,7 +194,7 @@ void Spell::SpellEffectNULL(uint32 i)
 
 void Spell::SpellEffectInstantKill(uint32 i)
 {
-	if(!unitTarget || !unitTarget->isAlive())
+	if( !unitTarget || !unitTarget->isAlive() || !u_caster )
 		return;
 
 	//Sacrifice: if spell caster has "void walker" pet, pet dies and spell caster gets a 
@@ -250,36 +250,39 @@ void Spell::SpellEffectInstantKill(uint32 i)
 
 	case 18788: //Demonic Sacrifice (508745)
 		{
-			uint32 spellid1 = 0;
-			switch(unitTarget->GetEntry())
+			if( p_caster )
 			{
-				case 416: //Imp
-				{   
-					spellid1 = 18789;
-				}break;
-				case 417: //Felhunter
+				uint32 spellid1 = 0;
+				switch(unitTarget->GetEntry())
 				{
-					spellid1 = 18792;
-				}break;
-				case 1860: //VoidWalker
+					case 416: //Imp
+					{   
+						spellid1 = 18789;
+					}break;
+					case 417: //Felhunter
+					{
+						spellid1 = 18792;
+					}break;
+					case 1860: //VoidWalker
+					{
+						spellid1 = 18790;
+					}break;
+					case 1863: //Succubus
+					{
+						spellid1 = 18791;
+					}break;
+					case 17252: //felguard
+					{
+						spellid1 = 35701;
+					}break;
+				}
+				//now caster gains this buff
+				if (spellid1 && spellid1 != 0)
 				{
-					spellid1 = 18790;
-				}break;
-				case 1863: //Succubus
-				{
-					spellid1 = 18791;
-				}break;
-				case 17252: //felguard
-				{
-					spellid1 = 35701;
-				}break;
+					u_caster->CastSpell(u_caster, dbcSpell.LookupEntry(spellid1), true);
+				}
 			}
-			//now caster gains this buff
-			if (spellid1 && spellid1 != 0)
-			{
-				u_caster->CastSpell(u_caster, dbcSpell.LookupEntry(spellid1), true);
-			}
-		}
+		}break;
 
 	case 7812: //Sacrifice Voidwalker
 	case 19438:
@@ -345,6 +348,7 @@ void Spell::SpellEffectInstantKill(uint32 i)
 
 		}break;
 	case SPELL_HASH_DIVINE_INTERVENTION:
+	case SPELL_HASH_DEMONIC_SACRIFICE:
 		{
 		}break;
 	default:
@@ -2336,17 +2340,21 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 			{
 				if (!unitTarget->IsPlayer() || !unitTarget->isAlive())
 					break;
+
 				PlayerPointer mPlayer = TO_PLAYER( unitTarget );
 				if (!mPlayer->IsInFeralForm() || 
 					(mPlayer->GetShapeShift() != FORM_BEAR &&
 					mPlayer->GetShapeShift() != FORM_DIREBEAR))
 					break;
+
 				uint32 val = mPlayer->GetUInt32Value(UNIT_FIELD_POWER2);
-				if (val>100)
+				if (val > 100)
 					val = 100;
-				mPlayer->SetUInt32Value(UNIT_FIELD_POWER2,mPlayer->GetUInt32Value(UNIT_FIELD_POWER2)-val);
+
+				mPlayer->SetUInt32Value(UNIT_FIELD_POWER2, mPlayer->GetUInt32Value(UNIT_FIELD_POWER2) - val);
 				if (val)
-					mPlayer->Heal(mPlayer,22845,uint32(val*2.5f));
+					mPlayer->Heal(mPlayer, 22845, mPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * ((val / 10) * 0.3f));
+			
 			}break;
 		case 18562: //druid - swiftmend
 			{
@@ -3001,11 +3009,6 @@ void Spell::SpellEffectSummon(uint32 i)
 	case SUMMON_TYPE_CRITTER:
 		{
 			SummonNonCombatPet(i);
-			break;
-		}
-	case SUMMON_TYPE_LIGHTWELL:
-		{
-			SummonLightwell(i);
 			break;
 		}
 	default:
@@ -4298,7 +4301,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		p_caster->SetSummonedObject( go );
 	}
 	else
-	{//portal, lightwell
+	{//portal
 		posx=px;
 		posy=py;		
 		GameObjectInfo * goI = GameObjectNameStorage.LookupEntry(entry);
@@ -4313,12 +4316,23 @@ void Spell::SpellEffectSummonObject(uint32 i)
 		}
 
 		GameObjectPointer go=u_caster->GetMapMgr()->CreateGameObject(entry);
-		if( go == NULL || !go->CreateFromProto(entry,mapid,posx,posy,pz,orient, 0.0f, 0.0f, 0.0f, 0.0f))
+		if( go == NULL )
 			return;
-	
+
+		if( m_spellInfo->NameHash == SPELL_HASH_LIGHTWELL )
+		{
+			if( !go->CreateFromProto(entry, mapid, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f) )
+				return;
+		}
+		else
+		{
+			if( !go->CreateFromProto(entry, mapid, posx, posy, pz, orient, 0.0f, 0.0f, 0.0f, 0.0f) )
+				return;
+		}
+
 		go->SetInstanceID(m_caster->GetInstanceID());
 		go->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 1);
-		go->SetUInt64Value(OBJECT_FIELD_CREATED_BY,m_caster->GetGUID());
+		go->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUID());
 		go->PushToWorld(m_caster->GetMapMgr());	  
 		sEventMgr.AddEvent(go, &GameObject::ExpireAndDelete, EVENT_GAMEOBJECT_EXPIRE, GetDuration(), 1,0);
 		if(entry ==17032)//this is a portal
@@ -4366,7 +4380,7 @@ void Spell::SpellEffectSummonObject(uint32 i)
 			go->m_ritualcaster = p_caster->GetLowGUID();
 			go->m_ritualspell = m_spellInfo->Id;
 		}
-		else //lightwell is npc now :P
+		else
 		{
 			go->charges = 10;
 		}
@@ -5482,6 +5496,7 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 		{
 			if( p_caster == NULL || unitTarget == NULL)
 				return; //can't imagine how this talent got to anybody else then a player casted on pet
+			
 			uint32 casted_spell_id = 0 ;
 			uint32 inc_resist_by_level = 0 ;
 			uint32 inc_resist_by_level_spell = 0 ;
@@ -5500,8 +5515,6 @@ void Spell::SpellEffectScriptEffect(uint32 i) // Script Effect
 			else if ( unitTarget->GetUInt32Value( OBJECT_FIELD_ENTRY ) == 17252 ) //Felguard
 			{
 				casted_spell_id = 35706 ;
-				inc_resist_by_level_spell = 23840 ;
-				inc_resist_by_level = 50 ;
 			}
 			if( casted_spell_id )
 			{

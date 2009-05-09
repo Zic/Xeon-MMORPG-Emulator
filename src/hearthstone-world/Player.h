@@ -2076,8 +2076,7 @@ public:
 	uint32 m_castFilter[3];	// spell group relation of only spells that player can currently cast 
 
 	uint32 m_vampiricEmbrace;
-	uint32 m_vampiricTouch;
-	void VampiricSpell(uint32 dmg, UnitPointer pTarget);
+	void VampiricSpell(uint32 dmg, UnitPointer pTarget, SpellEntry *spellinfo);
 
 	// grounding totem
 	AuraPointer m_magnetAura;
