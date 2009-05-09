@@ -4592,6 +4592,13 @@ void Player::AddToFinishedDailyQuests(uint32 quest_id)
 	DailyMutex.Release();
 }
 
+void Player::ResetDailyQuests()
+{
+	m_finishedDailyQuests.clear();
+	for(uint32 i = 0; i < 25; i++)
+		SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + i, 0);
+}
+
 bool Player::HasFinishedDailyQuest(uint32 quest_id)
 {
 	return (m_finishedDailyQuests.find(quest_id) != m_finishedDailyQuests.end());

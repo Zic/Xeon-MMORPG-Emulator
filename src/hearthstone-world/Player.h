@@ -911,29 +911,30 @@ public:
 		return GetQuestLogForEntry(qid) != NULL;
 	}
 
-	int32                GetOpenQuestSlot();
-	QuestLogEntry*       GetQuestLogForEntry(uint32 quest);
-	HEARTHSTONE_INLINE QuestLogEntry*GetQuestLogInSlot(uint32 slot)  { return m_questlog[slot]; }
-    HEARTHSTONE_INLINE uint32        GetQuestSharer()                { return m_questSharer; }
-    
-    HEARTHSTONE_INLINE void         SetQuestSharer(uint32 guid)     { m_questSharer = guid; }
-    void                SetQuestLogSlot(QuestLogEntry *entry, uint32 slot);
-    
-    HEARTHSTONE_INLINE void         PushToRemovedQuests(uint32 questid)	{ m_removequests.insert(questid);}
+	int32				GetOpenQuestSlot();
+	QuestLogEntry*GetQuestLogForEntry(uint32 quest);
+	HEARTHSTONE_INLINE QuestLogEntry*GetQuestLogInSlot(uint32 slot){ return m_questlog[slot]; }
+	HEARTHSTONE_INLINE uint32 GetQuestSharer(){ return m_questSharer; }
+
+	HEARTHSTONE_INLINE void	SetQuestSharer(uint32 guid{ m_questSharer = guid; }
+	void				SetQuestLogSlot(QuestLogEntry *entry, uint32 slot);
+
+	HEARTHSTONE_INLINE void		PushToRemovedQuests(uint32 questid)	{ m_removequests.insert(questid);}
 	HEARTHSTONE_INLINE uint32		GetFinishedDailiesCount() { return (uint32)m_finishedDailyQuests.size(); }
-    void                AddToFinishedQuests(uint32 quest_id);
+	void				AddToFinishedQuests(uint32 quest_id);
 	void				AddToFinishedDailyQuests(uint32 quest_id);
 	void				EventTimedQuestExpire(Quest *qst, QuestLogEntry *qle, uint32 log_slot, uint32 interval);
 	
-	bool                HasFinishedQuest(uint32 quest_id);
+	bool				HasFinishedQuest(uint32 quest_id);
 	bool				HasFinishedDailyQuest(uint32 quest_id);
-	bool                HasQuestForItem(uint32 itemid);
-    bool                CanFinishQuest(Quest* qst);
-	bool                HasQuestSpell(uint32 spellid);
-	void                RemoveQuestSpell(uint32 spellid);
-	bool                HasQuestMob(uint32 entry);
-	void                RemoveQuestMob(uint32 entry);
-	void                RemoveQuestsFromLine(int skill_line);
+	bool				HasQuestForItem(uint32 itemid);
+	bool				CanFinishQuest(Quest* qst);
+	bool				HasQuestSpell(uint32 spellid);
+	void				RemoveQuestSpell(uint32 spellid);
+	bool				HasQuestMob(uint32 entry);
+	void				RemoveQuestMob(uint32 entry);
+	void				RemoveQuestsFromLine(int skill_line);
+	void				ResetDailyQuests();
 
 	//Quest related variables
 	uint32 m_questbarrier1[25];

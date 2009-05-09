@@ -2690,16 +2690,10 @@ void ObjectMgr::ResetDailies()
 	for(; itr != _players.end(); itr++)
 	{
 		PlayerPointer pPlayer = itr->second;
-		if(pPlayer!=NULL && pPlayer->IsInWorld())
-		{
-			pPlayer->DailyMutex.Acquire();
-			pPlayer->m_finishedDailyQuests.clear();
-			for(uint32 i = 0; i < 25; i++)
-			{
-				pPlayer->SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + i, 0);
-			}
-			pPlayer->DailyMutex.Release();
-		}
+		uint8 eflags = 0;
+		if( pPlayer->IsInWorld() )
+			flags = EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT;
+		sEventMgr.AddEvent(pPlayer, &Player::ResetDailyQuests, EVENT_PLAYER_UPDATE, 100, 0, eflags);
 	}
 	_playerslock.ReleaseReadLock();
 }
