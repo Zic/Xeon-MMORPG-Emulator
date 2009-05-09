@@ -3317,8 +3317,8 @@ void Aura::EventPeriodicHeal( uint32 amount )
 				(TO_UNIT(*itr))->GetAIInterface()->HealReaction(u_caster, m_target, threat, m_spellProto);
 			}
 		}
+		u_caster->HandleProc(PROC_ON_SPELL_LAND, m_target, m_spellProto, add);
 	}
-	u_caster->HandleProc(PROC_ON_SPELL_LAND, m_target, m_spellProto, add);
 }
 
 void Aura::SpellAuraModAttackSpeed(bool apply)
