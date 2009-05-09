@@ -2439,17 +2439,6 @@ void Aura::SpellAuraDummy(bool apply)
 					m_target->m_noInterrupt = 0;
 			}*/
 		}break;
-	case 17056://Furor
-	case 17058:
-	case 17059:
-	case 17060:
-	case 17061:
-		{
-			if(apply)
-				_ptarget->m_furorChance += mod->m_amount;
-			else
-				_ptarget->m_furorChance -= mod->m_amount;
-		}break;
 	case 12295:
 	case 12676:
 	case 12677:
@@ -2463,10 +2452,6 @@ void Aura::SpellAuraDummy(bool apply)
 	case 2096://MindVision
 		{
 		}break;
-	case 54518:	// Penance
-		{
-			;	// TODO
-		}
 	case 6196://FarSight
 		{
 			if(apply)
@@ -4558,8 +4543,8 @@ void Aura::SpellAuraModShapeshift(bool apply)
 				else //TAUREN
 					modelId = 8571;
 
-				if( m_target->HasDummyAura(SPELL_HASH_FUROR) )
-					m_target->SetUInt32Value(UNIT_FIELD_POWER4, m_target->GetDummyAura(SPELL_HASH_FUROR)->RankNumber * 20);
+				if( p_target->HasDummyAura(SPELL_HASH_FUROR) )
+					p_target->SetUInt32Value(UNIT_FIELD_POWER4, p_target->GetDummyAura(SPELL_HASH_FUROR)->RankNumber * 20);
 			}
 			else
 			{//turn back to mana
@@ -4798,13 +4783,11 @@ void Aura::SpellAuraModShapeshift(bool apply)
 
 		if( m_target->getClass() == DRUID )
 		{
-			if( Rand( TO_PLAYER( m_target )->m_furorChance ) )
+			if( m_target->HasDummyAura(SPELL_HASH_FUROR) && Rand( m_target->GetDummyAura(SPELL_HASH_FUROR)->RankNumber * 20 ) )
 			{
-				uint32 furorSpell;
+				uint32 furorSpell = 0;
 				if( mod->m_miscValue == FORM_BEAR || mod->m_miscValue == FORM_DIREBEAR )
 					furorSpell = 17057;
-				else
-					furorSpell = 0;
 
 				if( furorSpell != 0 )
 				{
@@ -9457,9 +9440,9 @@ void Aura::UpdateModAmounts()
 {
 	for(uint32 i=0; i<m_modcount; i++)
 	{
-		if( m_modList[i].m_baseAmount <= 0 && GetUnitCaster() && GetTarget() )
+		if( m_modList[i].m_baseAmount == 0 && GetUnitCaster() && GetTarget() )
 		{
-			bool heal = (GetSpellProto()->c_is_flags & SPELL_FLAG_IS_HEALING) ? true: false;
+			bool heal = (GetSpellProto()->c_is_flags & SPELL_FLAG_IS_HEALING) ? true : false;
 			m_modList[i].m_amount = GetUnitCaster()->GetSpellBonusDamage(GetTarget(), GetSpellProto(), 0, true, heal) * (stackSize - 1);
 		}
 		else
@@ -9526,8 +9509,11 @@ void Aura::SpellAuraModDamageTakenByMechPCT(bool apply)
 	if( !m_target )
 		return;
 
-	if( mod->m_miscValue < 26 )
-		m_target->ModDamageTakenByMechPCT[mod->m_miscValue] += float2int32(mod->m_amount / 100.0f);
+	if( mod->m_miscValue >= MECHANIC_COUNT )
+		return;
+
+	float val = apply ? mod->m_amount / 100.0f : -(mod->m_amount / 100.0f);
+	m_target->ModDamageTakenByMechPCT[mod->m_miscValue] += val;
 }
 
 void Aura::SpellAuraAddCreatureImmunity(bool apply)

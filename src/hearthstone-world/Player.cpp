@@ -64,7 +64,6 @@ void Player::Init()
 	SoulStone			   = 0;
 	SoulStoneReceiver		= 0;
 	bReincarnation			= false;
-	m_furorChance			= 0;
 	Seal					= 0;
 	m_session			   = 0;
 	TrackingSpell		   = 0;

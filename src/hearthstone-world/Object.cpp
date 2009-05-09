@@ -2210,18 +2210,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			{
 				PlayerPointer plra = TO_PLAYER(shared_from_this());
 				SpellEntry *spentry = dbcSpell.LookupEntry( spellId );
-				if( spentry->NameHash == SPELL_HASH_CORRUPTION && plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] <= getMSTime() )
-				{
-					if( plra->HasDummyAura(SPELL_HASH_ERADICATION) && Rand(spentry->RankNumber * 3 + 1) )
-					{
-						SpellPointer sp(new Spell(shared_from_this(), dbcSpell.LookupEntry(47274), true, NULLAURA));
-						SpellCastTargets targets;
-						targets.m_unitTarget = plra->GetGUID();
-						sp->prepare(&targets);
-						plra->m_CustomTimers[CUSTOM_TIMER_ERADICATION] = getMSTime() + 30000;
-					}
-				}
-				else if( (spentry->NameHash == SPELL_HASH_CORRUPTION || spentry->NameHash == SPELL_HASH_UNSTABLE_AFFLICTION) && plra->HasDummyAura(SPELL_HASH_PANDEMIC) )
+				if( (spentry->NameHash == SPELL_HASH_CORRUPTION || spentry->NameHash == SPELL_HASH_UNSTABLE_AFFLICTION) && plra->HasDummyAura(SPELL_HASH_PANDEMIC) )
 				{
 					if( Rand( plra->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1_5) ) && pVictim )
 					{

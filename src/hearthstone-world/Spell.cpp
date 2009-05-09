@@ -4273,7 +4273,21 @@ exit:*/
 	}
 	
 	if( p_caster != NULL )
-	{	
+	{
+		int32 comboDamage = (int32)m_spellInfo->EffectPointsPerComboPoint[i];
+	
+		if(comboDamage)
+		{
+			if( m_spellInfo->NameHash != SPELL_HASH_EVISCERATE ) //Eviscerate
+			{
+				value += ( comboDamage * p_caster->m_comboPoints );
+				m_requiresCP = true;
+				//this is ugly so i will explain the case maybe someone ha a better idea :
+				// while casting a spell talent will trigger uppon the spell prepare faze
+				// the effect of the talent is to add 1 combo point but when triggering spell finishes it will clear the extra combo point
+				p_caster->m_spellcomboPoints = 0;	
+			}
+		}
 		SpellOverrideMap::iterator itr = p_caster->mSpellOverrideMap.find(m_spellInfo->Id);
 		if(itr != p_caster->mSpellOverrideMap.end())
 		{
