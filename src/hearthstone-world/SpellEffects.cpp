@@ -7192,73 +7192,81 @@ void Spell::SpellEffectCreateRandomItem(uint32 i) // Create Random Item
 
 	skilllinespell* skill = objmgr.GetSpellSkill(m_spellInfo->Id);
 
-	for(int j=0; j<3; j++) // now create the Items
-	{
-		ItemPrototype *m_itemProto;
-		itemid	=	m_spellInfo->EffectItemType[i];
-		m_itemProto = ItemPrototypeStorage.LookupEntry( m_spellInfo->EffectItemType[j] );
-		if (!m_itemProto)
-			 continue;
+	ItemPrototype *m_itemProto;
+	itemid	=	m_spellInfo->EffectItemType[i];
+	m_itemProto = ItemPrototypeStorage.LookupEntry( m_spellInfo->EffectItemType[i] );
+	if (!m_itemProto)
+		 return;
 
-		if(itemid == 0)
-			continue;
+	if(itemid == 0)
+		return;
 
-		uint32 item_count = 0;
-		// Random Item to Create Jewelcrafting part
-		RandomItemCreation * ric = RandomItemCreationStorage.LookupEntry( m_spellInfo->Id );
-		// If we Have Perfect Gem Cutting then we have a chance to create a Perfect Gem, according to comments on wowhead chance is between 20 and 30%
-		if ( ric && Rand(ric->Chance) && ric->Skill == SKILL_JEWELCRAFTING && p_caster->HasSpell(55534))
+	uint32 item_count = 0;
+	// Random Item to Create Jewelcrafting part
+	RandomItemCreation * ric = RandomItemCreationStorage.LookupEntry( m_spellInfo->Id );
+	// If we Have Perfect Gem Cutting then we have a chance to create a Perfect Gem, according to comments on wowhead chance is between 20 and 30%
+	if ( ric && Rand(ric->Chance) && ric->Skill == SKILL_JEWELCRAFTING && p_caster->HasSpell(55534))
 		{
 			m_itemProto = ItemPrototypeStorage.LookupEntry( ric->ItemToCreate );
 			itemid	=	ric->ItemToCreate;
 		}
-		//Tarot and Decks from Inscription 
-		if ( ric && ric->Skill == SKILL_INSCRIPTION )
+	//Tarot and Decks from Inscription + Northrend Inscription Research + Minor Inscription Research
+	//Northrend Alchemy
+	if ( ric && (ric->Skill == SKILL_INSCRIPTION || ric->Skill == SKILL_ALCHEMY ))
 		{
 			uint32 k;
-			switch(m_spellInfo->Id)
-			{
-				case 59480:
-				case 59491:
-				case 48247:
-				case 59487:
-					{
-						//Same chance for every card to appear according wowhead and wowwiki info
-						k = RandomUInt(4);
-					}break;
-				case 44317:
-				case 59502:
-				case 59504:
-					{
-						//Same chance for every card to appear according wowhead and wowwiki info
-						k = RandomUInt(31);
-					}break;
-			}
 			RandomCardCreation * rcc = RandomCardCreationStorage.LookupEntry(m_spellInfo->Id);
+			//Same chance for every card to appear according wowhead and wowwiki info
+			k = RandomUInt(rcc->itemcount-1);
 			m_itemProto = ItemPrototypeStorage.LookupEntry( rcc->ItemId[k] );
 			itemid	=	rcc->ItemId[k];
 			item_count = 1;
+			switch(m_spellInfo->Id)
+			{
+				case 61288:
+				case 61177:
+					{
+						item_count = RandomUInt(2);//This 2 can make random scrolls and vellum 1 or 2 according to info
+					}break;
+				case 60893:
+					{
+						item_count = RandomUInt(3);//Creates 3 random elixir/potion from alchemy
+					}break;
+			}
 		}
-		//ToDo Northrend Alchemy Research and move Minor Inscription Research and Northrend Inscription Research
-		//Here we must create an item and also learn a spell and create and item, Use profession dicoveries here 
-		
-		// item count cannot be more than allowed in a single stack
-		if (item_count > m_itemProto->MaxCount)
-			item_count = m_itemProto->MaxCount;
+	// Profession Discoveries used in Northrend Alchemy and Inscription Research plus Minor research
+	ProfessionDiscovery * pf = ProfessionDiscoveryStorage.LookupEntry( m_spellInfo->Id );
+	if( pf && !p_caster->HasSpell( pf->SpellToDiscover ) && Rand( pf->Chance )&& p_caster->_GetSkillLineCurrent( skill->skilline ) >= pf->SkillValue )
+		{
+			// if something discovered learn p_caster that recipe and broadcast message
+			SpellEntry * se = dbcSpell.LookupEntry( pf->SpellToDiscover );
+			if ( se != NULL )
+			{
+				p_caster->addSpell( pf->SpellToDiscover );
+				WorldPacket * data;
+				char msg[256];
+				sprintf( msg, "%sDISCOVERY! %s has discovered how to create %s.|r", MSG_COLOR_GOLD, p_caster->GetName(), se->Name );
+				data = sChatHandler.FillMessageData( CHAT_MSG_SYSTEM, LANG_UNIVERSAL,  msg, p_caster->GetGUID(), 0 );
+				p_caster->GetMapMgr()->SendChatMessageToCellPlayers( p_caster, data, 2, 1, LANG_UNIVERSAL, p_caster->GetSession() );
+			}
+		}
+	// item count cannot be more than allowed in a single stack
+	if (item_count > m_itemProto->MaxCount)
+		item_count = m_itemProto->MaxCount;
 
-		// item count cannot be more than item unique value
-		if (m_itemProto->Unique && item_count > m_itemProto->Unique)
-			item_count = m_itemProto->Unique;
+	// item count cannot be more than item unique value
+	if (m_itemProto->Unique && item_count > m_itemProto->Unique)
+		item_count = m_itemProto->Unique;
 
-		if(p_caster->GetItemInterface()->CanReceiveItem(m_itemProto, item_count, NULL)) 
+	if(p_caster->GetItemInterface()->CanReceiveItem(m_itemProto, item_count, NULL)) 
 		{
 			SendCastResult(SPELL_FAILED_TOO_MANY_OF_ITEM);
 			return;
 		}
 	
-		slot = 0;
-		add = p_caster->GetItemInterface()->FindItemLessMax(m_spellInfo->EffectItemType[j],1, false);
-		if (!add)
+	slot = 0;
+	add = p_caster->GetItemInterface()->FindItemLessMax(itemid,1, false);
+	if (!add)
 		{
 			slotresult = p_caster->GetItemInterface()->FindFreeInventorySlot(m_itemProto);
 			if(!slotresult.Result)
@@ -7319,6 +7327,4 @@ void Spell::SpellEffectCreateRandomItem(uint32 i) // Create Random Item
 			if(skill)
 				DetermineSkillUp(skill->skilline);
 		}
-		
-	}	   
 }

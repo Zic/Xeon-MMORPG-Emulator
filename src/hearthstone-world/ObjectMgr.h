@@ -79,6 +79,7 @@ struct RandomCardCreation
 {
 	uint32 SpellId;
 	uint32 ItemId[32];
+	uint32 itemcount;
 };
 struct ItemPage
 {

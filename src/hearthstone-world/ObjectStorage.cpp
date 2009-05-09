@@ -44,7 +44,7 @@ const char * gTeleportCoordFormat						= "uxuffff";
 const char * gWorldMapInfoFormat						= "uuuuufffusuuuuuuufub";
 const char * gProfessionDiscoveryFormat					= "uuuf";
 const char * gRandomItemCreationFormat					= "uuuu";
-const char * gRandomCardCreationFormat					= "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
+const char * gRandomCardCreationFormat					= "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu";
 const char * gZoneGuardsFormat							= "uuu";
 
 /** SQLStorage symbols

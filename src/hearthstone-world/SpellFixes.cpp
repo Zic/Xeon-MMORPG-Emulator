@@ -687,13 +687,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			//Minor Glyph Research + Northrend Inscription Research
 			case 61177:
 			case 61288:
+			case 60893:
 				{
-					sp->Effect[0]	=	24;
 					sp->Effect[1]	=	0;
 					sp->EffectBaseDice[1]	=	0;
 					sp->EffectBasePoints[1]	=	0;
 					sp->EffectImplicitTargetA[1]	=	0;
-					sp->EffectMiscValue[0]	=	0;
 					sp->EffectDieSides[1]	=	0;
 				}break;
 			// Shaman	Totem	items	fixes
