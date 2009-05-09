@@ -1842,7 +1842,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case  12576:
 			case  12577:
 				{
-					sp->procFlags = PROC_ON_SPELL_LAND | PROC_TARGET_SELF;
+					sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;
 				}break;
 		
 			//Mage - ClearCasting	Effect 
@@ -4495,12 +4495,6 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags = PROC_ON_CAST_SPELL;
 						sp->procChance = 4 * sp->RankNumber;
 				}
-			// Arcane Potency
-			case 57529:
-			case 57531:
-				{
-						sp->AuraInterruptFlags = AURA_INTERRUPT_ON_CAST_SPELL;
-				}break;
 			//Fiery Payback 
 			case 44440:
 			case 44441:
