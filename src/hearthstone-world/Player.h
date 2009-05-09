@@ -916,7 +916,7 @@ public:
 	HEARTHSTONE_INLINE QuestLogEntry*GetQuestLogInSlot(uint32 slot){ return m_questlog[slot]; }
 	HEARTHSTONE_INLINE uint32 GetQuestSharer(){ return m_questSharer; }
 
-	HEARTHSTONE_INLINE void	SetQuestSharer(uint32 guid{ m_questSharer = guid; }
+	HEARTHSTONE_INLINE void	SetQuestSharer(uint32 guid) { m_questSharer = guid; }
 	void				SetQuestLogSlot(QuestLogEntry *entry, uint32 slot);
 
 	HEARTHSTONE_INLINE void		PushToRemovedQuests(uint32 questid)	{ m_removequests.insert(questid);}

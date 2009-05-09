@@ -2692,7 +2692,7 @@ void ObjectMgr::ResetDailies()
 		PlayerPointer pPlayer = itr->second;
 		uint8 eflags = 0;
 		if( pPlayer->IsInWorld() )
-			flags = EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT;
+			eflags = EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT;
 		sEventMgr.AddEvent(pPlayer, &Player::ResetDailyQuests, EVENT_PLAYER_UPDATE, 100, 0, eflags);
 	}
 	_playerslock.ReleaseReadLock();
