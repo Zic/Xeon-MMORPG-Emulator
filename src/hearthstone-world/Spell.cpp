@@ -3373,16 +3373,24 @@ uint8 Spell::CanCast(bool tolerate)
 
 		if( m_spellInfo->AreaGroupId > 0)
 		{
+			bool found = false;
 			uint16 area_id = p_caster->GetMapMgr()->GetAreaID( p_caster->GetPositionX(),p_caster->GetPositionY() );
+			uint32 zone_id = p_caster->GetZoneId();
+
 			AreaGroup const* groupEntry = dbcAreaGroup.LookupEntry( m_spellInfo->AreaGroupId );
 			if( groupEntry )
 			{
 				for ( uint8 i=0; i<7; i++ )
 				{
-					if( groupEntry->AreaId[i] == area_id )
-						return SPELL_FAILED_REQUIRES_AREA;
+					if( groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id )
+					{
+						found = true;
+						break;
+					}
 				}
 			}
+			if(!found)
+				return SPELL_FAILED_REQUIRES_AREA;
 		}
 
 		// aurastate check
