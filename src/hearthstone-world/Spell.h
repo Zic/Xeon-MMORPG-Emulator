@@ -2100,31 +2100,31 @@ protected:
 
 	bool m_sharedPtrDestructed;
 
-    /// Spell state's
-    bool    m_usesMana;
-    bool    m_Spell_Failed;        //for 5sr
-    bool    m_Delayed;
-    uint32  m_spellState;
-    int32   m_castTime;
-    int32   m_timer;
-    
-	// Current Targets to be used in effect handler
-    UnitPointer      unitTarget;
-    ItemPointer      itemTarget;
-    GameObjectPointer gameObjTarget;
-    PlayerPointer     playerTarget;
-    CorpsePointer     corpseTarget;
-    uint32      add_damage;
+	/// Spell state's
+	bool    m_usesMana;
+	bool    m_Spell_Failed;        //for 5sr
+	bool    m_Delayed;
+	uint32  m_spellState;
+	int32   m_castTime;
+	int32   m_timer;
+	bool    m_ForceConsumption;
 
-    uint8       cancastresult;
-    uint32      Dur;
-    bool        bDurSet;
-    float       Rad[3];
-    bool        bRadSet[3];
+	// Current Targets to be used in effect handler
+	UnitPointer      unitTarget;
+	ItemPointer      itemTarget;
+	GameObjectPointer gameObjTarget;
+	PlayerPointer     playerTarget;
+	CorpsePointer     corpseTarget;
+	uint32      add_damage;
+
+	uint8       cancastresult;
+	uint32      Dur;
+	bool        bDurSet;
+	float       Rad[3];
+	bool        bRadSet[3];
 	bool        m_cancelled;
 	bool m_isCasting;
 	bool m_projectileWait;
-    //void _DamageRangeUpdate();
 
 private:
 	struct SpellTarget

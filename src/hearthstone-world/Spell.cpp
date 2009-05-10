@@ -230,6 +230,7 @@ Spell::Spell(ObjectPointer Caster, SpellEntry *info, bool triggered, AuraPointer
 	corpseTarget = NULLCORPSE;
 	add_damage = 0;
 	m_Delayed = false;
+	m_ForceConsumption = false;
 	pSpellId = 0;
 	m_cancelled = false;
 	ProcedOnSpell = 0;
@@ -1209,6 +1210,9 @@ void Spell::cancel()
 		}
 		SendChannelUpdate(0);
 	}
+	// Ensure the item gets consumed once the channel has started
+	if (m_timer > 0)
+		m_ForceConsumption = true;
 
 	//m_spellState = SPELL_STATE_FINISHED;
 
@@ -1974,9 +1978,11 @@ void Spell::finish()
 		sHookInterface.OnPostSpellCast( p_caster, GetSpellProto(), unitTarget );
 	}
 	
-	if( p_caster && ( cancastresult == SPELL_CANCAST_OK && !GetSpellFailed() ) )
-		RemoveItems();
-
+	if( p_caster)
+	{
+		if( m_ForceConsumption || ( cancastresult == SPELL_CANCAST_OK && !GetSpellFailed() ) )
+			RemoveItems();
+	}
 	Destructor();
 }
 
