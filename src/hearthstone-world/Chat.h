@@ -208,6 +208,7 @@ protected:
 	bool HandleStartCommand(const char* args, WorldSession *m_session);
 	bool HandleInfoCommand(const char* args, WorldSession *m_session);
 	bool HandleDismountCommand(const char* args, WorldSession *m_session);
+	bool HandleFullDismountCommand(const char * args, WorldSession *m_session);
 	bool HandleSaveCommand(const char* args, WorldSession *m_session);
 	bool HandleGMListCommand(const char* args, WorldSession *m_session);
 	bool HandleGmLogCommentCommand( const char *args , WorldSession *m_session);
