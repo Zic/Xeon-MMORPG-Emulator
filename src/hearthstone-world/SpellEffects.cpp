@@ -2353,7 +2353,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 
 				mPlayer->SetUInt32Value(UNIT_FIELD_POWER2, mPlayer->GetUInt32Value(UNIT_FIELD_POWER2) - val);
 				if (val)
-					mPlayer->Heal(mPlayer, 22845, mPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * ((val / 10) * 0.3f));
+					mPlayer->Heal(mPlayer, 22845, ( mPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.03f ) * (val / 10) );
 			
 			}break;
 		case 18562: //druid - swiftmend
