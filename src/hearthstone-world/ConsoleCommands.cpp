@@ -18,7 +18,7 @@
  */
 
 #include "StdAfx.h"
-#include <svn_revision.h>
+#include <git_revision.h>
 #include "ConsoleCommands.h"
 
 bool HandleInfoCommand(BaseConsole * pConsole, int argc, const char * argv[])
@@ -45,7 +45,7 @@ bool HandleInfoCommand(BaseConsole * pConsole, int argc, const char * argv[])
 	pConsole->Write("======================================================================\r\n");
 	pConsole->Write("Server Information: \r\n");
 	pConsole->Write("======================================================================\r\n");
-	pConsole->Write("Server Revision: Hearthstone r%u/%s-%s-%s\r\n", BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
+	pConsole->Write("Server Revision: Hearthstone %s (%s)/%s-%s-%s\r\n", BUILD_BRANCH, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	pConsole->Write("Server Uptime: %s\r\n", sWorld.GetUptimeString().c_str());
 	pConsole->Write("Current Players: %u (%d GMs, %d queued)\r\n", clientsNum, gm,  0);
 	pConsole->Write("Alliance Online: %u\r\n",sWorld.AlliancePlayers);

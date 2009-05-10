@@ -18,7 +18,7 @@
  */
 
 #include "RStdAfx.h"
-#include "svn_revision.h"
+#include "git_revision.h"
 
 WSSocket::WSSocket(SOCKET fd) : Socket(fd, 100000, 100000)
 {
@@ -194,6 +194,6 @@ void WSSocket::SendWoWPacket(Session * from, WorldPacket * pck)
 void WSSocket::OnConnect()
 {
 	WorldPacket data(ISMSG_AUTH_REQUEST, 4);
-	data << uint32(BUILD_REVISION);
+	data << uint32(BUILD_RAND);
 	SendPacket(&data);
 }

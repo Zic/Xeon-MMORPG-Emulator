@@ -19,13 +19,13 @@
 
 #include "StdAfx.h"
 
-#define BANNER "Hearthstone r%u/%s-%s-%s :: World Server\n"
+#define BANNER "Hearthstone %s revision (%s)/%s-%s-%s :: World Server\n"
 
 #ifndef WIN32
 #include <sched.h>
 #endif
 
-#include "svn_revision.h"
+#include "git_revision.h"
 
 #include <signal.h>
 
@@ -162,7 +162,7 @@ bool Master::Run(int argc, char ** argv)
 	UNIXTIME = time(NULL);
 	g_localTime = *localtime(&UNIXTIME);
 
-	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
+	printf(BANNER, BUILD_BRANCH, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
 	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 	Log.Line();
 

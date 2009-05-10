@@ -31,7 +31,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Extracting SVN revision..."
-				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;RevisionExtractor.exe&#x0D;&#x0A;"
+				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;ExtractGITRevision.exe"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Extracting SVN revision..."
-				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;RevisionExtractor.exe&#x0D;&#x0A;"
+				CommandLine="cd $(SolutionDir)\..\src\hearthstone-shared&#x0D;&#x0A;ExtractGITRevision.exe"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

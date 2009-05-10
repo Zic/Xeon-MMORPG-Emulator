@@ -19,7 +19,7 @@
 
 #include "StdAfx.h"
 #include "AuthCodes.h"
-#include "svn_revision.h"
+#include "git_revision.h"
 
 bool VerifyName(const char * name, size_t nlen)
 {
@@ -936,9 +936,9 @@ void WorldSession::FullLogin(PlayerPointer plr)
 
 	// Send revision (if enabled)
 #ifdef WIN32
-	_player->BroadcastMessage("Server: %sAspire Hearthstone r%u-TRUNK/%s-Win-%s", MSG_COLOR_WHITE, BUILD_REVISION, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
+	_player->BroadcastMessage("Server: %sAspire Hearthstone %s (%s)/%s-Win-%s", MSG_COLOR_WHITE, BUILD_BRANCH, BUILD_REVISION, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
 #else
-	_player->BroadcastMessage("Server: %sAspire Hearthstone r%u-TRUNK/%s-%s", MSG_COLOR_WHITE, BUILD_REVISION, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
+	_player->BroadcastMessage("Server: %sAspire Hearthstone %s (%s)/%s-%s", MSG_COLOR_WHITE, BUILD_BRANCH, BUILD_REVISION, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
 	//_player->BroadcastMessage("Built at %s on %s by %s@%s", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 #endif
 

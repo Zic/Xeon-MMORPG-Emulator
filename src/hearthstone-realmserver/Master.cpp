@@ -18,7 +18,7 @@
  */
 
 #include "RStdAfx.h"
-#include "../hearthstone-shared/svn_revision.h"
+#include "../hearthstone-shared/git_revision.h"
 
 Database * Database_Character;
 Database * Database_World;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     /* Print Banner */
 	Log.Notice("Server", "==============================================================");
 	Log.Notice("Server", "| Hearthstone - Realm Server                     |");
-	Log.Notice("Server", "| Revision %04u                                 |", BUILD_REVISION);
+	Log.Notice("Server", "| Revision %s", BUILD_REVISION);
 	Log.Notice("Server", "==============================================================");
 	Log.Line();
 
