@@ -272,7 +272,7 @@ AC_DEFINE_UNQUOTED([PREFIX], "${prefix}", "Prefix")
 AC_DEFINE_UNQUOTED([SCRIPTDIR], "${scriptdir}", "librarydir")
 AC_DEFINE_UNQUOTED([CONFDIR], "${sysconfdir}", "configdir")
 
-AC_DEFINE_UNQUOTED([SVN_REVISION_DONE], `sh ./extract_svn_revision.sh`, [SVN revision generated])
+AC_DEFINE_UNQUOTED([SVN_REVISION_DONE], `sh ./extract_git_revision.sh`, [Git revision generated])
 
 AC_CONFIG_FILES([
    ./Makefile
