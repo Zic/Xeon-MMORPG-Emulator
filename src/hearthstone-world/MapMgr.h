@@ -38,6 +38,7 @@ class Transporter;
 class Corpse;
 class CBattleground;
 class Instance;
+class InstanceScript;
 
 
 enum MapMgrTimers
@@ -74,6 +75,8 @@ typedef HM_NAMESPACE::hash_map<uint32, GameObjectPointer > GameObjectSqlIdMap;
 
 class Transporter;
 #define RESERVE_EXPAND_SIZE 1024
+
+#define CALL_INSTANCE_SCRIPT_EVENT( Mgr, Func ) if ( Mgr != NULL && Mgr->GetScript() != NULL ) Mgr->GetScript()->Func
 
 class SERVER_DECL MapMgr : public CellHandler <MapCell>, public EventableObject,public ThreadContext, public std::tr1::enable_shared_from_this<MapMgr>
 {
@@ -392,6 +395,15 @@ public:
 	
 	SessionSet::iterator __session_iterator_1;
 	SessionSet::iterator __session_iterator_2;
+
+	// Script related
+	InstanceScript* GetScript() { return mInstanceScript; };
+	void LoadInstanceScript();
+	void CallScriptUpdate();
+
+protected:
+
+	InstanceScript* mInstanceScript;
 };
 
 #endif

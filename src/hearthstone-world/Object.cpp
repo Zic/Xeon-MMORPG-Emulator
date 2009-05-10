@@ -1838,6 +1838,7 @@ void Object::DealDamage(UnitPointer pVictim, uint32 damage, uint32 targetEvent, 
 			pVictim->EventDeathAuraRemoval();
 			/* Set victim health to 0 */
 			pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+			CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnPlayerDeath )( TO_PLAYER( pVictim ), pKiller );
 
 			if( IsCreature() )
 			{

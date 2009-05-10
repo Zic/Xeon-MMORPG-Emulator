@@ -694,6 +694,7 @@ void GameObject::CallScriptUpdate()
 void GameObject::OnPushToWorld()
 {
 	Object::OnPushToWorld();
+	CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnGameObjectPushToWorld )( gob_shared_from_this() );
 }
 
 void GameObject::OnRemoveInRangeObject(ObjectPointer pObj)

@@ -3444,6 +3444,8 @@ void Player::OnPushToWorld()
 	// execute some of zeh hooks
 	sHookInterface.OnEnterWorld(plr_shared_from_this());
 	sHookInterface.OnZone(plr_shared_from_this(), m_zoneId, 0);
+	CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnZoneChange )( plr_shared_from_this(), m_zoneId, 0 );
+	CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnPlayerEnter )( plr_shared_from_this() );
 
 	if(m_TeleportState == 1)		// First world enter
 		CompleteLoading();
@@ -7526,6 +7528,7 @@ void Player::ZoneUpdate(uint32 ZoneId)
 
 	m_playerInfo->lastZone = ZoneId;
 	sHookInterface.OnZone(plr_shared_from_this(), ZoneId, oldzone);
+	CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnZoneChange )( plr_shared_from_this(), ZoneId, oldzone );
 
 
 	AreaTable *at = dbcArea.LookupEntry(GetAreaID());

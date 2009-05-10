@@ -371,6 +371,11 @@ void ScriptMgr::register_quest_script(uint32 entry, QuestScript * qs)
 	_questscripts.insert( qs );
 }
 
+void ScriptMgr::register_instance_script( uint32 pMapId, exp_create_instance_ai pCallback )
+{
+	mInstances.insert( InstanceCreateMap::value_type( pMapId, pCallback ) );
+};
+
 CreatureAIScript* ScriptMgr::CreateAIScriptClassForEntry(CreaturePointer pCreature)
 {
 	CreatureCreateMap::iterator itr = _creatures.find(pCreature->GetEntry());
@@ -390,6 +395,16 @@ GameObjectAIScript * ScriptMgr::CreateAIScriptClassForGameObject(uint32 uEntryId
 	exp_create_gameobject_ai function_ptr = itr->second;
 	return (function_ptr)(pGameObject);
 }
+
+InstanceScript* ScriptMgr::CreateScriptClassForInstance( uint32 pMapId, MapMgrPointer pMapMgr )
+{
+	InstanceCreateMap::iterator Iter = mInstances.find( pMapMgr->GetMapId() );
+	if ( Iter == mInstances.end() )
+		return NULL;
+
+	exp_create_instance_ai function_ptr = Iter->second;
+	return ( function_ptr )( pMapMgr );
+};
 
 bool ScriptMgr::CallScriptedDummySpell(uint32 uSpellId, uint32 i, SpellPointer pSpell)
 {
@@ -467,13 +482,6 @@ GameObjectAIScript::GameObjectAIScript(GameObjectPointer goinstance) : _gameobje
 void GameObjectAIScript::RegisterAIUpdateEvent(uint32 frequency)
 {
 	sEventMgr.AddEvent(_gameobject, &GameObject::CallScriptUpdate, EVENT_SCRIPT_UPDATE_EVENT, frequency, 0,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-}
-
-
-/* InstanceAI Stuff */
-
-InstanceScript::InstanceScript(MapMgrPointer instance) : _instance(instance)
-{
 }
 
 /* QuestScript Stuff */
@@ -725,6 +733,30 @@ void GossipScript::Destroy()
 {
 	delete this;
 }
+
+/* InstanceAI Stuff */
+
+InstanceScript::InstanceScript( MapMgrPointer pMapMgr ) : mInstance( pMapMgr )
+{
+};
+
+void InstanceScript::RegisterUpdateEvent( uint32 pFrequency )
+{
+	sEventMgr.AddEvent( mInstance, &MapMgr::CallScriptUpdate, EVENT_SCRIPT_UPDATE_EVENT, pFrequency, 0, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT );
+};
+
+void InstanceScript::ModifyUpdateEvent( uint32 pNewFrequency )
+{
+	sEventMgr.ModifyEventTimeAndTimeLeft( mInstance, EVENT_SCRIPT_UPDATE_EVENT, pNewFrequency );
+};
+
+void InstanceScript::RemoveUpdateEvent()
+{
+	sEventMgr.RemoveEvents( mInstance, EVENT_SCRIPT_UPDATE_EVENT );
+};
+
+/* Hook Stuff */
+
 
 void ScriptMgr::register_hook(ServerHookEvents event, void * function_pointer)
 {

@@ -142,6 +142,7 @@ void WorldSession::_HandleAreaTriggerOpcode(uint32 id)
 	AreaTrigger* pAreaTrigger = AreaTriggerStorage.LookupEntry( id );
 
 	sHookInterface.OnAreaTrigger(_player, id);
+	CALL_INSTANCE_SCRIPT_EVENT( _player->GetMapMgr(), OnAreaTrigger )( _player, id );
 
 	// if in BG handle is triggers
 	if( _player->m_bg )

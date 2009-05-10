@@ -1148,6 +1148,7 @@ void WorldSession::HandleGameObjectUse(WorldPacket & recv_data)
 	PlayerPointer plyr = GetPlayer();
    
 	CALL_GO_SCRIPT_EVENT(obj, OnActivate)(_player);
+	CALL_INSTANCE_SCRIPT_EVENT( _player->GetMapMgr(), OnGameObjectActivate )( obj, _player );
 
 	uint32 type = obj->GetByte(GAMEOBJECT_BYTES_1, GAMEOBJECT_BYTES_TYPE_ID);
 	switch (type)

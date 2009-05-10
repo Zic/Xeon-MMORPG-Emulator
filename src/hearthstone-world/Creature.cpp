@@ -1276,6 +1276,8 @@ void Creature::OnPushToWorld()
 		}
 
 	}
+
+	CALL_INSTANCE_SCRIPT_EVENT( m_mapMgr, OnCreaturePushToWorld )( creature_shared_from_this() );
 }
 
 // this is used for guardians. They are non respawnable creatures linked to a player

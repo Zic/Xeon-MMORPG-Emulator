@@ -489,6 +489,9 @@ void AIInterface::HandleEvent(uint32 event, UnitPointer pUnit, uint32 misc1)
 			}
 
 			CALL_SCRIPT_EVENT(m_Unit, OnDied)(pUnit);
+			if ( m_Unit->IsCreature() )
+				CALL_INSTANCE_SCRIPT_EVENT( m_Unit->GetMapMgr(), OnCreatureDeath )( TO_CREATURE( m_Unit ), pUnit );
+
 			m_AIState = STATE_IDLE;
 
 			StopMovement(0);

@@ -2353,7 +2353,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 
 				mPlayer->SetUInt32Value(UNIT_FIELD_POWER2, mPlayer->GetUInt32Value(UNIT_FIELD_POWER2) - val);
 				if (val)
-					mPlayer->Heal(mPlayer, 22845, ( mPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.03f ) * (val / 10) );
+					mPlayer->Heal(mPlayer, 22845, ( mPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.003f ) * (val / 10) );
 			
 			}break;
 		case 18562: //druid - swiftmend
@@ -3527,7 +3527,10 @@ void Spell::SpellEffectOpenLock(uint32 i) // Open Lock
 				return;
 
 			if( gameObjTarget->GetByte(GAMEOBJECT_BYTES_1, 1) == GAMEOBJECT_TYPE_GOOBER)
-				CALL_GO_SCRIPT_EVENT(gameObjTarget, OnActivate)(TO_PLAYER(p_caster));
+			{
+ 				CALL_GO_SCRIPT_EVENT(gameObjTarget, OnActivate)(TO_PLAYER(p_caster));
+				CALL_INSTANCE_SCRIPT_EVENT( gameObjTarget->GetMapMgr(), OnGameObjectActivate )( gameObjTarget, p_caster );
+			};
 
 			if(sQuestMgr.OnGameObjectActivate(p_caster, gameObjTarget))
 			{
@@ -3560,6 +3563,7 @@ void Spell::SpellEffectOpenLockItem(uint32 i)
 		TO_PLAYER(caster)->UpdateNearbyGameObjects();
 	
 	CALL_GO_SCRIPT_EVENT(gameObjTarget, OnActivate)(TO_PLAYER(caster));
+	CALL_INSTANCE_SCRIPT_EVENT( gameObjTarget->GetMapMgr(), OnGameObjectActivate )( gameObjTarget, TO_PLAYER( caster ) );
 	gameObjTarget->SetByte(GAMEOBJECT_BYTES_1,GAMEOBJECT_BYTES_STATE, 0);	
 
 	if( gameObjTarget->GetEntry() == 183146)

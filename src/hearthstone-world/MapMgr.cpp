@@ -95,6 +95,8 @@ MapMgr::MapMgr(Map *map, uint32 mapId, uint32 instanceid) : CellHandler<MapCell>
 		SetCollision(true);
 	else
 		SetCollision(false);
+
+	mInstanceScript = NULL;
 }
 
 void MapMgr::Init()
@@ -114,6 +116,9 @@ void MapMgr::Destructor()
 	sEventMgr.RemoveEvents(shared_from_this());
 	delete ScriptInterface;
 	delete m_stateManager;
+
+	if ( mInstanceScript != NULL )
+		mInstanceScript->Destroy();
 
 	// Remove objects
 	if(_cells)
@@ -1460,6 +1465,9 @@ bool MapMgr::Do()
 	ObjectSet::iterator i;
 	uint32 last_exec=getMSTime();
 
+	// Create Instance script
+	LoadInstanceScript();
+
 	/* create static objects */
 	for(GOSpawnList::iterator itr = _map->staticSpawns.GOSpawns.begin(); itr != _map->staticSpawns.GOSpawns.end(); ++itr)
 	{
@@ -1486,6 +1494,9 @@ bool MapMgr::Do()
 
 	// initialize worldstates
 	sWorldStateTemplateManager.ApplyMapTemplate(shared_from_this());
+
+	// Call script OnLoad virtual procedure
+	CALL_INSTANCE_SCRIPT_EVENT( shared_from_this(), OnLoad )();
 
 	if( GetMapInfo()->type == INSTANCE_NULL )
 		sHookInterface.OnContinentCreate(shared_from_this());
@@ -2186,3 +2197,14 @@ void MapMgr::SendPvPCaptureMessage(int32 iZoneMask, uint32 ZoneId, const char * 
 		}
 	}
 }
+
+void MapMgr::LoadInstanceScript()
+{
+	mInstanceScript = sScriptMgr.CreateScriptClassForInstance( _mapId, shared_from_this() );
+};
+
+void MapMgr::CallScriptUpdate()
+{
+	ASSERT( mInstanceScript );
+	mInstanceScript->UpdateEvent();
+};
