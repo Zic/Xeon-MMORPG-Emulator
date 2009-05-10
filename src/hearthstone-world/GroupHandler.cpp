@@ -27,12 +27,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 	if(!_player->IsInWorld())
 		return;
 
-	if(!_player->isAlive())
-	{
-		sChatHandler.RedSystemMessage( this, "You cannot invite players whilst dead." );
-		return;
-	}
-
 	CHECK_PACKET_SIZE(recv_data, 1);
 	WorldPacket data(100);
 	std::string membername;
@@ -50,11 +44,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 		return;
 	}
 
-	if(!player->isAlive())
-	{
-		sChatHandler.RedSystemMessage( this, "You cannot invite dead players." );
-		return;
-	}
 	if (player == _player)
 	{
 		return;
@@ -290,14 +279,22 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////////////////////////////////
 void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 {
-	if(!_player->IsInWorld()) return;
+	if(!_player->IsInWorld())
+		return;
+
 	Group* pGroup = _player->GetGroup();
-	if(!pGroup) return;
+	if(!pGroup)
+		return;
 
 	if(pGroup->HasFlag(GROUP_FLAG_BATTLEGROUND_GROUP))
 		return;
 
-	//pGroup->Disband();
+	//Update the group list
+	pGroup->SendNullUpdate( _player );
+
+	//Do we need to update our comrades inside an instance?
+	if( _player->GetInstanceID() )
+		sInstanceMgr.PlayerLeftGroup( pGroup, _player );
 	pGroup->RemovePlayer(_player->m_playerInfo);
 }
 

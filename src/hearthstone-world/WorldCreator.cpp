@@ -1034,7 +1034,7 @@ void InstanceMgr::PlayerLeftGroup(Group * pGroup, PlayerPointer pPlayer)
 				in = itr->second;
 				++itr;
 
-				if(in->m_creatorGroup && in->m_creatorGroup == pGroup->GetID())
+				if(PlayerOwnsInstance(in,pPlayer))
 				{
 					// better make sure we're actually in that instance.. :P
 					if(!pPlayer->raidgrouponlysent && pPlayer->GetInstanceID() == (int32)in->m_instanceId)

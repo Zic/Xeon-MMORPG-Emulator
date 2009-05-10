@@ -428,10 +428,18 @@ void SubGroup::Disband()
 		{
 			if( (*itr)->m_loggedInPlayer )
 			{
-				if( (*itr)->m_loggedInPlayer->GetSession() != NULL )
+				PlayerPointer plr = (*itr)->m_loggedInPlayer;
+				if( plr->GetSession() != NULL )
 				{
-					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data);
-					(*itr)->m_loggedInPlayer->GetSession()->SendPacket(&data2);
+					plr->GetSession()->SendPacket(&data);
+					plr->GetSession()->SendPacket(&data2);
+					//are we in an instance?
+					if( plr->GetGroup() && plr->GetInstanceID())
+					{
+						sInstanceMgr.PlayerLeftGroup(plr->GetGroup(),plr);
+					}
+					//clear the raid screen
+					GetParent()->SendNullUpdate(plr);
 				}
 			}
 
