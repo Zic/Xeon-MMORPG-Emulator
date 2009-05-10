@@ -137,17 +137,17 @@ void WorldSession::HandleRequestRaidInfoOpcode(WorldPacket & recv_data)
 void WorldSession::HandleReadyCheckOpcode(WorldPacket& recv_data)
 {
 	Group * pGroup  = _player->GetGroup();
-	WorldPacket data(MSG_RAID_READY_CHECK, 20);
-	uint8 ready;
-
 	if(!pGroup || ! _player->IsInWorld())
 		return;
 
+	uint8 ready;
 	if(recv_data.size() == 0)
 	{
-		if(pGroup->GetLeader() == _player->m_playerInfo)
+		if(pGroup->GetLeader() == _player->m_playerInfo || pGroup->GetAssistantLeader() == _player->m_playerInfo)
 		{
 			/* send packet to group */
+			WorldPacket data(MSG_RAID_READY_CHECK, 20);
+			data << _player->GetGUID();
 			pGroup->SendPacketToAllButOne(&data, _player);
 		}
 		else
@@ -160,6 +160,7 @@ void WorldSession::HandleReadyCheckOpcode(WorldPacket& recv_data)
 		if(_player->m_playerInfo != pGroup->GetLeader())
 		{
 			recv_data >> ready;
+			WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 20);
 			data << _player->GetGUID();
 			data << ready;
 			if(pGroup->GetLeader() && pGroup->GetLeader()->m_loggedInPlayer)
