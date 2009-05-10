@@ -7255,36 +7255,43 @@ void Spell::SpellEffectCreateRandomItem(uint32 i) // Create Random Item
 	uint32 item_count = 0;
 	// Random Item to Create Jewelcrafting part
 	RandomItemCreation * ric = RandomItemCreationStorage.LookupEntry( m_spellInfo->Id );
-	// If we Have Perfect Gem Cutting then we have a chance to create a Perfect Gem, according to comments on wowhead chance is between 20 and 30%
-	if ( ric && Rand(ric->Chance) && ric->Skill == SKILL_JEWELCRAFTING && p_caster->HasSpell(55534))
+	if(ric)
+	{
+		// If we Have Perfect Gem Cutting then we have a chance to create a Perfect Gem, according to comments on wowhead chance is between 20 and 30%
+		if (Rand(ric->Chance) && ric->Skill == SKILL_JEWELCRAFTING && p_caster->HasSpell(55534))
 		{
 			m_itemProto = ItemPrototypeStorage.LookupEntry( ric->ItemToCreate );
 			itemid	=	ric->ItemToCreate;
 		}
-	//Tarot and Decks from Inscription + Northrend Inscription Research + Minor Inscription Research
-	//Northrend Alchemy
-	if ( ric && (ric->Skill == SKILL_INSCRIPTION || ric->Skill == SKILL_ALCHEMY ))
+
+		//Tarot and Decks from Inscription + Northrend Inscription Research + Minor Inscription Research
+		//Northrend Alchemy
+		if (ric->Skill == SKILL_INSCRIPTION || ric->Skill == SKILL_ALCHEMY)
 		{
 			uint32 k;
 			RandomCardCreation * rcc = RandomCardCreationStorage.LookupEntry(m_spellInfo->Id);
-			//Same chance for every card to appear according wowhead and wowwiki info
-			k = RandomUInt(rcc->itemcount-1);
-			m_itemProto = ItemPrototypeStorage.LookupEntry( rcc->ItemId[k] );
-			itemid	=	rcc->ItemId[k];
-			item_count = 1;
-			switch(m_spellInfo->Id)
+			if(rcc)
 			{
-				case 61288:
-				case 61177:
-					{
-						item_count = RandomUInt(2);//This 2 can make random scrolls and vellum 1 or 2 according to info
-					}break;
-				case 60893:
-					{
-						item_count = RandomUInt(3);//Creates 3 random elixir/potion from alchemy
-					}break;
+				//Same chance for every card to appear according wowhead and wowwiki info
+				k = RandomUInt(rcc->itemcount-1);
+				m_itemProto = ItemPrototypeStorage.LookupEntry( rcc->ItemId[k] );
+				itemid	=	rcc->ItemId[k];
+				item_count = 1;
+				switch(m_spellInfo->Id)
+				{
+					case 61288:
+					case 61177:
+						{
+							item_count = RandomUInt(2);//This 2 can make random scrolls and vellum 1 or 2 according to info
+						}break;
+					case 60893:
+						{
+							item_count = RandomUInt(3);//Creates 3 random elixir/potion from alchemy
+						}break;
+				}
 			}
 		}
+	}
 	// Profession Discoveries used in Northrend Alchemy and Inscription Research plus Minor research
 	ProfessionDiscovery * pf = ProfessionDiscoveryStorage.LookupEntry( m_spellInfo->Id );
 	if( pf && !p_caster->HasSpell( pf->SpellToDiscover ) && Rand( pf->Chance )&& p_caster->_GetSkillLineCurrent( skill->skilline ) >= pf->SkillValue )
