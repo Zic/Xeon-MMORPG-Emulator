@@ -92,6 +92,7 @@ typedef shared_ptr<World> WorldPointer;
 #define TO_SPELL(ptr) CAST(Spell,ptr)
 #define TO_LOOTROLL(ptr) CAST(LootRoll,ptr)
 #define TO_VEHICLE(ptr) CAST(Vehicle,ptr)
+#define TO_WEATHER(ptr) CAST(WeatherInfo,ptr)
 #define TO_PTR(classname, ptr) CAST(classname,ptr)
 
 #define NULLPTR shared_ptr<void>()
@@ -134,6 +135,7 @@ typedef shared_ptr<World> WorldPointer;
 #define aura_shared_from_this() TO_AURA(shared_from_this())
 #define lootroll_shared_from_this() TO_LOOTROLL(shared_from_this())
 #define vehicle_shared_from_this() TO_VEHICLE(shared_from_this())
+#define weather_shared_from_this() TO_WEATHER(shared_from_this())
 #define class_shared_from_this(x) TO_PTR(x, shared_from_this())
 
 #endif
