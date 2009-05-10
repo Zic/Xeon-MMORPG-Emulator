@@ -148,7 +148,7 @@ pSpellEffect SpellEffectsHandler[TOTAL_SPELL_EFFECTS]={
 		&Spell::SpellEffectNULL,//SPELL_EFFECT_TELEPORT_GRAVEYARD - 120//Not used
 		&Spell::SpellEffectDummyMelee,//SPELL_EFFECT_DUMMYMELEE	- 121
 		&Spell::SpellEffectNULL,//unknown - 122 //not used
-		&Spell::SpellEffectNULL,//SPELL_EFFECT_FILMING - 123 // http://www.thottbot.com/?sp=27998: flightpath 
+		&Spell::EffectSendTaxi,//123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
 		&Spell::SpellEffectPlayerPull, // SPELL_EFFECT_PLAYER_PULL - 124 - http://thottbot.com/e2312
 		&Spell::SpellEffectNULL,//unknown - 125 // Reduce Threat by % //http://www.thottbot.com/?sp=32835
 		&Spell::SpellEffectSpellSteal,//SPELL_EFFECT_SPELL_STEAL - 126 // Steal Beneficial Buff (Magic) //http://www.thottbot.com/?sp=30449
@@ -6121,6 +6121,44 @@ void Spell::SpellEffectCharge(uint32 i)
 	// trigger an event to reset speedhack detection
 	p_caster->DelaySpeedHack( time + 1000 );
 	p_caster->z_axisposition = 0.0f;
+}
+
+void Spell::EffectSendTaxi(uint32 i)
+{
+	if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+		return;
+
+	TaxiPath * path = sTaxiMgr.GetTaxiPath( m_spellInfo->EffectMiscValue[i] );
+	if(!path)
+		return;
+
+	uint32 mountid = 0;
+	switch(m_spellInfo->Id)
+	{
+		case 31606:                                         //Stormcrow Amulet
+			mountid = 17447;
+			break;
+		case 45071:                                         //Quest - Sunwell Daily - Dead Scar Bombing Run
+		case 45113:                                         //Quest - Sunwell Daily - Ship Bombing Run
+		case 45353:                                         //Quest - Sunwell Daily - Ship Bombing Run Return
+			mountid = 22840;
+			break;
+		case 34905:                                         //Stealth Flight
+			mountid = 6851;
+			break;
+		case 45883:                                         //Amber Ledge to Beryl Point
+			mountid = 23524;
+			break;
+		case 46064:                                         //Amber Ledge to Coldarra
+			mountid = 6371;
+			break;
+		case 53335:                                         //Stormwind Harbor Flight - Peaceful
+			mountid = 6852;
+			break;
+	}
+
+	PlayerPointer p_target = TO_PLAYER( unitTarget );
+	p_target->TaxiStart( path, mountid, 0 );
 }
 
 void Spell::SpellEffectPlayerPull( uint32 i )

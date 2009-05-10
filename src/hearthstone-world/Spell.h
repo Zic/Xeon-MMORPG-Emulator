@@ -734,7 +734,7 @@ enum SpellEffects
     SPELL_EFFECT_TELEPORT_GRAVEYARD,        //    120
     SPELL_EFFECT_DUMMYMELEE,                //    121
     SPELL_EFFECT_UNKNOWN1,                  //    122
-    SPELL_EFFECT_UNKNOWN2,                  //    123
+    SPELL_EFFECT_SEND_TAXI,                 //    123
     SPELL_EFFECT_PLAYER_PULL,               //    124
     SPELL_EFFECT_UNKNOWN4,                  //    125
     SPELL_EFFECT_UNKNOWN5,                  //    126
@@ -1849,6 +1849,7 @@ public:
 	void SpellEffectTitanGrip(uint32 i);
 	void SummonLightwell(uint32 i);
 	void SpellEffectCreateRandomItem(uint32 i);
+	void EffectSendTaxi(uint32 i);
 
     // Spell Targets Handlers
     void SpellTargetNULL(uint32 i, uint32 j);
