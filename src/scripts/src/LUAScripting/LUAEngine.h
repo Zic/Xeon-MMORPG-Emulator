@@ -43,6 +43,21 @@ GossipMenu * Menu;
 #define LUA_ON_GOSSIP_EVENT(object, evtype, player, id, intid, code) if(object->IsInWorld()) { object->GetMapMgr()->GetScriptEngine()->OnGossipEvent(object, evtype, player, id, intid, code); }
 #define LUA_CALL_FUNC(unit,funcname) if(unit->GetTypeId()==TYPEID_UNIT && unit->IsInWorld()) { unit->GetMapMgr()->GetScriptEngine()->CallFunction(unit,funcname); }
 
+/* Macros for Lua pointer conversion
+*/
+#define LUA_TO_UNIT(ptr) ((Unit*)ptr.get())
+#define LUA_TO_CREATURE(ptr) ((Creature*)ptr.get())
+#define LUA_TO_PLAYER(ptr) ((Player*)ptr.get())
+#define LUA_TO_GAMEOBJECT(ptr) ((GameObject*)ptr.get())
+#define LUA_TO_ITEM(ptr) ((Item*)ptr.get())
+#define LUA_TO_RAW(ptr) ptr.get()
+#define FROM_RAW(ptr) ptr->shared_from_this()
+#define RAW_TO_UNIT(ptr) ((Unit*)ptr)
+#define RAW_TO_CREATURE(ptr) ((Creature*)ptr)
+#define RAW_TO_PLAYER(ptr) ((Player*)ptr)
+#define RAW_TO_GAMEOBJECT(ptr) ((GameObject*)ptr)
+#define RAW_TO_ITEM(ptr) ((Item*)ptr)
+
 /** Quest Events
  */
 enum QuestEvents

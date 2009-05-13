@@ -45,7 +45,7 @@ template<typename T>
 struct RegType
 {
 	const char * name;
-	int(*mfunc)(lua_State*,shared_ptr<T>);
+	int(*mfunc)(lua_State*,T*);
 };
 
 
@@ -387,33 +387,6 @@ public:
 	}
 
 	// push onto the Lua stack a userdata containing a pointer to T object
-	static int push(lua_State *L, shared_ptr<T> obj, bool gc=false) {
-		if (!obj) { lua_pushnil(L); return 0; }
-		luaL_getmetatable(L, GetTClassName<T>());  // lookup metatable in Lua registry
-		if (lua_isnil(L, -1)) luaL_error(L, "%s missing metatable", GetTClassName<T>());
-		int mt = lua_gettop(L);
-		subtable(L, mt, "userdata", "v");
-		userdataTypePtr *ud =
-			static_cast<userdataTypePtr*>(pushuserdata(L, obj.get(), sizeof(userdataTypePtr)));
-		if (ud) {
-			ud->pT = obj.get();  // store pointer to object in userdata
-			lua_pushvalue(L, mt);
-			lua_setmetatable(L, -2);
-			if (gc == false) {
-				lua_checkstack(L, 3);
-				subtable(L, mt, "do not trash", "k");
-				lua_pushvalue(L, -2);
-				lua_pushboolean(L, 1);
-				lua_settable(L, -3);
-				lua_pop(L, 1);
-			}
-		}
-		lua_replace(L, mt);
-		lua_settop(L, mt);
-		return mt;  // index of userdata containing pointer to T object
-	}
-
-	// push onto the Lua stack a userdata containing a pointer to T object
 	static int push(lua_State *L, T* obj, bool gc=false) {
 		if (!obj) { lua_pushnil(L); return 0; }
 		luaL_getmetatable(L, GetTClassName<T>());  // lookup metatable in Lua registry
@@ -441,15 +414,7 @@ public:
 	}
 
 	// get userdata from Lua stack and return pointer to T object
-	static shared_ptr<T> check(lua_State *L, int narg) {
-		userdataTypePtr *ud =
-			static_cast<userdataTypePtr*>(luaL_checkudata(L, narg, GetTClassName<T>()));
-		if(!ud) { luaL_typerror(L, narg, GetTClassName<T>()); return shared_ptr<T>(); }
-		return shared_ptr<T>(ud->pT);  // pointer to T object
-	}
-
-	// get userdata from Lua stack and return pointer to T object
-	static T* checkptr(lua_State *L, int narg) {
+	static T* check(lua_State *L, int narg) {
 		userdataTypePtr *ud =
 			static_cast<userdataTypePtr*>(luaL_checkudata(L, narg, GetTClassName<T>()));
 		if(!ud) { luaL_typerror(L, narg, GetTClassName<T>()); return NULL; }
@@ -462,7 +427,7 @@ private:
 	// member function dispatcher
 	static int thunk(lua_State *L) {
 		// stack has userdata, followed by method args
-		T *obj = checkptr(L, 1);  // get 'self', or if you prefer, 'this'
+		T *obj = check(L, 1);  // get 'self', or if you prefer, 'this'
 		lua_remove(L, 1);  // remove self so member function args start at index 1
 		// get member function from upvalue
 		RegType *l = static_cast<RegType*>(lua_touserdata(L, lua_upvalueindex(1)));
@@ -681,16 +646,16 @@ void LuaEngine::OnGossipEvent(ObjectPointer pObject, const char * FunctionName, 
 	}
 
     if(pObject->GetTypeId() == TYPEID_UNIT)
-        Lunar<Unit>::push(L, TO_UNIT(pObject));
+        Lunar<Unit>::push(L, LUA_TO_UNIT(pObject));
 
     else if(pObject->GetTypeId() == TYPEID_ITEM)
-        Lunar<Item>::push(L, TO_ITEM(pObject));
+        Lunar<Item>::push(L, LUA_TO_ITEM(pObject));
 
     else if(pObject->GetTypeId() == TYPEID_GAMEOBJECT)
-        Lunar<GameObject>::push(L, TO_GAMEOBJECT(pObject));
+        Lunar<GameObject>::push(L, LUA_TO_GAMEOBJECT(pObject));
 
     lua_pushinteger(L, EventType);
-	Lunar<Unit>::push(L, mPlayer);
+	Lunar<Unit>::push(L, LUA_TO_RAW(mPlayer));
 
     lua_pushinteger(L, Id);
     lua_pushinteger(L, IntId);
@@ -719,10 +684,10 @@ void LuaEngine::OnUnitEvent(UnitPointer  pUnit, const char * FunctionName, uint3
 		return;
 	}
 
-	Lunar<Unit>::push(L, pUnit);
+	Lunar<Unit>::push(L, LUA_TO_RAW(pUnit));
 	lua_pushinteger(L,EventType);
 	if(pMiscUnit!=NULL)
-		Lunar<Unit>::push(L, pMiscUnit);
+		Lunar<Unit>::push(L, LUA_TO_RAW(pMiscUnit));
 	else
 		lua_pushnil(L);
 	lua_pushinteger(L,Misc);
@@ -750,14 +715,14 @@ void LuaEngine::OnQuestEvent(PlayerPointer  QuestOwner, const char * FunctionNam
 	}
 
 	if (QuestOwner)
-		Lunar<Unit>::push(L, TO_UNIT(QuestOwner));
+		Lunar<Unit>::push(L, LUA_TO_UNIT(QuestOwner));
 	else
 		lua_pushnil(L);
 
 	lua_pushinteger(L,EventType);
 
 	if(QuestStarter!=NULL && QuestStarter->GetTypeId() == TYPEID_UNIT)
-		Lunar<Unit>::push(L, TO_UNIT(QuestStarter));
+		Lunar<Unit>::push(L, LUA_TO_UNIT(QuestStarter));
 	else
 		lua_pushnil(L);
 
@@ -780,7 +745,7 @@ void LuaEngine::CallFunction(UnitPointer  pUnit, const char * FuncName)
 		return;
 	}
 
-	Lunar<Unit>::push(L, pUnit);
+	Lunar<Unit>::push(L, LUA_TO_RAW(pUnit));
 	int r = lua_pcall(L,1,LUA_MULTRET,0);
 	if(r)
 		report(L);
@@ -803,12 +768,12 @@ void LuaEngine::OnGameObjectEvent(GameObjectPointer  pGameObject, const char * F
 		return;
 	}
 
-	Lunar<GameObject>::push(L, pGameObject);
+	Lunar<GameObject>::push(L, LUA_TO_RAW(pGameObject));
 	lua_pushinteger(L,EventType);
 	if(!pMiscUnit)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L, pMiscUnit);
+		Lunar<Unit>::push(L, LUA_TO_RAW(pMiscUnit));
 
 	int r = lua_pcall(L,3,LUA_MULTRET,0);
 	if(r)
@@ -1414,10 +1379,10 @@ void LuaEngine::Restart()
 int luaItem_GossipCreateMenu(lua_State * L, Item * ptr)
 {
 	int text_id = luaL_checkint(L, 1);
-	UnitPointer target = Lunar<Unit>::check(L, 2);
+	Unit * target = Lunar<Unit>::check(L, 2);
 	int autosend = luaL_checkint(L, 3);
 
-	PlayerPointer plr = TO_PLAYER(target);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 
 	objmgr.CreateGossipMenuForPlayer(&Menu, ptr->GetGUID(), text_id, plr);
 	if(autosend)
@@ -1437,24 +1402,24 @@ int luaItem_GossipMenuAddItem(lua_State * L, Item * ptr)
 
 int luaItem_GossipSendMenu(lua_State * L, Item * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	Menu->SendTo(plr);
 	return 1;
 }
 
 int luaItem_GossipComplete(lua_State * L, Item * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	plr->Gossip_Complete();
 	return 1;
 }
 
 int luaItem_GossipSendPOI(lua_State * L, Item * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	int icon = luaL_checkint(L, 4);
@@ -1468,13 +1433,13 @@ int luaItem_GossipSendPOI(lua_State * L, Item * ptr)
 ////////////////////////////////////////////////////
 //////////////UNIT GOSSIP///////////////////////////
 ////////////////////////////////////////////////////
-int luaUnit_GossipCreateMenu(lua_State * L, UnitPointer  ptr)
+int luaUnit_GossipCreateMenu(lua_State * L, Unit * ptr)
 {
 	int text_id = luaL_checkint(L, 1);
-	UnitPointer target = Lunar<Unit>::check(L, 2);
+	Unit * target = Lunar<Unit>::check(L, 2);
 	int autosend = luaL_checkint(L, 3);
 
-	PlayerPointer plr = TO_PLAYER(target);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 
 	objmgr.CreateGossipMenuForPlayer(&Menu, ptr->GetGUID(), text_id, plr);
 	if(autosend)
@@ -1482,7 +1447,7 @@ int luaUnit_GossipCreateMenu(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GossipMenuAddItem(lua_State * L, UnitPointer  ptr)
+int luaUnit_GossipMenuAddItem(lua_State * L, Unit * ptr)
 {
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
@@ -1492,19 +1457,19 @@ int luaUnit_GossipMenuAddItem(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GossipSendMenu(lua_State * L, UnitPointer  ptr)
+int luaUnit_GossipSendMenu(lua_State * L, Unit * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	Menu->SendTo(plr);
 	return 1;
 }
 
-int luaUnit_GossipSendPOI(lua_State * L, UnitPointer  ptr)
+int luaUnit_GossipSendPOI(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	int icon = luaL_checkint(L, 4);
@@ -1516,29 +1481,29 @@ int luaUnit_GossipSendPOI(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GossipComplete(lua_State * L, UnitPointer  ptr)
+int luaUnit_GossipComplete(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
-	PlayerPointer  plr = TO_PLAYER(ptr);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(ptr));
 	plr->Gossip_Complete();
 	return 1;
 }
 ////////////////////////////////////
 ////////////GAMEOBJECT GOSSIP///////
 /////////////////////////////////////
-int luaGameObject_GossipCreateMenu(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GossipCreateMenu(lua_State * L, GameObject * ptr)
 {
 	int text_id = luaL_checkint(L, 1);
-	UnitPointer target = Lunar<Unit>::check(L, 2);
+	Unit * target = Lunar<Unit>::check(L, 2);
  	int autosend = luaL_checkint(L, 3);
-	PlayerPointer plr = TO_PLAYER(target);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 
 	objmgr.CreateGossipMenuForPlayer(&Menu, ptr->GetGUID(), text_id, plr);
 	if(autosend)
 		Menu->SendTo(plr);
 	return 1;
 }
-int luaGameObject_GossipMenuAddItem(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GossipMenuAddItem(lua_State * L, GameObject * ptr)
 {
 	int icon = luaL_checkint(L, 1);
 	const char * menu_text = luaL_checkstring(L, 2);
@@ -1547,24 +1512,24 @@ int luaGameObject_GossipMenuAddItem(lua_State * L, GameObjectPointer  ptr)
 	Menu->AddItem(icon, menu_text, IntId);
 	return 1;
 }
-int luaGameObject_GossipSendMenu(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GossipSendMenu(lua_State * L, GameObject * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	Menu->SendTo(plr);
 	return 1;
 }
-int luaGameObject_GossipComplete(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GossipComplete(lua_State * L, GameObject * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	plr->Gossip_Complete();
 	return 1;
 }
-int luaGameObject_GossipSendPOI(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GossipSendPOI(lua_State * L, GameObject * ptr)
 {
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer  plr = TO_PLAYER(target);
+	Unit * target = Lunar<Unit>::check(L, 1);
+	PlayerPointer plr = TO_PLAYER(FROM_RAW(target));
 	float x = (float)luaL_checknumber(L, 2);
 	float y = (float)luaL_checknumber(L, 3);
 	int icon = luaL_checkint(L, 4);
@@ -1576,7 +1541,7 @@ int luaGameObject_GossipSendPOI(lua_State * L, GameObjectPointer  ptr)
 	return 1;
 }
 
-int luaUnit_IsPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsPlayer(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 	{
@@ -1592,7 +1557,7 @@ int luaUnit_IsPlayer(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_IsCreature(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsCreature(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 	{
@@ -1608,7 +1573,7 @@ int luaUnit_IsCreature(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_Emote(lua_State * L, UnitPointer  ptr)
+int luaUnit_Emote(lua_State * L, Unit * ptr)
 {
 	if(ptr==NULL) return 0;
 	uint32 emote_id = luaL_checkint(L, 1);
@@ -1622,7 +1587,7 @@ int luaUnit_Emote(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetManaPct(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetManaPct(lua_State * L, Unit * ptr)
 {
 	if(!ptr) 
 		return 0;
@@ -1633,7 +1598,7 @@ int luaUnit_GetManaPct(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetName(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetName(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
@@ -1641,11 +1606,11 @@ int luaUnit_GetName(lua_State * L, UnitPointer  ptr)
 	switch(ptr->GetTypeId())
 	{
 	case TYPEID_UNIT:
-		lua_pushstring(L, TO_CREATURE(ptr)->GetCreatureInfo() ? TO_CREATURE(ptr)->GetCreatureInfo()->Name : "Unknown");
+		lua_pushstring(L, RAW_TO_CREATURE(ptr)->GetCreatureInfo() ? RAW_TO_CREATURE(ptr)->GetCreatureInfo()->Name : "Unknown");
 		break;
 
 	case TYPEID_PLAYER:
-		lua_pushstring(L, TO_PLAYER(ptr)->GetName());
+		lua_pushstring(L, RAW_TO_PLAYER(ptr)->GetName());
 		break;
 
 	default:
@@ -1656,7 +1621,7 @@ int luaUnit_GetName(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SendChatMessage(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendChatMessage(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 typ = luaL_checkint(L, 1);
@@ -1669,7 +1634,7 @@ int luaUnit_SendChatMessage(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_MoveTo(lua_State * L, UnitPointer  ptr)
+int luaUnit_MoveTo(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	double x = luaL_checknumber(L, 1);
@@ -1684,7 +1649,7 @@ int luaUnit_MoveTo(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetMovementType(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetMovementType(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 typ = luaL_checkint(L, 1);
@@ -1692,78 +1657,78 @@ int luaUnit_SetMovementType(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_GetX(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetX(lua_State * L, Unit * ptr)
 {
 	if(ptr==NULL) return 0;
 	lua_pushnumber(L, ptr->GetPositionX());
 	return 1;
 }
 
-int luaUnit_GetY(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetY(lua_State * L, Unit * ptr)
 {
 	if(ptr==NULL) return 0;
 	lua_pushnumber(L, ptr->GetPositionY());
 	return 1;
 }
 
-int luaUnit_GetZ(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetZ(lua_State * L, Unit * ptr)
 {
 	if(ptr==NULL) return 0;
 	lua_pushnumber(L, ptr->GetPositionZ());
 	return 1;
 }
 
-int luaUnit_GetO(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetO(lua_State * L, Unit * ptr)
 {
 	if(ptr==NULL) return 0;
 	lua_pushnumber(L, ptr->GetOrientation());
 	return 1;
 }
 
-int luaUnit_CastSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_CastSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 sp = luaL_checkint(L, 1);
 	if(sp==0)
 		return 0;
-	ptr->CastSpell(ptr,dbcSpell.LookupEntry(sp),true);
+	ptr->CastSpell(TO_UNIT(FROM_RAW(ptr)),dbcSpell.LookupEntry(sp),true);
 	return 0;
 }
 
-int luaUnit_FullCastSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_FullCastSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 sp = luaL_checkint(L, 1);
 	if(sp==0)
 		return 0;
-	ptr->CastSpell(ptr,dbcSpell.LookupEntry(sp),false);
+	ptr->CastSpell(TO_UNIT(FROM_RAW(ptr)),dbcSpell.LookupEntry(sp),false);
 	return 0;
 }
 
-int luaUnit_CastSpellOnTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_CastSpellOnTarget(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 sp = luaL_checkint(L, 1);
-	UnitPointer  target = Lunar<Unit>::check(L, 2);
+	Unit * target = Lunar<Unit>::check(L, 2);
 
 	if(sp==0 || target==NULL)
 		return 0;
-	ptr->CastSpell(target,dbcSpell.LookupEntry(sp),true);
+	ptr->CastSpell(TO_UNIT(FROM_RAW(target)),dbcSpell.LookupEntry(sp),true);
 	return 0;
 }
 
-int luaUnit_FullCastSpellOnTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_FullCastSpellOnTarget(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	uint32 sp = luaL_checkint(L, 1);
-	UnitPointer  target = Lunar<Unit>::check(L, 2);
+	Unit * target = Lunar<Unit>::check(L, 2);
 
 	if(sp==0 || target==NULL)
 		return 0;
-	ptr->CastSpell(target,dbcSpell.LookupEntry(sp),false);
+	ptr->CastSpell(TO_UNIT(FROM_RAW(target)),dbcSpell.LookupEntry(sp),false);
 	return 0;
 }
-int luaUnit_SpawnCreature(lua_State * L, UnitPointer  ptr)
+int luaUnit_SpawnCreature(lua_State * L, Unit * ptr)
 {
 	if(ptr == NULL) return 0;
 	uint32 entry_id = luaL_checkint(L, 1);
@@ -1790,10 +1755,10 @@ int luaUnit_SpawnCreature(lua_State * L, UnitPointer  ptr)
 	pCreature->SetMapId(ptr->GetMapId());
 	if(duration)
 		pCreature->Despawn(duration,0);
-	Lunar<Unit>::push(L,pCreature);
+	Lunar<Unit>::push(L,LUA_TO_RAW(pCreature));
 	return 1;
 }
-int luaUnit_SpawnGameObject(lua_State * L, UnitPointer  ptr)
+int luaUnit_SpawnGameObject(lua_State * L, Unit * ptr)
 {
 	if(ptr == NULL) return 0;
 	uint32 entry_id = luaL_checkint(L, 1);
@@ -1810,12 +1775,12 @@ int luaUnit_SpawnGameObject(lua_State * L, UnitPointer  ptr)
 		pC->Spawn(ptr->GetMapMgr());
 		if(duration && duration > 0)
 			sEventMgr.AddEvent(pC,&GameObject::ExpireAndDelete,EVENT_GAMEOBJECT_UPDATE,duration,1,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
-		Lunar<GameObject>::push(L,pC,false);
+		Lunar<GameObject>::push(L,LUA_TO_RAW(pC));
 	}
 	return 1;
 }
 
-int luaUnit_RegisterEvent(lua_State * L, UnitPointer  ptr)
+int luaUnit_RegisterEvent(lua_State * L, Unit * ptr)
 {
 	if(!ptr||ptr->GetTypeId()!=TYPEID_UNIT)
 		return 0;
@@ -1827,25 +1792,25 @@ int luaUnit_RegisterEvent(lua_State * L, UnitPointer  ptr)
 	if(!func_to_call||!delay)
 		return 0;
 
-	CreaturePointer  pCreature = TO_CREATURE(ptr);
+	CreaturePointer  pCreature = TO_CREATURE(FROM_RAW(ptr));
 	string strFunc = string(func_to_call);
 	sEventMgr.AddEvent(pCreature, &Creature::TriggerScriptEvent, strFunc, EVENT_CREATURE_UPDATE, (uint32)delay, (uint32)repeats, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	return 0;
 }
 
-int luaUnit_RemoveEvents(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveEvents(lua_State * L, Unit * ptr)
 {
 	if(!ptr||ptr->GetTypeId()!=TYPEID_UNIT)
 		return 0;
 
-	CreaturePointer  pCreature = TO_CREATURE(ptr);
+	CreaturePointer  pCreature = TO_CREATURE(FROM_RAW(ptr));
 	sEventMgr.RemoveEvents(pCreature);
 	return 0;
 }
 
-int luaUnit_AddEventHolder(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddEventHolder(lua_State * L, Unit * ptr)
 {
-	EventableObjectHolder * holder = Lunar<EventableObjectHolder>::checkptr(L,1);
+	EventableObjectHolder * holder = Lunar<EventableObjectHolder>::check(L,1);
 
 	if(ptr&&holder)
 	{
@@ -1854,7 +1819,7 @@ int luaUnit_AddEventHolder(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetFaction(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetFaction(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int faction = luaL_checkint(L,1);
@@ -1865,7 +1830,7 @@ int luaUnit_SetFaction(lua_State * L, UnitPointer  ptr)
 	ptr->_setFaction();
 	return 0;
 }
-int luaUnit_SetStandState(lua_State * L, UnitPointer  ptr) //states 0..8
+int luaUnit_SetStandState(lua_State * L, Unit * ptr) //states 0..8
 {
 	if (!ptr)
 		return 0;
@@ -1875,7 +1840,7 @@ int luaUnit_SetStandState(lua_State * L, UnitPointer  ptr) //states 0..8
 	ptr->SetStandState(state);
 	return 0;
 }
-int luaUnit_IsInCombat(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInCombat(lua_State * L, Unit * ptr)
 {
 	if (!ptr)
 		return 0;
@@ -1886,7 +1851,7 @@ int luaUnit_IsInCombat(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetScale(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetScale(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	double faction = luaL_checknumber(L,1);
@@ -1897,7 +1862,7 @@ int luaUnit_SetScale(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetModel(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetModel(lua_State * L, Unit * ptr)
 {
 	if(!ptr||!ptr->IsUnit())
 		return 0;
@@ -1907,7 +1872,7 @@ int luaUnit_SetModel(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetNPCFlags(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetNPCFlags(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int flags = luaL_checkint(L,1);
@@ -1918,7 +1883,7 @@ int luaUnit_SetNPCFlags(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetCombatCapable(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCombatCapable(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L,1);
@@ -1926,7 +1891,7 @@ int luaUnit_SetCombatCapable(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetCombatMeleeCapable(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCombatMeleeCapable(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L,1);
@@ -1934,7 +1899,7 @@ int luaUnit_SetCombatMeleeCapable(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetCombatRangedCapable(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCombatRangedCapable(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L,1);
@@ -1942,7 +1907,7 @@ int luaUnit_SetCombatRangedCapable(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetCombatSpellCapable(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCombatSpellCapable(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L,1);
@@ -1950,7 +1915,7 @@ int luaUnit_SetCombatSpellCapable(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SetCombatTargetingCapable(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCombatTargetingCapable(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L,1);
@@ -1958,17 +1923,17 @@ int luaUnit_SetCombatTargetingCapable(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_DestroyCustomWaypointMap(lua_State * L, UnitPointer  ptr)
+int luaUnit_DestroyCustomWaypointMap(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	TO_CREATURE(ptr)->DestroyCustomWaypointMap();
+	RAW_TO_CREATURE(ptr)->DestroyCustomWaypointMap();
 	return 0;
 }
 
-int luaUnit_CreateCustomWaypointMap(lua_State * L, UnitPointer  ptr)
+int luaUnit_CreateCustomWaypointMap(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	CreaturePointer  pCreature = TO_CREATURE(ptr);
+	Creature * pCreature = RAW_TO_CREATURE(ptr);
 	if(pCreature->m_custom_waypoint_map)
 	{
 		for(WayPointMap::iterator itr = pCreature->m_custom_waypoint_map->begin(); itr != pCreature->m_custom_waypoint_map->end(); ++itr)
@@ -1981,7 +1946,7 @@ int luaUnit_CreateCustomWaypointMap(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_CreateWaypoint(lua_State * L, UnitPointer  ptr)
+int luaUnit_CreateWaypoint(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	float x = (float)luaL_checknumber(L,1);
@@ -1992,7 +1957,7 @@ int luaUnit_CreateWaypoint(lua_State * L, UnitPointer  ptr)
 	int flags = luaL_checkint(L,6);
 	int modelid = luaL_checkint(L,7);
 
-	CreaturePointer  pCreature = TO_CREATURE(ptr);
+	Creature * pCreature = RAW_TO_CREATURE(ptr);
 	if(!pCreature->m_custom_waypoint_map)
 	{
 		pCreature->m_custom_waypoint_map = new WayPointMap;
@@ -2019,7 +1984,7 @@ int luaUnit_CreateWaypoint(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_MoveToWaypoint(lua_State * L, UnitPointer  ptr)
+int luaUnit_MoveToWaypoint(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int id = luaL_checkint(L,1);
@@ -2029,23 +1994,23 @@ int luaUnit_MoveToWaypoint(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_RemoveItem(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveItem(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int id = luaL_checkint(L,1);
 	int count = luaL_checkint(L,2);
 
-	TO_PLAYER(ptr)->GetItemInterface()->RemoveItemAmt(id,count);
+	RAW_TO_PLAYER(ptr)->GetItemInterface()->RemoveItemAmt(id,count);
 	return 0;
 }
 
-int luaUnit_AddItem(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddItem(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int id = luaL_checkint(L,1);
 	int count = luaL_checkint(L,2);
 
-	PlayerPointer  plr = TO_PLAYER(ptr);
+	PlayerPointer  plr = TO_PLAYER(FROM_RAW(ptr));
 	ItemPrototype * proto = ItemPrototypeStorage.LookupEntry(id);
 	if(proto==NULL)
 		return 0;
@@ -2075,7 +2040,7 @@ int luaUnit_AddItem(lua_State * L, UnitPointer  ptr)
 
 	return 0;
 }
-int luaUnit_GetInstanceID(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInstanceID(lua_State * L, Unit * ptr)
 {
 	if(ptr->GetMapMgr()->GetMapInfo()->type == INSTANCE_NULL)
 		lua_pushnil(L);
@@ -2084,17 +2049,18 @@ int luaUnit_GetInstanceID(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetClosestPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetClosestPlayer(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
 
 	float dist, d2;
 	UnitPointer ret;
+	ObjectPointer obj = FROM_RAW(ptr);
 
 	for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 	{
-		d2=(*itr)->GetDistanceSq(ptr);
+		d2=(*itr)->GetDistanceSq(obj);
 		if(!ret||d2<dist)
 		{
 			dist=d2;
@@ -2105,17 +2071,18 @@ int luaUnit_GetClosestPlayer(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L, ret ,false);
+		Lunar<Unit>::push(L, LUA_TO_RAW(ret));
 
 	return 1;
 }
-int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetRandomPlayer(lua_State * L, Unit * ptr)
 {
 	if( ptr == NULL )
 		return 0;
 
 	int flag = luaL_checkint( L, 1 );
 
+	ObjectPointer ptrobj = FROM_RAW(ptr);
 	UnitPointer ret;
 	UnitPointer obj;
 	uint32 count;
@@ -2146,7 +2113,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
 				obj = (*itr);
-				if (obj && obj->CalcDistance(obj,ptr)<=8)
+				if (obj && obj->CalcDistance(obj,ptrobj)<=8)
 					++count;
 			}
 			if (count)
@@ -2156,7 +2123,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
 					obj = (*itr);
-					if (!obj || !(obj->CalcDistance(obj,ptr)<=8))
+					if (!obj || !(obj->CalcDistance(obj,ptrobj)<=8))
 						continue;
 					
 					if(count==r)
@@ -2177,7 +2144,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				obj = (*itr);
 				if (!obj)
 					continue;
-				float distance = obj->CalcDistance(obj,ptr);
+				float distance = obj->CalcDistance(obj,ptrobj);
 				if (distance<20 && distance>8)
 					++count;
 			}
@@ -2190,7 +2157,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 					obj = (*itr);
 					if (!obj)
 						continue;
-					float distance = obj->CalcDistance(obj,ptr);
+					float distance = obj->CalcDistance(obj,ptrobj);
 					if (!(distance<20 && distance>8))
 						continue;
 					
@@ -2210,7 +2177,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 			for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 			{
 				PlayerPointer obj = TO_PLAYER(*itr);
-				if (obj && obj->CalcDistance(obj,ptr)>=20)
+				if (obj && obj->CalcDistance(obj,ptrobj)>=20)
 					++count;
 			}
 			if (count)
@@ -2220,7 +2187,7 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 				for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); ++itr)
 				{
 					obj = (*itr);
-					if (!obj || !(obj->CalcDistance(obj,ptr)>=20))
+					if (!obj || !(obj->CalcDistance(obj,ptrobj)>=20))
 						continue;
 					
 					if(count==r)
@@ -2352,15 +2319,16 @@ int luaUnit_GetRandomPlayer(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L, ret ,false);
+		Lunar<Unit>::push(L, LUA_TO_RAW(ret));
 
 	return 1;
 }
-int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetRandomFriend(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
 
+	ObjectPointer ptrobj = FROM_RAW(ptr);
 	UnitPointer ret;
 	ObjectPointer obj;
 	uint32 count = 0;
@@ -2368,7 +2336,7 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 	for(unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); ++itr)
 	{
 		obj = (*itr);
-		if (obj->IsUnit() && isFriendly(obj,ptr))
+		if (obj->IsUnit() && isFriendly(obj,ptrobj))
 			++count;
 	}
 
@@ -2379,7 +2347,7 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 		for(unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); ++itr)
 		{
 			obj = (*itr);
-			if (!obj->IsUnit() || !isFriendly(obj,ptr))
+			if (!obj->IsUnit() || !isFriendly(obj,ptrobj))
 				continue;
 
 			if(count==r)
@@ -2393,11 +2361,11 @@ int luaUnit_GetRandomFriend(lua_State * L, UnitPointer  ptr)
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L, ret,false);
+		Lunar<Unit>::push(L, LUA_TO_RAW(ret));
 	return 1;
 }
 
-int luaUnit_StopMovement(lua_State * L, UnitPointer  ptr)
+int luaUnit_StopMovement(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int tim = luaL_checkint(L,1);
@@ -2405,7 +2373,7 @@ int luaUnit_StopMovement(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_RemoveAura(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveAura(lua_State * L, Unit * ptr)
 {
 	if(!ptr)return 0;
 	int auraid = luaL_checkint(L,1);
@@ -2413,7 +2381,7 @@ int luaUnit_RemoveAura(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_PlaySoundToSet(lua_State * L, UnitPointer  ptr)
+int luaUnit_PlaySoundToSet(lua_State * L, Unit * ptr)
 {
 	if(!ptr) return 0;
 	int soundid = luaL_checkint(L,1);
@@ -2421,42 +2389,42 @@ int luaUnit_PlaySoundToSet(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_GetUnitBySqlId(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetUnitBySqlId(lua_State * L, Unit * ptr)
 {
 	int sqlid = luaL_checkint(L,1);
 	if(ptr || sqlid)
-		Lunar<Unit>::push(L,ptr->GetMapMgr()->GetSqlIdCreature(sqlid));
+		Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetSqlIdCreature(sqlid)));  //REFACTOR
 	return 1;
 }
 
-int luaUnit_Despawn(lua_State * L, UnitPointer  ptr)
+int luaUnit_Despawn(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int delay = luaL_checkint(L,1);
 	int respawntime = luaL_checkint(L,2);
-	TO_CREATURE(ptr)->Despawn(delay,respawntime);
+	RAW_TO_CREATURE(ptr)->Despawn(delay,respawntime);
 	return 0;
 }
-int luaUnit_GetInRangeFriends(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInRangeFriends(lua_State * L, Unit * ptr)
 {
 	ObjectPointer pC;
 	uint32 count = 0;
 	lua_newtable(L);
 	for( unordered_set<ObjectPointer>::iterator itr = ptr->GetInRangeSetBegin(); itr != ptr->GetInRangeSetEnd(); itr++)
 	{
-		if( (*itr) ->IsUnit() )
+		if( (*itr)->IsUnit() )
 		{
 			count++,
 			pC = *itr;
 			lua_pushinteger(L,count);
-			Lunar<Unit>::push(L,TO_UNIT(pC),false);
+			Lunar<Unit>::push(L,LUA_TO_UNIT(pC),false);
 			lua_rawset(L,-3);
 		}
 	}
 	return 1;
 }
 
-int luaUnit_GetHealthPct(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetHealthPct(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		lua_pushinteger(L,0);
@@ -2465,42 +2433,42 @@ int luaUnit_GetHealthPct(lua_State * L, UnitPointer  ptr)
 
 	return 1;
 }
-int luaUnit_SetHealthPct(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetHealthPct(lua_State * L, Unit * ptr)
 {
 	int val = luaL_checkint(L,1);
 	if (val>0)
 		ptr->SetHealthPct(val);
 	return 1;
 }
-int luaUnit_GetItemCount(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetItemCount(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_PLAYER);
 	int itemid = luaL_checkint(L,1);
-	lua_pushinteger(L, TO_PLAYER(ptr)->GetItemInterface()->GetItemCount(itemid,false));
+	lua_pushinteger(L, RAW_TO_PLAYER(ptr)->GetItemInterface()->GetItemCount(itemid,false));
 	return 1;
 }
 
-int luaUnit_GetMainTank(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetMainTank(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	UnitPointer ret = ptr->GetAIInterface()->GetMostHated();
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,(ret),false);
+		Lunar<Unit>::push(L,LUA_TO_RAW(ret));
 	return 1;
 }
-int luaUnit_GetAddTank(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetAddTank(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	UnitPointer ret = ptr->GetAIInterface()->GetSecondHated();
 	if(ret==NULL)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,(ret),false);
+		Lunar<Unit>::push(L,LUA_TO_RAW(ret));
 	return 1;
 }
-int luaUnit_ClearThreatList(lua_State * L, UnitPointer  ptr)
+int luaUnit_ClearThreatList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	if( ptr->GetAIInterface() )
@@ -2508,60 +2476,66 @@ int luaUnit_ClearThreatList(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetTauntedBy(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetTauntedBy(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
 
 		if (!ptr->GetAIInterface()->getTauntedBy())
 			lua_pushnil(L);
 		else
-			Lunar<Unit>::push(L,ptr->GetAIInterface()->getTauntedBy(),false);
+			Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetAIInterface()->getTauntedBy())); //REFACTOR
 	return 1;
 }
-int luaUnit_SetTauntedBy(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetTauntedBy(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
-		UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
 
-	if (!target || ptr->GetAIInterface()->GetIsTaunted() || target==ptr)
+	if (!target || ptr->GetAIInterface()->GetIsTaunted() || target==TO_UNIT(FROM_RAW(ptr)))
 		return 0;
 	else
 		ptr->GetAIInterface()->taunt(target);
 	return 1;
 }
-int luaUnit_ModThreat(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModThreat(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L,1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
+
 	int32 amount = luaL_checkint(L,2);
 	if(ptr&&target&&amount)
 		ptr->GetAIInterface()->modThreatByPtr(target,amount);
 	return 0;
 }
-int luaUnit_GetThreatByPtr(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetThreatByPtr(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L,1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
+
 	if(ptr&&target)
 		lua_pushnumber(L,ptr->GetAIInterface()->getThreatByPtr(target));
 	return 0;
 }
 
-int luaUnit_ChangeTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_ChangeTarget(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
-		UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
 
-	if (!target || !isHostile(ptr,target) || ptr==target)
+	if (!target || !isHostile(FROM_RAW(ptr),target) || target==TO_UNIT(FROM_RAW(ptr)))
 		return 0;
 	else
 		ptr->GetAIInterface()->SetNextTarget(target);
 	return 1;
 }
 
-int luaUnit_HasFinishedQuest(lua_State * L, UnitPointer  ptr)
+int luaUnit_HasFinishedQuest(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
 	int questid = luaL_checkint(L,1);
-	if(TO_PLAYER(ptr)->HasFinishedQuest(questid))
+	if(RAW_TO_PLAYER(ptr)->HasFinishedQuest(questid))
 		lua_pushboolean(L,1);
 	else
 		lua_pushboolean(L,0);
@@ -2569,28 +2543,28 @@ int luaUnit_HasFinishedQuest(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_UnlearnSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_UnlearnSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int spellid = luaL_checkint(L,1);
-	TO_PLAYER(ptr)->removeSpell(spellid,false,false,0);
+	RAW_TO_PLAYER(ptr)->removeSpell(spellid,false,false,0);
 	return 0;
 }
 
-int luaUnit_LearnSpell(lua_State * L, UnitPointer ptr)
+int luaUnit_LearnSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int spellid = luaL_checkint(L,1);
-	TO_PLAYER(ptr)->addSpell(spellid);
+	RAW_TO_PLAYER(ptr)->addSpell(spellid);
 	return 0;
 }
 
-int luaUnit_MarkQuestObjectiveAsComplete(lua_State * L, UnitPointer  ptr)
+int luaUnit_MarkQuestObjectiveAsComplete(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int questid = luaL_checkint(L,1);
 	int objective = luaL_checkint(L,2);
-	PlayerPointer  pl = TO_PLAYER(ptr);
+	PlayerPointer  pl = TO_PLAYER(FROM_RAW(ptr));
 	QuestLogEntry * qle = pl->GetQuestLogForEntry(questid);
 	qle->SetMobCount(objective, qle->GetQuest()->required_mobcount[objective]);
 	qle->SendUpdateAddKill(objective);
@@ -2601,7 +2575,7 @@ int luaUnit_MarkQuestObjectiveAsComplete(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_KnockBack(lua_State * L, UnitPointer  ptr)
+int luaUnit_KnockBack(lua_State * L, Unit * ptr)
 {
 	if(!ptr) return 0;
 	double dx = luaL_checknumber(L,1);
@@ -2617,25 +2591,25 @@ int luaUnit_KnockBack(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_SendAreaTriggerMessage(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendAreaTriggerMessage(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	const char * msg = luaL_checkstring(L,1);
 	if(!msg) return 0;
-	TO_PLAYER(ptr)->SendAreaTriggerMessage(msg);
+	RAW_TO_PLAYER(ptr)->SendAreaTriggerMessage(msg);
 	return 0;
 }
 
-int luaUnit_SendBroadcastMessage(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendBroadcastMessage(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	const char * msg = luaL_checkstring(L,1);
 	if(!msg) return 0;
-	TO_PLAYER(ptr)->BroadcastMessage(msg);
+	RAW_TO_PLAYER(ptr)->BroadcastMessage(msg);
 	return 0;
 }
 
-int luaUnit_TeleportUnit(lua_State * L, UnitPointer  ptr)
+int luaUnit_TeleportUnit(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 mapId = luaL_checkint(L, 1);
@@ -2645,11 +2619,11 @@ int luaUnit_TeleportUnit(lua_State * L, UnitPointer  ptr)
 	if(!mapId || !posX || !posY || !posZ)
 		return 0;
 	LocationVector vec(posX,posY,posZ);
-	TO_PLAYER( ptr ) ->SafeTeleport(mapId,0,vec);
+	RAW_TO_PLAYER(ptr)->SafeTeleport(mapId,0,vec);
 	return 0;
 }
 
-int luaUnit_GetHealth(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetHealth(lua_State * L, Unit * ptr)
 {
 	if( ptr == NULL )
 		lua_pushinteger( L, 0 );
@@ -2659,7 +2633,7 @@ int luaUnit_GetHealth(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetMaxHealth(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetMaxHealth(lua_State * L, Unit * ptr)
 {
 	if( ptr == NULL )
 		lua_pushinteger( L, 0 );
@@ -2669,7 +2643,7 @@ int luaUnit_GetMaxHealth(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetHealth(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetHealth(lua_State * L, Unit * ptr)
 {
 	int val = luaL_checkint( L, 1 );
 	if( ptr != NULL && val > 0 )
@@ -2680,7 +2654,7 @@ int luaUnit_SetHealth(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetMaxHealth(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetMaxHealth(lua_State * L, Unit * ptr)
 {
 	int val = luaL_checkint( L, 1 );
 	if( ptr != NULL && val > 0 )
@@ -2690,7 +2664,7 @@ int luaUnit_SetMaxHealth(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_WipeHateList(lua_State * L, UnitPointer  ptr)
+int luaUnit_WipeHateList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	if( ptr->GetAIInterface() )
@@ -2698,7 +2672,7 @@ int luaUnit_WipeHateList(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_WipeTargetList(lua_State * L, UnitPointer  ptr)
+int luaUnit_WipeTargetList(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	if( ptr->GetAIInterface() )
@@ -2706,20 +2680,20 @@ int luaUnit_WipeTargetList(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_WipeCurrentTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_WipeCurrentTarget(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
 	ptr->GetAIInterface()->WipeCurrentTarget();
 	return 1;
 }
 
-int luaUnit_GetPlayerClass(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetPlayerClass(lua_State * L, Unit * ptr)
 {
    if(!ptr || ptr->GetTypeId()!=TYPEID_PLAYER) {
       lua_pushstring(L, "Unknown");
       return 1;
    }
-   int plrclass = TO_PLAYER(ptr)->getClass();
+   int plrclass = RAW_TO_PLAYER(ptr)->getClass();
 
    switch(plrclass) {
       case 1:
@@ -2760,21 +2734,21 @@ int luaUnit_GetPlayerClass(lua_State * L, UnitPointer  ptr)
 }
 
 
-int luaUnit_ClearHateList(lua_State * L, UnitPointer  ptr)
+int luaUnit_ClearHateList(lua_State * L, Unit * ptr)
 {
  	CHECK_TYPEID_RET_INT(TYPEID_UNIT);
  	if( ptr->GetAIInterface() )
 		ptr->GetAIInterface()->ClearHateList();
  	return 1;
 }
-int luaUnit_SetMana(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetMana(lua_State * L, Unit * ptr)
 {
 	int val = luaL_checkint( L, 1);
 	if( ptr != NULL)
 		ptr->SetUInt32Value( UNIT_FIELD_POWER1, val );
 	return 1;
 }
-int luaUnit_SetMaxMana(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetMaxMana(lua_State * L, Unit * ptr)
 {
 	int val = luaL_checkint( L, 1);
 	if( ptr != NULL && val > 0 )
@@ -2783,13 +2757,13 @@ int luaUnit_SetMaxMana(lua_State * L, UnitPointer  ptr)
 		ptr->SetUInt32Value( UNIT_FIELD_MAXPOWER1, val );
 	return 1;
 }
-int luaUnit_GetPlayerRace(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetPlayerRace(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET( TYPEID_PLAYER );
-	lua_pushinteger( L, TO_PLAYER( ptr )->getRace() );
+	lua_pushinteger( L, RAW_TO_PLAYER(ptr)->getRace() );
 	return 1;
 }
-int luaUnit_SetFlying(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetFlying(lua_State * L, Unit * ptr)
 {
 	WorldPacket data(SMSG_MOVE_SET_HOVER, 13);
 	data << ptr->GetNewGUID();
@@ -2801,7 +2775,7 @@ int luaUnit_SetFlying(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
  
-int luaUnit_Land(lua_State * L, UnitPointer  ptr)
+int luaUnit_Land(lua_State * L, Unit * ptr)
 {
 	WorldPacket data(SMSG_MOVE_UNSET_HOVER, 13);
 	data << ptr->GetNewGUID();
@@ -2812,7 +2786,7 @@ int luaUnit_Land(lua_State * L, UnitPointer  ptr)
 	ptr->Emote(EMOTE_ONESHOT_LAND);
 	return 0;
 }
-int luaUnit_HasAura(lua_State * L, UnitPointer  ptr)
+int luaUnit_HasAura(lua_State * L, Unit * ptr)
 {
 	int spellid = luaL_checkint (L,1);
 	if (!ptr || !spellid )
@@ -2824,7 +2798,7 @@ int luaUnit_HasAura(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L,0);
 	return 1;
 }
-int luaUnit_ReturnToSpawnPoint(lua_State * L, UnitPointer  ptr)
+int luaUnit_ReturnToSpawnPoint(lua_State * L, Unit * ptr)
 {
 	float x = ptr->GetSpawnX();
 	float y = ptr->GetSpawnY();
@@ -2834,20 +2808,20 @@ int luaUnit_ReturnToSpawnPoint(lua_State * L, UnitPointer  ptr)
 		ptr->GetAIInterface()->MoveTo(x, y, z, o);
 	return 0;
 }
-int luaUnit_GetGUID(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetGUID(lua_State * L, Unit * ptr)
 {
 	if(!ptr) return 0;
 	lua_pushinteger(L,(int)ptr->GetGUID()); return 0;
 }
-int luaUnit_GetDistance(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetDistance(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
-	lua_pushnumber(L,(float)ptr->GetDistance2dSq(target));
+	Unit * target = Lunar<Unit>::check(L, 1);
+	lua_pushnumber(L,(float)ptr->GetDistance2dSq(FROM_RAW(target)));
 	return 1;
 }
-int luaUnit_GetCreatureNearestCoords(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetCreatureNearestCoords(lua_State * L, Unit * ptr)
 {
     if(!ptr) return 0;
     uint32 entryid = luaL_checkint(L,4);
@@ -2857,11 +2831,11 @@ int luaUnit_GetCreatureNearestCoords(lua_State * L, UnitPointer  ptr)
     if(entryid == 0) 
         lua_pushnil(L);
     else
-        Lunar<Unit>::push(L,ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid), false);
+        Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid))); //REFACTOR
     return 1;
     
 }
-int luaUnit_GetGameObjectNearestCoords(lua_State *L, UnitPointer  ptr)
+int luaUnit_GetGameObjectNearestCoords(lua_State *L, Unit * ptr)
 {
     if(!ptr) return 0;
     uint32 entryid = luaL_checkint(L,4);
@@ -2871,10 +2845,10 @@ int luaUnit_GetGameObjectNearestCoords(lua_State *L, UnitPointer  ptr)
     if(entryid == 0) 
         lua_pushnil(L);
     else
-        Lunar<GameObject>::push(L,ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid), false);
+        Lunar<GameObject>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid))); //REFACTOR
     return 1;
 }
-int luaUnit_CastSpellAoF(lua_State * L, UnitPointer  ptr)
+int luaUnit_CastSpellAoF(lua_State * L, Unit * ptr)
 {
     CHECK_TYPEID(TYPEID_UNIT);
     uint32 sp = luaL_checkint(L, 4);
@@ -2886,29 +2860,29 @@ int luaUnit_CastSpellAoF(lua_State * L, UnitPointer  ptr)
 	ptr->CastSpellAoF(x,y,z,dbcSpell.LookupEntry(sp), true);
 	return 0;
 }
-int luaUnit_SetInFront(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetInFront(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(!target)
 		return 0;
-	ptr->GetAIInterface()->setInFront(target);
+	ptr->GetAIInterface()->setInFront(TO_UNIT(FROM_RAW(target)));
 	return 1;
 }
-int luaUnit_RemoveAllAuras(lua_State *L, UnitPointer  ptr)
+int luaUnit_RemoveAllAuras(lua_State *L, Unit * ptr)
 {
 	if (!ptr)
 		return 0;
 	ptr->RemoveAllAuras();
 	return 1;
 }
-int luaUnit_CancelSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_CancelSpell(lua_State * L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
 	ptr->CancelSpell(ptr->GetCurrentSpell());
 	return 0;
 }
-int luaUnit_IsAlive(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsAlive(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->isAlive())
@@ -2917,7 +2891,7 @@ int luaUnit_IsAlive(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_IsDead(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsDead(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->isDead())
@@ -2926,7 +2900,7 @@ int luaUnit_IsDead(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_IsInWorld(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInWorld(lua_State * L, Unit * ptr)
 {
 	if (ptr)
 		if(ptr->IsInWorld())
@@ -2935,14 +2909,14 @@ int luaUnit_IsInWorld(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_GetZoneId(lua_State *L, UnitPointer  ptr)
+int luaUnit_GetZoneId(lua_State *L, Unit * ptr)
 {
 	if(!ptr)
 		return 0;
 	lua_pushinteger(L,(ptr->GetZoneId()));
 	return 1;
 }
-int luaUnit_GetMana(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetMana(lua_State * L, Unit * ptr)
 {
 	if( ptr == NULL )
 		lua_pushinteger( L, 0 );
@@ -2952,7 +2926,7 @@ int luaUnit_GetMana(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetMaxMana(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetMaxMana(lua_State * L, Unit * ptr)
 {
 	if( ptr == NULL )
 		lua_pushinteger( L, 0 );
@@ -2961,19 +2935,19 @@ int luaUnit_GetMaxMana(lua_State * L, UnitPointer  ptr)
 
 	return 1;
 }
-int luaUnit_Root(lua_State * L, UnitPointer  ptr)
+int luaUnit_Root(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		ptr->Root();
 	return 0;
 }
-int luaUnit_Unroot(lua_State * L, UnitPointer  ptr)
+int luaUnit_Unroot(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		ptr->UnRoot();
 	return 0;
 }
-int luaUnit_IsCreatureMoving(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsCreatureMoving(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->GetAIInterface()->m_creatureState == MOVING)
@@ -2982,35 +2956,35 @@ int luaUnit_IsCreatureMoving(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_SetOutOfCombatRange(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetOutOfCombatRange(lua_State * L, Unit * ptr)
 {
 	int range = luaL_checkint(L, 1);
 	if(ptr && range != 0)
 		ptr->GetAIInterface()->setOutOfCombatRange(range);
 	return 0;
 }
-int luaUnit_ModifyRunSpeed(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModifyRunSpeed(lua_State * L, Unit * ptr)
 {
 	float Speed = (float)luaL_checkint(L, 1);
 	if(ptr)
 		ptr->m_runSpeed = Speed;
 	return 0;
 }
-int luaUnit_ModifyWalkSpeed(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModifyWalkSpeed(lua_State * L, Unit * ptr)
 {
 	float Speed = (float)luaL_checkint(L,1);
 	if(ptr && Speed)
 		ptr->m_walkSpeed = Speed;
 	return 0;
 }
-int luaUnit_ModifyFlySpeed(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModifyFlySpeed(lua_State * L, Unit * ptr)
 {
 	float Speed = (float)luaL_checkint(L,1);
 	if(ptr&&Speed)
 		ptr->m_flySpeed = Speed;
 	return 0;
 }
-int luaUnit_IsFlying(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsFlying(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->GetAIInterface()->IsFlying())
@@ -3019,63 +2993,63 @@ int luaUnit_IsFlying(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_SetRotation(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetRotation(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		ptr->SetRotation(ptr->GetGUID());
 	return 1;
 }
-int luaUnit_SetOrientation(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetOrientation(lua_State * L, Unit * ptr)
 {
 	float O = (float)luaL_checknumber(L, 1);
 	if(ptr)
 		ptr->SetOrientation(O);
 	return 0;
 }
-int luaUnit_CalcDistance(lua_State * L, UnitPointer  ptr)
+int luaUnit_CalcDistance(lua_State * L, Unit * ptr)
 {
-	ObjectPointer  ob = Lunar<Object>::check(L,1);
+	Object * ob = Lunar<Object>::check(L,1);
 	if(ob)
-		lua_pushnumber(L,(float)ptr->CalcDistance(ob));
+		lua_pushnumber(L,(float)ptr->CalcDistance(FROM_RAW(ob)));
 	return 1;
 }
-int luaUnit_GetSpawnX(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetSpawnX(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnX());
 	return 1;
 }
-int luaUnit_GetSpawnY(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetSpawnY(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnY());
 	return 1;
 }
-int luaUnit_GetSpawnZ(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetSpawnZ(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnZ());
 	return 1;
 }
-int luaUnit_GetSpawnO(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetSpawnO(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnO());
 	return 1;
 }
-int luaUnit_GetInRangePlayersCount(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInRangePlayersCount(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetInRangePlayersCount());
 	return 1;
 }
-int luaUnit_GetEntry(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetEntry(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetEntry());
 	return 1;
 }
-int luaUnit_SetMoveRunFlag(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetMoveRunFlag(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	int enabled = luaL_checkint(L, 1);
@@ -3083,16 +3057,16 @@ int luaUnit_SetMoveRunFlag(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 
-int luaUnit_HandleEvent(lua_State * L, UnitPointer  ptr)
+int luaUnit_HandleEvent(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	int event_id = luaL_checkint(L, 2);
 	int misc_1 = luaL_checkint(L, 3);
-	ptr->GetAIInterface()->HandleEvent(event_id, target, misc_1);
+	ptr->GetAIInterface()->HandleEvent(event_id, TO_UNIT(FROM_RAW(target)), misc_1);
 	return 1;
 }
-int luaUnit_GetCurrentSpellId(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetCurrentSpellId(lua_State * L, Unit * ptr)
 {
 	if(ptr->GetCurrentSpell())
 		lua_pushnumber(L, ptr->GetCurrentSpell()->GetSpellProto()->Id);
@@ -3100,7 +3074,7 @@ int luaUnit_GetCurrentSpellId(lua_State * L, UnitPointer  ptr)
 		lua_pushnil(L);
 	return 1;
 }
-int luaUnit_GetCurrentSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetCurrentSpell(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->GetCurrentSpell() != NULL)
@@ -3109,25 +3083,25 @@ int luaUnit_GetCurrentSpell(lua_State * L, UnitPointer  ptr)
 		}
 	return 1;
 }
-int luaUnit_AddAssistTargets(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddAssistTargets(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	UnitPointer  Friend = Lunar<Unit>::check(L,1);
+	Unit * Friend = Lunar<Unit>::check(L,1);
 	if(ptr && Friend)
 	{
-		if( isFriendly(ptr, Friend))
-			ptr->GetAIInterface()->addAssistTargets(Friend);
+		if( isFriendly(FROM_RAW(ptr), FROM_RAW(Friend)))
+			ptr->GetAIInterface()->addAssistTargets(TO_UNIT(FROM_RAW(Friend)));
 	}
 	return 0;
 }
-int luaUnit_GetAIState(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetAIState(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	lua_pushnumber(L, ptr->GetAIInterface()->getAIState());
 	return 1;
 }
 
-int luaUnit_GetFloatValue(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetFloatValue(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	if( ptr != NULL ) 
@@ -3135,7 +3109,7 @@ int luaUnit_GetFloatValue(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_InitPacket(lua_State * L, UnitPointer  ptr)
+int luaUnit_InitPacket(lua_State * L, Unit * ptr)
 {
 	int packet_id = luaL_checkint(L, 1);
 	WorldPacket data;
@@ -3143,7 +3117,7 @@ int luaUnit_InitPacket(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_AddDataToPacket(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddDataToPacket(lua_State * L, Unit * ptr)
 {
 	WorldPacket dat;
 	int type = luaL_checkint(L, 1);
@@ -3185,7 +3159,7 @@ int luaUnit_AddDataToPacket(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_AddGuidDataToPacket(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddGuidDataToPacket(lua_State * L, Unit * ptr)
 {
 	WorldPacket dat;
 	int type = luaL_checkint(L, 1);
@@ -3208,14 +3182,14 @@ int luaUnit_AddGuidDataToPacket(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SendData(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendData(lua_State * L, Unit * ptr)
 {
 	WorldPacket dat;
 	ptr->SendMessageToSet(&dat, true);
 	return 1;
 }
 
-int luaUnit_ModUInt32Value(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModUInt32Value(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	int value = luaL_checkint(L, 2);
@@ -3223,7 +3197,7 @@ int luaUnit_ModUInt32Value(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_ModFloatValue(lua_State * L, UnitPointer  ptr)
+int luaUnit_ModFloatValue(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	float value = (float)luaL_checknumber(L, 2);
@@ -3231,7 +3205,7 @@ int luaUnit_ModFloatValue(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetUInt32Value(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetUInt32Value(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	int value = luaL_checkint(L, 2);
@@ -3239,7 +3213,7 @@ int luaUnit_SetUInt32Value(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetUInt64Value(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetUInt64Value(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	int value = luaL_checkint(L, 2);
@@ -3247,7 +3221,7 @@ int luaUnit_SetUInt64Value(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_SetFloatValue(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetFloatValue(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	float value = (float)luaL_checknumber(L, 2);
@@ -3255,7 +3229,7 @@ int luaUnit_SetFloatValue(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetUInt32Value(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetUInt32Value(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	if( ptr != NULL ) 
@@ -3263,7 +3237,7 @@ int luaUnit_GetUInt32Value(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_GetUInt64Value(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetUInt64Value(lua_State * L, Unit * ptr)
 {
 	int field = luaL_checkint(L, 1);
 	if( ptr != NULL )
@@ -3271,12 +3245,12 @@ int luaUnit_GetUInt64Value(lua_State * L, UnitPointer  ptr)
 	return 1;
 }
 
-int luaUnit_AdvanceQuestObjective(lua_State * L, UnitPointer  ptr)
+int luaUnit_AdvanceQuestObjective(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int questid = luaL_checkint(L,1);
 	int objective = luaL_checkint(L,2);
-	PlayerPointer  pl = TO_PLAYER(ptr);
+	PlayerPointer  pl = TO_PLAYER(FROM_RAW(ptr));
 	QuestLogEntry * qle = pl->GetQuestLogForEntry(questid);
 	qle->SetMobCount(objective, qle->GetMobCount(objective) + 1);
 	qle->SendUpdateAddKill(objective);
@@ -3286,9 +3260,10 @@ int luaUnit_AdvanceQuestObjective(lua_State * L, UnitPointer  ptr)
 	qle->UpdatePlayerFields();
 	return 0;
 }
-int luaUnit_Heal(lua_State * L, UnitPointer  ptr)
+int luaUnit_Heal(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
 	uint32 spellid = luaL_checkint(L, 2);
 	uint32 amount = luaL_checkint(L, 3);
 	if (!target || !spellid || !amount || !ptr)
@@ -3296,18 +3271,18 @@ int luaUnit_Heal(lua_State * L, UnitPointer  ptr)
 	ptr->Heal(target,spellid,amount);
 	return 0;
 }
-int luaUnit_Energize(lua_State * L, UnitPointer  ptr)
+int luaUnit_Energize(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	uint32 spellid = luaL_checkint(L, 2);
 	uint32 amount = luaL_checkint(L, 3);
 	uint32 type = luaL_checkint(L, 4);
 	if(!target||!spellid||!amount||!type||!ptr)
 		return 0;
-	ptr->Energize(target,spellid,amount,type);
+	ptr->Energize(TO_UNIT(FROM_RAW(target)),spellid,amount,type);
 	return 0;
 }
-int luaUnit_SendChatMessageAlternateEntry(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendChatMessageAlternateEntry(lua_State * L, Unit * ptr)
 {
 	uint32 entry = luaL_checkint(L, 1);
 	uint8 type = luaL_checkint(L, 2);
@@ -3318,18 +3293,18 @@ int luaUnit_SendChatMessageAlternateEntry(lua_State * L, UnitPointer  ptr)
 	ptr->SendChatMessageAlternateEntry(entry,type,lang,msg);
 	return 0;
 }
-int luaUnit_SendChatMessageToPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_SendChatMessageToPlayer(lua_State * L, Unit * ptr)
 {
 	uint8 type = luaL_checkint(L, 1);
 	uint32 lang = luaL_checkint(L, 2);
 	const char *msg = luaL_checkstring(L,3);
-	PlayerPointer plr = Lunar<Player>::check(L,4);
+	Player * plr = Lunar<Player>::check(L,4);
 	if(!plr||!msg)
 		return 0;
-	ptr->SendChatMessageToPlayer(type,lang,msg,plr);
+	ptr->SendChatMessageToPlayer(type,lang,msg,TO_PLAYER(FROM_RAW(plr)));
 	return 0;
 }
-int luaUnit_SetPowerType(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetPowerType(lua_State * L, Unit * ptr)
 {
 	const char * message = luaL_checklstring(L,1,NULL);
 	if(!ptr||!message)
@@ -3346,7 +3321,7 @@ int luaUnit_SetPowerType(lua_State * L, UnitPointer  ptr)
 		ptr->SetPowerType(POWER_TYPE_ENERGY);
 	return 1;
 }
-int luaUnit_GetPowerType(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetPowerType(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 	{
@@ -3366,11 +3341,11 @@ int luaUnit_GetPowerType(lua_State * L, UnitPointer  ptr)
 	}
 	return 1;
 }
-int luaUnit_Strike(lua_State * L, UnitPointer  ptr)
+int luaUnit_Strike(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_UNIT);
 
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	uint32 weapon_damage_type = luaL_checkint(L, 2);
 	uint32 sp = luaL_checkint(L, 3);
 	int32 adddmg = luaL_checkint(L, 4);
@@ -3379,10 +3354,10 @@ int luaUnit_Strike(lua_State * L, UnitPointer  ptr)
 
 	if(!target||!weapon_damage_type||!sp||!adddmg||!pct_dmg_mod)
 		return 0;
-	ptr->Strike(target,weapon_damage_type,dbcSpell.LookupEntry(sp),adddmg,pct_dmg_mod,exclusive_damage,false,false);
+	ptr->Strike(TO_UNIT(FROM_RAW(target)),weapon_damage_type,dbcSpell.LookupEntry(sp),adddmg,pct_dmg_mod,exclusive_damage,false,false);
 	return 0;
 }
-int luaUnit_SetAttackTimer(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetAttackTimer(lua_State * L, Unit * ptr)
 {
 	int32 timer = luaL_checkint(L, 1);
 	uint32 offhand = luaL_checkint(L,2);
@@ -3391,53 +3366,53 @@ int luaUnit_SetAttackTimer(lua_State * L, UnitPointer  ptr)
 	ptr->setAttackTimer(timer,false);
 	return 0;
 }
-int luaUnit_Kill(lua_State * L, UnitPointer  ptr)
+int luaUnit_Kill(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if (!ptr ||!target)
 		return 0;
-	ptr->DealDamage(target,target->GetUInt32Value(UNIT_FIELD_HEALTH),0,0,0,true);
+	ptr->DealDamage(TO_UNIT(FROM_RAW(target)),target->GetUInt32Value(UNIT_FIELD_HEALTH),0,0,0,true);
 	return 0;
 }
-int luaUnit_DealDamage(lua_State * L, UnitPointer  ptr)
+int luaUnit_DealDamage(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	uint32 damage = luaL_checkint(L, 2);
 	uint32 spellid = luaL_checkint(L, 3);
 	if(!ptr||!target)
 		return 0;
-	ptr->DealDamage(target,damage,0,0,spellid,true);
+	ptr->DealDamage(TO_UNIT(FROM_RAW(target)),damage,0,0,spellid,true);
 	return 0;
 }
-int luaUnit_SetNextTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetNextTarget(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(ptr && target)
-		ptr->GetAIInterface()->SetNextTarget(target);
+		ptr->GetAIInterface()->SetNextTarget(TO_UNIT(FROM_RAW(target)));
 	return 0;
 }
-int luaUnit_GetNextTarget(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetNextTarget(lua_State * L, Unit * ptr)
 {
 	if(ptr || ptr->IsInWorld())
-		Lunar<Unit>::push(L, ptr->GetAIInterface()->GetNextTarget());
+		Lunar<Unit>::push(L, LUA_TO_RAW(ptr->GetAIInterface()->GetNextTarget())); //refactor
 	return 0;
 }
-int luaUnit_SetPetOwner(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetPetOwner(lua_State * L, Unit * ptr)
 {
-	UnitPointer  owner = Lunar<Unit>::check(L, 1);
+	Unit * owner = Lunar<Unit>::check(L, 1);
 	if(ptr || owner)
-		ptr->GetAIInterface()->SetPetOwner(owner);
+		ptr->GetAIInterface()->SetPetOwner(TO_UNIT(FROM_RAW(owner)));
 	return 0;
 }
-int luaUnit_DismissPet(lua_State * L, UnitPointer  ptr)
+int luaUnit_DismissPet(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		ptr->GetAIInterface()->DismissPet();
 	return 0;
 }
-int luaUnit_IsPet(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsPet(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->IsPet())
@@ -3446,70 +3421,70 @@ int luaUnit_IsPet(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_GetPetOwner(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetPetOwner(lua_State * L, Unit * ptr)
 {
 	if(ptr)
-		Lunar<Unit>::push(L, ptr->GetAIInterface()->GetPetOwner());
+		Lunar<Unit>::push(L, LUA_TO_RAW(ptr->GetAIInterface()->GetPetOwner())); //REFACTOR
 	return 0;
 }
-int luaUnit_SetUnitToFollow(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetUnitToFollow(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	float dist = (float)luaL_checkint(L, 2);
 	float angle = (float)luaL_checkint(L, 3);
 	if(!target||!ptr||!dist||dist<=0||!angle)
 		return 0;
-	ptr->GetAIInterface()->SetUnitToFollow(target);
+	ptr->GetAIInterface()->SetUnitToFollow(TO_UNIT(FROM_RAW(target)));
 	ptr->GetAIInterface()->SetFollowDistance(dist);
 	ptr->GetAIInterface()->SetUnitToFollowAngle(angle);
 	return 0;
 }
-int luaUnit_GetUnitToFollow(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetUnitToFollow(lua_State * L, Unit * ptr)
 {
 	if(ptr)
-		Lunar<Unit>::push(L,ptr->GetAIInterface()->getUnitToFollow());
+		Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetAIInterface()->getUnitToFollow())); //REFACTOR
 	return 0;
 }
-int luaUnit_IsInFront(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInFront(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(ptr && target)
-		if(ptr->isInFront(target))
+		if(ptr->isInFront(FROM_RAW(target)))
 			lua_pushboolean(L, 1);
 		else
 			lua_pushboolean(L, 0);
 	return 1;
 }
 
-int luaUnit_IsInBack(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInBack(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(ptr && target)
-		if(ptr->isInBack(target))
+		if(ptr->isInBack(FROM_RAW(target)))
 			lua_pushboolean(L, 1);
 		else
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_IsPacified(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsPacified(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushboolean(L,(ptr->IsPacified())?1:0);
 	return 1;
 }
-int luaUnit_IsFeared(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsFeared(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushboolean(L,(ptr->IsFeared())?1:0);
 	return 1;
 }
-int luaUnit_IsStunned(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsStunned(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushboolean(L,(ptr->IsStunned())?1:0);
 	return 1;
 }
-int luaUnit_CreateGuardian(lua_State * L, UnitPointer  ptr)
+int luaUnit_CreateGuardian(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 
@@ -3522,45 +3497,45 @@ int luaUnit_CreateGuardian(lua_State * L, UnitPointer  ptr)
 	ptr->CreateTemporaryGuardian(guardian_entry,duration,angle,lvl);
 	return 0;
 }
-/*int luaUnit_IsInArc(lua_State * L, UnitPointer  ptr)
+/*int luaUnit_IsInArc(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	float degrees = (float)luaL_checkint(L, 2);
 	if(!target||!ptr||!degrees)
 		return 0;
 	else
-		if(ptr->isInArc(target,degrees))
+		if(ptr->isInArc(FROM_RAW(target),degrees))
 			lua_pushboolean(L,1);
 		else
 			lua_pushboolean(L,0);
 	return 1;
 }*/
-int luaUnit_IsInWater(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInWater(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	if(ptr)
-		if( TO_PLAYER( ptr )->m_UnderwaterState)
+		if( RAW_TO_PLAYER(ptr)->m_UnderwaterState)
 			lua_pushboolean(L, 1);
 		else
 			lua_pushboolean(L, 0);
 	return 1;
 }
 	
-int luaUnit_GetAITargetsCount(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetAITargetsCount(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetAIInterface()->getAITargetsCount());
 	return 1;
 }
-int luaUnit_GetUnitByGUID(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetUnitByGUID(lua_State * L, Unit * ptr)
 {
 	uint64 guid = luaL_checkint(L,1);
 	if(ptr && guid)
-		Lunar<Unit>::push(L,ptr->GetMapMgr()->GetUnit(guid));
+		Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetUnit(guid))); //REFACTOR
 	return 1;
 }
 
-/*int luaUnit_GetAITargets(lua_State * L, UnitPointer  ptr)
+/*int luaUnit_GetAITargets(lua_State * L, Unit * ptr)
 {
 	UnitPointer  ret = NULL;
 	TargetMap::iterator itr;
@@ -3571,18 +3546,18 @@ int luaUnit_GetUnitByGUID(lua_State * L, UnitPointer  ptr)
 		ret = ptr->GetMapMgr()->GetUnit(itr->first);
 		count++;
 		lua_pushvalue(L,count);
-		Lunar<Unit>::push(L,ret,false);
+		Lunar<Unit>::push(L,LUA_TO_RAW(ret),false);
 		lua_rawset(L,-3);
 	}
 	return 1;
 }*/
-int luaUnit_GetInRangeObjectsCount(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInRangeObjectsCount(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetInRangeCount());
 	return 1;
 }
-int luaUnit_GetInRangePlayers(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInRangePlayers(lua_State * L, Unit * ptr)
 {
 	PlayerPointer  ret = NULLPLR;
 	uint32 count = 0;
@@ -3594,13 +3569,13 @@ int luaUnit_GetInRangePlayers(lua_State * L, UnitPointer  ptr)
 			count++,
 			ret = *itr;
 			lua_pushinteger(L,count);
-			Lunar<Unit>::push(L,TO_UNIT(ret),false);
+			Lunar<Unit>::push(L,LUA_TO_UNIT(ret),false);
 			lua_rawset(L,-3);
 		}
 	}
 	return 1;
 }
-int luaUnit_GetInRangeGameObjects(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetInRangeGameObjects(lua_State * L, Unit * ptr)
 {
 	ObjectPointer  ret = NULLOBJ;
 	lua_newtable(L);
@@ -3611,14 +3586,14 @@ int luaUnit_GetInRangeGameObjects(lua_State * L, UnitPointer  ptr)
 		{
 			count++,
 			lua_pushinteger(L,count);
-			Lunar<GameObject>::push(L,TO_GAMEOBJECT(*itr));
+			Lunar<GameObject>::push(L,LUA_TO_GAMEOBJECT((*itr)));
 			lua_rawset(L,-3);
 		}
 	}
 	return 1;
 }
 	
-int luaUnit_HasInRangeObjects(lua_State * L, UnitPointer  ptr)
+int luaUnit_HasInRangeObjects(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		if(ptr->HasInRangeObjects())
@@ -3627,7 +3602,7 @@ int luaUnit_HasInRangeObjects(lua_State * L, UnitPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaUnit_SetFacing(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetFacing(lua_State * L, Unit * ptr)
 {
 	float newo = (float)luaL_checkint(L, 1);
 	if(!ptr|!newo)
@@ -3635,7 +3610,7 @@ int luaUnit_SetFacing(lua_State * L, UnitPointer  ptr)
 	ptr->SetFacing(newo);
 	return 0;
 }
-int luaUnit_CalcToDistance(lua_State * L, UnitPointer  ptr)
+int luaUnit_CalcToDistance(lua_State * L, Unit * ptr)
 {
 	float x = (float)luaL_checkint(L,1 );
 	float y = (float)luaL_checkint(L, 2);
@@ -3645,7 +3620,7 @@ int luaUnit_CalcToDistance(lua_State * L, UnitPointer  ptr)
 	lua_pushnumber(L,ptr->CalcDistance(x,y,z));
 	return 1;
 }
-int luaUnit_CalcAngle(lua_State * L, UnitPointer  ptr)
+int luaUnit_CalcAngle(lua_State * L, Unit * ptr)
 {
 	float x = (float)luaL_checkint(L,1 );
 	float y = (float)luaL_checkint(L, 2);
@@ -3656,7 +3631,7 @@ int luaUnit_CalcAngle(lua_State * L, UnitPointer  ptr)
 	lua_pushnumber(L,ptr->calcAngle(x,y,x2,y2));
 	return 1;
 }
-int luaUnit_CalcRadAngle(lua_State * L, UnitPointer  ptr)
+int luaUnit_CalcRadAngle(lua_State * L, Unit * ptr)
 {
 	float ang = 0.0f;
 	float x = (float)luaL_checkint(L,1 );
@@ -3670,7 +3645,7 @@ int luaUnit_CalcRadAngle(lua_State * L, UnitPointer  ptr)
 	lua_pushnumber(L,ang);
 	return 1;
 }
-int luaUnit_IsInvisible(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInvisible(lua_State * L, Unit * ptr)
 {
 	int enabled = luaL_checkint(L, 1);
 	if(!ptr|!enabled)
@@ -3680,36 +3655,36 @@ int luaUnit_IsInvisible(lua_State * L, UnitPointer  ptr)
 		ptr->m_invisible = true;
 	return 1;
 }
-int luaUnit_MoveFly(lua_State * L, UnitPointer  ptr)
+int luaUnit_MoveFly(lua_State * L, Unit * ptr)
 {
 	int enabled = luaL_checkint(L,1);
 	if(ptr)
 		ptr->GetAIInterface()->m_moveFly = ((enabled > 0)?true:false);
 	return 1;
 }
-int luaUnit_IsInvincible(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsInvincible(lua_State * L, Unit * ptr)
 {
 	int enabled = luaL_checkint(L, 1);
 	if(ptr)
 		ptr->bInvincible = ((enabled > 0)? true : false );
 	return 0;
 }
-int luaUnit_ResurrectPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_ResurrectPlayer(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	if(ptr)
-		TO_PLAYER( ptr ) ->ResurrectPlayer( TO_PLAYER(ptr) );
+		RAW_TO_PLAYER(ptr)->ResurrectPlayer( TO_PLAYER(FROM_RAW(ptr)) );
 	return 0;
 }
-int luaUnit_KickPlayer(lua_State * L, UnitPointer  ptr)
+int luaUnit_KickPlayer(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	int delay = luaL_checkint(L,1);
 	if(ptr)
-		TO_PLAYER(ptr)->Kick(delay);
+		RAW_TO_PLAYER(ptr)->Kick(delay);
 	return 0;
 }
-int luaUnit_CanCallForHelp(lua_State * L, UnitPointer  ptr)
+int luaUnit_CanCallForHelp(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT)
 	int enabled = luaL_checkint(L, 1);
@@ -3718,14 +3693,14 @@ int luaUnit_CanCallForHelp(lua_State * L, UnitPointer  ptr)
 	ptr->GetAIInterface()->m_canCallForHelp = ((enabled < 0)? true: false);
 	return 0;
 }
-int luaUnit_CallForHelpHp(lua_State * L, UnitPointer  ptr)
+int luaUnit_CallForHelpHp(lua_State * L, Unit * ptr)
 {
 	float hp = (float)luaL_checkint(L, 1);
 	if(ptr)
 		ptr->GetAIInterface()->m_CallForHelpHealth = hp;
 	return 0;
 }
-int luaUnit_SetDeathState(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetDeathState(lua_State * L, Unit * ptr)
 {
 	int state = luaL_checkint(L, 1);
 	if(ptr)
@@ -3746,52 +3721,52 @@ int luaUnit_SetDeathState(lua_State * L, UnitPointer  ptr)
 	}
 	return 1;
 }
-int luaUnit_SetCreatureName(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetCreatureName(lua_State * L, Unit * ptr)
 {
 	uint32 id = luaL_checkint(L,1);
 	if(!ptr|!id)
 		return 0;
-	TO_CREATURE(ptr)->SetCreatureName(CreatureNameStorage.LookupEntry(id));
+	RAW_TO_CREATURE(ptr)->SetCreatureName(CreatureNameStorage.LookupEntry(id));
 	return 0;
 }
-int luaUnit_GetSpellId(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetSpellId(lua_State * L, Unit * ptr)
 {
 	uint32 spellid = luaL_checkint(L,1);
 	if(ptr)
-		Lunar<SpellEntry>::push(L,ptr->GetAIInterface()->getSpellEntry(spellid));
+		Lunar<SpellEntry>::push(L,ptr->GetAIInterface()->getSpellEntry(spellid)); //REFACTOR
 	return 1;
 }
-int luaUnit_SetNextSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetNextSpell(lua_State * L, Unit * ptr)
 {
 	SpellEntry * sp = dbcSpell.LookupEntry(luaL_checkint(L,1));
 	if(ptr || sp)
 		ptr->GetAIInterface()->SetNextSpell((AI_Spell*)sp);
 	return 0;
 }
-int luaUnit_Possess(lua_State * L, UnitPointer  ptr)
+int luaUnit_Possess(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 
-	UnitPointer  target = Lunar<Unit>::check(L,1);
+	Unit * target = Lunar<Unit>::check(L,1);
 	if(target)
-		TO_PLAYER(ptr)->Possess(target);
+		RAW_TO_PLAYER(ptr)->Possess(TO_UNIT(FROM_RAW(target)));
 	return 0;
 }
-int luaUnit_Unpossess(lua_State * L, UnitPointer  ptr)
+int luaUnit_Unpossess(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
-	PlayerPointer target = Lunar<Player>::check(L,1);
+	Player * target = Lunar<Player>::check(L,1);
 	if(target)
 		target->UnPossess();
 	return 0;
 }
-int luaUnit_RemoveFromWorld(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveFromWorld(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 		ptr->RemoveFromWorld(true);
 	return 0;
 }
-int luaUnit_GetFaction(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetFaction(lua_State * L, Unit * ptr)
 {
 	if(ptr)
 	{
@@ -3799,28 +3774,28 @@ int luaUnit_GetFaction(lua_State * L, UnitPointer  ptr)
 	}
 	return 1;
 }
-int luaUnit_SpellNonMeleeDamageLog(lua_State * L, UnitPointer  ptr)
+int luaUnit_SpellNonMeleeDamageLog(lua_State * L, Unit * ptr)
 {
-	UnitPointer  pVictim = Lunar<Unit>::check(L,1);
+	Unit * pVictim = Lunar<Unit>::check(L,1);
 	uint32 spellid = luaL_checkint(L,2);
 	uint32 damage = luaL_checkint(L,3);
 	int allowproc = luaL_checkint(L,4);
 	int static_dmg = luaL_checkint(L,5);
 	int no_remove_auras = luaL_checkint(L,6);
-	if(pVictim&&spellid&&damage&&allowproc&&static_dmg&&no_remove_auras)
+	if(pVictim && spellid && damage && allowproc && static_dmg && no_remove_auras)
 	{
-		ptr->SpellNonMeleeDamageLog(pVictim,spellid,damage,((allowproc >0)?true:false),((static_dmg>0)?true:false),((no_remove_auras>0)?true:false));
+		ptr->SpellNonMeleeDamageLog(TO_UNIT(FROM_RAW(pVictim)),spellid,damage,((allowproc >0)?true:false),((static_dmg>0)?true:false),((no_remove_auras>0)?true:false));
 	}
 	return 1;
 }
-int luaUnit_NoRespawn(lua_State * L, UnitPointer  ptr)
+int luaUnit_NoRespawn(lua_State * L, Unit * ptr)
 {
 	int enabled = luaL_checkint(L,1);
 	if(ptr&&enabled)
-		TO_CREATURE( ptr ) ->m_noRespawn = ((enabled < 0)? true:false);
+		RAW_TO_CREATURE( ptr ) ->m_noRespawn = ((enabled < 0)? true:false);
 	return 1;
 }
-int luaUnit_GetMapId(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetMapId(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_UNIT || TYPEID_PLAYER);
 
@@ -3830,21 +3805,23 @@ int luaUnit_GetMapId(lua_State * L, UnitPointer  ptr)
 		lua_pushinteger(L,ptr->GetMapId());
 	return 1;
 }
-int luaUnit_AttackReaction(lua_State * L, UnitPointer  ptr)
+int luaUnit_AttackReaction(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L,1);
+	Unit * target = Lunar<Unit>::check(L,1);
 	uint32 damage = luaL_checkint(L,2);
 	uint32 spell = luaL_checkint(L,3);
 	if(ptr && target && damage)
 	{
-		ptr->GetAIInterface()->AttackReaction(target,damage,spell);
+		ptr->GetAIInterface()->AttackReaction(TO_UNIT(FROM_RAW(target)),damage,spell);
 	}
 	return 1;
 }
-int luaUnit_EventCastSpell(lua_State * L, UnitPointer  ptr)
+int luaUnit_EventCastSpell(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * raw = Lunar<Unit>::check(L, 1);
+	UnitPointer target = TO_UNIT(FROM_RAW(raw));
+	UnitPointer ptrUnit = TO_UNIT(FROM_RAW(ptr));
 	uint32 sp = luaL_checkint(L,2);
 	uint32 delay = luaL_checkint(L,3);
 	uint32 repeats = luaL_checkint(L,4);
@@ -3853,37 +3830,37 @@ int luaUnit_EventCastSpell(lua_State * L, UnitPointer  ptr)
 		switch(ptr->GetTypeId())
 		{
 		case TYPEID_PLAYER:
-			sEventMgr.AddEvent(ptr, &Player::EventCastSpell,target,dbcSpell.LookupEntry(sp),EVENT_PLAYER_UPDATE,delay,repeats,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(ptrUnit, &Player::EventCastSpell,target,dbcSpell.LookupEntry(sp),EVENT_PLAYER_UPDATE,delay,repeats,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		case TYPEID_UNIT:
-			sEventMgr.AddEvent(ptr, &Unit::EventCastSpell,target,dbcSpell.LookupEntry(sp),EVENT_CREATURE_UPDATE,delay,repeats,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
+			sEventMgr.AddEvent(ptrUnit, &Unit::EventCastSpell,target,dbcSpell.LookupEntry(sp),EVENT_CREATURE_UPDATE,delay,repeats,EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 		}
 	}
 	return 0;
 }
-int luaUnit_IsPlayerMoving(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsPlayerMoving(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
-	if( TO_PLAYER(ptr) ->m_isMoving)
+	if( RAW_TO_PLAYER(ptr) ->m_isMoving)
 		lua_pushboolean(L,1);
 	else
 		lua_pushboolean(L,0);
 	return 1;
 }
-int luaUnit_IsPlayerAttacking(lua_State * L, UnitPointer  ptr)
+int luaUnit_IsPlayerAttacking(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
-	if( TO_PLAYER(ptr) ->IsAttacking())
+	if( RAW_TO_PLAYER(ptr) ->IsAttacking())
 		lua_pushboolean(L,1);
 	else
 		lua_pushboolean(L,0);
 	return 1;
 }
-int luaUnit_GetFactionStanding(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetFactionStanding(lua_State * L, Unit * ptr)
 {
 	uint32 faction = luaL_checkint(L,1);
 	if (ptr && faction)
 	{
-		switch(TO_PLAYER(ptr)->GetStanding(faction))
+		switch(RAW_TO_PLAYER(ptr)->GetStanding(faction))
 		{
 		case STANDING_HATED:
 			lua_pushstring(L, "Hated");
@@ -3905,70 +3882,70 @@ int luaUnit_GetFactionStanding(lua_State * L, UnitPointer  ptr)
 	}
 return 1;
 }
-int luaUnit_SetPlayerAtWar(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetPlayerAtWar(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
 	uint32 faction = luaL_checkint(L,1);
 	uint32 set = luaL_checkint(L,2);
 	if(ptr && faction && set)
 	{
-		TO_PLAYER(ptr)->SetAtWar(faction,((set > 0)? true : false));
+		RAW_TO_PLAYER(ptr)->SetAtWar(faction,((set > 0)? true : false));
 	}
 	return 0;
 }
-/*int luaUnit_IsPlayerAtWar(lua_State * L, UnitPointer  ptr)
+/*int luaUnit_IsPlayerAtWar(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
 	uint32 faction = luaL_checkint(L,1);
 	if (ptr && faction)
-		if( TO_PLAYER(ptr)->IsAtWar(faction))
+		if( RAW_TO_PLAYER(ptr)->IsAtWar(faction))
 			lua_pushboolean(L,1);
 		else
 			lua_pushboolean(L,0);
 	return 1;
 }*/
-int luaUnit_SetPlayerStanding(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetPlayerStanding(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 faction = luaL_checkint(L,1);
 	uint32 value = luaL_checkint(L,2);
 	if(faction && value)
-		TO_PLAYER(ptr)->SetStanding(faction,value);
+		RAW_TO_PLAYER(ptr)->SetStanding(faction,value);
 	return 0;
 }
-int luaUnit_GetStanding(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetStanding(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 faction = luaL_checkint(L,1);
 	if(ptr && faction)
-		lua_pushinteger(L,TO_PLAYER(ptr)->GetStanding(faction));
+		lua_pushinteger(L,RAW_TO_PLAYER(ptr)->GetStanding(faction));
 	return 0;
 }
-int luaUnit_RemoveThreatByPtr(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveThreatByPtr(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if( ptr && target)
 	{
-		ptr->GetAIInterface()->RemoveThreatByPtr(target);
+		ptr->GetAIInterface()->RemoveThreatByPtr(TO_UNIT(FROM_RAW(target)));
 	}
 	return 0;
 }
-int luaUnit_HasItem(lua_State * L, UnitPointer  ptr)
+int luaUnit_HasItem(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 itemid = luaL_checkint(L,1);
 	if(ptr && itemid)
 	{
-		if( TO_PLAYER(ptr)->GetItemInterface()->GetItemCount(itemid,false) > 0 )
+		if( RAW_TO_PLAYER(ptr)->GetItemInterface()->GetItemCount(itemid,false) > 0 )
 			lua_pushboolean(L,1);
 		else
 			lua_pushboolean(L,0);
 	}
 	return 1;
 }
-int luaUnit_PlaySpellVisual(lua_State * L, UnitPointer  ptr)
+int luaUnit_PlaySpellVisual(lua_State * L, Unit * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L,1);
+	Unit * target = Lunar<Unit>::check(L,1);
 	uint32 spell = luaL_checkint(L,2);
 	if( ptr && target && spell)
 	{
@@ -3976,16 +3953,16 @@ int luaUnit_PlaySpellVisual(lua_State * L, UnitPointer  ptr)
 	}
 	return 0;
 }
-int luaUnit_GetPlayerLevel(lua_State * L, UnitPointer  ptr)
+int luaUnit_GetPlayerLevel(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
 	if(ptr)
 	{
-		lua_pushnumber(L,TO_PLAYER(ptr) ->getLevel());
+		lua_pushnumber(L,RAW_TO_PLAYER(ptr)->getLevel());
 	}
 	return 0;
 }
-int luaUnit_SetPlayerLevel(lua_State * L, UnitPointer  ptr)
+int luaUnit_SetPlayerLevel(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID_RET(TYPEID_PLAYER);
 	uint32 level = luaL_checkint(L,1);
@@ -3994,12 +3971,12 @@ int luaUnit_SetPlayerLevel(lua_State * L, UnitPointer  ptr)
 		LevelInfo * Info = objmgr.GetLevelInfo(ptr->getRace(),ptr->getClass(),level);
 		if (Info != 0)
 		{
-			TO_PLAYER(ptr) ->ApplyLevelInfo(Info, level);
+			RAW_TO_PLAYER(ptr)->ApplyLevelInfo(Info, level);
 		}
 	}
 	return 0;
 }
-int luaUnit_AddSkill(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddSkill(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 skill = luaL_checkint(L,1);
@@ -4007,42 +3984,42 @@ int luaUnit_AddSkill(lua_State * L, UnitPointer  ptr)
 	uint32 max = luaL_checkint(L,3);
 	if(!max) max = 375;
 	if(current > max)
-		TO_PLAYER(ptr)->BroadcastMessage("CURRENT LEVEL CAN'T BE GREATER THAN MAX LEVEL");
+		RAW_TO_PLAYER(ptr)->BroadcastMessage("CURRENT LEVEL CAN'T BE GREATER THAN MAX LEVEL");
 		return 0;
-	TO_PLAYER(ptr)->_AddSkillLine(skill,current,max);
-	TO_PLAYER(ptr)->_UpdateMaxSkillCounts();
+	RAW_TO_PLAYER(ptr)->_AddSkillLine(skill,current,max);
+	RAW_TO_PLAYER(ptr)->_UpdateMaxSkillCounts();
 	return 0;
 }
-int luaUnit_RemoveSkill(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveSkill(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 skill = luaL_checkint(L,1);
 	if(!ptr ||!skill) return 0;
-	TO_PLAYER(ptr)->_RemoveSkillLine(skill);
-	TO_PLAYER(ptr)->_UpdateMaxSkillCounts();
+	RAW_TO_PLAYER(ptr)->_RemoveSkillLine(skill);
+	RAW_TO_PLAYER(ptr)->_UpdateMaxSkillCounts();
 	return 1;
 }
-int luaUnit_FlyCheat(lua_State * L, UnitPointer  ptr)
+int luaUnit_FlyCheat(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 enabled = luaL_checkint(L,1);
 	if(ptr && enabled)
-		TO_PLAYER(ptr)->FlyCheat = ((enabled > 0)? true : false);
+		RAW_TO_PLAYER(ptr)->FlyCheat = ((enabled > 0)? true : false);
 	return 0;
 }
-int luaUnit_AdvanceSkill(lua_State * L, UnitPointer  ptr)
+int luaUnit_AdvanceSkill(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_PLAYER);
 	uint32 skill = luaL_checkint(L,1);
 	uint32 count = luaL_checkint(L,2);
 	if(skill && count)
 	{
-		if( TO_PLAYER(ptr)->_HasSkillLine(skill))
-			TO_PLAYER(ptr)->_AdvanceSkillLine(skill,count);
+		if( RAW_TO_PLAYER(ptr)->_HasSkillLine(skill))
+			RAW_TO_PLAYER(ptr)->_AdvanceSkillLine(skill,count);
 	}
 	return 0;
 }
-int luaUnit_RemoveAurasByMechanic(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveAurasByMechanic(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
 	uint32 mechanic = luaL_checkint(L,1);
@@ -4053,7 +4030,7 @@ int luaUnit_RemoveAurasByMechanic(lua_State * L, UnitPointer  ptr)
 	}
 	return 0;
 }
-int luaUnit_RemoveAurasType(lua_State * L, UnitPointer  ptr)
+int luaUnit_RemoveAurasType(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
 	uint32 type = luaL_checkint(L,1);
@@ -4064,7 +4041,7 @@ int luaUnit_RemoveAurasType(lua_State * L, UnitPointer  ptr)
 	return 0;
 }
 /*
-int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
+int luaUnit_AddAuraVisual(lua_State * L, Unit * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT || TYPEID_PLAYER);
 	uint32 spellid = luaL_checkint(L,1);
@@ -4087,7 +4064,7 @@ int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
 ///////////////////////////////////////////////
-/*int luaGameObject_EventCastSpell(lua_State * L, GameObjectPointer  ptr)
+/*int luaGameObject_EventCastSpell(lua_State * L, GameObject * ptr)
 {
 	uint32 guid = luaL_checkint(L,1);
 	uint32 sp = luaL_checkint(L,2);
@@ -4099,7 +4076,7 @@ int luaUnit_AddAuraVisual(lua_State * L, UnitPointer  ptr)
 	}
 	return 0;
 }*/
-int luaGameObject_GetMapId(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetMapId(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 	{
@@ -4107,13 +4084,13 @@ int luaGameObject_GetMapId(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_RemoveFromWorld(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_RemoveFromWorld(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		ptr->RemoveFromWorld(true);
 	return 0;
 }
-//int luaGameObject_GetAreaID(lua_State * L, GameObjectPointer  ptr)
+//int luaGameObject_GetAreaID(lua_State * L, GameObject * ptr)
 //{
 //	float x = (float)luaL_checkint(L, 1);
 //	float y = (float)luaL_checkint(L, 2);
@@ -4121,7 +4098,7 @@ int luaGameObject_RemoveFromWorld(lua_State * L, GameObjectPointer  ptr)
 //		lua_pushinteger(L,ptr->GetMapMgr()->GetAreaID(x, y));
 //	return 1;
 //}
-int luaGameObject_GetName(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetName(lua_State * L, GameObject * ptr)
 {
 	if(!ptr||ptr->GetTypeId()!=TYPEID_GAMEOBJECT||!ptr->GetInfo())
 	{
@@ -4132,10 +4109,10 @@ int luaGameObject_GetName(lua_State * L, GameObjectPointer  ptr)
 	lua_pushstring(L,ptr->GetInfo()->Name);
 	return 1;
 }
-int luaGameObject_Teleport(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_Teleport(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
-	PlayerPointer target = Lunar<Player>::check(L, 1);
+	Player * target = Lunar<Player>::check(L, 1);
 	int mapId = luaL_checkint(L, 2);
 	double posX = luaL_checknumber(L, 3);
 	double posY = luaL_checknumber(L, 4);
@@ -4143,10 +4120,10 @@ int luaGameObject_Teleport(lua_State * L, GameObjectPointer  ptr)
 	if(!mapId || !posX || !posY || !posZ)
 		return 0;
 	LocationVector vec((float)posX, (float)posY, (float)posZ);
-	(TO_PLAYER(target))->SafeTeleport((uint32)mapId, 0, vec);
+	RAW_TO_PLAYER(target)->SafeTeleport((uint32)mapId, 0, vec);
 	return 0;
 }
-int luaGameObject_GetCreatureNearestCoords(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetCreatureNearestCoords(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
     if(!ptr) return 0;
@@ -4157,10 +4134,10 @@ int luaGameObject_GetCreatureNearestCoords(lua_State * L, GameObjectPointer  ptr
     if(entryid == 0) 
         lua_pushnil(L);
     else
-        Lunar<Unit>::push(L,ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid), false);
+        Lunar<Unit>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetInterface()->GetCreatureNearestCoords(x, y, z, entryid)), false); //REFACTOR
     return 1;
 }
-int luaGameObject_GetGameObjectNearestCoords(lua_State *L, GameObjectPointer  ptr)
+int luaGameObject_GetGameObjectNearestCoords(lua_State *L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
     if(!ptr) return 0;
@@ -4171,10 +4148,10 @@ int luaGameObject_GetGameObjectNearestCoords(lua_State *L, GameObjectPointer  pt
     if(entryid == 0) 
         lua_pushnil(L);
     else
-        Lunar<GameObject>::push(L,ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid), false);
+        Lunar<GameObject>::push(L,LUA_TO_RAW(ptr->GetMapMgr()->GetInterface()->GetGameObjectNearestCoords(x, y, z, entryid)), false); //REFACTOR
     return 1;
 }
-int luaGameObject_GetClosestPlayer(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetClosestPlayer(lua_State * L, GameObject * ptr)
 {
 	if(!ptr)
 		return 0;
@@ -4184,7 +4161,7 @@ int luaGameObject_GetClosestPlayer(lua_State * L, GameObjectPointer  ptr)
 
 	for(unordered_set<PlayerPointer>::iterator itr = ptr->GetInRangePlayerSetBegin(); itr != ptr->GetInRangePlayerSetEnd(); itr)
 	{
-		d2=(*itr)->GetDistanceSq(ptr);
+		d2=(*itr)->GetDistanceSq(FROM_RAW(ptr));
 		if(!ret||d2<dist)
 		{
 			dist=d2;
@@ -4195,19 +4172,19 @@ int luaGameObject_GetClosestPlayer(lua_State * L, GameObjectPointer  ptr)
 	if(!ret)
 		lua_pushnil(L);
 	else
-		Lunar<Unit>::push(L,TO_UNIT(ret),false);
+		Lunar<Unit>::push(L,LUA_TO_UNIT(ret));
 
 	return 1;
 }
-int luaGameObject_GetDistance(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetDistance(lua_State * L, GameObject * ptr)
 {
 	if(!ptr)
 		return 0;
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
-	lua_pushnumber(L,ptr->GetDistance2dSq(target));
+	Unit * target = Lunar<Unit>::check(L, 1);
+	lua_pushnumber(L,ptr->GetDistance2dSq(FROM_RAW(target)));
 	return 1;
 }
-int luaGameObject_IsInWorld(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_IsInWorld(lua_State * L, GameObject * ptr)
 {
 	if (ptr)
 		if(ptr->IsInWorld())
@@ -4216,21 +4193,21 @@ int luaGameObject_IsInWorld(lua_State * L, GameObjectPointer  ptr)
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaGameObject_GetZoneId(lua_State *L, GameObjectPointer  ptr)
+int luaGameObject_GetZoneId(lua_State *L, GameObject * ptr)
 {
 	if(!ptr)
 		return 0;
 	lua_pushinteger(L,(ptr->GetZoneId()));
 	return 1;
 }
-int luaGameObject_PlaySoundToSet(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_PlaySoundToSet(lua_State * L, GameObject * ptr)
 {
 	if(!ptr) return 0;
 	int soundid = luaL_checkint(L,1);
 	ptr->PlaySoundToSet(soundid);
 	return 0;
 }
-int luaGameObject_SpawnCreature(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SpawnCreature(lua_State * L, GameObject * ptr)
 {
 	if(ptr == NULL) return 0;
 	uint32 entry_id = luaL_checkint(L, 1);
@@ -4266,10 +4243,10 @@ int luaGameObject_SpawnCreature(lua_State * L, GameObjectPointer  ptr)
 	{
 		pCreature->Despawn(duration,0);
 	}
-	Lunar<Unit>::push(L,pCreature);
+	Lunar<Unit>::push(L,LUA_TO_RAW(pCreature));
 	return 0;
 }
-int luaGameObject_SpawnGameObject(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SpawnGameObject(lua_State * L, GameObject * ptr)
 {
 	if(ptr == NULL) return 0;
 	uint32 entry_id = luaL_checkint(L, 1);
@@ -4297,78 +4274,78 @@ int luaGameObject_SpawnGameObject(lua_State * L, GameObjectPointer  ptr)
 	{
 		sEventMgr.AddEvent(pC, &GameObject::ExpireAndDelete, EVENT_GAMEOBJECT_UPDATE, duration, 1, EVENT_FLAG_DO_NOT_EXECUTE_IN_WORLD_CONTEXT);
 	}
-	Lunar<GameObject>::push(L,pC);
+	Lunar<GameObject>::push(L,LUA_TO_RAW(pC));
 	return 0;
 }
-int luaGameObject_CalcDistance(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_CalcDistance(lua_State * L, GameObject * ptr)
 {
-	ObjectPointer  ob = Lunar<Object>::check(L,1);
+	Object * ob = Lunar<Object>::check(L,1);
 	if(ob)
-		lua_pushnumber(L,ptr->CalcDistance(ob));
+		lua_pushnumber(L,ptr->CalcDistance(FROM_RAW(ob)));
 	return 1;
 }
-int luaGameObject_GetSpawnX(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetSpawnX(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnX());
 	return 1;
 }
-int luaGameObject_GetSpawnY(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetSpawnY(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnY());
 	return 1;
 }
-int luaGameObject_GetSpawnZ(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetSpawnZ(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnZ());
 	return 1;
 }
-int luaGameObject_GetSpawnO(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetSpawnO(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetSpawnO());
 	return 1;
 }
-int luaGameObject_GetX(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetX(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetPositionX());
 	return 0;
 }
-int luaGameObject_GetY(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetY(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetPositionY());
 	return 0;
 }
-int luaGameObject_GetZ(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetZ(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetPositionZ());
 	return 0;
 }
-int luaGameObject_GetO(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetO(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetOrientation());
 	return 0;
 }
 
-int luaGameObject_GetInRangePlayersCount(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetInRangePlayersCount(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetInRangePlayersCount());
 	return 1;
 }
-int luaGameObject_GetEntry(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetEntry(lua_State * L, GameObject * ptr)
 {
 	if(ptr)
 		lua_pushnumber(L,ptr->GetEntry());
 	return 1;
 }
-int luaGameObject_SetOrientation(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SetOrientation(lua_State * L, GameObject * ptr)
 {
 	float newo = (float)luaL_checkint(L, 1);
 	if(!newo|!ptr)
@@ -4376,7 +4353,7 @@ int luaGameObject_SetOrientation(lua_State * L, GameObjectPointer  ptr)
 	ptr->SetOrientation(newo);
 	return 0;
 }
-int luaGameObject_CalcRadAngle(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_CalcRadAngle(lua_State * L, GameObject * ptr)
 {
 	float x = (float)luaL_checkint(L,1 );
 	float y = (float)luaL_checkint(L, 2);
@@ -4387,7 +4364,7 @@ int luaGameObject_CalcRadAngle(lua_State * L, GameObjectPointer  ptr)
 	lua_pushnumber(L,ptr->calcRadAngle(x,y,x2,y2));
 	return 0;
 }
-int luaGameObject_GetInstanceID(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetInstanceID(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_UNIT);
 	if(ptr->GetMapMgr()->GetMapInfo()->type == INSTANCE_NULL)
@@ -4396,7 +4373,7 @@ int luaGameObject_GetInstanceID(lua_State * L, GameObjectPointer  ptr)
 	lua_pushinteger(L,ptr->GetInstanceID());
 	return 1;
 }
-int luaGameObject_GetInRangePlayers(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetInRangePlayers(lua_State * L, GameObject * ptr)
 {
 	uint32 count = 0;
 	lua_newtable(L);
@@ -4406,14 +4383,14 @@ int luaGameObject_GetInRangePlayers(lua_State * L, GameObjectPointer  ptr)
 		{
 			count++,
 			lua_pushinteger(L,count);
-			Lunar<Unit>::push(L,TO_UNIT(*itr),false);
+			Lunar<Unit>::push(L,LUA_TO_UNIT((*itr)));
 			lua_rawset(L,-3);
 		}
 	}
 	return 1;
 }
 
-int luaGameObject_GetInRangeGameObjects(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetInRangeGameObjects(lua_State * L, GameObject * ptr)
 {
 	uint32 count = 0;
 	lua_newtable(L);
@@ -4423,40 +4400,40 @@ int luaGameObject_GetInRangeGameObjects(lua_State * L, GameObjectPointer  ptr)
 		{
 			count++,
 			lua_pushinteger(L,count);
-			Lunar<GameObject>::push(L,TO_GAMEOBJECT(*itr),false);
+			Lunar<GameObject>::push(L,LUA_TO_GAMEOBJECT((*itr)));
 			lua_rawset(L,-3);
 		}
 	}
 	return 1;
 }
-int luaGameObject_IsInFront(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_IsInFront(lua_State * L, GameObject * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(ptr && target)
-		if(ptr->isInFront(target))
+		if(ptr->isInFront(FROM_RAW(target)))
 			lua_pushboolean(L, 1);
 		else
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaGameObject_IsInBack(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_IsInBack(lua_State * L, GameObject * ptr)
 {
-	UnitPointer  target = Lunar<Unit>::check(L, 1);
+	Unit * target = Lunar<Unit>::check(L, 1);
 	if(ptr && target)
-		if(ptr->isInBack(target))
+		if(ptr->isInBack(FROM_RAW(target)))
 			lua_pushboolean(L, 1);
 		else
 			lua_pushboolean(L, 0);
 	return 1;
 }
-int luaGameObject_GetUInt32Value(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetUInt32Value(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	if (ptr)
 		lua_pushinteger(L,ptr->GetUInt32Value(field));
 	return 1;
 }
-int luaGameObject_GetUInt64Value(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetUInt64Value(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	if (ptr && field)
@@ -4465,7 +4442,7 @@ int luaGameObject_GetUInt64Value(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_SetUInt32Value(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SetUInt32Value(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	int value = luaL_checkint(L,2);
@@ -4475,7 +4452,7 @@ int luaGameObject_SetUInt32Value(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_SetUInt64Value(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SetUInt64Value(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	int value = luaL_checkint(L,2);
@@ -4485,7 +4462,7 @@ int luaGameObject_SetUInt64Value(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_SetFloatValue(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_SetFloatValue(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	float value = (float)luaL_checkint(L,2);
@@ -4495,7 +4472,7 @@ int luaGameObject_SetFloatValue(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_GetFloatValue(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_GetFloatValue(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	if( ptr && field)
@@ -4504,7 +4481,7 @@ int luaGameObject_GetFloatValue(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_ModUInt32Value(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_ModUInt32Value(lua_State * L, GameObject * ptr)
 {
 	int field = luaL_checkint(L,1);
 	int value = luaL_checkint(L,2);
@@ -4514,120 +4491,55 @@ int luaGameObject_ModUInt32Value(lua_State * L, GameObjectPointer  ptr)
 	}
 	return 1;
 }
-int luaGameObject_CastSpell(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_CastSpell(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
 	uint32 sp = luaL_checkint(L,1);
 	if( !ptr || !sp|| sp == 0) return 0;
 	
-	SpellPointer spp(new Spell( ptr, dbcSpell.LookupEntry(sp), true, NULLAURA));
+	SpellPointer spp(new Spell( FROM_RAW(ptr), dbcSpell.LookupEntry(sp), true, NULLAURA));
 	SpellCastTargets tar(ptr->GetGUID());
 	spp->prepare(&tar);
 	return 0;
 }
-int luaGameObject_FullCastSpell(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_FullCastSpell(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
 	uint32 sp = luaL_checkint(L,1);
 	if( !ptr || !sp|| sp == 0) return 0;
 	
-	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
+	SpellPointer nspell(new Spell(FROM_RAW(ptr),dbcSpell.LookupEntry(sp),false,NULLAURA));
 	SpellCastTargets tar(ptr->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
 }
-int luaGameObject_CastSpellOnTarget(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_CastSpellOnTarget(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
 	uint32 sp = luaL_checkint(L,1);
-	UnitPointer  target = Lunar<Unit>::check(L,2);
+	Unit * target = Lunar<Unit>::check(L,2);
 	if( !ptr || !sp || sp == 0) return 0;
 
-	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),true,NULLAURA));
+	SpellPointer nspell(new Spell(FROM_RAW(ptr),dbcSpell.LookupEntry(sp),true,NULLAURA));
 	SpellCastTargets tar(target->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
 }
-int luaGameObject_FullCastSpellOnTarget(lua_State * L, GameObjectPointer  ptr)
+int luaGameObject_FullCastSpellOnTarget(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
 	uint32 sp = luaL_checkint(L,1);
-	UnitPointer  target = Lunar<Unit>::check(L,2);
+	Unit * target = Lunar<Unit>::check(L,2);
 	if( !ptr || !sp || sp == 0) return 0;
-	SpellPointer nspell(new Spell(ptr,dbcSpell.LookupEntry(sp),false,NULLAURA));
+	SpellPointer nspell(new Spell(FROM_RAW(ptr),dbcSpell.LookupEntry(sp),false,NULLAURA));
 	SpellCastTargets tar(target->GetGUID());
 	nspell->prepare(&tar);
 	return 0;
 }
-int luaGameObject_GetGUID(lua_State * L, GameObjectPointer ptr)
+int luaGameObject_GetGUID(lua_State * L, GameObject * ptr)
 {
 	CHECK_TYPEID(TYPEID_GAMEOBJECT);
 
 	lua_pushinteger(L,(lua_Integer)ptr->GetGUID());
-	return 1;
-}
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////ITEM COMMANDS///////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-///////////////////////////////////////////////
-int luaItem_GossipCreateMenu(lua_State * L, ItemPointer ptr)
-{
-    int text_id = luaL_checkint(L, 1);
-	UnitPointer target = Lunar<Unit>::check(L, 2);
- 	int autosend = luaL_checkint(L, 3);
-
-	PlayerPointer plr = TO_PLAYER(target);
-    
-    objmgr.CreateGossipMenuForPlayer(&Menu, ptr->GetGUID(), text_id, plr);
-	if(autosend)
-        Menu->SendTo(plr);
-	return 1;
-}
-
-int luaItem_GossipMenuAddItem(lua_State * L, ItemPointer ptr)
-{
-	int icon = luaL_checkint(L, 1);
-	const char * menu_text = luaL_checkstring(L, 2);
-	int IntId = luaL_checkint(L, 3);
-
-	Menu->AddItem(icon, menu_text, IntId);
-	return 1;
-}
-
-int luaItem_GossipSendMenu(lua_State * L, ItemPointer ptr)
-{
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer plr = TO_PLAYER(target);
-	Menu->SendTo(plr);
-	return 1;
-}
-
-int luaItem_GossipComplete(lua_State * L, ItemPointer ptr)
-{
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer plr = TO_PLAYER(target);
-	plr->Gossip_Complete();
-	return 1;
-}
-
-int luaItem_GossipSendPOI(lua_State * L, ItemPointer ptr)
-{
-	UnitPointer target = Lunar<Unit>::check(L, 1);
-	PlayerPointer plr = TO_PLAYER(target);
-	float x = (float)luaL_checknumber(L, 2);
-	float y = (float)luaL_checknumber(L, 3);
-	int icon = luaL_checkint(L, 4);
-	int flags = luaL_checkint(L, 5);
-	int data = luaL_checkint(L, 6);
-	const char * name = luaL_checkstring(L, 7);
-
-	plr->Gossip_SendPOI(x, y, icon, flags, data, name);
 	return 1;
 }
