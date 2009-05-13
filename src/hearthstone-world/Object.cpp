@@ -2537,7 +2537,7 @@ void Object::SpellNonMeleeDamageLog(UnitPointer pVictim, uint32 spellID, uint32 
 		if( pVictim->isAlive() && IsUnit() )
 		{
 			//Shadow Word:Death
-			if( spellID == 32379 || spellID == 32996 ) 
+			if( spellID == 32379 || spellID == 32996 || spellID == 48157 || spellID == 48158) 
 			{
 				uint32 damage = (uint32)( res + abs_dmg );
 				uint32 absorbed = unit_shared_from_this()->AbsorbDamage(shared_from_this(), school, &damage, dbcSpell.LookupEntryForced(spellID) );

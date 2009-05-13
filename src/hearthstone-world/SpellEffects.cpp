@@ -572,7 +572,8 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 					dmg += (uint32)( p_caster->GetAP() * ( perc / 100 ) );
 
 					int32 comboDamage = (int32)m_spellInfo->EffectPointsPerComboPoint[i];
-					dmg += ( comboDamage * p_caster->m_comboPoints );
+					int32 bpdamage	= m_spellInfo->EffectBasePoints[i] + 1;
+					dmg += (( comboDamage * p_caster->m_comboPoints ) + bpdamage);
 					m_requiresCP = true;
 					//this is ugly so i will explain the case maybe someone ha a better idea :
 					// while casting a spell talent will trigger uppon the spell prepare faze
@@ -599,26 +600,24 @@ void Spell::SpellEffectSchoolDMG(uint32 i) // dmg school
 					uint32 doses = unitTarget->GetPoisonDosesCount( POISON_TYPE_DEADLY );
 					if( doses )
 					{
-						dmg += (uint32)(p_caster->GetAP() * (0.07f * doses));
-
-						if( doses - p_caster->m_comboPoints < 0 )
+						if (doses <= (uint32) ( p_caster->m_comboPoints ) )
 							dosestoate = doses;
 						else
 							dosestoate = p_caster->m_comboPoints;
-
+						uint32 bpdamage = m_spellInfo->EffectBasePoints[0] + 1;
+						dmg = ( bpdamage * dosestoate) + float2int32(p_caster->GetAP() * (0.07f * dosestoate));
 						m_requiresCP = true;
-
-						p_caster->m_comboPoints = 0;
 
 						//remove deadly poisons
 						for(uint32 x = MAX_POSITIVE_AURAS; x < MAX_AURAS; ++x)
 						{
 							if(unitTarget->m_auras[x] && unitTarget->m_auras[x]->m_spellProto->poison_type == POISON_TYPE_DEADLY )
 							{
-								unitTarget->m_auras[x]->Remove();
-								dosestoate--;
-								if( dosestoate <= 0 )
-									break;
+								if (dosestoate >= doses) 
+									unitTarget->m_auras[x]->Remove();
+								else
+									unitTarget->m_auras[x]->ModStackSize((dosestoate) * -1);
+							    break;
 							}
 						}
 					}
@@ -1162,19 +1161,21 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 	
 	case 53385:
 		{
-			if( p_caster && p_caster->GetGroup() && m_targetList.size())
+		  if( p_caster && m_targetList.size())
 			{
 				uint32 amt = float2int32( 0.25f * m_targetList.size() * CalculateDamage(p_caster, unitTarget, MELEE, m_spellInfo) );
 				uint32 count = 0;
 
-				p_caster->GetGroup()->Lock();
-				for(uint32 x = 0; x < p_caster->GetGroup()->GetSubGroupCount(); ++x)
+				if( p_caster->GetGroup() )
 				{
-					if( count == 3 ) break;
-					for(GroupMembersSet::iterator itr = p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersBegin(); itr != p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersEnd(); ++itr)
+					p_caster->GetGroup()->Lock();
+					for(uint32 x = 0; x < p_caster->GetGroup()->GetSubGroupCount(); ++x)
 					{
-						if( (*itr) && (*itr)->m_loggedInPlayer && (*itr)->m_loggedInPlayer->GetPowerType() == POWER_TYPE_MANA && count != 3)
+						if( count == 3 ) break;
+						for(GroupMembersSet::iterator itr = p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersBegin(); itr != p_caster->GetGroup()->GetSubGroup( x )->GetGroupMembersEnd(); ++itr)
 						{
+						if( (*itr) && (*itr)->m_loggedInPlayer && (*itr)->m_loggedInPlayer->GetPowerType() == POWER_TYPE_MANA && count != 3)
+							{
 							SpellEntry *spellInfo = dbcSpell.LookupEntry( 54172 );
 							SpellPointer sp(new Spell( p_caster, spellInfo, true, NULLAURA ));
 							sp->forced_basepoints[0] = amt;
@@ -1182,12 +1183,22 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 							tgt.m_unitTarget = (*itr)->m_loggedInPlayer->GetGUID();
 							sp->prepare(&tgt);
 							count++;
+							}
 						}
 					}
+					p_caster->GetGroup()->Unlock();
 				}
-				p_caster->GetGroup()->Unlock();
-			}
-		}break;
+				else
+				{
+					SpellEntry *spellInfo = dbcSpell.LookupEntry( 54172 );
+					SpellPointer sp(new Spell( p_caster, spellInfo, true, NULLAURA ));
+					sp->forced_basepoints[0] = amt;
+					SpellCastTargets tgt;
+					tgt.m_unitTarget = p_caster->GetGUID();
+					sp->prepare(&tgt);
+				}
+		  }
+	}break;
 	/*************************
 	 * PRIEST SPELLS
 	 *************************
@@ -2087,6 +2098,20 @@ void Spell::SpellEffectDummy(uint32 i) // Dummy(Scripted events)
 					petunit->CastSpell(petunit->GetAIInterface()->GetNextTarget(),34027,true);
 			}
 		}break;
+	//Berserking Troll Racial
+	case  20554:
+	case  26296:
+	case  26297:
+	case  50621:
+		{
+			if(!playerTarget)
+				break;
+			SpellCastTargets tgt;
+			tgt.m_unitTarget = playerTarget->GetGUID();
+			SpellEntry * inf =dbcSpell.LookupEntry(26635);
+			SpellPointer spe = CREATESPELL(u_caster,inf,true,NULLAURA);
+			spe->prepare(&tgt);
+		}break;
 	}										 
 }
 
@@ -2320,6 +2345,13 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 		//health is below 30%, we have a mother spell to get value from
 		switch (m_spellInfo->Id)
 		{
+        case 23880: //Bloodthirst Heal
+            {
+                if(unitTarget)
+                {
+                    Heal( unitTarget->GetUInt32Value( UNIT_FIELD_MAXHEALTH ) / 100 );
+                }
+            }break;
 		case 34299: //Druid: Improved Leader of the PAck
 			{
 				if (!unitTarget->IsPlayer() || !unitTarget->isAlive())
@@ -2441,7 +2473,7 @@ void Spell::SpellEffectHeal(uint32 i) // Heal
 				if( bonus )
 				{
 					int32 new_dmg = damage + float2int32(damage*0.2f);
-					Heal((int32)damage);
+					Heal(new_dmg);
 				}else
 					Heal((int32)damage);
 			}break;
@@ -3235,6 +3267,11 @@ void Spell::SpellEffectEnergize(uint32 i) // Energize
 	uint32 modEnergy;
 	switch( m_spellInfo->Id )
 	{
+	case 30824:
+		{
+			if( unitTarget && u_caster )
+				modEnergy = float2int32(( damage * u_caster->GetAP() ) * 0.3f );
+		}break;
 	case 31930:
 		{
 			if( unitTarget && u_caster )

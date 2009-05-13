@@ -1164,6 +1164,16 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 				{
 						sp->procFlags	=	0;
 				}break;
+
+			//Rogue  - Ruthlessness
+			case 14156:
+			case 14160:
+			case 14161:
+				{
+						sp->EffectApplyAuraName[0]	=	SPELL_AURA_PROC_TRIGGER_SPELL;//proc	spell
+						sp->EffectTriggerSpell[0]	=	14157;	
+						sp->procFlags	=	PROC_ON_CAST_SPELL | PROC_TARGET_SELF;					
+				}break;
 		
 			//priest	-	Holy Concentration
 			case 34753:
@@ -2604,16 +2614,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->Effect[1] = 2;
 						sp->EffectImplicitTargetA[1] = 6;
 				}break;
-
-			//make Berserking	a	simple spell 
-			case  20554:
-			case  26296:
-			case  26297:
+			//Berserking
+			case 26635:
 				{
-						sp->Effect[0]	=	SPELL_EFFECT_TRIGGER_SPELL;
-						sp->EffectTriggerSpell[0]	=	26635;
+					sp->Attributes	=	327680;
+					sp->CasterAuraState	=	0;
 				}break;
-		
 			//rogue	-	intiative
 			case  13976:
 			case  13979:
@@ -2758,10 +2764,9 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			// Druid: Omen of Clarity
 			case  16864:
 				{
-						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_SPELL_LAND;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_CAST_SPELL;
 						sp->procChance = 6;
 						sp->proc_interval = 10000;
-						sp->procCharges++;
 				}break;
 			case 52610:
 				{
@@ -2809,6 +2814,8 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 56636:
 				{
 					sp->procFlags	=	PROC_ON_ANY_HOSTILE_ACTION;
+					sp->EffectSpellClassMask[0][0]	= 0x0;
+					sp->EffectSpellClassMask[1][0]	= 0x0;
 				}break;
 				
 			// Flametongue weapon
@@ -3347,6 +3354,19 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 						sp->procFlags	=	PROC_ON_CAST_SPELL;
 						sp->EffectTriggerSpell[0]	=	40461;
 						sp->maxstack = 1;
+				}break;
+			//Leatherworking Drums
+			case 35475://Drums of War
+			case 35476://Drums of Battle
+			case 35478://Drums of Restoration
+			case 35477://Drums of Speed
+				{
+					sp->EffectImplicitTargetA[0] = EFF_TARGET_ALL_PARTY;
+					sp->EffectImplicitTargetA[1] = EFF_TARGET_ALL_PARTY;
+					sp->EffectImplicitTargetA[2] = EFF_TARGET_NONE;
+					sp->EffectImplicitTargetB[0] = EFF_TARGET_NONE;
+					sp->EffectImplicitTargetB[1] = EFF_TARGET_NONE;
+					sp->EffectImplicitTargetB[2] = EFF_TARGET_NONE;
 				}break;
 
 			/**********************************************************
@@ -4954,10 +4974,7 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 46914:
 			case 46913:
 				{
-						sp->procFlags = PROC_ON_CAST_SPELL;
-						sp->EffectSpellClassMask[0][0] = 64;
-						sp->EffectSpellClassMask[0][1] = 1024 | 4;
-						sp->EffectSpellClassMask[0][2] = 0;
+						sp->procFlags = PROC_ON_MELEE_ATTACK | PROC_ON_ANY_HOSTILE_ACTION | PROC_ON_CAST_SPELL;
 				}break;
 			//Waylay			 
 			case  51692:

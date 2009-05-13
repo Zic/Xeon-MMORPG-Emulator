@@ -993,6 +993,7 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 								case POWER_TYPE_RUNIC: spellId = 57321; break;
 							}
 						}break;
+						case 16459:
 						case 4350:
 						{
 							//sword specialization
@@ -1467,8 +1468,8 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 
 								if(IsPlayer())
 								{
-									plr_shared_from_this()->m_spellcomboPoints++;
-									plr_shared_from_this()->UpdateComboPoints();
+									plr_shared_from_this()->m_spellcomboPoints = 0;
+									//plr_shared_from_this()->UpdateComboPoints();
 								}
 							}break;
 						//rogue - Relentless Strikes
@@ -2199,6 +2200,16 @@ uint32 Unit::HandleProc( uint32 flag, UnitPointer victim, SpellEntry* CastingSpe
 									continue;
 								if( CastingSpell->NameHash != SPELL_HASH_WRATH &&
 									CastingSpell->NameHash != SPELL_HASH_STARFIRE )
+									continue;
+							}break;
+						// Bloodsurge
+						case 46916:
+							{
+								if (!CastingSpell )
+									continue;
+								if( CastingSpell->NameHash != SPELL_HASH_HEROIC_STRIKE &&
+									CastingSpell->NameHash != SPELL_HASH_BLOODTHIRST &&
+									CastingSpell->NameHash != SPELL_HASH_WHIRLWIND )
 									continue;
 							}break;
 						case 58362: // Glyph of heroic strike
@@ -5860,7 +5871,8 @@ uint32 Unit::GetPoisonDosesCount( uint32 poison_type )
 	{
 		if(m_auras[x] && m_auras[x]->m_spellProto->poison_type == poison_type )
 		{
-			doses++;
+			doses = m_auras[x]->stackSize;
+			//doses++;
 		}
 	}
 	return doses;
