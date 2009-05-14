@@ -19,7 +19,7 @@
 
 #include "StdAfx.h"
 
-#define BANNER "Hearthstone r%u/%s-%s-%s :: World Server\n"
+#define BANNER "Xeon MMORPG Emulator r%u/%s-%s-%s :: World Server\n"
 
 #ifndef WIN32
 #include <sched.h>
@@ -162,8 +162,13 @@ bool Master::Run(int argc, char ** argv)
 	UNIXTIME = time(NULL);
 	g_localTime = *localtime(&UNIXTIME);
 
-	printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
-	printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
+	//printf(BANNER, BUILD_REVISION, CONFIG, PLATFORM_TEXT, ARCH);
+	//printf("Built at %s on %s by %s@%s\n", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
+        printf("=========================================================================================\n");
+        printf("Copyright (C) 2009 Zic & XeonTeam)\n");
+        printf("Xeon is based of Aspire Hearthstone.Copyright (c) 2008-2009 AspireDev\n");
+        printf("Also we added some stuff from ArcEmu.Copyright (c) 2008-2009 ArcEmu\n");
+        printf("Xeon is powered by GitHub (github.com)\n");
 	Log.Line();
 
 	if( do_check_conf )
