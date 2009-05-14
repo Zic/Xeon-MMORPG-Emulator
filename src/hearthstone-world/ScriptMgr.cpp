@@ -605,7 +605,11 @@ void GossipScript::GossipHello(ObjectPointer pObject, PlayerPointer Plr, bool Au
 	if( pTrainer && pTrainer->RequiredClass )
 	{
 		if( pTrainer->RequiredClass == Plr->getClass() && pCreature->getLevel() > 10 && Plr->getLevel() > 11 )
+		{
 			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "I would like to reset my talents.", 11);
+			if( Plr->getLevel() >= 40 && Plr->m_talentSpecsCount < 2)
+				Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Learn about Dual Talent Specialization.", 16);
+        }
 	}
 	
 	if( pTrainer &&
@@ -706,6 +710,18 @@ void GossipScript::GossipSelectOption(ObjectPointer pObject, PlayerPointer Plr, 
 			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Goodbye",99);
 			Menu->SendTo(Plr);
 		}break;
+	case 16:
+		{
+			GossipMenu *Menu;
+			objmgr.CreateGossipMenuForPlayer(&Menu, pCreature->GetGUID(), 30000, Plr);
+			Menu->AddItem(GOSSIP_ICON_GOSSIP_NORMAL, "Purchase a Dual Talent Specialization.", 17);
+			Menu->SendTo(Plr);
+		}break;
+	case 17:
+		{
+			Plr->Gossip_Complete();
+			Plr->SendDualSpecPurchase();
+		}break;	
 	case 99:		// Aborting current action
 		{
 			Plr->Gossip_Complete();

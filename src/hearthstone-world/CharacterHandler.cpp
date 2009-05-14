@@ -923,9 +923,9 @@ void WorldSession::FullLogin(PlayerPointer plr)
 
 	// Send revision (if enabled)
 #ifdef WIN32
-	_player->BroadcastMessage("Server: %sAspire Hearthstone r%u-TRUNK/%s-Win-%s", MSG_COLOR_WHITE, BUILD_REVISION, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
+	_player->BroadcastMessage("Powered by: %sXeon MMORPG Emulator r%u-TEST/%s-Win-%s", MSG_COLOR_LIGHTBLUE, BUILD_REVISION, CONFIG, ARCH, MSG_COLOR_LIGHTBLUE);
 #else
-	_player->BroadcastMessage("Server: %sAspire Hearthstone r%u-TRUNK/%s-%s", MSG_COLOR_WHITE, BUILD_REVISION, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
+	_player->BroadcastMessage("Powered by: %sXeon MMORPG Emulator r%u-TEST/%s-%s", MSG_COLOR_LIGHTBLUE, BUILD_REVISION, PLATFORM_TEXT, ARCH, MSG_COLOR_LIGHTBLUE);
 	//_player->BroadcastMessage("Built at %s on %s by %s@%s", BUILD_TIME, BUILD_DATE, BUILD_USER, BUILD_HOST);
 #endif
 
@@ -933,7 +933,7 @@ void WorldSession::FullLogin(PlayerPointer plr)
 	{
 		_player->BroadcastMessage("Online Players: %s%u |rPeak: %s%u|r Accepted Connections: %s%u",
 			MSG_COLOR_WHITE, sWorld.GetSessionCount(), MSG_COLOR_WHITE, sWorld.PeakSessionCount, MSG_COLOR_WHITE, sWorld.mAcceptedConnections);
-		_player->BroadcastMessage("Server Uptime: |r%s", sWorld.GetUptimeString().c_str());
+		//_player->BroadcastMessage("Server Uptime: |r%s", sWorld.GetUptimeString().c_str());
 	}
 
 	// send to gms

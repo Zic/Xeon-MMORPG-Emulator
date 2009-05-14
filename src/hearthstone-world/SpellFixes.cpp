@@ -4892,6 +4892,12 @@ void ApplySingleSpellFixes(SpellEntry *sp)
 			case 20578:
 				sp->AuraInterruptFlags = AURA_INTERRUPT_ON_MOVEMENT|AURA_INTERRUPT_ON_ANY_DAMAGE_TAKEN;
 				break;
+			// Learn Dual Talent Specialization
+			case 63624:
+				{
+					sp->Effect[1] = SPELL_EFFECT_TRIGGER_SPELL;
+					sp->EffectTriggerSpell[1] = 63680;
+				}break;	
 			}
 		}
 	}

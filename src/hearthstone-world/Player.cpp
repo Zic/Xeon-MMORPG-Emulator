@@ -11700,6 +11700,27 @@ bool Player::IsFlyHackEligible()
 	return true;
 }
 
+void Player::SendDualSpecPurchase()
+{
+	uint32 talentCost = sWorld.dualTalentTrainCost;
+	// Here we should send a confirmation box, but there is no documented opcode for it
+	if( GetUInt32Value(PLAYER_FIELD_COINAGE) >= talentCost )
+	{
+		// Cast the learning spell
+		CastSpell(player_shared_from_this(), 63624, true);
+		ModUnsigned32Value(PLAYER_FIELD_COINAGE, -(int32)talentCost);
+	}
+	else
+	{
+		// Not enough money!
+		sChatHandler.SystemMessage(m_session, "You must have at least 1000 gold to use this function.");
+	}
+	/*WorldPacket data();
+	data << GetGUID();
+	data << sWorld.dualTalentTrainCost;
+	GetSession()->SendPacket( &data );*/
+}
+
 void Player::UpdateTalentInspectBuffer()
 {
 	memset(m_talentInspectBuffer, 0, TALENT_INSPECT_BYTES);

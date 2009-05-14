@@ -562,6 +562,9 @@ public:
 	// Level Caps
 	uint32 LevelCap_Custom_All;
 	// could add configs for every expansion..
+	
+	// Duel Talent cost
+	uint32 dualTalentTrainCost;
 
 	void CharacterEnumProc(QueryResultVector& results, uint32 AccountId);
 	void LoadAccountDataProc(QueryResultVector& results, uint32 AccountId);

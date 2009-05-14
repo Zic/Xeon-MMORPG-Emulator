@@ -1234,6 +1234,7 @@ public:
 	void DestroyForPlayer( PlayerPointer target ) const;
 	void SetTalentHearthOfWildPCT(int value){hearth_of_wild_pct=value;}
 	void EventTalentHearthOfWildChange(bool apply);
+	void SendDualSpecPurchase();
 	
 	std::list<LoginAura> loginauras;
 

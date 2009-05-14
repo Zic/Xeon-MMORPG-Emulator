@@ -1396,6 +1396,10 @@ void World::Rehash(bool load)
 
 	// LevelCaps
 	LevelCap_Custom_All = Config.MainConfig.GetIntDefault("Server", "LevelCap_Custom_All", 0);
+	
+	dualTalentTrainCost = Config.MainConfig.GetIntDefault("Server", "DualSpecPrice", 1000);
+	if(dualTalentTrainCost)
+		dualTalentTrainCost *= 10000;	// Convert to gold
 
 	if( m_banTable != NULL )
 		free( m_banTable );
